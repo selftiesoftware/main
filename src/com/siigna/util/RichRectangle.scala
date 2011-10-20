@@ -1,0 +1,27 @@
+/*
+ * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
+ * to Share — to copy, distribute and transmit the work,
+ * to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
+ * Noncommercial — You may not use this work for commercial purposes.
+ * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ */
+
+package com.siigna.util
+
+import geom.Rectangle
+import rtree.MBR
+
+/**
+ * Pimp-my-library for Rectangles.
+ */
+class RichRectangle(rectangle : Rectangle) {
+
+  /**
+   * Return the rectangle as a Minimum Bounding Rectangle (MBR).
+   */
+  def toMBR = MBR(rectangle.topLeft.x, rectangle.topLeft.y, rectangle.bottomRight.x, rectangle.bottomRight.y)
+
+}
