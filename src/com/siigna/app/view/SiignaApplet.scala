@@ -45,7 +45,6 @@ class SiignaApplet extends View
       Log.success("View: Initiating paint-loop.")
       while(!shutdown) {
         // Set the cursor
-        // TODO: Find a more optimized way to do this
         if (getCursor != interface.cursor) {
           setCursor(interface.cursor)
         }
@@ -136,13 +135,17 @@ class SiignaApplet extends View
    */
   private def handleKeyEvent(e : AWTKeyEvent, constructor : (Int, ModifierKeys) => Event)
   {
+    // Sets the correct casing of the character - i.e. make it uppercase if shift is pressed and vice versa
+    def getCorrectCase(c : Int) = if (e.isShiftDown) c.toChar.toUpper.toInt else c.toChar.toLower.toInt
+
+    // Set the event-values
     val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
     val code = e.getKeyCode
     val isModifier = (code == 16 || code == 17 || code == 18)
 
     // If they key-code equals a modifier key, nothing bad can happen..
     if (isModifier) {
-      dispatchEvent( constructor(code, keys) )
+      dispatchEvent( constructor(getCorrectCase(code), keys) )
 
     // If it doesn't check if a key is being hid by
     // a modifier key and return the key it that's the case
@@ -152,10 +155,9 @@ class SiignaApplet extends View
         else if (e.isAltDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
         else Array[Char]()
       if (!array.isEmpty) { // If there are elements in the character-array pass them on
-        val sanitized = if (e.isShiftDown) array(0) else array(0).toLower
-        dispatchEvent( constructor(sanitized, keys) )
+        dispatchEvent( constructor(getCorrectCase(array(0)), keys) )
       } else { // Otherwise we accept the original char for the event
-        dispatchEvent( constructor(code, keys) )
+        dispatchEvent( constructor(getCorrectCase(code), keys) )
       }
     }
   }
@@ -233,7 +235,6 @@ class SiignaApplet extends View
 
     // Dispatch the event if it wasn't caught above
     if (option.isDefined) dispatchEvent(option.get)
-
   }
 
   /**

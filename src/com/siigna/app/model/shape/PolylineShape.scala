@@ -23,7 +23,7 @@ import collection.generic.{Subtractable, Addable}
  * malformed and the log outputs an error.
  * TODO: Do an apply(shapes : BasicShape*)..
  */
-case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Addable[BasicShape, PolylineShape] with Subtractable[BasicShape, PolylineShape] {
+case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
 
   /**
    * Whether the PolylineShape is malformed (the shapes aren't connected).
@@ -32,7 +32,19 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
    */
   assert(PolylineShape.isConnected(shapes), Log.error("The following PolylineShape is malformed: "+this))
 
-  def + (shape : BasicShape) = copy(shapes :+ shape)
+  /**
+   * Add a single shape to the polyline.
+   */
+  def +: (shape : BasicShape) = copy(shapes.+:(shape))
+
+  /**
+   * Add several shapes to the polyline.
+   */
+  def +: (shapes : BasicShape*) = copy(shapes.++:(shapes))
+
+  /**
+   * Remove a shape from the polyline.
+   */
   def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
 
   def geometry = Polyline(shapes.map(_.geometry))

@@ -30,12 +30,6 @@ abstract class ViewInterface {
   def display : Option[Display]
 
   /**
-   * A list containing the paintfilters for the given view
-   * TODO: Use a regular set?
-   */
-  def filters : scala.collection.mutable.HashSet[PaintFilter]
-
-  /**
    * A boolean value that signals whether panning and zooming is active.
    */
   def navigation : Boolean

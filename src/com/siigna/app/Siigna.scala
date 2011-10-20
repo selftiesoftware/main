@@ -107,11 +107,6 @@ object Siigna extends ViewInterface {
   def display = try { interface.display } catch {case _ => None }
 
   /**
-   * The paint filters active.
-   */
-  def filters = try { interface.filters } catch { case _ => new scala.collection.mutable.HashSet[PaintFilter]() }
-
-  /**
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view, translated to a given point.
    */

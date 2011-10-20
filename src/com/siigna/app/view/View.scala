@@ -164,9 +164,9 @@ trait View extends Applet {
 
       // Draw model
       try {
-        // Set the MBR for the model
-        val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
-        Model(mbr) map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
+        // TODO: Set the MBR for the model
+        //val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
+        Model map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
         // Filter away shapes that are drawn in the dynamic layer and draw the rest.
         //Model.queryForShapesWithId(mbr).filterNot(e => dynamic.contains(e._1)).map(e => e._2.transform(transformation) ) foreach( graphics draw)
       } catch {

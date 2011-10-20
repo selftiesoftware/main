@@ -39,11 +39,6 @@ class Interface(interface : ViewInterface) extends ViewInterface {
   var display : Option[Display] = interface.display
 
   /**
-   * A list containing the paintfilters for the given view
-   */
-  var filters              = interface.filters
-
-  /**
    * A boolean value that signals whether panning and zooming is active or not
    */
   var navigation : Boolean = interface.navigation
@@ -69,19 +64,9 @@ class Interface(interface : ViewInterface) extends ViewInterface {
   }
 
   /**
-   * Add a paint filterRecursive to the interface.
-   */
-  def addPaintFilter(filter : PaintFilter)  = filters += filter
-
-  /**
    * Clears the display. NOT the interface. The interface can only be cleared by destroying the module.
    */
   def clearDisplay() { display = None }
-
-  /**
-   * Clears all paint filters.
-   */
-  def clearPaintFilters() { filters.clear() }
 
   /**
    * A method used to access the container of Siigna.
@@ -141,8 +126,6 @@ class Interface(interface : ViewInterface) extends ViewInterface {
    * Paints the interface. I. e. paint the filters, current paint-function and any active displays.
    */
   def paint(graphics : Graphics, transformation: TransformationMatrix) {
-    //TODO: filters foreach{_.paint(bufferedSrc)}
-
     // Paint the current paint-function, if defined
     if (paint.isDefined) {
       paint.get.apply(graphics, transformation)
@@ -153,16 +136,10 @@ class Interface(interface : ViewInterface) extends ViewInterface {
   }
 
   /**
-   * Remove a paint filterRecursive from the list.
-   */
-  def paintFilterRemove(filter : PaintFilter) = filters -= filter
-
-  /**
    * Resets the interface to default.
    */
   def reset() {
     navigation = true
-    filters.clear()
     setCursor(Interface.Cursors.crosshair)
   }
 

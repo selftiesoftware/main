@@ -38,8 +38,14 @@ import com.siigna.util.rtree.{MBR, PRTree}
  */
 class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
 
+  /**
+   * Groups defined in the model.
+   */
   val groups = ArrayBuffer[GroupShape]()
 
+  /**
+   * This hashmap contains every shapes in the model.
+   */
   var static  = HashMap[String, ImmutableShape]()
 
   /**
@@ -225,7 +231,7 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for every shape included in or touched by the Rectangle.
    */
-  def apply(rectangle : Rectangle) : Seq[Shape] = {
+  def apply(rectangle : Rectangle) : Iterable[Shape] = {
     apply(rectangle.toMBR)
   }
 
