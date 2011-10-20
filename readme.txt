@@ -17,8 +17,8 @@
   ABOUT SIIGNA
   Siigna is an online open-source 2d CAD application that runs online on the JAVA platform.
   it is intended to suit the needs of different groups. Therefore the backbone of Siigna, the mainline, is relatively 
-  small and a majority of functionality is branched out into modules. The idea is that Siigna can be loaded with different 
-  sets of modules, creating different modes for generating different types of artwork. 
+  small and a majority of functionality is branched out into modules. The idea is that Siigna can be loaded with 
+  different sets of modules, creating different modes for generating different types of artwork. 
  
   COPYRIGHT
   Siigna is released under the creative commons license, see siigna_license.pdf for further info.
