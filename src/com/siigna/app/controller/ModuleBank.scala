@@ -33,7 +33,8 @@ class ModuleBank {
    * The class loader used to load classes.
    */
   private val classLoader = new ScalaClassLoader(Array(new URL("jar:file:/C:/workspace/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/"),
-	  new URL("jar:file:/C:/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/")))
+	  new URL("jar:file:/E:/OLE/06_Siigna/06_programmering/06_endogenous/out/artifacts/endogenous.jar!/"),
+	  new URL("jar:file:/C:/siigna/endogenous/out/artifacts/endogenous.jar!/")))
 
   /**
    * Examines whether the bank contains a given module.
@@ -93,7 +94,7 @@ class ModuleBank {
       // Save the class if the class loader succeeds
       if (loadedClass.isDefined) {
         Log.success("ModuleBank: Successfully preloaded class "+name+".")
-        modules += (name -> toModule(loadedClass.get))
+        modules += (name -> loadedClass.get)
         true
       } else {
         Log.warning("ModuleBank: Failed to preload class: ", name, classPath, filePath)
@@ -101,10 +102,5 @@ class ModuleBank {
       }
     }
   }
-
-  /**
-   * Creates a new instance of a module.
-   */
-  private def toModule(module : Module) = module.getClass.newInstance().asInstanceOf[Module]
 
 }

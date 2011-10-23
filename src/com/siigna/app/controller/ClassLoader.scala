@@ -1,3 +1,5 @@
+package com.siigna.app.controller
+
 /*
  * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -9,12 +11,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.remote
-
-import java.lang.ClassLoader
-import java.io.{File}
-import java.net.{JarURLConnection, URL, URLClassLoader}
-import java.lang.ClassLoader
+import java.net.{URL, URLClassLoader}
 
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
@@ -25,7 +22,7 @@ import com.siigna.util.logging.Log
  * TODO: Add a remote system for finding vars - includes setting up a server!
  * -> val url = new URL("jar:http://siigna.com/module/"+moduleName+".jar!/")
  */
-class ScalaClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
+class ClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
 
   /**
    * Load a module class with the given name from a given location.
@@ -41,9 +38,9 @@ class ScalaClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
    * @param classPath  the path to the module to load.
    * @param filePath  the path to the module as file or URL.
    *
-   * @return Option[Module] Some[Module] if the module loads successfully and the resulting class is an instance of Module, else None.
+   * @return Option[T] Some[T] if the module loads successfully and the resulting class is an instance of T, else None.
    */
-  def loadModule(classPath : String, filePath : String) : Option[Module] = {
+  def loadModule[T : Manifest](classPath : String, filePath : String) : Option[T] = {
     if (classPath == "") {
       Log.warning("JarLoader: Cannot load modules with empty classPath.")
       None
@@ -61,19 +58,25 @@ class ScalaClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
           }
         }
       }
-      
-      // Tries to load the class from a series of different locations.
-      var result : Option[Module] = None
-      
-      // If the result hasn't been found yet, continue the loop
-      try {
-        // Save the class
-        val loadedClass = loadClass(classPath)
-        
-        // Try and load it!
-        result = Some(loadedClass.newInstance().asInstanceOf[Module])
+
+      // Get the module as an object and then a class respectively
+      // Thanks to: http://stackoverflow.com/questions/3039822/how-do-i-call-a-scala-object-method-using-reflection
+      val resource : Option[Class[_]] = try {
+        // Load the object and not the class
+        Some(loadClass(classPath + "$"))
       } catch {
         case e => errors += ("JarLoader: No resource could be found at the given location: " + classPath -> Some(e))
+        None
+      }
+
+      // Try and load the module!
+      val result : Option[T] = if (resource.isEmpty) None else try {
+        val instance = resource.get.getField("MODULE$").get(manifest.erasure).asInstanceOf[T]
+        // Return!
+        Some(instance)
+      } catch {
+        case e => errors += ("JarLoader: Class found, but failed to cast to type T." -> Some(e))
+        None
       }
       
       // Print errors in case no modules was found
@@ -87,3 +90,4 @@ class ScalaClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
   }
 
 }
+
