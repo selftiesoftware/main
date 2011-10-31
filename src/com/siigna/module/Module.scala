@@ -11,17 +11,11 @@
 
 package com.siigna.module
 
-import scala.actors.{Actor, Exit}
-
-import com.siigna.app.controller.ModuleBank
-
-import com.siigna.app.Siigna
-import com.siigna.app.view.{Graphics}
+import com.siigna.app.view.Graphics
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.util.event._
-import com.siigna.util.logging.Log
-import parser.EventParser
-import com.siigna.app.view.{Popup, Display, Interface}
+import com.siigna.util.event.EventHandler
+import com.siigna.util.event.parser.EventParser
+import com.siigna.app.view.{Display, ModuleInterface}
 
 /**
  * Defines the parent class for all modules.
@@ -47,7 +41,7 @@ trait Module extends Serializable {
    * An interface the module can utilize to communicate with the controller and
    * view.
    */
-  var interface : Interface = new Interface(Siigna)
+  var interface : ModuleInterface = new ModuleInterface(None)
 
   /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.

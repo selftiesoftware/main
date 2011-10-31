@@ -12,9 +12,9 @@
 package com.siigna.app.view
 
 import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
-import java.awt.Frame
-
-import com.siigna._
+import java.awt.{Dimension, Frame}
+import com.siigna.app.Siigna
+import com.siigna.util.collection.Preferences
 
 /**
  * This object represents the main class of the Siigna application, when run on
@@ -55,12 +55,12 @@ class ApplicationWindow extends Frame
 
   // The applet is also an AWT Panel (the Java applet class extends it), so we
   // just create a new instance and add it to our window.
-  val applet = new SiignaApplet
+  val applet = Siigna.view
 
   // Add the applet to the application.
   add(applet)
   setTitle("Siigna")
-  applet.init
+  applet.init()
 
   // Setup event handler for when the window is closed (user press the X
   // button). In this case we dispose the window, which in the end terminates
@@ -72,7 +72,7 @@ class ApplicationWindow extends Frame
     override def windowIconified(e: WindowEvent)   { }
     override def windowClosed(e: WindowEvent)      { }
     override def windowOpened(e: WindowEvent)      { }
-    override def windowClosing(e: WindowEvent)     { applet.destroy; dispose }
+    override def windowClosing(e: WindowEvent)     { applet.destroy(); dispose() }
   })
 
   // TODO: Add full screen mode.
@@ -81,14 +81,16 @@ class ApplicationWindow extends Frame
     override def componentMoved  (e : ComponentEvent)  { }
     override def componentShown  (e : ComponentEvent)  { }
     override def componentResized (e : ComponentEvent) {
-      val bounds = getBounds()
-      applet.resize(Rectangle(Vector(0, 0), Vector(bounds.getWidth.toInt, bounds.getHeight.toInt)))
+      applet.resize(getSize.getWidth.toInt, getSize.getHeight.toInt)
       false
     }
   })
 
+  // Set preferred size
+  setPreferredSize(Preferences("defaultScreenSize").asInstanceOf[Dimension])
+
   // Pack the elements of this window. The panel requests a certain size.
-  pack
+  pack()
   // Show the window. The program is running.
   setVisible(true)
   // The initialization itself is done in the view...

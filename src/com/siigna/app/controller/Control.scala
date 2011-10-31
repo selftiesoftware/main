@@ -13,6 +13,7 @@ package com.siigna.app.controller
 import collection.mutable.{Queue, Stack}
 
 import com.siigna.app.controller.command._
+import com.siigna.app.view.ModuleInterface
 import com.siigna.module.Module
 import com.siigna.util.event.{Event, ModuleEvent}
 import com.siigna.util.logging.Log
@@ -99,7 +100,9 @@ object Control extends Thread("Siigna Controller") {
   def getEvents = events
 
   /**
-   * Initializes a module.
+   * Initializes a module by setting the starting state to 'Start and chaining the modules
+   * interface to the other interfaces (among other things this is the chain for painting -
+   * see the <code>Interface</code> trait for more info.
    *
    * @return A Boolean value indicating whether the module was successfully initialized.
    */
@@ -107,14 +110,22 @@ object Control extends Thread("Siigna Controller") {
     // Set the state to start!
     module.state = 'Start
 
+    // Chain the interface with the one higher in the hierarchy
+    val interface = if (modules.size > 1)
+      new ModuleInterface(Some(modules(1).interface))
+    else
+      new ModuleInterface(None)
+
     // Get the interface
-    val interface = module.interface
+    module.interface = interface
 
     // Give the paint-function to the interface
     interface.setPaint(module.paint)
 
-    // Give Siigna the new interface in hand
-    Siigna.interface = interface
+    // Set the active interface
+    Siigna.setInterface(interface)
+
+    // Return success!
     true
   } catch {
     // Log the failure
@@ -260,8 +271,10 @@ object Control extends Thread("Siigna Controller") {
               }
 
               // Initialize module
-              if (initModule(modules.top)) {
-                // Log the success
+              val success = initModule(modules.top)
+
+              // Log the success
+              if (success) {
                 Log.success("Controller: Succesfully forwarded to "+symbol+".")
               }
             } else {

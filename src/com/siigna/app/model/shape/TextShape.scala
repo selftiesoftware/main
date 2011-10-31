@@ -30,7 +30,7 @@ import com.siigna.util.geom.{Rectangle, TransformationMatrix, Vector}
  *                           as a vector between (0, 0) and (1, 1).
  * </pre>
  *
- * TODO: Fix
+ * TODO: Redo this! Completely.
  */
 case class TextShape(text: String, position : Vector, scale : Double, attributes : Attributes) extends ImmutableShape {
 
@@ -75,7 +75,7 @@ case class TextShape(text: String, position : Vector, scale : Double, attributes
                          DXFValue(100, "AcDbEntity"),
                          DXFValue(100, "AcDbText"),
                          DXFValue(62, 1),
-                         DXFValue(40, fontSize)) + position.toDXF +
+                         DXFValue(40, fontSize)) // TODO: + position.toDXF +
               DXFSection(DXFValue(1, text),
                          DXFValue(100, "AcDbText"))
 

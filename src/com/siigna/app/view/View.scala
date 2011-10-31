@@ -11,12 +11,10 @@
 
 package com.siigna.app.view
 
-import java.applet._
-import java.awt.{Color, Cursor, Graphics2D, Graphics => AWTGraphics, RenderingHints}
+import java.applet.Applet
+import java.awt.{Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 import java.awt.image.VolatileImage
 
-import com.siigna.app.controller.Control
-import com.siigna.util.Implicits
 import com.siigna.util.Implicits._
 import com.siigna.util.collection.Preferences
 import com.siigna.util.geom.{Rectangle, Vector}
@@ -26,7 +24,7 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 
 /**
- * A trait for the view. The view is responsible for painting the appropriate
+ * The View. The view is responsible for painting the appropriate
  * content, and transforming the zoom scale and the pan vector.
  * TODO: Cache(?)
  */
@@ -41,32 +39,34 @@ trait View extends Applet {
   /**
    * The frames in the current second.
    */
-  private var fpsCurrent : Double = 0;
+  var fpsCurrent : Double = 0;
 
   /**
    * The second the fps is counting in.
    */
-  private var fpsSecond : Double = 0;
+  var fpsSecond : Double = 0;
 
   /**
-   * An accesible interface for the view.
+   * Describes how far the view has been panned. This vector is given in
+   * physical coordinates, relative from the top left point of the screen.
    */
-  val interface = com.siigna.app.Siigna
+  var pan           = Vector(0, 0)
 
   /**
-   * The physical center of siigna.
+   * Describes the current mouse-location when panning.
    */
-  var center : Vector = Vector(0, 0)
+  var panPointMouse =  Vector(0, 0)
 
   /**
-   * Repaints the view.
+   * Describes the old panning-point, so the software can tell how much
+   * the current panning has moved relative to the old.
    */
-  def repaint()
+  var panPointOld   = Vector(0, 0)
 
   /**
-   * Sets the cursor to a given cursor bitmap.
+   * The zoom scale. Starts out in 1:1.
    */
-  def setCursor(customCursor : Cursor)
+  var zoom : Double = 1
 
   /***************** VIEW-CODE ****************/
 
@@ -102,7 +102,7 @@ trait View extends Applet {
   def draw(graphicsPanel : AWTGraphics) { try {
 
     // Create a new transformation-matrix
-    val transformation = interface.virtual
+    val transformation = Siigna.virtual
 
     // Save the size of the view.
     val size = getSize
@@ -142,9 +142,6 @@ trait View extends Applet {
       // Draw a white rectangle inside the boundary of the current model.
       graphics2D setBackground(Color white)
       graphics2D clearRect(topLeft.x.toInt, bottomRight.y.toInt, boundary.width.toInt, boundary.height.toInt)
-
-      // Examines whether we should redraw
-      val delta = interface.pan - interface.lastPan
 
       // Draw a black border
       graphics.draw(PolylineShape.fromRectangle(offscreenBoundary).attributes_+=("Color" -> "#555555".color))
@@ -205,12 +202,7 @@ trait View extends Applet {
   } catch {
     case e => Log.error("View: Unknown critical error encountered while painting.", e)
 
-  // Set the last pan-value and the last zoom-value.
   } finally {
-    if (interface.lastZoom != interface.zoom)
-      interface.lastPan = interface.pan
-    interface.lastZoom = interface.zoom
-
     // Count the fps
     val nextSecond = System.currentTimeMillis() * 0.001 + 1
     if (fpsSecond + 1 < nextSecond) { // Shift the second and save the fps
@@ -227,15 +219,55 @@ trait View extends Applet {
    * and the vector for the <code>pan</code> value.
    */
   def startPan(point : Vector) {
-    interface.panPointOld   = interface.pan
-    interface.panPointMouse = point
+    panPointOld   = pan
+    panPointMouse = point
+  }
+
+  /**
+   * Short explanation: Redirects the update-method to <code>paint</code>.
+   *
+   * <p><b>Longer explanation</b>:
+   * AWT draws in a way that is logical for larger software but rather
+   * illogical for smaller ones. When the software needs to draw on a
+   * panel it calls the <code>repaint</code>-function, which then dispatches
+   * the request on to <code>update</code>. This function waits until the
+   * program has the capacity for drawing and then calls <code>paint</code> to
+   * do the dirty-work.
+   * </p>
+   *
+   * <p><b>Further explanation:</b>
+   * The reason it's great for large application is that they can end up in
+   * situations that needs massive computer-power, where a sudden painting can
+   * steal resources, or situations where you need to draw on layers
+   * (which probably is the case in most of the software working with AWT - or
+   * Swing in particular), where it's handy to wait until all changes on a
+   * layers has been performed before drawing the whole thing all over. But
+   * for a program such as Siigna where the main task is to actually draw a
+   * Model, we don't need to put the task in line more than we need
+   * to just get it done. Furthermore this jumping back and forth from
+   * repaint-update-paint can be yet another source of double-buffering
+   * (see above), since <code>update</code> can cause irregular calls to <code>paint</code>
+   * which then can end up in a situation where the former paint-job is overridden
+   * and thus a black screen occur. Which makes us saaad pandas.
+   * However: Keep in mind that the <code>update</code> function is there for
+   * a reason. Don't ever just call paint and expect the whole thing to sort
+   * itself out...
+   * </p>
+   *
+   * <p><b>Short explanation:</b>
+   * We override the update functionality and dispatches it directly to <code>paint</code>, in order
+   * to avoid double-buffering.
+   * </p>
+   */
+  override def update(g : AWTGraphics) {
+    paint(g)
   }
 
   /**
    * Pans the view and asks to repaint it afterwards.
    */
   def pan(endPoint : Vector) {
-    if (interface.navigation) interface.pan = interface.panPointOld + endPoint - interface.panPointMouse
+    if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
     repaint
   }
 
@@ -252,12 +284,12 @@ trait View extends Applet {
   def zoom(point : Vector, _delta : Int)
   {
     val delta = if (_delta > 10) 10 else if (_delta < -10) -10 else _delta
-    if (interface.navigation && (interface.zoom < 50 || delta > 0)) {
-      val zoomFactor = scala.math.pow(2, -delta * interface.zoomSpeed)
-      if ((interface.zoom > 0.000001 || delta < 0)) {
-          interface.zoom *= zoomFactor
+    if (Siigna.navigation && (zoom < 50 || delta > 0)) {
+      val zoomFactor = scala.math.pow(2, -delta * Siigna.zoomSpeed)
+      if ((zoom > 0.000001 || delta < 0)) {
+          zoom *= zoomFactor
         }
-      interface.pan = (interface.pan - point) * zoomFactor + point
+      pan = (pan - point) * zoomFactor + point
       repaint
     }
   }

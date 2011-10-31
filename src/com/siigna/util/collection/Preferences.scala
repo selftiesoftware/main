@@ -11,9 +11,8 @@
 
 package com.siigna.util.collection
 
-import java.awt.Color
-
 import com.siigna.util.Implicits._
+import java.awt.{Dimension, Color}
 
 /**
  * Preferences used by Siigna.
@@ -22,14 +21,13 @@ import com.siigna.util.Implicits._
 
 object Preferences extends scala.collection.mutable.ListMap[String, Any] {
 
-  /**
-   * Set initial values
-   */
-  this += "anti-aliasing"   -> true
-  this += "colorBackground" -> "#F9F9F9".color
-  this += "colorDraw"       -> "#000000".color
-  this += "colorSelected"   -> "#7777FF".color
-  this += "colorUniverse"   -> "#DDDDDD".color
+  // Set initial values
+  this += "anti-aliasing"     -> true
+  this += "colorBackground"   -> "#F9F9F9".color
+  this += "colorDraw"         -> "#000000".color
+  this += "colorSelected"     -> "#7777FF".color
+  this += "colorUniverse"     -> "#DDDDDD".color
+  this += "defaultScreenSize" -> new Dimension(600, 400)
 
   /**
    * Returns a boolean preference. Unless anything else is specified the defaulting value is set to true.
@@ -50,16 +48,24 @@ object Preferences extends scala.collection.mutable.ListMap[String, Any] {
   }
 
   /**
+   * Returns a specific value as an option of a given type. If the value doesn't not exist the method returns None.
+   */
+  def get[T](key : String) : Option[T] = try {
+    Some(apply(key).asInstanceOf[T])
+  } catch {
+    case _ => None
+  }
+
+  /**
    * Toggles a boolean preference on/off or creates the given attribute if not defined.
    * The default value is false unless stated otherwise.
    */
-  def toggle(preference : String, defaultValue : Boolean = false) : Unit = {
+  def toggle(preference : String, defaultValue : Boolean = false) {
     val res = get(preference)
-    if (res.isEmpty)
+    if (res.isDefined && res.get.isInstanceOf[Boolean])
+      update(preference, !res.get.asInstanceOf[Boolean])
+    else
       update(preference, defaultValue)
-    else if (res.get == false)
-      update(preference, true)
-    else update(preference, false)
   }
 
 }

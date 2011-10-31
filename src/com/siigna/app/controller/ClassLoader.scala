@@ -13,7 +13,6 @@ package com.siigna.app.controller
 
 import java.net.{URL, URLClassLoader}
 
-import com.siigna.module.Module
 import com.siigna.util.logging.Log
 
 /**

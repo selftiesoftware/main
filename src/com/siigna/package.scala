@@ -111,7 +111,7 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Cursors = com.siigna.app.view.Interface.Cursors 
   type Display = com.siigna.app.view.Display
   type Graphics = com.siigna.app.view.Graphics
-  type Interface = com.siigna.app.view.Interface
+  type ModuleInterface = com.siigna.app.view.ModuleInterface
   type Popup = com.siigna.app.view.Popup
 
   // ------------------ UTIL -------------------- //

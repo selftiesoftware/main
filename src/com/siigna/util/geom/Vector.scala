@@ -78,12 +78,12 @@ case class Vector(x : Double, y : Double) extends Geometry
    * Confines this vector into the bounds of the given rectangle.
    */
   def confine(rectangle : Rectangle) : Vector = Vector(
-    if (x < rectangle.topLeft.x) rectangle.topLeft.x
+    if      (x < rectangle.topLeft.x)  rectangle.topLeft.x
     else if (x > rectangle.topRight.x) rectangle.topRight.x
-    else x,
-    if (y > rectangle.topLeft.y) rectangle.topLeft.y
+    else     x,
+    if      (y > rectangle.topLeft.y)    rectangle.topLeft.y
     else if (y < rectangle.bottomLeft.y) rectangle.bottomLeft.y
-    else y)
+    else     y)
 
   /**
    * Gets the distance to another vector.
@@ -97,7 +97,7 @@ case class Vector(x : Double, y : Double) extends Geometry
   /**
    * Calculates the length of the vector.
    */
-  def length = scala.math.abs(java.lang.Math.hypot(x, y))
+  def length = java.lang.Math.hypot(x, y)
 
   // TODO: Should probably have a better name.
   /**
@@ -113,8 +113,7 @@ case class Vector(x : Double, y : Double) extends Geometry
   /**
    * Transforms a vector with a given transformation matrix.
    */
-  def transform(transformation : TransformationMatrix) : Vector =
-    transformation.transform(this)
+  def transform(transformation : TransformationMatrix) : Vector = transformation.transform(this)
 
   /**
    * Calculates the unit-vector of this.

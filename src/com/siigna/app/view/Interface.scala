@@ -11,150 +11,45 @@
 
 package com.siigna.app.view
 
-import java.awt.{Component, Container, Cursor, Point, Toolkit}
+import java.awt.{Cursor, Point, Toolkit}
 import java.awt.image.MemoryImageSource
 
-import com.siigna.app._
 
 import com.siigna.util.geom.TransformationMatrix
 
 /**
- * A public interface that provides an interface with the core.
+ * An Interface provides functionality to interact with the graphical part of Siigna. There are two
+ * types interfaces in the Siigna core: ModuleInterfaces and the <code>Siigna</code> object. The
+ * hierarchy Each module is thus as follows:
+ * <pre>
+ *       Interface
+ *     ____/   \____
+ *    /             \
+ * Siigna      ModuleInterface
+ * </pre>
+ * Each module is connected to their unique instance of a ModuleInterface where they can set stuff
+ * like cursors, displays, paint-functions etc. <br />
+ * The Siigna object is the main entry-point to the graphical parts of Siigna. It communicates
+ * directly to the view. See the <code>Siigna</code> object for more info.
  */
-class Interface(interface : ViewInterface) extends ViewInterface {
+trait Interface {
 
   /**
-   * Contains a list of components, added by this interface.
+   * Paints the interface.
    */
-  private var components : List[Component] = Nil
+  def paint(graphics : Graphics, transformation : TransformationMatrix)
 
   /**
-   * The cursor of the current interface.
+   * Set's the current cursor.
    */
-  var cursor : Cursor      = interface.cursor
-
-  /**
-   * The active display, if any.
-   */
-  var display : Option[Display] = interface.display
-
-  /**
-   * A boolean value that signals whether panning and zooming is active or not
-   */
-  var navigation : Boolean = interface.navigation
-
-  /**
-   * A paint-function that the interface should paint on every paint-tick.
-   */
-  private var paint : Option[(Graphics, TransformationMatrix) => Unit] = None
-
-  /**
-   * The Java Toolkit used by the interface.
-   */
-  private lazy val toolkit = Toolkit.getDefaultToolkit
-
-  /**
-   * Adds a component to the container of Siigna.
-   * Instead of calling the direct value at Siigna.container, this function
-   * cleans up after itself, removing every component added by this interface.
-   */
-  def addComponent(c : Component) {
-    container(_.add(c))
-    components = components :+ c
-  }
-
-  /**
-   * Clears the display. NOT the interface. The interface can only be cleared by destroying the module.
-   */
-  def clearDisplay() { display = None }
-
-  /**
-   * A method used to access the container of Siigna.
-   * The function adds a validate method, which is required to display the
-   * elements in the container correctly.
-   */
-  def container(f : Container => Any) {
-    f(Siigna.container)
-    Siigna.container.validate()
-  }
-
-  /**
-   * Destroy this interface.
-   * This method should not be called directly. It's being called by the module
-   * the given interface is connected to, when the module exits.
-   */
-  def destroy() {
-    components.foreach(c => container(_.remove(c)))
-  }
-
-  /**
-   * Disables navigation (panning and zooming).
-   */
-  def disableNavigation() { navigation = false }
-
-  /**
-   * Saves a given display.
-   */
-  def display(newDisplay : Display) { this.display = Some(newDisplay) }
-
-  /**
-   * Saves a given display.
-   */
-  def display(newDisplay : Option[Display]) { this.display = newDisplay }
-
-  /**
-   * A shorthand reference to display a popup.
-   */
-  def display(string : String) { display(Popup(string)) }
-
-  /**
-   * Enables navigation (panning and zooming).
-   */
-  def enableNavigation() { navigation = true }
-
-  /**
-   * Sets the cursor to an invisible block.
-   */
-  def hideCursor() {
-    val pic       = new Array[Int](32 * 32)
-    val image     = toolkit.createImage(new MemoryImageSource(32, 32, pic, 0, 32))
-    val invisible = toolkit.createCustomCursor(image, new Point(16, 16), "invisibleCursor");
-    cursor = invisible
-  }
-
-  /**
-   * Paints the interface. I. e. paint the filters, current paint-function and any active displays.
-   */
-  def paint(graphics : Graphics, transformation: TransformationMatrix) {
-    // Paint the current paint-function, if defined
-    if (paint.isDefined) {
-      paint.get.apply(graphics, transformation)
-    }
-
-    // Paint the display
-    if (display.isDefined) display.get paint graphics
-  }
-
-  /**
-   * Resets the interface to default.
-   */
-  def reset() {
-    navigation = true
-    setCursor(Interface.Cursors.crosshair)
-  }
-
-  /**
-   * Sets the cursor to a crosshair.
-   */
-  def setCursor(newCursor : Cursor) { cursor = newCursor }
-
-  /**
-   * Set the paint-function.
-   */
-  def setPaint(f : (Graphics, TransformationMatrix) => Unit) { paint = Some(f) }
+  def setCursor(cursor : Cursor)
 
 }
 
+/**
+ * The object Interface provides references to cursors and other immutable graphical
+ * values relevant to the Interface.
+ */
 object Interface {
  
   /**
@@ -169,7 +64,7 @@ object Interface {
 	    val pic     = new Array[Int](32 * 32)
 	    val color   = 0xAAEEEEFF
 	    for (i <- 4 to 28) {
-	      if (i < 15 || i > 17) {
+	      if (i < 16 || i > 16) {
 	        pic(i + 16 * 32) = color
 	        pic(16 + i * 32) = color
 	      }
@@ -178,6 +73,16 @@ object Interface {
 	    val image = toolkit.createImage(new MemoryImageSource(32, 32, pic, 0, 32))
 	    toolkit.createCustomCursor(image, new Point(16, 16), "crosshair")
 	  }
+
+    /**
+     * An invisible block.
+     */
+    lazy val invisible : Cursor = {
+      val toolkit = Toolkit.getDefaultToolkit
+      val pic     = new Array[Int](32 * 32)
+      val image   = toolkit.createImage(new MemoryImageSource(32, 32, pic, 0, 32))
+      toolkit.createCustomCursor(image, new Point(16, 16), "invisibleCursor")
+    }
 	
 	}
   

@@ -10,41 +10,29 @@
  */
 package com.siigna.app
 
-import java.awt.{Container, Cursor}
-
 import com.siigna.util.geom.{Rectangle, TransformationMatrix, Vector}
 import com.siigna.util.logging.Log
 import model.Model
-import view.{Graphics, Interface, PaintFilter, ViewInterface}
+import view._
+import java.awt.{GraphicsEnvironment, Cursor, Window}
 
-object Siigna extends ViewInterface {
+/**
+ * The Siigna object provides access to various core elements of the software. It also functions
+ * as the first <code>Interface</code> connected to the unique interface of each module.
+ */
+object Siigna extends Interface {
 
   Log.level = Log.INFO
 
   /**
-   * A container on which elements can be added, accessible for everyone.
-   */
-  val container : Container = new Container
-
-  /**
    * Counts the frames per second. Don't set this if you want the correct answer..
    */
-  var fps : Double = 0;
+  var fps : Double = 0
 
   /**
-   * The interface provided by the modules.
+   * The active ModuleInterface.
    */
-  var interface = new Interface(this)
-
-  /**
-   * Saves the last pan-value, used to optimize the rendering-process.
-   */
-  var lastPan = Vector(0, 0)
-
-  /**
-   * The last zoom-value, used to optimize the rendering-process.
-   */
-  var lastZoom = -1.0
+  private var interface : Option[ModuleInterface] = None
 
   /**
    * The current position of the mouse.
@@ -52,10 +40,11 @@ object Siigna extends ViewInterface {
   var mousePosition = Vector(0, 0)
 
   /**
-   * Describes how far the view has been panned. This vector is given in
-   * physical coordinates, relative from the top left point of the screen.
+   * If navigation is turned off the canvas of Siigna stops moving. In other words the
+   * <code>Model</code> remains where it is while the modules still receives the events and
+   * are still able to react.
    */
-  var pan           = Vector(0, 0)
+  var navigation = true
 
   /**
    * The printmargin of the paper to print on.
@@ -73,20 +62,15 @@ object Siigna extends ViewInterface {
   var printFormatMax = 297.0 - printMargin
 
   /**
-   * Describes the current mouse-location when panning.
+   * The screen as a rectangle, given in physical coordinates.
+   * TODO: Reverse control to def!
    */
-  var panPointMouse =  Vector(0, 0)
+  var screen : Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
 
   /**
-   * Describes the old panning-point, so the software can tell how much
-   * the current panning has moved relative to the old.
+   * The graphical environment for Siigna.
    */
-  var panPointOld   = Vector(0, 0)
-
-  /**
-   * The zoom scala. Starts out in 1:1.
-   */
-  var zoom : Double = 1
+  val view = new SiignaApplet
 
   /**
    * The zoom-speed. Defaults to 0.1 (i. e. 10%).
@@ -100,32 +84,28 @@ object Siigna extends ViewInterface {
   def center = screen.center
 
   /**
-   * The cursor of the view.
+   * Get the current active cursor.
    */
-  def cursor = try { interface.cursor } catch { case _ => new Cursor(Cursor.CROSSHAIR_CURSOR) }
-
-  def display = try { interface.display } catch {case _ => None }
+  def cursor = view.getCursor
 
   /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view, translated to a given point.
-   */
-  def transformationTo(point : Vector) = TransformationMatrix(pan + point, zoom).flipY
-
-  /**
-   * Whether or not navigation is enabled.
-   */
-  def navigation = try { interface.navigation } catch { case _ => true }
-
-  /**
-   * The entrance to the paint-functions of the interfaces, i. e. the modules. This function requests the active
-   * interface to paint. The matrix is sent on in case the module needs to use/reverse some of the transformations
-   * that already have been applied to the view.
+   * The entrance to the paint-functions of the interfaces, i. e. the modules. This function
+   * requests the active interface to paint. The matrix is sent on in case the module needs
+   * to use/reverse some of the transformations that already have been applied to the view.
    * <br />
-   * The painting eludes the normal event-based thread communication, since we'd like to make sure that the painting
-   * happens instantly. There are thus potential synchronization-issues between the paint-loop and the Control thread.
+   * The painting eludes the normal event-based thread communication, since we'd like to make
+   * sure that the painting happens instantly.
    */
-  def paint(graphics : Graphics, transformation : TransformationMatrix) { interface.paint(graphics, transformation) }
+  def paint(graphics : Graphics, transformation : TransformationMatrix) {
+    if (interface.isDefined) {
+      interface.get.paint(graphics, transformation)
+    }
+  }
+
+  /**
+   * Returns the current panning position.
+   */
+  def pan = view.pan
 
   /**
    * Returns the paper scale of the current model.
@@ -138,9 +118,26 @@ object Siigna extends ViewInterface {
   def physical = TransformationMatrix(center, 1).flipY
 
   /**
-   * The screen as a rectangle, given in physical coordinates.
+   * Set's the current cursor of Siigna. Overrides the current value.
    */
-  var screen : Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
+  def setCursor(cursor : Cursor) {
+    view setCursor cursor
+  }
+
+  /**
+   * Sets the current active ModuleInterface.
+   */
+  def setInterface(interface : ModuleInterface) {
+    this.interface = Some(interface)
+
+    setCursor(interface.getCursor)
+  }
+
+  /**
+   * Returns the TransformationMatrix for the current pan distance and zoom
+   * level of the view, translated to a given point.
+   */
+  def transformationTo(point : Vector) = TransformationMatrix(pan + point, zoom).flipY
   
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom
@@ -161,6 +158,11 @@ object Siigna extends ViewInterface {
 
     TransformationMatrix(center, scaleFactor).flipY
   }
+
+  /**
+   * Returns the current zoom scale
+   */
+  def zoom = view.zoom
   
 
 }
