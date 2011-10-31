@@ -16,7 +16,7 @@ import java.lang.Thread
 
 import com.siigna.app.Siigna
 import com.siigna.app.controller.Control
-import com.siigna.util.event._
+import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
 import java.awt.{Dimension}

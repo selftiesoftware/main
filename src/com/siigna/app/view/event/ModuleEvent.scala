@@ -8,9 +8,7 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-package com.siigna.util.event
-
-import com.siigna.util.collection.Attributes
+package com.siigna.app.view.event
 
 /**
  * Events the modules can use to signal to each other.
@@ -23,6 +21,3 @@ trait ModuleEvent extends Event
  * @param message  any object that the module wishes to forward.
  */
 case class Message[T](message : T) extends ModuleEvent { val symbol = 'Message }
-
-
-

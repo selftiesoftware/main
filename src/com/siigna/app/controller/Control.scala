@@ -14,8 +14,8 @@ import collection.mutable.{Queue, Stack}
 
 import com.siigna.app.controller.command._
 import com.siigna.app.view.ModuleInterface
+import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
-import com.siigna.util.event.{Event, ModuleEvent}
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 

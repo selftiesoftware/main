@@ -12,9 +12,9 @@
 package com.siigna.module
 
 import com.siigna.app.view.Graphics
+import com.siigna.app.view.event.EventHandler
+import com.siigna.app.view.event.EventParser
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.util.event.EventHandler
-import com.siigna.util.event.parser.EventParser
 import com.siigna.app.view.{Display, ModuleInterface}
 
 /**

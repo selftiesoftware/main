@@ -14,7 +14,7 @@ package com.siigna.app.view.event
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.{Geometry, Vector}
 import com.siigna.app.model.shape.{PolylineShape, Shape}
-import com.siigna.util.event._
+import com.siigna.app.view.event._
 import com.siigna.app.Siigna
 
 /**

@@ -125,43 +125,43 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Preferences = com.siigna.util.collection.Preferences
 
   // Events
-  type Event = com.siigna.util.event.Event
+  type Event = com.siigna.app.view.event.Event
 
-  type EventHandler = com.siigna.util.event.EventHandler
-  lazy val EventHandler = com.siigna.util.event.EventHandler
+  type EventHandler = com.siigna.app.view.event.EventHandler
+  lazy val EventHandler = com.siigna.app.view.event.EventHandler
 
-  lazy val Key = com.siigna.util.event.Key
-  type KeyDown = com.siigna.util.event.KeyDown
-  val KeyDown = com.siigna.util.event.KeyDown
-  type KeyUp = com.siigna.util.event.KeyUp
-  val KeyUp = com.siigna.util.event.KeyUp
+  lazy val Key = com.siigna.app.view.event.Key
+  type KeyDown = com.siigna.app.view.event.KeyDown
+  val KeyDown = com.siigna.app.view.event.KeyDown
+  type KeyUp = com.siigna.app.view.event.KeyUp
+  val KeyUp = com.siigna.app.view.event.KeyUp
 
-  type Message[T] = com.siigna.util.event.Message[T]
-  lazy val Message = com.siigna.util.event.Message
+  type Message[T] = com.siigna.app.view.event.Message[T]
+  lazy val Message = com.siigna.app.view.event.Message
 
-  type ModifierKeys = com.siigna.util.event.ModifierKeys
-  val ModifierKeys = com.siigna.util.event.ModifierKeys
+  type ModifierKeys = com.siigna.app.view.event.ModifierKeys
+  val ModifierKeys = com.siigna.app.view.event.ModifierKeys
 
-  type ModuleEvent = com.siigna.util.event.ModuleEvent
+  type ModuleEvent = com.siigna.app.view.event.ModuleEvent
 
-  lazy val MouseButtonLeft = com.siigna.util.event.MouseButtonLeft
-  lazy val MouseButtonMiddle = com.siigna.util.event.MouseButtonMiddle
-  lazy val MouseButtonRight = com.siigna.util.event.MouseButtonRight
+  lazy val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
+  lazy val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle
+  lazy val MouseButtonRight = com.siigna.app.view.event.MouseButtonRight
 
-  type MouseDown = com.siigna.util.event.MouseDown
-  val MouseDown = com.siigna.util.event.MouseDown
-  type MouseDrag = com.siigna.util.event.MouseDrag
-  val MouseDrag = com.siigna.util.event.MouseDrag
-  type MouseEnter = com.siigna.util.event.MouseEnter
-  val MouseEnter = com.siigna.util.event.MouseEnter
-  type MouseExit = com.siigna.util.event.MouseExit
-  val MouseExit = com.siigna.util.event.MouseExit
-  type MouseMove = com.siigna.util.event.MouseMove
-  val MouseMove = com.siigna.util.event.MouseMove
-  type MouseUp = com.siigna.util.event.MouseUp
-  val MouseUp = com.siigna.util.event.MouseUp
-  type MouseWheel = com.siigna.util.event.MouseWheel
-  val MouseWheel = com.siigna.util.event.MouseWheel
+  type MouseDown = com.siigna.app.view.event.MouseDown
+  val MouseDown = com.siigna.app.view.event.MouseDown
+  type MouseDrag = com.siigna.app.view.event.MouseDrag
+  val MouseDrag = com.siigna.app.view.event.MouseDrag
+  type MouseEnter = com.siigna.app.view.event.MouseEnter
+  val MouseEnter = com.siigna.app.view.event.MouseEnter
+  type MouseExit = com.siigna.app.view.event.MouseExit
+  val MouseExit = com.siigna.app.view.event.MouseExit
+  type MouseMove = com.siigna.app.view.event.MouseMove
+  val MouseMove = com.siigna.app.view.event.MouseMove
+  type MouseUp = com.siigna.app.view.event.MouseUp
+  val MouseUp = com.siigna.app.view.event.MouseUp
+  type MouseWheel = com.siigna.app.view.event.MouseWheel
+  val MouseWheel = com.siigna.app.view.event.MouseWheel
 
   // Geometry
   type Arc = com.siigna.util.geom.Arc
