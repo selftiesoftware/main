@@ -89,6 +89,14 @@ object Siigna extends Interface {
   def cursor = view.getCursor
 
   /**
+   * Returns the active ModuleInterface that's been placed highest in the interface-hierarchy.
+   * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
+   * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
+   * get painted.
+   */
+  def getInterface = interface
+
+  /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules. This function
    * requests the active interface to paint. The matrix is sent on in case the module needs
    * to use/reverse some of the transformations that already have been applied to the view.
@@ -125,7 +133,12 @@ object Siigna extends Interface {
   }
 
   /**
-   * Sets the current active ModuleInterface.
+   * Sets the currently active ModuleInterface.
+   * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
+   * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
+   * get painted.
+   * <br />
+   * In other words don't meddle with this if you don't know what you're doing.
    */
   def setInterface(interface : ModuleInterface) {
     this.interface = Some(interface)

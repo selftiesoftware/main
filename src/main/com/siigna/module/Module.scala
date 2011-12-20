@@ -41,7 +41,7 @@ trait Module extends Serializable {
    * An interface the module can utilize to communicate with the controller and
    * view.
    */
-  var interface : ModuleInterface = new ModuleInterface(None)
+  var interface : ModuleInterface = new ModuleInterface()
 
   /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.
