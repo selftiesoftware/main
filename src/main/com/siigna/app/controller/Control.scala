@@ -110,26 +110,24 @@ object Control extends Thread("Siigna Controller") {
     // Set the state to start!
     module.state = 'Start
 
-    // Chain the interface with the one higher in the hierarchy
-    val interface = if (modules.size > 1)
-      new ModuleInterface(Some(modules(1).interface))
-    else
-      new ModuleInterface(None)
+    // Create a new interface
+    module.interface = new ModuleInterface
 
-    // Get the interface
-    module.interface = interface
+    // Chain the interface higher up in the hierarchy with the new interface
+    // or set the active interface in Siigna if the interface hasn't been defined
+    if (modules.size > 1)
+      modules(1).interface.chain(module.interface)
+    else if (Siigna.getInterface.isEmpty)
+      Siigna.setInterface(module.interface)
 
     // Give the paint-function to the interface
-    interface.setPaint(module.paint)
-
-    // Set the active interface
-    Siigna.setInterface(interface)
+    module.interface.setPaint(module.paint)
 
     // Return success!
     true
   } catch {
     // Log the failure
-    case e => Log.warning("Controller: Failed to initialize module " + module + ". The module will still run, but the painting is probably messed up.")
+    case e => Log.warning("Controller: Failed to initialize the interface of module " + module + ". The module will (probably) still run, but the painting is probably messed up.")
     false
   }
   

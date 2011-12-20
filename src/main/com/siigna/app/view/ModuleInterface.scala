@@ -24,7 +24,12 @@ import com.siigna.util.geom.TransformationMatrix
  * paint-call is forwarded to the chained instance as well. In this way every active module
  * gets painted, starting from the first one initialized to the latest.
  */
-case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
+class ModuleInterface extends Interface {
+
+  /**
+   * The chained interface, if any.
+   */
+  protected var chain : Option[ModuleInterface] = None
 
   /**
    * The cursor of the current interface, if any.
@@ -40,6 +45,13 @@ case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
    * A paint-function that the interface should paint on every paint-tick.
    */
   private var paint : Option[(Graphics, TransformationMatrix) => Unit] = None
+
+  /**
+   * Chain the interface to another interface.
+   */
+  def chain(interface : ModuleInterface) {
+    chain = Some(interface)
+  }
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
@@ -63,9 +75,10 @@ case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
   def display(string : String) { display(Popup(string)) }
 
   /**
-   * Returns the current cursor of the interface.
+   * Returns the current cursor of the current interface (if an interface
+   * is currently chained, it returns the cursor of the chained interface).
    */
-  def getCursor : Cursor = cursor
+  def getCursor : Cursor = if (chain.isDefined) chain.get.getCursor else cursor
 
   /**
    * Sets the cursor to an invisible block.
@@ -79,11 +92,11 @@ case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
    * If the interface is chaining to another interface then we let that interface paint.
    */
   def paint(graphics : Graphics, transformation: TransformationMatrix) {
-    // Paint the parent first
-    if (parent.isDefined)  parent.get.paint(graphics, transformation)
-
     // Paint the current paint-function, if defined
     if (paint.isDefined)   paint.get.apply(graphics, transformation)
+
+    // Paint the chain
+    if (chain.isDefined)  chain.get.paint(graphics, transformation)
 
     // Paint the display of this interface - if defined
     if (display.isDefined) display.get paint graphics
@@ -91,6 +104,9 @@ case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
 
   /**
    * Resets this interface by setting cursor to default and clearing the display.
+   * <br/>
+   * Remember that you have to direct the call to the bottom of the interface-chain
+   * if you want to clear the cursor completely.
    */
   def reset() {
     cursor  = Interface.Cursors.crosshair
@@ -109,5 +125,12 @@ case class ModuleInterface(parent : Option[ModuleInterface]) extends Interface {
    * Set the paint-function.
    */
   def setPaint(f : (Graphics, TransformationMatrix) => Unit) { paint = Some(f) }
+
+  /**
+   * Unchains any interfaces from this interface.
+   */
+  def unchain() {
+    chain = None
+  }
 
 }
