@@ -11,22 +11,40 @@
 
 package com.siigna.util.rtree
 
+import com.siigna.util.geom.Rectangle2D
+
 /**
- * Orders Minimum Bounding Rectangles after one of four available dimensions.
+ * Orders two shapes by their Minimum Bounding Rectangles after one of four available dimensions.
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */
-trait MBROrdering extends Ordering[MBR]
+trait MBROrdering extends Ordering[Rectangle2D]
 
+/**
+ * Orders two shapes after the least x value.
+ */
 case object OrderMinX extends MBROrdering {
-  def compare(r1 : MBR, r2 : MBR) = java.lang.Double.compare(r1.xMin, r2.xMin)
+  def compare(s1 : Rectangle2D, s2 : Rectangle2D) =
+    java.lang.Double.compare(s1.xMin, s2.xMin)
 }
+/**
+ * Orders two shapes after the least y value.
+ */
 case object OrderMinY extends MBROrdering {
-  def compare(r1 : MBR, r2 : MBR) = java.lang.Double.compare(r1.yMin, r2.yMin)
+  def compare(s1 : Rectangle2D, s2 : Rectangle2D) =
+    java.lang.Double.compare(s1.yMin, s2.yMin)
 }
+/**
+ * Orders two shapes after the biggest x value.
+ */
 case object OrderMaxX extends MBROrdering {
-  def compare(r1 : MBR, r2 : MBR) = java.lang.Double.compare(r2.xMax, r1.xMax)
+  def compare(s1 : Rectangle2D, s2 : Rectangle2D) =
+    java.lang.Double.compare(s1.xMax, s2.xMax)
 }
+/**
+ * Orders two shapes after their biggest y value.
+ */
 case object OrderMaxY extends MBROrdering {
-  def compare(r1 : MBR, r2 : MBR) = java.lang.Double.compare(r2.yMax, r1.yMax)
+  def compare(s1 : Rectangle2D, s2 : Rectangle2D) =
+    java.lang.Double.compare(s1.yMax, s2.yMax)
 }
