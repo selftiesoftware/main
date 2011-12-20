@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.siigna.app.controller.command</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.siigna" class="extype" href="../../../package.html">siigna</a>.<a name="com.siigna.app" class="extype" href="../../package.html">app</a>.<a name="com.siigna.app.controller" class="extype" href="../package.html">controller</a></p>
+        <h1>command</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">command</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.siigna.app.controller.command.Command" data-isabs="true">
+      <a id="Command:Command"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="Command.html"><span class="name">Command</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Commands that the modules can use to instruct the controller.</p>
+    </li><li visbl="pub" name="com.siigna.app.controller.command.ForwardTo" data-isabs="false">
+      <a id="ForwardTo:ForwardTo"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ForwardTo.html"><span class="name">ForwardTo</span></a>
+        
+        <span class="params">(<span name="module">module: Symbol</span>, <span name="continue">continue: Boolean</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A class that signals to the controller that the current module wishes to forward to another module.</p>
+    </li><li visbl="pub" name="com.siigna.app.controller.command.Goto" data-isabs="false">
+      <a id="Goto:Goto"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Goto.html"><span class="name">Goto</span></a>
+        
+        <span class="params">(<span name="state">state: Symbol</span>, <span name="continue">continue: Boolean</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A message that signals the Controller to go to another state.</p>
+    </li><li visbl="pub" name="com.siigna.app.controller.command.Preload" data-isabs="false">
+      <a id="Preload:Preload"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Preload.html"><span class="name">Preload</span></a>
+        
+        <span class="params">(<span name="name">name: Symbol</span>, <span name="classPath">classPath: String</span>, <span name="filePath">filePath: String</span>)</span><span class="result"> extends Command with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Asks the controller to preload a given module.</p>
+    </li></ol>
+            </div>
+        
+        
+
+        
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

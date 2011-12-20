@@ -1,0 +1,403 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>com.siigna.app.view.event</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../../../../lib/template.css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../../../../lib/package_big.png" />
+        <p id="owner"><a name="com" class="extype" href="../../../../package.html">com</a>.<a name="com.siigna" class="extype" href="../../../package.html">siigna</a>.<a name="com.siigna.app" class="extype" href="../../package.html">app</a>.<a name="com.siigna.app.view" class="extype" href="../package.html">view</a></p>
+        <h1>event</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">event</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="com.siigna.app.view.event.Event" data-isabs="true">
+      <a id="Event:Event"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="Event.html"><span class="name">Event</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The basic interface for all events in the system
+</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.EventHandler" data-isabs="false">
+      <a id="EventHandler:EventHandler"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="EventHandler.html"><span class="name">EventHandler</span></a>
+        
+        <span class="params">(<span name="stateMap">stateMap: DirectedGraph[Symbol, Symbol]</span>, <span name="stateMachine">stateMachine: Map[Symbol, (List[Event]) ⇒ Any]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Handles events using two state diagrams: one that maps events that leed to
+states (the stateMap) and one that maps states with actions (the stateMachine).</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.EventParser" data-isabs="false">
+      <a id="EventParser:EventParser"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="EventParser.html"><span class="name">EventParser</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An event-parser that analyses a given list of events, and returns an
+optimized and edited version in accordance with the given track and snap
+settings.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.EventSnap" data-isabs="true">
+      <a id="EventSnap:EventSnap"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="EventSnap.html"><span class="name">EventSnap</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The abstract class for every <code>EventSnaps</code>.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.EventTrack" data-isabs="true">
+      <a id="EventTrack:EventTrack"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="EventTrack.html"><span class="name">EventTrack</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <p class="comment cmt">The abstract class for every <code>EventTracks</code>.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.KeyDown" data-isabs="false">
+      <a id="KeyDown:KeyDown"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="KeyDown.html"><span class="name">KeyDown</span></a>
+        
+        <span class="params">(<span name="code">code: Int</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends KeyEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An event that triggers when any key is pressed.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.KeyEvent" data-isabs="true">
+      <a id="KeyEvent:KeyEvent"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="KeyEvent.html"><span class="name">KeyEvent</span></a>
+        
+        <span class="result"> extends Event</span>
+      </span>
+      </h4>
+      <p class="comment cmt">KeyEvents.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.KeyUp" data-isabs="false">
+      <a id="KeyUp:KeyUp"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="KeyUp.html"><span class="name">KeyUp</span></a>
+        
+        <span class="params">(<span name="code">code: Int</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends KeyEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">An event that triggers when any key is released.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.Message" data-isabs="false">
+      <a id="Message:Message[T]"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Message.html"><span class="name">Message</span></a>
+        <span class="tparams">[<span name="T">T</span>]</span>
+        <span class="params">(<span name="message">message: T</span>)</span><span class="result"> extends ModuleEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Messages that can be sent to and from modules containing any object.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.ModifierKeys" data-isabs="false">
+      <a id="ModifierKeys:ModifierKeys"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ModifierKeys.html"><span class="name">ModifierKeys</span></a>
+        
+        <span class="params">(<span name="shift">shift: Boolean</span>, <span name="ctrl">ctrl: Boolean</span>, <span name="alt">alt: Boolean</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">ModifierKeys used to match further information in a given event.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.ModuleEvent" data-isabs="true">
+      <a id="ModuleEvent:ModuleEvent"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="ModuleEvent.html"><span class="name">ModuleEvent</span></a>
+        
+        <span class="result"> extends Event</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Events the modules can use to signal to each other.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseButton" data-isabs="true">
+      <a id="MouseButton:MouseButton"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="MouseButton.html"><span class="name">MouseButton</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseDown" data-isabs="false">
+      <a id="MouseDown:MouseDown"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseDown.html"><span class="name">MouseDown</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseDrag" data-isabs="false">
+      <a id="MouseDrag:MouseDrag"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseDrag.html"><span class="name">MouseDrag</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseEnter" data-isabs="false">
+      <a id="MouseEnter:MouseEnter"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseEnter.html"><span class="name">MouseEnter</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseEvent" data-isabs="true">
+      <a id="MouseEvent:MouseEvent"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="MouseEvent.html"><span class="name">MouseEvent</span></a>
+        
+        <span class="result"> extends Event</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseExit" data-isabs="false">
+      <a id="MouseExit:MouseExit"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseExit.html"><span class="name">MouseExit</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseMove" data-isabs="false">
+      <a id="MouseMove:MouseMove"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseMove.html"><span class="name">MouseMove</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseUp" data-isabs="false">
+      <a id="MouseUp:MouseUp"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseUp.html"><span class="name">MouseUp</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseWheel" data-isabs="false">
+      <a id="MouseWheel:MouseWheel"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="MouseWheel.html"><span class="name">MouseWheel</span></a>
+        
+        <span class="params">(<span name="position">position: Vector</span>, <span name="button">button: MouseButton</span>, <span name="keys">keys: ModifierKeys</span>, <span name="wheel">wheel: Int</span>)</span><span class="result"> extends MouseEvent with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="com.siigna.app.view.event.CenterPoints" data-isabs="false">
+      <a id="CenterPoints:CenterPoints"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="CenterPoints$.html"><span class="name">CenterPoints</span></a>
+        
+        <span class="result"> extends EventSnap with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A hook for parsing points that snaps to center-points on objects.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.EndPoints" data-isabs="false">
+      <a id="EndPoints:EndPoints"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="EndPoints$.html"><span class="name">EndPoints</span></a>
+        
+        <span class="result"> extends EventSnap with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A hook for parsing points that snaps to end-points of objects.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.Key" data-isabs="false">
+      <a id="Key:Key"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Key$.html"><span class="name">Key</span></a>
+        
+        <span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Shortcuts to AWT's <code>KeyEvent</code> constants.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.MidPoints" data-isabs="false">
+      <a id="MidPoints:MidPoints"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MidPoints$.html"><span class="name">MidPoints</span></a>
+        
+        <span class="result"> extends EventSnap with Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A hook for parsing points that snap to mid-points on objects.</p>
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseButtonLeft" data-isabs="false">
+      <a id="MouseButtonLeft:MouseButtonLeft"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MouseButtonLeft$.html"><span class="name">MouseButtonLeft</span></a>
+        
+        <span class="result"> extends MouseButton with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseButtonMiddle" data-isabs="false">
+      <a id="MouseButtonMiddle:MouseButtonMiddle"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MouseButtonMiddle$.html"><span class="name">MouseButtonMiddle</span></a>
+        
+        <span class="result"> extends MouseButton with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseButtonNone" data-isabs="false">
+      <a id="MouseButtonNone:MouseButtonNone"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MouseButtonNone$.html"><span class="name">MouseButtonNone</span></a>
+        
+        <span class="result"> extends MouseButton with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseButtonRight" data-isabs="false">
+      <a id="MouseButtonRight:MouseButtonRight"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MouseButtonRight$.html"><span class="name">MouseButtonRight</span></a>
+        
+        <span class="result"> extends MouseButton with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.MouseWheel" data-isabs="false">
+      <a id="MouseWheel:MouseWheel"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="MouseWheel$.html"><span class="name">MouseWheel</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="com.siigna.app.view.event.Track" data-isabs="false">
+      <a id="Track:Track"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Track$.html"><span class="name">Track</span></a>
+        
+        <span class="result"> extends EventTrack</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
