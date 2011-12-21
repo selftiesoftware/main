@@ -17,11 +17,11 @@ import java.awt.image.VolatileImage
 
 import com.siigna.util.Implicits._
 import com.siigna.util.collection.Preferences
-import com.siigna.util.geom.{Rectangle, Vector}
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.PolylineShape
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
+import com.siigna.util.geom.{Vector2D, Rectangle, Vector}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -175,8 +175,8 @@ trait View extends Applet {
       try {
         val dynamic = Model.dynamicShapes
         // 1: Draw the dynamic layer and a shadow of the old shape
-        dynamic.values.map(_.shape.attributes_+=("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
-        dynamic.values.map(_.immutableShape.attributes_+=("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
+        dynamic.values.map(_.shape.addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
+        dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
       }
@@ -218,7 +218,7 @@ trait View extends Applet {
    * Initializes a pan in order to save the start-vector of the current pan
    * and the vector for the <code>pan</code> value.
    */
-  def startPan(point : Vector) {
+  def startPan(point : Vector2D) {
     panPointOld   = pan
     panPointMouse = point
   }
@@ -266,7 +266,7 @@ trait View extends Applet {
   /**
    * Pans the view and asks to repaint it afterwards.
    */
-  def pan(endPoint : Vector) {
+  def pan(endPoint : Vector2D) {
     if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
     repaint
   }
@@ -281,7 +281,7 @@ trait View extends Applet {
    * </ol>
    * Also, if the delta is cropped at (+/-)10, to avoid touch-pad bugs with huge deltas etc.
    */
-  def zoom(point : Vector, _delta : Int)
+  def zoom(point : Vector2D, _delta : Int)
   {
     val delta = if (_delta > 10) 10 else if (_delta < -10) -10 else _delta
     if (Siigna.navigation && (zoom < 50 || delta > 0)) {

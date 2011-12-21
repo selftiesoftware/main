@@ -16,7 +16,7 @@ import scala.actors.Debug
 import scala.collection.generic.{Addable, Subtractable}
 
 import com.siigna.app.model.shape._
-import com.siigna.util.geom.Vector
+import com.siigna.util.geom.{Vector2D, Vector}
 
 /**
  * A DXF section, represented by list of DXFValues.
@@ -107,9 +107,19 @@ case class DXFSection(values : Seq[DXFValue]) extends Addable[DXFValue, DXFSecti
 
 }
 
+/**
+ * The companion object to DXFValue providing utility functions to create DXFValues from
+ * various objects.
+ */
 object DXFSection {
 
   def apply(value : DXFValue) : DXFSection = new DXFSection(List(value))
   def apply(value1 : DXFValue, value2 : DXFValue, values : DXFValue*) : DXFSection = DXFSection(value1) + value2 ++ values
 
+  /**
+   * Create a DXFSection from a Vector2D.
+   */
+  def fromVector(vector : Vector2D) = {
+    DXFSection(DXFValue(100, "AcDbPoint"), DXFValue(10, vector.x), DXFValue(20, vector.y))
+  }
 }

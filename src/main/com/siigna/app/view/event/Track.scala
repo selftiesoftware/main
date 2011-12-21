@@ -43,7 +43,7 @@ object Track extends EventTrack {
 
   override def paint(graphics : Graphics, transformation : TransformationMatrix) {
     if (line.isDefined) {
-      val transformedLine = line.get.transform(transformation).attributes_+=("infinite" -> true)
+      val transformedLine = line.get.transform(transformation).setAttribute("infinite" -> true)
       graphics draw transformedLine
     }
   }

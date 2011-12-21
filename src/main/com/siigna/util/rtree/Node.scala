@@ -52,16 +52,6 @@ trait Node {
   def mbr : Rectangle2D
 
   /**
-   * Removes a single element from the Node.
-   */
-  def remove(elem : (String, Shape)) : Node
-  
-  /**
-   * Removes a number of elements from the Node.
-   */
-  def remove(elems : Traversable[(String, Shape)]) : Node
-
-  /**
    * The number of elements in the Node.
    */
   def size : Int
@@ -70,10 +60,5 @@ trait Node {
    * Returns the node as a string.
    */
   def toString : String
-  
-  /**
-   * Updates the shape associated with the given string.
-   */
-  def updated(elem : (String, Shape)) : Node
 
 }

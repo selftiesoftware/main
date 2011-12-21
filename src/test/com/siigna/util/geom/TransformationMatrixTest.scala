@@ -20,7 +20,7 @@ import org.scalatest.{FunSuite, FlatSpec}
 class TransformationMatrixTest extends FunSuite with ShouldMatchers {
 
   // Concatenate
-  "A TransformationMatrix" should "be able to concatenate itself with other matrices" in {
+  test("A TransformationMatrix can concatenate itself with other matrices") {
     val t1 = TransformationMatrix()
     val t2 = TransformationMatrix(Vector(10, 10), 1000)
 

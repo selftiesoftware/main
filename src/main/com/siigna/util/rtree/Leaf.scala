@@ -19,7 +19,7 @@ import com.siigna.util.geom.Rectangle2D
  *
  * @author Jens Egholm <jensep@gmail.com>
  */
-/*trait Leaf extends Node {
+trait Leaf extends Node {
 
   /**
    * Adds a single element to the Node.
@@ -33,7 +33,7 @@ import com.siigna.util.geom.Rectangle2D
    */
   def add(elems : Traversable[(String, Shape)]) : Leaf = {
     if (elems.size + size > branchFactor || elems.isEmpty) {
-      throw new IlegalArgumentException("Unable to add to the leaf with " + elems.size + " elements")
+      throw new IllegalArgumentException("Unable to add to the leaf with " + elems.size + " elements")
     } else if (elems.size + size > 2) { // If we require a LeafN node (more than 2 elements)
       val a = (traversable ++ elems).toArray
       new Leaf.LeafN(a, elems.size + size, branchFactor, ordering)
@@ -64,13 +64,13 @@ import com.siigna.util.geom.Rectangle2D
   /**
    * Removes a single element from the leaf.
    */
-  def remove(elem : (String, Shape)) : Leaf
+  def remove(elem : String) : Leaf
   
   /**
    * Removes a number of elements from the leaf.
    * TODO: Optimize
    */
-  def remove(elems : Map[(String, Shape)]) : Leaf =
+  def remove(elems : Traversable[String]) : Leaf =
     elems.foldLeft(this)((leaf, elem) => leaf.remove(elem))
   
   /**
@@ -115,13 +115,13 @@ object Leaf {
   /**
    * A leaf with one element.
    */
-  class Leaf1(key1 : String, value1 : Shape, branchFactor : Int, ordering : MBROrdering) extends Leaf {
-    def add(elem : (String, Shape)) = new Leaf2(key1, value1, elem._1, elem._2, branchFactor, ordering)
-    def apply(query : Rectangle2D) = if (mbr.intersects(query)) Iterator(value1) else Iterator.empty
-    def isBetter(query : Rectangle2D) = ordering.lt(worst, value1)
-    val iterable = Iterable(key1 -> value1)
-    val mbr = value1.boundary
-    def remove(elem : String) = if (value1.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
+  class Leaf1(key : String, value : Shape, branchFactor : Int, ordering : MBROrdering) extends Leaf {
+    def add(elem : (String, Shape)) = new Leaf2(key, value, elem._1, elem._2, branchFactor, ordering)
+    def apply(query : Rectangle2D) = if (mbr.intersects(query)) Iterator(value) else Iterator.empty
+    def isBetter(query : Rectangle2D) = ordering.lt(worst, value)
+    val iterable = Iterable(key -> value)
+    val mbr = value.boundary
+    def remove(elem : String) = if (value.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
     val size = 1
     override val toString = "Leaf[ " + key + " -> " + value + " ]"
     def updated(elem : (MBR, String)) = if (value1.equals(value)) new Leaf1(key, value, branchFactor, ordering) else this
@@ -255,4 +255,4 @@ object Leaf {
     }
 
   }
-}                                  */
+}
