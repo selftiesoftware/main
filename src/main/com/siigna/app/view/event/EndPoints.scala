@@ -12,8 +12,8 @@
 package com.siigna.app.view.event
 
 import com.siigna.app.model.shape._
-import com.siigna.util.geom.{Geometry, Vector}
-import com.siigna.app.model.shape.{PolylineShape, Shape}
+import com.siigna.util.geom.{Vector2D}
+import com.siigna.app.model.shape.{PolylineShape}
 import com.siigna.app.view.event._
 import com.siigna.app.Siigna
 
@@ -30,19 +30,19 @@ case object EndPoints extends EventSnap {
     case some => some
   }
 
-  def snap(point : Vector, model : Iterable[ImmutableShape]) : Vector = {
-    def closestTwo(p1 : Vector, p2 : Vector) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
-    def closestPoints(points : Seq[Vector]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
+  def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
+    def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
+    def closestPoints(points : Seq[Vector2D]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
 
     if (!model.isEmpty) {
       val res = model.map(_ match {
         case ArcShape(start, middle, end, _) => closestTwo(start, end)
         case s : CircleShape => closestPoints(s.handles)
-        case s : ImageShape => closestPoints(s.geometry.points)
+        case s : ImageShape => closestPoints(s.geometry.vertices.toSeq)
         case LineShape(start, end, _) => closestTwo(start, end)
         case PointShape(p, _) => p
-        case s : PolylineShape => closestPoints(s.geometry.handles)
-        case s : TextShape => closestPoints(s.geometry.points)
+        case s : PolylineShape => closestPoints(s.geometry.vertices.toSeq)
+        case s : TextShape => closestPoints(s.geometry.vertices.toSeq)
       })
       val closestPoint = res.reduceLeft(closestTwo)
 

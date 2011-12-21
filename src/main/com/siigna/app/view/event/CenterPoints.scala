@@ -12,7 +12,7 @@
 package com.siigna.app.view.event
 
 import com.siigna.app.model.shape.{ImmutableShape}
-import com.siigna.util.geom.Vector
+import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
 
 /**
@@ -25,7 +25,7 @@ case object CenterPoints extends EventSnap {
     case some => some
   }
 
-  def snap(point : Vector, model : Iterable[ImmutableShape]) : Vector = {
+  def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       val res = model.map(_.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
       if (res.distanceTo(point) * Siigna.zoom <= 10) {

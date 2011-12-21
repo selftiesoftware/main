@@ -12,6 +12,7 @@
 package com.siigna.util.dxf
 
 import scala.actors.Debug
+import com.siigna.util.geom.Vector2D
 
 case class DXFValue(a : Int, b : Any) {
   def toDouble : Option[Double] = try {

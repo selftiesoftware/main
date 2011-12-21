@@ -30,10 +30,10 @@ trait Shape {
    * Merge the new attributes in with the existing ones, eventually overwriting
    * attributes with new values.
    *
-   * @param  attributes  the new attributes to merge in.
+   * @param  attribute  the new attribute to merge in.
    * @return  a shape with the updated attributes.
    */
-  def addAttribute(attribute : (String, Any)) = setAttributes(attributes :+ attribute)
+  def addAttribute(attribute : (String, Any)) = setAttribute(attribute)
 
   /**
    * Merge the new attributes in with the existing ones, eventually overwriting
@@ -59,6 +59,15 @@ trait Shape {
    * Calculates the closest distance to the shape in the given scale.
    */
   def distanceTo(point : Vector2D, scale : Double) : Double
+
+  /**
+   * Merge the new attributes in with the existing ones, eventually overwriting
+   * attributes with new values.
+   *
+   * @param  attribute  the new attribute to merge in.
+   * @return  a shape with the updated attributes.
+   */
+  def setAttribute(attribute : (String, Any)) = setAttributes(attributes :+ attribute)
 
   /**
    * Returns a new shape with a new set of attributes.

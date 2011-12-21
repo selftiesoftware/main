@@ -10,11 +10,11 @@
  */
 package com.siigna.app
 
-import com.siigna.util.geom.{Rectangle, TransformationMatrix, Vector}
 import com.siigna.util.logging.Log
 import model.Model
 import view._
 import java.awt.{GraphicsEnvironment, Cursor, Window}
+import com.siigna.util.geom._
 
 /**
  * The Siigna object provides access to various core elements of the software. It also functions
@@ -37,7 +37,7 @@ object Siigna extends Interface {
   /**
    * The current position of the mouse.
    */
-  var mousePosition = Vector(0, 0)
+  var mousePosition = Vector2D(0, 0)
 
   /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
@@ -65,7 +65,7 @@ object Siigna extends Interface {
    * The screen as a rectangle, given in physical coordinates.
    * TODO: Reverse control to def!
    */
-  var screen : Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
+  var screen : Rectangle2D = Rectangle(Vector(0, 0), Vector(0, 0))
 
   /**
    * The graphical environment for Siigna.

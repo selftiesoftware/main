@@ -20,7 +20,7 @@ import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
 import java.awt.{Dimension}
-import com.siigna.util.geom.{Rectangle, Vector}
+import com.siigna.util.geom.{Vector2D, Rectangle, Vector}
 
 /**
  * The main class of Siigna.
@@ -170,10 +170,10 @@ class SiignaApplet extends View
    * dispatched even in MouseMove and MouseDrag, and dispatches them to
    * EventHandler by filling in the correct constructor-parameters.
    */
-  private def handleMouseEvent(e : AWTMouseEvent, constructor : (Vector, MouseButton, ModifierKeys) => Event)
+  private def handleMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event)
   {
     // Converts a physical point to a virtual one.
-    def toVirtual(physical : Vector) = {
+    def toVirtual(physical : Vector2D) = {
       val r = physical.transform(Siigna.virtual.inverse)
       Siigna.mousePosition = r
       r

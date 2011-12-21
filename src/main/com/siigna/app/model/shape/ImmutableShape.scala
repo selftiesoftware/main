@@ -53,7 +53,7 @@ trait ImmutableShape extends Shape {
   /**
    * Returns a rectangle that includes the entire shape.
    */
-  def boundary : Rectangle = geometry.boundary
+  def boundary : Rectangle2D = geometry.boundary
 
   /**
    * The basic geometric object for the shape.

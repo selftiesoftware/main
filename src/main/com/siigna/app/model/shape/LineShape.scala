@@ -43,10 +43,11 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
                          DXFValue(5, scala.util.Random.nextString(4)),
                          DXFValue(100, "AcDbEntity"),
                          DXFValue(100, "AcDbPolyline"),
-                         DXFValue(62, 1)) + p1.toDXF + p2.toDXF
+                         DXFValue(62, 1)) +
+              DXFSection.fromVector(p1) +
+              DXFSection.fromVector(p2)
 
-  def transform(transformation : TransformationMatrix) : LineShape =
-  {
+  def transform(transformation : TransformationMatrix) : LineShape = {
     LineShape(p1 transform(transformation),
               p2 transform(transformation),
               attributes)
@@ -56,6 +57,6 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 object LineShape
 {
   def apply(p1 : Vector2D, p2 : Vector2D) = new LineShape(p1, p2, Attributes())
-  def apply(line : Segment2D)             = LineShape(line.p1, line.p2)
+  def apply(line : Segment2D) : LineShape = LineShape(line.p1, line.p2)
 
 }

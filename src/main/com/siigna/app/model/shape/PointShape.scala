@@ -11,14 +11,14 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.{DXFSection, DXFValue}
+import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 
 /**
  * This class draws a simple 2-dimensional point.
  */
-case class PointShape(point : Vector, attributes : Attributes) extends ImmutableShape
+case class PointShape(point : Vector2D, attributes : Attributes) extends ImmutableShape
 {
 
   val geometry = point
@@ -35,5 +35,5 @@ case class PointShape(point : Vector, attributes : Attributes) extends Immutable
 }
 
 object PointShape {
-  def apply(point : Vector) = new PointShape(point, Attributes())
+  def apply(point : Vector2D) = new PointShape(point, Attributes())
 }

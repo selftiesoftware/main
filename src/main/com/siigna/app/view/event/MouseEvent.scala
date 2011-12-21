@@ -11,7 +11,7 @@
 
 package com.siigna.app.view.event
 
-import com.siigna.util.geom.Vector
+import com.siigna.util.geom.Vector2D
 
 trait MouseButton
 final case object MouseButtonNone   extends MouseButton
@@ -22,7 +22,7 @@ final case object MouseButtonMiddle extends MouseButton
 trait MouseEvent extends Event
 {
 
-  def position : Vector
+  def position : Vector2D
 
   def button : MouseButton
 
@@ -30,16 +30,16 @@ trait MouseEvent extends Event
 
 }
 
-case class MouseEnter(position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseEnter }
-case class MouseExit (position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseExit }
-case class MouseDown (position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDown }
-case class MouseUp   (position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseUp }
-case class MouseDrag (position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDrag }
-case class MouseMove (position : Vector, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseMove }
-case class MouseWheel(position : Vector, button : MouseButton, keys : ModifierKeys, wheel : Int) extends MouseEvent { val symbol = 'MouseWheel }
+case class MouseEnter(position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseEnter }
+case class MouseExit (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseExit }
+case class MouseDown (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDown }
+case class MouseUp   (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseUp }
+case class MouseDrag (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDrag }
+case class MouseMove (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseMove }
+case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Int) extends MouseEvent { val symbol = 'MouseWheel }
 
 object MouseWheel
 {
-  def apply(wheel : Int)(position : Vector, button : MouseButton, keys : ModifierKeys) =
+  def apply(wheel : Int)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
     new MouseWheel(position, button, keys, wheel)
 }
