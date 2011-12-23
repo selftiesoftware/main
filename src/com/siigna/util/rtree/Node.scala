@@ -11,49 +11,58 @@
 
 package com.siigna.util.rtree
 
+import com.siigna.app.model.shape.Shape
+import com.siigna.util.geom.Rectangle2D
+
 /**
- * A node in a PR-tree containing the MBR. This can effectively be either a leaf or a branch.
+ * A node in a PR-tree. This can effectively be either a leaf or a branch.
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */
-trait Node[T] {
+trait Node {
 
   /**
    * Adds a single element to the Node.
    */
-  def add(key : MBR, elem : T) : Unit
+  def add(elem : (String, Shape)) : Node
   
   /**
-   * Adds several elements to the Node.
+   * Adds a number of elements to the Node.
    */
-  def add(elems : Map[MBR, T]) : Unit
-  
+  def add(elems : Traversable[(String, Shape)]) : Node
+
   /**
    * Queries for elements in the node whose MBR is contained or intersected by a given MBR.
    */
-  def apply(mbr : MBR) : Iterable[T]
+  def apply(query : Rectangle2D) : Traversable[Shape]
+
+  /**
+   * The branch factor for the node.
+   */
+  def branchFactor : Int
+  
+  /**
+   * Retrieve the traversable for all elements in the node.
+   */
+  def traversable : Traversable[(String, Shape)]
 
   /**
    * The MinimumBoundingRectangle of the node.
    */
-  def mbr : MBR
-  
+  def mbr : Rectangle2D
+
   /**
    * Removes a single element from the Node.
-   * 
-   * @returns  The element that could not be found and removed, if any.
    */
-  def remove(key : MBR, elem : T) : Unit
+  def remove(elem : (String, Shape)) : Node
   
   /**
    * Removes a number of elements from the Node.
-   * 
-   * @returns  A collection of the elements that could not be found and removed - can be empty!.
    */
-  def remove(elems : Map[MBR, T]) : Unit
+  def remove(elems : Traversable[(String, Shape)]) : Node
 
   /**
-   * The size of the elements in the Node.
+   * The number of elements in the Node.
    */
   def size : Int
 
@@ -61,5 +70,10 @@ trait Node[T] {
    * Returns the node as a string.
    */
   def toString : String
+  
+  /**
+   * Updates the shape associated with the given string.
+   */
+  def updated(elem : (String, Shape)) : Node
 
 }

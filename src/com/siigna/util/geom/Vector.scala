@@ -13,47 +13,52 @@ package com.siigna.util.geom
 
 /**
  * A vector class utility.
+ *
+ * @tparam T  The type of the vector given so we can assure the functions returns the desired type of vector.
  */
-case class Vector(x : Double, y : Double) extends Geometry
+trait Vector[D <: Dimension] extends Geometry
 {
 
+  /**
+   * The center of the geometry.
+   */
   val center = this
 
   /**
    * Returns the sum of this vector with another vector.
    */
-  def +(other : Vector) = Vector(x + other.x, y + other.y)
+  def +(other : Vector[D]) : Vector[D]
 
   /**
    * Subtracts this vector with another vector.
    */
-  def -(other : Vector) = Vector(x - other.x, y - other.y)
+  def -(other : Vector[D]) : Vector[D]
 
   /**
    * The scalar product of this vector with another vector.
    */
-  def *(other : Vector) = x * other.x + y * other.y
+  def *(other : Vector[D]) : Vector[D]
 
   /**
    * Multiplies a vector with a number.
    */
-  def *(scale : Double) = Vector(x * scale, y * scale)
+  def *(scale : Double) : Vector[D]
 
   /**
    * Divides a vector with a number.
    */
-  def /(scale : Double) = Vector(x / scale, y / scale)
+  def /(scale : Double) : Vector[D]
 
   /**
    * Rotates the vector 180 degrees by multiplying with (-1). This gives a vector
    * pointing in the opposite direction.
    */
-  def unary_- = new Vector(-x, -y)
+  def unary_- : Vector[D]
 
   /**
    * Returns the absolute value of the vector.
    */
-  def abs = Vector(scala.math.abs(this.x), scala.math.abs(this.y))
+  def abs : Vector[D]
 
   /**
    * Gives an angle (in degrees) for the vector relative to the x-axis CCW. Zero degrees indicate
@@ -61,64 +66,42 @@ case class Vector(x : Double, y : Double) extends Geometry
    *
    * @return  a number between 0 and 360, calculated counter-clockwise from the (positive) x-axis.
    */
-  def angle = {
-    val degrees = scala.math.atan2(y, x) * 180 / scala.math.Pi
-    if (degrees < 0)
-      degrees + 360
-    else
-      degrees
-  }
+  def angle : Double
 
   /**
    * Defines the boundary of the Vector as an empty rectangle.
    */
-  def boundary = Rectangle(this, this)
+  def boundary : Rectangle[D]
 
   /**
    * Confines this vector into the bounds of the given rectangle.
    */
-  def confine(rectangle : Rectangle) : Vector = Vector(
-    if      (x < rectangle.topLeft.x)  rectangle.topLeft.x
-    else if (x > rectangle.topRight.x) rectangle.topRight.x
-    else     x,
-    if      (y > rectangle.topLeft.y)    rectangle.topLeft.y
-    else if (y < rectangle.bottomLeft.y) rectangle.bottomLeft.y
-    else     y)
-
-  /**
-   * Gets the distance to another vector.
-   */
-  def distanceTo(point : Vector) = (point - this).length
-
-  def handles = List(this)
-
-  def intersect(rectangle : Rectangle) = rectangle.distanceTo(this) == 0
+  def confine(rectangle : Rectangle[D]) : Vector[D]
 
   /**
    * Calculates the length of the vector.
    */
-  def length = java.lang.Math.hypot(x, y)
+  def length : Double
 
-  // TODO: Should probably have a better name.
   /**
    * Calculates the vector rotated 90 degrees counter-clockwise.
    */
-  def normal = new Vector(-y, x)
+  def normal : Vector[D]
 
   /**
    * Rounds the vector to whole numbers.
    */
-  def round = new Vector(scala.math.round(x), scala.math.round(y))
+  def round : Vector[D]
 
   /**
    * Transforms a vector with a given transformation matrix.
    */
-  def transform(transformation : TransformationMatrix) : Vector = transformation.transform(this)
+  def transform(transformation : TransformationMatrix) : Vector[D]
 
   /**
    * Calculates the unit-vector of this.
    */
-  def unit = new Vector(this.x / this.length, this.y / this.length)
+  def unit : Vector[D]
 
 }
 
@@ -130,7 +113,12 @@ case class Vector(x : Double, y : Double) extends Geometry
 object Vector {
 
   /**
-   * Parses a string as a 2D vector. Here is an example of the expected format:
+   * Creates a new 2-dimensional vector.
+   */
+  def apply(x : Double, y : Double) = new Vector2D(x, y)
+
+  /**
+   * Parses a string as a ND vector. Here is an example of the expected format:
    * <code>(3.14, 7)</code>.
    *
    * <p>
@@ -157,43 +145,10 @@ object Vector {
         }
       if (coordinates.size != 2)
         throw new IllegalArgumentException("Expected a 2-dimensional vector, got: " + value)
-      Vector(coordinates(0), coordinates(1))
+      Vector2D(coordinates(0), coordinates(1))
     } else {
       throw new IllegalArgumentException("Expected a vector, got: " + value)
     }
-  }
-
-  /**
-   * Calculates the determinant of the 2x2 matrix described by two vectors.
-   *
-   * <p>
-   * The matrix is defined like this:
-   * <pre>
-   *     | a.x  b.x |             or    | a.x  a.y |
-   *     | a.y  b.y | (columns)         | b.x  b.y | (rows)
-   * </pre>
-   * </p>
-   *
-   * @param  a  the first column (or row) of the determinant matrix.
-   * @param  b  the second column (or row) of the determinant matrix.
-   * @return  the determinant value.
-   */
-  def determinant(a : Vector, b : Vector) = a.x * b.y - a.y * b.x
-
-  /**
-   * Calculates the shortest angle between two vectors.
-   *
-   * @param  v1  the first vector.
-   * @param  v2  the second vector.
-   * @return  the angle between the two vectors in degrees.
-   */
-  def shortestAngleBetweenVectors(v1 : Vector, v2 : Vector) =
-  {
-    val scalar = v1.length * v2.length
-    if (scalar != 0) {
-      val inner = v1 * v2 / scalar
-      scala.math.acos(inner) * 180 / scala.math.Pi
-    } else 0.0
   }
 
 }

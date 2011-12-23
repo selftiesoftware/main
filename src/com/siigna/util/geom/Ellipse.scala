@@ -20,22 +20,8 @@ import com.siigna._
  * Pre-condition: <code>p.x != a</code>.
  * If the pre-condition isn't fulfilled, the ellipse is created with a very small b.
  */
-case class Ellipse (f1 : Vector, f2 : Vector, p : Vector) extends Geometry
+trait Ellipse[D <: Dimension] extends Geometry[D]
 {
-
-  val center = (f1 + f2)/2
-
-  val a = ((f1 - p).length + (f2 - p).length)/2
-  val b = try { p.y / scala.math.sqrt(scala.math.abs(1 - (p.x / a) * (p.x / a))) } catch {
-    case e => //Log.warning("The two focal points are the same, parsing a very very small number.")
-    0.00000001
-  }
-  val e = (center - f1).length / a
-
-  def boundary = Rectangle(Vector(center.x - b, center.y - a), Vector(center.x + b, center.y + a))
-
-  // TODO: Find a Math wiz.
-  def distanceTo(point : Vector) = java.lang.Double.POSITIVE_INFINITY
 
   /**
    * Calculates the distance from a ellipse to a point.
@@ -121,20 +107,5 @@ case class Ellipse (f1 : Vector, f2 : Vector, p : Vector) extends Geometry
     }
   }
   */
-
-  def handles = List(Vector(center.x + b, center.y), Vector(center.x, center.y + a),
-                     Vector(center.x - b, center.y), Vector(center.x, center.y - a))
-
-  /**
-   * Examines whether the ellipse intersects with a segment
-   */
-  def intersect(line: Segment) =
-    line.intersect(this)
-
-  /**
-   * Examines whether the ellipse intersects with rectangle
-   */
-  def intersect(rect: Rectangle) =
-    rect.intersect(this)
   
 }

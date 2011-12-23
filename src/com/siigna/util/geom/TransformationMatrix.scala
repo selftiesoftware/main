@@ -22,6 +22,8 @@ import java.awt.geom.{AffineTransform, Point2D}
  * Later..: Can't find the problem...
  *
  * @param t  The transformation matrix derived from AWT.
+ *
+ * TODO: Create a 3D representation as well.
  */
 case class TransformationMatrix(t : AffineTransform)
 {
@@ -43,7 +45,7 @@ case class TransformationMatrix(t : AffineTransform)
   /**
    * Flips the X-axis around the point.
    */
-  def flipX(point : Vector) : TransformationMatrix =
+  def flipX(point : Vector2D) : TransformationMatrix =
     translate(point).flipX.translate(-point)
 
   /**
@@ -55,7 +57,7 @@ case class TransformationMatrix(t : AffineTransform)
   /**
    * Flips the Y-axis around a point.
    */
-  def flipY(point : Vector) : TransformationMatrix =
+  def flipY(point : Vector2D) : TransformationMatrix =
     translate(point).flipY.translate(-point)
 
   /**
@@ -86,7 +88,7 @@ case class TransformationMatrix(t : AffineTransform)
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
    */
-  def rotate(degrees : Double, point : Vector) =
+  def rotate(degrees : Double, point : Vector2D) =
     TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point x, point y)))
 
   /**
@@ -104,7 +106,7 @@ case class TransformationMatrix(t : AffineTransform)
   /**
    * Transforms a vector with this transformation.
    */
-  def transform(point : Vector) =
+  def transform(point : Vector2D) =
   {
     val src = new Point2D.Double(point x, point y)
     var dst = new Point2D.Double(0, 0)
@@ -123,15 +125,13 @@ case class TransformationMatrix(t : AffineTransform)
    * Creates a translation (panning) and concatenates it with this
    * transformation.
    */
-  def translate(delta : Vector) =
-    TransformationMatrix(operation(_ translate(delta x, delta y)))
+  def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta x, delta y)))
   
   /**
    * Performs a operation on the affine transformation which is wrapped by this
    * transformation.
    */
-  protected def operation(op : AffineTransform => Unit) =
-  {
+  protected def operation(op : AffineTransform => Unit) = {
     val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
     op(newAffineTransform)
     newAffineTransform
@@ -146,7 +146,7 @@ object TransformationMatrix
 {
 
   def apply() : TransformationMatrix = new TransformationMatrix
-  def apply(pan : Vector, zoom : Double) : TransformationMatrix =
+  def apply(pan : Vector2D, zoom : Double) : TransformationMatrix =
     new TransformationMatrix() translate(pan) scale(zoom)
 
 }
