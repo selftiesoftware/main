@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
+=======
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
@@ -25,7 +30,15 @@
     <option name="myDefaultNotNull" value="org.jetbrains.annotations.NotNull" />
     <option name="myNullables">
       <value>
+<<<<<<< HEAD
         <list size="0" />
+=======
+        <list size="3">
+          <item index="0" class="java.lang.String" itemvalue="org.jetbrains.annotations.Nullable" />
+          <item index="1" class="java.lang.String" itemvalue="javax.annotation.Nullable" />
+          <item index="2" class="java.lang.String" itemvalue="edu.umd.cs.findbugs.annotations.Nullable" />
+        </list>
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7
       </value>
     </option>
     <option name="myNotNulls">
