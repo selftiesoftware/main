@@ -1,8 +1,0 @@
-<component name="CopyrightManager">
-  <settings default="Siigna">
-    <module2copyright>
-      <element module="Project Files" copyright="Siigna" />
-    </module2copyright>
-    <LanguageOptions name="Scala" />
-  </settings>
-</component>
