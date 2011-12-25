@@ -106,7 +106,12 @@ case class TransformationMatrix(t : AffineTransform)
   /**
    * Transforms a vector with this transformation.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/TransformationMatrix.scala
+  def transform(point : Vector2D) =
+  {
+=======
   def transform(point : Vector2D) : Vector2D = {
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/TransformationMatrix.scala
     val src = new Point2D.Double(point x, point y)
     val dst = new Point2D.Double(0, 0)
     t transform(src, dst)
@@ -124,7 +129,11 @@ case class TransformationMatrix(t : AffineTransform)
    * Creates a translation (panning) and concatenates it with this
    * transformation.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/TransformationMatrix.scala
+  def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta x, delta y)))
+=======
   def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta.x, delta.y)))
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/TransformationMatrix.scala
   
   /**
    * Performs a operation on the affine transformation which is wrapped by this
