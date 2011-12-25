@@ -72,7 +72,7 @@ case class DXFSection(values : Seq[DXFValue]) extends Addable[DXFValue, DXFSecti
         }
         // Polylines
         case DXFValue(0, "LWPOLYLINE") => {
-          var points = List[Vector]()
+          var points = List[Vector2D]()
           var x, y : Option[Double] = None
           values.foreach((value : DXFValue) => value match {
             case DXFValue(10, _) => x = value.toDouble

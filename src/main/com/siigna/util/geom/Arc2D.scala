@@ -18,7 +18,7 @@ package com.siigna.util.geom
  * @param startAngle  The starting angle of the arc. In degrees between 0 and 360.
  * @param angle The number of degrees the arc is spanning.
  */
-case class Arc2D(center : Vector2D, radius : Double, startAngle : Double, angle : Double) extends Arc with Geometry2D {
+case class Arc2D(center : Vector2D, radius : Double, startAngle : Double, angle : Double) extends Arc with GeometryBasic2D {
 
   type T = Arc2D
 
@@ -156,7 +156,7 @@ object Arc2D {
   /**
    * Creates an arc from three points.
    */
-  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) {
+  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = {
     // TODO: Write this
     empty
   }
@@ -164,7 +164,7 @@ object Arc2D {
   /**
    * Creates an empty arc.
    */
-  def empty() {
+  def empty() = {
     new Arc2D(Vector2D.empty, NaN, NaN, NaN)
   }
 

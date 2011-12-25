@@ -25,7 +25,7 @@ case object MidPoints extends EventSnap {
   }
 
   // TODO: Finish this
-  def snap(point : Vector, model : Iterable[ImmutableShape]) : Vector = {
+  def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       //val res = model.map(_ geometry match {
       //  case _ =>

@@ -13,7 +13,7 @@ package com.siigna.app
 import com.siigna.util.logging.Log
 import model.Model
 import view._
-import java.awt.{GraphicsEnvironment, Cursor, Window}
+import java.awt.{Cursor}
 import com.siigna.util.geom._
 
 /**
@@ -150,7 +150,7 @@ object Siigna extends Interface {
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view, translated to a given point.
    */
-  def transformationTo(point : Vector) = TransformationMatrix(pan + point, zoom).flipY
+  def transformationTo(point : Vector2D) = TransformationMatrix(pan + point, zoom).flipY
   
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom

@@ -65,16 +65,6 @@ abstract class Implicits {
    * </p>
    */
   implicit def stringToColor(string : String) = new RichColorString(string)
-  
-  /**
-   * Implicitly adds a toDXF method to Vectors.
-   */
-  implicit def vectorToRichVector(vector : Vector) = new RichVector(vector)
-  
-  /**
-   * Implicitly adds a toMBR method to a Rectangle.
-   */
-  implicit def RectangleToRichRectangle(rect : Rectangle) = new RichRectangle(rect)
 
 }
 

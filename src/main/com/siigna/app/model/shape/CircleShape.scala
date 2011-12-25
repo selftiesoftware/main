@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Circle, TransformationMatrix, Vector}
+import com.siigna.util.geom.{Circle, TransformationMatrix, Vector2D}
 
 /**
  * This class represents a circle.
@@ -24,7 +24,7 @@ import com.siigna.util.geom.{Circle, TransformationMatrix, Vector}
  *  - StrokeWidth  Double  The width of the line-stroke used to draw.
  * </pre>
  */
-case class CircleShape(center : Vector, p : Vector, attributes : Attributes) extends EnclosedShape
+case class CircleShape(center : Vector2D, p : Vector2D, attributes : Attributes) extends EnclosedShape
 {
 
   val geometry = Circle(center, p)
@@ -37,16 +37,16 @@ case class CircleShape(center : Vector, p : Vector, attributes : Attributes) ext
    * A handle is a point on a circle used for visual feedback and manipulation
    * of the circle.
    */
-  val handleE = Vector(center.x + radius, center.y)
-  val handleN = Vector(center.x, center.y + radius)
-  val handleW = Vector(center.x - radius, center.y)
-  val handleS = Vector(center.x, center.y - radius)
-  val handles = List(handleE, handleN, handleW, handleS)
+  val handleE = Vector2D(center.x + radius, center.y)
+  val handleN = Vector2D(center.x, center.y + radius)
+  val handleW = Vector2D(center.x - radius, center.y)
+  val handleS = Vector2D(center.x, center.y - radius)
+  val handles = Seq(handleE, handleN, handleW, handleS)
 
   /**
    * The distance to the closest handle from a given point.
    */
-  def distanceToHandlesFrom(point : Vector) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
+  def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
   def setAttributes(attributes : Attributes) = new CircleShape(center, p, attributes)
 
@@ -63,6 +63,6 @@ case class CircleShape(center : Vector, p : Vector, attributes : Attributes) ext
 object CircleShape
 {
 
-  def apply(center : Vector, p : Vector)         = new CircleShape(center, p, Attributes())
+  def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, p, Attributes())
 
 }

@@ -47,7 +47,8 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
    */
   def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
 
-  def geometry = Polyline(shapes.map(_.geometry))
+  // TODO: Write this
+  def geometry = shapes(0).geometry
 
   def repr = this
 
@@ -65,9 +66,9 @@ object PolylineShape {
 
   def empty = new PolylineShape(Seq(), Attributes())
 
-  def fromPoints(points : Vector*) : PolylineShape = fromPoints(points.toIterable)
+  def fromPoints(points : Vector2D*) : PolylineShape = fromPoints(points.toIterable)
 
-  def fromPoints(points : Iterable[Vector]) : PolylineShape = {
+  def fromPoints(points : Traversable[Vector2D]) : PolylineShape = {
     var lines = Seq[LineShape]()
     points.reduceLeft((a, b) => {
       lines :+= LineShape(a, b)
@@ -76,7 +77,7 @@ object PolylineShape {
     PolylineShape(lines, Attributes())
   }
 
-  def fromRectangle(rect : Rectangle) = fromPoints(rect.points :+ rect.topLeft)
+  def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices.toSeq)
 
   def isConnected(shapes : Seq[BasicShape]) : Boolean = if (!shapes.isEmpty) {
     var isConnected = true

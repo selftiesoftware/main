@@ -67,7 +67,7 @@ trait Shape {
    * @param  attribute  the new attribute to merge in.
    * @return  a shape with the updated attributes.
    */
-  def setAttribute(attribute : (String, Any)) = setAttributes(attributes :+ attribute)
+  def setAttribute(attribute : (String, Any)) = setAttributes(attributes + attribute)
 
   /**
    * Returns a new shape with a new set of attributes.

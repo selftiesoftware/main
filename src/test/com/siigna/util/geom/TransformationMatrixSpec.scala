@@ -17,7 +17,7 @@ import org.scalatest.{FunSuite, FlatSpec}
 /**
  * A test class for the Transformation Matrix.
  */
-class TransformationMatrixTest extends FunSuite with ShouldMatchers {
+class TransformationMatrixSpec extends FunSuite with ShouldMatchers {
 
   // Concatenate
   test("A TransformationMatrix can concatenate itself with other matrices") {

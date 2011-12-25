@@ -11,7 +11,6 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.app.model.shape.Shape
 import com.siigna.util.geom.Rectangle2D
 
 /**
@@ -24,14 +23,14 @@ trait Leaf extends Node {
   /**
    * Adds a single element to the Node.
    */
-  def add(elem : (String, Shape)) : Leaf
+  def add(elem : (String, Rectangle2D)) : Leaf
 
   /**
    * Adds a number of elements to the leaf. If the number of elements plus the size of the leaf
    * exceeds the branchFactor, an error is thrown.
    * TODO: Optimize
    */
-  def add(elems : Traversable[(String, Shape)]) : Leaf = {
+  def add(elems : Traversable[(String, Rectangle2D)]) : Leaf = {
     if (elems.size + size > branchFactor || elems.isEmpty) {
       throw new IllegalArgumentException("Unable to add to the leaf with " + elems.size + " elements")
     } else if (elems.size + size > 2) { // If we require a LeafN node (more than 2 elements)
@@ -39,7 +38,7 @@ trait Leaf extends Node {
       new Leaf.LeafN(a, elems.size + size, branchFactor, ordering)
     } else if (elems.size == 2) {       // If there's 2 elements to add
       val e = elems.toSeq
-      new Leaf.Leaf2(e(0)._1, e(0)._2, e(1)._1, e(0)._2¸ branchFactor, ordering)
+      new Leaf.Leaf2(e(0)._1, e(0)._2, e(1)._1, e(1)._2, branchFactor, ordering)
     } else {                            // Else there can be only one.....
       if (size == 1) {
         val e = (traversable ++ elems).toSeq
@@ -72,11 +71,16 @@ trait Leaf extends Node {
    */
   def remove(elems : Traversable[String]) : Leaf =
     elems.foldLeft(this)((leaf, elem) => leaf.remove(elem))
+
+  /**
+   * A collection that traverses the string-identifiers of the leaf.
+   */
+  def traversable : Traversable[(String, Rectangle2D)]
   
   /**
    * Returns the leaf where the given element is updated.
    */
-  def updated(elem : (String, Shape)) : Leaf
+  def updated(elem : (String, Rectangle2D)) : Leaf
   
   /**
    * The worst case MBR from the given ordering.
@@ -99,53 +103,51 @@ object Leaf {
   /**
    * An empty leaf with an empty MBR.
    */
-  class EmptyLeaf(branchFactor : Int, ordering : MBROrdering) extends Leaf {
-    def add(elem : (String, Shape)) = new Leaf1(elem._1, elem._2, branchFactor, ordering)
+  class EmptyLeaf(val branchFactor : Int, val ordering : MBROrdering) extends Leaf {
+    def add(elem : (String, Rectangle2D)) = new Leaf1(elem._1, elem._2, branchFactor, ordering)
     def apply(query : Rectangle2D) = Traversable.empty
     def isBetter(query : Rectangle2D) = true
     val mbr = Rectangle2D.empty
-    def remove(elem : String) = this
+    def remove(elem : String) = throw new UnsupportedOperationException("Unable to delete element from empty leaf.")
     val size = 0
     override val toString = "Empty Leaf"
-    val traversable = Iterable.empty[(String, Shape)]
-    def updated(elem : (String, Shape)) = this
-    val worst = Rectangle2D.empty
+    val traversable = Iterable.empty[(String, Rectangle2D)]
+    def updated(elem : (String, Rectangle2D)) = this
+    lazy val worst = Rectangle2D.empty
   }
 
   /**
    * A leaf with one element.
    */
-  class Leaf1(key : String, value : Shape, branchFactor : Int, ordering : MBROrdering) extends Leaf {
-    def add(elem : (String, Shape)) = new Leaf2(key, value, elem._1, elem._2, branchFactor, ordering)
-    def apply(query : Rectangle2D) = if (mbr.intersects(query)) Iterator(value) else Iterator.empty
+  class Leaf1(key : String, value : Rectangle2D, val branchFactor : Int, val ordering : MBROrdering) extends Leaf {
+    def add(elem : (String, Rectangle2D)) = new Leaf2(key, value, elem._1, elem._2, branchFactor, ordering)
+    def apply(query : Rectangle2D) = if (mbr.intersects(query)) Traversable(key) else Traversable.empty
     def isBetter(query : Rectangle2D) = ordering.lt(worst, value)
-    val iterable = Iterable(key -> value)
     val mbr = value.boundary
     def remove(elem : String) = if (value.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
     val size = 1
     override val toString = "Leaf[ " + key + " -> " + value + " ]"
-    def updated(elem : (MBR, String)) = if (value1.equals(value)) new Leaf1(key, value, branchFactor, ordering) else this
-    val worst = key1
+    val traversable = Traversable(key -> value)
+    def updated(elem : (String, Rectangle2D)) = if (value.equals(value)) new Leaf1(key, value, branchFactor, ordering) else this
+    lazy val worst = value
   }
 
   /**
    * A leaf with two elements.
    */
-  class Leaf2(key1 : String, value1 : Shape, key2 : MBR, value2 : String, branchFactor : Int, ordering : MBROrdering) extends Leaf {
-    def add(elem : (MBR, String)) = {
-      val a = new Array[(MBR, String)](branchFactor)
+  class Leaf2(key1 : String, value1 : Rectangle2D, key2 : String, value2 : Rectangle2D, val branchFactor : Int, val ordering : MBROrdering) extends Leaf {
+    def add(elem : (String, Rectangle2D)) = {
+      val a = new Array[(String, Rectangle2D)](branchFactor)
       a(0) = (key1 -> value1); a(1) = (key2 -> value2); a(2) = elem
       new LeafN(a, 3, branchFactor, ordering)
     }
-    def add(elems 
-    def apply(mbr : MBR) =
-      if (key1.overlap(mbr) && key2.overlap(mbr)) Iterator(value1, value2)
-      else if (key1.overlap(mbr)) Iterator(value1)
-      else if (key2.overlap(mbr)) Iterator(value2)
-      else Iterator.empty
-    def isBetter(query : MBR) = ordering.lt(query, worst)
-    val iterable = Iterable(key1 -> value2, key2 -> value2)
-    val mbr = key1.expand(key2)
+    def apply(mbr : Rectangle2D) =
+      if (value1.intersects(mbr) && value2.intersects(mbr)) Traversable(key1, key2)
+      else if (value1.intersects(mbr)) Traversable(key1)
+      else if (value2.intersects(mbr)) Traversable(key2)
+      else Traversable.empty
+    def isBetter(query : Rectangle2D) = ordering.lt(query, worst)
+    val mbr = value1.expand(value2)
     def remove(elem : String) =
       if (elem.equals(value1))
         new Leaf1(key2, value2, branchFactor, ordering)
@@ -154,12 +156,14 @@ object Leaf {
       else this
     val size = 2
     override val toString = "Leaf[ " + key1 + " -> " + value1 + ", " + key2 + " -> " + value2 + " ]"
-    def updated(elem : (MBR, String)) = 
+    val traversable = Traversable(key1 -> value2, key2 -> value2)
+    def updated(elem : (String, Rectangle2D)) =
       if (elem._2.equals(value1))
-        new Leaf2(elem._1, value, key2, value2, branchFactor, ordering)
+        new Leaf2(key1, elem._2, key2, value2, branchFactor, ordering)
       else if (elem._2.equals(value2))
-        new Leaf2(key1, value1, elem._1, value, branchFactor, ordering)
+        new Leaf2(key1, value1, key2, elem._2, branchFactor, ordering)
       else this
+    lazy val worst = ordering.min(value1, value2) // todo: test
   }
 
   /**
@@ -167,59 +171,59 @@ object Leaf {
    *
    * @param elems  The array to store - MUST have a length equal to the branch factor.
    */
-  class LeafN(elems : Array[(String, Shape)], val size : Int, branchFactor : Int, ordering : MBROrdering) extends Leaf {
+  class LeafN(elems : Array[(String, Rectangle2D)], val size : Int, val branchFactor : Int, val ordering : MBROrdering) extends Leaf {
 
     /**
      * The MBR of the leaf.
      */
     val mbr = {
-      var mbr = MBR.empty
-      for(n <- 0 until size) mbr = mbr.expand(elems(n)._1)
+      var mbr = elems(0)._2
+      for(n <- 1 until size) mbr = mbr.expand(elems(n)._2)
       mbr
     }
 
     /**
-     * The index of the "worst-case" node defined by the given ordering.
+     * The "worst-case" mbr defined by the given ordering.
      */
-    val worst : Int = {
+    val worst = {
       var worst = 0
-      for (n <- 0 until size) if (ordering.gt(elems(n)._1, elems(worst)._1)) worst = n
-      worst
+      for (n <- 0 until size) if (ordering.gt(elems(n)._2, elems(worst)._2)) worst = n
+      elems(worst)._2
     }
 
     /**
      * Add an element to the leaf. Throws an error if the leaf is full.
      */
-    def add(elem : (MBR, String)) = {
+    def add(elem : (String, Rectangle2D)) = {
       elems(size) = elem
-      new LeafN[T](elems, size + 1, branchFactor, ordering)
+      new LeafN(elems, size + 1, branchFactor, ordering)
     }
 
     /**
      * Searches the node for any elements that interacts with the query.
      */
-    def apply(query : Shape) = {
-      elems.view.filter(p => query.overlap(p._1)).map(_._2).toIterator
+    def apply(query : Rectangle2D) = {
+      elems.view.filter(p => query.intersects(p._2)).map(_._1).toTraversable
     }
 
     /**
      * Examines whether a given mbr is "better" than the current worst case.
      */
-    def isBetter(mbr : Shape) = ordering.lt(mbr, elems(worst)._1)
+    def isBetter(mbr : Rectangle2D) = ordering.lt(mbr, worst)
 
     /**
-     * Return an iterable with all the elements in the leaf.
+     * Return an traversable with all the elements in the leaf.
      */
-    def iterable = elems.toIterable
+    def traversable = elems.toTraversable
 
     /**
      * Remove an element from the leaf.
      */
     def remove(value : String) : Leaf = {
       for (i <- 0 until size) {
-        if (value.equals(elems(i)._2)) {
+        if (value.equals(elems(i)._1)) {
           if (size > 3) {
-            elems(i) == null
+            elems(i) = null
             return new LeafN(elems, size - 1, branchFactor, ordering)
           } else if (size == 3) {
             return new Leaf2(elems(0)._1, elems(0)._2, elems(1)._1, elems(1)._2, branchFactor, ordering)
@@ -243,8 +247,8 @@ object Leaf {
       str.substring(0, str.length() - 2) + " ]"
     }
     
-    def updated(elem : (Rectangle2D, String)) = {
-      for (i <- until size) {
+    def updated(elem : (String, Rectangle2D)) : LeafN = {
+      for (i <- 0 until size) {
         if (elems(i)._2.equals(elem._2)) {
           elems(i) = elem
           return new LeafN(elems, size, branchFactor, ordering)

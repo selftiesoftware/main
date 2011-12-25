@@ -40,7 +40,6 @@ case object EndPoints extends EventSnap {
         case s : CircleShape => closestPoints(s.handles)
         case s : ImageShape => closestPoints(s.geometry.vertices.toSeq)
         case LineShape(start, end, _) => closestTwo(start, end)
-        case PointShape(p, _) => p
         case s : PolylineShape => closestPoints(s.geometry.vertices.toSeq)
         case s : TextShape => closestPoints(s.geometry.vertices.toSeq)
       })
