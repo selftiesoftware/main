@@ -44,6 +44,7 @@ trait Node {
   
   /**
    * Retrieve the traversable for all elements in the node.
+<<<<<<< HEAD:src/com/siigna/util/rtree/Node.scala
    */
   def traversable : Traversable[(String, Rectangle2D)]
 
@@ -51,6 +52,25 @@ trait Node {
    * The MinimumBoundingRectangle of the node.
    */
   def mbr : Rectangle2D
+
+  /**
+   * Removes a single element from the Node.
+   */
+  def remove(elem : (String, Shape)) : Node
+  
+  /**
+   * Removes a number of elements from the Node.
+   */
+  def remove(elems : Traversable[(String, Shape)]) : Node
+=======
+   */
+  def traversable : Traversable[(String, Shape)]
+
+  /**
+   * The MinimumBoundingRectangle of the node.
+   */
+  def mbr : Rectangle2D
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/rtree/Node.scala
 
   /**
    * The number of elements in the Node.
@@ -61,5 +81,10 @@ trait Node {
    * Returns the node as a string.
    */
   def toString : String
+  
+  /**
+   * Updates the shape associated with the given string.
+   */
+  def updated(elem : (String, Shape)) : Node
 
 }

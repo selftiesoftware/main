@@ -11,6 +11,14 @@
 package com.siigna.util.geom
 
 /**
+<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
+ * A circle. Represented by a center and a point on the circle.
+ */
+trait Circle[D <: Dimension] extends EnclosedGeometry[D]
+{
+  
+  def radius : Double
+=======
  * A circle represented by a center and a point on the circle.
  */
 case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed2D {
@@ -18,9 +26,16 @@ case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed
   import java.lang.Double.POSITIVE_INFINITY
   
   type T = Circle2D
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
-  def area = math.Pi * radius * radius
+}
 
+<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
+/**
+ * A companion object to Circle.
+ */
+object Circle {
+=======
   def boundary = Rectangle(Vector(center.x - radius, center.y - radius), Vector(center.x + radius, center.y + radius))
 
   def contains(arc : Arc2D) = false
@@ -98,16 +113,18 @@ case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed
       } else true
     }
   }
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
   def intersects(segment : Segment2D) = false
 
   def intersections(arc : Arc2D) = Set()
 
   /**
-   * Locates the points where this circle intersects with another circle.
-   *
-   * Source: http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
+   * Creates a 2D circle.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
+  def apply(center : Vector2D, radius : Double) = new Circle2D(center, radius)
+=======
   def intersections(circle : Circle2D) : Set[Vector2D] = if (intersects(circle)) {
       // Calculate various constants
       val d = (center - circle.center).length
@@ -133,13 +150,18 @@ case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed
   def intersections(ellipse : Ellipse2D) = Set()
   def intersections(line : Line2D) = Set()
   def intersections(rectangle : Rectangle2D) = Set()
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
   /**
-   * Locates the points where this circle intersects with a line segment.
+   * Creates a 2D circle.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
+  def apply(center : Vector2D, point : Vector2D) = new Circle2D(center, (point - center).length)
+=======
   def intersections(segment : Segment2D) = segment.intersections(this)
 
   def transform(t : TransformationMatrix) = Circle2D(t.transform(center), radius * t.scaleFactor)
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
   /**
    * Displays a set of vectors as the center along with

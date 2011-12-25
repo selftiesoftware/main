@@ -15,6 +15,19 @@ package com.siigna.util.geom
  * The mathematical class for a line segment, defined as a line with a start
  * point (p1) and a end point (p2). The segment has a finite length.
  */
+<<<<<<< HEAD:src/com/siigna/util/geom/Segment.scala
+trait Segment[D <: Dimension] extends BasicGeometry[D]
+
+/**
+ * The companion object to the Segment trait.
+ */
+object Segment {
+
+  /**
+   * Create a 2D segment.
+   */
+  def apply(p1 : Vector2D, p2 : Vector2D) = new Segment2D(p1, p2)
+=======
 case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with Segment {
 
   import java.lang.Double.POSITIVE_INFINITY
@@ -266,6 +279,7 @@ object Segment2D {
       case list => segmentsOnOpenPathOfPoints(list ++ List(list.head))
     }
   }
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Segment2D.scala
 
 }
 

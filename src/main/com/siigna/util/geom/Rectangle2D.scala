@@ -11,6 +11,16 @@
 package com.siigna.util.geom
 
 /**
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+ * A rectangle given by two points. <b>Thus this rectangle cannot be rotated</b>.
+ * TODO: Refactor with error-handling.
+ * TODO: Refactor to an inner class with four doubles as parameters!
+ */
+trait Rectangle[D <: Dimension] extends EnclosedGeometry[D]
+{
+
+  /**
+=======
  * A rectangle given by two points.
  * TODO:
  */
@@ -44,9 +54,10 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   lazy val center = (topLeft + bottomRight) / 2
 
   /**
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
    * Computes the area of the rectangle.
    */
-  def area = height * width
+  def area : Double
 
   /**
    * The boundary of the rectangle. In this case returns itself.
@@ -56,6 +67,12 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   def closestPoint(point : Vector2D) = point
 
   /**
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+   * Examines whether a given rectangle is within (or on top of) the four boundaries
+   * of this rectangle.
+   */
+  def contains(rectangle : Rectangle[D]) : Boolean
+=======
    * Examines whether a given arc is within the four boundaries
    * of a rectangle.
    */
@@ -131,11 +148,12 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   def contains(rectangle : Rectangle2D) : Boolean =
     (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
        bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Calculate the circumference of the rectangle.
    */
-  def circumference = width + width + height + height
+  def circumference : Double
 
   def distanceTo(arc : Arc2D) = java.lang.Double.POSITIVE_INFINITY
   def distanceTo(circle : Circle2D) = java.lang.Double.POSITIVE_INFINITY
@@ -147,32 +165,51 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   /**
    * Calculates the distance to a point.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def distanceTo(point : Vector[D]) : Double
+=======
   def distanceTo(point : Vector2D) =
     Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
       _ distanceTo(point)
     ).reduceLeft( (a, b) => if (a < b) a else b)
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Expands this rectangle to include an arc.
    * TODO: Not the right way to include an arc!
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def expand(arc : Arc[D]) : Rectangle[D]
+=======
   def expand(arc : Arc2D) : Rectangle2D = expand(Circle(arc.center, arc.radius))
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Expands this rectangle to include a circle.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def expand(circle : Circle[D]) : Rectangle[D]
+=======
   def expand(circle : Circle2D) : Rectangle2D =
     expand(Rectangle2D(Vector(circle.center.x - circle.radius, circle.center.y + circle.radius),
                      Vector(circle.center.x + circle.radius, circle.center.y - circle.radius)))
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Expands this rectangle to include an ellipse.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def expand(e : Ellipse[D]) : Rectangle[D]
+=======
   def expand(e : Ellipse2D) = this
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Expands this rectangle to include a point.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def expand(point : Vector[D]) : Rectangle[D]
+=======
   def expand(point : Vector2D) : Rectangle2D = {
     if (contains(point))
       this
@@ -182,10 +219,24 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
       Rectangle(newTopLeft, newBottomRight)
     }
   }
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
    * Expands this rectangle to include another rectangle.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def expand(rect : Rectangle[D]) : Rectangle[D]
+
+  /**
+   * Checks whether the given point is on the outer edge of the rectangle.
+   */
+  def onPeriphery(point : Vector[D]) : Boolean
+
+  /**
+   * Calculate the overlap between this and another rectangle. If two rectangles do not overlap the area is 0.
+   */ 
+  def overlap(that : Rectangle[D]) : Double
+=======
   def expand(rect : Rectangle2D) : Rectangle2D = {
     val newTopLeft     = Vector(scala.math.min(topLeft.x, rect.topLeft.x),
                                 scala.math.max(topLeft.y, rect.topLeft.y))
@@ -240,10 +291,26 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   def intersections(line : Line2D) = Set()
   def intersections(rectangle : Rectangle2D) = Set()
   def intersections(segment : Segment2D) = segment.intersections(this)
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
-   * Checks whether the given point is on the outer edge of the rectangle.
+   * Transforms the rectangle with the given matrix.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def transform(t : TransformationMatrix[D]) : Rectangle[D]
+
+  /**
+   * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
+   */
+  def union(that : Rectangle[D]) : Rectangle[D]
+
+}
+
+/**
+ * A companion object for the Rectangle class.
+ */
+object Rectangle {
+=======
   def onPeriphery(point : Vector2D) =
     (point.x == xMin || point.x == xMax) && (point.y == yMax || point.y == yMin)
 
@@ -265,21 +332,29 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
     val dy = t.getTranslate.y
     Rectangle2D(xMin + dx, yMin + dy, xMax + dx, yMax + dy)
   }
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   /**
-   * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
+   * Creates a 2-dimensional rectangle.
    */
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+  def apply(xMin : Double, yMin : Double, xMax : Double, yMax : Double) = new Rectangle2D(xMin, yMin, xMax, yMax)
+=======
   def union(that : Rectangle2D) =
     Rectangle2D(Vector(math.min(this.topLeft.x, that.topLeft.x), math.min(this.topLeft.y, that.topLeft.y)),
               Vector(math.max(this.bottomRight.x, that.bottomRight.x), math.max(this.bottomRight.y, that.bottomRight.y)))
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 
   lazy val vertices = Set(topLeft, topRight, bottomRight, bottomLeft)
   
   /**
-   * Returns the width of the rectangle.
+   * Creates a 2-dimensional rectangle.
    */
-  def width = (topRight.x - topLeft.x).abs
+  def apply(v1 : Vector2D, v2 : Vector2D) =
+    new Rectangle2D(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.max(v1.x, v2.x), math.max(v1.y, v2.y))
 
+<<<<<<< HEAD:src/com/siigna/util/geom/Rectangle.scala
+=======
 }
 
 /**
@@ -294,4 +369,5 @@ object Rectangle2D {
   def apply(v1 : Vector2D, v2 : Vector2D) =
     new Rectangle2D(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.max(v1.x, v2.x), math.max(v1.y, v2.y))
 
+>>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Rectangle2D.scala
 }
