@@ -1,5 +1,4 @@
 /*
-/*
  * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
@@ -12,24 +11,28 @@
 
 package com.siigna.util.rtree
 
+import com.siigna.util.geom.Rectangle2D
+
 /**
  * In a PR-tree a branch contains of 4 priority-nodes and 2 subtrees.
  *
  * @author Jens Egholm <jensep@gmail.com>
  */
-trait Branch extends Node {
+/*trait Branch extends Node {
+
+  type T = Branch
 
   /**
    * Adds a number of elements to the branch.
    */
-  def add(elems : Iterator[(MBR, String)]) = {
+  def add(elems : Traversable[(String, Rectangle2D)]) = {
     // If there's more elements than can be contained in a single
     // block, then add them manually.
     if (elems.size + size <= branchFactor) { 
-      elems.foldLeft(this)((branch, elem) => branch.add(elem))
+      elems.foldLeft[Branch](this)((branch, elem) => branch.add(elem))
     } else {
       // Otherwise bulkload away!
-      bulkload(elems, (elems.size > size << 1))
+      bulkload(elems, (elems.size > (size << 1)))
     }
   }
   
@@ -39,8 +42,8 @@ trait Branch extends Node {
    * 
    * @param elems  The elements to add.
    */
-  def bulkload(elems : Iterator[(MBR, String)]) : Branch {
-    Branch.empty // Erm..
+  def bulkload(elems : Traversable[(String, Rectangle2D)]) : Branch = {
+    Branch.empty(branchFactor) // Erm..
   }
    
   /**
@@ -51,7 +54,7 @@ trait Branch extends Node {
   /**
    * Replace a single element in the Node.
    */
-  def update(key : MBR, value : String) : Node
+  def update(key : String, value : Rectangle2D) : Node
 }
 
 /**
@@ -68,16 +71,16 @@ object Branch {
    * An empty branch.
    */
   class EmptyBranch(branchFactor : Int) extends Branch {
-    def add(key : MBR, value : String) = new SingleBlockBranch(Seq(key -> value), branchFactor)
-    def apply(query : MBR) = Iterator.empty
-    def iterable = Iterable.empty
-    def mbr = MBR.empty
+    def add(key : String, value : Rectangle2D) = new SingleBlockBranch(Traversable(key -> value), branchFactor)
+    def apply(query : Rectangle2D) = Iterator.empty
+    def traversable = Traversable.empty
+    def mbr = Rectangle2D.empty
     def rebalance = this
-    def remove(key : MBR, value : String) = this
-    def remove(elems : Iterator[(MBR, String)]) = this
+    def remove(key : String, value : Rectangle2D) = throw new UnsupportedOperationException("Unable to delete element from empty branch.")
+    def remove(elems : Iterator[(String, Rectangle2D)]) = this
     val size = 0
     val toString = "Branch[ ]"
-    def update(key : MBR, value : String) = this
+    def update(key : String, value : Rectangle2D) = this
   }
 
   /**
@@ -85,15 +88,18 @@ object Branch {
    * 
    * @param elems  The array containing the elements.
    */
-  class SingleBlockBranch(elems : Seq[(MBR, String)], branchFactor : Int) extends Branch(branchFactor) {
-    def add(key : MBR, value : String) = 
-      if (elems.size < 7) {
+  class SingleBlockBranch(elems : Traversable[(String, Rectangle2D)], branchFactor : Int) extends Branch(branchFactor) {
+    def add(key : String, value : Rectangle2D) = {
+      if (elems.size < branchFactor) {
         new SingleBlockBranch(elems :+ (key -> value), branchFactor)
       } else {
         val branch = new RBranch(Leaf(branchFactor, OrderMinX), Leaf(branchFactor, OrderMinY), 
                                  Leaf(branchFactor, OrderMaxX), Leaf(branchFactor, OrderMaxY),
-                                 
+                                 Branch.empty(branchFactor), Branch.empty(branchFactor), branchFactor)
+        branch.add(elems ++ Traversable(key -> value))
       }
+    }
+
   }
 
   class RBranch(leafMinX : Leaf, leafMinY : Leaf, leafMaxX : Leaf, leafMaxY : Leaf, branchMinX : Branch, branchMaxX : Branch, branchFactor : Int) {
@@ -102,25 +108,25 @@ object Branch {
      * Add a single element to the branch. If the element cannot fit in the priority leaves,
      * the branch will grow in depth.
      */
-    def add(key : MBR, value : String) {
+    def add(key : String, value : Rectangle2D) = {
       // First try all the priority leaves to see if they're not full
-      if (leafXMin.size < branchFactor)      leafXMin.add(key, value)
-      else if (leafYMin.size < branchFactor) leafYMin.add(key, value)
-      else if (leafXMax.size < branchFactor) leafXMax.add(key, value)
-      else if (leafYMax.size < branchFactor) leafYMax.add(key, value)
+      if (leafMinX.size < branchFactor)      leafMinX.add(key, value)
+      else if (leafMinY.size < branchFactor) leafMinY.add(key, value)
+      else if (leafMaxX.size < branchFactor) leafMaxX.add(key, value)
+      else if (leafMaxY.size < branchFactor) leafMaxY.add(key, value)
 
       // Then try all the priority leaves for a better fit
-      else if (leafXMin.isBetter(key)) {
-        val res = leafXMin.swap(key, value)
+      else if (leafMinX.isBetter(value)) {
+        val res = leafMinX.swap(key, value)
         add(res._1, res._2)
-      } else if (leafYMin.isBetter(key)) {
-        val res = leafYMin.swap(key, value)
+      } else if (leafMinY.isBetter(key)) {
+        val res = leafMinY.swap(key, value)
         add(res._1, res._2)
-      } else if (leafXMax.isBetter(key)) {
-        val res = leafXMax.swap(key, value)
+      } else if (leafMaxX.isBetter(key)) {
+        val res = leafMaxX.swap(key, value)
         add(res._1, res._2)
-      } else if (leafYMax.isBetter(key)) {
-        val res = leafYMax.swap(key, value)
+      } else if (leafMaxY.isBetter(key)) {
+        val res = leafMaxY.swap(key, value)
         add(res._1, res._2)
       }
 
@@ -129,30 +135,40 @@ object Branch {
     }
   }
 
-}
+}*/
 
+class Branch(val branchFactor : Int) extends Node {
 
-/**class Branch[T](branchFactor : Int, level : Int) extends Node[T] {
+  private var map = Map[String, Rectangle2D]()
 
-  private var map = Map[MBR, T]()
+  def add(key : String, value : Rectangle2D) = map = map + (key -> value)
   
-  def add(key : MBR, elem : T) = map = map + (key -> elem)
-  
-  def add(elems : Map[MBR, T]) = map = map ++ elems
-  
-  def apply(mbr : MBR) = map.filter(_._1 == mbr).values
-  
-  def mbr : MBR = 
-  	if (map.isEmpty) MBR(0, 0, 0, 0) 
-  	else map.keys.reduceLeft((p1, p2) => (p1.expand(p2)))
-  
-  def remove(elems : Map[MBR, T]) { map = map.--(elems.keys) }
-  	
-  def remove(key : MBR, elem : T) { map = map.filterNot(_ == (key, elem)) }
-  
+  def add(elem : (String, Rectangle2D)) = {
+    map = map + elem
+    this
+  }
+
+  def add(elems : Map[String, Rectangle2D]) = map = map ++ elems
+
+  def add(elems : Traversable[(String, Rectangle2D)]) = {
+    map = map ++ elems
+    this
+  }
+
+  def apply(mbr : Rectangle2D) = map.filter(_._2.intersects(mbr)).keys
+
+  def mbr : Rectangle2D =
+  	if (map.isEmpty) Rectangle2D.empty
+  	else map.values.reduceLeft((p1, p2) => (p1.expand(p2)))
+
+  def remove(elems : Map[String, Rectangle2D]) { map = map.--(elems.keys) }
+
+  def remove(key : String, elem : Rectangle2D) { map = map.filterNot(_ == (key, elem)) }
+
   def size = map.size
-  
+
+  def traversable = map.toTraversable
+
   override def toString() = "Hello!"
 
-}*/
-*/
+}

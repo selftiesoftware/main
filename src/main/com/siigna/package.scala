@@ -95,9 +95,6 @@ package object siigna extends com.siigna.util.Implicits {
   type LineShape = com.siigna.app.model.shape.LineShape
   lazy val LineShape = com.siigna.app.model.shape.LineShape
 
-  type PointShape = com.siigna.app.model.shape.PointShape
-  lazy val PointShape = com.siigna.app.model.shape.PointShape
-
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
   lazy val PolylineShape = com.siigna.app.model.shape.PolylineShape
 
@@ -165,28 +162,34 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Geometry
   type Arc = com.siigna.util.geom.Arc
-  lazy val Arc = com.siigna.util.geom.Arc
+  type Arc2D = com.siigna.util.geom.Arc2D
+  lazy val Arc2D = com.siigna.util.geom.Arc2D
 
   type Circle = com.siigna.util.geom.Circle
-  lazy val Circle = com.siigna.util.geom.Circle
+  type Circle2D = com.siigna.util.geom.Circle2D
+  lazy val Circle2D = com.siigna.util.geom.Circle2D
 
-  type Ellipse = com.siigna.util.geom.Ellipse
-  lazy val Ellipse = com.siigna.util.geom.Ellipse
+  //type Ellipse = com.siigna.util.geom.Ellipse
+  //lazy val Ellipse = com.siigna.util.geom.Ellipse
 
   type Line = com.siigna.util.geom.Line
-  lazy val Line = com.siigna.util.geom.Line
+  type Line2D = com.siigna.util.geom.Line2D
+  lazy val Line2D = com.siigna.util.geom.Line2D
 
   type Rectangle = com.siigna.util.geom.Rectangle
-  lazy val Rectangle = com.siigna.util.geom.Rectangle
+  type Rectangle2D = com.siigna.util.geom.Rectangle2D
+  lazy val Rectangle2D = com.siigna.util.geom.Rectangle2D
 
   type Segment = com.siigna.util.geom.Segment
-  lazy val Segment = com.siigna.util.geom.Segment
+  type Segment2D = com.siigna.util.geom.Segment2D
+  lazy val Segment2D = com.siigna.util.geom.Segment2D
 
   type TransformationMatrix = com.siigna.util.geom.TransformationMatrix
   lazy val TransformationMatrix = com.siigna.util.geom.TransformationMatrix
 
   type Vector = com.siigna.util.geom.Vector
-  lazy val Vector = com.siigna.util.geom.Vector
+  type Vector2D = com.siigna.util.geom.Vector2D
+  lazy val Vector2D = com.siigna.util.geom.Vector2D
 
   // Log
   lazy val Log = com.siigna.util.logging.Log

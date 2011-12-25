@@ -14,7 +14,7 @@ package com.siigna.util.rtree
 import com.siigna.util.geom.Rectangle2D
 
 /**
- * Orders two shapes by their Minimum Bounding Rectangles after one of four available dimensions.
+ * Orders rectangles after one of four available dimensions.
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */

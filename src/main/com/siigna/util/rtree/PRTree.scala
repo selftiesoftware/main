@@ -25,13 +25,4 @@ import com.siigna.util.geom.{Rectangle, Vector}
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */
-class PRTree(branchFactor : Int = 8)  {
-
-  /**
-   * The branch factor which determines how many elements can reside in a leaf. <br />
-   * This value is truncated between [2; 100], so the efficiency of the PRTree isn't completely lost.
-   * <br />
-   * According to Arge et al. the optimal value is 8.
-   */
-  val this.branchFactor = if (branchFactor < 2) 2 else if (branchFactor > 100) 100 else branchFactor
-}
+class PRTree(branchFactor : Int = 8) extends Branch(branchFactor)

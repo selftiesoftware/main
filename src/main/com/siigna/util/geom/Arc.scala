@@ -68,6 +68,6 @@ object Arc {
   /**
    * Creates a 2D Arc.
    */
-  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) = Arc2D(start, middle, end)
+  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = Arc2D(start, middle, end)
 
 }

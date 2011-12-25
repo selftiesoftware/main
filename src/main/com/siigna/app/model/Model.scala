@@ -16,12 +16,10 @@ import collection.immutable.HashMap
 import collection.mutable.ArrayBuffer
 
 import com.siigna.app.Siigna
-import com.siigna.util.Implicits
-import com.siigna.util.Implicits._
-import com.siigna.util.geom.{Rectangle, Vector}
 import com.siigna.util.logging.Log
 import shape.{GroupShape, ImmutableShape, Shape}
 import com.siigna.util.rtree.PRTree
+import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector2D}
 
 /**
  * The model of Siigna which contains a sequence of <i>immutable</i> shapes associated with ID's
@@ -51,7 +49,7 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
   /**
    * Creates a new prioritized R-tree associated with strings used to store the id of the shapes.
    */
-  val tree = new PRTree[String](12)
+  val tree = new PRTree()
 
   /**
    * Add a shape to the model. <b>Assuming that the shape does not exist in the Model!</b>
@@ -59,7 +57,7 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
   def + (elem : (String, ImmutableShape)) : Model = {
     try {
       static = static + elem
-      tree add (elem._2.boundary, elem._1)
+      tree add (elem._1, elem._2.boundary)
     } catch {
       case e => Log.error("Model: Insertion failed. Unknown error: "+e)
     }
@@ -69,10 +67,10 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
   /**
    * Adds several shapes to the model.
    */
-  def ++ (elems : Iterable[(String, ImmutableShape)]) : Model = {
+  def ++ (elems : Traversable[(String, ImmutableShape)]) : Model = {
     try {
-      static = static ++ elems.toMap
-      tree.add(elems.map(e => (e._2.boundary.toMBR, e._1)).toMap)
+      static = static.++(elems.toMap).asInstanceOf[HashMap[String, ImmutableShape]]
+      tree.add(elems.map(e => (e._1, e._2.boundary)).toMap)
     } catch {
       case e => Log.error("Model: Insertion failed. Unkown error: "+e)
     }
@@ -86,7 +84,7 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
     try {
       val shape = static(key)
       static = static - key
-      tree remove (shape.boundary, key)
+      tree remove (key, shape.boundary)
     } catch {
       case e : NoSuchElementException => Log.warning("Model: Removal failed. Could not find the given shape in the model: "+e)
       case e => Log.warning("Model: Removal failed. Unknown error encountered: "+e)
@@ -99,7 +97,7 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
    */
   def -- (keys : Traversable[String]) : Model = {
     try {
-      val elems : Map[MBR, String] = keys.collect{case key => (static(key).boundary.toMBR -> key)}.toMap
+      val elems : Map[String, Rectangle2D] = keys.collect{case key => (key -> static(key).boundary)}.toMap
       static = static -- keys
       tree remove elems
     } catch {
@@ -127,8 +125,8 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
     try {
       val oldShape = static(id)
       static = static.updated(id, shape)
-      tree remove (oldShape.boundary.toMBR, id)
-      tree add (shape.boundary.toMBR, id)
+      tree remove (id, oldShape.boundary)
+      tree add (id, shape.boundary)
     } catch {
       case e : NoSuchElementException => Log.error("Update failed. Could not find the given shape in the model: "+e)
       case e => Log.error("Update failed. Unknown error encountered: "+e)
@@ -144,8 +142,8 @@ class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
       val oldShape = static(id)
       val newShape = f(oldShape)
       static = static.updated(id, newShape)
-      tree remove (oldShape.boundary.toMBR, id)
-      tree add (newShape.boundary.toMBR, id)
+      tree remove (id, oldShape.boundary)
+      tree add (id, newShape.boundary)
     } catch {
       case e : NoSuchElementException => Log.error("Model: Update failed. Could not find the given shape in the model: "+e)
       case e => Log.error("Model: Update failed. Unknown error encountered: "+e)
@@ -180,24 +178,24 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   }
 
   /**
-   * Searches the model for every shape included in or touched by the MBR.
+   * Searches the model for every shape included in or touched by the Rectangle2D.
    */
-  def apply(mbr : MBR) : Iterable[Shape] = apply(mbr, false)
+  def apply(Rectangle2D : Rectangle2D) : Traversable[Shape] = apply(Rectangle2D, false)
 
   /**
-   * Searches the model for every shape included in or touched by the MBR, with a flag that determines whether groups
+   * Searches the model for every shape included in or touched by the Rectangle2D, with a flag that determines whether groups
    * should be included in the search.
    */
-  def apply(mbr : MBR, includeGroups : Boolean = false) : Iterable[Shape] = try {
+  def apply(Rectangle2D : Rectangle2D, includeGroups : Boolean = false) : Iterable[Shape] = try {
     if (!model.static.isEmpty) {
       val ids = if (includeGroups) {
-        var ids = model.tree(mbr)
-        model.groups.foreach(g => if (mbr.overlap(g.boundary.toMBR)) { // TODO: Search for ids not boundaries!
+        var ids = model.tree(Rectangle2D)
+        model.groups.foreach(g => if (Rectangle2D.intersects(g.boundary)) { // TODO: Search for ids not boundaries!
           ids = ids ++ g.ids
         })
         ids.toSeq.distinct
       } else {
-        model.tree(mbr)
+        model.tree(Rectangle2D)
       }
       // Replace shapes with dynamic shapes if they exist.
       ids.map(id => if (mutableShapes.contains(id)) mutableShapes(id) else model.static(id))
@@ -210,7 +208,7 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for the closest shape to the given point.
    */
-  def apply(point : Vector) : Option[Shape] = try {
+  def apply(point : Vector2D) : Option[Shape] = try {
     val res = apply(point, 20)
     if (res.isEmpty)
       None
@@ -223,16 +221,9 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for shapes included in or touched by the point +/- a given margin.
    */
-  def apply(point : Vector, margin : Double) : Iterable[Shape] = {
-    val mbr = MBR(point.x - margin, point.y - margin, point.x + margin, point.y + margin)
+  def apply(point : Vector2D, margin : Double) : Traversable[Shape] = {
+    val mbr = Rectangle2D(point.x - margin, point.y - margin, point.x + margin, point.y + margin)
     apply(mbr)
-  }
-
-  /**
-   * Searches the model for every shape included in or touched by the Rectangle.
-   */
-  def apply(rectangle : Rectangle) : Iterable[Shape] = {
-    apply(rectangle.toMBR)
   }
 
   /**
@@ -245,9 +236,9 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
    */
   def boundary = {
     val newBoundary  = model.tree.mbr
-    val size         = (newBoundary.p2 - newBoundary.p1).abs
-    val center       = (newBoundary.p2 + newBoundary.p1) / 2
-    val proportion   = 1.41421356
+    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
+    //val proportion   = 1.41421356
 
     // Saves the format, as the format with the margin subtracted
     var aFormatMin = Siigna.printFormatMin
@@ -267,11 +258,11 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      Rectangle(Vector(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+      Rectangle(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
+                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
     } else {
-      Rectangle(Vector(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      Rectangle(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
+                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
     }
   }
 
@@ -316,7 +307,7 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Prints the model as a (possibly very long) string. You're warned...
    */
-  override def toString = model.toString
+  override def toString = model.toString()
 
   /**
    * The underlying mutable model.
@@ -326,7 +317,7 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for static shapes closes to a given point excluding <code>Groups</code> and <code>DynamicShapes</code>.
    */
-  def queryForShapes(point : Vector) : Option[ImmutableShape] = {
+  def queryForShapes(point : Vector2D) : Option[ImmutableShape] = {
     val res = queryForShapes(point, 10)
     if (res.isEmpty)
       None
@@ -336,15 +327,15 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for static shapes from a point with a given margin excluding <code>Groups</code> and <code>DynamicShapes</code>.
    */
-  def queryForShapes(point : Vector, margin : Double) : Iterable[ImmutableShape] =
-    queryForShapes(MBR(point.x - margin, point.y - margin, point.x + margin, point.y + margin))
+  def queryForShapes(point : Vector2D, margin : Double) : Iterable[ImmutableShape] =
+    queryForShapes(Rectangle2D(point.x - margin, point.y - margin, point.x + margin, point.y + margin))
 
   /**
    * Searches the model for static shapes excluding <code>Groups</code> and <code>DynamicShapes</code>.
    */
-  def queryForShapes(mbr : MBR) : Iterable[ImmutableShape] = try {
+  def queryForShapes(Rectangle2D : Rectangle2D) : Iterable[ImmutableShape] = try {
     if (!model.static.isEmpty) {
-      model.tree(mbr).map(model.static)
+      model.tree(Rectangle2D).map(model.static)
     } else {
       Seq[ImmutableShape]()
     }
@@ -356,9 +347,9 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   /**
    * Searches the model for static shapes associated with an id, excluding <code>Groups</code> and <code>DynamicShapes</code>.
    */
-  def queryForShapesWithId(mbr : MBR) : Map[String, ImmutableShape] = try {
+  def queryForShapesWithId(Rectangle2D : Rectangle2D) : Map[String, ImmutableShape] = try {
     if (!model.static.isEmpty) {
-      model.tree(mbr).map(i => i -> model.static(i)).toMap
+      model.tree(Rectangle2D).map(i => i -> model.static(i)).toMap
     } else {
       Map[String, ImmutableShape]()
     }
@@ -368,14 +359,14 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
   }
 
   /**
-   * Searches the model for every shape included in or touched by the MBR. Includes a flag whether to include groups
+   * Searches the model for every shape included in or touched by the Rectangle2D. Includes a flag whether to include groups
    * in the search.
    */
-  def queryWithId(mbr : MBR, includeGroups : Boolean = false) : Map[String, Shape] = try {
+  def queryWithId(mbr : Rectangle2D, includeGroups : Boolean = false) : Map[String, Shape] = try {
     if (!model.static.isEmpty) {
       val ids = if (includeGroups) {
         var ids = model.tree(mbr)
-        model.groups.foreach(g => if (mbr.overlap(g.boundary.toMBR)) {
+        model.groups.foreach(g => if (mbr.intersects(g.boundary)) {
           ids = ids ++ g.ids
         })
         ids.toSeq.distinct

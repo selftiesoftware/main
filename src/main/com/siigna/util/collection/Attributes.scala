@@ -14,7 +14,7 @@ package com.siigna.util.collection
 import java.awt.Color
 
 import scala.collection.immutable.Map
-import com.siigna.util.geom.{TransformationMatrix, Vector}
+import com.siigna.util.geom.{Vector2D, TransformationMatrix, Vector}
 
 /**
  * Represents a set of attributes for a shape, a group of shapes, a layer and
@@ -43,7 +43,7 @@ import com.siigna.util.geom.{TransformationMatrix, Vector}
  *
  * @author Bjarke Walling <bjarke.walling@gmail.com>
  *
- * @param  attributes  a map of keys and their values.
+ * @param  attributesMap  a map of keys and their values.
  */
 case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any] {
 
@@ -110,7 +110,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  attribute  the new attribute written as <code>key -> value</code>.
    * @return  a set of attributes containing the new attribute.
    */
-  def :+[T >: Any](attribute : (String, T)) =
+  def +[T >: Any](attribute : (String, T)) =
     Attributes(attributesMap + attribute)
 
   /**
@@ -121,7 +121,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  attributes  other new attributes.
    * @return  a set of attributes containing the new attributes.
    */
-  override def :+[T >: Any](attribute1 : (String, T), attribute2 : (String, T), attributes : (String, T)*) =
+  override def +[T >: Any](attribute1 : (String, T), attribute2 : (String, T), attributes : (String, T)*) =
     Attributes(attributesMap + attribute1 + attribute2 ++ attributes)
 
   /**
@@ -458,7 +458,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
   def update[V >: Any](attributeName : String, value : V) = Attributes(attributesMap updated(attributeName, value))
 
   /**
-   * Gets an attribute value as an optional vector. This means no exceptions
+   * Gets an attribute value as an optional Vector2D. This means no exceptions
    * are thrown. You can either use pattern matching or the getOrElse feature
    * to provide a default value.
    *
@@ -472,14 +472,14 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    *   }
    *
    *   // Using default value.
-   *   println( attributes vector "Direction" getOrElse Vector(0, 0) )
+   *   println( attributes vector "Direction" getOrElse Vector2D(0, 0) )
    * </pre>
    * </p>
    *
    * @param  attributeName  the name of attribute to look up.
    * @return  an optional attribute vector value.
    */
-  def vector(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Vector])
+  def vector2D(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Vector2D])
 
   /**
    * The same set of attributes with a given default function.

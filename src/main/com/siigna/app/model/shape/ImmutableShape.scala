@@ -27,12 +27,12 @@ trait ImmutableShape extends Shape {
    * Merge the new attributes in with the existing ones, eventually overwriting
    * attributes with new values.
    *
-   * @param  attributes  the new attributes to merge in.
+   * @param  attribute  the new attributes to merge in.
    * @return  a shape with the updated attributes.
    *
    * TODO: Refactor to addAttribute
    */
-  override def addAttribute(attribute : (String, Any)) = setAttributes(attributes :+ attribute)
+  override def addAttribute(attribute : (String, Any)) = setAttributes(attributes + attribute)
 
   /**
    * Merge the new attributes in with the existing ones, eventually overwriting

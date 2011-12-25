@@ -12,7 +12,7 @@
 package com.siigna.app.model.shape
 
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Arc, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{Arc2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.Attributes
 
 /**
@@ -33,7 +33,7 @@ import com.siigna.util.collection.Attributes
 case class ArcShape(start : Vector2D, middle : Vector2D, end : Vector2D, attributes : Attributes) extends BasicShape
 {
 
-  val geometry = Arc(start, middle, end)
+  val geometry = Arc2D(start, middle, end)
 
   val points = Seq(start, middle, end)
 
@@ -78,9 +78,9 @@ object ArcShape
    * TODO: Revise and test the middle coordinate.
    */
   def apply(center : Vector2D, radius : Double, startAngle : Double, endAngle : Double) = {
-    val start = center + Vector(math.cos(math.toRadians(startAngle)), math.sin(math.toRadians(startAngle))) * radius
-    val middle = center + Vector(math.cos(math.toRadians((endAngle + startAngle)*0.5)), math.sin(math.toRadians((endAngle + startAngle)*0.5))) * radius
-    val end = center + Vector(math.cos(math.toRadians(endAngle)), math.sin(math.toRadians(endAngle))) * radius
+    val start = center + Vector2D(math.cos(math.toRadians(startAngle)), math.sin(math.toRadians(startAngle))) * radius
+    val middle = center + Vector2D(math.cos(math.toRadians((endAngle + startAngle)*0.5)), math.sin(math.toRadians((endAngle + startAngle)*0.5))) * radius
+    val end = center + Vector2D(math.cos(math.toRadians(endAngle)), math.sin(math.toRadians(endAngle))) * radius
     new ArcShape(start, middle, end, Attributes())    
   }
 

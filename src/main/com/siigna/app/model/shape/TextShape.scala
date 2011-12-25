@@ -16,7 +16,7 @@ import java.awt.font._
 
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.{DXFSection, DXFValue}
-import com.siigna.util.geom.{Rectangle, TransformationMatrix, Vector}
+import com.siigna.util.geom._
 
 /**
  * This class represents a text-string.
@@ -32,21 +32,21 @@ import com.siigna.util.geom.{Rectangle, TransformationMatrix, Vector}
  *
  * TODO: Redo this! Completely.
  */
-case class TextShape(text: String, position : Vector, scale : Double, attributes : Attributes) extends ImmutableShape {
+case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends ImmutableShape {
 
   final val GlobalFontScale = 0.1
 
-  val geometry = Rectangle(boundaryPosition, boundaryPosition + boundarySize)
+  val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize)
 
   val points = Iterable(position)
 
-  def alignment           = attributes.vector("TextAlignment") getOrElse (Vector(0, 0))
+  def alignment           = attributes.vector2D("TextAlignment") getOrElse (Vector(0, 0))
 
-  def alignmentPosition   = Vector(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
+  def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
-  def boundaryPosition    = Vector(layout.getBounds.getX, layout.getBounds.getY)
+  def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
-  def boundarySize        = Vector(layout.getBounds.getWidth, layout.getBounds.getHeight)
+  def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)
 
@@ -91,8 +91,8 @@ case class TextShape(text: String, position : Vector, scale : Double, attributes
 object TextShape
 {
 
-  def apply(text : String, position : Vector)                    = new TextShape(text, position, 1.0, Attributes())
-  def apply(text : String, position : Vector, attr : Attributes) = new TextShape(text, position, 1.0, attr)
-  def apply(text : String, position : Vector, scale : Double)    = new TextShape(text, position, scale, Attributes())
+  def apply(text : String, position : Vector2D)                    = new TextShape(text, position, 1.0, Attributes())
+  def apply(text : String, position : Vector2D, attr : Attributes) = new TextShape(text, position, 1.0, attr)
+  def apply(text : String, position : Vector2D, scale : Double)    = new TextShape(text, position, scale, Attributes())
 
 }

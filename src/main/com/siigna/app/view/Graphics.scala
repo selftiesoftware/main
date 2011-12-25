@@ -17,9 +17,9 @@ import java.awt.geom.Arc2D
 import com.siigna.app.Siigna
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape._
-import com.siigna.util.geom.{Segment, Line, Vector, TransformationMatrix}
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
+import com.siigna.util.geom._
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -42,12 +42,16 @@ class Graphics(val g : Graphics2D)
   /**
    * Draw a number of shapes.
    */
-  def draw(shapes : Iterable[Shape]) : Unit = shapes foreach draw
+  def draw(shapes : Iterable[Shape]) {
+    shapes foreach draw
+  }
 
   /**
    * Draws any number of given shapes.
    */
-  def draw(shapes : Shape*) : Unit = shapes foreach draw
+  def draw(shapes : Shape*) {
+    shapes foreach draw
+  }
 
   /**
    * Draws a given shape.
@@ -104,19 +108,13 @@ class Graphics(val g : Graphics2D)
           //draw(s.p1)
           //draw(s.p2)
         }
-        case s : PointShape       => {
-          setColor(attributes color("Color") getOrElse(colorDraw))
-          setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
-          // Draws four lines around the point
-          val radius = 3 * Siigna.zoom
-          drawCircle(s.point, radius)
-        }
         case s : TextShape        => {
           val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
           setColor(attributes color("Color") getOrElse(colorDraw))
-          val shape = if (adjustToScale) {
+          val shape : TextShape = if (adjustToScale) {
             s.copy(scale = s.scale * Model.boundaryScale)
           } else s
+          // Draw!
           drawText(shape.layout, shape.position - shape.boundaryPosition - shape.alignmentPosition)
         }
         /** COLLECTION SHAPES **/
@@ -134,7 +132,7 @@ class Graphics(val g : Graphics2D)
    * Draws a arc from a center-point, a radius and a start-angle and end-angle,
    * defined in degrees.
    */
-  def drawArc(center : Vector, radius : Double, startAngle : Double, arcAngle : Double)
+  def drawArc(center : Vector2D, radius : Double, startAngle : Double, arcAngle : Double)
   {
     // We're using this instead of the function 'drawArc', since Arc2D is using
     // doubles and are more precise.
@@ -145,7 +143,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a circle from a center-point and a radius
    */
-  def drawCircle(center : Vector, radius : Double)
+  def drawCircle(center : Vector2D, radius : Double)
   {
     g drawArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
   }
@@ -153,28 +151,28 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws an ellipse from a center-point and the vertical and horizontal radius
    */
-  def drawEllipse(center : Vector, a : Double, b : Double)
+  def drawEllipse(center : Vector2D, a : Double, b : Double)
   {
-    g drawOval(center.x.toInt - a.toInt, center.y.toInt - b.toInt, (a * 2) toInt, (b * 2) toInt)
+    g drawOval(center.x.toInt - a.toInt, center.y.toInt - b.toInt, (a * 2).toInt, (b * 2).toInt)
   }
 
   /**
    * Draws an endless line.
    */
-  def drawLine(p1 : Vector, p2 : Vector) {
+  def drawLine(p1 : Vector2D, p2 : Vector2D) {
     val boundary = Siigna.screen
     val line = Line(p1, p2)
     val line1 = Line(boundary.topLeft, boundary.bottomLeft)
     val line2 = Line(boundary.topRight, boundary.bottomRight)
-    val intersection1 = line.intersects(line1)
-    val intersection2 = line.intersects(line2)
-    if (!intersection1.isEmpty && !intersection2.isEmpty) drawSegment(intersection1(0), intersection2(0))
+    val intersection1 = line.intersections(line1)
+    val intersection2 = line.intersections(line2)
+    if (!intersection1.isEmpty && !intersection2.isEmpty) drawSegment(intersection1.head, intersection2.head)
   }
 
   /**
    * Draws a rectangle from two points
    */
-  def drawRectangle(p1 : Vector, p2 : Vector)
+  def drawRectangle(p1 : Vector2D, p2 : Vector2D)
   {
     val topLeft     = Vector(scala.math.min(p1.x, p2.x), scala.math.max(p1.y, p2.y))
     val topRight    = Vector(scala.math.max(p1.x, p2.x), scala.math.max(p1.y, p2.y))
@@ -190,7 +188,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a line-segment (limited by two points) from two points
    */
-  def drawSegment(p1 : Vector, p2 : Vector)
+  def drawSegment(p1 : Vector2D, p2 : Vector2D)
   {
     g drawLine(p1.x.toInt, p1.y.toInt, p2.x.toInt, p2.y.toInt)
   }
@@ -198,7 +196,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws text using Javas TextLayout feature.
    */
-  def drawText(layout : TextLayout, position : Vector)
+  def drawText(layout : TextLayout, position : Vector2D)
   {
     layout draw(g, position.x.toFloat, position.y.toFloat)
   }

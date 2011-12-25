@@ -11,7 +11,6 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.app.model.shape.Shape
 import com.siigna.util.geom.Rectangle2D
 
 /**
@@ -21,20 +20,22 @@ import com.siigna.util.geom.Rectangle2D
  */
 trait Node {
 
+  type T = Node
+
   /**
    * Adds a single element to the Node.
    */
-  def add(elem : (String, Shape)) : Node
+  def add(elem : (String, Rectangle2D)) : T
   
   /**
    * Adds a number of elements to the Node.
    */
-  def add(elems : Traversable[(String, Shape)]) : Node
+  def add(elems : Traversable[(String, Rectangle2D)]) : T
 
   /**
    * Queries for elements in the node whose MBR is contained or intersected by a given MBR.
    */
-  def apply(query : Rectangle2D) : Traversable[Shape]
+  def apply(query : Rectangle2D) : Traversable[String]
 
   /**
    * The branch factor for the node.
@@ -44,7 +45,7 @@ trait Node {
   /**
    * Retrieve the traversable for all elements in the node.
    */
-  def traversable : Traversable[(String, Shape)]
+  def traversable : Traversable[(String, Rectangle2D)]
 
   /**
    * The MinimumBoundingRectangle of the node.
