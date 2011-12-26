@@ -20,11 +20,6 @@ import com.siigna._
  * Pre-condition: <code>p.x != a</code>.
  * If the pre-condition isn't fulfilled, the ellipse is created with a very small b.
  */
-<<<<<<< HEAD:src/com/siigna/util/geom/Ellipse.scala
-trait Ellipse[D <: Dimension] extends Geometry[D]
-{
-
-=======
 case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse //with GeometryEnclosed2D
 {
 
@@ -46,7 +41,6 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   // TODO: Find a Math wiz.
   def distanceTo(point : Vector) = java.lang.Double.POSITIVE_INFINITY
 
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Ellipse2D.scala
   /**
    * Calculates the distance from a ellipse to a point.
    */
@@ -131,8 +125,6 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
     }
   }
   */
-<<<<<<< HEAD:src/com/siigna/util/geom/Ellipse.scala
-=======
 
   /**
    * Examines whether the ellipse intersects with a segment
@@ -143,6 +135,5 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
    * Examines whether the ellipse intersects with rectangle
    */
   def intersects(rect: Rectangle) = false
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Ellipse2D.scala
   
 }
