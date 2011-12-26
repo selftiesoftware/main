@@ -162,7 +162,7 @@ object Siigna extends Interface {
    * Returns a TransformationMatrix with a translation and scale that fits the
    * given rectangle.
    */
-  def virtualTransformationTo(rectangle : Rectangle) = {
+  def virtualTransformationTo(rectangle : Rectangle2D) = {
     // Calculates the difference between the size of the screen and the size of the
     // boundary. This is then multiplied on the zoom level to give the exact
     // scale for the TransformationMatrix.

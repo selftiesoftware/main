@@ -13,10 +13,6 @@ package com.siigna.util.geom
 /**
  * An endless mathematically representation of a line with infinite length. 
  */
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-trait Line[D <: Dimension] extends Geometry[D]
-{
-=======
 case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
   
   import java.lang.Double.POSITIVE_INFINITY
@@ -26,14 +22,10 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
   val center = (p1 + p2) / 2
 
   def boundary = Rectangle(p1, p2)
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
   /**
    * Calculates the closest point on the line from a given vector.
    */
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-  def closestPoint(point : Vector[D]) : Vector[D]
-=======
   def closestPoint(point : Vector2D) = {
     // Found this at: http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
     // We take advantage of the fact that the slope of two orthogonal lines
@@ -48,7 +40,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     // Return the point.
     Vector2D(x, y)
   }
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
   def distanceTo(arc : Arc2D) = POSITIVE_INFINITY
   def distanceTo(circle : Circle2D) = POSITIVE_INFINITY
@@ -59,14 +50,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
   /**
    * Calculates the distance between a vector and a line.
    */
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-  def distanceTo(point : Vector[D]) : Double
-
-  /**
-   * Determines whether the line intersects with a rectangle.
-   */
-  def intersects(rectangle : Rectangle[D]) : Boolean
-=======
   def distanceTo(point : Vector2D) : Double = {
     if (p1 != p2) {
       // Calculate the distance from the projection on the line to the point.
@@ -86,17 +69,12 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
   def intersects(segment : Segment2D) = false
 
   def intersections(arc : Arc2D) = Set()
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
   /**
    * Returns a list of points, defined as the intersection(s) between the
    * line and the circle.
    */
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-  def intersections(circle : Circle[D]) : Set[Vector[D]]
-=======
-  def intersections(circle : Circle2D) =
-  {
+  def intersections(circle : Circle2D) = {
     val f           = p2 - p1
     val g           = p1 - circle.center
     val determinant = (f * g) * (f * g) - (f * f) * (g * g - circle.radius * circle.radius)
@@ -112,7 +90,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
     t map(f * _ + p1)
   }
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
   def intersections(ellipse : Ellipse2D) = Set()
 
@@ -120,9 +97,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
    * Returns a set of points, defined as the intersection(s) between the
    * two endless lines.
    */
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-  def intersections(line : Line) : Set[Vector[D]]
-=======
   def intersections(line : Line2D) = {
     // The lines are defined by the equations:
     //   L1 = A*u + C
@@ -151,7 +125,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     else
       Set[Vector2D](A * u + C)
   }
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
   def intersections(rectangle : Rectangle2D) = Set()
   def intersections(segment : Segment2D) = Set()
@@ -164,17 +137,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
 }
 
-<<<<<<< HEAD:src/com/siigna/util/geom/Line.scala
-/**
- * A companion object to the Line trait.
- */
-object Line {
-
-  /**
-   * Creates a 2D line.
-   */
-  def apply(p1 : Vector2D, p2 : Vector2D) = new Line2D(p1, p2)
-=======
 object Line2D {
 
   /**
@@ -216,6 +178,5 @@ object Line2D {
       case list => linesOnOpenPathOfPoints(list ::: List(list.head))
     }
   }
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Line2D.scala
 
 }
