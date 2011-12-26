@@ -11,31 +11,16 @@
 package com.siigna.util.geom
 
 /**
-<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
- * A circle. Represented by a center and a point on the circle.
- */
-trait Circle[D <: Dimension] extends EnclosedGeometry[D]
-{
-  
-  def radius : Double
-=======
- * A circle represented by a center and a point on the circle.
+ * A circle. Represented by a center and a radius.
  */
 case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed2D {
 
   import java.lang.Double.POSITIVE_INFINITY
   
   type T = Circle2D
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
-}
+  def area = radius * radius * math.Pi
 
-<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
-/**
- * A companion object to Circle.
- */
-object Circle {
-=======
   def boundary = Rectangle(Vector(center.x - radius, center.y - radius), Vector(center.x + radius, center.y + radius))
 
   def contains(arc : Arc2D) = false
@@ -113,18 +98,10 @@ object Circle {
       } else true
     }
   }
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
 
   def intersects(segment : Segment2D) = false
 
   def intersections(arc : Arc2D) = Set()
-
-  /**
-   * Creates a 2D circle.
-   */
-<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
-  def apply(center : Vector2D, radius : Double) = new Circle2D(center, radius)
-=======
   def intersections(circle : Circle2D) : Set[Vector2D] = if (intersects(circle)) {
       // Calculate various constants
       val d = (center - circle.center).length
@@ -150,18 +127,9 @@ object Circle {
   def intersections(ellipse : Ellipse2D) = Set()
   def intersections(line : Line2D) = Set()
   def intersections(rectangle : Rectangle2D) = Set()
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
+  def intersections(segment : Segment2D) = Set()
 
-  /**
-   * Creates a 2D circle.
-   */
-<<<<<<< HEAD:src/com/siigna/util/geom/Circle.scala
-  def apply(center : Vector2D, point : Vector2D) = new Circle2D(center, (point - center).length)
-=======
-  def intersections(segment : Segment2D) = segment.intersections(this)
-
-  def transform(t : TransformationMatrix) = Circle2D(t.transform(center), radius * t.scaleFactor)
->>>>>>> 8896d427524cee7181dfbcf806c82c2213a383f7:src/main/com/siigna/util/geom/Circle2D.scala
+  def transform(t : TransformationMatrix) = new Circle2D(t.transform(center), radius * t.scaleFactor)
 
   /**
    * Displays a set of vectors as the center along with
@@ -169,4 +137,13 @@ object Circle {
    */
   lazy val vertices = Set(center, center.changeX(radius), center.changeY(-radius), center.changeX(-radius), center.changeY(radius))
   
+}
+
+object Circle2D {
+
+  /**
+   * Creates a 2D circle.
+   */
+  def apply(center : Vector2D, point : Vector2D) = new Circle2D(center, (point - center).length)
+
 }

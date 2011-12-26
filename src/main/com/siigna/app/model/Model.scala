@@ -258,10 +258,10 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      Rectangle(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
+      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
                 Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
     } else {
-      Rectangle(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
+      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
                 Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
     }
   }

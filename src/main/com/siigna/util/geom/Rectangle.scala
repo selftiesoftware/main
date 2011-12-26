@@ -47,6 +47,11 @@ trait Rectangle
   def distanceTo(point : V) : Double
 
   /**
+   * The height of the rectangle
+   */
+  def height : Double
+
+  /**
    * Checks whether the given point is on the outer edge of the rectangle.
    */
   def onPeriphery(point : V) : Boolean
@@ -65,6 +70,11 @@ trait Rectangle
    * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
    */
   def union(that : T) : T
+
+  /**
+   * The width of the rectangle
+   */
+  def width : Double
 
 }
 
