@@ -143,7 +143,7 @@ case class Arc2D(center : Vector2D, radius : Double, startAngle : Double, angle 
     new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)
 
   // TODO: Add middlepoint
-  lazy val vertices = Set(startPoint, endPoint)
+  lazy val vertices = Seq(startPoint, endPoint)
 }
 
 /**

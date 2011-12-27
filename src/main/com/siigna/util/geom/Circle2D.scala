@@ -135,7 +135,7 @@ case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed
    * Displays a set of vectors as the center along with
    * four vectors which is set on the East, South, West and North side of the circumference.
    */
-  lazy val vertices = Set(center, center.changeX(radius), center.changeY(-radius), center.changeX(-radius), center.changeY(radius))
+  lazy val vertices = Seq(center, center.changeX(radius), center.changeY(-radius), center.changeX(-radius), center.changeY(radius))
   
 }
 

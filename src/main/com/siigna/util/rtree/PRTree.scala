@@ -12,7 +12,7 @@
 package com.siigna.util.rtree
 
 import com.siigna.app.model.shape.Shape
-import com.siigna.util.geom.{Rectangle, Vector}
+import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector}
 
 /**
  * A priority tree containing references to the shapes in the static Model.
@@ -25,4 +25,13 @@ import com.siigna.util.geom.{Rectangle, Vector}
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */
-class PRTree(branchFactor : Int = 8) extends Branch(branchFactor)
+class PRTree(branchFactor : Int = 8) extends Branch(branchFactor) {
+
+  // TODO: Rethink
+  override def mbr = {
+    if (!java.lang.Double.isNaN(super.mbr.xMin)) {
+      super.mbr
+    } else Rectangle2D(0, 0, 0, 0)
+  }
+
+}
