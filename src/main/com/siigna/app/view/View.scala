@@ -144,7 +144,8 @@ trait View extends Applet {
       graphics2D clearRect(topLeft.x.toInt, bottomRight.y.toInt, boundary.width.toInt, boundary.height.toInt)
 
       // Draw a black border
-      graphics.draw(PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color))
+      val p = PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color)
+      graphics.draw(p)
 
       // Draw the Model.
       // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model

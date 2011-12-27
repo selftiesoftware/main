@@ -221,7 +221,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   
   def transform(t : TransformationMatrix) = new Segment2D(t.transform(p1), t.transform(p2))
   
-  lazy val vertices = Set(p1, p2)
+  lazy val vertices = Seq(p1, p2)
 
 }
 

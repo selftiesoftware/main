@@ -56,7 +56,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a given shape.
    */
-  def draw(shape : Shape) : Unit = {
+  def draw(shape : Shape) {
     val attributes = shape.attributes
     val selected = false
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
@@ -121,7 +121,9 @@ class Graphics(val g : Graphics2D)
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {
           setColor(attributes color("Color") getOrElse(colorDraw))
-          s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+          s.shapes.foreach(s => {
+            draw(s.setAttributes(attributes))
+          })
         }
         case _ =>
       }

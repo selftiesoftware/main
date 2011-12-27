@@ -22,7 +22,7 @@ import com.siigna.util.geom._
  */
 object Siigna extends Interface {
 
-  Log.level = Log.INFO
+  Log.level = Log.SUCCESS
 
   /**
    * Counts the frames per second. Don't set this if you want the correct answer..
