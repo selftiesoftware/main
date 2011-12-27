@@ -265,11 +265,17 @@ trait View extends Applet {
   }
 
   /**
-   * Pans the view and asks to repaint it afterwards.
+   * Pans the view.
    */
   def pan(endPoint : Vector2D) {
     if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
-    repaint
+  }
+
+  /**
+   * Pans the view by a given x and y coordinate.
+   */
+  def pan(x : Double, y : Double) {
+    if (Siigna.navigation) pan = panPointOld + Vector2D(x, y) - panPointMouse
   }
 
   /**
@@ -291,7 +297,6 @@ trait View extends Applet {
           zoom *= zoomFactor
         }
       pan = (pan - point) * zoomFactor + point
-      repaint
     }
   }
 
