@@ -156,6 +156,9 @@ object Control extends Thread("Siigna Controller") {
     com.siigna.Preload('Menu)
     com.siigna.ForwardTo('Default)
 
+    // Log that controller is initializing
+    Log.success("Control: Initiating control-loop.")
+
     // Run the loop
     while(true) {
       // Check there's modules to execute code from

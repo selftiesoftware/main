@@ -11,7 +11,7 @@
 
 package com.siigna.app.controller
 
-import java.net.URL
+import java.net.{URL}
 
 import com.siigna.module._
 import com.siigna.util.logging.Log
@@ -30,9 +30,10 @@ class ModuleBank {
   /**
    * The class loader used to load classes.
    */
-  private val classLoader = new ClassLoader(Array(new URL("jar:file:/C:/workspace/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/"),
-	  new URL("jar:file:/E:/OLE/06_Siigna/06_programmering/06_endogenous/out/artifacts/endogenous.jar!/"),
-	  new URL("jar:file:/C:/siigna/endogenous/out/artifacts/endogenous.jar!/")))
+  private val classLoader : ModuleLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/endogenous.jar!/")), this.getClass.getClassLoader)
+    //new ModuleLoader(Array(new URL("jar:file:/C:/workspace/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/"),
+	  //new URL("jar:file:/E:/OLE/06_Siigna/06_programmering/06_endogenous/out/artifacts/endogenous.jar!/"),
+	  //new URL("jar:file:/C:/siigna/endogenous/out/artifacts/endogenous.jar!/")))
 
   /**
    * Examines whether the bank contains a given module.

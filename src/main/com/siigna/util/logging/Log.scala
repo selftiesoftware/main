@@ -39,8 +39,8 @@ object Log extends scala.util.logging.ConsoleLogger {
   val DEBUG   = 8
   val SUCCESS = 16
 
-  private def format(message : Any, logLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) =
-    if ((level & logLevel) == logLevel) {
+  private def format(message : Any, logLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
+    if ((level & logLevel) <= level) { // TODO: Is this working?
       // Add to the line-number
       lineNumber += 1
 
@@ -54,6 +54,7 @@ object Log extends scala.util.logging.ConsoleLogger {
 
       log(lineNumber.toString + ": " + text)
     }
+  }
 
   /**
    * Logs messages as info by default.
