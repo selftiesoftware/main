@@ -254,9 +254,10 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def transform(t : TransformationMatrix) = {
-    val dx = t.getTranslate.x
-    val dy = t.getTranslate.y
-    Rectangle2D(xMin + dx, yMin + dy, xMax + dx, yMax + dy)
+    val p1 = topLeft.transform(t)
+    val p2 = bottomRight.transform(t)
+
+    Rectangle2D(p1, p2)
   }
 
   def union(that : Rectangle2D) =

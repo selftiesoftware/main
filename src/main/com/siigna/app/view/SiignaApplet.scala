@@ -10,9 +10,7 @@
  */
 package com.siigna.app.view
 
-import java.applet.Applet
 import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
-import java.lang.Thread
 
 import com.siigna.app.Siigna
 import com.siigna.app.controller.Control
@@ -21,6 +19,7 @@ import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
 import java.awt.{Dimension}
 import com.siigna.util.geom.{Vector2D, Rectangle, Vector}
+import java.lang.{SecurityManager, Thread}
 
 /**
  * The main class of Siigna.
@@ -88,8 +87,8 @@ class SiignaApplet extends View
    * Initializes the view. Sets panning to the center of the screen and
    * adds EventListeners.
    */
-  override def init()
-  {
+  override def init() {
+    // Add event listeners
     addKeyListener(new KeyListener {
       override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
       override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
@@ -121,9 +120,8 @@ class SiignaApplet extends View
     // Set the correct position of the screen
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
     setPreferredSize(dimension)
-    pan(Vector(dimension.width >> 1, dimension.height >> 1))
 
-    //
+    pan(Vector(dimension.width >> 1, dimension.height >> 1))
 
     // Start the applet
     start()

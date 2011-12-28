@@ -11,6 +11,7 @@ package com.siigna.app.controller
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+import java.lang.ClassLoader
 import java.net.{URL, URLClassLoader}
 
 import com.siigna.util.logging.Log
@@ -21,8 +22,15 @@ import com.siigna.util.logging.Log
  * TODO: Add a remote system for finding vars - includes setting up a server!
  * -> val url = new URL("jar:http://siigna.com/module/"+moduleName+".jar!/")
  */
-class ClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
+class ModuleLoader(private var urls : Array[URL], loader : ClassLoader) {
 
+  private var classLoader = URLClassLoader.newInstance(urls, loader)
+
+  private def addURL(url : URL) {
+    urls = urls.+:(url)
+    classLoader = URLClassLoader.newInstance(urls, loader)
+  }
+  
   /**
    * Load a module class with the given name from a given location.
    * <b>Note:</b> Siigna tries to locate the class from specific paths in the file. Ordered, they are:
@@ -62,7 +70,7 @@ class ClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
       // Thanks to: http://stackoverflow.com/questions/3039822/how-do-i-call-a-scala-object-method-using-reflection
       val resource : Option[Class[_]] = try {
         // Load the object and not the class
-        Some(loadClass(classPath + "$"))
+        Some(classLoader.loadClass(classPath + "$"))
       } catch {
         case e => errors += ("JarLoader: No resource could be found at the given location: " + classPath -> Some(e))
         None
@@ -77,12 +85,12 @@ class ClassLoader(urls : Array[URL]) extends URLClassLoader(urls) {
         case e => errors += ("JarLoader: Class found, but failed to cast to type T." -> Some(e))
         None
       }
-      
+
       // Print errors in case no modules was found
       if (result.isEmpty) {
         errors.foreach(e => if (e._2.isDefined) Log.error(e._1, e._2) else Log.error(e._1))
       }
-      
+
       // Return the result
       result
     }
