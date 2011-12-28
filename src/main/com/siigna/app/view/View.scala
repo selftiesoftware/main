@@ -144,7 +144,8 @@ trait View extends Applet {
       graphics2D clearRect(topLeft.x.toInt, bottomRight.y.toInt, boundary.width.toInt, boundary.height.toInt)
 
       // Draw a black border
-      graphics.draw(PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color))
+      val p = PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color)
+      graphics.draw(p)
 
       // Draw the Model.
       // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
@@ -264,11 +265,17 @@ trait View extends Applet {
   }
 
   /**
-   * Pans the view and asks to repaint it afterwards.
+   * Pans the view.
    */
   def pan(endPoint : Vector2D) {
     if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
-    repaint
+  }
+
+  /**
+   * Pans the view by a given x and y coordinate.
+   */
+  def pan(x : Double, y : Double) {
+    if (Siigna.navigation) pan = panPointOld + Vector2D(x, y) - panPointMouse
   }
 
   /**
@@ -290,7 +297,6 @@ trait View extends Applet {
           zoom *= zoomFactor
         }
       pan = (pan - point) * zoomFactor + point
-      repaint
     }
   }
 

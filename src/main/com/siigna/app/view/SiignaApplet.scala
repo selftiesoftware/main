@@ -123,6 +123,8 @@ class SiignaApplet extends View
     setPreferredSize(dimension)
     pan(Vector(dimension.width >> 1, dimension.height >> 1))
 
+    //
+
     // Start the applet
     start()
 
