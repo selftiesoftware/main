@@ -119,6 +119,8 @@ object Control extends Thread("Siigna Controller") {
       modules(1).interface.chain(module.interface)
     else if (Siigna.getInterface.isEmpty)
       Siigna.setInterface(module.interface)
+    
+    println("Interface: " + Siigna.getInterface)
 
     // Give the paint-function to the interface
     module.interface.setPaint(module.paint)

@@ -77,13 +77,12 @@ object PolylineShape {
     PolylineShape(lines, Attributes())
   }
 
-  def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices.toSeq)
+  def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices :+ rect.vertices.head)
 
   def isConnected(shapes : Seq[BasicShape]) : Boolean = if (!shapes.isEmpty) {
     var isConnected = true
     shapes.reduceLeft((a, b) => {
       if (a.end != b.start) {
-        println(a.end, b.start)
         isConnected = false
       }
       b

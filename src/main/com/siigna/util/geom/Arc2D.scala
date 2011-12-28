@@ -11,7 +11,8 @@
 package com.siigna.util.geom
 
 /**
- * A mathematical representation of a 2-dimensional arc i. e. a circle piece.
+ * A mathematical representation of a 2-dimensional arc i. e. a circle piece. An arc is drawn counter-clockwise, so
+ * positive values draws an arc counter-clockwise, and negative values draws it clockwise.
  *
  * @param center  The center of the circle representing the arc.
  * @param radius  The radius of the circle representing the arc.
@@ -143,7 +144,7 @@ case class Arc2D(center : Vector2D, radius : Double, startAngle : Double, angle 
     new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)
 
   // TODO: Add middlepoint
-  lazy val vertices = Set(startPoint, endPoint)
+  lazy val vertices = Seq(startPoint, endPoint)
 }
 
 /**
@@ -154,11 +155,57 @@ object Arc2D {
   import java.lang.Double.NaN
 
   /**
+   * Locates a center point from three points on a periphery.
+   */
+  def findCenterPoint(start : Vector2D, middle : Vector2D, end : Vector2D) : Vector2D = {
+    // If two of the points are the same, we cannot properly locate the center
+    if (start == middle && start == end && middle == end) {
+      throw new IllegalArgumentException("Unable to create arc if two points coincide.")
+    }
+
+    // Locate the center where the normal-vectors of the lines from start to middle and end to middle intersects
+    // First find the two middle points
+    val m1 = (middle + start)/2
+    val m2 = (end + middle)/2
+    // Then find the normal vectors
+    val p1 = m1 + (middle - start).normal
+    val p2 = m2 + (end - middle).normal
+
+    // Locate the intersections
+    val intersections = Line2D(m1, p1).intersections(Line2D(m2, p2))
+
+    if (intersections.size != 1) {
+      throw new UnsupportedOperationException("Unable to calculate the center of the arc.")
+    } else {
+      intersections.head
+    }
+  }
+
+  /**
+   * Calculates the entire angle-span of an arc from a start and end angle.
+   */
+  def findArcAngle(startAngle : Double, endAngle : Double) = {
+    (startAngle - endAngle).abs  //+ (if (endAngle > startAngle) 180 else 0)
+  }
+
+  /**
    * Creates an arc from three points.
    */
   def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = {
-    // TODO: Write this
-    empty
+    val center = findCenterPoint(start, middle, end)
+    val radius = (start - center).length
+    val startAngle = (start - center).angle
+    val endAngle = (end - center).angle
+    val angle = findArcAngle(startAngle, endAngle)
+
+    // Swap the end and start angle if the middle point isn't included
+    // TODO: This isn't working!
+    val middleAngle = (middle - center).angle
+    if (middleAngle - startAngle <= endAngle - startAngle) {
+      new Arc2D(center, radius, startAngle, angle)
+    } else {
+      new Arc2D(center, radius, endAngle, angle)
+    }
   }
 
   /**
