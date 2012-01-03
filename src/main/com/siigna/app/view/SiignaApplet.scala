@@ -43,8 +43,16 @@ class SiignaApplet extends View
    */
   private val paintLoop = new Thread("PaintLoop") {
     override def run() { try {
-      Log.success("View: Initiating paint-loop.")
+      var init = false;
       while(true) {
+
+        // This is added inside the loop to make sure siigna's painting
+        // TODO: Find out why this is needed!
+        if (!init) {
+          Log.success("View: Initiating paint-loop.")
+          init = true
+        }
+
         // Start the paint-loop
         if (isShowing) {
           val graphics = getGraphics;
