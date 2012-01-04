@@ -63,7 +63,6 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
 
 object PolylineShape {
 
-
   def empty = new PolylineShape(Seq(), Attributes())
 
   def fromPoints(points : Vector2D*) : PolylineShape = fromPoints(points.toIterable)

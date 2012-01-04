@@ -22,7 +22,7 @@ import com.siigna.util.geom._
  */
 object Siigna extends Interface {
 
-  Log.level = Log.SUCCESS
+  Log.level = Log.DEBUG
 
   /**
    * Counts the frames per second. Don't set this if you want the correct answer..
@@ -142,7 +142,6 @@ object Siigna extends Interface {
    */
   def setInterface(interface : ModuleInterface) {
     this.interface = Some(interface)
-
     setCursor(interface.getCursor)
   }
 

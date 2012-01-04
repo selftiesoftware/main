@@ -40,7 +40,8 @@ object Log extends scala.util.logging.ConsoleLogger {
   val SUCCESS = 16
 
   private def format(message : Any, logLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
-    if ((level & logLevel) <= level) { // TODO: Is this working?
+    if (false){
+    //if ((level & logLevel) <= level) { // TODO: Is this working?
       // Add to the line-number
       lineNumber += 1
 
