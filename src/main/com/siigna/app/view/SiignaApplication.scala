@@ -57,10 +57,6 @@ class ApplicationWindow extends Frame
   // just create a new instance and add it to our window.
   val applet = Siigna.view
 
-  // Add the applet to the application.
-  add(applet)
-  setTitle("Siigna")
-  applet.init()
   // Setup event handler for when the window is closed (user press the X
   // button). In this case we dispose the window, which in the end terminates
   // the program.
@@ -85,14 +81,23 @@ class ApplicationWindow extends Frame
     }
   })
 
+  // Initializing the applet
+  applet.init()
+
+  // Set the title
+  setTitle("Siigna")
+
   // Set preferred size
   setPreferredSize(Preferences("defaultScreenSize").asInstanceOf[Dimension])
 
-  // Pack the elements of this window. The panel requests a certain size.
-  pack()
+  // Add the applet to the application.
+  add(applet)
+
   // Show the window. The program is running.
   setVisible(true)
-  // The initialization itself is done in the view...
 
+  // Pack the elements of this window. The panel requests a certain size.
+  pack()
+  // The initialization itself is done in the view...
 }
 

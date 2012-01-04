@@ -30,8 +30,7 @@ import java.lang.{SecurityManager, Thread}
  * the modules to paint additional graphics. The modules do not have direct access to
  * the view, but the <code>Interface</code> is designed to utilize access to it.
  */
-class SiignaApplet extends View
-{
+class SiignaApplet extends View {
 
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
@@ -44,7 +43,12 @@ class SiignaApplet extends View
   private val paintLoop = new Thread("PaintLoop") {
     override def run() { try {
       Log.success("View: Initiating paint-loop.")
+
       while(true) {
+        // A print-statement makes the while loop run.... Why??
+        // TODO: Find a solution
+        System.out.print("")
+
         // Start the paint-loop
         if (isShowing) {
           val graphics = getGraphics;
@@ -121,16 +125,17 @@ class SiignaApplet extends View
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
     setPreferredSize(dimension)
 
+    // Pan to the center
     pan(Vector(dimension.width >> 1, dimension.height >> 1))
-
-    // Start the applet
-    start()
 
     // Start the paint-loop
     paintLoop.start()
 
     // Start the controller
     Control.start()
+
+    // Start the applet
+    start()
   }
 
   /**

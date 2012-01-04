@@ -30,9 +30,9 @@ class ModuleBank {
   /**
    * The class loader used to load classes.
    */
-  private val classLoader = new ClassLoader(Array(new URL("jar:file:/C:/workspace/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/"),
+  private val classLoader = new ModuleLoader(Array(new URL("jar:file:/C:/workspace/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/"),
 	  new URL("jar:file:/E:/OLE/06_Siigna/06_programmering/06_endogenous/out/artifacts/endogenous.jar!/"),
-	  new URL("jar:file:/C:/siigna/endogenous/out/artifacts/endogenous.jar!/")))
+	  new URL("jar:file:/C:/siigna/siigna-modules/out/artifacts/endogenous/endogenous.jar!/")), this.getClass.getClassLoader)
 
   /**
    * Examines whether the bank contains a given module.

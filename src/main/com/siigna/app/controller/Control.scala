@@ -119,8 +119,6 @@ object Control extends Thread("Siigna Controller") {
       modules(1).interface.chain(module.interface)
     else if (Siigna.getInterface.isEmpty)
       Siigna.setInterface(module.interface)
-    
-    println("Interface: " + Siigna.getInterface)
 
     // Give the paint-function to the interface
     module.interface.setPaint(module.paint)
@@ -198,7 +196,7 @@ object Control extends Thread("Siigna Controller") {
                 module.state = s
                 Log.info(this + " succesfully changed the state of the active module to "+s)
               }
-              case None => Log.debug(this + " tried to change state with event "+events.head+", but no route was found.")
+              case None => Log.info(this + " tried to change state with event "+events.head+", but no route was found.")
             }
 
             // React on the event parsed and execute the function associated with the state;
