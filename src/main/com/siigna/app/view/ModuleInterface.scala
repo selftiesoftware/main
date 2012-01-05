@@ -93,10 +93,10 @@ class ModuleInterface extends Interface {
    */
   def paint(graphics : Graphics, transformation: TransformationMatrix) {
     // Paint the current paint-function, if defined
-    if (paint.isDefined)   paint.get.apply(graphics, transformation)
+    if (paint.isDefined) paint.get.apply(graphics, transformation)
 
     // Paint the chain
-    if (chain.isDefined)  chain.get.paint(graphics, transformation)
+    if (chain.isDefined) chain.get.paint(graphics, transformation)
 
     // Paint the display of this interface - if defined
     if (display.isDefined) display.get paint graphics

@@ -17,9 +17,9 @@ import com.siigna.app.controller.Control
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
-import java.awt.{Dimension}
-import com.siigna.util.geom.{Vector2D, Rectangle, Vector}
-import java.lang.{SecurityManager, Thread}
+import java.awt.Dimension
+import com.siigna.util.geom.{Vector2D, Rectangle}
+import java.lang.Thread
 
 /**
  * The main class of Siigna.
@@ -129,7 +129,7 @@ class SiignaApplet extends View
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
     setPreferredSize(dimension)
 
-    pan(Vector(dimension.width >> 1, dimension.height >> 1))
+    pan(Vector2D(dimension.width >> 1, dimension.height >> 1))
 
     // Start the applet
     start()
@@ -188,7 +188,7 @@ class SiignaApplet extends View
     }
 
     // Saves the position of the mouse
-    val position = Vector(e getX, e getY)
+    val position = Vector2D(e getX, e getY)
 
     // Saves the last mouse-button as a boolean in the case of a MouseDown event,
     // to be used later on.
@@ -264,7 +264,7 @@ class SiignaApplet extends View
 
     // Since the size of the component in some cases vary from the actual size (think menus and
     // title-bars etc.) we set the size according to the actual width and height
-    Siigna.screen = Rectangle(Vector(0, 0), Vector(width, height))
+    Siigna.screen = Rectangle(Vector2D(0, 0), Vector2D(width, height))
   }
 
 }
