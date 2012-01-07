@@ -96,27 +96,6 @@ class SiignaApplet extends View
    * adds EventListeners.
    */
   override def init() {
-    // Add event listeners
-    addKeyListener(new KeyListener {
-      override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
-      override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
-      override def keyTyped   (e : AWTKeyEvent) { false }
-    })
-    addMouseListener(new MouseListener {
-      override def mouseClicked (e : AWTMouseEvent) { false }
-      override def mouseEntered (e : AWTMouseEvent) { handleMouseEvent(e, MouseEnter) }
-      override def mouseExited  (e : AWTMouseEvent) { handleMouseEvent(e, MouseExit) }
-      override def mousePressed (e : AWTMouseEvent) { handleMouseEvent(e, MouseDown) }
-      override def mouseReleased(e : AWTMouseEvent) { handleMouseEvent(e, MouseUp) }
-    })
-    addMouseMotionListener(new MouseMotionListener {
-      override def mouseDragged(e : AWTMouseEvent) { handleMouseEvent(e, MouseDrag) }
-      override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
-    })
-    addMouseWheelListener(new MouseWheelListener {
-      override def mouseWheelMoved(e : MouseWheelEvent) { handleMouseEvent(e, MouseWheel(e getUnitsToScroll)) }
-    })
-
     // Misc initialization
     setVisible(true)
     setFocusable(true)
@@ -139,6 +118,30 @@ class SiignaApplet extends View
 
     // Start the controller
     Control.start()
+
+    // Connect to the siigna object
+    Siigna.setView(this)
+
+    // Add event listeners
+    addKeyListener(new KeyListener {
+      override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
+      override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
+      override def keyTyped   (e : AWTKeyEvent) { false }
+    })
+    addMouseListener(new MouseListener {
+      override def mouseClicked (e : AWTMouseEvent) { false }
+      override def mouseEntered (e : AWTMouseEvent) { handleMouseEvent(e, MouseEnter) }
+      override def mouseExited  (e : AWTMouseEvent) { handleMouseEvent(e, MouseExit) }
+      override def mousePressed (e : AWTMouseEvent) { handleMouseEvent(e, MouseDown) }
+      override def mouseReleased(e : AWTMouseEvent) { handleMouseEvent(e, MouseUp) }
+    })
+    addMouseMotionListener(new MouseMotionListener {
+      override def mouseDragged(e : AWTMouseEvent) { handleMouseEvent(e, MouseDrag) }
+      override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
+    })
+    addMouseWheelListener(new MouseWheelListener {
+      override def mouseWheelMoved(e : MouseWheelEvent) { handleMouseEvent(e, MouseWheel(e getUnitsToScroll)) }
+    })
   }
 
   /**
