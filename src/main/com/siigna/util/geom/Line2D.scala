@@ -133,7 +133,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     Line2D(p1.transform(t), p2.transform(t))
   }
 
-  def vertices = Set(p1, p2)
+  def vertices = Seq(p1, p2)
 
 }
 

@@ -28,7 +28,7 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   /**
    * The lowest right corner of the rectangle.
    */
-  def bottomRight = Vector(xMax, yMax)
+  def bottomRight = Vector(xMax, yMin)
 
   /**
    * The upper left corner of the rectangle.
@@ -251,12 +251,13 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
     } else 0 // No overlap
   }
 
-  lazy val vertices = Set(topLeft, topRight, bottomRight, bottomLeft)
+  lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def transform(t : TransformationMatrix) = {
-    val dx = t.getTranslate.x
-    val dy = t.getTranslate.y
-    Rectangle2D(xMin + dx, yMin + dy, xMax + dx, yMax + dy)
+    val p1 = topLeft.transform(t)
+    val p2 = bottomRight.transform(t)
+
+    Rectangle2D(p1, p2)
   }
 
   def union(that : Rectangle2D) =
