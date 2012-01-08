@@ -54,7 +54,7 @@ trait Geometry {
   /**
    * A set of vertices defined by the geometry.
    */
-  def vertices : Set[V]
+  def vertices : Seq[V]
 
 }
 
