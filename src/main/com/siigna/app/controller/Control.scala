@@ -119,8 +119,6 @@ object Control extends Thread("Siigna Controller") {
       modules(1).interface.chain(module.interface)
     else if (Siigna.getInterface.isEmpty)
       Siigna.setInterface(module.interface)
-    
-    println("Interface: " + Siigna.getInterface)
 
     // Give the paint-function to the interface
     module.interface.setPaint(module.paint)
@@ -170,7 +168,7 @@ object Control extends Thread("Siigna Controller") {
         }
       } else {
         // Checks that there's an even waiting to be processed
-        if (!eventQueue.isEmpty && !modules.isEmpty) {
+        if (!eventQueue.isEmpty) {
 
           // Check whether the event is forwarded, and thus needs to be discarded
           if (isForwardedEvent) {
@@ -220,6 +218,7 @@ object Control extends Thread("Siigna Controller") {
             if (module.state == 'End) result match {
               // Put a module event back in the event queue
               case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
+              // TODO: What to do with return types that aren't ModuleEvents?
               case unknown => Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
                 "but not reacting since it's not a Module Event.")
             }
