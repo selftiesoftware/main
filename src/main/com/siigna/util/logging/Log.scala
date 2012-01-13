@@ -25,6 +25,8 @@ object Log extends scala.util.logging.ConsoleLogger {
    *  <li>Debug - Debug-information. Note: Can log quite a bit of lines.</li>
    *  <li>Success - Reports when something succeeds... Sometimes.</li>
    * </ol>
+   *
+   * TODO: Use twitter's util-logging instead of inventing the wheel damnit!
    */
   var level : Int = 0
 
@@ -39,8 +41,8 @@ object Log extends scala.util.logging.ConsoleLogger {
   val DEBUG   = 8
   val SUCCESS = 16
 
-  private def format(message : Any, logLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
-    if ((level & logLevel) <= level) { // TODO: Is this working?
+  private def format(message : Any, messageLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
+    if ((level & messageLevel) == messageLevel) { // TODO: Is this working?
       // Add to the line-number
       lineNumber += 1
 

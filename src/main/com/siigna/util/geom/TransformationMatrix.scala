@@ -104,6 +104,13 @@ case class TransformationMatrix(t : AffineTransform)
   def scaleFactor = t.getScaleX
 
   /**
+   * Prints the affine transform.
+   */
+  override def toString = {
+    t.toString
+  }
+
+  /**
    * Transforms a vector with this transformation.
    */
   def transform(point : Vector2D) : Vector2D = {
