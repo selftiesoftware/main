@@ -55,7 +55,7 @@ class ApplicationWindow extends Frame
 
   // The applet is also an AWT Panel (the Java applet class extends it), so we
   // just create a new instance and add it to our window.
-  val applet = Siigna.view
+  val applet = new SiignaApplet
 
   // Add the applet to the application.
   add(applet)

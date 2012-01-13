@@ -272,13 +272,6 @@ trait View extends Applet {
   }
 
   /**
-   * Pans the view by a given x and y coordinate.
-   */
-  def pan(x : Double, y : Double) {
-    if (Siigna.navigation) pan = panPointOld + Vector2D(x, y) - panPointMouse
-  }
-
-  /**
    * Carries out a zoom action by zooming with the given delta and then panning
    * the view relative to the current zoom-factor.
    * The zoom-function are disabled if:

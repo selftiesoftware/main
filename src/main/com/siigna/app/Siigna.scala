@@ -22,7 +22,7 @@ import com.siigna.util.geom._
  */
 object Siigna extends Interface {
 
-  Log.level = Log.SUCCESS
+  Log.level = Log.ERROR + Log.WARNING + Log.INFO
 
   /**
    * Counts the frames per second. Don't set this if you want the correct answer..
@@ -70,7 +70,7 @@ object Siigna extends Interface {
   /**
    * The graphical environment for Siigna.
    */
-  val view = new SiignaApplet
+  private var view : Option[View] = None
 
   /**
    * The zoom-speed. Defaults to 0.1 (i. e. 10%).
@@ -86,7 +86,9 @@ object Siigna extends Interface {
   /**
    * Get the current active cursor.
    */
-  def cursor = view.getCursor
+  def cursor = 
+    if (view.isDefined) view.get.getCursor
+    else Cursor.DEFAULT_CURSOR
 
   /**
    * Returns the active ModuleInterface that's been placed highest in the interface-hierarchy.
@@ -113,7 +115,9 @@ object Siigna extends Interface {
   /**
    * Returns the current panning position.
    */
-  def pan = view.pan
+  def pan =
+    if (view.isDefined) view.get.pan
+    else Vector2D(0, 0)
 
   /**
    * Returns the paper scale of the current model.
@@ -129,7 +133,8 @@ object Siigna extends Interface {
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
-    view setCursor cursor
+    if (view.isDefined)
+      view.get setCursor cursor
   }
 
   /**
@@ -144,6 +149,13 @@ object Siigna extends Interface {
     this.interface = Some(interface)
 
     setCursor(interface.getCursor)
+  }
+
+  /**
+   * Defines the view for Siigna to use. Should be called by the applet.
+   */
+  def setView(view : View) {
+    this.view = Some(view)
   }
 
   /**
@@ -175,7 +187,8 @@ object Siigna extends Interface {
   /**
    * Returns the current zoom scale
    */
-  def zoom = view.zoom
-  
+  def zoom =
+    if (view.isDefined) view.get.zoom
+    else 1.0
 
 }
