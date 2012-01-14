@@ -169,7 +169,8 @@ object Control extends Thread("Siigna Controller") {
         if (!eventQueue.isEmpty && !modules.isEmpty) {
 
           // Check whether the event is forwarded, and thus needs to be discarded
-          if (isForwardedEvent) {
+          // - but only if it isn't a message from an ending module
+          if (isForwardedEvent && !eventQueue.head.isInstanceOf[ModuleEvent]) {
             // Kaboom!
             eventQueue.dequeue()
             // .......
@@ -215,24 +216,25 @@ object Control extends Thread("Siigna Controller") {
               case e => Log.error("Error in retrieving state machine from module " + module + ".", e)
             }
 
-            // If the module is ending then send a ModuleEvent back into the
-            // event-queue for other modules to respond on
-            if (module.state == 'End) result match {
-              // Put a module event back in the event queue
-              case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
-              case unknown => Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
-                "but not reacting since it's not a Module Event.")
-            }
-
             // Check for current state. If modules is ending remove the most recent module and store it's events
             // back in the queue so the next loop returns true (and the "parent" gets a chance to act).
             if (module.state == 'End) {
-              println("Destruction! " + module)
               // Remove the ending module from the module stack.
               modules.pop()
 
-              // Store the head of the event-list in the event-queue.
-              eventQueue.enqueue(events.head)
+              // If the module is ending then send a ModuleEvent back into the
+              // event-queue for other modules to respond on
+              result match {
+                // Put a module event back in the event queue
+                case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
+
+                  // Store the head of the event-list in the event-queue.
+                case unknown => {
+                  //Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
+                  //  "but not reacting since it's not a Module Event.")
+                  eventQueue.enqueue(events.head)
+                }
+              }
 
               // Set the most dangerous isForwardedEvent variable!
               isForwardedEvent = true
