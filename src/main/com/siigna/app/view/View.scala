@@ -193,6 +193,9 @@ trait View extends Applet {
       } catch {
         case e => Log.error("View: Error while painting the interfaces.", e)
       }
+      val v = (Vector2D(150,-21),Vector2D(158,0),Vector2D(150,21))
+
+      graphics draw com.siigna.app.model.shape.ArcShape(v._1, v._2, v._3).transform(Siigna.virtual)
 
       // Draw the image we get from the print-method on the view.
       // Parameters are (Image img, int x, int y, ImageObserver observer)
