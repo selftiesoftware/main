@@ -24,39 +24,28 @@ import com.siigna.util.collection.Attributes
  *  - StrokeWidth  Double  The width of the linestroke used to draw.
  * </pre>
  *
- * @param start  The vector where the arc starts (CCW).
- * @param middle  The middle vector of the arc.
- * @param end  The vector where the arc stops (CCW).
- * 
+ * @param center  The center of the circle-piece.
+ * @param radius  The distance from the center to the periphery.
+ * @param startAngle  The angle where the arc starts (counting from 3'clock CCW).
+ * @param angle  The angles the arc is spanning.
+ *
  * TODO: Middle point should be middle of arc, not random point on circumference.
  */
-case class ArcShape(start : Vector2D, middle : Vector2D, end : Vector2D, attributes : Attributes) extends BasicShape
+case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape
 {
 
-  val geometry = Arc2D(start, middle, end)
+  val geometry = Arc2D(center, radius, startAngle, angle)
 
-  val points = Seq(start, middle, end)
-
-  def setAttributes(attributes : Attributes) = new ArcShape(start, middle, end, attributes)
+  def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 
   // TODO: Export arcs.
   def toDXF = DXFSection(List())
 
-  def transform(transformation : TransformationMatrix) =
-  {
-    // Don't tamper with this hack!
-    // TODO: What.. The.. Fuck.. Is.. This?!!
-    if (transformation.isFlippedY)
-      ArcShape(start.transform(transformation.flipY(geometry.center)),
-               middle.transform(transformation.flipY(geometry.center)),
-               end.transform(transformation.flipY(geometry.center)),
+  def transform(t : TransformationMatrix) =
+      ArcShape(t.transform(center),
+               radius * t.scaleFactor,
+               startAngle, angle,
                attributes)
-    else
-      ArcShape(start.transform(transformation),
-               middle.transform(transformation),
-               end.transform(transformation),
-               attributes)
-  }
 
 }
 
@@ -67,8 +56,12 @@ object ArcShape
    * @param start  The vector where the arc starts (CCW).
    * @param middle  The middle vector of the arc.
    * @param end  The vector where the arc stops (CCW).
+   * TODO: Deprecate?
    */
-  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) = new ArcShape(start, middle, end, Attributes())
+  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : ArcShape = {
+    val a = Arc2D(start, middle, end)
+    apply(a.center, a.radius, a.startAngle, a.angle)
+  }
 
   /**
    * @param center  The center of the arc.
@@ -77,11 +70,8 @@ object ArcShape
    * @param endAngle  The end angle in degrees CCW from 3 o'clock.
    * TODO: Revise and test the middle coordinate.
    */
-  def apply(center : Vector2D, radius : Double, startAngle : Double, endAngle : Double) = {
-    val start = center + Vector2D(math.cos(math.toRadians(startAngle)), math.sin(math.toRadians(startAngle))) * radius
-    val middle = center + Vector2D(math.cos(math.toRadians((endAngle + startAngle)*0.5)), math.sin(math.toRadians((endAngle + startAngle)*0.5))) * radius
-    val end = center + Vector2D(math.cos(math.toRadians(endAngle)), math.sin(math.toRadians(endAngle))) * radius
-    new ArcShape(start, middle, end, Attributes())    
+  def apply(center : Vector2D, radius : Double, startAngle : Double, endAngle : Double) : ArcShape = {
+    new ArcShape(center, radius, startAngle, endAngle, Attributes())
   }
 
 }

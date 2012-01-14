@@ -13,7 +13,6 @@ package com.siigna.app.controller
 import collection.mutable.{Queue, Stack}
 
 import com.siigna.app.controller.command._
-import com.siigna.app.view.ModuleInterface
 import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
@@ -121,6 +120,9 @@ object Control extends Thread("Siigna Controller") {
     // Give the paint-function to the interface
     module.interface.setPaint(module.paint)
 
+    // Tell the module that it's active!
+    module.isActive = true
+    
     // Return success!
     Log.success("Controller: Successfully initialized module: " + module)
     true
@@ -195,7 +197,7 @@ object Control extends Thread("Siigna Controller") {
                   module.state = s
                   Log.info("Controller: Succesfully changed the state of the active module to "+s)
                 }
-                case None => Log.debug("Controller:  Tried to change state with event "+events.head+", but no route was found.")
+                case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
               }
             } catch {
               case e => Log.error("Controller: Unexpected error in processing state map: ", e)
@@ -224,28 +226,9 @@ object Control extends Thread("Siigna Controller") {
                 "but not reacting since it's not a Module Event.")
             }
 
-            // Check for current state. If modules is ending remove the most recent module and store it's events
-            // back in the queue so the next loop returns true (and the "parent" gets a chance to act).
+            // Stop the module if it's in state 'End
             if (module.state == 'End) {
-              println("Destruction! " + module)
-              // Remove the ending module from the module stack.
-              modules.pop()
-
-              // Store the head of the event-list in the event-queue.
-              eventQueue.enqueue(events.head)
-
-              // Set the most dangerous isForwardedEvent variable!
-              isForwardedEvent = true
-
-              // Store the tail of the events in the next module in the module stack.
-              events = events.tail
-
-              // Set the new interface
-              if (!modules.isEmpty) {
-                initModule(modules.top)
-
-                Log.success("Control: Successfully ended module. Current module: "+modules.top)
-              }
+              stopModule(module)
             }
           }
         }
@@ -327,5 +310,34 @@ object Control extends Thread("Siigna Controller") {
     case e : InterruptedException => Log.info("Control has been terminated.")
     case e => Log.error("Control was terminated with unexpected error.", e)
   }}
+
+  /**
+   * Stops a module and enqueues the latest event for use in the module that takes over.
+   * In other words we remove the most recent module and store it's events back in the queue so the next
+   * control-loop if initiated and so the "parent" gets a chance to act.
+   */
+  private def stopModule(module : Module) {
+    // Tell the module that it's no longer active
+    module.isActive = false
+    
+    // Remove the ending module from the module stack.
+    modules.pop()
+
+    // Store the head of the event-list in the event-queue.
+    eventQueue.enqueue(events.head)
+
+    // Set the most dangerous isForwardedEvent variable!
+    isForwardedEvent = true
+
+    // Store the tail of the events in the next module in the module stack.
+    events = events.tail
+
+    // Set the new interface
+    if (!modules.isEmpty) {
+      initModule(modules.top)
+
+      Log.success("Control: Successfully ended module. Current module: "+modules.top)
+    }
+  }
 
 }

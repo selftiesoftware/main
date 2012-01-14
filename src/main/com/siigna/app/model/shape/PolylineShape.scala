@@ -26,13 +26,6 @@ import collection.generic.{Subtractable, Addable}
 case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
 
   /**
-   * Whether the PolylineShape is malformed (the shapes aren't connected).
-   * TODO: What to do here? Just a flag? Or a MalformedPolylineShape object? Or...?
-   * TODO: Just connect...?
-   */
-  assert(PolylineShape.isConnected(shapes), Log.error("The following PolylineShape is malformed: "+this))
-
-  /**
    * Add a single shape to the polyline.
    */
   def +: (shape : BasicShape) = copy(shapes.+:(shape))
@@ -78,16 +71,5 @@ object PolylineShape {
   }
 
   def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices :+ rect.vertices.head)
-
-  def isConnected(shapes : Seq[BasicShape]) : Boolean = if (!shapes.isEmpty) {
-    var isConnected = true
-    shapes.reduceLeft((a, b) => {
-      if (a.end != b.start) {
-        isConnected = false
-      }
-      b
-    })
-    isConnected
-  } else true
 
 }
