@@ -134,7 +134,7 @@ class EventParser {
   /**
    * Add an EventSnap to the Set. If it's already in the Set, don't do anything.
    */
-  def snapTo(snap : EventSnap) : Unit = this.snap += snap
+  def snapTo(snap : EventSnap) { this.snap += snap }
 
 }
 

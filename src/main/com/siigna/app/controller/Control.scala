@@ -171,7 +171,7 @@ object Control extends Thread("Siigna Controller") {
         if (!eventQueue.isEmpty && !modules.isEmpty) {
 
           // Check whether the event is forwarded, and thus needs to be discarded
-          if (isForwardedEvent) {
+          if (isForwardedEvent && !eventQueue.head.isInstanceOf[ModuleEvent]) {
             // Kaboom!
             eventQueue.dequeue()
             // .......
