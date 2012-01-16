@@ -47,7 +47,7 @@ object Log extends scala.util.logging.ConsoleLogger {
       lineNumber += 1
 
       // Get the error-string, if defined
-      val errorString = if (error.isDefined) " - " + error.get.getStackTrace.mkString("\n") else ""
+      val errorString = if (error.isDefined) " - " + error.get.getMessage else ""
 
       // Get the log-string  with references, if defined
       val text = if (refs.size > 0) {
