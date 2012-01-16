@@ -47,7 +47,7 @@ object Log extends scala.util.logging.ConsoleLogger {
       lineNumber += 1
 
       // Get the error-string, if defined
-      val errorString = if (error.isDefined) " - " + error.get.getStackTrace.mkString("\n") else ""
+      val errorString = if (error.isDefined) " - " + error.get.getMessage else ""
 
       // Get the log-string  with references, if defined
       val text = if (refs.size > 0) {
@@ -68,18 +68,18 @@ object Log extends scala.util.logging.ConsoleLogger {
    * Debug messages.
    */
   def debug(message : Any, refs : Any*) : Unit = format("[Debug] "+message, DEBUG, refs)
-  def debug(message : Any, e : Throwable, refs : Any*) : Unit = format(message, DEBUG, refs, Some(e))
+  def debug(message : Any, e : Throwable, refs : Any*) : Unit = format("[Debug] "+message, DEBUG, refs, Some(e))
 
   def error(message : Any, refs : Any*) : Unit = format("[Error] "+message, ERROR, refs)
-  def error(message : Any, e : Throwable, refs : Any*) : Unit = format(message, ERROR, refs, Some(e))
+  def error(message : Any, e : Throwable, refs : Any*) : Unit = format("[Error] "+message, ERROR, refs, Some(e))
 
   def info(message : Any, refs : Any*) : Unit = format("[Info] "+message, INFO, refs)
-  def info(message : Any, e : Throwable, refs : Any*) : Unit = format(message, INFO, refs, Some(e))
+  def info(message : Any, e : Throwable, refs : Any*) : Unit = format("[Info] "+message, INFO, refs, Some(e))
 
   def success(message : Any, refs : Any*) : Unit = format("[Success] "+message, SUCCESS, refs)
-  def success(message : Any, e : Throwable, refs : Any*) : Unit = format(message, SUCCESS, refs, Some(e))
+  def success(message : Any, e : Throwable, refs : Any*) : Unit = format("[Success] "+message, SUCCESS, refs, Some(e))
 
   def warning(message : Any, refs : Any*) : Unit = format("[Warning] "+message, WARNING, refs)
-  def warning(message : Any, e : Throwable, refs : Any*) : Unit = format(message, WARNING, refs, Some(e))
+  def warning(message : Any, e : Throwable, refs : Any*) : Unit = format("[Warning] "+message, WARNING, refs, Some(e))
 
 }
