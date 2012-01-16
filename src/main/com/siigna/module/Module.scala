@@ -44,6 +44,11 @@ trait Module extends Serializable {
   var interface : ModuleInterface = new ModuleInterface()
 
   /**
+   * A boolean value stating whether the module is active.
+   */
+  var isActive = false
+
+  /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.
    */
   final var state : Symbol = 'Start

@@ -13,11 +13,10 @@ package com.siigna.app.view
 
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._
-import java.awt.geom.Arc2D
+import java.awt.geom.{Arc2D => JavaArc}
 import com.siigna.app.Siigna
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape._
-import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
 import com.siigna.util.geom._
 
@@ -61,7 +60,7 @@ class Graphics(val g : Graphics2D)
     val selected = false
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
     val transformedShape = shape.transform(transformation)
-
+    
     if (attributes.boolean("Visible") != Some(false)) {
       transformedShape match {
         case s : ArcShape         => {
@@ -138,7 +137,7 @@ class Graphics(val g : Graphics2D)
   {
     // We're using this instead of the function 'drawArc', since Arc2D is using
     // doubles and are more precise.
-    val arc2d = new Arc2D.Double(center.x - radius, center.y - radius, radius * 2, radius * 2, startAngle, arcAngle, Arc2D.OPEN)
+    val arc2d = new JavaArc.Double(center.x - radius, center.y - radius, radius * 2, radius * 2, startAngle, arcAngle, JavaArc.OPEN)
     g draw(arc2d)
   }
 
