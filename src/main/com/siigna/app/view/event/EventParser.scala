@@ -13,22 +13,30 @@ package com.siigna.app.view.event
 
 import java.awt.event.{KeyEvent => AWTKeyEvent}
 
-import scala.collection.mutable.HashSet
 import com.siigna.app.model.Model
 import com.siigna.app.Siigna
-import com.siigna.app.model.shape.{ImmutableShape, Shape}
+import com.siigna.app.model.shape.{ImmutableShape}
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.view.Graphics
 
 /**
- * An event-parser that analyses a given list of events, and returns an
+ * An <code>EventParser</code> that analyses a given list of events, and returns an
  * optimized and edited version in accordance with the given track and snap
  * settings.
+ * <br />
+ * For each module a <code>EventParser</code> is attached, which filters every event
+ * that comes in. The events are not filtered if the module is not the last in the module-chain. 
+ * Read more about the [[com.siigna.app.view.ModuleInterface]] and the [[com.siigna.app.controller.Control]].
  */
 class EventParser {
 
   /**
-   * A boolean value of whether the EventParser is enable or not.
+   * The default snap-modules.
+   */
+  var defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
+  
+  /**
+   * A boolean value of whether the EventParser is enable or not. Defaults to true.
    */
   private var enabled : Boolean = true
 
@@ -48,7 +56,7 @@ class EventParser {
   var margin : Double = 5
 
   /**
-   * The current EventTracker
+   * The current EventTracker.
    */
   private var track : EventTrack = Track
 
@@ -58,12 +66,24 @@ class EventParser {
    * we allow the user to have several snap-settings with a HashSet.
    * Defaults to: CenterPoints, MidPoints and EndPoints.
    */
-  private var snap = HashSet[EventSnap](CenterPoints, MidPoints, EndPoints)
+  private var snap = defaultSnap
 
   /**
-   * Disables the EventParser.
+   * Clears any snap-modules that is not a part of the default snap set.
    */
-  def disable = enabled = false
+  def clearSnap() {
+    snap = defaultSnap
+  }
+
+  /**
+   * Disables the EventParser. The EventParser is enabled per default.
+   */
+  def disable() { enabled = false }
+
+  /**
+   * Enables the EventParser. The EventParser is enabled per default.
+   */
+  def enable() { enabled = true }
 
   /**
    * Examines whether the EventParser is tracking or not.
@@ -71,12 +91,8 @@ class EventParser {
   def isTracking = track.isTracking
 
   /**
-   * Enables the EventParser.
-   */
-  def enable = enabled = true
-
-  /**
-   * Let the track and the snappers paint.
+   * Let the track and the snappers paint. This is handy if a track, for instance, wishes to show some kind
+   * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
     Track.paint(graphics, transformation)
@@ -132,9 +148,23 @@ class EventParser {
   } else list
 
   /**
-   * Add an EventSnap to the Set. If it's already in the Set, don't do anything.
+   * Stop snapping to the given event snap. If the module is nowhere to be found in the snap
+   * Seq, nothing happens.
    */
-  def snapTo(snap : EventSnap) { this.snap += snap }
+  def removeSnap(snap : EventSnap) {
+    this.snap = this.snap.filterNot(_ == snap)
+  }
+
+  /**
+   * Add an EventSnap to the end of the event parser. Every event passing through the event-parser will
+   * perform the snap-functionality given in the snap.
+   */
+  def snapTo(snap : EventSnap) { this.snap = this.snap :+ snap }
+
+  /**
+   * Track to a given track module.
+   */
+  def trackTo(track : EventTrack) { this.track = track }
 
 }
 
