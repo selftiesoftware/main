@@ -191,7 +191,8 @@ trait View extends Applet {
       try {
         Siigna.paint(graphics, transformation)
       } catch {
-        case e => Log.error("View: Error while painting the interfaces.", e)
+        case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.", e)
+        case e => Log.error("View: Error while painting the modules.", e)
       }
       val v = (Vector2D(150,-21),Vector2D(158,0),Vector2D(150,21))
 
