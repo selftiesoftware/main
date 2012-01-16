@@ -170,15 +170,30 @@ object Control extends Thread("Siigna Controller") {
         // Checks that there's an even waiting to be processed
         if (!eventQueue.isEmpty && !modules.isEmpty) {
 
-          // Check whether the event is forwarded, and thus needs to be discarded
-          if (isForwardedEvent && !eventQueue.head.isInstanceOf[ModuleEvent]) {
-            // Kaboom!
-            eventQueue.dequeue()
-            // .......
+          // If there is a forwarded event and the head of the queue is a ModuleEvent
+          // the ModuleEvent has been placed in front of the forwarded Event
+          // - thus discard the event before the head
+          if (isForwardedEvent) {
+            if (eventQueue.head.isInstanceOf[ModuleEvent]) {
+              // Save the module event
+              val moduleEvent = eventQueue.dequeue()
+
+              // Destroy the other event
+              eventQueue.dequeue()
+
+              // Enqueue the moduleEvent
+              eventQueue.enqueue(moduleEvent)
+
+            // Check whether the event is forwarded, and thus needs to be discarded
+            } else {
+              // Kaboom!
+              eventQueue.dequeue()
+              // .......
+
+            }
 
             // Stop the inhumane destruction of events
             isForwardedEvent = false
-
           // Otherwise we're good to go!
           } else {
             // Retrieve event
