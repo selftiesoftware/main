@@ -68,6 +68,11 @@ object Siigna extends Interface {
   var screen : Rectangle2D = Rectangle(Vector(0, 0), Vector(0, 0))
 
   /**
+   * The version of Siigna.
+   */
+  val version = "v. 0.1.12.2"
+
+  /**
    * The graphical environment for Siigna.
    */
   private var view : Option[View] = None
