@@ -20,12 +20,13 @@ import java.lang.String
     //(data) field declarations:
     var pointId: Int                =0
     var query: String               ="0"
+    //val createStatement: Statement = PgsqlConnectionInfo().GetConnectionAndStatement()
     var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     var createStatement: Statement = databaseConnection.createStatement()
 
     // methods:
 
-    //Get point:
+    //Save point: Modtager x, y og z-koordinater (Int), og returnerer pointId (Int)
     def postgresSavePoint (xCoordinateInt: Int, yCoordinateInt: Int, zCoordinateInt: Int): (Int) = {
       //Lav punkterne om fra integers til strenge
       val xCoordinateString: String = xCoordinateInt.toString
@@ -36,30 +37,27 @@ import java.lang.String
               "FROM point " ++
               "WHERE x_coordinate = " ++ xCoordinateString ++ " AND y_coordinate = " ++ yCoordinateString ++ " AND z_coordinate = " ++ zCoordinateString
       var queryResult: ResultSet = createStatement.executeQuery(query)
-      queryResult.next()
-      pointId = queryResult.getInt("point_id")
-      //Hvis det ikke findes, indsættes det i databasen, og pointId fra foregående søgning returneres
-      if (!queryResult.next) {
+      if (queryResult.next()) {pointId = queryResult.getInt("point_id")
+      } else {
+      //Hvis det ikke findes, indsættes det i databasen, og pointId findes og returneres
         query = "INSERT INTO point " ++
                 "(x_coordinate, y_coordinate, z_coordinate) " ++
                 "VALUES " ++
                 "(" ++ xCoordinateString ++ "," ++ yCoordinateString ++ "," ++ zCoordinateString ++ ")"
         createStatement.execute(query)
-        //Og point_id findes og returneres
         query = "SELECT point_id " ++
                 "FROM point " ++
                 "WHERE x_coordinate = " ++ xCoordinateString ++ " AND y_coordinate = " ++ yCoordinateString ++ " AND z_coordinate = " ++ zCoordinateString
         queryResult = createStatement.executeQuery(query)
-        queryResult.next()
-        pointId = queryResult.getInt("point_id")
-        println ("her")
+        if (queryResult.next()) pointId = queryResult.getInt("point_id")
       }
       //Luk forbindelsen
-      databaseConnection.close()
+      createStatement.close()
 
       //Data, der returneres
       (pointId)
     }
+
 
    /*
     //Testfunktion til illustration:
