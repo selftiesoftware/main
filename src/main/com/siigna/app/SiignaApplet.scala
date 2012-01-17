@@ -1,3 +1,5 @@
+package com.siigna.app
+
 /*
  * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -8,12 +10,11 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-package com.siigna.app.view
 
 import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
 
-import com.siigna.app.Siigna
 import com.siigna.app.controller.Control
+import com.siigna.app.view.View
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
@@ -80,10 +81,10 @@ class SiignaApplet extends View
   override def destroy() {
     // Put down the paint loop
     paintLoop.interrupt()
-    
+
     // Stop the controller by interruption so we're sure the controller shuts it
     Control.interrupt()
-    
+
     // Stop the applet
     super.destroy()
 

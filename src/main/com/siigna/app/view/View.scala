@@ -193,9 +193,6 @@ trait View extends Applet {
         case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.", e)
         case e => Log.error("View: Error while painting the modules.", e)
       }
-      val v = (Vector2D(150,-21),Vector2D(158,0),Vector2D(150,21))
-
-      graphics draw com.siigna.app.model.shape.ArcShape(v._1, v._2, v._3).transform(Siigna.virtual)
 
       // Draw the image we get from the print-method on the view.
       // Parameters are (Image img, int x, int y, ImageObserver observer)
