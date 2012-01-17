@@ -34,7 +34,7 @@ object Log extends scala.util.logging.ConsoleLogger {
    * The line-number.
    */
   private var lineNumber = 0
-
+  
   val ERROR   = 1
   val WARNING = 2
   val INFO    = 4
@@ -42,13 +42,13 @@ object Log extends scala.util.logging.ConsoleLogger {
   val SUCCESS = 16
 
   private def format(message : Any, messageLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
-    if ((level & messageLevel) == messageLevel) { // TODO: Is this working?
+    if ((level & messageLevel) == messageLevel) {
       // Add to the line-number
       lineNumber += 1
 
-      // Get the error-string, if defined
-      val errorString = if (error.isDefined) " - " + error.get.getMessage else ""
-
+      // Get the error-string, if defined, as the 5 latest errors
+      val errorString = if (error.isDefined) " \n[StackTrace]: " + error.get.getStackTrace.slice(0, 5).mkString("\n    ") else ""
+      
       // Get the log-string  with references, if defined
       val text = if (refs.size > 0) {
          message.toString + " " + refs.mkString(", ") + errorString
@@ -61,25 +61,25 @@ object Log extends scala.util.logging.ConsoleLogger {
   /**
    * Logs messages as info by default.
    */
-  def apply(message : Any, refs : Any*) : Unit = info(message, refs)
-  def apply(message : Any, e : Throwable, refs : Any*) : Unit = info(message, e, refs)
+  def apply(message : Any) { info(message) }
+  def apply(message : Any, e : Throwable) { info(message, e) }
 
   /**
    * Debug messages.
    */
-  def debug(message : Any, refs : Any*) : Unit = format("[Debug] "+message, DEBUG, refs)
-  def debug(message : Any, e : Throwable, refs : Any*) : Unit = format("[Debug] "+message, DEBUG, refs, Some(e))
+  def debug(message : Any, refs : Any*) { format("[Debug] "+message, DEBUG, refs) }
+  def debug(message : Any, e : Throwable, refs : Any*) { format("[Debug] "+message, DEBUG, refs, Some(e)) }
 
-  def error(message : Any, refs : Any*) : Unit = format("[Error] "+message, ERROR, refs)
-  def error(message : Any, e : Throwable, refs : Any*) : Unit = format("[Error] "+message, ERROR, refs, Some(e))
+  def error(message : Any, refs : Any*) { format("[Error] "+message, ERROR, refs) }
+  def error(message : Any, e : Throwable, refs : Any*) { format("[Error] "+message, ERROR, refs, Some(e)) }
 
-  def info(message : Any, refs : Any*) : Unit = format("[Info] "+message, INFO, refs)
-  def info(message : Any, e : Throwable, refs : Any*) : Unit = format("[Info] "+message, INFO, refs, Some(e))
+  def info(message : Any, refs : Any*) { format("[Info] "+message, INFO, refs) }
+  def info(message : Any, e : Throwable, refs : Any*) { format("[Info] "+message, INFO, refs, Some(e)) }
 
-  def success(message : Any, refs : Any*) : Unit = format("[Success] "+message, SUCCESS, refs)
-  def success(message : Any, e : Throwable, refs : Any*) : Unit = format("[Success] "+message, SUCCESS, refs, Some(e))
+  def success(message : Any, refs : Any*) { format("[Success] "+message, SUCCESS, refs) }
+  def success(message : Any, e : Throwable, refs : Any*) { format("[Success] "+message, SUCCESS, refs, Some(e)) }
 
-  def warning(message : Any, refs : Any*) : Unit = format("[Warning] "+message, WARNING, refs)
-  def warning(message : Any, e : Throwable, refs : Any*) : Unit = format("[Warning] "+message, WARNING, refs, Some(e))
+  def warning(message : Any, refs : Any*) { format("[Warning] "+message, WARNING, refs) }
+  def warning(message : Any, e : Throwable, refs : Any*) { format("[Warning] "+message, WARNING, refs, Some(e)) }
 
 }
