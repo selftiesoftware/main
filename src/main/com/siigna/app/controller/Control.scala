@@ -174,7 +174,7 @@ object Control extends Thread("Siigna Controller") {
           // the ModuleEvent has been placed in front of the forwarded Event
           // - thus discard the event before the head
           if (isForwardedEvent) {
-            if (eventQueue.head.isInstanceOf[ModuleEvent]) {
+            if (eventQueue.head.isInstanceOf[ModuleEvent] && eventQueue.size > 1) {
               // Save the module event
               val moduleEvent = eventQueue.dequeue()
 
