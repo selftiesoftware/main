@@ -18,10 +18,10 @@ import java.awt.image.VolatileImage
 import com.siigna.util.Implicits._
 import com.siigna.util.collection.Preferences
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.PolylineShape
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{Vector2D, Rectangle, Vector}
+import com.siigna.app.model.shape.{TextShape, PolylineShape}
+import com.siigna.util.geom.{TransformationMatrix, Vector2D, Rectangle, Vector}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -101,7 +101,7 @@ trait View extends Applet {
   */
   def draw(graphicsPanel : AWTGraphics) { try {
     // Create a new transformation-matrix
-    val transformation = Siigna.virtual
+    val transformation : TransformationMatrix = Siigna.virtual
 
     // Save the size of the view.
     val size = getSize
@@ -145,6 +145,10 @@ trait View extends Applet {
       // Draw a black border
       val p = PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color)
       graphics.draw(p)
+
+      // Draw a version number
+      val v = TextShape(Siigna.version, Vector2D(size.width - 80, size.height - 50), 10)
+      graphics.draw(v)
 
       // Draw the Model.
       // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
