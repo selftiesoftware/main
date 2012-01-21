@@ -49,12 +49,12 @@ class PgsqlSaveShapeLine {
           resultSequence = resultSequence :+ queryResult.getInt("shape_id")
         }
 
-      //Finder den shape, der indeholder de to punkter, og er af typen linje (type-id 1), hvis den findes
+      //Finder den shape, der indeholder de to punkter, og er af typen linje (type-id 2), hvis den findes
         var i:Int =0
         while (resultSequence.isDefinedAt(i)) {
           query =   "SELECT shape_id " +
                     "FROM shape " +
-                    "WHERE shape_type = 1 " +
+                    "WHERE shape_type = 2 " +
                     "AND shape_id = " + resultSequence(i).toString
           val queryResult: ResultSet = createStatement.executeQuery(query)
           if (queryResult.next()) shapeId = Some(queryResult.getInt("shape_id"))
@@ -67,7 +67,7 @@ class PgsqlSaveShapeLine {
       query =       "INSERT INTO shape " +
                     "(shape_type) " +
                     "VALUES" +
-                    "(1)" +
+                    "(2)" +
                     "RETURNING shape_id"
       val queryResult: ResultSet = createStatement.executeQuery(query)
       if (queryResult.next()) shapeId = Some(queryResult.getInt("shape_id"))
