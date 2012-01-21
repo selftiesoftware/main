@@ -19,8 +19,6 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
   type T = Line2D
 
-  val center = (p1 + p2) / 2
-
   def boundary = Rectangle(p1, p2)
 
   /**
