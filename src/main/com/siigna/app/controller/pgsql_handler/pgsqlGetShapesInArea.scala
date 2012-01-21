@@ -14,13 +14,16 @@ class pgsqlGetShapesInArea {
 
     //SaveShapeLine: Modtager     x- og y-koordinat (Int), (default: 0,0)
     //                            samt afstand fra centerpunkt i x- og y-retning, der skal søges
-    // og returnerer en sequence af: (Markør for ny shape (0), shapeType (Int), shapeId (Int), pointId'er (Int))
+    // og returnerer en sequence af: (shapeType (Int),shapeId (Int))
     def getShapesInArea (xCoordinate: Int, yCoordinate: Int, xDistance: Int, yDistance: Int) = {
 
       // Field variable definition
       var pointId : Option[Int] = None
       var shapeId : Option[Int] = None
       var resultSequence: Seq[Int] = Seq()
+      var resultSequencePointId: Seq[Int] = Seq()
+      var resultSequenceShapeId: Seq[Int] = Seq()
+      var resultSequenceShapeType: Seq[Int] = Seq()
 
       var query: String               ="0"
 
@@ -36,49 +39,65 @@ class pgsqlGetShapesInArea {
                   " AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") "
         val queryResult: ResultSet = createStatement.executeQuery(query)
         while (queryResult.next()) {
-          resultSequencePointId = resultSequence :+ queryResult.getInt("shape_id")
+          resultSequencePointId = resultSequencePointId :+ queryResult.getInt("point_id")
         }
 
-        //Finder de linjer, der indeholder punkterne
+      //Finder de shapes, der indeholder punkterne
         var i:Int =0
-        while (resultSequencePointId.isDefinedAt(i)) {
-          query =   "SELECT shape_id " +
-            "FROM shape_point_relation " +
-            "WHERE shape_type = 2 " +
-            "AND point_id = " + resultSequence(i).toString
-          val queryResult: ResultSet = createStatement.executeQuery(query)
-          while (queryResult.next()) {
-            resultSequenceShapeId = resultSequence :+ queryResult.getInt("shape_id")
+          query =       "SELECT DISTINCT shape_id " +
+                        "FROM shape_point_relation " +
+                        "WHERE "
+            while (resultSequencePointId.isDefinedAt(i)) {
+              if (i==0) {
+                query = query +
+                        "point_id = " +
+                        resultSequencePointId(i).toString
+              } else {
+                query = query +
+                        "OR point_id = " +
+                        resultSequencePointId(i).toString
+              }
+              i=i+1
+            }
+          val queryResult2: ResultSet = createStatement.executeQuery(query)
+          while (queryResult2.next()) {
+            resultSequenceShapeId = resultSequenceShapeId :+ queryResult2.getInt("shape_id")
           }
+
+      //Finder shape_id for shapsene:
+      i = 0
+      query =       "SELECT shape_type " +
+                    "FROM shape " +
+                    "WHERE "
+      while (resultSequenceShapeId.isDefinedAt(i)) {
+        if (i==0) {
+          query = query +
+                    "shape_id = " +
+            resultSequenceShapeId(i).toString
+        } else {
+          query = query +
+                    "OR shape_id = " +
+            resultSequenceShapeId(i).toString
         }
-
-
-      /*
-      //Hvis shapen ikke findes, gemmes shapen, og shape-id returneres
-      if (!shapeId.isDefined) {
-        query =       "INSERT INTO shape " +
-          "(shape_type) " +
-          "VALUES" +
-          "(2)" +
-          "RETURNING shape_id"
-        val queryResult: ResultSet = createStatement.executeQuery(query)
-        if (queryResult.next()) shapeId = Some(queryResult.getInt("shape_id"))
-
-        query =       "INSERT INTO shape_point_relation " +
-          "(shape_id, point_id) " +
-          "VALUES (" + shapeId.get.toString + "," + pointId1.get.toString + ") "
-        createStatement.execute(query)
-        query =       "INSERT INTO shape_point_relation " +
-          "(shape_id, point_id) " +
-          "VALUES (" + shapeId.get.toString + "," + pointId2.get.toString + ")"
-        createStatement.execute(query)
+        i=i+1
       }
+      val queryResult3: ResultSet = createStatement.executeQuery(query)
+      while (queryResult3.next()) {
+        resultSequenceShapeType = resultSequenceShapeType :+ queryResult3.getInt("shape_type")
+      }
+
+      i=0
+      while (resultSequenceShapeType.isDefinedAt(i)) {
+        resultSequence = resultSequence :+ resultSequenceShapeType(i)
+        resultSequence = resultSequence :+ resultSequenceShapeId(i)
+        i=i+1
+      }
+
       //Luk forbindelsen
       createStatement.close()
 
       //Data, der returneres
 
-      (shapeId.get,pointId1.get,pointId2.get)
-      */
+      (resultSequence)
     }
-  }
+}
