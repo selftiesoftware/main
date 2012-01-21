@@ -63,7 +63,14 @@ trait Geometry {
  */
 trait Geometry2D extends Geometry {
 
+  /**
+   * The geometry type to be used in concrete implementations.
+   */
   type T <: Geometry2D
+
+  /**
+   * The vector type of this dimension.
+   */
   type V = Vector2D
 
   /**
@@ -75,6 +82,11 @@ trait Geometry2D extends Geometry {
    * The boundary of the shape.
    */
   override def boundary : Rectangle2D
+
+  /**
+   * The center of the shape.
+   */
+  override def center = boundary.center
 
   /**
    * Determines the distance from the geometry to an arc.

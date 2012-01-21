@@ -19,8 +19,6 @@ import collection.generic.{Subtractable, Addable}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs.
- * <b>Note:</b> PolylineShapes needs to consist of elements that's connected! If not, the PolylineShape is flagged as
- * malformed and the log outputs an error.
  * TODO: Do an apply(shapes : BasicShape*)..
  */
 case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
@@ -40,8 +38,8 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
    */
   def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
 
-  // TODO: Write this
-  def geometry = shapes(0).geometry
+  // TODO: Fix this
+  val geometry = shapes(0).geometry
 
   def repr = this
 
@@ -55,7 +53,6 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
 }
 
 object PolylineShape {
-
 
   def empty = new PolylineShape(Seq(), Attributes())
 

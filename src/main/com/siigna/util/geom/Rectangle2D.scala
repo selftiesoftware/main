@@ -43,7 +43,7 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   /**
    * The center of the rectangle.
    */
-  lazy val center = (topLeft + bottomRight) / 2
+  override val center = (topLeft + bottomRight) / 2
 
   /**
    * The boundary of the rectangle. In this case returns itself.
