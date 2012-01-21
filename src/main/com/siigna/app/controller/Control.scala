@@ -306,6 +306,10 @@ object Control extends Thread("Siigna Controller") {
           case Preload(name, classPath, filePath) => {
             moduleBank.preload(name, classPath, filePath)
           }
+          // Send an event into the event-stream
+          case Send(event) => {
+            eventQueue enqueue event
+          }
           // Match unknown commands
           case unknown => Log.warning("Controller received unknown command: "+unknown)
         }
