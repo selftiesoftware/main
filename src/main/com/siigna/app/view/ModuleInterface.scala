@@ -62,6 +62,11 @@ class ModuleInterface extends Interface {
   }
 
   /**
+   * Examines whether the <code>ModuleInterface</code> is chaining to another module.
+   */
+  def isChained = chain.isDefined
+
+  /**
    * Paints the interface. I. e. paint the filters, current paint-function and displays.
    * If the interface is chaining to another interface then we let that interface paint.
    */
