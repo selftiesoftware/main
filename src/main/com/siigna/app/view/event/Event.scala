@@ -20,7 +20,7 @@ trait Event
   /**
    * A symbolic name for a given event.
    */
-  val symbol : Symbol
+  def symbol : Symbol
 
 }
 
