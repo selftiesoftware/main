@@ -24,7 +24,7 @@ class pgsqlGetLine {
     var x2coordinate : Option[Int] = None
     var y2coordinate : Option[Int] = None
     var z2coordinate : Option[Int] = None
-    var query: String          ="0"
+    var query: String              ="0"
 
     //Henter objektet med forbindelsesoplysninger
     //val createStatement: Statement = PgsqlConnectionInfo.GetConnectionAndStatement()
