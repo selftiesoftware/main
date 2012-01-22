@@ -70,7 +70,7 @@ object Siigna extends Interface {
   /**
    * The version of Siigna.
    */
-  val version = "v. 0.1.12.2"
+  val version = "v. 0.1.12.4"
 
   /**
    * The graphical environment for Siigna.
