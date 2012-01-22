@@ -14,8 +14,8 @@ package com.siigna.app.model.shape
 import com.siigna._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Geometry, Vector}
 import collection.generic.{Subtractable, Addable}
+import util.geom.{PolylineGeometry, Geometry, Vector}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs.
@@ -39,7 +39,7 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
   def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
 
   // TODO: Fix this
-  val geometry = shapes(0).geometry
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
 
   def repr = this
 
