@@ -54,11 +54,6 @@ trait Module extends Serializable {
   final var state : Symbol = 'Start
 
   /**
-   * A shorthand reference to the Interface's display.
-   */
-  final def display(display : Display) { interface.display(display) }
-
-  /**
    * The method defines the event handler the module want to use. It is sent
    * to the controller that "walks" the state diagram and executes actions
    * associated with each state.
