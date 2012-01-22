@@ -14,13 +14,11 @@ package com.siigna.app.model.shape
 import com.siigna._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Geometry, Vector}
 import collection.generic.{Subtractable, Addable}
+import util.geom.{PolylineGeometry, Geometry, Vector}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs.
- * <b>Note:</b> PolylineShapes needs to consist of elements that's connected! If not, the PolylineShape is flagged as
- * malformed and the log outputs an error.
  * TODO: Do an apply(shapes : BasicShape*)..
  */
 case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
@@ -40,8 +38,8 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
    */
   def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
 
-  // TODO: Write this
-  def geometry = shapes(0).geometry
+  // TODO: Fix this
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
 
   def repr = this
 
