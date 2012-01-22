@@ -12,9 +12,9 @@ import java.sql._
 
 class pgsqlGetShapesInArea {
 
-    //SaveShapeLine: Modtager     x- og y-koordinat (Int), (default: 0,0)
-    //                            samt afstand fra centerpunkt i x- og y-retning, der skal søges
-    // og returnerer en sequence af: (shapeType (Int),shapeId (Int))
+    //GetShapesInArea: Modtager     x- og y-koordinat (Int), (default: 0,0)
+    //                               samt afstand fra centerpunkt i x- og y-retning, der skal søges
+    // og returnerer en sequence af: (shapeType1 (Int),shapeId1 (Int), shapeType2 (Int),shapeId2 (Int)...,...,...)
     def getShapesInArea (xCoordinate: Int, yCoordinate: Int, xDistance: Int, yDistance: Int) = {
 
       // Field variable definition
@@ -43,10 +43,10 @@ class pgsqlGetShapesInArea {
         }
 
       //Finder de shapes, der indeholder punkterne
-        var i:Int =0
           query =       "SELECT DISTINCT shape_id " +
                         "FROM shape_point_relation " +
                         "WHERE "
+            var i:Int =0
             while (resultSequencePointId.isDefinedAt(i)) {
               if (i==0) {
                 query = query +
@@ -76,7 +76,7 @@ class pgsqlGetShapesInArea {
             resultSequenceShapeId(i).toString
         } else {
           query = query +
-                    "OR shape_id = " +
+                    " OR shape_id = " +
             resultSequenceShapeId(i).toString
         }
         i=i+1
