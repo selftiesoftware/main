@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
@@ -273,9 +273,14 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
  */
 object Rectangle2D {
 
-  import java.lang.Double.NaN
+  val NaN = java.lang.Double.NaN
 
-  def empty = new Rectangle2D(NaN, NaN, NaN, NaN)
+  def empty = EmptyRectangle2D
+
+  /**
+   * An empty rectangle.
+   */
+  object EmptyRectangle2D extends Rectangle2D(NaN, NaN, NaN, NaN)
 
   def apply(v1 : Vector2D, v2 : Vector2D) =
     new Rectangle2D(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.max(v1.x, v2.x), math.max(v1.y, v2.y))

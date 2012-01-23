@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
@@ -25,8 +25,6 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p3 = Vector2D(5, 0)
 
     Arc2D.findCenterPoint(p1, p2, p3) should equal (Vector2D(0, 0))
-
-    // TODO: Test more!
   }
 
   test("The ability to calculate the angle-span of an arc from two given angles") {
