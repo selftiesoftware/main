@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011. Siigna is released under the creative common license by-nc-sa. You are free
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
@@ -112,7 +112,7 @@ object Leaf {
     val size = 0
     override val toString = "Empty Leaf"
     val traversable = Iterable.empty[(String, Rectangle2D)]
-    def updated(elem : (String, Rectangle2D)) = this
+    def updated(elem : (String, Rectangle2D)) = throw new UnsupportedOperationException("Unable to update an element on an empty leaf.")
     lazy val worst = Rectangle2D.empty
   }
 
@@ -123,7 +123,7 @@ object Leaf {
     def add(elem : (String, Rectangle2D)) = new Leaf2(key, value, elem._1, elem._2, branchFactor, ordering)
     def apply(query : Rectangle2D) = if (mbr.intersects(query)) Traversable(key) else Traversable.empty
     def isBetter(query : Rectangle2D) = ordering.lt(worst, value)
-    val mbr = value.boundary
+    val mbr = value
     def remove(elem : String) = if (value.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
     val size = 1
     override val toString = "Leaf[ " + key + " -> " + value + " ]"
