@@ -14,6 +14,7 @@ package com.siigna.app.model.shape
 import com.siigna.app.Siigna
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Rectangle2D, Vector2D}
+import com.siigna.app.view.View
 
 /**
  * The highest trait for objects that are shape-like in the hierarchy. This includes having a boundary, a distance to a
@@ -53,7 +54,7 @@ trait Shape {
    * Calculates the closest distance to the shape using the views current zoom
    * scale.
    */
-  def distanceTo(point : Vector2D) : Double = distanceTo(point, Siigna.zoom)
+  def distanceTo(point : Vector2D) : Double = distanceTo(point, View.zoom)
 
   /**
    * Calculates the closest distance to the shape in the given scale.
