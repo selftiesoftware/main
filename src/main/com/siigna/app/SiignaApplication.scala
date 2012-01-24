@@ -60,6 +60,7 @@ class ApplicationWindow extends Frame
   add(applet)
   setTitle("Siigna")
   applet.init()
+
   // Setup event handler for when the window is closed (user press the X
   // button). In this case we dispose the window, which in the end terminates
   // the program.

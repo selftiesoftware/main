@@ -13,7 +13,7 @@ package com.siigna.app.view.event
 
 import com.siigna.app.model.shape.{ImmutableShape}
 import com.siigna.util.geom.Vector2D
-import com.siigna.app.Siigna
+import com.siigna.app.view.View
 
 /**
  * A hook for parsing points that snaps to center-points on objects.
@@ -28,7 +28,7 @@ case object CenterPoints extends EventSnap {
   def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       val res = model.map(_.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
-      if (res.distanceTo(point) * Siigna.zoom <= 10) {
+      if (res.distanceTo(point) * View.zoom <= 10) {
         res
       }
       else point
