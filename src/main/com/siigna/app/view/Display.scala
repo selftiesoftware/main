@@ -17,10 +17,19 @@ import com.siigna.app.Siigna
 import com.siigna.util.Implicits._
 
 /**
- * The overall trait for displays.
- * TODO: Insert fade-effect: end-time - start-time 
+ * A 'Display' can display information on the screen.
  */
 trait Display {
+
+  /**
+   * The background-color of the message, defaults to a black color with 10% transparency.
+   */
+  var backgroundColor = new Color(0f, 0f, 0f, 0.1f)
+
+  /**
+   * A flag that signals whether the Display is disabled or otherwise ready to be discarded.
+   */
+  def isEnabled : Boolean
 
   /**
    * Paints on top of a given Graphics element.
@@ -30,11 +39,10 @@ trait Display {
   /**
    * Paints a default frame with a given width and height
    */
-  def paintFrame(graphics : Graphics, width : Int, height : Int) {
+  def paintFrame(graphics : Graphics, width : Int, height : Int, color : Color = backgroundColor) {
     val center = Siigna.center
-    graphics setColor new Color(0f, 0f, 0f, 0.1f)
+    graphics setColor color
     graphics.g.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
-    graphics setColor Color.white
   }
 
 }
