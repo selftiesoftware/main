@@ -103,11 +103,13 @@ object Control extends Thread("Siigna Controller") {
    * interface to the other interfaces (among other things this is the chain for painting -
    * see the <code>Interface</code> trait for more info.
    *
+   * @param module  The module to initialize.
+   * @param state  The state to start the module in. Defaults to 'Start
    * @return A Boolean value indicating whether the module was successfully initialized.
    */
-  private def initModule(module : Module) : Boolean = try {
+  private def initModule(module : Module, state : Symbol = 'Start) : Boolean = try {
     // Set the state to start!
-    module.state = 'Start
+    module.state = state
 
     // Chain the interface higher up in the hierarchy with the new interface
     // or set the active interface in Siigna if the interface hasn't been defined
@@ -119,6 +121,10 @@ object Control extends Thread("Siigna Controller") {
 
     // Give the paint-function to the interface
     module.interface.setPaint(module.paint)
+
+    // Unchain the module if it happens to be chained
+    if (module.interface.isChained)
+      module.interface.unchain()
 
     // Tell the module that it's active!
     module.isActive = true
@@ -353,7 +359,7 @@ object Control extends Thread("Siigna Controller") {
 
     // Set the new interface
     if (!modules.isEmpty) {
-      initModule(modules.top)
+      initModule(modules.top, modules.top.state)
 
       Log.success("Control: Successfully ended module. Current module: "+modules.top)
     }
