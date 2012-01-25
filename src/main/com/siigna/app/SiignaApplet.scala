@@ -13,14 +13,15 @@ package com.siigna.app
 
 import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
 
+import java.applet.Applet
 import com.siigna.app.controller.Control
-import com.siigna.app.view.View
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
-import java.awt.Dimension
 import com.siigna.util.geom.{Vector2D, Rectangle}
 import java.lang.Thread
+import java.awt.{BorderLayout, Dimension}
+import view.View
 
 /**
  * The main class of Siigna.
@@ -31,56 +32,20 @@ import java.lang.Thread
  * the modules to paint additional graphics. The modules do not have direct access to
  * the view, but the <code>Interface</code> is designed to utilize access to it.
  */
-class SiignaApplet extends View
-{
+class SiignaApplet extends Applet {
 
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
   private var mouseButtonRight  = false
 
-  /**
-   * The active rendering-loop. Avoids paint-events from native Java.
-   * See: <a href="http://download.oracle.com/javase/tutorial/fullscreen/rendering.html">download.oracle.com/javase/tutorial/fullscreen/rendering.html</a>.
-   */
-  private val paintLoop = new Thread("PaintLoop") {
-    override def run() { try {
-      var init = false;
-      while(true) {
-
-        // This is added inside the loop to make sure siigna's painting
-        // TODO: Find out why this is needed!
-        if (!init) {
-          Log.success("View: Initiating paint-loop.")
-          init = true
-        }
-
-        // Start the paint-loop
-        if (isShowing) {
-          val graphics = getGraphics;
-          if (graphics != null) {
-            draw(graphics)
-            graphics.dispose()
-          } else {
-            Log.debug("View: Could not create graphics-object.")
-          }
-        }
-
-        // Terminate the thread if it's been interrupted
-        if (Thread.currentThread().isInterrupted)
-          throw new InterruptedException()
-      }
-    } catch {
-      case e : InterruptedException => Log.info("View has been terminated.")
-      case e => Log.error("View has been terminated with unexpected error.", e)
-    } }
-  }
+  private val paintThread = new Thread(View, "Siigna view")
 
   /**
    * Closes down relevant actors and destroys the applet.
    */
   override def destroy() {
     // Put down the paint loop
-    paintLoop.interrupt()
+    paintThread.interrupt()
 
     // Stop the controller by interruption so we're sure the controller shuts it
     Control.interrupt()
@@ -98,9 +63,34 @@ class SiignaApplet extends View
    */
   override def init() {
     // Misc initialization
-    setVisible(true)
-    setFocusable(true)
-    requestFocus()
+    setVisible(true); setFocusable(true); requestFocus()
+
+    // Set the layout
+    setLayout(new BorderLayout())
+
+    // Add the view to the applet
+    add(View, BorderLayout.CENTER)
+
+    // Add event listeners
+    View.addKeyListener(new KeyListener {
+      override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
+      override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
+      override def keyTyped   (e : AWTKeyEvent) { false }
+    })
+    View.addMouseListener(new MouseListener {
+      override def mouseClicked (e : AWTMouseEvent) { false }
+      override def mouseEntered (e : AWTMouseEvent) { handleMouseEvent(e, MouseEnter) }
+      override def mouseExited  (e : AWTMouseEvent) { handleMouseEvent(e, MouseExit) }
+      override def mousePressed (e : AWTMouseEvent) { handleMouseEvent(e, MouseDown) }
+      override def mouseReleased(e : AWTMouseEvent) { handleMouseEvent(e, MouseUp) }
+    })
+    View.addMouseMotionListener(new MouseMotionListener {
+      override def mouseDragged(e : AWTMouseEvent) { handleMouseEvent(e, MouseDrag) }
+      override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
+    })
+    View.addMouseWheelListener(new MouseWheelListener {
+      override def mouseWheelMoved(e : MouseWheelEvent) { handleMouseEvent(e, MouseWheel(e getUnitsToScroll)) }
+    })
 
     // Allows specific KeyEvents to be detected.
     setFocusTraversalKeysEnabled(false)
@@ -109,40 +99,11 @@ class SiignaApplet extends View
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
     setPreferredSize(dimension)
 
-    pan(Vector2D(dimension.width >> 1, dimension.height >> 1))
-
-    // Start the applet
-    start()
-
-    // Start the paint-loop
-    paintLoop.start()
-
     // Start the controller
     Control.start()
 
-    // Connect to the siigna object
-    Siigna.setView(this)
-
-    // Add event listeners
-    addKeyListener(new KeyListener {
-      override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
-      override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
-      override def keyTyped   (e : AWTKeyEvent) { false }
-    })
-    addMouseListener(new MouseListener {
-      override def mouseClicked (e : AWTMouseEvent) { false }
-      override def mouseEntered (e : AWTMouseEvent) { handleMouseEvent(e, MouseEnter) }
-      override def mouseExited  (e : AWTMouseEvent) { handleMouseEvent(e, MouseExit) }
-      override def mousePressed (e : AWTMouseEvent) { handleMouseEvent(e, MouseDown) }
-      override def mouseReleased(e : AWTMouseEvent) { handleMouseEvent(e, MouseUp) }
-    })
-    addMouseMotionListener(new MouseMotionListener {
-      override def mouseDragged(e : AWTMouseEvent) { handleMouseEvent(e, MouseDrag) }
-      override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
-    })
-    addMouseWheelListener(new MouseWheelListener {
-      override def mouseWheelMoved(e : MouseWheelEvent) { handleMouseEvent(e, MouseWheel(e getUnitsToScroll)) }
-    })
+    // Start the paint-loop
+    paintThread.start()
   }
 
   /**
@@ -234,11 +195,11 @@ class SiignaApplet extends View
     // to dispatchEvent.
     val option : Option[Event] = event match {
 
-      case MouseWheel (point, button, keys, delta)  => if (Siigna.navigation) { zoom(point, delta); None }
+      case MouseWheel (point, button, keys, delta)  => if (Siigna.navigation) { View.zoom(point, delta); None }
                                                        else Some(MouseWheel(toVirtual(point), button, keys, delta))
-      case MouseDown  (point, MouseButtonMiddle, _) => startPan(point); None
-      case MouseDrag  (point, MouseButtonMiddle, _) => pan(point); None
-      case MouseUp    (point, MouseButtonMiddle, _) => pan(point); None
+      case MouseDown  (point, MouseButtonMiddle, _) => View.startPan(point); None
+      case MouseDrag  (point, MouseButtonMiddle, _) => View.pan(point); None
+      case MouseUp    (point, MouseButtonMiddle, _) => View.pan(point); None
       case MouseEnter (point, button, keys)         => Some(MouseEnter(toVirtual(point), button, keys))
       case MouseExit  (point, button, keys)         => Some(MouseExit(toVirtual(point), button, keys))
       case MouseDown  (point, button, keys)         => Some(MouseDown(toVirtual(point), button, keys))
@@ -266,9 +227,17 @@ class SiignaApplet extends View
     // Resize the view
     super.resize(width, height)
 
+    // Resize the View...?
+    View.setSize(this.getSize)
+
     // Since the size of the component in some cases vary from the actual size (think menus and
     // title-bars etc.) we set the size according to the actual width and height
     Siigna.screen = Rectangle(Vector2D(0, 0), Vector2D(width, height))
+
+    // Pan the view if the pan isn't set
+    // TODO: Refine this hack
+    if (View.pan == Vector2D(0, 0))
+      View.pan(Siigna.screen.center)
   }
 
 }

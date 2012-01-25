@@ -11,24 +11,22 @@
 
 package com.siigna.app.view
 
-import java.applet.Applet
-import java.awt.{Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
-import java.awt.image.VolatileImage
-
 import com.siigna.util.Implicits._
 import com.siigna.util.collection.Preferences
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
+import com.siigna.util.geom._
+import java.awt.image.{VolatileImage}
+import java.awt.{Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 import com.siigna.app.model.shape.{TextShape, PolylineShape}
-import com.siigna.util.geom.{TransformationMatrix, Vector2D, Rectangle, Vector}
 
 /**
  * The View. The view is responsible for painting the appropriate
  * content, and transforming the zoom scale and the pan vector.
  * TODO: Cache(?)
  */
-trait View extends Applet {
+object View extends Canvas with Runnable {
 
   /**
    * A volatile image, used to utilize hardware acceleration and cancel out the double-buffering issue
@@ -37,44 +35,63 @@ trait View extends Applet {
   private var cachedBackgroundImage : Option[VolatileImage] = None
 
   /**
+   * This variable stores a function that paints the boundary with a surrounding black border
+   * and a version number in the upper right corner.
+   * <br />
+   * This variable can be overridden with a function that paints a different
+   */
+  var drawBoundary : (Graphics, Rectangle2D, TransformationMatrix) => Unit = (graphics : Graphics, boundary : Rectangle2D, transformation : TransformationMatrix) => {
+    // Draw a white rectangle inside the boundary of the current model.
+    graphics.g.setBackground(Color white)
+    graphics.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+
+    // Draw a black border
+    val p = PolylineShape.fromRectangle(boundary).setAttribute("Color" -> "#555555".color)
+    graphics.draw(p)
+
+    // Draw a version number
+    val v = TextShape(Siigna.version, Vector2D(Siigna.screen.width - 80, 10), 10)
+    graphics.draw(v)
+  }
+
+  /**
    * The frames in the current second.
    */
-  var fpsCurrent : Double = 0;
+  var fpsCurrent : Double = 0
 
   /**
    * The second the fps is counting in.
    */
-  var fpsSecond : Double = 0;
+  var fpsSecond : Double = 0
 
   /**
    * Describes how far the view has been panned. This vector is given in
    * physical coordinates, relative from the top left point of the screen.
    */
-  var pan           = Vector(0, 0)
+  var pan           = Vector2D(0, 0)
 
   /**
    * Describes the current mouse-location when panning.
    */
-  var panPointMouse =  Vector(0, 0)
+  var panPointMouse =  Vector2D(0, 0)
 
   /**
    * Describes the old panning-point, so the software can tell how much
    * the current panning has moved relative to the old.
    */
-  var panPointOld   = Vector(0, 0)
+  var panPointOld   = Vector2D(0, 0)
 
   /**
    * The zoom scale. Starts out in 1:1.
    */
   var zoom : Double = 1
 
-  /***************** VIEW-CODE ****************/
-
   /**
    * Creates a Volatile Image with the width and height of the current screen.
    */
-  private def backBuffer : VolatileImage =
+  private def backBuffer : VolatileImage = {
     getGraphicsConfiguration.createCompatibleVolatileImage(getSize width, getSize height)
+  }
 
   /**
    * Creates a Volatile Image with a given width and height.
@@ -97,14 +114,13 @@ trait View extends Applet {
   * create 'black-outs' (also known as double-buffering) which makes us
   * saaaad pandas.
   *
+  * TODO: Implement fork/join: http://docs.oracle.com/javase/tutorial/essential/concurrency/forkjoin.html
+  *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
   def draw(graphicsPanel : AWTGraphics) { try {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = Siigna.virtual
-
-    // Save the size of the view.
-    val size = getSize
 
     /**
      * Confines a coordinate within a lower and a higher boundary.
@@ -114,11 +130,11 @@ trait View extends Applet {
     // Define the boundary by first grabbing the boundary of the model, snapping it to the current view and saving it
     // in the boundary-value.
     val offscreenBoundary = Model.boundary.transform(transformation)
-    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, size.width),     confine(offscreenBoundary.topLeft.y, 0, size.height))
-    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, size.width), confine(offscreenBoundary.bottomRight.y, 0, size.height))
-    val boundary          = Rectangle(topLeft, bottomRight)
+    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offscreenBoundary.topLeft.y, 0, size.height))
+    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offscreenBoundary.bottomRight.y, 0, size.height))
+    val boundary          = Rectangle2D(topLeft, bottomRight)
 
-    // Get the volatile images
+    // Get the volatile image
     var backgroundImage = cachedBackgroundImage.getOrElse(backBuffer)
 
     // Loop the rendering.
@@ -134,34 +150,26 @@ trait View extends Applet {
       // Wraps the graphics-object in our own Graphics-wrapper (more simple API).
       val graphics = new Graphics(graphics2D)
 
-      // Clear the view and draw a greyish background.
+      // Clear the view and draw the default background-color.
       graphics2D setBackground("#DDDDDF".color)
-      graphics2D clearRect(0, 0, size width, size height)
+      graphics2D clearRect(0, 0, Siigna.screen.width.toInt, Siigna.screen.height.toInt)
 
-      // Draw a white rectangle inside the boundary of the current model.
-      graphics2D setBackground(Color white)
-      graphics2D clearRect(topLeft.x.toInt, bottomRight.y.toInt, boundary.width.toInt, boundary.height.toInt)
+      // Draw the background
+      drawBoundary(graphics, boundary, transformation)
 
-      // Draw a black border
-      val p = PolylineShape.fromRectangle(offscreenBoundary).setAttribute("Color" -> "#555555".color)
-      graphics.draw(p)
+      // Set up anti-aliasing
+      val antiAliasing = Preferences.boolean("anti-aliasing", true)
+      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
-      // Draw a version number
-      val v = TextShape(Siigna.version, Vector2D(size.width - 80, size.height - 50), 10)
-      graphics.draw(v)
-
-      // Draw the Model.
+      /***** MODEL *****/
+      // TODO: Cache the way it's written below.
       // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
       // isn't much bigger than the current view then draw the entire model and save the image as the
       // last static image. This is done because it can save a lot of performance to save the static image
       // for later, since most of the redrawing happens because of panning, which strictly doesn't require a redraw.
       // Otherwise find the shapes inside the view-bound and paint them, without saving anything as static.
       // Examines whether the cached image is valid and applicable.
-
-      // First set the anti-aliasing
-      val antiAliasing = Preferences.boolean("anti-aliasing", true)
-      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
-      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
       // Draw model
       try {
@@ -184,10 +192,6 @@ trait View extends Applet {
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
       }
-
-      // Save information about the current zoom and pan
-      //lastPan = interface.pan
-      //lastZoom = interface.zoom
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
@@ -217,6 +221,51 @@ trait View extends Applet {
     } else {
       fpsCurrent += 1 // Add a counter
     }
+  } }
+
+  /**
+   * The active rendering-loop. Avoids paint-events from native Java.
+   * See: <a href="http://download.oracle.com/javase/tutorial/fullscreen/rendering.html">download.oracle.com/javase/tutorial/fullscreen/rendering.html</a>.
+   */
+  override def run() { try {
+    // Tell the applet that we haven't initialized yet
+    var init = false
+
+    // Create peer
+    View.addNotify()
+
+    // Create a buffer strategy of 2
+    View.createBufferStrategy(2)
+
+    // Start the loop
+    while(true) {
+
+      // This is added inside the loop to make sure siigna's painting
+      // TODO: Find out why this is needed!
+      if (!init) {
+        Log.debug("View: Initiating paint-loop.")
+        init = true
+      }
+
+      try {
+        if (isShowing) {
+          // Retrieve the graphics object from the buffer strategy
+          val graphics = getBufferStrategy.getDrawGraphics
+          draw(graphics)
+          graphics.dispose()
+          getBufferStrategy.show()
+        }
+      } catch {
+        case e => Log.warning("View: Could not create graphics-object.")
+      }
+
+      // Terminate the thread if it's been interrupted
+      if (Thread.currentThread().isInterrupted)
+        throw new InterruptedException()
+    }
+  } catch {
+    case e : InterruptedException => Log.info("View has been terminated.")
+    case e => Log.error("View has been terminated with unexpected error.", e)
   } }
 
   /**
