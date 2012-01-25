@@ -202,6 +202,7 @@ object Control extends Thread("Siigna Controller") {
             isForwardedEvent = false
           // Otherwise we're good to go!
           } else {
+            
             // Retrieve event
             val event = eventQueue dequeue()
 
@@ -238,18 +239,24 @@ object Control extends Thread("Siigna Controller") {
               case e => Log.error("Error in retrieving state machine from module " + module + ".", e)
             }
 
-            // If the module is ending then send a ModuleEvent back into the
-            // event-queue for other modules to respond on
-            if (module.state == 'End) result match {
-              // Put a module event back in the event queue
-              case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
-              case unknown => Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
-                "but not reacting since it's not a Module Event.")
-            }
-
-            // Stop the module if it's in state 'End
+            // If the module is ending then stop the module and match on the resulting event
+            // If it was a ModuleEvent then send it back into the event-queue for other modules
+            // to respond on. If it was anything else then put the latest event back in the queue, so the
+            // parent can respond
             if (module.state == 'End) {
+
+              // Stop the module
               stopModule(module)
+
+              result match {
+                // Put a module event back in the event queue
+                case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
+                case unknown => {
+                  eventQueue enqueue events.head
+                  Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
+                    "but not reacting since it's not a Module Event.")
+                }
+              }
             }
           }
         }
@@ -292,7 +299,7 @@ object Control extends Thread("Siigna Controller") {
           // Goto another state
           case Goto(state, continue) => {
             if (modules.isEmpty) {
-              Log.warning("Controller could not goto another stat - no module in the stack.")
+              Log.warning("[Control]: Could not goto another state - no module in the stack.")
             } else {
               // Set the new state
 	            modules.top.state = state
@@ -302,6 +309,7 @@ object Control extends Thread("Siigna Controller") {
 	            if (continue) {
 	              eventQueue.+=:(events.head)
 	              events = events.tail
+
 	              Log.info("Controller successfully changed state to "+state+" and continued execution of the new state.")
 	            } else {
 	              Log.info("Controller successfully changed state to "+state+".")
@@ -342,27 +350,29 @@ object Control extends Thread("Siigna Controller") {
    * control-loop if initiated and so the "parent" gets a chance to act.
    */
   private def stopModule(module : Module) {
-    // Tell the module that it's no longer active
-    module.isActive = false
-    
-    // Remove the ending module from the module stack.
-    modules.pop()
+    if (modules.size > 1) {
+      // Tell the module that it's no longer active
+      module.isActive = false
 
-    // Store the head of the event-list in the event-queue.
-    eventQueue.enqueue(events.head)
+      // Remove the ending module from the module stack.
+      modules.pop()
 
-    // Set the most dangerous isForwardedEvent variable!
-    isForwardedEvent = true
+      // Store the head of the event-list in the event-queue.
+      eventQueue.enqueue(events.head)
 
-    // Store the tail of the events in the next module in the module stack.
-    events = events.tail
+      // Set the most dangerous isForwardedEvent variable!
+      isForwardedEvent = true
 
-    // Set the new interface
-    if (!modules.isEmpty) {
-      initModule(modules.top, modules.top.state)
+      // Store the tail of the events in the next module in the module stack.
+      events = events.tail
 
-      Log.success("Control: Successfully ended module. Current module: "+modules.top)
-    }
+      // Set the new interface
+      if (!modules.isEmpty) {
+        initModule(modules.top, modules.top.state)
+
+        Log.success("Control: Successfully ended module. Current module: "+modules.top)
+      }
+    } else Log.error("Control: Unable to stop module " + modules.head + " - it's the only module left.")
   }
 
 }
