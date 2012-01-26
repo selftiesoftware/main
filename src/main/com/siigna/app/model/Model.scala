@@ -33,6 +33,7 @@ import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector2D}
  * TODO: Create a thread for actions.
  * TODO: Remove touple-addition and use String and Shape separately!
  * TODO: Remove "+" operations.
+ * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
  */
 class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
 
