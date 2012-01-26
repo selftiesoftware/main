@@ -37,11 +37,6 @@ class ModuleInterface extends Interface {
   protected var cursor : Cursor = Interface.Cursors.crosshair
 
   /**
-   * The active display, if any.
-   */
-  protected var display : Option[Display] = None
-
-  /**
    * A paint-function that the interface should paint on every paint-tick.
    */
   private var paint : Option[(Graphics, TransformationMatrix) => Unit] = None
@@ -52,27 +47,6 @@ class ModuleInterface extends Interface {
   def chain(interface : ModuleInterface) {
     chain = Some(interface)
   }
-
-  /**
-   * Clears the display. NOT the interface. The interface can only be cleared by
-   * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
-   */
-  def clearDisplay() { display = None }
-
-  /**
-   * Saves a given display.
-   */
-  def display(display : Display) { this.display = Some(display) }
-
-  /**
-   * Saves a given display.
-   */
-  def display(display : Option[Display]) { this.display = display }
-
-  /**
-   * A shorthand reference to display a popup.
-   */
-  def display(string : String) { display(Popup(string)) }
 
   /**
    * Returns the current cursor of the current interface (if an interface
@@ -88,6 +62,11 @@ class ModuleInterface extends Interface {
   }
 
   /**
+   * Examines whether the <code>ModuleInterface</code> is chaining to another module.
+   */
+  def isChained = chain.isDefined
+
+  /**
    * Paints the interface. I. e. paint the filters, current paint-function and displays.
    * If the interface is chaining to another interface then we let that interface paint.
    */
@@ -97,20 +76,16 @@ class ModuleInterface extends Interface {
 
     // Paint the chain
     if (chain.isDefined) chain.get.paint(graphics, transformation)
-
-    // Paint the display of this interface - if defined
-    if (display.isDefined) display.get paint graphics
   }
 
   /**
-   * Resets this interface by setting cursor to default and clearing the display.
+   * Resets this interface by setting cursor to default.
    * <br/>
    * Remember that you have to direct the call to the bottom of the interface-chain
    * if you want to clear the cursor completely.
    */
   def reset() {
     cursor  = Interface.Cursors.crosshair
-    display = None
   }
 
   /**

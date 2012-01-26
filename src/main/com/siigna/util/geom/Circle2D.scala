@@ -13,7 +13,7 @@ package com.siigna.util.geom
 /**
  * A circle. Represented by a center and a radius.
  */
-case class Circle2D(center : Vector2D, radius : Double) extends GeometryEnclosed2D {
+case class Circle2D(override val center : Vector2D, radius : Double) extends GeometryEnclosed2D {
 
   import java.lang.Double.POSITIVE_INFINITY
   

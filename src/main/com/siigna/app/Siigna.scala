@@ -25,6 +25,11 @@ object Siigna extends Interface {
   Log.level = Log.ERROR + Log.WARNING + Log.INFO
 
   /**
+   * The active display, if any.
+   */
+  protected var display : Option[Display] = None
+
+  /**
    * Counts the frames per second. Don't set this if you want the correct answer..
    */
   var fps : Double = 0
@@ -68,6 +73,11 @@ object Siigna extends Interface {
   var screen : Rectangle2D = Rectangle(Vector(0, 0), Vector(0, 0))
 
   /**
+   * The version of Siigna.
+   */
+  val version = "v. 0.1.12.5"
+
+  /**
    * The graphical environment for Siigna.
    */
   private var view : Option[View] = None
@@ -84,11 +94,32 @@ object Siigna extends Interface {
   def center = screen.center
 
   /**
+   * Clears the display. NOT the interface. The interface can only be cleared by
+   * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
+   */
+  def clearDisplay() { display = None }
+
+  /**
    * Get the current active cursor.
    */
   def cursor = 
     if (view.isDefined) view.get.getCursor
     else Cursor.DEFAULT_CURSOR
+
+  /**
+   * Saves a given display.
+   */
+  def display(display : Display) { this.display = Some(display) }
+  
+  /**
+   * Saves a given display.
+   */
+  def display(display : Option[Display]) { this.display = display }
+
+  /**
+   * A shorthand reference to display a popup.
+   */
+  def display(string : String) { display(new Popup(string)) }
 
   /**
    * Returns the active ModuleInterface that's been placed highest in the interface-hierarchy.
@@ -99,25 +130,30 @@ object Siigna extends Interface {
   def getInterface = interface
 
   /**
-   * The entrance to the paint-functions of the interfaces, i. e. the modules. This function
-   * requests the active interface to paint. The matrix is sent on in case the module needs
-   * to use/reverse some of the transformations that already have been applied to the view.
+   * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
+   * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
+   * needs to use/reverse some of the transformations that already have been applied to the view.
    * <br />
-   * The painting eludes the normal event-based thread communication, since we'd like to make
-   * sure that the painting happens instantly.
+   * The painting eludes the normal event-based thread communication, since the <code>Control<code>
+   * mechanism runs on it's own thread and we'd like to make sure that the painting happens instantly.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    if (interface.isDefined) {
-      interface.get.paint(graphics, transformation)
+    // Paint the interface
+    if (interface.isDefined) interface.get.paint(graphics, transformation)
+
+    // Paint the display and remove it if needed
+    if (display.isDefined) {
+      if (display.get.isEnabled)
+        display.get paint graphics
+      else
+        display = None
     }
   }
 
   /**
    * Returns the current panning position.
    */
-  def pan =
-    if (view.isDefined) view.get.pan
-    else Vector2D(0, 0)
+  def pan = if (view.isDefined) view.get.pan else Vector2D(0, 0)
 
   /**
    * Returns the paper scale of the current model.

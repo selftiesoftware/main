@@ -1,3 +1,5 @@
+package com.siigna.app
+
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -9,11 +11,8 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view
-
 import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
 import java.awt.{Dimension, Frame}
-import com.siigna.app.Siigna
 import com.siigna.util.collection.Preferences
 
 /**
@@ -77,8 +76,8 @@ class ApplicationWindow extends Frame
   // TODO: Add full screen mode.
   addComponentListener(new ComponentListener {
     override def componentHidden  (e : ComponentEvent) { }
-    override def componentMoved  (e : ComponentEvent)  { }
-    override def componentShown  (e : ComponentEvent)  { }
+    override def componentMoved   (e : ComponentEvent) { }
+    override def componentShown   (e : ComponentEvent) { }
     override def componentResized (e : ComponentEvent) {
       applet.resize(getSize.getWidth.toInt, getSize.getHeight.toInt)
       false

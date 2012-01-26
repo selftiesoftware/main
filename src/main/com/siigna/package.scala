@@ -66,6 +66,16 @@ package object siigna extends com.siigna.util.Implicits {
     Control(new com.siigna.app.controller.command.Preload(name, classPath, fileName))
   }
 
+  /**
+   * Asks the controller to send a given event into the event stream.
+   *
+   * @tparam T  The type of the event.
+   * @param event  The event to send.
+   */
+  def Send[T <: Event](event : T) {
+    Control(new com.siigna.app.controller.command.Send[T](event))
+  }
+
   // Controller
   lazy val Control = com.siigna.app.controller.Control
 

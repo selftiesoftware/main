@@ -9,24 +9,11 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
+package com.siigna.app.controller.command
+
+import com.siigna.app.view.event.Event
 
 /**
- * The basic interface for all events in the system
+ * Sends an event into the event-flow, to be caught by the active module.
  */
-trait Event
-{
-  
-  /**
-   * A symbolic name for a given event.
-   */
-  def symbol : Symbol
-
-}
-
-/**
- * ModifierKeys used to match further information in a given event.
- * Arguments are listed as follows: Shift - Control - Alt
- */
-case class ModifierKeys(shift : Boolean, ctrl : Boolean, alt : Boolean)
-
+case class Send[T <: Event](e : T) extends Command
