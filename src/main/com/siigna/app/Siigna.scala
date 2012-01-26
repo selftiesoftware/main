@@ -13,8 +13,9 @@ package com.siigna.app
 import com.siigna.util.logging.Log
 import model.Model
 import view._
-import java.awt.{Cursor}
 import com.siigna.util.geom._
+import java.awt.{Cursor}
+
 
 /**
  * The Siigna object provides access to various core elements of the software. It also functions
@@ -75,12 +76,7 @@ object Siigna extends Interface {
   /**
    * The version of Siigna.
    */
-  val version = "v. 0.1.12.5"
-
-  /**
-   * The graphical environment for Siigna.
-   */
-  private var view : Option[View] = None
+  val version = "v. 0.1.13.0"
 
   /**
    * The zoom-speed. Defaults to 0.1 (i. e. 10%).
@@ -98,13 +94,6 @@ object Siigna extends Interface {
    * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
    */
   def clearDisplay() { display = None }
-
-  /**
-   * Get the current active cursor.
-   */
-  def cursor = 
-    if (view.isDefined) view.get.getCursor
-    else Cursor.DEFAULT_CURSOR
 
   /**
    * Saves a given display.
@@ -141,19 +130,12 @@ object Siigna extends Interface {
     // Paint the interface
     if (interface.isDefined) interface.get.paint(graphics, transformation)
 
-    // Paint the display and remove it if needed
-    if (display.isDefined) {
-      if (display.get.isEnabled)
-        display.get paint graphics
-      else
-        display = None
-    }
+    // Paint the display or remove it if needed
+    if (display.isDefined && display.get.isEnabled)
+      display.get paint graphics
+    else
+      display = None
   }
-
-  /**
-   * Returns the current panning position.
-   */
-  def pan = if (view.isDefined) view.get.pan else Vector2D(0, 0)
 
   /**
    * Returns the paper scale of the current model.
@@ -169,8 +151,7 @@ object Siigna extends Interface {
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
-    if (view.isDefined)
-      view.get setCursor cursor
+    View setCursor cursor
   }
 
   /**
@@ -188,23 +169,17 @@ object Siigna extends Interface {
   }
 
   /**
-   * Defines the view for Siigna to use. Should be called by the applet.
-   */
-  def setView(view : View) {
-    this.view = Some(view)
-  }
-
-  /**
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view, translated to a given point.
    */
-  def transformationTo(point : Vector2D) = TransformationMatrix(pan + point, zoom).flipY
+  def transformationTo(point : Vector2D) : TransformationMatrix =
+    TransformationMatrix(View.pan + point, View.zoom).flipY
   
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view.
    */
-  def virtual = TransformationMatrix(pan, zoom).flipY
+  def virtual : TransformationMatrix = TransformationMatrix(View.pan, View.zoom).flipY
 
   /**
    * Returns a TransformationMatrix with a translation and scale that fits the
@@ -215,16 +190,9 @@ object Siigna extends Interface {
     // boundary. This is then multiplied on the zoom level to give the exact
     // scale for the TransformationMatrix.
     val screenFactor = screen.width / Model.boundary.transform(virtual).width
-    val scaleFactor  = screenFactor * zoom
+    val scaleFactor  = screenFactor * View.zoom
 
     TransformationMatrix(center, scaleFactor).flipY
   }
-
-  /**
-   * Returns the current zoom scale
-   */
-  def zoom =
-    if (view.isDefined) view.get.zoom
-    else 1.0
 
 }

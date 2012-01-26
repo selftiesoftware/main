@@ -68,4 +68,9 @@ trait Module extends Serializable {
    */
   def paint(graphics: Graphics, transformation : TransformationMatrix) { }
 
+  /**
+   * Returns the simple name of the module.
+   */
+  override def toString = this.getClass.getSimpleName
+
 }

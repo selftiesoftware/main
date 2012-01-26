@@ -120,6 +120,7 @@ package object siigna extends com.siigna.util.Implicits {
   type Graphics = com.siigna.app.view.Graphics
   type ModuleInterface = com.siigna.app.view.ModuleInterface
   type Popup = com.siigna.app.view.Popup
+  val View = com.siigna.app.view.View
 
   // ------------------ UTIL -------------------- //
   // Collection

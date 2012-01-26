@@ -16,6 +16,7 @@ import com.siigna.util.geom.{Vector2D}
 import com.siigna.app.model.shape.{PolylineShape}
 import com.siigna.app.view.event._
 import com.siigna.app.Siigna
+import com.siigna.app.view.View
 
 /**
  * A hook for parsing points that snaps to end-points of objects.
@@ -45,7 +46,7 @@ case object EndPoints extends EventSnap {
       })
       val closestPoint = res.reduceLeft(closestTwo)
 
-      if (closestPoint.distanceTo(point) * Siigna.zoom <= 10) {
+      if (closestPoint.distanceTo(point) * View.zoom <= 10) {
         closestPoint
       }
       else point
