@@ -14,8 +14,7 @@ package com.siigna.util.geom
  * A rectangle given by two points. <b>Thus this rectangle cannot be rotated</b>.
  * TODO: Refactor with error-handling.
  */
-trait Rectangle
-{
+trait Rectangle {
 
   type T <: Rectangle
   type V <: Vector
@@ -26,25 +25,9 @@ trait Rectangle
   def area : Double
 
   /**
-   * The boundary of the rectangle. In this case returns itself.
-   */
-  def boundary = this
-
-  /**
-   * Examines whether a given rectangle is within (or on top of) the four boundaries
-   * of this rectangle.
-   */
-  def contains(rectangle : T) : Boolean
-
-  /**
    * Calculate the circumference of the rectangle.
    */
   def circumference : Double
-
-  /**
-   * Calculates the distance to a point.
-   */
-  def distanceTo(point : V) : Double
 
   /**
    * The height of the rectangle
@@ -60,11 +43,6 @@ trait Rectangle
    * Calculate the overlap between this and another rectangle. If two rectangles do not overlap the area is 0.
    */ 
   def overlap(that : T) : Double
-
-  /**
-   * Transforms the rectangle with the given matrix.
-   */
-  def transform(t : TransformationMatrix) : T
 
   /**
    * Returns a rectangle that encapsulates both this rectangle and the given rectangle.

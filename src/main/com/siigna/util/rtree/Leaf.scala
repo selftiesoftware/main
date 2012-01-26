@@ -122,9 +122,9 @@ object Leaf {
   class Leaf1(key : String, value : Rectangle2D, val branchFactor : Int, val ordering : MBROrdering) extends Leaf {
     def add(elem : (String, Rectangle2D)) = new Leaf2(key, value, elem._1, elem._2, branchFactor, ordering)
     def apply(query : Rectangle2D) = if (mbr.intersects(query)) Traversable(key) else Traversable.empty
-    def isBetter(query : Rectangle2D) = ordering.lt(worst, value)
+    def isBetter(query : Rectangle2D) = ordering.lt(query, worst)
     val mbr = value
-    def remove(elem : String) = if (value.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
+    def remove(elem : String) = if (key.equals(elem)) new EmptyLeaf(branchFactor, ordering) else this
     val size = 1
     override val toString = "Leaf[ " + key + " -> " + value + " ]"
     val traversable = Traversable(key -> value)
@@ -149,9 +149,9 @@ object Leaf {
     def isBetter(query : Rectangle2D) = ordering.lt(query, worst)
     val mbr = value1.expand(value2)
     def remove(elem : String) =
-      if (elem.equals(value1))
+      if (elem.equals(key1))
         new Leaf1(key2, value2, branchFactor, ordering)
-      else if (elem.equals(value2))
+      else if (elem.equals(key2))
         new Leaf1(key1, value1, branchFactor, ordering)
       else this
     val size = 2

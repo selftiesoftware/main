@@ -44,14 +44,14 @@ trait Module extends Serializable {
   var interface : ModuleInterface = new ModuleInterface()
 
   /**
+   * A boolean value stating whether the module is active.
+   */
+  var isActive = false
+
+  /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.
    */
   final var state : Symbol = 'Start
-
-  /**
-   * A shorthand reference to the Interface's display.
-   */
-  final def display(display : Display) { interface.display(display) }
 
   /**
    * The method defines the event handler the module want to use. It is sent

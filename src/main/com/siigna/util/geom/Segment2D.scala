@@ -21,8 +21,6 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   
   type T = Segment2D
 
-  val center = (p1 + p2) / 2
-
   /**
    * This function determines whether 0 <= n/N <= 1 without using a
    * division operation (they're slow). This table sums up the calculation:

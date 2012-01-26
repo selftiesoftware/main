@@ -19,7 +19,7 @@ package com.siigna.util.geom
  * @param startAngle  The starting angle of the arc. In degrees between 0 and 360.
  * @param angle The number of degrees the arc is spanning.
  */
-case class Arc2D(center : Vector2D, radius : Double, startAngle : Double, angle : Double) extends Arc with GeometryBasic2D {
+case class Arc2D(override val center : Vector2D, radius : Double, startAngle : Double, angle : Double) extends Arc with GeometryBasic2D {
 
   type T = Arc2D
 
@@ -182,29 +182,42 @@ object Arc2D {
   }
 
   /**
-   * Calculates the entire angle-span of an arc from a start and end angle.
+   * Calculates the entire angle-span of an arc from a start and end angle (CCW).
    */
-  def findArcAngle(startAngle : Double, endAngle : Double) = {
-    (startAngle - endAngle).abs  //+ (if (endAngle > startAngle) 180 else 0)
+  def findArcSpan(startAngle : Double, endAngle : Double) = {
+    if (startAngle > endAngle)
+      endAngle - startAngle + 360
+    else if (startAngle < endAngle)
+      endAngle - startAngle
+    else 360.0
   }
 
   /**
    * Creates an arc from three points.
    */
   def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = {
+    // Calculate center and radius
     val center = findCenterPoint(start, middle, end)
     val radius = (start - center).length
+    // The start angle of the points, NOT the arc
     val startAngle = (start - center).angle
+    // The end angle of the points, NOT the arc
     val endAngle = (end - center).angle
-    val angle = findArcAngle(startAngle, endAngle)
 
-    // Swap the end and start angle if the middle point isn't included
-    // TODO: This isn't working!
+    // Find the angle spanning start -> end CCW
+    val angle = findArcSpan(startAngle, endAngle)
+
+    // Swap the end and start angle if the arc isn't spanning the middle point
     val middleAngle = (middle - center).angle
-    if (middleAngle - startAngle <= endAngle - startAngle) {
+
+
+    // If the middle angle is inside the interval between start and end angle...
+    // TODO: Not quite working.
+    if (startAngle <= middleAngle && middleAngle <= angle + startAngle) {
       new Arc2D(center, radius, startAngle, angle)
     } else {
-      new Arc2D(center, radius, endAngle, angle)
+      // Otherwise swap the end and start angle and find the CCW angle from end -> start
+      new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
     }
   }
 

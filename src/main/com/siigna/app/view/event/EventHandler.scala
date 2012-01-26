@@ -14,7 +14,7 @@ package com.siigna.app.view.event
 import com.siigna.util.collection.DirectedGraph
 
 /**
- * Handles events using two state diagrams: one that maps events that leed to
+ * Handles events using two state diagrams: one that maps events that leads to
  * states (the stateMap) and one that maps states with actions (the stateMachine).
  * Both the states and events are described using the build-in scala symbols
  * (example: <code>'MouseDown</code>).

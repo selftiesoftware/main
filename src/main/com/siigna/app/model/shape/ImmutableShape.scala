@@ -85,11 +85,6 @@ trait ImmutableShape extends Shape {
 trait BasicShape extends ImmutableShape {
 
   /**
-   * The last point of the basic shape.
-   */
-  def end : Vector
-
-  /**
    * The basic geometric object for the shape.
    */
   def geometry : GeometryBasic2D
@@ -99,11 +94,6 @@ trait BasicShape extends ImmutableShape {
    * but otherwise the same attributes.
    */
   def setAttributes(attributes : Attributes) : BasicShape
-
-  /**
-   * The first point of the basic shape.
-   */
-  def start : Vector
 
   /**
    * Applies a transformation to the BasicShape.

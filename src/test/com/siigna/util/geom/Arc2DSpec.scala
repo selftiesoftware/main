@@ -33,10 +33,10 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val a3 = 45
     val a4 = 225
 
-    Arc2D.findArcAngle(a1, a2) should equal (180d)
-    Arc2D.findArcAngle(a2, a1) should equal (180d)
-    Arc2D.findArcAngle(a3, a4) should equal (180d)
-    Arc2D.findArcAngle(a4, a3) should equal (180d)
+    Arc2D.findArcSpan(a1, a2) should equal (180d)
+    Arc2D.findArcSpan(a2, a1) should equal (180d)
+    Arc2D.findArcSpan(a3, a4) should equal (180d)
+    Arc2D.findArcSpan(a4, a3) should equal (180d)
   }
 
   test("Can create an arc from three points on the periphery") {
