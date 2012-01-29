@@ -13,4 +13,4 @@ package com.siigna.app.controller.command
 /**
  * A class that signals to the controller that the current module wishes to forward to another module.
  */
-case class ForwardTo(module : Symbol, continue : Boolean) extends Command
+case class ForwardTo(module : Symbol, continue : Boolean = true) extends Command
