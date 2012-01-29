@@ -28,7 +28,7 @@ object Log extends scala.util.logging.ConsoleLogger {
    *
    * TODO: Use twitter's util-logging instead of inventing the wheel damnit!
    */
-  var level : Int = 0
+  var level : Int = ERROR + WARNING + INFO
 
   /**
    * The line-number.
@@ -42,6 +42,8 @@ object Log extends scala.util.logging.ConsoleLogger {
   val SUCCESS = 16
 
   private def format(message : Any, messageLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
+
+  println((level & messageLevel) == messageLevel, level, messageLevel)
     if ((level & messageLevel) == messageLevel) {
       // Add to the line-number
       lineNumber += 1

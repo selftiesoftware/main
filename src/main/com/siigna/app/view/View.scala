@@ -232,7 +232,6 @@ object View extends Canvas with Runnable {
     var init = false
 
     // Create peer
-    println("Creating")
     View.addNotify()
 
     // Create a buffer strategy of 2
