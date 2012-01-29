@@ -62,8 +62,8 @@ package object siigna extends com.siigna.util.Implicits {
    * @param classPath  The name of the path to load the class from, including the name of the class itself. Defaults to "com.siigna.module.endogenous".
    * @param filePath  The name and the place of the given file to load. Defaults to "".
    */
-  def Preload(name : Symbol, classPath : String = "com.siigna.module.endogenous", fileName : String = "") {
-    Control(new com.siigna.app.controller.command.Preload(name, classPath, fileName))
+  def Preload(name : Symbol, classPath : String = "com.siigna.module.endogenous", filePath : String = "") {
+    Control(new com.siigna.app.controller.command.Preload(name, classPath, if (filePath.eq("")) name.name else filePath ))
   }
 
   /**
