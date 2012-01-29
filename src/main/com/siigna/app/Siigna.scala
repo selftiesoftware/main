@@ -23,8 +23,6 @@ import java.awt.{Cursor}
  */
 object Siigna extends Interface {
 
-  Log.level = Log.ERROR + Log.WARNING + Log.INFO
-
   /**
    * The active display, if any.
    */

@@ -156,9 +156,9 @@ object Control extends Thread("Siigna Controller") {
    */
   override def run() { try {
     // Initialize the Default module and Menu module.
-    com.siigna.Preload('Default)
-    com.siigna.Preload('Menu)
-    com.siigna.ForwardTo('Default)
+    Preload('Default)
+    Preload('Menu)
+    ForwardTo('Default)
 
     // Log that controller is initializing
     Log.success("Control: Initiating control-loop.")

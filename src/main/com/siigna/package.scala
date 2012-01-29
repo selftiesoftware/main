@@ -34,47 +34,10 @@ package object siigna extends com.siigna.util.Implicits {
   type TransformShapes = com.siigna.app.model.action.TransformShapes
 
   // Commands
-  /**
-   * Creates a ForwardTo class and puts it in the controller event-queue.
-   *
-   * @param module  The module expressed by a symbol. Remember to <code>Preload</code> it!
-   * @param continue  A Boolean value to express whether the forwarded module should receive the last event again. Defaults to true.
-   */
-  def ForwardTo(module : Symbol, continue : Boolean = true) {
-    Control(new com.siigna.app.controller.command.ForwardTo(module, continue))
-  }
-
-  /**
-   * Shortcut to the Goto command.
-   *
-   * @param state The state to forward to.
-   * @param continue  A flag that signals whether the module should continue it's execution in the new state or wait
-   * for a new event. Defaults to true.
-   */
-  def Goto(state : Symbol, continue : Boolean = true) {
-    Control(new com.siigna.app.controller.command.Goto(state, continue))
-  }
-
-  /**
-   * Asks the controller to preload a given module.
-   *
-   * @param name  The symbolic representation of the module used inside Siigna to recognize the module.
-   * @param classPath  The name of the path to load the class from, including the name of the class itself. Defaults to "com.siigna.module.endogenous".
-   * @param filePath  The name and the place of the given file to load. Defaults to "".
-   */
-  def Preload(name : Symbol, classPath : String = "com.siigna.module.endogenous", filePath : String = "") {
-    Control(new com.siigna.app.controller.command.Preload(name, classPath, if (filePath.eq("")) name.name else filePath ))
-  }
-
-  /**
-   * Asks the controller to send a given event into the event stream.
-   *
-   * @tparam T  The type of the event.
-   * @param event  The event to send.
-   */
-  def Send[T <: Event](event : T) {
-    Control(new com.siigna.app.controller.command.Send[T](event))
-  }
+  val ForwardTo = com.siigna.app.controller.command.ForwardTo
+  val Goto = com.siigna.app.controller.command.Goto
+  val Preload = com.siigna.app.controller.command.Preload
+  val Send = com.siigna.app.controller.command.Send
 
   // Controller
   lazy val Control = com.siigna.app.controller.Control

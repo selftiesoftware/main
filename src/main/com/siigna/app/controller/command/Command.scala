@@ -15,4 +15,8 @@ import com.siigna.app.controller.Control
 /**
  * Commands that the modules can use to instruct the controller.
  */
-trait Command
+trait Command {
+
+  // Dispatches the command
+  Control.dispatchCommand(this)
+}
