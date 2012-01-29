@@ -131,8 +131,8 @@ object View extends Canvas with Runnable {
     // Define the boundary by first grabbing the boundary of the model, snapping it to the current view and saving it
     // in the boundary-value.
     val offscreenBoundary = Model.boundary.transform(transformation)
-    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offscreenBoundary.topLeft.y, 0, size.height))
-    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offscreenBoundary.bottomRight.y, 0, size.height))
+    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offscreenBoundary.topLeft.y, 0, getSize.height))
+    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offscreenBoundary.bottomRight.y, 0, getSize.height))
     val boundary          = Rectangle2D(topLeft, bottomRight)
 
     // Get the volatile image
@@ -233,6 +233,7 @@ object View extends Canvas with Runnable {
     var init = false
 
     // Create peer
+    println("Creating")
     View.addNotify()
 
     // Create a buffer strategy of 2
