@@ -30,8 +30,8 @@ class ModuleBank {
   /**
    * The class loader used to load classes.
    */
-  //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/siigna-modules/out/artifacts/endogenous.jar!/")), this.getClass.getClassLoader)
-  private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/endogenous.jar!/")), this.getClass.getClassLoader)
+  private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/siigna-modules/out/artifacts/endogenous.jar!/")), this.getClass.getClassLoader)
+  //private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/endogenous.jar!/")), this.getClass.getClassLoader)
 
   /**
    * Examines whether the bank contains a given module.
@@ -82,11 +82,7 @@ class ModuleBank {
       true
     } else {
       // Try to load the module from the JarLoader
-      val loadedClass = if (classPath == "com.siigna.module.endogenous")
-        classLoader.loadModule(classPath + "." + name.name, filePath)
-      else if (classPath.eq(""))
-        classLoader.loadModule("com.siigna.module.endogenous." + name.name, filePath)
-      else classLoader.loadModule(classPath + "." + name.name, filePath)
+      val loadedClass = classLoader.loadModule(classPath + "." + name.name, filePath)
 
       // Save the class if the class loader succeeds
       if (loadedClass.isDefined) {

@@ -17,4 +17,4 @@ package com.siigna.app.controller.command
  * @param classPath  The name of the path to load the class from, including the name of the class itself.
  * @param filePath  The name and the place of the given file to load.
  */
-case class Preload(name : Symbol, classPath : String, filePath : String) extends Command
+case class Preload(name : Symbol, classPath : String = "com.siigna.module.endogenous", filePath : String = "") extends Command
