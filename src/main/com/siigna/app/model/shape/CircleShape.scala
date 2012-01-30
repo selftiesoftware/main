@@ -24,8 +24,9 @@ import com.siigna.util.geom.{Circle, TransformationMatrix, Vector2D}
  *  - StrokeWidth  Double  The width of the line-stroke used to draw.
  * </pre>
  */
-case class CircleShape(center : Vector2D, p : Vector2D, attributes : Attributes) extends EnclosedShape
-{
+case class CircleShape(center : Vector2D, p : Vector2D, attributes : Attributes) extends EnclosedShape {
+
+  type T = CircleShape
 
   val geometry = Circle(center, p)
   val radius = geometry.radius

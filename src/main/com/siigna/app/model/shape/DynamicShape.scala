@@ -26,6 +26,8 @@ import com.siigna.util.Implicits._
 */
 case class DynamicShape(id : String, immutableShape : ImmutableShape) extends Shape {
 
+  type T = ImmutableShape
+
   /**
    * The action performed on the shape.
    * TODO: Refactor to a Option[Action] and use merge.
@@ -51,8 +53,7 @@ case class DynamicShape(id : String, immutableShape : ImmutableShape) extends Sh
   /**
    * Returns a new shape with a new set of attributes.
    */
-  def setAttributes(attributes : Attributes) : ImmutableShape =
-    underlyingShape.setAttributes(attributes)
+  def setAttributes(attributes : Attributes) : T = underlyingShape.setAttributes(attributes)
 
   /**
    * Save the attributes to the underlying static shape and return this.
@@ -71,7 +72,7 @@ case class DynamicShape(id : String, immutableShape : ImmutableShape) extends Sh
   /**
    * Applies a transformation to the shape.
    */
-  def transform(transformation : TransformationMatrix) : ImmutableShape =
+  def transform(transformation : TransformationMatrix) : T =
     underlyingShape.transform(transformation)
 
   /**
