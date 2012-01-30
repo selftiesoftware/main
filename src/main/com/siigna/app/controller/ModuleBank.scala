@@ -30,8 +30,8 @@ class ModuleBank {
   /**
    * The class loader used to load classes.
    */
-  private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/siigna-modules/out/artifacts/endogenous.jar!/")), this.getClass.getClassLoader)
-  //private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/endogenous.jar!/")), this.getClass.getClassLoader)
+  //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/siigna-modules/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
+  private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/base.jar!/")), this.getClass.getClassLoader)
 
   /**
    * Examines whether the bank contains a given module.
@@ -45,7 +45,7 @@ class ModuleBank {
    * @param classPath  The path to the class.
    * @param filePath  The path to the file.
    *
-   * TODO: How do we differ between endogenous and exogenous modules?
+   * TODO: How do we differ between base and exogenous modules?
    */
   def load(name : Symbol, classPath : String = "", filePath : String = "") : Option[Module] =
     if (modules.contains(name)) {
