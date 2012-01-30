@@ -20,9 +20,6 @@ package com.siigna.util.geom
  */
 case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle with GeometryEnclosed2D {
 
-  assert(xMin < yMax, "xMin must be the least x-value")
-  assert(yMin < yMax, "yMin must be the least y-value")
-
   type T = Rectangle2D
 
   def area = width * height
