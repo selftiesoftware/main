@@ -228,8 +228,8 @@ object View extends Canvas with Runnable {
    * See: <a href="http://download.oracle.com/javase/tutorial/fullscreen/rendering.html">download.oracle.com/javase/tutorial/fullscreen/rendering.html</a>.
    */
   override def run() { try {
-    // Tell the applet that we haven't initialized yet
-    var init = false
+    // State that we're initiating
+    Log.success("View: Initiating paint-loop.")
 
     // Create peer
     View.addNotify()
@@ -239,14 +239,6 @@ object View extends Canvas with Runnable {
 
     // Start the loop
     while(true) {
-
-      // This is added inside the loop to make sure siigna's painting
-      // TODO: Find out why this is needed!
-      if (!init) {
-        Log.debug("View: Initiating paint-loop.")
-        init = true
-      }
-
       try {
         if (isShowing) {
           // Retrieve the graphics object from the buffer strategy

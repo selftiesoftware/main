@@ -21,6 +21,8 @@ import shape.DynamicShape
  * These shapes can be altered without changes in the static layer.
  * When the changes have been made, the shapes are removed from the dynamic layer, and the actions which have
  * been applied on the dynamic layer is applied on the static layer.
+ *
+ * TODO: Start the thread
  */
 trait DynamicModel extends Thread {
 
@@ -28,8 +30,6 @@ trait DynamicModel extends Thread {
    * The actions performed on the model.
    */
   protected lazy val actions = new ActionQueue(model)
-
-  // Start the action-thread
 
   /**
    * The underlying mutable model.

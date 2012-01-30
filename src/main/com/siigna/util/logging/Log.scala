@@ -15,7 +15,13 @@ package com.siigna.util.logging
  * A simple log object used to log messages to the console.
  */
 object Log extends scala.util.logging.ConsoleLogger {
-  
+
+  val ERROR   = 1
+  val WARNING = 2
+  val INFO    = 4
+  val DEBUG   = 8
+  val SUCCESS = 16
+
   /**
    * The debug-level. Levels are following:
    * <ol>
@@ -34,12 +40,6 @@ object Log extends scala.util.logging.ConsoleLogger {
    * The line-number.
    */
   private var lineNumber = 0
-  
-  val ERROR   = 1
-  val WARNING = 2
-  val INFO    = 4
-  val DEBUG   = 8
-  val SUCCESS = 16
 
   private def format(message : Any, messageLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
     if ((level & messageLevel) == messageLevel) {
