@@ -34,10 +34,10 @@ package object siigna extends com.siigna.util.Implicits {
   type TransformShapes = com.siigna.app.model.action.TransformShapes
 
   // Commands
-  val ForwardTo = com.siigna.app.controller.command.ForwardTo
-  val Goto = com.siigna.app.controller.command.Goto
-  val Preload = com.siigna.app.controller.command.Preload
-  val Send = com.siigna.app.controller.command.Send
+  lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
+  lazy val Goto = com.siigna.app.controller.command.Goto
+  lazy val Preload = com.siigna.app.controller.command.Preload
+  lazy val Send = com.siigna.app.controller.command.Send
 
   // Controller
   lazy val Control = com.siigna.app.controller.Control

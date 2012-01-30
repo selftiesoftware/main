@@ -189,7 +189,7 @@ object Arc2D {
       endAngle - startAngle + 360
     else if (startAngle < endAngle)
       endAngle - startAngle
-    else 360.0
+    else throw new IllegalArgumentException("Cannot create arc with 0 degrees.")
   }
 
   /**
@@ -207,10 +207,20 @@ object Arc2D {
     // Find the angle spanning start -> end CCW
     val angle = findArcSpan(startAngle, endAngle)
 
-    // Swap the end and start angle if the arc isn't spanning the middle point
+    // Find out which side of the line from start to end, the middle point is on.
+    // If it's positive, the arc is counter-clockwise
+    val det = (end.x - start.x) * (middle.y - start.y) - (end.y - start.y) * (middle.x - start.x)
+
     val middleAngle = (middle - center).angle
 
+    if (det > 0) {
+      new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
+    } else {
+      new Arc2D(center, radius, startAngle, angle)
+    }
 
+    /*
+    val middleAngle = (middle - center).angle
     // If the middle angle is inside the interval between start and end angle...
     // TODO: Not quite working.
     if (startAngle <= middleAngle && middleAngle <= angle + startAngle) {
@@ -219,6 +229,7 @@ object Arc2D {
       // Otherwise swap the end and start angle and find the CCW angle from end -> start
       new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
     }
+    */
   }
 
   /**

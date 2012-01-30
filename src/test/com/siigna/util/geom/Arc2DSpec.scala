@@ -32,11 +32,14 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val a2 = 270
     val a3 = 45
     val a4 = 225
+    val a5 = 44
 
     Arc2D.findArcSpan(a1, a2) should equal (180d)
     Arc2D.findArcSpan(a2, a1) should equal (180d)
     Arc2D.findArcSpan(a3, a4) should equal (180d)
     Arc2D.findArcSpan(a4, a3) should equal (180d)
+    Arc2D.findArcSpan(a3, a5) should equal (359d)
+    Arc2D.findArcSpan(a5, a3) should equal (1d)
   }
 
   test("Can create an arc from three points on the periphery") {
@@ -48,14 +51,9 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p6 = Vector2D(p4.x, -p4.y)
 
     val arc1 = Arc2D(p1, p2, p3)
-    arc1 should equal (Arc2D(Vector2D(0, 0), 1, 90, 180))
+    arc1 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
     
     val arc2 = Arc2D(p3, p2, p1)
     arc2 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
-    
-    val arc3 = Arc2D(p4, p5, p6)
-    arc3.startAngle should equal (45d)
-    // TODO: Test properly
-  }
 
 }
