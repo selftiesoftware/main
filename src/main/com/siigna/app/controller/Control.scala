@@ -134,7 +134,7 @@ object Control extends Thread("Siigna Controller") {
     true
   } catch {
     // Log the failure
-    case e => Log.warning("Controller: Failed to initialize the interface of module " + module + ". The module will (probably) still run, but without a graphical output.")
+    case e => Log.warning("Controller: Failed to initialize the interface of " + module + ". The module will (probably) still run, but without a graphical output.")
     false
   }
   
@@ -156,9 +156,9 @@ object Control extends Thread("Siigna Controller") {
    */
   override def run() { try {
     // Initialize the Default module and Menu module.
-    com.siigna.Preload('Default)
-    com.siigna.Preload('Menu)
-    com.siigna.ForwardTo('Default)
+    Preload('Default)
+    Preload('Menu)
+    ForwardTo('Default)
 
     // Log that controller is initializing
     Log.success("Control: Initiating control-loop.")
@@ -217,7 +217,7 @@ object Control extends Thread("Siigna Controller") {
               module.eventHandler.stateMap(module.state -> events.head.symbol) match {
                 case Some(s : Symbol) => if (module.state != s) {
                   module.state = s
-                  Log.info("Controller: Succesfully changed the state of the active module to "+s)
+                  Log.info("Controller: Succesfully changed the state of the " + module + " to "+s)
                 }
                 case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
               }
@@ -228,7 +228,6 @@ object Control extends Thread("Siigna Controller") {
             // React on the event parsed and execute the function associated with the state;
             // These lines are in a try-catch loop in case anything goes wrong in a module.
             // Since modules are prone to error we need to make sure they don't break the entire program.
-
             val result : Any = try {
               // Retrieve the function from the map and apply them if they exist
               module.eventHandler.stateMachine.get(module.state) match {
@@ -251,8 +250,8 @@ object Control extends Thread("Siigna Controller") {
                   false
                 }
                 case unknown => {
-                  Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
-                    "but not reacting since it's not a Module Event.")
+                  Log.debug("Control: Received object "+unknown+" from the ending module " + module +
+                    ", but not reacting since it is not a Module Event.")
                   true
                 }
               }
@@ -268,6 +267,8 @@ object Control extends Thread("Siigna Controller") {
       if (!commandQueue.isEmpty) {
         // Retrieve command
         val command = commandQueue dequeue()
+
+        Log.debug("Control: Received command: " + command)
 
         // Match on the command
         command match {
@@ -305,7 +306,7 @@ object Control extends Thread("Siigna Controller") {
           // Goto another state
           case Goto(state, continue) => {
             if (modules.isEmpty) {
-              Log.warning("[Control]: Could not goto another state - no module in the stack.")
+              Log.warning("[Control]: Could not change state - no module in the stack.")
             } else {
               // Set the new state
 	            modules.top.state = state
@@ -318,7 +319,7 @@ object Control extends Thread("Siigna Controller") {
 
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+" and continued execution.")
 	            } else {
-	              Log.info("Controller successfully changed state to "+state+".")
+	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
             }
           }
@@ -355,7 +356,7 @@ object Control extends Thread("Siigna Controller") {
    * In other words we remove the most recent module and store it's events back in the queue so the next
    * control-loop if initiated and so the "parent" gets a chance to act.
    */
-  private def stopModule(module : Module, continue : Boolean) {
+  private def stopModule(module : Module) {
     if (modules.size > 1) {
       // Tell the module that it's no longer active
       module.isActive = false
@@ -364,7 +365,7 @@ object Control extends Thread("Siigna Controller") {
       modules.pop()
 
       // Store the head of the event-list in the event-queue.
-      if (continue) eventQueue.enqueue(events.head)
+      eventQueue.enqueue(events.head)
 
       // Set the most dangerous isForwardedEvent variable!
       isForwardedEvent = true
@@ -373,12 +374,10 @@ object Control extends Thread("Siigna Controller") {
       events = events.tail
 
       // Initialize the module
-      if (!modules.isEmpty) {
-        if (initModule(modules.top, modules.top.state))
-          Log.success("Control: Successfully ended module. Current module: "+modules.top)
-        else
-          Log.error("Control: Sucessfully ended module, but unable to initialize the parent: " + modules.top)
-      }
+      if (initModule(modules.top, modules.top.state))
+        Log.success("Control: Successfully ended " + module + ". Current module: "+modules.top)
+      else
+        Log.error("Control: Sucessfully ended " + module + ", but unable to initialize the parent: " + modules.top)
     } else Log.error("Control: Unable to stop module " + modules.head + " - it's the only module left.")
   }
 

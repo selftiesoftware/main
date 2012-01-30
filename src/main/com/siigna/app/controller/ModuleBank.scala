@@ -45,7 +45,7 @@ class ModuleBank {
    * @param classPath  The path to the class.
    * @param filePath  The path to the file.
    *
-   * TODO: How do we differ between base and exogenous modules?
+   * TODO: How do we differ between endogenous and exogenous modules?
    */
   def load(name : Symbol, classPath : String = "", filePath : String = "") : Option[Module] =
     if (modules.contains(name)) {
