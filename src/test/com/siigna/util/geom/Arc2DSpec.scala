@@ -56,4 +56,5 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val arc2 = Arc2D(p3, p2, p1)
     arc2 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
 
+  }
 }
