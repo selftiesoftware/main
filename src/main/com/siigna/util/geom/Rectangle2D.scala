@@ -12,9 +12,16 @@ package com.siigna.util.geom
 
 /**
  * A rectangle given by two points.
- * TODO:
+ *
+ * @param xMin  The least x-value
+ * @param yMin  The least y-value
+ * @param xMax  The largest x-value
+ * @param yMax  The largest y-value
  */
 case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle with GeometryEnclosed2D {
+
+  assert(xMin < yMax, "xMin must be the least x-value")
+  assert(yMin < yMax, "yMin must be the least y-value")
 
   type T = Rectangle2D
 
