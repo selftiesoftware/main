@@ -21,6 +21,7 @@ import com.siigna.app.Siigna
 /**
  * The Control controls the core of the software. Basically that includes
  * dealing with the event-flow to the modules.
+ * TODO: Implement actors when applets can use them without permissions.
  */
 object Control extends Thread("Siigna Controller") {
 

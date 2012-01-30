@@ -34,6 +34,8 @@ import com.siigna.util.geom._
  */
 case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends ImmutableShape {
 
+  type T = TextShape
+
   final val GlobalFontScale = 0.1
 
   val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize)
