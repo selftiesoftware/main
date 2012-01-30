@@ -12,8 +12,8 @@ package com.siigna.app
  */
 
 import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
-import java.awt.{Dimension, Frame}
 import com.siigna.util.collection.Preferences
+import java.awt.{BorderLayout, Dimension, Frame}
 
 /**
  * This object represents the main class of the Siigna application, when run on
@@ -56,10 +56,12 @@ class ApplicationWindow extends Frame
   // just create a new instance and add it to our window.
   val applet = new SiignaApplet
 
+  // Set the layout
+  setLayout(new BorderLayout())
+
   // Add the applet to the application.
-  add(applet)
+  add(applet, BorderLayout.CENTER)
   setTitle("Siigna")
-  applet.init()
 
   // Setup event handler for when the window is closed (user press the X
   // button). In this case we dispose the window, which in the end terminates
@@ -88,11 +90,15 @@ class ApplicationWindow extends Frame
   // Set preferred size
   setPreferredSize(Preferences("defaultScreenSize").asInstanceOf[Dimension])
 
-  // Pack the elements of this window. The panel requests a certain size.
-  pack()
+  // Start the applet
+  applet.init()
+
   // Show the window. The program is running.
   setVisible(true)
-  // The initialization itself is done in the view...
+
+  // Pack the elements of this window. The panel requests a certain size.
+  pack()
+
 
 }
 
