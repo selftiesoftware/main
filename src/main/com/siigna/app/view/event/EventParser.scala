@@ -86,6 +86,13 @@ class EventParser {
   def enable() { enabled = true }
 
   /**
+   * Examines whether the EventParser is snapping to the given Snap.
+   *
+   * @param snapper  The snap we are examining.
+   */
+  def isSnapping(snapper : EventSnap) = snap.exists(_ == snapper)
+
+  /**
    * Examines whether the EventParser is tracking or not.
    */
   def isTracking = track.isTracking
