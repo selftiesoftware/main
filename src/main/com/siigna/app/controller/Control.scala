@@ -365,13 +365,15 @@ object Control extends Thread("Siigna Controller") {
       modules.pop()
 
       // Store the head of the event-list in the event-queue.
-      if(continue) eventQueue.enqueue(events.head)
+      if (continue) {
+        eventQueue.enqueue(events.head)
 
-      // Set the most dangerous isForwardedEvent variable!
-      isForwardedEvent = true
+        // Set the most dangerous isForwardedEvent variable!
+        isForwardedEvent = true
 
-      // Store the tail of the events in the next module in the module stack.
-      events = events.tail
+        // Store the tail of the events in the next module in the module stack.
+        events = events.tail
+      }
 
       // Initialize the module
       if (initModule(modules.top, modules.top.state))
