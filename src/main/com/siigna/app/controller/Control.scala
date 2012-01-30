@@ -212,7 +212,6 @@ object Control extends Thread("Siigna Controller") {
             // Parse the events
             events = module.eventParser.parse(event :: events)
 
-            val preState = module.state
             // Give the module a chance to change state
             try {
               module.eventHandler.stateMap(module.state -> events.head.symbol) match {
@@ -226,7 +225,6 @@ object Control extends Thread("Siigna Controller") {
               case e => Log.error("Controller: Unexpected error in processing state map: ", e)
             }
 
-            println(module, preState, module.state)
             // React on the event parsed and execute the function associated with the state;
             // These lines are in a try-catch loop in case anything goes wrong in a module.
             // Since modules are prone to error we need to make sure they don't break the entire program.
