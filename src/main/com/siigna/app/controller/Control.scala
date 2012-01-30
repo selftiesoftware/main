@@ -242,17 +242,22 @@ object Control extends Thread("Siigna Controller") {
             // If it was a ModuleEvent then send it back into the event-queue for other modules
             // to respond on.
             if (module.state == 'End) {
-              // Stop the module
-              stopModule(module)
 
-              result match {
+              val continue = result match {
                 // Put a module event back in the event queue
-                case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
+                case moduleEvent : ModuleEvent => {
+                  eventQueue enqueue moduleEvent
+                  false
+                }
                 case unknown => {
                   Log.debug("Control: Received object "+unknown+" from the ending module " + module +
                     ", but not reacting since it is not a Module Event.")
+                  true
                 }
               }
+
+              // Stop the module
+              stopModule(module, continue)
             }
           }
         }
@@ -351,7 +356,7 @@ object Control extends Thread("Siigna Controller") {
    * In other words we remove the most recent module and store it's events back in the queue so the next
    * control-loop if initiated and so the "parent" gets a chance to act.
    */
-  private def stopModule(module : Module) {
+  private def stopModule(module : Module, continue : Boolean) {
     if (modules.size > 1) {
       // Tell the module that it's no longer active
       module.isActive = false
@@ -360,7 +365,7 @@ object Control extends Thread("Siigna Controller") {
       modules.pop()
 
       // Store the head of the event-list in the event-queue.
-      eventQueue.enqueue(events.head)
+      if(continue) eventQueue.enqueue(events.head)
 
       // Set the most dangerous isForwardedEvent variable!
       isForwardedEvent = true

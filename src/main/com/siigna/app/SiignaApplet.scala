@@ -62,9 +62,6 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
-    // Misc initialization
-    setVisible(true); setFocusable(true); requestFocus()
-
     // Set the layout
     setLayout(new BorderLayout())
 
@@ -104,6 +101,9 @@ class SiignaApplet extends Applet {
 
     // Start the paint-loop
     paintThread.start()
+
+    // Misc initialization
+    setVisible(true); setFocusable(true); requestFocus()
   }
 
   /**
