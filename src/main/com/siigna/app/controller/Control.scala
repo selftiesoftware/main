@@ -134,7 +134,7 @@ object Control extends Thread("Siigna Controller") {
     true
   } catch {
     // Log the failure
-    case e => Log.warning("Controller: Failed to initialize the interface of module " + module + ". The module will (probably) still run, but without a graphical output.")
+    case e => Log.warning("Controller: Failed to initialize the interface of " + module + ". The module will (probably) still run, but without a graphical output.")
     false
   }
   
@@ -212,12 +212,13 @@ object Control extends Thread("Siigna Controller") {
             // Parse the events
             events = module.eventParser.parse(event :: events)
 
+            val preState = module.state
             // Give the module a chance to change state
             try {
               module.eventHandler.stateMap(module.state -> events.head.symbol) match {
                 case Some(s : Symbol) => if (module.state != s) {
                   module.state = s
-                  Log.info("Controller: Succesfully changed the state of the active module to "+s)
+                  Log.info("Controller: Succesfully changed the state of the " + module + " to "+s)
                 }
                 case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
               }
@@ -225,10 +226,10 @@ object Control extends Thread("Siigna Controller") {
               case e => Log.error("Controller: Unexpected error in processing state map: ", e)
             }
 
+            println(module, preState, module.state)
             // React on the event parsed and execute the function associated with the state;
             // These lines are in a try-catch loop in case anything goes wrong in a module.
             // Since modules are prone to error we need to make sure they don't break the entire program.
-
             val result : Any = try {
               // Retrieve the function from the map and apply them if they exist
               module.eventHandler.stateMachine.get(module.state) match {
@@ -250,8 +251,8 @@ object Control extends Thread("Siigna Controller") {
                 // Put a module event back in the event queue
                 case moduleEvent : ModuleEvent => eventQueue enqueue moduleEvent
                 case unknown => {
-                  Log.debug("Control: Received object "+unknown+" from the active modules state machine, " +
-                    "but not reacting since it's not a Module Event.")
+                  Log.debug("Control: Received object "+unknown+" from the ending module " + module +
+                    ", but not reacting since it is not a Module Event.")
                 }
               }
             }
@@ -263,6 +264,8 @@ object Control extends Thread("Siigna Controller") {
       if (!commandQueue.isEmpty) {
         // Retrieve command
         val command = commandQueue dequeue()
+
+        Log.debug("Control: Received command: " + command)
 
         // Match on the command
         command match {
@@ -300,7 +303,7 @@ object Control extends Thread("Siigna Controller") {
           // Goto another state
           case Goto(state, continue) => {
             if (modules.isEmpty) {
-              Log.warning("[Control]: Could not goto another state - no module in the stack.")
+              Log.warning("[Control]: Could not change state - no module in the stack.")
             } else {
               // Set the new state
 	            modules.top.state = state
@@ -313,7 +316,7 @@ object Control extends Thread("Siigna Controller") {
 
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+" and continued execution.")
 	            } else {
-	              Log.info("Controller successfully changed state to "+state+".")
+	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
             }
           }
@@ -368,12 +371,10 @@ object Control extends Thread("Siigna Controller") {
       events = events.tail
 
       // Initialize the module
-      if (!modules.isEmpty) {
-        if (initModule(modules.top, modules.top.state))
-          Log.success("Control: Successfully ended module. Current module: "+modules.top)
-        else
-          Log.error("Control: Sucessfully ended module, but unable to initialize the parent: " + modules.top)
-      }
+      if (initModule(modules.top, modules.top.state))
+        Log.success("Control: Successfully ended " + module + ". Current module: "+modules.top)
+      else
+        Log.error("Control: Sucessfully ended " + module + ", but unable to initialize the parent: " + modules.top)
     } else Log.error("Control: Unable to stop module " + modules.head + " - it's the only module left.")
   }
 
