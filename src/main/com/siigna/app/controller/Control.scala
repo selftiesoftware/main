@@ -356,7 +356,7 @@ object Control extends Thread("Siigna Controller") {
    * In other words we remove the most recent module and store it's events back in the queue so the next
    * control-loop if initiated and so the "parent" gets a chance to act.
    */
-  private def stopModule(module : Module) {
+  private def stopModule(module : Module, continue : Boolean) {
     if (modules.size > 1) {
       // Tell the module that it's no longer active
       module.isActive = false
@@ -365,7 +365,7 @@ object Control extends Thread("Siigna Controller") {
       modules.pop()
 
       // Store the head of the event-list in the event-queue.
-      eventQueue.enqueue(events.head)
+      if(continue) eventQueue.enqueue(events.head)
 
       // Set the most dangerous isForwardedEvent variable!
       isForwardedEvent = true
