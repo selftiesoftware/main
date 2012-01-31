@@ -52,5 +52,6 @@ case object Key {
   val Enter, enter                    = AWTKey.VK_ENTER
   val Escape, Esc, escape, esc        = AWTKey.VK_ESCAPE
   val Tabulator, Tab, tab, tabulator  = AWTKey.VK_TAB
+  val Shift, shift                    = AWTKey.VK_SHIFT
   val Space, space                    = AWTKey.VK_SPACE
 }

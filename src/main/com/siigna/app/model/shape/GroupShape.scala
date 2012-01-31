@@ -24,6 +24,8 @@ import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 case class GroupShape(ids : Seq[String], attributes : Attributes) extends Shape with collection.generic.SeqForwarder[ImmutableShape]
 {
 
+  type T = GroupShape
+
   /**
    * The boundary of the group.
    */

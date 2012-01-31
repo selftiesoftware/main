@@ -19,9 +19,19 @@ import util.geom.{PolylineGeometry, Geometry, Vector}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs.
+ *
+ * Available attributes:
+ * <pre>
+ *  - Color   Color   The color of the lines in the Polyline.
+ *  - Raster  Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
+ *                    in the PolylineShape.
+ * </pre>
  * TODO: Do an apply(shapes : BasicShape*)..
+ * TODO: Rewrite into a seq of points instead and optimize...
  */
 case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
+
+  type T = PolylineShape
 
   /**
    * Add a single shape to the polyline.
@@ -52,21 +62,45 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
 
 }
 
+/**
+ * A companion object to PolylineShape. Provides shortcuts to creations of PolylineShapes.
+ */
 object PolylineShape {
 
+  /**
+   * Creates an empty PolylineShape.
+   */
   def empty = new PolylineShape(Seq(), Attributes())
 
+  /**
+   * Creates a PolylineShape from a number of points.
+   *
+   * @param points  The points to use.
+   */
   def fromPoints(points : Vector2D*) : PolylineShape = fromPoints(points.toIterable)
 
-  def fromPoints(points : Traversable[Vector2D]) : PolylineShape = {
+  /**
+   * Creates a PolylineShape from a collection of points.
+   *
+   * @param points  The collection of points to use
+   * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
+   */
+  def fromPoints(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
     var lines = Seq[LineShape]()
     points.reduceLeft((a, b) => {
       lines :+= LineShape(a, b)
       b
     })
+
+    // Close the shape, if requested
+    if (closed) lines :+= LineShape(points.last, points.head)
+      
     PolylineShape(lines, Attributes())
   }
 
+  /**
+   * Returns a PolylineShape with four lines, representing the given Rectangle.
+   */
   def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices :+ rect.vertices.head)
 
 }

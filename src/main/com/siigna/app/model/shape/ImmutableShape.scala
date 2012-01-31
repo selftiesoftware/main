@@ -23,6 +23,8 @@ import com.siigna.util.geom._
  */
 trait ImmutableShape extends Shape {
 
+  type T <: ImmutableShape
+
   /**
    * Merge the new attributes in with the existing ones, eventually overwriting
    * attributes with new values.
@@ -64,7 +66,7 @@ trait ImmutableShape extends Shape {
    * Returns a setAttributes of the shape. In other words return a shape with a new id,
    * but otherwise the same attributes.
    */
-  def setAttributes(attributes : Attributes) : ImmutableShape
+  def setAttributes(attributes : Attributes) : T
 
   /**
    * Returns a DXFSection with the given shape represented.
@@ -74,7 +76,7 @@ trait ImmutableShape extends Shape {
   /**
    * Applies a transformation to the shape.
    */
-  def transform(transformation : TransformationMatrix) : ImmutableShape
+  def transform(transformation : TransformationMatrix) : T
 
 }
 
@@ -83,6 +85,8 @@ trait ImmutableShape extends Shape {
  * BasicShape is extended by two shapes: ArcShape and LineShape.
  */
 trait BasicShape extends ImmutableShape {
+
+  type T <: BasicShape
 
   /**
    * The basic geometric object for the shape.
@@ -93,12 +97,12 @@ trait BasicShape extends ImmutableShape {
    * Returns a setAttributes of the shape. In other words return a shape with a new id,
    * but otherwise the same attributes.
    */
-  def setAttributes(attributes : Attributes) : BasicShape
+  def setAttributes(attributes : Attributes) : T
 
   /**
    * Applies a transformation to the BasicShape.
    */
-  def transform(transformation : TransformationMatrix) : BasicShape
+  def transform(transformation : TransformationMatrix) : T
 
 }
 
@@ -107,17 +111,19 @@ trait BasicShape extends ImmutableShape {
  */
 trait EnclosedShape extends ImmutableShape {
 
+  type T <: EnclosedShape
+
   override def geometry : GeometryEnclosed2D
 
   /**
    * Returns a setAttributes of the shape. In other words return a shape with a new id,
    * but otherwise the same attributes.
    */
-  def setAttributes(attributes : Attributes) : EnclosedShape
+  def setAttributes(attributes : Attributes) : T
 
   /**
    * Applies a transformation to the BasicShape.
    */
-  def transform(transformation : TransformationMatrix) : EnclosedShape
+  def transform(transformation : TransformationMatrix) : T
 
 }

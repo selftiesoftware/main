@@ -36,6 +36,8 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  */
 case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int, attributes : Attributes) extends EnclosedShape {
 
+  type T = ImageShape
+
   val geometry = Rectangle2D(p1, p2)
 
   val points = Iterable(p1, p2)

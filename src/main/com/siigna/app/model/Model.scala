@@ -29,9 +29,8 @@ import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector2D}
  * The Prioritized R-tree is used for fast spatial queries through the shapes.
  * The Model extends ImmutableModel to easy the implementation, if you wanted to include the trait, but change any functions.
  *
- * TODO: Make parallel!
+ * TODO: Make parallel - and safe! (read up)
  * TODO: Create a thread for actions.
- * TODO: Remove touple-addition and use String and Shape separately!
  * TODO: Remove "+" operations.
  * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
  */
@@ -187,16 +186,16 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
    * Searches the model for every shape included in or touched by the Rectangle2D, with a flag that determines whether groups
    * should be included in the search.
    */
-  def apply(rectangle2D : Rectangle2D, includeGroups : Boolean = false) : Iterable[Shape] = try {
+  def apply(Rectangle2D : Rectangle2D, includeGroups : Boolean = false) : Iterable[Shape] = try {
     if (!model.static.isEmpty) {
       val ids = if (includeGroups) {
-        var ids = model.tree(rectangle2D)
-        model.groups.foreach(g => if (rectangle2D.intersects(g.boundary)) { // TODO: Search for ids not boundaries!
+        var ids = model.tree(Rectangle2D)
+        model.groups.foreach(g => if (Rectangle2D.intersects(g.boundary)) { // TODO: Search for ids not boundaries!
           ids = ids ++ g.ids
         })
         ids.toSeq.distinct
       } else {
-        model.tree(rectangle2D)
+        model.tree(Rectangle2D)
       }
       // Replace shapes with dynamic shapes if they exist.
       ids.map(id => if (mutableShapes.contains(id)) mutableShapes(id) else model.static(id))

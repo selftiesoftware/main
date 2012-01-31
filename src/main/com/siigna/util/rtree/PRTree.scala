@@ -11,8 +11,7 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.app.model.shape.Shape
-import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector}
+import com.siigna.util.geom.{Rectangle2D}
 
 /**
  * A priority tree containing references to the shapes in the static Model.
@@ -21,7 +20,8 @@ import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector}
  * This implementation is an approximation to the example given by the paper authored by Arge, de Berg, Haverkort and Yi (2004)
  * <a href="http://www.win.tue.nl/~mdberg/Papers/prtree.pdf">http://www.win.tue.nl/~mdberg/Papers/prtree.pdf</a> (PDF-warning).
  *
- * @param branchFactor  The branch factor is the maximum number of elements a single leaf can contain before being split. Default (and recommended) is 8. The value is truncated to fall within the range of [2; 1000]
+ * @param branchFactor  The branch factor is the maximum number of elements a single leaf can contain before being split.
+ * Default (and recommended) is 8.
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */

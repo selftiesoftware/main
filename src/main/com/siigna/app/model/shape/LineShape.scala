@@ -20,14 +20,15 @@ import com.siigna.util.geom.{TransformationMatrix, Vector2D, Segment2D}
  *
  * You can use the following attributes:
  * <pre>
- *  - Color        Color   The color of the line.
- *  - StrokeWidth  Double  The width of the linestroke used to draw.
+ *  - Color        Color                 The color of the line.
+ *  - StrokeWidth  Double                The width of the linestroke used to draw.
  *  - Transform    TransformationMatrix  A matrix to dynamically transform the shape when drawing.
  * </pre>
  * TODO: Update useable attributes.
  */
-case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) extends BasicShape
-{
+case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) extends BasicShape {
+
+  type T = LineShape
 
   val end = p2
 
