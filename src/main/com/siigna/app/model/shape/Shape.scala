@@ -22,6 +22,8 @@ import com.siigna.app.view.View
  */
 trait Shape {
 
+  type T <: Shape
+
   /**
    * The attributes of the shape.
    */
@@ -73,11 +75,11 @@ trait Shape {
   /**
    * Returns a new shape with a new set of attributes.
    */
-  def setAttributes(attributes : Attributes) : Shape
+  def setAttributes(attributes : Attributes) : T
 
   /**
    * Applies a transformation to the shape.
    */
-  def transform(transformation : TransformationMatrix) : Shape
+  def transform(transformation : TransformationMatrix) : T
   
 }

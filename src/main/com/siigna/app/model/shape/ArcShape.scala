@@ -34,6 +34,8 @@ import com.siigna.util.collection.Attributes
 case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape
 {
 
+  type T = ArcShape
+
   val geometry = Arc2D(center, radius, startAngle, angle)
 
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)

@@ -56,15 +56,20 @@ class Graphics(val g : Graphics2D)
    * Draws a given shape.
    */
   def draw(shape : Shape) {
+
     val attributes = shape.attributes
-    val selected = false
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
     val transformedShape = shape.transform(transformation)
+
+    // Retrieve the color-value
+    val color = attributes color("Color") getOrElse(colorDraw)
+
+    // Set the drawing-color
+    setColor(color)
     
     if (attributes.boolean("Visible") != Some(false)) {
       transformedShape match {
         case s : ArcShape         => {
-          setColor(attributes color("Color") getOrElse(colorDraw))
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
           drawArc(s.geometry.center, s.geometry.radius, s.geometry.startAngle, s.geometry.angle)
           // Something utterly wrong here...
@@ -73,7 +78,6 @@ class Graphics(val g : Graphics2D)
           //draw(s.end.transform(TransformationMatrix(Vector(0, 0), 1).flipY(s.geometry.center)))
         }
         case s : CircleShape      => {
-          setColor(attributes color("Color") getOrElse(colorDraw))
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
           drawCircle(s.center, s.radius)
           //draw(s.center)
@@ -98,7 +102,6 @@ class Graphics(val g : Graphics2D)
                       color, null)
         }
         case s : LineShape        => {
-          setColor(attributes color("Color") getOrElse(colorDraw))
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
           if (attributes.boolean("infinite").getOrElse(false))
             drawLine(s.p1, s.p2)
@@ -109,7 +112,6 @@ class Graphics(val g : Graphics2D)
         }
         case s : TextShape        => {
           val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
-          setColor(attributes color("Color") getOrElse(colorDraw))
           val shape : TextShape = if (adjustToScale) {
             s.copy(scale = s.scale * Model.boundaryScale)
           } else s
@@ -119,10 +121,21 @@ class Graphics(val g : Graphics2D)
         /** COLLECTION SHAPES **/
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {
+          // Set the color
           setColor(attributes color("Color") getOrElse(colorDraw))
-          s.shapes.foreach(s => {
-            draw(s.setAttributes(attributes))
-          })
+
+          // Examine the raster attribute
+          val raster = attributes color "raster"
+
+          // Draw the raster if it's defined
+          if (raster.isDefined) {
+            val points = s.geometry.vertices.map(p => (p.x.toInt, p.y.toInt)).toMap
+            g setColor raster.get
+            g.fillPolygon(points.keys.toArray, points.values.toArray, points.size)
+          }
+
+          // Draw the outline if the color is different
+          if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
         }
         case _ =>
       }
