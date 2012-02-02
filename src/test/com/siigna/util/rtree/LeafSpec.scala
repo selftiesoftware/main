@@ -20,9 +20,9 @@ import com.siigna.util.geom.Rectangle2D
  */
 class LeafSpec extends Spec with ShouldMatchers {
 
-  val elem1 = ("a81958d8-0664-4fac-be9c-bc59c44fb47b", Rectangle2D(15.23, 17.30, 89.3502, 123.273))
-  val elem2 = ("c0dd2d18-96ad-439b-b5da-cca31d59823c", Rectangle2D.empty)
-  val elem3 = ("c11c02e2-f146-4703-8477-b99165d48363", Rectangle2D(0, 26, -15, -70000))
+  val elem1 = (10020, Rectangle2D(15.23, 17.30, 89.3502, 123.273))
+  val elem2 = (0, Rectangle2D.empty)
+  val elem3 = (Int.MaxValue, Rectangle2D(0, 26, -15, -70000))
 
   describe("An empty leaf") {                        
     val leaf = new Leaf.EmptyLeaf(8, OrderMinX);
