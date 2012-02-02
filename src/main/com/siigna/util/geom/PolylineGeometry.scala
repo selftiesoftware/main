@@ -11,6 +11,8 @@
 
 package com.siigna.util.geom
 
+import com.siigna.app.model.shape.LineShape
+
 /**
  * A geometry designed for polylines
  */
@@ -48,6 +50,16 @@ case class PolylineGeometry(geometries : Seq[GeometryBasic2D]) extends Geometry2
 
   def transform(t : TransformationMatrix) = PolylineGeometry(geometries.map(_ transform t))
 
-  def vertices = geometries.foldLeft(Seq[Vector2D]())((c, s) => c ++ s.vertices)
+  def vertices = {
+    var vertices = Seq[Vector2D]()
+    for (g <- geometries) {
+      if (vertices.isEmpty) {
+        vertices :+= g.vertices.head
+      }
+
+      vertices :+= g.vertices.last
+    }
+    vertices
+  }
 
 }
