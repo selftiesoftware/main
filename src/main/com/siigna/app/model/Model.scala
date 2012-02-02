@@ -11,7 +11,32 @@
 
 package com.siigna.app.model
 
-import collection.generic.SeqForwarder
+import collection.parallel.immutable.ParIterable
+
+/**
+ * An immutable Model trait with add, remove, update and traversable functionalities. The model is parallel in the
+ * sense that the elements inside the model must use the [[scala.collection.parallel.immutable.ParIterable]] trait.
+ * This makes the model potentially very efficient, but it can be dangerous to use. Implementations of the Model
+ * trait has to be very careful!
+ */
+trait Model[T] extends Iterable[T] {
+
+  protected def elems : ParIterable[T]
+
+  def add(elem : T) : Model[T]
+  def add(elems : T*) : Model[T]
+  def add(elems : Traversable[T]) : Model[T]
+  
+  def remove(elem : T) : Model[T] 
+  def remove(elems : T*) : Model[T] 
+  def remove(elems : Traversable[T]) : Model[T]
+  
+  def update(elem1 : T, elem2 : T) : Model[T]
+  def update(elems : Map[T, T]) : Model[T]
+
+}
+
+/*import collection.generic.SeqForwarder
 import collection.immutable.HashMap
 import collection.mutable.ArrayBuffer
 
@@ -30,6 +55,7 @@ import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector2D}
  * The Model extends ImmutableModel to easy the implementation, if you wanted to include the trait, but change any functions.
  *
  * TODO: Make parallel - and safe! (read up)
+ * TODO: Atomize
  * TODO: Create a thread for actions.
  * TODO: Remove "+" operations.
  * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
@@ -381,4 +407,4 @@ object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
     Map[String, Shape]()
   }
 
-}
+}*/
