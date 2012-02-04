@@ -1,0 +1,5 @@
+Shape type id:  Shape type Name:        Dataformat:
+
+1:              Punkt                   Punkt
+2:              Linje                   Punkt, Punkt
+3:              Polylinie               Punkt, Punkt, Punkt, ...
