@@ -140,7 +140,8 @@ class Graphics(val g : Graphics2D)
           }
 
           // Draw the outline if the color is different
-          if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+          // TODO: Write this
+          //if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
         }
         case _ =>
       }
