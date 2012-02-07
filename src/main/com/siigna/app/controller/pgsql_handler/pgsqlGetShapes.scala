@@ -143,8 +143,6 @@ class pgsqlGetShapes {
       if (shapeType.get == 2)
       {
         resultSequenceShapes = resultSequenceShapes :+ LineShape(Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(0)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(0))), Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(1)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(1))))
-
-        //resultSequenceShapes = resultSequenceShapes :+ LineShape(Vector2D(0,0),Vector2D(1,1))
       }
       //Polyline-shape:
       if (shapeType.get == 3)
