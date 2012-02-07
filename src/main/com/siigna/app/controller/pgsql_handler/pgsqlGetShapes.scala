@@ -59,8 +59,8 @@ class pgsqlGetShapes {
               "ON shape_point_relation.shape_id = alias2.shape_id"
     val queryResultShapeIdPointId: ResultSet = createStatement.executeQuery(query)
     while (queryResultShapeIdPointId.next()) {
-      resultSequenceShapeIdPointIdShapeId = resultSequenceShapeIdPointId :+ queryResult.getInt("shape_id")
-      resultSequenceShapeIdPointIdPointId = resultSequenceShapeIdPointId :+ queryResult.getInt("point_id")      
+      resultSequenceShapeIdPointIdShapeId = resultSequenceShapeIdPointIdShapeId :+ queryResultShapeIdPointId.getInt("shape_id")
+      resultSequenceShapeIdPointIdPointId = resultSequenceShapeIdPointIdPointId :+ queryResultShapeIdPointId.getInt("point_id")
     }
 
     //Finder punkt id og tilhørende koordinater for shapes, der har et eller flere punkter i det angivne område (søgning B):
@@ -85,10 +85,10 @@ class pgsqlGetShapes {
               "ON point.point_id = shape_point_relation.point_id"
     val queryResultPointIdCoordinates: ResultSet = createStatement.executeQuery(query)
     while (queryResultPointIdCoordinates.next()) {
-      resultSequencePointIdXYZCoordinatesPointId = resultSequencePointIdXYZCoordinatesPoint :+ queryResult.getInt("point_id")
-      resultSequencePointIdXYZCoordinatesX = resultSequencePointIdXYZCoordinatesX :+ queryResult.getInt("x_coordinate")
-      resultSequencePointIdXYZCoordinatesY = resultSequencePointIdXYZCoordinatesY :+ queryResult.getInt("y_coordinate")
-      resultSequencePointIdXYZCoordinatesZ = resultSequencePointIdXYZCoordinatesZ :+ queryResult.getInt("z_coordinate")
+      resultSequencePointIdXYZCoordinatesPointId = resultSequencePointIdXYZCoordinatesPointId :+ queryResultPointIdCoordinates.getInt("point_id")
+      resultSequencePointIdXYZCoordinatesX = resultSequencePointIdXYZCoordinatesX :+ queryResultPointIdCoordinates.getInt("x_coordinate")
+      resultSequencePointIdXYZCoordinatesY = resultSequencePointIdXYZCoordinatesY :+ queryResultPointIdCoordinates.getInt("y_coordinate")
+      resultSequencePointIdXYZCoordinatesZ = resultSequencePointIdXYZCoordinatesZ :+ queryResultPointIdCoordinates.getInt("z_coordinate")
     }    
     
     //Finder shape type og tilhørende shape id for shapes, der har et eller flere punkter i det angivne område (søgning B):
@@ -112,14 +112,14 @@ class pgsqlGetShapes {
     //Finder de shapes, der er returneret
     while (queryResultShapeTypeShapeId.next()) {
       //Henter shape-id
-      shapeId = some(queryResultShapeTypeShapeId.getInt("shape_id"))
+      shapeId = Some(queryResultShapeTypeShapeId.getInt("shape_id"))
       //Henter shape-type
-      shapeType = some(queryResultShapeTypeShapeId.getInt("shape_type"))
+      shapeType = Some(queryResultShapeTypeShapeId.getInt("shape_type"))
       //laver liste over de steder i resultSequencePointIdXYZCoordinatesX/Y/Z hvor koordinaterne til punkterne i shapen findes
         //Først skal punkt-id findes ud fra shape id:
           i=0
           while (resultSequenceShapeIdPointIdShapeId.isDefinedAt(i)) {
-            if (resultSequenceShapeIdPointIdShapeId(i) == shapeId  ) {
+            if (resultSequenceShapeIdPointIdShapeId(i) == shapeId.get  ) {
               pointIdSequence = pointIdSequence :+ resultSequenceShapeIdPointIdPointId(i)
           i=i+1
           }}
@@ -137,21 +137,23 @@ class pgsqlGetShapes {
           }
 
       //Punkt-shape:
-      if (shapeType == 1)
+      if (shapeType.get == 1)
         {}
       //Line-shape:
-      if (shapeType == 2)
+      if (shapeType.get == 2)
       {
-        resultSequenceShapes = resultSequenceShapes :+ new LineShape(Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(0)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(0))), Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(1)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(1))))
+        resultSequenceShapes = resultSequenceShapes :+ LineShape(Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(0)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(0))), Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(1)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(1))))
+
+        //resultSequenceShapes = resultSequenceShapes :+ LineShape(Vector2D(0,0),Vector2D(1,1))
       }
       //Polyline-shape:
-      if (shapeType == 3)
+      if (shapeType.get == 3)
         {}
       //Cirkel-shape:
-      if (shapeType == 4)
+      if (shapeType.get == 4)
       {}
       //Arc-shape:
-      if (shapeType == 5)
+      if (shapeType.get == 5)
       {}
 
     //Nulstiller sequences til brug for næste gennemløb af løkken, hvor næste shape findes frem.
