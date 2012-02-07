@@ -47,14 +47,14 @@ class pgsqlGetShapes {
               "FROM shape_point_relation " +
               "JOIN " +
               "(shape_point_relation" +
-              "    JOIN " +
-              "    (SELECT point_id " +
-              "    FROM point " +
-              "    WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
-              "       AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
-              "       AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
-              "    AS alias " +
-              "    ON  shape_point_relation.point_id = alias.point_id) " +
+                  "JOIN " +
+                  "(SELECT point_id " +
+                  "FROM point " +
+                  "WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
+                      "AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
+                      "AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
+                  "AS alias " +
+                  "ON  shape_point_relation.point_id = alias.point_id) " +
               "AS alias2 " +
               "ON shape_point_relation.shape_id = alias2.shape_id"
     val queryResultShapeIdPointId: ResultSet = createStatement.executeQuery(query)
@@ -70,18 +70,18 @@ class pgsqlGetShapes {
               "FROM point " +
               "JOIN " +
               "(shape_point_relation " +
-              "    JOIN " +
-              "    (shape_point_relation " +
-              "        JOIN " +
-              "        (SELECT point_id " +
-              "        FROM point " +
-              "        WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
-              "           AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
-              "           AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
-              "        AS alias " +
-              "        ON  shape_point_relation.point_id = alias.point_id) " +
-              "    AS alias2 " +
-              "    ON shape_point_relation.shape_id = alias2.shape_id) " +
+                  "JOIN " +
+                  "(shape_point_relation " +
+                      "JOIN " +
+                      "(SELECT point_id " +
+                      "FROM point " +
+                      "WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
+                          "AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
+                          "AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
+                      "AS alias " +
+                      "ON  shape_point_relation.point_id = alias.point_id) " +
+                  "AS alias2 " +
+                  "ON shape_point_relation.shape_id = alias2.shape_id) " +
               "ON point.point_id = shape_point_relation.point_id"
     val queryResultPointIdCoordinates: ResultSet = createStatement.executeQuery(query)
     while (queryResultPointIdCoordinates.next()) {
@@ -97,14 +97,14 @@ class pgsqlGetShapes {
               "FROM shape " +
               "JOIN " +
               "(shape_point_relation " +
-              "    JOIN " +
-              "    (SELECT point_id " +
-              "    FROM point " +
-              "    WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
-              "       AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
-              "       AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
-              "    AS alias " +
-              "    ON  shape_point_relation.point_id = alias.point_id) " +
+                  "JOIN " +
+                  "(SELECT point_id " +
+                  "FROM point " +
+                  "WHERE ((x_coordinate BETWEEN " + (xCoordinate - xDistance) + " AND " + (xCoordinate + xDistance) + ") " +
+                      "AND (y_coordinate BETWEEN " + (yCoordinate - yDistance) + " AND " + (yCoordinate + yDistance) + ") " +
+                      "AND (z_coordinate BETWEEN " + (zCoordinate - zDistance) + " AND " + (zCoordinate + zDistance) + ")) " +
+                  "AS alias " +
+                  "ON  shape_point_relation.point_id = alias.point_id) " +
               "AS alias2 " +
               "ON shape.shape_id = alias2.shape_id"
     val queryResultShapeTypeShapeId: ResultSet = createStatement.executeQuery(query)
