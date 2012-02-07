@@ -14,42 +14,31 @@ package com.siigna.app.model.shape
 import com.siigna._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import collection.generic.{Subtractable, Addable}
-import util.geom.{PolylineGeometry, Geometry, Vector}
+import util.geom.PolylineGeometry
+
+import polyline._
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs.
  *
  * Available attributes:
  * <pre>
- *  - Color   Color   The color of the lines in the Polyline.
- *  - Raster  Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
+ *  - Color        Color   The color of the lines in the Polyline.
+ *  - StrokeWidth  Double  The width of the linestroke used to draw.
+ *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
  *                    in the PolylineShape.
  * </pre>
+ *
+ * @param shapes  The inner shapes of the PolylineShape, basically a List implementation.
  * TODO: Do an apply(shapes : BasicShape*)..
- * TODO: Rewrite into a seq of points instead and optimize...
+ * TODO: Implement additions and subtractions
  */
-case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) extends ImmutableShape with Subtractable[BasicShape, PolylineShape] {
+case class PolylineShape(shapes : InnerPolylineShape, attributes : Attributes) extends ImmutableShape {
 
   type T = PolylineShape
 
-  /**
-   * Add a single shape to the polyline.
-   */
-  def +: (shape : BasicShape) = copy(shapes.+:(shape))
-
-  /**
-   * Add several shapes to the polyline.
-   */
-  def +: (shapes : BasicShape*) = copy(shapes.++:(shapes))
-
-  /**
-   * Remove a shape from the polyline.
-   */
-  def - (shape : BasicShape) = copy(shapes.filterNot(_ == shape))
-
   // TODO: Fix this
-  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
+  def geometry = Rectangle2D.empty//if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
 
   def repr = this
 
@@ -58,7 +47,7 @@ case class PolylineShape(shapes : Seq[BasicShape], attributes : Attributes) exte
   // TODO: export polylines.
   def toDXF = DXFSection(List())
 
-  def transform(transformation : TransformationMatrix) = copy(shapes.map(_.transform(transformation)))
+  def transform(transformation : TransformationMatrix) = this //copy(shapes.map(_.transform(transformation)))
 
 }
 
@@ -70,7 +59,7 @@ object PolylineShape {
   /**
    * Creates an empty PolylineShape.
    */
-  def empty = new PolylineShape(Seq(), Attributes())
+  def empty = new PolylineShape(PolylineNil, Attributes())
 
   /**
    * Creates a PolylineShape from a number of points.
@@ -86,14 +75,11 @@ object PolylineShape {
    * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
    */
   def fromPoints(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
-    var lines = Seq[LineShape]()
-    points.reduceLeft((a, b) => {
-      lines :+= LineShape(a, b)
-      b
-    })
+    var lines : InnerPolylineShape = PolylineNil
+    points.foreach(p => lines = PolylineLineShape(p, lines))
 
     // Close the shape, if requested
-    if (closed) lines :+= LineShape(points.last, points.head)
+    if (closed) lines = PolylineLineShape(points.last, lines)
       
     PolylineShape(lines, Attributes())
   }

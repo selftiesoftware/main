@@ -46,7 +46,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    */
   def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def setAttributes(attributes : Attributes) = new CircleShape(center, p, attributes)
+  def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 
   // TODO export circles
   def toDXF = DXFSection(List())
@@ -59,6 +59,6 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
 object CircleShape
 {
 
-  def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, p, Attributes())
+  def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
 
 }

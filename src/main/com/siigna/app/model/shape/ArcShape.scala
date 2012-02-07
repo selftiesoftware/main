@@ -58,11 +58,10 @@ object ArcShape
    * @param start  The vector where the arc starts (CCW).
    * @param middle  The middle vector of the arc.
    * @param end  The vector where the arc stops (CCW).
-   * TODO: Deprecate?
    */
   def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : ArcShape = {
     val a = Arc2D(start, middle, end)
-    apply(a.center, a.radius, a.startAngle, a.angle)
+    new ArcShape(a.center, a.radius, a.startAngle, a.angle, Attributes())
   }
 
   /**
@@ -70,7 +69,6 @@ object ArcShape
    * @param radius  The radius of the arc.
    * @param startAngle  The start angle in degrees given from 3 o'clock and CCW.
    * @param endAngle  The end angle in degrees CCW from 3 o'clock.
-   * TODO: Revise and test the middle coordinate.
    */
   def apply(center : Vector2D, radius : Double, startAngle : Double, endAngle : Double) : ArcShape = {
     new ArcShape(center, radius, startAngle, endAngle, Attributes())
