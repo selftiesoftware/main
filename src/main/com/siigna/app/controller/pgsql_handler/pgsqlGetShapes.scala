@@ -7,8 +7,8 @@ import com.siigna.util.geom.Vector2D
 
 class pgsqlGetShapes {
 
-  //Modtager      x- og y-koordinat (Int), (default: 0,0)
-  //              samt afstand fra centerpunkt i x-(Int) og y-retning (Int), der skal søges
+  //Modtager      x- og y-koordinat (Int),
+  //              samt afstand fra centerpunkt i x- og y-retning (Int), der skal søges
   //Returnerer    en sequence af instantierede shapes:   (Shape1, Shape2,..., ShapeN)
 
   def getShapes (xCoordinate: Int, yCoordinate: Int, zCoordinate: Int, xDistance: Int, yDistance: Int, zDistance: Int) = {
@@ -32,7 +32,6 @@ class pgsqlGetShapes {
     var resultSequencePointIdXYZCoordinatesZ: Seq[Int] = Seq()
 
     var resultSequenceShapes: Seq[Shape] = Seq()
-
 
     //Virker ikke: Henter objektet med forbindelsesoplysninger
     //val createStatement: Statement = PgsqlConnectionInfo.GetConnectionAndStatement()
@@ -89,8 +88,8 @@ class pgsqlGetShapes {
       resultSequencePointIdXYZCoordinatesX = resultSequencePointIdXYZCoordinatesX :+ queryResultPointIdCoordinates.getInt("x_coordinate")
       resultSequencePointIdXYZCoordinatesY = resultSequencePointIdXYZCoordinatesY :+ queryResultPointIdCoordinates.getInt("y_coordinate")
       resultSequencePointIdXYZCoordinatesZ = resultSequencePointIdXYZCoordinatesZ :+ queryResultPointIdCoordinates.getInt("z_coordinate")
-    }    
-    
+    }
+
     //Finder shape type og tilhørende shape id for shapes, der har et eller flere punkter i det angivne område (søgning B):
     //Hage: fx. cirkler, der ikke har punkter men kun streg i området kommer ikke med.
     query =   "SELECT DISTINCT shape_type, shape.shape_id  " +
@@ -123,13 +122,13 @@ class pgsqlGetShapes {
               pointIdSequence = pointIdSequence :+ resultSequenceShapeIdPointIdPointId(i)
           i=i+1
           }}
-        //Så kan placeringen af punkterne i resultSequencePointIdXYZCoordinates findes ud fra point id: 
+        //Så kan placeringen af punkterne i resultSequencePointIdXYZCoordinates findes ud fra point id:
           i=0
           while (pointIdSequence.isDefinedAt(i)) {
             j=0
             while (resultSequencePointIdXYZCoordinatesPointId.isDefinedAt(j)) {
               if (pointIdSequence(i) == resultSequencePointIdXYZCoordinatesPointId(j)) {
-                pointCoordinatesLocationSequence = pointCoordinatesLocationSequence :+ j  
+                pointCoordinatesLocationSequence = pointCoordinatesLocationSequence :+ j
               }
               j=j+1
             }
