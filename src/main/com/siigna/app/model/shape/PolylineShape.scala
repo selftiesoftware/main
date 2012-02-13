@@ -42,15 +42,14 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
   /**
    * The shapes inside the PolylineShape
    */
-  def shapes : Seq[BasicShape] = {
-    val tmp = new Array[BasicShape](shapes.size)
-    if (innerShapes.size > 1)
+  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
+    val tmp = new Array[BasicShape](innerShapes.size)
     tmp(0) = innerShapes.head.apply(startPoint)
     for (i <- 1 until innerShapes.size) {
       tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
     }
     tmp
-  }
+  } else Seq[BasicShape]()
   
 
   // TODO: Fix this
@@ -63,7 +62,7 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
   // TODO: export polylines.
   def toDXF = DXFSection(List())
 
-  def transform(transformation : TransformationMatrix) = this //copy(shapes.map(_.transform(transformation)))
+  def transform(t : TransformationMatrix) = new PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
 
 }
 
@@ -85,9 +84,14 @@ object PolylineShape {
     def apply(v : Vector2D) : BasicShape
 
     /**
-     * The only known point in the InnerPolylineShape.
+     * The only point the InnerPolylineShape knows for certain.
      */
     def point : Vector2D
+
+    /**
+     * Transforms the InnerPolylineShape with the given [[com.siigna.util.geom.TransformationMatrix]].
+     */
+    def transform(t : TransformationMatrix) : InnerPolylineShape
 
   }
 
@@ -96,15 +100,18 @@ object PolylineShape {
    * @param point  The point given to create a LineShape.
    */
   sealed class PolylineLineShape(val point : Vector2D) extends InnerPolylineShape {
-    def apply(v : Vector2D) = LineShape(point, v)
+    def apply(v : Vector2D) = LineShape(v, point)
+    def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
   }
 
   /**
    * An ArcShape representation used inside a PolylineShape.
+   * @param middle  The center point of the arc
    * @param point The point given to create a LineShape.
    */
-  sealed class PolylineArcShape(val point : Vector2D) extends InnerPolylineShape {
-    def apply(v : Vector2D) = LineShape(point, v)
+  sealed class PolylineArcShape(val middle : Vector2D, val point : Vector2D) extends InnerPolylineShape {
+    def apply(v : Vector2D) = ArcShape(v, middle, point)
+    def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
   }
 
   /**

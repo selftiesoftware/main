@@ -137,11 +137,14 @@ class Graphics(val g : Graphics2D)
             })
             g setColor raster.get
             g.fillPolygon(px.toArray, py.toArray, px.size)
+
+            // Draw the outline if the color is different
+            if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+          } else {
+            s.shapes.foreach(s => draw(s.setAttributes(attributes)))
           }
 
-          // Draw the outline if the color is different
-          // TODO: Write this
-          //if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+
         }
         case _ =>
       }
