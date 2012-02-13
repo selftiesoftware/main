@@ -8,18 +8,19 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-
 package com.siigna.app.model.shape
 
-import com.siigna._
+import collection.immutable.Vector
+
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import util.geom.PolylineGeometry
-
-import polyline._
+import com.siigna.util.geom.{TransformationMatrix, PolylineGeometry, Rectangle2D, Vector2D}
 
 /**
- * A PolylineShape is a shape that can consist of segments or arcs.
+ * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
+ * [[com.siigna.app.model.shape.PolylineShape]] to construct a Polylineshape!</b> The default
+ * constructor uses a [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape] to ensure
+ * that data is not being duplicated in the long list of lines and/or arcs.
  *
  * Available attributes:
  * <pre>
@@ -29,16 +30,31 @@ import polyline._
  *                    in the PolylineShape.
  * </pre>
  *
- * @param shapes  The inner shapes of the PolylineShape, basically a List implementation.
+ * @param startPoint  The starting point of the PolylineShape.
+ * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
  */
-case class PolylineShape(shapes : InnerPolylineShape, attributes : Attributes) extends ImmutableShape {
+case class PolylineShape(private val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
 
   type T = PolylineShape
 
+  /**
+   * The shapes inside the PolylineShape
+   */
+  def shapes : Seq[BasicShape] = {
+    val tmp = new Array[BasicShape](shapes.size)
+    if (innerShapes.size > 1)
+    tmp(0) = innerShapes.head.apply(startPoint)
+    for (i <- 1 until innerShapes.size) {
+      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
+    }
+    tmp
+  }
+  
+
   // TODO: Fix this
-  def geometry = Rectangle2D.empty//if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
 
   def repr = this
 
@@ -57,9 +73,44 @@ case class PolylineShape(shapes : InnerPolylineShape, attributes : Attributes) e
 object PolylineShape {
 
   /**
+   * A shape type used in the PolylineShape. This shape is instantiated by a given point,
+   * so we (1) ensure that the shapes are connected and (2) avoids any duplicated points.
+   */
+  sealed trait InnerPolylineShape extends Function[Vector2D, BasicShape] {
+
+    /**
+     * Creates a BasicShape to use inside the PolylineShape.
+     * @param v  The vector with which the BasicShape is instantiated.
+     */
+    def apply(v : Vector2D) : BasicShape
+
+    /**
+     * The only known point in the InnerPolylineShape.
+     */
+    def point : Vector2D
+
+  }
+
+  /**
+   * A LineShape representation used inside a PolylineShape.
+   * @param point  The point given to create a LineShape.
+   */
+  sealed class PolylineLineShape(val point : Vector2D) extends InnerPolylineShape {
+    def apply(v : Vector2D) = LineShape(point, v)
+  }
+
+  /**
+   * An ArcShape representation used inside a PolylineShape.
+   * @param point The point given to create a LineShape.
+   */
+  sealed class PolylineArcShape(val point : Vector2D) extends InnerPolylineShape {
+    def apply(v : Vector2D) = LineShape(point, v)
+  }
+
+  /**
    * Creates an empty PolylineShape.
    */
-  def empty = new PolylineShape(PolylineNil, Attributes())
+  def empty = new PolylineShape(Vector2D.empty, Vector[InnerPolylineShape](), Attributes())
 
   /**
    * Creates a PolylineShape from a number of points.
@@ -75,13 +126,13 @@ object PolylineShape {
    * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
    */
   def fromPoints(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
-    var lines : InnerPolylineShape = PolylineNil
-    points.foreach(p => lines = PolylineLineShape(p, lines))
+    val startPoint = points.head
+    var lines = points.tail.toSeq.map(p => new PolylineLineShape(p))
 
     // Close the shape, if requested
-    if (closed) lines = PolylineLineShape(points.last, lines)
-      
-    PolylineShape(lines, Attributes())
+    if (closed) lines = lines :+ new PolylineLineShape(startPoint) else lines
+
+    PolylineShape(startPoint, lines, Attributes())
   }
 
   /**
