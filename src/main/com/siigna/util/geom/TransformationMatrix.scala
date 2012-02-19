@@ -155,4 +155,9 @@ object TransformationMatrix
   def apply(pan : Vector2D, zoom : Double) : TransformationMatrix =
     new TransformationMatrix() translate(pan) scale(zoom)
 
+  /**
+   * Creates a transformation matrix that doesn't move, scale or rotate anything.
+   */
+  def empty = new TransformationMatrix() translate(Vector2D(0, 0)) scale(1)
+
 }
