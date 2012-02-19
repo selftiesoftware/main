@@ -11,11 +11,16 @@
 
 package com.siigna.app.model
 
+import shape.ImmutableShape
+import collection.parallel.immutable.{ParIterable, ParVector}
+
 /**
- * An immutable model containing immutable shapes.
+ * An immutable and parallel model containing immutable shapes.
  */
-trait ImmutableModel {
+class ImmutableModel(shapes : ParVector[ImmutableShape]) extends ParIterable[ImmutableShape] {
 
-
+  def seq = shapes.seq
+  def size = shapes.size
+  def splitter = shapes.splitter
 
 }

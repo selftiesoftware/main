@@ -21,7 +21,7 @@ import com.siigna.util.geom.{TransformationMatrix, Vector2D}
  * @param ids  a set of ID's that refer to shapes in the model.
  * @param attributes  Attributes to be applied on the shapes in the collection.
  */
-case class GroupShape(ids : Seq[String], attributes : Attributes) extends Shape with collection.generic.SeqForwarder[ImmutableShape]
+case class GroupShape(ids : Seq[String], attributes : Attributes) extends CollectionShape[ImmutableShape]
 {
 
   type T = GroupShape
