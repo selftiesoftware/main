@@ -151,13 +151,22 @@ case class TransformationMatrix(t : AffineTransform)
 object TransformationMatrix
 {
 
-  def apply() : TransformationMatrix = new TransformationMatrix
+  /**
+   * Creates a transformation matrix that doesn't move, scale or rotate anything.
+   */
+  def apply : TransformationMatrix = new TransformationMatrix()
+
+  /**
+   * Creates a transformation matrix which moves and rotates by the given params.
+   * @param pan  The value by which the matrix should pan.
+   * @param zoom  The value by which the matrix should zoom.
+   */
   def apply(pan : Vector2D, zoom : Double) : TransformationMatrix =
     new TransformationMatrix() translate(pan) scale(zoom)
 
   /**
    * Creates a transformation matrix that doesn't move, scale or rotate anything.
    */
-  def empty = new TransformationMatrix() translate(Vector2D(0, 0)) scale(1)
+  def empty = new TransformationMatrix()
 
 }
