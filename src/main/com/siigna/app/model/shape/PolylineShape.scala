@@ -35,7 +35,7 @@ import com.siigna.util.geom.{TransformationMatrix, PolylineGeometry, Rectangle2D
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
  */
-case class PolylineShape(private val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
+case class PolylineShape(private val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   type T = PolylineShape
 
@@ -50,7 +50,6 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
     }
     tmp
   } else Seq[BasicShape]()
-  
 
   // TODO: Fix this
   def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))

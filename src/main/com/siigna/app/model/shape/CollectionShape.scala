@@ -9,25 +9,17 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.model
-
-import shape.ImmutableShape
-import collection.parallel.immutable.{ParIterable, ParVector}
+package com.siigna.app.model.shape
 
 /**
- * The model of Siigna.
- *
- * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
+ * A trait for immutable shapes containing other immutable shapes.
+ * @tparam T  The type of shapes inside the collection.
  */
-object Model extends DynamicModel with ParIterable[ImmutableShape] {
+trait CollectionShape[T] extends ImmutableShape with Iterable[T] {
 
   /**
-   * The immutable model containing the shapes.
+   * The inner shapes of the collection.
    */
-  private var immutableModel = new ImmutableModel(ParVector[ImmutableShape]())
-
-  def seq = immutableModel.seq
-  def size = immutableModel.size
-  def splitter = immutableModel.splitter
-
+  def shapes : Traversable[Shape]
+  
 }
