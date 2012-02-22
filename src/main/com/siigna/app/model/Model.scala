@@ -11,23 +11,87 @@
 
 package com.siigna.app.model
 
+
+import action.Action
+import com.siigna.util.logging.Log
 import shape.ImmutableShape
-import collection.parallel.immutable.{ParIterable, ParVector}
+import collection.parallel.immutable.{ParVector, ParIterable}
+
+/**
+ * A model that can store shapes, select and deselect shapes and group shapes.
+ *
+ * TODO: Examine possibility to implement an actor. Thread-less please.
+ * 
+ * @param shapes  The [[com.siigna.app.model.ImmutableModel]] where all the [[com.siigna.app.model.shape.Shape]]s are stored.
+ */
+sealed class Model(shapes : ImmutableModel) extends DynamicModel with GroupableModel
 
 /**
  * The model of Siigna.
- *
- * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
  */
-object Model extends DynamicModel with ParIterable[ImmutableShape] {
+object Model extends ParIterable[ImmutableShape] {
 
   /**
-   * The immutable model containing the shapes.
+   * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
    */
-  private var immutableModel = new ImmutableModel(ParVector[ImmutableShape]())
+  private var executed = Seq[Action]()
 
-  def seq = immutableModel.seq
-  def size = immutableModel.size
-  def splitter = immutableModel.splitter
+  /**
+   * The underlying immutable model of Siigna.
+   */
+  private var model = new Model(new ImmutableModel(ParVector[ImmutableShape]()))
+
+  /**
+   * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
+   */
+  private var undone = Seq[Action]()
+
+  /**
+   * Execute an action, list it as executed and clear the undone stack to make way for a new actions.
+   */
+  def execute(action : Action) {
+    model = action.execute(model)
+    executed +:= action
+    undone = Seq()
+  }
+
+  /**
+   * Redo an action, by executing the last function that's been undone.
+   */
+  def redo() {
+    if (undone.size > 0) {
+      // Retrieve the event
+      val action = undone.head
+      undone = undone.tail
+
+      // Execute the event and add it to the executed list
+      model = action.execute(model)
+      executed +:= action
+    } else {
+      Log.warning("Model: No more actions to redo.")
+    }
+  }
+
+  /**
+   * Undo an action and put it in the list of undone actions.
+   */
+  def undo() {
+    if (executed.size > 0) {
+      // Retrieve the action
+      val action = executed.head
+      executed = executed.tail
+
+      // Undo it and add it to the undone list
+      model = action.undo(shapes)
+      undone +:= action
+    } else {
+      Log.warning("Model: No more actions to undo.")
+    }
+  }
+
+  // Required by the ParIterable trait
+  def seq = model.shapes.seq
+  def size = model.shapes.size
+  def splitter = model.shapes.splitter
 
 }

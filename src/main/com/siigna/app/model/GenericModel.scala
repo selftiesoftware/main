@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
+ * to Share — to copy, distribute and transmit the work, 
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -11,17 +11,15 @@
 
 package com.siigna.app.model
 
-import shape.ImmutableShape
-import collection.parallel.immutable.{ParSeq, ParVector}
-
 /**
- * An immutable and parallel model containing immutable shapes.
+ * A trait for model-types in a whole. This trait implements the backbone of every model: 
+ * The [[com.siigna.app.model.ImmutableModel]].
  */
-class ImmutableModel(val shapes : ParVector[ImmutableShape]) extends ParSeq[ImmutableShape] {
+trait GenericModel {
 
-  def apply(idx : Int) = shapes(idx)
-  def length = shapes.length
-  def seq = shapes.seq
-  def splitter = shapes.splitter
+  /**
+   * The [[com.siigna.app.model.ImmutableModel]] on which actions, selections etc. can be performed.
+   */
+  protected def shapes : ImmutableModel
 
 }

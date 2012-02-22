@@ -14,73 +14,28 @@ package com.siigna.app.model.shape
 import com.siigna.app.model.Model
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
+import com.siigna.util.dxf.{DXFValue, DXFSection}
 
 /**
  * A Group that contains <b>references</b> to other shape and is thus only used as a container.
  *
- * @param ids  a set of ID's that refer to shapes in the model.
+ * @param shapes  The shapes stored in the GroupShape.
  * @param attributes  Attributes to be applied on the shapes in the collection.
+ * TODO: Implement additions and subtractions
  */
-case class GroupShape(ids : Seq[String], attributes : Attributes) extends CollectionShape[ImmutableShape]
-{
+case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) extends CollectionShape[ImmutableShape] {
 
   type T = GroupShape
 
-  /**
-   * The boundary of the group.
-   */
-  lazy val boundary = shapes.map(_.boundary).reduceLeft((a, b) => a.expand(b))
-
-  /**
-   * An instance of the shapes referred to by the <code>ids</code> sequence.
-   */
-  private lazy val shapes : Seq[ImmutableShape] = ids.map(Model.immutable.apply)
-
-  /**
-   * Adds a shape to the group.
-   */
-  def + (id : String) : GroupShape  = copy(ids :+ id)
-
-  /**
-   * Adds several shapes to the group.
-   */
-  def + (id1 : String, id2 : String, idx : String*) : GroupShape = this.+(id1).+(id2).++(idx)
-
-  /**
-   * Adds a number of shapes to the group.
-   */
-  def ++ (xs : TraversableOnce[String]) : GroupShape  = copy(ids ++ xs)
-
-  /**
-   * Removes a shape from the group.
-   */
-  def - (id : String) : GroupShape  = copy(ids.filterNot(_ == id))
-
-  /**
-   * Removes several shapes from the group.
-   */
-  def - (id1 : String, id2 : String, idx : String*) : GroupShape  = this.-(id1).-(id2).--(idx)
-
-  /**
-   * Removes a number of shapes from the group.
-   */
-  def -- (xs : TraversableOnce[String]) : GroupShape  = copy(ids.diff(xs.toSeq))
-
-  /**
-   * Calculates the closest distance to the group in the given scale.
-   */
-  def distanceTo(point : Vector2D, scale : Double) : Double = shapes.map(_.distanceTo(point, scale)).reduceLeft(math.min)
-
-  /**
-   * The underlying shapes as required by the SeqForwarder trait.
-   */
-  def underlying = shapes
+  def iterator = shapes.iterator
 
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
    * but otherwise the same attributes.
    */
   def setAttributes(attributes : Attributes) : GroupShape = copy(attributes = attributes)
+
+  def toDXF = new DXFSection(Seq())
 
   /**
    * Applies a transformation to the shape.
@@ -95,6 +50,6 @@ case class GroupShape(ids : Seq[String], attributes : Attributes) extends Collec
  */
 object GroupShape {
 
-  def apply(ids : Traversable[String]) = new GroupShape(ids.toSeq, Attributes())
+  def apply(shapes : Traversable[ImmutableShape]) = new GroupShape(shapes.toSeq, Attributes())
 
 }

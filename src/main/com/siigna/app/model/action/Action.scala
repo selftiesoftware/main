@@ -10,7 +10,7 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna._
+import com.siigna.app.model.Model
 
 /**
  * An action is an immutable representation of a state-change in the model and <b>the only way</b> to alter shapes and groups in the Model.

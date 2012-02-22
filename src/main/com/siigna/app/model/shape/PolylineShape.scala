@@ -14,7 +14,7 @@ import collection.immutable.Vector
 
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{TransformationMatrix, PolylineGeometry, Rectangle2D, Vector2D}
+import com.siigna.util.geom.{TransformationMatrix, CollectionGeometry, Rectangle2D, Vector2D}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -50,9 +50,6 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
     }
     tmp
   } else Seq[BasicShape]()
-
-  // TODO: Fix this
-  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
 
   def repr = this
 
