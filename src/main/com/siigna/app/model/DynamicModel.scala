@@ -11,8 +11,8 @@
 package com.siigna.app.model
 
 import com.siigna.util.logging.Log
-import action.{ActionQueue, Action}
 import shape.DynamicShape
+import collection.parallel.immutable.ParVector
 
 /**
  * The DynamicModel contains the <b>dynamic</b> (<code>var dynamic : Seq[DynamicShape]</code>) layer which is the part
@@ -21,43 +21,18 @@ import shape.DynamicShape
  * These shapes can be altered without changes in the static layer.
  * When the changes have been made, the shapes are removed from the dynamic layer, and the actions which have
  * been applied on the dynamic layer is applied on the static layer.
- *
- * TODO: Start the thread
  */
-trait DynamicModel extends Thread {
+trait DynamicModel extends GenericModel {
 
   /**
-   * The actions performed on the model.
+   * The currently selected shapes. This is not immutable since
    */
-  protected lazy val actions = new ActionQueue(model)
-
-  /**
-   * The underlying mutable model.
-   */
-  protected val model = new Model
-
-  /**
-   * The mutable shapes.
-   */
-  protected var mutableShapes = scala.collection.immutable.HashMap[String, DynamicShape]()
-
-  /**
-   * Shortcut to execute a given Action.
-   */
-  def apply(action : Action) = execute(action)
+  protected var dynamics : ParVector[DynamicShape] = ParVector()
 
   /**
    * Deselects the entire model.
    */
-  def deselect = {
-    mutableShapes.foreach(entry => {
-      if (!entry._2.actions.isEmpty) {
-        execute(entry._2.actions)
-      }
-      mutableShapes -= entry._1
-    })
-    this
-  }
+  def deselect() { dynamics = ParVector() }
 
   /**
    * Deselects a shape.
@@ -99,35 +74,10 @@ trait DynamicModel extends Thread {
       case e => Log.error("Model: Could not deselct shape with id '"+idx+"' - unknown error.")
     })
   }
-
-  /**
-   * Execute an action.
-   */
-  def execute(action : Action) : this.type = {
-    actions.execute(action)
-    this
-  }
-
-  /**
-   * Executes several actions.
-   */
-  def execute(actions : TraversableOnce[Action]) : this.type = {
-    actions.foreach(execute(_))
-    this
-  }
-
   /**
    * Determines whether a part of the model is selected (condition: <code>!selectedShapes.isEmpty</code>).
    */
   def isSelected = !selected.isEmpty
-
-  /**
-   * Redo the last action undone, unless there aren't any actions to redo.
-   */
-  def redo : this.type = {
-    actions.redo
-    this
-  }
 
   /**
    * Selects a shape from it's id unless it's already selected.
@@ -180,13 +130,5 @@ trait DynamicModel extends Thread {
    * Returns a <code>Map</code> of every selected shape paired with their id.
    */
   def selectedWithId = mutableShapes
-
-  /**
-   * Undo the last action executed, unless there aren't any actions to redo.
-   */
-  def undo : this.type = {
-    actions.undo
-    this
-  }
 
 }

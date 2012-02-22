@@ -11,15 +11,21 @@
 
 package com.siigna.app.model.shape
 
+import com.siigna.util.geom.{CollectionGeometry, Rectangle2D}
+
+
 /**
  * A trait for immutable shapes containing other immutable shapes.
  * @tparam T  The type of shapes inside the collection.
  */
-trait CollectionShape[T] extends ImmutableShape with Iterable[T] {
+trait CollectionShape[T <: ImmutableShape] extends ImmutableShape with Iterable[T] {
+
+  // TODO: Fix this
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
 
   /**
    * The inner shapes of the collection.
    */
-  def shapes : Traversable[Shape]
+  def shapes : Traversable[T]
   
 }

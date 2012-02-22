@@ -11,24 +11,21 @@
 
 package com.siigna.app.model
 
-import shape.GroupShape
 import com.siigna.util.logging.Log
+import shape.{ImmutableShape, GroupShape}
+import collection.parallel.immutable.ParVector
 
 /**
  * A CollectibleModel is able to group shapes into <code>Groups</code>.
  */
-trait GroupableModel {
-
-  /**
-   * The collections in the model.
-   */
-  val groups : collection.mutable.ArrayBuffer[GroupShape]
+trait GroupableModel extends GenericModel {
 
   /**
    * Groups a number of shapes.
    */
-  def group(shapes : Traversable[String]) : GroupableModel = {
-    groups + GroupShape(shapes)
+  def group(shapes : Traversable[Int]) : GroupableModel = {
+    val shapes = shapes.map(immutableModel(_))
+    immutableModel =
     this
   }
 
