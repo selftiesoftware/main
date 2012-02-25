@@ -13,6 +13,8 @@ package com
 
 package object siigna extends com.siigna.util.Implicits {
 
+  // ------------------ APP -------------------- //
+
   // Actions
   type Action = com.siigna.app.model.action.Action
 
@@ -45,9 +47,6 @@ package object siigna extends com.siigna.util.Implicits {
   // Model
   type Model = com.siigna.app.model.Model
   lazy val Model = com.siigna.app.model.Model
-
-  // Module
-  type Module = com.siigna.module.Module
 
   // Shapes
   type ImmutableShape = com.siigna.app.model.shape.ImmutableShape
@@ -84,6 +83,9 @@ package object siigna extends com.siigna.util.Implicits {
   type ModuleInterface = com.siigna.app.view.ModuleInterface
   type Popup = com.siigna.app.view.Popup
   val View = com.siigna.app.view.View
+
+  // ------------------ Module ------------------ //
+  type Module = com.siigna.module.Module
 
   // ------------------ UTIL -------------------- //
   // Collection
