@@ -24,7 +24,7 @@ import com.siigna.util.Implicits._
 * @param id  The id of the wrapped shape.
 * @param immutableShape  The original immutable shape.
 */
-case class DynamicShape(id : String, immutableShape : ImmutableShape) extends Shape {
+case class DynamicShape(id : Int, immutableShape : ImmutableShape) extends Shape {
 
   type T = ImmutableShape
 

@@ -12,10 +12,10 @@
 package com.siigna.app.model
 
 
-import action.Action
+import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.ImmutableShape
-import collection.parallel.immutable.{ParVector, ParIterable}
+import collection.parallel.immutable.{ParSeq, ParVector}
 
 /**
  * A model that can store shapes, select and deselect shapes and group shapes.
@@ -29,7 +29,7 @@ sealed class Model(shapes : ImmutableModel) extends DynamicModel with GroupableM
 /**
  * The model of Siigna.
  */
-object Model extends ParIterable[ImmutableShape] {
+object Model extends ParSeq[ImmutableShape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
@@ -47,12 +47,17 @@ object Model extends ParIterable[ImmutableShape] {
   private var undone = Seq[Action]()
 
   /**
-   * Execute an action, list it as executed and clear the undone stack to make way for a new actions.
+   * Execute an action, list it as executed and clear the undone stack to make way for a new actions
+   * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).
    */
   def execute(action : Action) {
     model = action.execute(model)
-    executed +:= action
-    undone = Seq()
+
+    // Only store the action if it is not volatile
+    if (!action.isInstanceOf[VolatileAction]) {
+      executed +:= action
+      undone = Seq()
+    }
   }
 
   /**
@@ -82,7 +87,7 @@ object Model extends ParIterable[ImmutableShape] {
       executed = executed.tail
 
       // Undo it and add it to the undone list
-      model = action.undo(shapes)
+      model = action.undo(model)
       undone +:= action
     } else {
       Log.warning("Model: No more actions to undo.")
@@ -90,8 +95,8 @@ object Model extends ParIterable[ImmutableShape] {
   }
 
   // Required by the ParIterable trait
+  def apply(idx : Int) = model.shapes.apply(idx)
   def seq = model.shapes.seq
-  def size = model.shapes.size
   def splitter = model.shapes.splitter
 
 }
