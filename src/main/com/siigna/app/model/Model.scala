@@ -14,22 +14,38 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.ImmutableShape
-import collection.parallel.immutable.{ParSeq, ParVector}
+import collection.parallel.immutable.{ParIterable, ParHashMap}
+import shape.{ImmutableShape, Shape}
 
 /**
- * A model that can store shapes, select and deselect shapes and group shapes.
+ * An immutable model with two layers: an static and dynamic.
+ * <br />
+ * The static part is basically a long list of all the
+ * [[com.siigna.app.model.shape.ImmutableShape]]s and their keys in the Model.
+ * <br />
+ * The dynamic part allows selecting parts of the global immutable layer. These shapes can be altered
+ * without changes in the static layer which allows for significant performance benefits. When the
+ * changes have been made (and the shapes are deselected), the shapes are removed from the dynamic
+ * layer, and the actions which have been applied on the dynamic layer is applied on the static layer.
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
- * 
- * @param shapes  The [[com.siigna.app.model.ImmutableModel]] where all the [[com.siigna.app.model.shape.Shape]]s are stored.
  */
-sealed class Model(shapes : ImmutableModel) extends DynamicModel with GroupableModel
+sealed class Model extends ImmutableModel[Int, ImmutableShape, Model]
+                      with DynamicModel[Model]
+                      with GroupableModel[Model]
+                      with SpatialModelInterface {
+
+def add(shape : Shape) : Model
+
+def delete(shape : Shape) : Model
+
+}
+
 
 /**
  * The model of Siigna.
  */
-object Model extends ParSeq[ImmutableShape] {
+object Model extends SpatialModelInterface with ParIterable[Shape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
@@ -39,7 +55,7 @@ object Model extends ParSeq[ImmutableShape] {
   /**
    * The underlying immutable model of Siigna.
    */
-  private var model = new Model(new ImmutableModel(ParVector[ImmutableShape]()))
+  private var model = new Model()
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
@@ -94,9 +110,10 @@ object Model extends ParSeq[ImmutableShape] {
     }
   }
 
-  // Required by the ParIterable trait
-  def apply(idx : Int) = model.shapes.apply(idx)
+  //------------- Required by the ParIterable trait -------------//
+  def apply(idx : Int) = model.shapes(idx)
   def seq = model.shapes.seq
+  def size = model.shapes.size
   def splitter = model.shapes.splitter
 
 }
