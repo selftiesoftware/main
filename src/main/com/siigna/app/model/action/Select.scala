@@ -16,7 +16,7 @@ import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 
 /**
- * An [[com.siigna.app.model.action.Action]] that can select objects. This action is crucial to
+ * Select objects. Even though this technically is not an action it is crucial to
  * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.ImmutableShape]]
  * and [[com.siigna.app.model.shape.DynamicShape]] that allows shapes to enter the
  * [[com.siigna.app.model.DynamicModel]]. DynamicShapes does not just duplicate shapes but also

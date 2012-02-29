@@ -19,7 +19,7 @@ import com.siigna.app.model.Model
 object Create {
 
   def apply(shape : Shape) { shape match {
-    case s : ImmutableShape => Model(CreateShape(uuid, s))
+    case s : ImmutableShape => Model(CreateShape(s))
     case _ => Model
   } }
 
@@ -36,28 +36,25 @@ object Create {
       Model(CreateShapes(immutableShapes.map(s => (uuid, s)).toMap))
   }
 
-  /**
-   * Returns a Universal Unique IDentifier (UUID).
-   */
-  private def uuid = java.util.UUID.randomUUID.toString
-
 }
 
 /**
  * Creates a shape with an associated ID.
  */
-case class CreateShape(id : String, shape : ImmutableShape) extends Action {
+case class CreateShape(shape : ImmutableShape) extends Action {
 
-  def execute(model : Model) = model + (id -> shape)
+  def execute(model : Model) = {
+    new Model(model.shapes :+ shape, model.dynamics)
+  }
 
   def merge(that : Action) = that match {
-    case CreateShape(i : String, s : ImmutableShape) =>
-      if (i == id && s == shape) this
-      else CreateShapes(Map((id, shape), (i, s)))
+    case CreateShape(s : ImmutableShape) =>
+      if (s == shape) this
+      else CreateShapes(Seq(shape, s))
     case _ => SequenceAction(this, that)
   }
 
-  def undo(model : Model) = model - id
+  def undo(model : Model) = new Model(model.shapes.filterNot(_ == shape), model.dynamics)
 
 }
 

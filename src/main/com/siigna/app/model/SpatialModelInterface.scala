@@ -11,34 +11,34 @@
 
 package com.siigna.app.model
 
-import shape.Shape
+import com.siigna.util.rtree.PRTree
+import com.siigna.util.geom.{Vector2D, Rectangle2D}
 
 /**
- * An immutable model containing shapes
- * @tparam Key  The keys in the Model.
- * @tparam Value  The shapes in the model.
- * @rparam Model  The return-type of the model.
+ * An interface that supplies
  */
-trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel] {
+trait SpatialModelInterface {
 
   /**
-   * Add a shape to the model.
+   * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
    */
-  def add(key : Key, shape : Value) : Model
+  protected def rtree : PRTree
 
   /**
-   * Add several shapes to the model.
+   * Query for shapes inside the given boundary.
    */
-  def add(shapes : Map[Key, Value]) : Model
+  def apply(query : Rectangle2D) = {
+    rtree(query)
+  }
 
   /**
-   * Remove a shape from the model.
+   * Query for shapes close to the given point by a given radius.
+   * @param query  The point to query.
+   * @param radius  (Optional) The radius added to the point.
    */
-  def remove(key : Key) : Model
+  def apply(query : Vector2D, radius : Double) = {
+    rtree(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
+  }
 
-  /**
-   * Remove several shapes from the model.
-   */
-  def remove(keys : Traversable[Key]) : Model
 
 }
