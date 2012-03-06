@@ -20,12 +20,11 @@ import com.siigna.util.geom.{Rectangle2D}
  * This implementation is an approximation to the example given by the paper authored by Arge, de Berg, Haverkort and Yi (2004)
  * <a href="http://www.win.tue.nl/~mdberg/Papers/prtree.pdf">http://www.win.tue.nl/~mdberg/Papers/prtree.pdf</a> (PDF-warning).
  *
- * @param branchFactor  The branch factor is the maximum number of elements a single leaf can contain before being split.
- * Default (and recommended) is 8.
+ * The branch factor (the maximum number of elements a single leaf) is set to 8 as recommended.
  * 
  * @author Jens Egholm <jensep@gmail.com>
  */
-class PRTree(branchFactor : Int = 8) extends Branch(branchFactor) {
+object PRTree extends Branch(8) {
 
   // TODO: Rethink
   override def mbr = {

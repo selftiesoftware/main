@@ -14,8 +14,9 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import collection.parallel.immutable.{ParIterable, ParHashMap}
 import shape.{ImmutableShape, Shape}
+import collection.parallel.immutable.{ParMap, ParIterable, ParHashMap}
+import com.siigna.util.rtree.PRTree
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -28,19 +29,22 @@ import shape.{ImmutableShape, Shape}
  * changes have been made (and the shapes are deselected), the shapes are removed from the dynamic
  * layer, and the actions which have been applied on the dynamic layer is applied on the static layer.
  *
+ * @param shapes  The shapes and their identifiers (keys) stored in the model.
+ *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model extends ImmutableModel[Int, ImmutableShape, Model]
-                      with DynamicModel[Model]
-                      with GroupableModel[Model]
+sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
+                      with DynamicModel[Int, Model]
+                      with GroupableModel[Int, Model]
                       with SpatialModelInterface {
 
-def add(shape : Shape) : Model
+  val rtree = PRTree;
 
-def delete(shape : Shape) : Model
+  def add(key : Int, shape : ImmutableShape) = { this }
+  def add(shapes : Map[Int, ImmutableShape]) = { this }
+
 
 }
-
 
 /**
  * The model of Siigna.
@@ -55,7 +59,7 @@ object Model extends SpatialModelInterface with ParIterable[Shape] {
   /**
    * The underlying immutable model of Siigna.
    */
-  private var model = new Model()
+  private var model = new Model(ParMap[Int, ImmutableShape]())
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
@@ -112,8 +116,8 @@ object Model extends SpatialModelInterface with ParIterable[Shape] {
 
   //------------- Required by the ParIterable trait -------------//
   def apply(idx : Int) = model.shapes(idx)
-  def seq = model.shapes.seq
+  def seq : Iterable[Shape] = model.shapes.seq.values ++ model.dynamics.seq.values
   def size = model.shapes.size
-  def splitter = model.shapes.splitter
+  def splitter = model.shapes.splitter.map(_._2).appendParIterable(model.dynamics.splitter.map(_._2))
 
 }
