@@ -12,6 +12,7 @@
 package com.siigna.app.model
 
 import shape.Shape
+import collection.parallel.immutable.ParMap
 
 /**
  * An immutable model containing shapes
@@ -20,7 +21,7 @@ import shape.Shape
  * @rparam Model  The return-type of the model.
  */
 trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel] {
-
+  
   /**
    * Add a shape to the model.
    */

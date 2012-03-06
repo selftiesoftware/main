@@ -11,8 +11,8 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.ParHashMap
 import shape.DynamicShape
+import collection.parallel.immutable.{ParMap, ParHashMap}
 
 /**
  * An immutable model containing [[com.siigna.app.model.shape.DynamicShape]]s.
@@ -20,10 +20,19 @@ import shape.DynamicShape
  * @tparam Model  The model to return whenever operations are performed on the DynamicModel.
  * @see [[com.siigna.app.model.Model]]
  */
-trait DynamicModel[Model <: DynamicModel] {
+trait DynamicModel[Key, Model <: DynamicModel] {
+  
+  var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
 
-  def deselect(id : Int) : Model
+  /**
+   * Deselect the active shapes in the DynamicModel. Remember it is immutable
+   */
+  def deselect  {
 
-  def select(id : Int) : Model
+  }
+
+  def select(id : Int) {
+
+  }
 
 }
