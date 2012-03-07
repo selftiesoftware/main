@@ -154,7 +154,7 @@ object TransformationMatrix
   /**
    * Creates a transformation matrix that doesn't move, scale or rotate anything.
    */
-  def apply : TransformationMatrix = new TransformationMatrix()
+  def apply() : TransformationMatrix = new TransformationMatrix()
 
   /**
    * Creates a transformation matrix which moves and rotates by the given params.
