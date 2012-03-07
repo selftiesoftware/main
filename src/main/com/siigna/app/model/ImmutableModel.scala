@@ -42,4 +42,14 @@ trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel] {
    */
   def remove(keys : Traversable[Key]) : Model
 
+  /**
+   * Update a shape in the model.
+   */
+  def update(key : Key, shape : Value) : Model
+
+  /**
+   * Update several shapes in the model.
+   */
+  def update(shapes : Map[Key, Value]) : Model
+
 }
