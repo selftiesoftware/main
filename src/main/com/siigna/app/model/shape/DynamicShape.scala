@@ -22,13 +22,66 @@ import com.siigna.util.Implicits._
 * can be made to the static version later on, when the shape is "demoted" back into the static layer.
 *
 * @param id  The id of the wrapped shape.
-* @param shape  The original immutable shape.
+* @param immutableShape  The original immutable shape.
 */
-case class DynamicShape(id : Int, shape : ImmutableShape) extends Shape
-                                                                      with (TransformationMatrix => ImmutableShape) {
+case class DynamicShape(id : String, immutableShape : ImmutableShape) extends Shape {
 
   type T = ImmutableShape
-  
-  def attributes = shape.attributes
+
+  /**
+   * The action performed on the shape.
+   * TODO: Refactor to a Option[Action] and use merge.
+   */
+  private var underlyingActions = Seq[Action]()
+
+  /**
+   * The underlying shape used to represent the current state of the dynamic shape.
+   */
+  private var underlyingShape = immutableShape
+
+  /**
+   * The actions performed on the DynamicShape.
+   */
+  def actions = underlyingActions
+
+  def attributes = underlyingShape.attributes
+
+  def boundary = underlyingShape.boundary
+
+  def distanceTo(point : Vector2D, scale : Double) = underlyingShape.distanceTo(point, scale)
+
+  /**
+   * Returns a new shape with a new set of attributes.
+   */
+  def setAttributes(attributes : Attributes) : T = underlyingShape.setAttributes(attributes)
+
+  /**
+   * Save the attributes to the underlying static shape and return this.
+   */
+  def setDynamicAttributes(attributes : Attributes) = {
+    underlyingShape = underlyingShape.setAttributes(attributes)
+    //TODO: underlyingActions = underlyingActions :+ UpdateShape(id, attributes)
+    this
+  }
+
+  /**
+   * Returns the underlying static shape.
+   */
+  def shape : ImmutableShape = underlyingShape
+
+  /**
+   * Applies a transformation to the shape.
+   */
+  def transform(transformation : TransformationMatrix) : T =
+    underlyingShape.transform(transformation)
+
+  /**
+   * Transforms the dynamic shape with a <code>TransformationMatrix</code>.
+   */
+  def transformDynamic(t : TransformationMatrix) = {
+    underlyingShape = underlyingShape.transform(t)
+    underlyingActions = underlyingActions :+ TransformShape(id, t)
+    this
+  }
 
 }

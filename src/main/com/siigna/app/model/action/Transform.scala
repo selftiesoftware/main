@@ -19,9 +19,9 @@ object Transform {
   // TODO: Optimize
   def apply(shape : Shape, transformation : TransformationMatrix) { shape match {
     case s : ImmutableShape => {
-      val id = Model.find(_._2 == shape)
+      val id = Model.findId(_ == shape)
       if (id.isDefined)
-        Model(TransformShape(id.get._1, transformation))
+        Model(TransformShape(id.get, transformation))
     }
     case s : DynamicShape => {
       s.transformDynamic(transformation)
