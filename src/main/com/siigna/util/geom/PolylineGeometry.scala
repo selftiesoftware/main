@@ -16,11 +16,11 @@ import com.siigna.app.model.shape.LineShape
 /**
  * A geometry designed for polylines
  */
-case class CollectionGeometry(geometries : Traversable[GeometryBasic2D]) extends Geometry2D {
+case class PolylineGeometry(geometries : Seq[GeometryBasic2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
 
-  type T = CollectionGeometry
+  type T = PolylineGeometry
 
   def boundary = geometries.map(_.boundary).reduceLeft((a, b) => a.expand(b))
 
@@ -48,7 +48,7 @@ case class CollectionGeometry(geometries : Traversable[GeometryBasic2D]) extends
   def intersections(s : Rectangle2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
   def intersections(s : Segment2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
 
-  def transform(t : TransformationMatrix) = CollectionGeometry(geometries.map(_ transform t))
+  def transform(t : TransformationMatrix) = PolylineGeometry(geometries.map(_ transform t))
 
   def vertices = {
     var vertices = Seq[Vector2D]()

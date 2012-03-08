@@ -11,45 +11,11 @@
 
 package com.siigna.app.model
 
-import shape.Shape
-import collection.parallel.immutable.ParMap
-
 /**
- * An immutable model containing shapes
- * @tparam Key  The keys in the Model.
- * @tparam Value  The shapes in the model.
- * @rparam Model  The return-type of the model.
+ * An immutable model containing immutable shapes.
  */
-trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel] {
-  
-  /**
-   * Add a shape to the model.
-   */
-  def add(key : Key, shape : Value) : Model
+trait ImmutableModel {
 
-  /**
-   * Add several shapes to the model.
-   */
-  def add(shapes : Map[Key, Value]) : Model
 
-  /**
-   * Remove a shape from the model.
-   */
-  def remove(key : Key) : Model
-
-  /**
-   * Remove several shapes from the model.
-   */
-  def remove(keys : Traversable[Key]) : Model
-
-  /**
-   * Update a shape in the model.
-   */
-  def update(key : Key, shape : Value) : Model
-
-  /**
-   * Update several shapes in the model.
-   */
-  def update(shapes : Map[Key, Value]) : Model
 
 }
