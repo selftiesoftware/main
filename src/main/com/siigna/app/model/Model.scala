@@ -15,7 +15,7 @@ package com.siigna.app.model
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.{ImmutableShape, Shape}
-import collection.parallel.immutable.{ParMap, ParIterable, ParHashMap}
+import collection.parallel.immutable.{ParMap}
 import com.siigna.util.rtree.PRTree
 
 /**
@@ -43,13 +43,29 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
   def add(key : Int, shape : ImmutableShape) = { this }
   def add(shapes : Map[Int, ImmutableShape]) = { this }
 
+  def remove(key: Int) = null
 
+  def remove(keys: Traversable[Int]) = null
+
+  def update(key: Int, shape: ImmutableShape) = null
+
+  def update(shapes: Map[Int, ImmutableShape]) = null
+
+  def group(key: Int, group: Int) = null
+
+  def group(keys: Traversable[Int]) = null
+
+  def group(keys: Traversable[Int], group: Int) = null
+
+  def ungroup(group: Int) = null
+
+  def ungroup(shape: Int, group: Int) = null
 }
 
 /**
  * The model of Siigna.
  */
-object Model extends SpatialModelInterface with ParIterable[Shape] {
+object Model extends SpatialModelInterface with ParMap[Int, ImmutableShape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
@@ -65,6 +81,8 @@ object Model extends SpatialModelInterface with ParIterable[Shape] {
    * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
    */
   private var undone = Seq[Action]()
+
+  def boundary = rtree.mbr
 
   /**
    * Execute an action, list it as executed and clear the undone stack to make way for a new actions
@@ -98,6 +116,11 @@ object Model extends SpatialModelInterface with ParIterable[Shape] {
   }
 
   /**
+   * The [[com.siigna.util.rtree.PRTree]] used by the model.
+   */
+  def rtree = model.rtree
+
+  /**
    * Undo an action and put it in the list of undone actions.
    */
   def undo() {
@@ -115,9 +138,11 @@ object Model extends SpatialModelInterface with ParIterable[Shape] {
   }
 
   //------------- Required by the ParIterable trait -------------//
-  def apply(idx : Int) = model.shapes(idx)
+  def +[U >: Int](kv : (Int, ImmutableShape)) = model.shapes.+[Int, U](kv)
+  def -(key : Int) = model.shapes.-(key)
+  def get(key : Int) = model.shapes.get(key)
   def seq : Iterable[Shape] = model.shapes.seq.values ++ model.dynamics.seq.values
   def size = model.shapes.size
-  def splitter = model.shapes.splitter.map(_._2).appendParIterable(model.dynamics.splitter.map(_._2))
+  def splitter = model.shapes.splitter.appendParIterable(model.dynamics.splitter)
 
 }

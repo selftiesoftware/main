@@ -16,7 +16,7 @@ import com.siigna.app.model.shape.LineShape
 /**
  * A geometry designed for polylines
  */
-case class CollectionGeometry(geometries : Seq[GeometryBasic2D]) extends Geometry2D {
+case class CollectionGeometry(geometries : Traversable[GeometryBasic2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
 

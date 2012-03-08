@@ -175,7 +175,7 @@ object View extends Canvas with Runnable {
       try {
         // TODO: Set the MBR for the model
         //val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
-        Model map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
+        Model.foreach(e => graphics.draw(e._2 transform transformation)) // Draw the entire Model
         // Filter away shapes that are drawn in the dynamic layer and draw the rest.
         //Model.queryForShapesWithId(mbr).filterNot(e => dynamic.contains(e._1)).map(e => e._2.transform(transformation) ) foreach( graphics draw)
       } catch {
@@ -184,14 +184,14 @@ object View extends Canvas with Runnable {
 
       // Fetch and draw the dynamic layer.
       // TODO: Cache this too
-      try {
+      /*try {
         val dynamic = Model.dynamicShapes
         // 1: Draw the dynamic layer and a shadow of the old shape
         dynamic.values.map(_.shape.addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
         dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
-      }
+      } */
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
