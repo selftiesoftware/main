@@ -28,7 +28,7 @@ class pgsqlSaveShapes {
   // methods:
 
   //Save point: Modtager x, y og z-koordinater (Int), og returnerer pointId (Int)
-  def saveLine (/*coordinates: Seq[Int]*/) = {
+  def saveShapes (/*coordinates: Seq[Int]*/) = {
 
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
