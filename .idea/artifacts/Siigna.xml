@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Siigna">
+    <output-path>$PROJECT_DIR$/out/artifacts/</output-path>
+    <root id="archive" name="siigna.jar">
+      <element id="module-output" name="siigna" />
+      <element id="extracted-dir" path="C:/scala/lib/scala-library.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/postgresql-9.1-901.jdbc4.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
