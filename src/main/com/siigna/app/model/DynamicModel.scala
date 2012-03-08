@@ -25,14 +25,14 @@ trait DynamicModel[Key, Model <: DynamicModel] {
   var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
 
   /**
-   * Deselect the active shapes in the DynamicModel. Remember it is immutable
+   * Deselect the active shapes in the DynamicModel.
    */
-  def deselect  {
+  def deselect() {
 
   }
 
   def select(id : Int) {
-
+    dynamics = dynamics.+(Model(id));
   }
 
 }
