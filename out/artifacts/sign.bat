@@ -1,2 +1,0 @@
-#keytool -genkey -alias signFiles -keystore compstore -keypass siigna -dname "cn=siigna" -storepass siigna
-jarsigner -keystore compstore -storepass siigna -keypass siigna -signedjar siigna_signed.jar siigna.jar signFiles
