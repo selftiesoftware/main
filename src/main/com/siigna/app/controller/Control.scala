@@ -17,6 +17,7 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
+import pgsql_handler._
 
 /**
  * The Control controls the core of the software. Basically that includes
@@ -322,6 +323,10 @@ object Control extends Thread("Siigna Controller") {
 	            } else {
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
+
+              //println ("her")
+              //val ne1 = new pgsqlSaveShapes
+              //ne1.saveLine()
             }
           }
           // Preload a module
