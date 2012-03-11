@@ -130,7 +130,7 @@ class pgsqlSaveShapes {
 
 
     //Vi har shape- og point-ids. Nu skal property og relationer laves.
-    var queryStringPropertyInt: String = "INSERT INTO property_int (property_number,property_value) VALUES "
+    var queryStringPropertyInt: String = "INSERT INTO property_int (property_int_number,property_int_value) VALUES "
     var queryStringShapePointRelation: String = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES "
     val shapeIdListIterator = shapeIds.iterator
     val pointIdListIterator = pointIds.iterator
@@ -191,8 +191,8 @@ class pgsqlSaveShapes {
     // Og tada- der gemmes
     queryStringPropertyInt = queryStringPropertyInt.take(queryStringPropertyInt.length-1)
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
-    queryStringPropertyInt += " RETURNING shape_id"
-    queryStringShapePointRelation += " RETURNING property_int_id"
+    queryStringPropertyInt += " RETURNING property_int_id"
+    queryStringShapePointRelation += " RETURNING shape_id"
 
     println(queryStringPropertyInt)
     println(queryStringShapePointRelation)
@@ -201,12 +201,12 @@ class pgsqlSaveShapes {
     if (queryStringPropertyInt.length > 110) {
       val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
       while (queryResultShapeIds.next()) {
-        shapeIds = shapeIds :+ queryResultShapeIds.getInt("shape_id")
+        shapeIds = shapeIds :+ queryResultShapeIds.getInt("property_int_id")
       }
 
       val queryResultPointIds: ResultSet = createStatement.executeQuery(queryStringShapePointRelation)
       while (queryResultPointIds.next()) {
-        pointIds = pointIds :+ queryResultPointIds.getInt("point_id")
+        pointIds = pointIds :+ queryResultPointIds.getInt("shape_id")
       }
     }
 
