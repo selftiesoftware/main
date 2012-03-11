@@ -46,8 +46,8 @@ class pgsqlSaveShapes {
 
     println("jada")
     val modelContains = Model.seq
-    var queryStringShapeType: String = "INSERT INTO shapet (shape_type) VALUES "
-    var queryStringCoordinates: String = "INSERT INTO pointt (x_coordinate, y_coordinate, z_coordinate) VALUES "
+    var queryStringShapeType: String = "INSERT INTO shape (shape_type) VALUES "
+    var queryStringCoordinates: String = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES "
 
       modelContains.foreach(shape => shape match {
       case shape : LineShape => {
@@ -130,8 +130,8 @@ class pgsqlSaveShapes {
 
 
     //Vi har shape- og point-ids. Nu skal property og relationer laves.
-    var queryStringPropertyInt: String = "INSERT INTO property_intt (property_number,property_value) VALUES "
-    var queryStringShapePointRelation: String = "INSERT INTO shape_point_relationt (shape_id,point_id) VALUES "
+    var queryStringPropertyInt: String = "INSERT INTO property_int (property_number,property_value) VALUES "
+    var queryStringShapePointRelation: String = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES "
     val shapeIdListIterator = shapeIds.iterator
     val pointIdListIterator = pointIds.iterator
     val polylineSizesListIterator = polylineSizes.iterator
