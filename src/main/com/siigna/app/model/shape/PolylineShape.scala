@@ -51,8 +51,6 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
     tmp
   } else Seq[BasicShape]()
 
-  def repr = this
-
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
   // TODO: export polylines.

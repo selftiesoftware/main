@@ -19,7 +19,7 @@ import com.siigna._
  */
 trait ActionModel {
 
-  protected def model : ImmutableModel
+  protected def model : Model
 
   /**
    * Every executed action.
