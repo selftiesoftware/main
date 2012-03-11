@@ -74,7 +74,7 @@ object Siigna extends Interface {
   /**
    * The version of Siigna.
    */
-  val version = "v. 0.1.13.5"
+  val version = "v. 0.1.15.4"
 
   /**
    * The zoom-speed. Defaults to 0.1 (i. e. 10%).

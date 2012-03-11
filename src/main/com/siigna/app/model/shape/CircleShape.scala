@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Circle, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{Circle2D, TransformationMatrix, Vector2D}
 
 /**
  * This class represents a circle.
@@ -24,14 +24,11 @@ import com.siigna.util.geom.{Circle, TransformationMatrix, Vector2D}
  *  - StrokeWidth  Double  The width of the line-stroke used to draw.
  * </pre>
  */
-case class CircleShape(center : Vector2D, p : Vector2D, attributes : Attributes) extends EnclosedShape {
+case class CircleShape(center : Vector2D, radius : Double, attributes : Attributes) extends EnclosedShape {
 
   type T = CircleShape
 
-  val geometry = Circle(center, p)
-  val radius = geometry.radius
-
-  val points = Iterable(center, p)
+  val geometry = Circle2D(center, radius)
 
   /**
    * Graphical handles for the circle.
@@ -49,21 +46,19 @@ case class CircleShape(center : Vector2D, p : Vector2D, attributes : Attributes)
    */
   def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def setAttributes(attributes : Attributes) = new CircleShape(center, p, attributes)
+  def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 
   // TODO export circles
   def toDXF = DXFSection(List())
 
   def transform(t : TransformationMatrix) =
-    CircleShape(center transform(t),
-                p transform(t),
-                attributes)
+    CircleShape(center transform(t), radius * t.scaleFactor, attributes)
 
 }
 
 object CircleShape
 {
 
-  def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, p, Attributes())
+  def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
 
 }

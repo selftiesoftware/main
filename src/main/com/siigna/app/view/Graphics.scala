@@ -129,13 +129,22 @@ class Graphics(val g : Graphics2D)
 
           // Draw the raster if it's defined
           if (raster.isDefined) {
-            val points = s.geometry.vertices.map(p => (p.x.toInt, p.y.toInt)).toMap
+            var px = Seq[Int]()
+            var py = Seq[Int]()
+            s.geometry.vertices.foreach(p => {
+              px :+= p.x.toInt
+              py :+= p.y.toInt
+            })
             g setColor raster.get
-            g.fillPolygon(points.keys.toArray, points.values.toArray, points.size)
+            g.fillPolygon(px.toArray, py.toArray, px.size)
+
+            // Draw the outline if the color is different
+            if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+          } else {
+            s.shapes.foreach(s => draw(s.setAttributes(attributes)))
           }
 
-          // Draw the outline if the color is different
-          if (color != raster) s.shapes.foreach(s => draw(s.setAttributes(attributes)))
+
         }
         case _ =>
       }

@@ -11,28 +11,34 @@
 
 package com.siigna.app.model
 
-import shape.DynamicShape
-import collection.parallel.immutable.{ParMap, ParHashMap}
+import com.siigna.util.rtree.PRTree
+import com.siigna.util.geom.{Vector2D, Rectangle2D}
 
 /**
- * An immutable model containing [[com.siigna.app.model.shape.DynamicShape]]s.
- *
- * @tparam Model  The model to return whenever operations are performed on the DynamicModel.
- * @see [[com.siigna.app.model.Model]]
+ * An interface that supplies
  */
-trait DynamicModel[Key, Model <: DynamicModel] {
-  
-  var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
+trait SpatialModelInterface {
 
   /**
-   * Deselect the active shapes in the DynamicModel.
+   * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
    */
-  def deselect() {
+  protected def rtree : PRTree
 
+  /**
+   * Query for shapes inside the given boundary.
+   */
+  def apply(query : Rectangle2D) = {
+    rtree(query)
   }
 
-  def select(id : Int) {
-    dynamics = dynamics.+(Model(id));
+  /**
+   * Query for shapes close to the given point by a given radius.
+   * @param query  The point to query.
+   * @param radius  (Optional) The radius added to the point.
+   */
+  def apply(query : Vector2D, radius : Double) = {
+    rtree(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
+
 
 }

@@ -11,14 +11,16 @@
 
 package com.siigna.util.geom
 
+import com.siigna.app.model.shape.LineShape
+
 /**
  * A geometry designed for polylines
  */
-case class PolylineGeometry(geometries : Seq[GeometryBasic2D]) extends Geometry2D {
+case class CollectionGeometry(geometries : Traversable[GeometryBasic2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
 
-  type T = PolylineGeometry
+  type T = CollectionGeometry
 
   def boundary = geometries.map(_.boundary).reduceLeft((a, b) => a.expand(b))
 
@@ -46,8 +48,18 @@ case class PolylineGeometry(geometries : Seq[GeometryBasic2D]) extends Geometry2
   def intersections(s : Rectangle2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
   def intersections(s : Segment2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
 
-  def transform(t : TransformationMatrix) = PolylineGeometry(geometries.map(_ transform t))
+  def transform(t : TransformationMatrix) = CollectionGeometry(geometries.map(_ transform t))
 
-  def vertices = geometries.foldLeft(Seq[Vector2D]())((c, s) => c ++ s.vertices)
+  def vertices = {
+    var vertices = Seq[Vector2D]()
+    for (g <- geometries) {
+      if (vertices.isEmpty) {
+        vertices :+= g.vertices.head
+      }
+
+      vertices :+= g.vertices.last
+    }
+    vertices
+  }
 
 }
