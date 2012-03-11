@@ -11,7 +11,9 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.ParIterable
+import shape.{ImmutableShape, Shape}
+import collection.parallel.immutable.{ParVector, ParIterable}
+import com.siigna.util.rtree.PRTree
 
 /**
  * An immutable Model trait with add, remove, update and traversable functionalities. The model is parallel in the
@@ -19,7 +21,7 @@ import collection.parallel.immutable.ParIterable
  * This makes the model potentially very efficient, but it can be dangerous to use. Implementations of the Model
  * trait has to be very careful!
  */
-trait Model[T] extends Iterable[T] {
+trait Model[T <: Shape] extends Iterable[T] {
 
   protected def elems : ParIterable[T]
 
@@ -31,8 +33,87 @@ trait Model[T] extends Iterable[T] {
   def remove(elems : T*) : Model[T] 
   def remove(elems : Traversable[T]) : Model[T]
   
-  def update(elem1 : T, elem2 : T) : Model[T]
-  def update(elems : Map[T, T]) : Model[T]
+  def updated(elem1 : T, elem2 : T) : Model[T]
+  def updated(elems : Map[T, T]) : Model[T]
+
+}
+
+
+/**
+ * The model of Siigna which contains a sequence of <i>immutable</i> shapes associated with ID's
+ * (<code>var static : HashMap[String, Shape]</code>)
+ * and a <i>Prioritized R Tree</i> (<code>val tree : PRTree[String]</code>) for graphic searches.
+ * The <i>immutable</i> Seq represents the drawing as it looks like in the Siigna universe - the version everybody sees.
+ * The Prioritized R-tree is used for fast spatial queries through the shapes.
+ * The Model extends ImmutableModel to easy the implementation, if you wanted to include the trait, but change any functions.
+ *
+ * TODO: Atomize
+ * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
+ */
+object Model extends Iterable[ImmutableShape] with ActionModel {
+
+  /**
+   * The model containing the immutable shapes, that is the shapes that the drawing itself consists of..
+   */
+  private var immutableModel = new ImmutableModel(new ParVector[ImmutableShape]())
+
+  /**
+   * The Prioritized R-tree.
+   */
+  var rtree = new PRTree()
+
+  /**
+   * The boundary from the current content of the Model.
+   * The rectangle returned fits an A-paper format, but <b>without margin</b>.
+   * This is done in order to make sure that the print viewed on page is the
+   * actual print you get.
+   *
+   * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
+   */
+  def boundary = {
+    val newBoundary  = model.tree.mbr
+    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
+    //val proportion   = 1.41421356
+
+    // Saves the format, as the format with the margin subtracted
+    var aFormatMin = Siigna.printFormatMin
+    var aFormatMax = Siigna.printFormatMax
+
+    // If the format is too small for the least proportion, then up the size
+    // one format.
+    // TODO: Optimize!
+    val list = List[Double](2, 2.5, 2)
+    var take = 0
+    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
+      val factor = list.apply(take)
+      aFormatMin *= factor
+      aFormatMax *= factor
+      take = if (take < 2) take + 1 else 0
+    }
+
+    // Set the boundary-rectangle.
+    if (size.x >= size.y) {
+      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
+                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+    } else {
+      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
+                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+    }
+  }
+
+  /**
+   * Uses toInt since it always rounds down to an integer.
+   */
+  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
+
+
+  /**
+   * The iterator used by the Iterable trait.
+   */
+  private def iterator = immutableModel.iterator
+
+  def model = immutableModel
 
 }
 

@@ -8,7 +8,8 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-package com.siigna.app.model.action
+
+package com.siigna.app.model
 
 import scala.collection.mutable.Stack
 import com.siigna._
@@ -16,7 +17,9 @@ import com.siigna._
 /**
  * Saved actions associated with a given model. Ordered by LIFO (Last In First Out).
  */
-class ActionQueue(model : Model) {
+trait ActionModel {
+
+  protected def model : ImmutableModel
 
   /**
    * Every executed action.

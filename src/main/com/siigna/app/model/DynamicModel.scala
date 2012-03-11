@@ -8,10 +8,10 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-package com.siigna.app.model
+/*package com.siigna.app.model
 
 import com.siigna.util.logging.Log
-import action.{ActionQueue, Action}
+import action.Action
 import shape.DynamicShape
 
 /**
@@ -29,7 +29,7 @@ trait DynamicModel extends Thread {
   /**
    * The actions performed on the model.
    */
-  protected lazy val actions = new ActionQueue(model)
+  protected lazy val actions = new ActionModel(model)
 
   /**
    * The underlying mutable model.
@@ -189,4 +189,4 @@ trait DynamicModel extends Thread {
     this
   }
 
-}
+}*/
