@@ -10,7 +10,7 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna._
+import com.siigna.app.model.{Model, ImmutableModel}
 
 /**
  * An action is an immutable representation of a state-change in the model and <b>the only way</b> to alter shapes and groups in the Model.
@@ -20,7 +20,7 @@ trait Action {
   /**
    * Executes the action on a given model.
    */
-  def execute(model : Model) : Model
+  def execute(model : ImmutableModel) : Model
 
   /**
    * The method merges this action in with another action, so this action is performed first.
@@ -30,7 +30,7 @@ trait Action {
   /**
    * Undo the action on a given model.
    */
-  def undo(model : Model) : Model
+  def undo(model : ImmutableModel) : Model
 
 }
 
