@@ -108,7 +108,7 @@ object Leaf {
     def apply(query : Rectangle2D) = Traversable.empty
     def isBetter(query : Rectangle2D) = true
     val mbr = Rectangle2D.empty
-    def remove(elem : String) = throw new UnsupportedOperationException("Unable to delete element from empty leaf.")
+    def remove(elem : Int) = throw new UnsupportedOperationException("Unable to delete element from empty leaf.")
     val size = 0
     override val toString = "Empty Leaf"
     val traversable = Iterable.empty[(Int, Rectangle2D)]

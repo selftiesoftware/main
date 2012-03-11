@@ -13,11 +13,12 @@ package com.siigna.app.model
 
 import com.siigna.util.rtree.PRTree
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
+import shape.{ImmutableShape, Shape}
 
 /**
  * An interface that supplies
  */
-trait SpatialModelInterface {
+trait SpatialModelInterface[Key, Value <: ImmutableShape] {
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
@@ -36,8 +37,8 @@ trait SpatialModelInterface {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double) = {
-    rtree(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
+  def apply(query : Vector2D, radius : Double) : Iterable[ImmutableShape] = {
+    rtree(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius)).map(Model(_))
   }
 
 

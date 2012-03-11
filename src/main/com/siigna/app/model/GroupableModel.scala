@@ -17,7 +17,7 @@ package com.siigna.app.model
  * @tparam Key  The type of the keys to group.
  * @tparam Model  The model to return whenever operations are performed on the GroupableModel.
  */
-trait GroupableModel[Key, Model <: GroupableModel] {
+trait GroupableModel[Key, Model <: GroupableModel[Key, Model]] {
 
   /**
    * Group a single shape to another group.

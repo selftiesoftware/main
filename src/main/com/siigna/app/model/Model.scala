@@ -17,6 +17,9 @@ import com.siigna.util.logging.Log
 import shape.{ImmutableShape, Shape}
 import collection.parallel.immutable.{ParMap}
 import com.siigna.util.rtree.PRTree
+import com.siigna.app.Siigna
+import com.siigna.util.geom.{Vector2D, Rectangle2D}
+import collection.parallel.IterableSplitter
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,9 +39,9 @@ import com.siigna.util.rtree.PRTree
 sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
                       with DynamicModel[Int, Model]
                       with GroupableModel[Int, Model]
-                      with SpatialModelInterface {
+                      with SpatialModelInterface[Int, ImmutableShape] {
 
-  val rtree = PRTree;
+  val rtree = new PRTree(8);
 
   def add(key : Int, shape : ImmutableShape) = { this }
   def add(shapes : Map[Int, ImmutableShape]) = { this }
@@ -65,7 +68,7 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
 /**
  * The model of Siigna.
  */
-object Model extends SpatialModelInterface with ParMap[Int, ImmutableShape] {
+object Model extends SpatialModelInterface[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
@@ -82,7 +85,50 @@ object Model extends SpatialModelInterface with ParMap[Int, ImmutableShape] {
    */
   private var undone = Seq[Action]()
 
-  def boundary = rtree.mbr
+  /**
+   * The boundary from the current content of the Model.
+   * The rectangle returned fits an A-paper format, but <b>without margin</b>.
+   * This is done in order to make sure that the print viewed on page is the
+   * actual print you get.
+   *
+   * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
+   */
+  def boundary = {
+    val newBoundary  = model.rtree.mbr
+    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
+    //val proportion   = 1.41421356
+
+    // Saves the format, as the format with the margin subtracted
+    var aFormatMin = Siigna.printFormatMin
+    var aFormatMax = Siigna.printFormatMax
+
+    // If the format is too small for the least proportion, then up the size
+    // one format.
+    // TODO: Optimize!
+    val list = List[Double](2, 2.5, 2)
+    var take = 0
+    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
+      val factor = list.apply(take)
+      aFormatMin *= factor
+      aFormatMax *= factor
+      take = if (take < 2) take + 1 else 0
+    }
+
+    // Set the boundary-rectangle.
+    if (size.x >= size.y) {
+      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
+                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+    } else {
+      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
+                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+    }
+  }
+
+  /**
+   * Uses toInt since it always rounds down to an integer.
+   */
+  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
 
   /**
    * Execute an action, list it as executed and clear the undone stack to make way for a new actions
@@ -137,12 +183,11 @@ object Model extends SpatialModelInterface with ParMap[Int, ImmutableShape] {
     }
   }
 
-  //------------- Required by the ParIterable trait -------------//
-  def +[U >: Int](kv : (Int, ImmutableShape)) = model.shapes.+[Int, U](kv)
+  //------------- Required by the ParMap trait -------------//
+  def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
   def -(key : Int) = model.shapes.-(key)
   def get(key : Int) = model.shapes.get(key)
-  def seq : Iterable[Shape] = model.shapes.seq.values ++ model.dynamics.seq.values
+  def seq = model.shapes.seq
   def size = model.shapes.size
-  def splitter = model.shapes.splitter.appendParIterable(model.dynamics.splitter)
-
+  def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
 }

@@ -17,7 +17,7 @@ import com.siigna.app.model.Model
 * An object that allows you to create one or multiple shapes.
 */
 object Create {
-
+/*
   def apply(shape : Shape) { shape match {
     case s : ImmutableShape => Model(CreateShape(s))
     case _ => Model
@@ -73,5 +73,5 @@ case class CreateShapes(shapes : Map[String, ImmutableShape]) extends Action {
   }
 
   def undo(model : Model) = model -- shapes.keys
-
+     */
 }
