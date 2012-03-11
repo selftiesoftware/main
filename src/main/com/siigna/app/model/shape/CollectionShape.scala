@@ -9,30 +9,23 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.model
+package com.siigna.app.model.shape
 
-import shape.DynamicShape
-import collection.parallel.immutable.{ParMap, ParHashMap}
+import com.siigna.util.geom.{CollectionGeometry, Rectangle2D}
+
 
 /**
- * An immutable model containing [[com.siigna.app.model.shape.DynamicShape]]s.
- *
- * @tparam Model  The model to return whenever operations are performed on the DynamicModel.
- * @see [[com.siigna.app.model.Model]]
+ * A trait for immutable shapes containing other immutable shapes.
+ * @tparam T  The type of shapes inside the collection.
  */
-trait DynamicModel[Key, Model <: DynamicModel] {
-  
-  var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
+trait CollectionShape[T <: ImmutableShape] extends ImmutableShape with Iterable[T] {
+
+  // TODO: Fix this
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
 
   /**
-   * Deselect the active shapes in the DynamicModel.
+   * The inner shapes of the collection.
    */
-  def deselect() {
-
-  }
-
-  def select(id : Int) {
-    dynamics = dynamics.+(Model(id));
-  }
-
+  def shapes : Traversable[T]
+  
 }

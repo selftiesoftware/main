@@ -1,0 +1,10 @@
+Shapes i databasen:
+
+Shape type id:  Shape type Name:        Dataformat:
+
+1:              Punkt                   Punkt
+2:              Linje                   Punkt, Punkt
+3:              Polylinie               Punkt, Punkt, Punkt, ...
+4:              Cirkel                  Punkt                        Radius
+5:              Arc (cirkelbue)         Punkt, Radius, vinkel1 (grader*1000), vinkel2 (grader*1000)
+

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
+ * to Share — to copy, distribute and transmit the work, 
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -11,73 +11,44 @@
 
 package com.siigna.app.model
 
-import shape.GroupShape
-import com.siigna.util.logging.Log
-
 /**
- * A CollectibleModel is able to group shapes into <code>Groups</code>.
+ * A model that can group and ungroup [[com.siigna.app.model.shape.ImmutableShape]]s.
+ * 
+ * @tparam Key  The type of the keys to group.
+ * @tparam Model  The model to return whenever operations are performed on the GroupableModel.
  */
-trait GroupableModel {
+trait GroupableModel[Key, Model <: GroupableModel] {
 
   /**
-   * The collections in the model.
+   * Group a single shape to another group.
+   * @param key  The key of the shape to group
+   * @param group  The key of the group.
    */
-  val groups : collection.mutable.ArrayBuffer[GroupShape]
+  def group(key : Key, group : Key) : Model
+  
+  /**
+   * Group a collection of shapes.
+   */
+  def group(keys : Traversable[Key]) : Model
 
   /**
-   * Groups a number of shapes.
+   * Group a collection of shapes into another group.
+   * @param keys  The keys of the shapes to group.
+   * @param group  The key of the group.
    */
-  def group(shapes : Traversable[String]) : GroupableModel = {
-    groups + GroupShape(shapes)
-    this
-  }
+  def group(keys : Traversable[Key], group : Key) : Model
 
   /**
-   * Disperses a group.
+   * Ungroup a group by destroying it and putting the shapes back into the model individually.
+   * @param group  The key of the group to explode.
    */
-  def ungroup(group : GroupShape) : GroupableModel = try {
-    groups -= group
-    this
-  } catch {
-    case e => Log.error("Model: Unknown error when dispersing a group: "+e)
-    this
-  }
+  def ungroup(group : Key) : Model
 
   /**
-   * Ungroups a number of shapes from the given collection.
+   * Ungroups a shape given by its key from a group given by its key.
+   * @param shape  The key of the shape to ungroup.
+   * @param group  The key of the group to ungroup the shape from.
    */
-  def ungroup(group : GroupShape, shapes : Traversable[String]): GroupableModel = try {
-    val index = groups.indexWhere(_ == group)
-    if (index >= 0) {
-      val newGroup = group -- shapes
-      if (!newGroup.isEmpty) {
-        groups.update(index, newGroup)
-      } else {
-        groups.remove(index)
-      }
-    } else {
-      Log.warning("Model: The group to be dispersed could not be found in the model. Dispersion cancelled.")
-    }
-    this
-  } catch {
-    case e => Log.error("Model: Unknown error when dispersing a shape from a group: "+e)
-    this
-  }
-
-  /**
-   * Replaces a given group with a new group, if the first group exists.
-   */
-  def update(oldGroup : GroupShape, newGroup : GroupShape) : GroupableModel = try {
-    val index = groups.indexWhere(_ == oldGroup)
-    if (index >= 0) {
-      groups.update(index, newGroup)
-    } else {
-      Log.warning("Model: The group to be updates could not be found in the model. Dispersion cancelled.")
-    }
-    this
-  } catch {
-    case e => Log.error("Model: Unknown error when dispersing a shape from a group: "+e)
-    this
-  }
-
+  def ungroup(shape : Key, group : Key) : Model
+  
 }

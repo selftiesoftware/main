@@ -11,481 +11,138 @@
 
 package com.siigna.app.model
 
-import shape.{ImmutableShape, Shape}
-import collection.parallel.immutable.{ParVector, ParIterable}
-import com.siigna.util.rtree.PRTree
 
-/**
- * An immutable Model trait with add, remove, update and traversable functionalities. The model is parallel in the
- * sense that the elements inside the model must use the [[scala.collection.parallel.immutable.ParIterable]] trait.
- * This makes the model potentially very efficient, but it can be dangerous to use. Implementations of the Model
- * trait has to be very careful!
- */
-trait Model[T <: Shape] extends Iterable[T] {
-
-  protected def elems : ParIterable[T]
-
-  def add(elem : T) : Model[T]
-  def add(elems : T*) : Model[T]
-  def add(elems : Traversable[T]) : Model[T]
-  
-  def remove(elem : T) : Model[T] 
-  def remove(elems : T*) : Model[T] 
-  def remove(elems : Traversable[T]) : Model[T]
-  
-  def updated(elem1 : T, elem2 : T) : Model[T]
-  def updated(elems : Map[T, T]) : Model[T]
-
-}
-
-
-/**
- * The model of Siigna which contains a sequence of <i>immutable</i> shapes associated with ID's
- * (<code>var static : HashMap[String, Shape]</code>)
- * and a <i>Prioritized R Tree</i> (<code>val tree : PRTree[String]</code>) for graphic searches.
- * The <i>immutable</i> Seq represents the drawing as it looks like in the Siigna universe - the version everybody sees.
- * The Prioritized R-tree is used for fast spatial queries through the shapes.
- * The Model extends ImmutableModel to easy the implementation, if you wanted to include the trait, but change any functions.
- *
- * TODO: Atomize
- * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
- */
-object Model extends Iterable[ImmutableShape] with ActionModel {
-
-  /**
-   * The model containing the immutable shapes, that is the shapes that the drawing itself consists of..
-   */
-  private var immutableModel = new ImmutableModel(new ParVector[ImmutableShape]())
-
-  /**
-   * The Prioritized R-tree.
-   */
-  var rtree = new PRTree()
-
-  /**
-   * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>without margin</b>.
-   * This is done in order to make sure that the print viewed on page is the
-   * actual print you get.
-   *
-   * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
-   */
-  def boundary = {
-    val newBoundary  = model.tree.mbr
-    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
-    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
-    //val proportion   = 1.41421356
-
-    // Saves the format, as the format with the margin subtracted
-    var aFormatMin = Siigna.printFormatMin
-    var aFormatMax = Siigna.printFormatMax
-
-    // If the format is too small for the least proportion, then up the size
-    // one format.
-    // TODO: Optimize!
-    val list = List[Double](2, 2.5, 2)
-    var take = 0
-    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
-      val factor = list.apply(take)
-      aFormatMin *= factor
-      aFormatMax *= factor
-      take = if (take < 2) take + 1 else 0
-    }
-
-    // Set the boundary-rectangle.
-    if (size.x >= size.y) {
-      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
-    } else {
-      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
-    }
-  }
-
-  /**
-   * Uses toInt since it always rounds down to an integer.
-   */
-  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
-
-
-  /**
-   * The iterator used by the Iterable trait.
-   */
-  private def iterator = immutableModel.iterator
-
-  def model = immutableModel
-
-}
-
-/*import collection.generic.SeqForwarder
-import collection.immutable.HashMap
-import collection.mutable.ArrayBuffer
-
-import com.siigna.app.Siigna
+import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.{GroupShape, ImmutableShape, Shape}
+import shape.{ImmutableShape, Shape}
+import collection.parallel.immutable.{ParMap}
 import com.siigna.util.rtree.PRTree
-import com.siigna.util.geom.{Rectangle2D, Rectangle, Vector2D}
 
 /**
- * The model of Siigna which contains a sequence of <i>immutable</i> shapes associated with ID's
- * (<code>var static : HashMap[String, Shape]</code>)
- * and a <i>Prioritized R Tree</i> (<code>val tree : PRTree[String]</code>) for graphic searches.
- * The <i>immutable</i> Seq represents the drawing as it looks like in the Siigna universe - the version everybody sees.
- * The Prioritized R-tree is used for fast spatial queries through the shapes.
- * The Model extends ImmutableModel to easy the implementation, if you wanted to include the trait, but change any functions.
+ * An immutable model with two layers: an static and dynamic.
+ * <br />
+ * The static part is basically a long list of all the
+ * [[com.siigna.app.model.shape.ImmutableShape]]s and their keys in the Model.
+ * <br />
+ * The dynamic part allows selecting parts of the global immutable layer. These shapes can be altered
+ * without changes in the static layer which allows for significant performance benefits. When the
+ * changes have been made (and the shapes are deselected), the shapes are removed from the dynamic
+ * layer, and the actions which have been applied on the dynamic layer is applied on the static layer.
  *
- * TODO: Make parallel - and safe! (read up)
- * TODO: Atomize
- * TODO: Create a thread for actions.
- * TODO: Remove "+" operations.
- * TODO: Optimize group-operations. Possibly let the group shapes operate as regular shapes.
+ * @param shapes  The shapes and their identifiers (keys) stored in the model.
+ *
+ * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-class Model extends GroupableModel with SeqForwarder[ImmutableShape] {
+sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
+                      with DynamicModel[Int, Model]
+                      with GroupableModel[Int, Model]
+                      with SpatialModelInterface {
 
-  /**
-   * Groups defined in the model.
-   */
-  val groups = ArrayBuffer[GroupShape]()
+  val rtree = PRTree;
 
-  /**
-   * This hashmap contains every shape in the model.
-   */
-  var static  = HashMap[String, ImmutableShape]()
+  def add(key : Int, shape : ImmutableShape) = { this }
+  def add(shapes : Map[Int, ImmutableShape]) = { this }
 
-  /**
-   * Creates a new prioritized R-tree associated with strings used to store the id of the shapes.
-   */
-  val tree = new PRTree()
+  def remove(key: Int) = null
 
-  /**
-   * Add a shape to the model. <b>Assuming that the shape does not exist in the Model!</b>
-   */
-  def + (elem : (String, ImmutableShape)) : Model = {
-    try {
-      static = static + elem
-      tree add (elem._1, elem._2.boundary)
-    } catch {
-      case e => Log.error("Model: Insertion failed. Unknown error: "+e)
-    }
-    this
-  }
+  def remove(keys: Traversable[Int]) = null
 
-  /**
-   * Adds several shapes to the model.
-   */
-  def ++ (elems : Traversable[(String, ImmutableShape)]) : Model = {
-    try {
-      static = static.++(elems.toMap).asInstanceOf[HashMap[String, ImmutableShape]]
-      tree.add(elems.map(e => (e._1, e._2.boundary)).toMap)
-    } catch {
-      case e => Log.error("Model: Insertion failed. Unkown error: "+e)
-    }
-    this
-  }
+  def update(key: Int, shape: ImmutableShape) = null
 
-  /**
-   * Remove a shape by it's index in the model, assuming the shape exists.
-   */
-  def - (key : String) : Model = {
-    try {
-      val shape = static(key)
-      static = static - key
-      tree remove (key, shape.boundary)
-    } catch {
-      case e : NoSuchElementException => Log.warning("Model: Removal failed. Could not find the given shape in the model: "+e)
-      case e => Log.warning("Model: Removal failed. Unknown error encountered: "+e)
-    }
-    this
-  }
+  def update(shapes: Map[Int, ImmutableShape]) = null
 
-  /**
-   * Removes several shapes from the model.
-   */
-  def -- (keys : Traversable[String]) : Model = {
-    try {
-      val elems : Map[String, Rectangle2D] = keys.collect{case key => (key -> static(key).boundary)}.toMap
-      static = static -- keys
-      tree remove elems
-    } catch {
-      case e : NoSuchElementException => Log.warning("Model: Removals failed. Could not find a given shape in the model: "+e)
-      case e => Log.warning("Model: Removals failed. Unknown error encountered: "+e)
-    }
-    this
-  }
+  def group(key: Int, group: Int) = null
 
-  /**
-   * Prints the model as a (possibly very long) string. You're warned...
-   */
-  override def toString() = "Model[ Shapes: ("+static.toString+"),\n"+
-                          "Prioritized R-Tree: "+tree.toString+" ]"
+  def group(keys: Traversable[Int]) = null
 
-  /**
-   * The underlying Seq as required by the SeqForwarder trait.
-   */
-  def underlying = static.values.toSeq
+  def group(keys: Traversable[Int], group: Int) = null
 
-  /**
-   * Updates the shape with the associated key id.
-   */
-  def update(id : String, shape : ImmutableShape) : Model = {
-    try {
-      val oldShape = static(id)
-      static = static.updated(id, shape)
-      tree remove (id, oldShape.boundary)
-      tree add (id, shape.boundary)
-    } catch {
-      case e : NoSuchElementException => Log.error("Update failed. Could not find the given shape in the model: "+e)
-      case e => Log.error("Update failed. Unknown error encountered: "+e)
-    }
-    this
-  }
+  def ungroup(group: Int) = null
 
-  /**
-   * Updates the shape with the associated key id with a given function.
-   */
-  def update(id : String, f : (ImmutableShape) => ImmutableShape) : Model = {
-    try {
-      val oldShape = static(id)
-      val newShape = f(oldShape)
-      static = static.updated(id, newShape)
-      tree remove (id, oldShape.boundary)
-      tree add (id, newShape.boundary)
-    } catch {
-      case e : NoSuchElementException => Log.error("Model: Update failed. Could not find the given shape in the model: "+e)
-      case e => Log.error("Model: Update failed. Unknown error encountered: "+e)
-    }
-    this
-  }
-
-  /**
-   * Updates a number of shapes associated with a key with a function.
-   * TODO: Optimize
-   */
-  def update(ids : Traversable[String], f : (ImmutableShape) => ImmutableShape) : Model = {
-    ids.foreach(update(_, f))
-    this
-  }
-
+  def ungroup(shape: Int, group: Int) = null
 }
 
 /**
- * The globally accessible Model.
+ * The model of Siigna.
  */
-object Model extends DynamicModel with SeqForwarder[ImmutableShape] {
+object Model extends SpatialModelInterface with ParMap[Int, ImmutableShape] {
 
   /**
-   * Returns the immutable shape associated with the given ids.
+   * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
    */
-  def apply(id : String) : Shape = {
-    if (mutableShapes.contains(id))
-      mutableShapes(id).shape
-    else
-      model.static.apply(id)
-  }
+  private var executed = Seq[Action]()
 
   /**
-   * Searches the model for every shape included in or touched by the Rectangle2D.
+   * The underlying immutable model of Siigna.
    */
-  def apply(Rectangle2D : Rectangle2D) : Traversable[Shape] = apply(Rectangle2D, false)
+  private var model = new Model(ParMap[Int, ImmutableShape]())
 
   /**
-   * Searches the model for every shape included in or touched by the Rectangle2D, with a flag that determines whether groups
-   * should be included in the search.
+   * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
    */
-  def apply(Rectangle2D : Rectangle2D, includeGroups : Boolean = false) : Iterable[Shape] = try {
-    if (!model.static.isEmpty) {
-      val ids = if (includeGroups) {
-        var ids = model.tree(Rectangle2D)
-        model.groups.foreach(g => if (Rectangle2D.intersects(g.boundary)) { // TODO: Search for ids not boundaries!
-          ids = ids ++ g.ids
-        })
-        ids.toSeq.distinct
-      } else {
-        model.tree(Rectangle2D)
-      }
-      // Replace shapes with dynamic shapes if they exist.
-      ids.map(id => if (mutableShapes.contains(id)) mutableShapes(id) else model.static(id))
-    } else Seq[Shape]()
-  } catch {
-    case e => Log.warning("Model: Query failed. Returning empty sequence. Unknown error: "+e)
-    Seq[Shape]()
-  }
+  private var undone = Seq[Action]()
+
+  def boundary = rtree.mbr
 
   /**
-   * Searches the model for the closest shape to the given point.
+   * Execute an action, list it as executed and clear the undone stack to make way for a new actions
+   * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).
    */
-  def apply(point : Vector2D) : Option[Shape] = try {
-    val res = apply(point, 20)
-    if (res.isEmpty)
-      None
-    else Some(res.reduceLeft((a, b) => if (a.distanceTo(point) <= b.distanceTo(point)) a else b))
-  } catch {
-    case e => Log.error("Model: Error occurred while retrieving shapes from a given point.", e)
-    None
-  }
+  def execute(action : Action) {
+    model = action.execute(model)
 
-  /**
-   * Searches the model for shapes included in or touched by the point +/- a given margin.
-   */
-  def apply(point : Vector2D, margin : Double) : Traversable[Shape] = {
-    val mbr = Rectangle2D(point.x - margin, point.y - margin, point.x + margin, point.y + margin)
-    apply(mbr)
-  }
-
-  /**
-   * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>without margin</b>.
-   * This is done in order to make sure that the print viewed on page is the
-   * actual print you get.
-   *
-   * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
-   */
-  def boundary = {
-    val newBoundary  = model.tree.mbr
-    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
-    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
-    //val proportion   = 1.41421356
-
-    // Saves the format, as the format with the margin subtracted
-    var aFormatMin = Siigna.printFormatMin
-    var aFormatMax = Siigna.printFormatMax
-
-    // If the format is too small for the least proportion, then up the size
-    // one format.
-    // TODO: Optimize!
-    val list = List[Double](2, 2.5, 2)
-    var take = 0
-    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
-      val factor = list.apply(take)
-      aFormatMin *= factor
-      aFormatMax *= factor
-      take = if (take < 2) take + 1 else 0
+    // Only store the action if it is not volatile
+    if (!action.isInstanceOf[VolatileAction]) {
+      executed +:= action
+      undone = Seq()
     }
+  }
 
-    // Set the boundary-rectangle.
-    if (size.x >= size.y) {
-      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+  /**
+   * Redo an action, by executing the last function that's been undone.
+   */
+  def redo() {
+    if (undone.size > 0) {
+      // Retrieve the event
+      val action = undone.head
+      undone = undone.tail
+
+      // Execute the event and add it to the executed list
+      model = action.execute(model)
+      executed +:= action
     } else {
-      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      Log.warning("Model: No more actions to redo.")
     }
   }
 
   /**
-   * Uses toInt since it always rounds down to an integer.
+   * The [[com.siigna.util.rtree.PRTree]] used by the model.
    */
-  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
+  def rtree = model.rtree
 
   /**
-   * The underlying dynamic shapes (selected shapes).
+   * Undo an action and put it in the list of undone actions.
    */
-  def dynamicShapes = mutableShapes
+  def undo() {
+    if (executed.size > 0) {
+      // Retrieve the action
+      val action = executed.head
+      executed = executed.tail
 
-  /**
-   * Returns the id for the given shape.
-   * TODO: MapForwarder
-   */
-  def findId(f : (ImmutableShape) => Boolean) : Option[String] = {
-    val res = model.static.find(s => f(s._2))
-    if (res.isDefined)
-      Some(res.get._1)
-    else
-      None
-  }
-
-  /**
-   * Returns a list with ids for the given shapes.
-   */
-  def findIds(shapes : Traversable[ImmutableShape]) : Traversable[String] =
-    shapes.map(s => findId(_ == s)).filter(_ == None).map(_.get)
-
-  /**
-   * The underlying immutable model.
-   */
-  def immutable = model.static
-
-  /**
-   * The underlying immutable shapes.
-   */
-  def shapes = underlying
-
-  /**
-   * Prints the model as a (possibly very long) string. You're warned...
-   */
-  override def toString = model.toString()
-
-  /**
-   * The underlying mutable model.
-   */
-  def underlying = model.static.values.toSeq
-
-  /**
-   * Searches the model for static shapes closes to a given point excluding <code>Groups</code> and <code>DynamicShapes</code>.
-   */
-  def queryForShapes(point : Vector2D) : Option[ImmutableShape] = {
-    val res = queryForShapes(point, 10)
-    if (res.isEmpty)
-      None
-    else Some(res.reduceLeft((a, b) => if (a.distanceTo(point) <= b.distanceTo(point)) a else b))
-  }
-
-  /**
-   * Searches the model for static shapes from a point with a given margin excluding <code>Groups</code> and <code>DynamicShapes</code>.
-   */
-  def queryForShapes(point : Vector2D, margin : Double) : Iterable[ImmutableShape] =
-    queryForShapes(Rectangle2D(point.x - margin, point.y - margin, point.x + margin, point.y + margin))
-
-  /**
-   * Searches the model for static shapes excluding <code>Groups</code> and <code>DynamicShapes</code>.
-   */
-  def queryForShapes(Rectangle2D : Rectangle2D) : Iterable[ImmutableShape] = try {
-    if (!model.static.isEmpty) {
-      model.tree(Rectangle2D).map(model.static)
+      // Undo it and add it to the undone list
+      model = action.undo(model)
+      undone +:= action
     } else {
-      Seq[ImmutableShape]()
+      Log.warning("Model: No more actions to undo.")
     }
-  } catch {
-    case e => Log.warning("Model: Query failed. Returning empty sequence. Unknown error: "+e)
-    Seq[ImmutableShape]()
   }
 
-  /**
-   * Searches the model for static shapes associated with an id, excluding <code>Groups</code> and <code>DynamicShapes</code>.
-   */
-  def queryForShapesWithId(Rectangle2D : Rectangle2D) : Map[String, ImmutableShape] = try {
-    if (!model.static.isEmpty) {
-      model.tree(Rectangle2D).map(i => i -> model.static(i)).toMap
-    } else {
-      Map[String, ImmutableShape]()
-    }
-  } catch {
-    case e => Log.warning("Model: Query failed. Returning empty map. Unknown error: "+e)
-    Map[String, ImmutableShape]()
-  }
+  //------------- Required by the ParIterable trait -------------//
+  def +[U >: Int](kv : (Int, ImmutableShape)) = model.shapes.+[Int, U](kv)
+  def -(key : Int) = model.shapes.-(key)
+  def get(key : Int) = model.shapes.get(key)
+  def seq : Iterable[Shape] = model.shapes.seq.values ++ model.dynamics.seq.values
+  def size = model.shapes.size
+  def splitter = model.shapes.splitter.appendParIterable(model.dynamics.splitter)
 
-  /**
-   * Searches the model for every shape included in or touched by the Rectangle2D. Includes a flag whether to include groups
-   * in the search.
-   */
-  def queryWithId(mbr : Rectangle2D, includeGroups : Boolean = false) : Map[String, Shape] = try {
-    if (!model.static.isEmpty) {
-      val ids = if (includeGroups) {
-        var ids = model.tree(mbr)
-        model.groups.foreach(g => if (mbr.intersects(g.boundary)) {
-          ids = ids ++ g.ids
-        })
-        ids.toSeq.distinct
-      } else {
-        model.tree(mbr)
-      }
-      // Replace shapes with dynamic shapes if they exist.
-      ids.map(id => if (mutableShapes.contains(id)) (id -> mutableShapes(id)) else (id -> model.static(id))).toMap
-    } else Map[String, Shape]()
-  } catch {
-    case e => Log.warning("Model: Query failed. Returning empty sequence. Unknown error: "+e)
-    Map[String, Shape]()
-  }
-
-}*/
+}
