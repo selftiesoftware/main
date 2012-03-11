@@ -25,19 +25,19 @@
       val createStatement: Statement = databaseConnection.createStatement()
 
       var queryString: String = "delete from drawing"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
       queryString = "delete from drawing_shape_relation"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
       queryString = "delete from shape"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
       queryString = "delete from shape_property_int_relation"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
        queryString = "delete from property_int"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
        queryString = "delete from point"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
        queryString = "delete from shape_point_relation"
-      createStatement.executeQuery(queryString)
+      createStatement.execute(queryString)
 
         //Luk forbindelsen
         databaseConnection.close()
