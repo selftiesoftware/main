@@ -14,12 +14,12 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.{ImmutableShape, Shape}
-import collection.parallel.immutable.{ParMap}
+import shape.{ImmutableShape}
 import com.siigna.util.rtree.PRTree
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
+import collection.parallel.immutable.{ParHashMap, ParMap}
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,19 +36,19 @@ import collection.parallel.IterableSplitter
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
+sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
                       with DynamicModel[Int, Model]
                       with GroupableModel[Int, Model]
                       with SpatialModelInterface[Int, ImmutableShape] {
 
   val rtree = new PRTree(8);
 
-  def add(key : Int, shape : ImmutableShape) = { this }
-  def add(shapes : Map[Int, ImmutableShape]) = { this }
+  def add(key : Int, shape : ImmutableShape) = new Model(shapes.+(key, shape))
+  def add(shapes : Map[Int, ImmutableShape]) = new Model(this.shapes ++ shapes)
 
-  def remove(key: Int) = null
+  def remove(key: Int) = new Model(shapes - key)
 
-  def remove(keys: Traversable[Int]) = null
+  def remove(keys: Traversable[Int]) = new Model(shapes.filterNot(i => keys.exists(_ == i._1)))
 
   def update(key: Int, shape: ImmutableShape) = null
 
@@ -78,7 +78,7 @@ object Model extends SpatialModelInterface[Int, ImmutableShape] with ParMap[Int,
   /**
    * The underlying immutable model of Siigna.
    */
-  private var model = new Model(ParMap[Int, ImmutableShape]())
+  private var model = new Model(ParHashMap[Int, ImmutableShape]())
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
@@ -190,4 +190,5 @@ object Model extends SpatialModelInterface[Int, ImmutableShape] with ParMap[Int,
   def seq = model.shapes.seq
   def size = model.shapes.size
   def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
+  
 }
