@@ -19,7 +19,7 @@ import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParHashMap, ParMap}
-import shape.{Shape, ImmutableShape}
+import shape.ImmutableShape
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -39,19 +39,17 @@ import shape.{Shape, ImmutableShape}
 sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                       with DynamicModel[Int]
                       with GroupableModel[Int, ImmutableShape]
-                      with SpatialModelInterface[Int, ImmutableShape] 
+                      with SpatialModel[Int, ImmutableShape]
                       with ModelBuilder[Int, ImmutableShape] {
 
   def build(coll : ParHashMap[Int, ImmutableShape]) = new Model(coll)
-  
-  val rtree = new PRTree(8);
 
 }
 
 /**
  * The model of Siigna.
  */
-object Model extends SpatialModelInterface[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
+object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
