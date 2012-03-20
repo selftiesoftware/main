@@ -14,12 +14,12 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.{ImmutableShape}
 import com.siigna.util.rtree.PRTree
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParHashMap, ParMap}
+import shape.{Shape, ImmutableShape}
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,33 +36,16 @@ import collection.parallel.immutable.{ParHashMap, ParMap}
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
-                      with DynamicModel[Int, Model]
-                      with GroupableModel[Int, Model]
-                      with SpatialModelInterface[Int, ImmutableShape] {
+sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+                      with DynamicModel[Int]
+                      with GroupableModel[Int, ImmutableShape]
+                      with SpatialModelInterface[Int, ImmutableShape] 
+                      with ModelBuilder[Int, ImmutableShape] {
 
+  def build(coll : ParHashMap[Int, ImmutableShape]) = new Model(coll)
+  
   val rtree = new PRTree(8);
 
-  def add(key : Int, shape : ImmutableShape) = new Model(shapes.+(key, shape))
-  def add(shapes : Map[Int, ImmutableShape]) = new Model(this.shapes ++ shapes)
-
-  def remove(key: Int) = new Model(shapes - key)
-
-  def remove(keys: Traversable[Int]) = new Model(shapes.filterNot(i => keys.exists(_ == i._1)))
-
-  def update(key: Int, shape: ImmutableShape) = null
-
-  def update(shapes: Map[Int, ImmutableShape]) = null
-
-  def group(key: Int, group: Int) = null
-
-  def group(keys: Traversable[Int]) = null
-
-  def group(keys: Traversable[Int], group: Int) = null
-
-  def ungroup(group: Int) = null
-
-  def ungroup(shape: Int, group: Int) = null
 }
 
 /**

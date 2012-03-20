@@ -45,7 +45,6 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Control = com.siigna.app.controller.Control
 
   // Model
-  type Model = com.siigna.app.model.Model
   lazy val Model = com.siigna.app.model.Model
 
   // Shapes
