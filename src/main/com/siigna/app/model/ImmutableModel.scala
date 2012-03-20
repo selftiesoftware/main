@@ -13,6 +13,7 @@ package com.siigna.app.model
 
 import shape.Shape
 import collection.parallel.immutable.ParMap
+import com.siigna.util.rtree.PRTree
 
 /**
  * An immutable model containing shapes
@@ -20,7 +21,9 @@ import collection.parallel.immutable.ParMap
  * @tparam Value  The shapes in the model.
  * @rparam Model  The return-type of the model.
  */
-trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value] {
+trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value] with SpatialModel[Key, Value] {
+
+  val rtree = new PRTree(8);
 
   /**
    * Add a shape to the model.
