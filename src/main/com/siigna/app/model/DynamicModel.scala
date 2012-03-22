@@ -11,16 +11,16 @@
 
 package com.siigna.app.model
 
-import shape.DynamicShape
 import collection.parallel.immutable.{ParMap, ParHashMap}
+import shape.{Shape, DynamicShape}
 
 /**
  * An immutable model containing [[com.siigna.app.model.shape.DynamicShape]]s.
  *
- * @tparam Model  The model to return whenever operations are performed on the DynamicModel.
+ * @tparam Key  The type of the keys in the Model.
  * @see [[com.siigna.app.model.Model]]
  */
-trait DynamicModel[Key, Model <: DynamicModel[Key, Model]] {
+trait DynamicModel[Key] {
   
   var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
 

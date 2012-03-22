@@ -13,6 +13,7 @@ package com.siigna.app.model
 
 import shape.Shape
 import collection.parallel.immutable.ParMap
+import com.siigna.util.rtree.PRTree
 
 /**
  * An immutable model containing shapes
@@ -20,36 +21,40 @@ import collection.parallel.immutable.ParMap
  * @tparam Value  The shapes in the model.
  * @rparam Model  The return-type of the model.
  */
-trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel[Key, Value, Model]] {
-  
+trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
+                                    with SpatialModel[Key, Value]
+                                    with GroupableModel[Key, Value] {
+
+  val rtree = new PRTree(8);
+
   /**
    * Add a shape to the model.
    */
-  def add(key : Key, shape : Value) : Model
+  def add(key : Key, shape : Value) = build(shapes.+(key, shape))
 
   /**
    * Add several shapes to the model.
    */
-  def add(shapes : Map[Key, Value]) : Model
+  def add(shapes : Map[Key, Value]) = build(this.shapes ++ shapes)
 
   /**
    * Remove a shape from the model.
    */
-  def remove(key : Key) : Model
+  def remove(key: Key) = build(shapes - key)
 
   /**
    * Remove several shapes from the model.
    */
-  def remove(keys : Traversable[Key]) : Model
+  def remove(keys: Traversable[Key]) = build(shapes.filterNot(i => keys.exists(_ == i._1)))
 
   /**
    * Update a shape in the model.
    */
-  def update(key : Key, shape : Value) : Model
+  def update(key : Key, shape : Value) : Model = null
 
   /**
    * Update several shapes in the model.
    */
-  def update(shapes : Map[Key, Value]) : Model
+  def update(shapes : Map[Key, Value]) : Model = null
 
 }

@@ -14,12 +14,12 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.{ImmutableShape}
 import com.siigna.util.rtree.PRTree
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParHashMap, ParMap}
+import shape.ImmutableShape
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,39 +36,18 @@ import collection.parallel.immutable.{ParHashMap, ParMap}
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape, Model]
-                      with DynamicModel[Int, Model]
-                      with GroupableModel[Int, Model]
-                      with SpatialModelInterface[Int, ImmutableShape] {
+sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+                                                                    with DynamicModel[Int]
+                                                                    with ModelBuilder[Int, ImmutableShape] {
 
-  val rtree = new PRTree(8);
+  def build(coll : ParHashMap[Int, ImmutableShape]) = new Model(coll)
 
-  def add(key : Int, shape : ImmutableShape) = new Model(shapes.+(key, shape))
-  def add(shapes : Map[Int, ImmutableShape]) = new Model(this.shapes ++ shapes)
-
-  def remove(key: Int) = new Model(shapes - key)
-
-  def remove(keys: Traversable[Int]) = new Model(shapes.filterNot(i => keys.exists(_ == i._1)))
-
-  def update(key: Int, shape: ImmutableShape) = null
-
-  def update(shapes: Map[Int, ImmutableShape]) = null
-
-  def group(key: Int, group: Int) = null
-
-  def group(keys: Traversable[Int]) = null
-
-  def group(keys: Traversable[Int], group: Int) = null
-
-  def ungroup(group: Int) = null
-
-  def ungroup(shape: Int, group: Int) = null
 }
 
 /**
  * The model of Siigna.
  */
-object Model extends SpatialModelInterface[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
+object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
