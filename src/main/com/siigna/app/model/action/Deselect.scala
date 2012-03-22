@@ -23,7 +23,7 @@ import com.siigna.util.logging.Log
  * happens they are just floating around in dynamic space somewhere...
  */
 object Deselect {
-
+  /*
   def apply(shape : Shape) { shape match {
     case s : DynamicShape => {
       Model.deselect(s)
@@ -45,6 +45,6 @@ object Deselect {
   def apply(id : String) { Model.deselect(id) }
 
   def apply(id1 : String, id2 : String, ids : String*) { apply(Traversable(id1, id2) ++ ids) }
-
+                */
 }
 

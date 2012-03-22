@@ -25,17 +25,17 @@ trait Node {
   /**
    * Adds a single element to the Node.
    */
-  def add(elem : (String, Rectangle2D)) : T
+  def add(elem : (Int, Rectangle2D)) : T
   
   /**
    * Adds a number of elements to the Node.
    */
-  def add(elems : Traversable[(String, Rectangle2D)]) : T
+  def add(elems : Traversable[(Int, Rectangle2D)]) : T
 
   /**
    * Queries for elements in the node whose MBR is contained or intersected by a given MBR.
    */
-  def apply(query : Rectangle2D) : Traversable[String]
+  def apply(query : Rectangle2D) : Traversable[Int]
 
   /**
    * The branch factor for the node.
@@ -50,7 +50,7 @@ trait Node {
   /**
    * Retrieve the traversable for all elements in the node.
    */
-  def traversable : Traversable[(String, Rectangle2D)]
+  def traversable : Traversable[(Int, Rectangle2D)]
 
   /**
    * The number of elements in the Node.

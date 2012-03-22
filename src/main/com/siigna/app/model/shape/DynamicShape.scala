@@ -11,10 +11,8 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.app.model.action.{Action, TransformShape}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import com.siigna.util.Implicits._
 
 /**
 * A dynamic shape is a mutable wrapper for a regular Shape.
@@ -25,10 +23,19 @@ import com.siigna.util.Implicits._
 * @param shape  The original immutable shape.
 */
 case class DynamicShape(id : Int, shape : ImmutableShape) extends Shape
-                                                                      with (TransformationMatrix => ImmutableShape) {
+                                                             with (TransformationMatrix => ImmutableShape) {
 
   type T = ImmutableShape
+
+  def apply(t : TransformationMatrix) = shape.transform(t)
   
   def attributes = shape.attributes
 
+  def boundary = null
+
+  def distanceTo(point: Vector2D, scale: Double) = 0
+
+  def setAttributes(attributes: Attributes) = null
+
+  def transform(transformation: TransformationMatrix) = null
 }

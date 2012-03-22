@@ -18,7 +18,7 @@ package object siigna extends com.siigna.util.Implicits {
   // Actions
   type Action = com.siigna.app.model.action.Action
 
-  lazy val Create = com.siigna.app.model.action.Create
+  /*lazy val Create = com.siigna.app.model.action.Create
   type CreateShape = com.siigna.app.model.action.CreateShape
   lazy val CreateShape = com.siigna.app.model.action.CreateShape
   type CreateShapes = com.siigna.app.model.action.CreateShapes
@@ -33,7 +33,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   lazy val Transform = com.siigna.app.model.action.Transform
   type TransformShape = com.siigna.app.model.action.TransformShape
-  type TransformShapes = com.siigna.app.model.action.TransformShapes
+  type TransformShapes = com.siigna.app.model.action.TransformShapes*/
 
   // Commands
   lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
