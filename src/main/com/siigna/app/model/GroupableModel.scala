@@ -11,44 +11,46 @@
 
 package com.siigna.app.model
 
+import shape.Shape
+
 /**
  * A model that can group and ungroup [[com.siigna.app.model.shape.ImmutableShape]]s.
  * 
  * @tparam Key  The type of the keys to group.
- * @tparam Model  The model to return whenever operations are performed on the GroupableModel.
+ * @tparam Value  The type of the values inside the Model.
  */
-trait GroupableModel[Key, Model <: GroupableModel[Key, Model]] {
+trait GroupableModel[Key, Value] extends ModelBuilder[Key, Value] {
 
   /**
    * Group a single shape to another group.
    * @param key  The key of the shape to group
    * @param group  The key of the group.
    */
-  def group(key : Key, group : Key) : Model
-  
+  def group(key : Key, group : Key) : Model = throw new UnsupportedOperationException("Not implemented")
+
   /**
    * Group a collection of shapes.
    */
-  def group(keys : Traversable[Key]) : Model
+  def group(keys : Traversable[Key]) : Model = throw new UnsupportedOperationException("Not implemented")
 
   /**
    * Group a collection of shapes into another group.
    * @param keys  The keys of the shapes to group.
    * @param group  The key of the group.
    */
-  def group(keys : Traversable[Key], group : Key) : Model
+  def group(keys : Traversable[Key], group : Key) : Model = throw new UnsupportedOperationException("Not implemented")
 
   /**
    * Ungroup a group by destroying it and putting the shapes back into the model individually.
    * @param group  The key of the group to explode.
    */
-  def ungroup(group : Key) : Model
+  def ungroup(group : Key) : Model = throw new UnsupportedOperationException("Not implemented")
 
   /**
    * Ungroups a shape given by its key from a group given by its key.
    * @param shape  The key of the shape to ungroup.
    * @param group  The key of the group to ungroup the shape from.
    */
-  def ungroup(shape : Key, group : Key) : Model
+  def ungroup(shape : Key, group : Key) : Model = throw new UnsupportedOperationException("Not implemented")
   
 }
