@@ -60,6 +60,6 @@ trait Node {
   /**
    * Returns the node as a string.
    */
-  def toString : String
+  override def toString : String
 
 }

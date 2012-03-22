@@ -14,12 +14,12 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import com.siigna.util.rtree.PRTree
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
-import collection.parallel.immutable.{ParHashMap, ParMap}
 import shape.ImmutableShape
+import collection.parallel.immutable.{ParHashMap, ParMap}
+import collection.GenMap
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,11 +36,11 @@ import shape.ImmutableShape
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+sealed class Model(val shapes : GenMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     with DynamicModel[Int]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : ParHashMap[Int, ImmutableShape]) = new Model(coll)
+  def build(coll : GenMap[Int, ImmutableShape]) = new Model(coll)
 
 }
 
@@ -164,9 +164,9 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
 
   //------------- Required by the ParMap trait -------------//
   def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
-  def -(key : Int) = model.shapes.-(key)
+  def -(key : Int) = model.shapes.-(key).asInstanceOf[ParMap[Int, ImmutableShape]]
   def get(key : Int) = model.shapes.get(key)
-  def seq = model.shapes.seq
+  def seq = model.shapes.seq.asInstanceOf[collection.immutable.Map[Int, ImmutableShape]]
   def size = model.shapes.size
   def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
   
