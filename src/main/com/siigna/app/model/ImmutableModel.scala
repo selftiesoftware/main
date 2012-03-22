@@ -11,9 +11,9 @@
 
 package com.siigna.app.model
 
-import shape.Shape
 import collection.parallel.immutable.ParMap
 import com.siigna.util.rtree.PRTree
+import shape.{ImmutableShape, Shape}
 
 /**
  * An immutable model containing shapes
@@ -31,7 +31,7 @@ trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
   /**
    * Add (or update) a shape to the model.
    */
-  def add(key : Key, shape : Value) = build(shapes.+(key, shape))
+  def add(key : Key, shape : Value) = build(shapes.+(key, shape).asInstanceOf[ParMap[Key, Value]])
 
   /**
    * Add (or update) several shapes to the model.

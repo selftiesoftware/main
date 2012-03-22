@@ -36,11 +36,11 @@ import collection.GenMap
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : GenMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     with DynamicModel[Int]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : GenMap[Int, ImmutableShape]) = new Model(coll)
+  def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
 
 }
 
@@ -166,7 +166,7 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
   def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
   def -(key : Int) = model.shapes.-(key).asInstanceOf[ParMap[Int, ImmutableShape]]
   def get(key : Int) = model.shapes.get(key)
-  def seq = model.shapes.seq.asInstanceOf[collection.immutable.Map[Int, ImmutableShape]]
+  def seq = model.shapes.seq
   def size = model.shapes.size
   def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
   

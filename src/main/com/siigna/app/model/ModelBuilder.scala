@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import collection.GenMap
+import collection.parallel.immutable.ParMap
 
 
 /**
@@ -25,12 +25,12 @@ trait ModelBuilder[Key, Value] {
    * @param coll  The map of keys and shapes.
    * @return A new (immutable) Model.
    */
-  protected def build(coll : GenMap[Key, Value]) : Model
+  protected def build(coll : ParMap[Key, Value]) : Model
 
   /**
    * The shapes used to perform actions upon.
    * @return A ParHashMap containing the shapes.
    */
-  def shapes : GenMap[Key, Value]
+  def shapes : ParMap[Key, Value]
   
 }
