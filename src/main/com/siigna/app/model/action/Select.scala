@@ -51,10 +51,10 @@ object Select {
    * @param shape  The shape to select.
    */
   def apply(shape : ImmutableShape) {
-    Model.indexWhere(_ == shape) match {
+    /*Model.indexWhere(_ == shape) match {
       case -1 => Log.info("Select: Unable to select shape, could not locate it in the model.")
       case i => Model execute new Select(Seq(i))
-    }
+    }*/
   }
 
   /**
@@ -62,7 +62,7 @@ object Select {
    * @param shapes  The shapes to select.
    */
   def apply(shapes : ImmutableShape*) {
-    Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
+    //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
   }
 
   /**
@@ -70,7 +70,7 @@ object Select {
    * @param shapes  The shapes to select.
    */
   def apply(shapes : Traversable[ImmutableShape]) {
-    Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
+    //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
   }
 
 }

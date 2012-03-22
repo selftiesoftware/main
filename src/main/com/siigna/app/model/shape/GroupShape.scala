@@ -27,8 +27,6 @@ case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) ext
 
   type T = GroupShape
 
-  def iterator = shapes.iterator
-
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
    * but otherwise the same attributes.

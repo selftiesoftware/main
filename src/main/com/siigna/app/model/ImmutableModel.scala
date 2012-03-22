@@ -20,7 +20,7 @@ import collection.parallel.immutable.ParMap
  * @tparam Value  The shapes in the model.
  * @rparam Model  The return-type of the model.
  */
-trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel] {
+trait ImmutableModel[Key, Value <: Shape, Model <: ImmutableModel[Key, Value, Model]] {
   
   /**
    * Add a shape to the model.

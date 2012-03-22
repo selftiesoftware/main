@@ -15,7 +15,7 @@ import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{DynamicShape, ImmutableShape, Shape}
 
 object Transform {
-
+/*
   // TODO: Optimize
   def apply(shape : Shape, transformation : TransformationMatrix) { shape match {
     case s : ImmutableShape => {
@@ -97,6 +97,6 @@ case class TransformShapes(ids : Seq[String], transformation : TransformationMat
   }
 
   def undo(model : Model) = model.update(ids, (s : ImmutableShape) => s.transform(transformation.inverse))
-
+  */
 }
 

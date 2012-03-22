@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
- * to Share — to copy, distribute and transmit the work, 
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
+ * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -20,7 +20,7 @@ import collection.parallel.immutable.{ParMap, ParHashMap}
  * @tparam Model  The model to return whenever operations are performed on the DynamicModel.
  * @see [[com.siigna.app.model.Model]]
  */
-trait DynamicModel[Key, Model <: DynamicModel] {
+trait DynamicModel[Key, Model <: DynamicModel[Key, Model]] {
   
   var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
 
@@ -28,11 +28,11 @@ trait DynamicModel[Key, Model <: DynamicModel] {
    * Deselect the active shapes in the DynamicModel.
    */
   def deselect() {
-
+    throw new UnsupportedOperationException("Not implemented")
   }
 
   def select(id : Int) {
-    dynamics = dynamics.+(Model(id));
+    throw new UnsupportedOperationException("Not implemented")
   }
 
 }
