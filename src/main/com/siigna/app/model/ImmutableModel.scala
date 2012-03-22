@@ -25,15 +25,16 @@ trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
                                     with SpatialModel[Key, Value]
                                     with GroupableModel[Key, Value] {
 
-  val rtree = new PRTree(8);
+  // TODO: Implement this
+  val rtree = new PRTree(8)
 
   /**
-   * Add a shape to the model.
+   * Add (or update) a shape to the model.
    */
   def add(key : Key, shape : Value) = build(shapes.+(key, shape))
 
   /**
-   * Add several shapes to the model.
+   * Add (or update) several shapes to the model.
    */
   def add(shapes : Map[Key, Value]) = build(this.shapes ++ shapes)
 
@@ -46,15 +47,5 @@ trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
    * Remove several shapes from the model.
    */
   def remove(keys: Traversable[Key]) = build(shapes.filterNot(i => keys.exists(_ == i._1)))
-
-  /**
-   * Update a shape in the model.
-   */
-  def update(key : Key, shape : Value) : Model = null
-
-  /**
-   * Update several shapes in the model.
-   */
-  def update(shapes : Map[Key, Value]) : Model = null
 
 }
