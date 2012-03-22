@@ -19,7 +19,7 @@ import collection.GenMap
 import com.siigna.app.model.shape.{ImmutableShape, LineShape}
 
 /**
- * Test an arc.
+ * Test the immutable model to manipulate and contain a map of ints and shapes.
  */
 class ImmutableModelSpec extends Spec with ShouldMatchers {
 
@@ -31,10 +31,6 @@ class ImmutableModelSpec extends Spec with ShouldMatchers {
     val l1 = LineShape(v1, v2)
     val l2 = LineShape(v2, v1)
     val lines = Map(0 -> l1, 1 -> l2)
-
-    it("has a parallel map of ints and shapes") {
-      model.shapes.isInstanceOf[GenMap[Int, ImmutableShape]] should be (true)
-    }
 
     it("can add one shape") {
       // Single shape
