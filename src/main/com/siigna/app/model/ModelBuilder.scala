@@ -12,7 +12,6 @@
 package com.siigna.app.model
 
 import collection.parallel.immutable.ParHashMap
-import shape.{ImmutableShape}
 
 
 /**

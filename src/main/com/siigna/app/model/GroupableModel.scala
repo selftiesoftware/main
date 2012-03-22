@@ -19,7 +19,7 @@ import shape.Shape
  * @tparam Key  The type of the keys to group.
  * @tparam Value  The type of the values inside the Model.
  */
-trait GroupableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value] {
+trait GroupableModel[Key, Value] extends ModelBuilder[Key, Value] {
 
   /**
    * Group a single shape to another group.

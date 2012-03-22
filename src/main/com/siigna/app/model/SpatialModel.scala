@@ -18,7 +18,7 @@ import shape.{ImmutableShape, Shape}
 /**
  * An interface that supplies
  */
-trait SpatialModel[Key, Value <: ImmutableShape] {
+trait SpatialModel[Key, Value] {
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.

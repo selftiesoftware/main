@@ -21,7 +21,9 @@ import com.siigna.util.rtree.PRTree
  * @tparam Value  The shapes in the model.
  * @rparam Model  The return-type of the model.
  */
-trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value] with SpatialModel[Key, Value] {
+trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
+                                    with SpatialModel[Key, Value]
+                                    with GroupableModel[Key, Value] {
 
   val rtree = new PRTree(8);
 
