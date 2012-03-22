@@ -25,7 +25,7 @@ trait ModelBuilder[Key, Value] {
    * @param coll  The map of keys and shapes.
    * @return A new (immutable) Model.
    */
-  def build(coll : ParHashMap[Key, Value]) : Model
+  protected def build(coll : ParHashMap[Key, Value]) : Model
 
   /**
    * The shapes used to perform actions upon.
