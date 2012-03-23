@@ -21,7 +21,7 @@ import com.siigna.util.rtree.PRTree
  * @tparam Value  The shapes in the model.
  * @rparam Model  The return-type of the model.
  */
-trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
+trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
                                     with GroupableModel[Key, Value] {
 
   /**
