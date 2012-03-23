@@ -13,13 +13,15 @@ package com.siigna.app.model
 
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.{ImmutableShape}
-import collection.parallel.immutable.ParIterable
+import collection.parallel.immutable.{ParMap, ParIterable}
 
 /**
  * An interface that supplies
  */
-trait SpatialModel[Key, Value <: ImmutableShape] extends ModelBuilder[Key, Value] {
+trait SpatialModel[Key, Value <: ImmutableShape] {
 
+  def shapes : ParMap[Key, Value]
+  
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
    * TODO: Implement spatial structure
@@ -41,6 +43,13 @@ trait SpatialModel[Key, Value <: ImmutableShape] extends ModelBuilder[Key, Value
   def apply(query : Vector2D, radius : Double) : ParIterable[Value] = {
     apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
+
+  /**
+   * The minimum bounding rectangle for the model, i. e. the smallest rectangle including all the 
+   * elements in the model.
+   * @return  The minimum-bounding rectangle
+   */
+  def mbr : Rectangle2D = shapes.foldLeft[Rectangle2D](Rectangle2D.empty)((a : Rectangle2D, b : (Key, Value)) => a.union(b._2.geometry.boundary))
 
 
 }

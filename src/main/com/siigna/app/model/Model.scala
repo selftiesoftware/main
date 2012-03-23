@@ -74,7 +74,7 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
    * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
    */
   def boundary = {
-    val newBoundary  = model.rtree.mbr
+    val newBoundary  = model.mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
     //val proportion   = 1.41421356
@@ -142,11 +142,6 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
   }
 
   /**
-   * The [[com.siigna.util.rtree.PRTree]] used by the model.
-   */
-  def rtree = model.rtree
-
-  /**
    * Undo an action and put it in the list of undone actions.
    */
   def undo() {
@@ -163,6 +158,9 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
     }
   }
 
+  // Required by the Spatial Model trait
+  def shapes = model.shapes
+
   //------------- Required by the ParMap trait -------------//
   def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
   def -(key : Int) = model.shapes.-(key)
@@ -170,5 +168,5 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
   def seq = model.shapes.seq
   def size = model.shapes.size
   def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
-  
+
 }
