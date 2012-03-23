@@ -22,10 +22,7 @@ import com.siigna.util.rtree.PRTree
  * @rparam Model  The return-type of the model.
  */
 trait ImmutableModel[Key, Value] extends ModelBuilder[Key, Value]
-                                    with SpatialModel[Key, Value]
                                     with GroupableModel[Key, Value] {
-
-  val rtree = new PRTree(8);
 
   /**
    * Add a shape to the model.

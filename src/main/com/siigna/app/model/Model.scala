@@ -37,6 +37,7 @@ import shape.ImmutableShape
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
 sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+                                                                    with SpatialModel[Int, ImmutableShape]
                                                                     with DynamicModel[Int]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 

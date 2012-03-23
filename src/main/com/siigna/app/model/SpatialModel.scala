@@ -11,25 +11,26 @@
 
 package com.siigna.app.model
 
-import com.siigna.util.rtree.PRTree
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import shape.{ImmutableShape, Shape}
+import shape.{ImmutableShape}
+import collection.parallel.immutable.ParIterable
 
 /**
  * An interface that supplies
  */
-trait SpatialModel[Key, Value] {
+trait SpatialModel[Key, Value <: ImmutableShape] extends ModelBuilder[Key, Value] {
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
+   * TODO: Implement spatial structure
    */
-  protected def rtree : PRTree
+  //protected def rtree : PRTree
 
   /**
    * Query for shapes inside the given boundary.
    */
-  def apply(query : Rectangle2D) = {
-    rtree(query)
+  def apply(query : Rectangle2D) : ParIterable[Value] = {
+    shapes.filter((s : (Key, Value)) => query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry.boundary)).map(_._2)
   }
 
   /**
@@ -37,8 +38,8 @@ trait SpatialModel[Key, Value] {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double) : Iterable[ImmutableShape] = {
-    rtree(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius)).map(Model(_))
+  def apply(query : Vector2D, radius : Double) : ParIterable[Value] = {
+    apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
 
 
