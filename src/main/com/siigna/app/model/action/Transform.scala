@@ -12,43 +12,11 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.{DynamicShape, ImmutableShape, Shape}
 
 object Transform {
-/*
-  // TODO: Optimize
-  def apply(shape : Shape, transformation : TransformationMatrix) { shape match {
-    case s : ImmutableShape => {
-      val id = Model.find(_._2 == shape)
-      if (id.isDefined)
-        Model(TransformShape(id.get._1, transformation))
-    }
-    case s : DynamicShape => {
-      s.transformDynamic(transformation)
-    }
-  } }
 
-  // TODO: Optimize.
-  def apply(shapes : Iterable[Shape], transformation : TransformationMatrix) {
-    var ids = Seq[String]()
-    while (shapes.iterator.hasNext) {
-      shapes.iterator.next() match {
-        case s : ImmutableShape => {
-          val id = Model.findId(_ == shapes.iterator.next)
-          if (id.isDefined)
-            ids = ids.:+(id.get)
-        }
-        case s : DynamicShape => {
-          s.transformDynamic(transformation)
-        }
-        case _ =>
-      }
-    }
-
-    if (ids.size == 1)
-      Model(TransformShape(ids(0), transformation))
-    else (ids.size > 1)
-      Model(TransformShapes(ids, transformation))
+  def apply(id : Int, transformation : TransformationMatrix) {
+    Model execute TransformShape(id, transformation)
   }
 
 }
@@ -56,12 +24,12 @@ object Transform {
 /**
  * Transforms a shape.
  */
-case class TransformShape(id : String, transformation : TransformationMatrix) extends Action {
+case class TransformShape(id : Int, transformation : TransformationMatrix) extends Action {
 
-  def execute(model : Model) = model.update(id, (s : ImmutableShape) => s.transform(transformation))
+  def execute(model : Model) = model add (id, model.shapes(id).transform(transformation))
 
   def merge(action : Action) = action match {
-    case TransformShape(idx : String, trf : TransformationMatrix) =>
+    case TransformShape(idx : Int, trf : TransformationMatrix) =>
       if (idx == id)
         TransformShape(id, transformation.concatenate(trf))
       else
@@ -69,21 +37,24 @@ case class TransformShape(id : String, transformation : TransformationMatrix) ex
     case _ => SequenceAction(this, action)
   }
 
-  def undo(model : Model) = model.update(id, (s : ImmutableShape) => s.transform(transformation.inverse))
+  def undo(model : Model) = model add (id, model.shapes(id).transform(transformation.inverse))
 
 }
 
 /**
  * Transforms a number of shapes.
  */
-case class TransformShapes(ids : Seq[String], transformation : TransformationMatrix) extends Action {
+case class TransformShapes(ids : Traversable[Int], transformation : TransformationMatrix) extends Action {
 
-  def execute(model : Model) = model.update(ids, (s : ImmutableShape) => s.transform(transformation))
+  def execute(model : Model) = {
+    val map = ids.map(id => (id -> model.shapes(id).transform(transformation))).toMap
+    model add map
+  }
 
   def merge(that : Action) = that match {
     case TransformShape(id, transformationOther) => {
       if (transformation == transformationOther)
-        TransformShapes(ids.:+(id), transformation)
+        TransformShapes(ids.++(Traversable(id)), transformation)
       else
         SequenceAction(this, that)
     }
@@ -96,7 +67,9 @@ case class TransformShapes(ids : Seq[String], transformation : TransformationMat
     case _ => SequenceAction(this, that)
   }
 
-  def undo(model : Model) = model.update(ids, (s : ImmutableShape) => s.transform(transformation.inverse))
-  */
+  def undo(model : Model) = {
+    val map = ids.map(id => (id -> model.shapes(id).transform(transformation.inverse))).toMap
+    model add map
+  }
 }
 
