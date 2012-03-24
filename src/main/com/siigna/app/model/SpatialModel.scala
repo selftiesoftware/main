@@ -40,7 +40,7 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double) : ParIterable[Value] = {
+  def apply(query : Vector2D, radius : Double = 5.0) : ParIterable[Value] = {
     apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
 
