@@ -39,6 +39,9 @@ class ModelSpec extends Spec with ShouldMatchers {
       // Single shape, weird ids
       model.add(-500, l1).shapes should equal(ParHashMap(-500 -> l1))
       model.add(Int.MaxValue + 1, l1).shapes should equal(ParHashMap(Int.MinValue -> l1))
+      
+      // Single shape, override id
+      model.add(1442, l1).add(1442, l2).shapes should equal (ParHashMap(1442 -> l2))
     }
 
     it("can add several shapes") {
