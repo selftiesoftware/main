@@ -10,9 +10,9 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{ImmutableShape, Shape}
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
+import com.siigna.app.model.shape.{CollectionShape, ImmutableShape, Shape}
 
 /**
 * An object that allows you to create one or multiple shapes.
@@ -26,6 +26,11 @@ object Create {
   def apply(shape : ImmutableShape) { 
     val id = shape.attributes.int("id").getOrElse(getId)
     Model execute CreateShape(id, shape)
+  }
+
+  def apply[T <: ImmutableShape](collection : CollectionShape[T]) {
+    val id = collection.attributes.int("id").getOrElse(getId)
+    Model execute CreateShape(id, collection)
   }
 
   def apply(shape1 : ImmutableShape, shape2 : ImmutableShape, shapes : ImmutableShape*) {
