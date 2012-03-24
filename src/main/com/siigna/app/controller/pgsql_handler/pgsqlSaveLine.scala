@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -9,6 +10,8 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+=======
+>>>>>>> e29baaeb5521f16c7b6858d70cfaf210aa0fa052
 package com.siigna.app.controller.pgsql_handler
 
 /**
@@ -21,7 +24,8 @@ package com.siigna.app.controller.pgsql_handler
 
 import java.sql._
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.LineShape
+import com.siigna.app.model.shape.{PolylineShape, LineShape}
+import com.siigna.util.geom.Vector2D
 
 
 //import java.lang.String
@@ -53,8 +57,24 @@ class pgsqlSaveLine {
     //Laver søgestreng, der finder id på de punkter, der findes i forvejen
 
     println("jada")
-    val aaa = Model.seq
-    var i=0
+    val modelContains = Model.seq
+    var i = Vector2D.empty
+    modelContains.foreach(shape => shape match {
+      case shape : LineShape => {
+        println(shape)
+        println("Punkt 1:")
+        i = shape.p1
+        println (i.x + "'" + i.y)
+        println("Punkt 2:")
+        i = shape.p2
+        println (i.x + "'" + i.y)
+        
+      }
+      case shape : PolylineShape => { println("polyline") }
+    }
+    )
+
+    /*var i=0
     while (aaa.isDefinedAt(i)) {
       if (aaa(i).getClass.toString == "class com.siigna.app.model.shape.LineShape") {
         var j = aaa(i)
@@ -71,8 +91,11 @@ class pgsqlSaveLine {
         println ("Polyline")
       }
       i=i+1
+<<<<<<< HEAD
     }
 
+    }
+     */
     println("jada2")
 
     /*

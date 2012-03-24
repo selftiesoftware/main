@@ -10,7 +10,7 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
+import com.siigna._
 
 /**
  * An action is an immutable representation of a state-change in the model and <b>the only way</b> to alter shapes and groups in the Model.
@@ -34,9 +34,4 @@ trait Action {
 
 }
 
-/**
- * An [[com.siigna.app.model.action.Action]] that is not stored in the [[com.siigna.app.model.Model]]
- * after execution and thus cannot be undone or redone.
- */
-trait VolatileAction extends Action
 

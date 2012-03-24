@@ -150,7 +150,9 @@ class pgsqlGetShapes {
         {}
       //Cirkel-shape:
       if (shapeType.get == 4)
-      {}
+      {
+        resultSequenceShapes = resultSequenceShapes :+ LineShape(Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(0)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(0))), Vector2D(resultSequencePointIdXYZCoordinatesX(pointCoordinatesLocationSequence(1)),resultSequencePointIdXYZCoordinatesY(pointCoordinatesLocationSequence(1))))
+      }
       //Arc-shape:
       if (shapeType.get == 5)
       {}
