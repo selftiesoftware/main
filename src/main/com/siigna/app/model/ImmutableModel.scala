@@ -19,7 +19,6 @@ import com.siigna.util.rtree.PRTree
  * An immutable model containing shapes
  * @tparam Key  The keys in the Model.
  * @tparam Value  The shapes in the model.
- * @rparam Model  The return-type of the model.
  */
 trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
                                     with GroupableModel[Key, Value] {
@@ -43,15 +42,5 @@ trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
    * Remove several shapes from the model.
    */
   def remove(keys: Traversable[Key]) = build(shapes.filterNot(i => keys.exists(_ == i._1)))
-
-  /**
-   * Update a shape in the model.
-   */
-  def update(key : Key, shape : Value) : Model = null
-
-  /**
-   * Update several shapes in the model.
-   */
-  def update(shapes : Map[Key, Value]) : Model = null
 
 }
