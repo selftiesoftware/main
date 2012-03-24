@@ -17,21 +17,13 @@ package object siigna extends com.siigna.util.Implicits {
   type Action = com.siigna.app.model.action.Action
 
   lazy val Create = com.siigna.app.model.action.Create
-  type CreateShape = com.siigna.app.model.action.CreateShape
-  lazy val CreateShape = com.siigna.app.model.action.CreateShape
-  type CreateShapes = com.siigna.app.model.action.CreateShapes
-  lazy val CreateShapes = com.siigna.app.model.action.CreateShapes
 
-  lazy val Delete = com.siigna.app.model.action.Delete
-  type DeleteShape = com.siigna.app.model.action.DeleteShape
-  type DeleteShapes = com.siigna.app.model.action.DeleteShapes
+  //lazy val Delete = com.siigna.app.model.action.Delete
 
-  lazy val Deselect = com.siigna.app.model.action.Deselect
-  lazy val Select = com.siigna.app.model.action.Select
+  //lazy val Deselect = com.siigna.app.model.action.Deselect
+  //lazy val Select = com.siigna.app.model.action.Select
 
   lazy val Transform = com.siigna.app.model.action.Transform
-  type TransformShape = com.siigna.app.model.action.TransformShape
-  type TransformShapes = com.siigna.app.model.action.TransformShapes
 
   // Commands
   lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
@@ -43,7 +35,6 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Control = com.siigna.app.controller.Control
 
   // Model
-  type Model = com.siigna.app.model.Model
   lazy val Model = com.siigna.app.model.Model
 
   // Module

@@ -14,16 +14,15 @@ package com.siigna.app.view.event
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.{Vector2D}
 import com.siigna.app.model.shape.{PolylineShape}
-import com.siigna.app.view.event._
-import com.siigna.app.Siigna
 import com.siigna.app.view.View
+import collection.parallel.immutable.ParIterable
 
 /**
  * A hook for parsing points that snaps to end-points of objects.
  */
 case object EndPoints extends EventSnap {
 
-  def parse(event : Event, model : Iterable[ImmutableShape]) = event match {
+  def parse(event : Event, model : ParIterable[ImmutableShape]) = event match {
     case MouseDown(point, a, b)  => MouseDown(snap(point, model), a, b)
     case MouseDrag(point, a, b)  => MouseDrag(snap(point, model), a, b)
     case MouseMove(point, a, b)  => MouseMove(snap(point, model), a, b)
@@ -31,7 +30,7 @@ case object EndPoints extends EventSnap {
     case some => some
   }
 
-  def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : ParIterable[ImmutableShape]) : Vector2D = {
     def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
     def closestPoints(points : Seq[Vector2D]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
 

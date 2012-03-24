@@ -35,7 +35,7 @@ trait Module extends Serializable {
    * The EventParser that parses the event-stream from the given snap- and
    * track-settings.
    */
-  final val eventParser : EventParser = new EventParser()
+  val eventParser : EventParser = new EventParser()
 
   /**
    * An interface the module can utilize to communicate with the controller and
