@@ -49,7 +49,7 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
  * The model of Siigna.
  */
 object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
-
+  
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
    */
@@ -76,7 +76,7 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
   def boundary = {
     val newBoundary  = model.mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
-    val center       = (newBoundary.bottomRight + newBoundary.topLeft) / 2
+    val center       = newBoundary.center
     //val proportion   = 1.41421356
 
     // Saves the format, as the format with the margin subtracted
@@ -87,9 +87,9 @@ object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, Immutabl
     // one format.
     // TODO: Optimize!
     val list = List[Double](2, 2.5, 2)
-    var take = 0
+    var take = 0 // which element to "take" from the above list
     while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
-      val factor = list.apply(take)
+      val factor = list(take)
       aFormatMin *= factor
       aFormatMax *= factor
       take = if (take < 2) take + 1 else 0

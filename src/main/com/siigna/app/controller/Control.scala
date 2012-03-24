@@ -325,9 +325,6 @@ object Control extends Thread("Siigna Controller") {
             }
           }
             
-          val ne1 = new pgsql_handler.pgsqlSaveLine();
-            ne1.saveLine();
-            
           // Preload a module
           case Preload(name, classPath, filePath) => {
             moduleBank.preload(name, classPath, filePath)
