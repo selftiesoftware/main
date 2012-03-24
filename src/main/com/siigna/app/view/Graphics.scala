@@ -39,20 +39,6 @@ class Graphics(val g : Graphics2D)
   def colorUniverse    = Preferences("colorUniverse").asInstanceOf[Color]
 
   /**
-   * Draw a number of shapes.
-   */
-  def draw(shapes : Iterable[Shape]) {
-    shapes foreach draw
-  }
-
-  /**
-   * Draws any number of given shapes.
-   */
-  def draw(shapes : Shape*) {
-    shapes foreach draw
-  }
-
-  /**
    * Draws a given shape.
    */
   def draw(shape : Shape) {

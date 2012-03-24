@@ -65,11 +65,8 @@ class pgsqlSaveShapes {
       }
       case shape : PolylineShape => {
         //WrappedArray(LineShape(Vector2D(27.0,31.0),Vector2D(27.0,24.0),Attributes()))
-        println("polyline - " + shape.shapes.length + " linjesegmenter")
         shapeTypes = shapeTypes :+ 3
         queryStringShapeType += "(3),"
-        println(shape)
-        println(shape.shapes)
         polylineSizes = polylineSizes :+ shape.shapes.length
         //Til at indsætte startpunkt for tomme polylines - findes, men metoden til at hente det mangler.
         /*
@@ -91,11 +88,8 @@ class pgsqlSaveShapes {
             queryStringCoordinates += j + ",0),"
             queryStringCoordinates += "(" + k + ","
             queryStringCoordinates += l + ",0),"
-            println("("+i+","+j+"),("+k+","+l+")")
-            println(m)
           }
         })
-        println(shape.attributes)
       }
     })
         
@@ -124,9 +118,6 @@ class pgsqlSaveShapes {
       }
     }
 
-    println (shapeIds)
-    println (pointIds)
-    println(polylineSizes)
 
 
     //Vi har shape- og point-ids. Nu skal property og relationer laves.
@@ -184,18 +175,11 @@ class pgsqlSaveShapes {
       case _ => println("ukendt")
 
     })
-
-    println (queryStringPropertyInt)
-
-    println (queryStringShapePointRelation)
     // Og tada- der gemmes
     queryStringPropertyInt = queryStringPropertyInt.take(queryStringPropertyInt.length-1)
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
     queryStringPropertyInt += " RETURNING property_int_id"
     queryStringShapePointRelation += " RETURNING shape_id"
-
-    println(queryStringPropertyInt)
-    println(queryStringShapePointRelation)
 
 
     if (queryStringPropertyInt.length > 110) {

@@ -10,54 +10,68 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{ImmutableShape, Shape}
 import com.siigna.app.model.Model
+import com.siigna.util.logging.Log
+import com.siigna.app.model.shape.{CollectionShape, ImmutableShape, Shape}
 
 /**
 * An object that allows you to create one or multiple shapes.
 */
 object Create {
-
-  def apply(shape : Shape) { shape match {
-    case s : ImmutableShape => Model(CreateShape(uuid, s))
-    case _ => Model
-  } }
-
-  def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
-    apply(Iterable(shape1, shape2) ++ shapes)
+  
+  private var id = 0;
+  
+  private def getId = { id += 1; id; }
+  
+  def apply(shape : ImmutableShape) { 
+    val id = shape.attributes.int("id").getOrElse(getId)
+    apply(id, shape)
+  }
+  
+  def apply(id : Int, shape : ImmutableShape) {
+    Model execute CreateShape(id, shape)
   }
 
-  def apply(shapes : Traversable[Shape]) {
-    val immutableShapes = shapes.filter(_.isInstanceOf[ImmutableShape]).asInstanceOf[Traversable[ImmutableShape]]
-    
-    if (immutableShapes.size == 1)
-      Model(CreateShape(uuid, immutableShapes.head))
-    else
-      Model(CreateShapes(immutableShapes.map(s => (uuid, s)).toMap))
+  def apply[T <: ImmutableShape](collection : CollectionShape[T]) {
+    val id = collection.attributes.int("id").getOrElse(getId)
+    apply(id, collection)
   }
 
-  /**
-   * Returns a Universal Unique IDentifier (UUID).
-   */
-  private def uuid = java.util.UUID.randomUUID.toString
+  def apply(shape1 : ImmutableShape, shape2 : ImmutableShape, shapes : ImmutableShape*) {
+    apply(Traversable(shape1, shape2) ++ shapes)
+  }
+
+  def apply(shapes : Traversable[ImmutableShape]) {
+    if (shapes.size > 1) {
+      val map = shapes.map(s => {
+        val id = s.attributes.int("id").getOrElse(getId)
+        (id -> s)
+      }).toMap
+      Model execute CreateShapes(map)
+    } else if (shapes.size == 1) {
+      apply(shapes.head)
+    } else {
+      Log.info("Create: Create was called with an empty Traversable.")
+    }
+  }
 
 }
 
 /**
  * Creates a shape with an associated ID.
  */
-case class CreateShape(id : String, shape : ImmutableShape) extends Action {
+case class CreateShape(id : Int, shape : ImmutableShape) extends Action {
 
-  def execute(model : Model) = model + (id -> shape)
+  def execute(model : Model) = model add (id, shape)
 
   def merge(that : Action) = that match {
-    case CreateShape(i : String, s : ImmutableShape) =>
-      if (i == id && s == shape) this
-      else CreateShapes(Map((id, shape), (i, s)))
+    case CreateShape(i : Int, s : ImmutableShape) =>
+      if (s == shape) this
+      else CreateShapes(Map(id -> shape, i -> s))
     case _ => SequenceAction(this, that)
   }
 
-  def undo(model : Model) = model - id
+  def undo(model : Model) = model remove (id)
 
 }
 
@@ -65,16 +79,17 @@ case class CreateShape(id : String, shape : ImmutableShape) extends Action {
  * Creates several shapes.
  * This action cannot be instantiated directly, but needs to be called through the <code>Create</code> object.
  */
-case class CreateShapes(shapes : Map[String, ImmutableShape]) extends Action {
+case class CreateShapes(shapes : Map[Int, ImmutableShape]) extends Action {
 
-  def execute(model : Model) = model ++ shapes
+  require(shapes.size > 2, "Cannot initialize CreateShapes with one or no shapes.")
+
+  def execute(model : Model) = model add shapes
 
   def merge(that : Action) = that match {
-    case CreateShape(i : String, s : ImmutableShape) => CreateShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[String, ImmutableShape]) => CreateShapes(shapes ++ s)
+    case CreateShape(i : Int, s : ImmutableShape) => CreateShapes(shapes + (i -> s))
+    case CreateShapes(s : Map[Int, ImmutableShape]) => CreateShapes(shapes ++ s)
     case _ => SequenceAction(this, that)
   }
 
-  def undo(model : Model) = model -- shapes.keys
-
+  def undo(model : Model) = model remove shapes.keys
 }
