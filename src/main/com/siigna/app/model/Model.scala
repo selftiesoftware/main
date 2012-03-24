@@ -14,12 +14,12 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import com.siigna.util.rtree.PRTree
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
-import collection.parallel.immutable.{ParHashMap, ParMap}
 import shape.ImmutableShape
+import collection.parallel.immutable.{ParHashMap, ParMap}
+import collection.GenMap
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -36,19 +36,34 @@ import shape.ImmutableShape
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParHashMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     with SpatialModel[Int, ImmutableShape]
                                                                     with DynamicModel[Int]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : ParHashMap[Int, ImmutableShape]) = new Model(coll)
+  def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
 
 }
 
 /**
  * The model of Siigna.
  */
-object Model extends ActionModel with SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
+object Model extends SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
+
+  /**
+   * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
+   */
+  private var executed = Seq[Action]()
+
+  /**
+   * The underlying immutable model of Siigna.
+   */
+  private var model = new Model(ParHashMap[Int, ImmutableShape]())
+
+  /**
+   * The [[com.siigna.app.model.action.Action]]s that have been undone on this model. 
+   */
+  private var undone = Seq[Action]()
 
   /**
    * The boundary from the current content of the Model.
@@ -95,8 +110,60 @@ object Model extends ActionModel with SpatialModel[Int, ImmutableShape] with Par
    */
   def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
 
-  // Required by the Spatial Model trait
+  /**
+   * Execute an action, list it as executed and clear the undone stack to make way for a new actions
+   * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).
+   */
+  def execute(action : Action) {
+    model = action.execute(model)
+
+    // Only store the action if it is not volatile
+    if (!action.isInstanceOf[VolatileAction]) {
+      executed +:= action
+      undone = Seq()
+    }
+  }
+
+  /**
+   * Redo an action, by executing the last function that's been undone.
+   */
+  def redo() {
+    if (undone.size > 0) {
+      // Retrieve the event
+      val action = undone.head
+      undone = undone.tail
+
+      // Execute the event and add it to the executed list
+      model = action.execute(model)
+      executed +:= action
+    } else {
+      Log.warning("Model: No more actions to redo.")
+    }
+  }
+
+  /**
+   * The [[com.siigna.util.rtree.PRTree]] used by the model.
+   */
+  //def rtree = model.rtree
+
   def shapes = model.shapes
+
+  /**
+   * Undo an action and put it in the list of undone actions.
+   */
+  def undo() {
+    if (executed.size > 0) {
+      // Retrieve the action
+      val action = executed.head
+      executed = executed.tail
+
+      // Undo it and add it to the undone list
+      model = action.undo(model)
+      undone +:= action
+    } else {
+      Log.warning("Model: No more actions to undo.")
+    }
+  }
 
   //------------- Required by the ParMap trait -------------//
   def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
@@ -105,5 +172,5 @@ object Model extends ActionModel with SpatialModel[Int, ImmutableShape] with Par
   def seq = model.shapes.seq
   def size = model.shapes.size
   def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
-
+  
 }

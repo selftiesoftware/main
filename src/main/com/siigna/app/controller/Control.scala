@@ -24,7 +24,7 @@ import com.siigna.app.Siigna
  * TODO: Implement actors when applets can use them without permissions.
  */
 object Control extends Thread("Siigna Controller") {
-
+  
   /**
    * The last 10 events
    */
@@ -324,6 +324,10 @@ object Control extends Thread("Siigna Controller") {
 	            }
             }
           }
+            
+          val ne1 = new pgsql_handler.pgsqlSaveLine();
+            ne1.saveLine();
+            
           // Preload a module
           case Preload(name, classPath, filePath) => {
             moduleBank.preload(name, classPath, filePath)

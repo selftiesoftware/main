@@ -11,7 +11,8 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.ParHashMap
+import collection.parallel.immutable.ParMap
+import shape.ImmutableShape
 
 
 /**
@@ -25,12 +26,12 @@ trait ModelBuilder[Key, Value] {
    * @param coll  The map of keys and shapes.
    * @return A new (immutable) Model.
    */
-  def build(coll : ParHashMap[Key, Value]) : Model
+  protected def build(coll : ParMap[Key, Value]) : Model
 
   /**
    * The shapes used to perform actions upon.
    * @return A ParHashMap containing the shapes.
    */
-  def shapes : ParHashMap[Key, Value]
+  def shapes : ParMap[Key, Value]
   
 }
