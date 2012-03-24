@@ -25,12 +25,16 @@ object Create {
   
   def apply(shape : ImmutableShape) { 
     val id = shape.attributes.int("id").getOrElse(getId)
+    apply(id, shape)
+  }
+  
+  def apply(id : Int, shape : ImmutableShape) {
     Model execute CreateShape(id, shape)
   }
 
   def apply[T <: ImmutableShape](collection : CollectionShape[T]) {
     val id = collection.attributes.int("id").getOrElse(getId)
-    Model execute CreateShape(id, collection)
+    apply(id, collection)
   }
 
   def apply(shape1 : ImmutableShape, shape2 : ImmutableShape, shapes : ImmutableShape*) {
