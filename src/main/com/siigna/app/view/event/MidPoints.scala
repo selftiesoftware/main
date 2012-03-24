@@ -13,19 +13,20 @@ package com.siigna.app.view.event
 
 import com.siigna.util.geom._
 import com.siigna.app.model.shape.ImmutableShape
+import collection.parallel.immutable.ParIterable
 
 /**
  * A hook for parsing points that snap to mid-points on objects.
  */
 case object MidPoints extends EventSnap {
 
-  def parse(event : Event, model : Iterable[ImmutableShape]) = event match {
+  def parse(event : Event, model : ParIterable[ImmutableShape]) = event match {
     case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
     case some => some
   }
 
   // TODO: Finish this
-  def snap(point : Vector2D, model : Iterable[ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : ParIterable[ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       //val res = model.map(_ geometry match {
       //  case _ =>
