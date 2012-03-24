@@ -163,22 +163,17 @@ object View extends Canvas with Runnable {
       graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
       /***** MODEL *****/
-      // TODO: Cache the way it's written below.
-      // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
-      // isn't much bigger than the current view then draw the entire model and save the image as the
-      // last static image. This is done because it can save a lot of performance to save the static image
-      // for later, since most of the redrawing happens because of panning, which strictly doesn't require a redraw.
-      // Otherwise find the shapes inside the view-bound and paint them, without saving anything as static.
-      // Examines whether the cached image is valid and applicable.
+      // TODO: Cache
 
       // Draw model
       try {
         // TODO: Set the MBR for the model
-        //val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
-        Model map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Model
+        val mbr = Rectangle2D(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse))
+        Model(mbr) map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
         // Filter away shapes that are drawn in the dynamic layer and draw the rest.
         //Model.queryForShapesWithId(mbr).filterNot(e => dynamic.contains(e._1)).map(e => e._2.transform(transformation) ) foreach( graphics draw)
       } catch {
+        case e : InterruptedException => Log.info("View: Error while drawing Model, the view is shutting down.")
         case e => Log.error("View: Unable to draw Model: "+e)
       }
 
