@@ -264,9 +264,10 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
     Rectangle2D(p1, p2)
   }
 
+  // TODO: What does this do? It is not working....
   def union(that : Rectangle2D) =
-    Rectangle2D(Vector(math.min(this.topLeft.x, that.topLeft.x), math.min(this.topLeft.y, that.topLeft.y)),
-              Vector(math.max(this.bottomRight.x, that.bottomRight.x), math.max(this.bottomRight.y, that.bottomRight.y)))
+    Rectangle2D(math.min(this.topLeft.x, that.topLeft.x), math.min(this.topLeft.y, that.topLeft.y),
+                math.max(this.bottomRight.x, that.bottomRight.x), math.max(this.bottomRight.y, that.bottomRight.y))
 
   def width = (xMax - xMin).abs
 

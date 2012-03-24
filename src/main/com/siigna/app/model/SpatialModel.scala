@@ -49,7 +49,8 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
    * elements in the model.
    * @return  The minimum-bounding rectangle
    */
-  def mbr : Rectangle2D = shapes.foldLeft[Rectangle2D](Rectangle2D.empty)((a : Rectangle2D, b : (Key, Value)) => a.union(b._2.geometry.boundary))
+  def mbr : Rectangle2D =
+    shapes.foldLeft[Rectangle2D](Rectangle2D(0, 0, 0, 0))((a : Rectangle2D, b : (Key, Value)) => a.expand(b._2.geometry.boundary))
 
 
 }
