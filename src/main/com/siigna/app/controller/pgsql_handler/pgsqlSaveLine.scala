@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -10,8 +9,6 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-=======
->>>>>>> e29baaeb5521f16c7b6858d70cfaf210aa0fa052
 package com.siigna.app.controller.pgsql_handler
 
 /**
@@ -91,7 +88,6 @@ class pgsqlSaveLine {
         println ("Polyline")
       }
       i=i+1
-<<<<<<< HEAD
     }
 
     }
