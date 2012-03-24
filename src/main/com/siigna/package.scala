@@ -117,6 +117,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   lazy val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
   lazy val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle
+  lazy val MouseButtonNone = com.siigna.app.view.event.MouseButtonNone
   lazy val MouseButtonRight = com.siigna.app.view.event.MouseButtonRight
 
   type MouseDown = com.siigna.app.view.event.MouseDown

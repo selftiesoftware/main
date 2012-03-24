@@ -13,6 +13,9 @@ package com.siigna.app.view.event
 
 import com.siigna.util.geom.Vector2D
 
+//TODO: implement touch gestures (for track/touch pads)
+//TODO: why does MousebuttonNone not work in modules even though it is defined here?
+
 trait MouseButton
 final case object MouseButtonNone   extends MouseButton
 final case object MouseButtonLeft   extends MouseButton
