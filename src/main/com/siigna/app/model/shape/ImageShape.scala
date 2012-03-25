@@ -9,7 +9,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.model.shape
+/*package com.siigna.app.model.shape
 
 import java.awt.{Color, Graphics2D, Image, RenderingHints, Toolkit}
 import com.siigna.util.dxf.DXFSection
@@ -62,7 +62,6 @@ case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : 
                width, height,
                attributes)
   }
-
 }
 
 object ImageShape {
@@ -128,3 +127,4 @@ object ImageShape {
     fromImage(bufferedImage, rawShape.boundary.topLeft, rawShape.boundary.bottomRight, boundary.width.toInt, boundary.height.toInt, shape.attributes)
   }
 }
+       */
