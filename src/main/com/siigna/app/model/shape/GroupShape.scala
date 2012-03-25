@@ -13,8 +13,8 @@ package com.siigna.app.model.shape
 
 import com.siigna.app.model.Model
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.dxf.{DXFValue, DXFSection}
+import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
 
 /**
  * A Group that contains <b>references</b> to other shape and is thus only used as a container.
@@ -25,7 +25,13 @@ import com.siigna.util.dxf.{DXFValue, DXFSection}
  */
 case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) extends CollectionShape[ImmutableShape] {
 
+  throw new UnsupportedOperationException("Not implemented yet")
+
   type T = GroupShape
+
+  def select(rect: Rectangle2D) = null
+
+  def select(point: Vector2D) = null
 
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
@@ -39,8 +45,7 @@ case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) ext
    * Applies a transformation to the shape.
    * TODO: Make a pivotal point for the groupshape?
    */
-  def transform(transformation : TransformationMatrix) = this
-
+  def transform(transformation : TransformationMatrix) = throw new UnsupportedOperationException("Not implemented yet")
 }
 
 /**
