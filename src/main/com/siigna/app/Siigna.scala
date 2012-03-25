@@ -66,12 +66,6 @@ object Siigna extends Interface {
   var printFormatMax = 297.0 - printMargin
 
   /**
-   * The screen as a rectangle, given in physical coordinates.
-   * TODO: Reverse control to def!
-   */
-  var screen : Rectangle2D = Rectangle(Vector(0, 0), Vector(0, 0))
-
-  /**
    * The version of Siigna.
    */
   val version = "v. 0.2.0"
@@ -80,12 +74,6 @@ object Siigna extends Interface {
    * The zoom-speed. Defaults to 0.1 (i. e. 10%).
    */
   var zoomSpeed = 0.1
-
-  /**
-   * Returns the physical center of Siigna, relative from the top left corner
-   * of the screen.
-   */
-  def center = screen.center
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
@@ -143,7 +131,7 @@ object Siigna extends Interface {
   /**
    * The physical TransformationMatrix.
    */
-  def physical = TransformationMatrix(center, 1).flipY
+  def physical = TransformationMatrix(View.center, 1).flipY
 
   /**
    * Set's the current cursor of Siigna. Overrides the current value.
@@ -187,10 +175,10 @@ object Siigna extends Interface {
     // Calculates the difference between the size of the screen and the size of the
     // boundary. This is then multiplied on the zoom level to give the exact
     // scale for the TransformationMatrix.
-    val screenFactor = screen.width / Model.boundary.transform(virtual).width
+    val screenFactor = View.screen.width / Model.boundary.transform(virtual).width
     val scaleFactor  = screenFactor * View.zoom
 
-    TransformationMatrix(center, scaleFactor).flipY
+    TransformationMatrix(View.center, scaleFactor).flipY
   }
 
 }

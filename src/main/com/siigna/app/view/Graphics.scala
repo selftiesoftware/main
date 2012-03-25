@@ -169,7 +169,7 @@ class Graphics(val g : Graphics2D)
    * Draws an endless line.
    */
   def drawLine(p1 : Vector2D, p2 : Vector2D) {
-    val boundary = Siigna.screen
+    val boundary = View.screen
     val line = Line(p1, p2)
     val line1 = Line(boundary.topLeft, boundary.bottomLeft)
     val line2 = Line(boundary.topRight, boundary.bottomRight)
