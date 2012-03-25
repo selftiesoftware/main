@@ -56,7 +56,7 @@ object View extends Canvas with Runnable {
     graphics.draw(p)
 
     // Draw a version number
-    val v = TextShape(Siigna.version, Vector2D(Siigna.screen.width - 80, 10), 10)
+    val v = TextShape(Siigna.version, Vector2D(screen.width - 80, 10), 10)
     graphics.draw(v)
   }
 
@@ -105,6 +105,12 @@ object View extends Canvas with Runnable {
   private def backBuffer(height : Int, width : Int) : VolatileImage =
     getGraphicsConfiguration.createCompatibleVolatileImage(if (height > 0) height else 1, if (width > 0) width else 1)
 
+  /**
+   * Returns the physical center of Siigna, relative from the top left corner
+   * of the screen.
+   */
+  def center = screen.center
+
  /**
   * Draws the view.<br />
   *
@@ -136,8 +142,8 @@ object View extends Canvas with Runnable {
     // Define the boundary by first grabbing the boundary of the model, snapping it to the current view and saving it
     // in the boundary-value.
     val offScreenBoundary = Model.boundary.transform(transformation)
-    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offScreenBoundary.topLeft.y, 0, getSize.height))
-    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offScreenBoundary.bottomRight.y, 0, getSize.height))
+    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, screen.width),     confine(offScreenBoundary.topLeft.y, 0, getSize.height))
+    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, screen.width), confine(offScreenBoundary.bottomRight.y, 0, getSize.height))
     val boundary          = Rectangle2D(topLeft, bottomRight)
 
     // Get the volatile image
@@ -286,6 +292,11 @@ object View extends Canvas with Runnable {
     case e : InterruptedException => Log.info("View has been terminated.")
     case e => Log.error("View has been terminated with unexpected error.", e)
   } }
+
+  /**
+   * The screen as a rectangle, given in physical coordinates.
+   */
+  def screen = Rectangle2D(0, 0, getSize.width, getSize.height)
 
   /**
    * Initializes a pan in order to save the start-vector of the current pan
