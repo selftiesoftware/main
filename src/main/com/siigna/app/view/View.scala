@@ -324,15 +324,15 @@ object View extends Canvas with Runnable {
    * situations that needs massive computer-power, where a sudden painting can
    * steal resources, or situations where you need to draw on layers
    * (which probably is the case in most of the software working with AWT - or
-   * Swing in particular), where it's handy to wait until all changes on a
-   * layers has been performed before drawing the whole thing all over. But
+   * Swing), where it's handy to wait until all changes on a
+   * layer has been performed before drawing the whole thing all over. But
    * for a program such as Siigna where the main task is to actually draw a
-   * Model, we don't need to put the task in line more than we need
+   * Model and modules, we don't need to put the task in line more than we need
    * to just get it done. Furthermore this jumping back and forth from
    * repaint-update-paint can be yet another source of double-buffering
-   * (see above), since <code>update</code> can cause irregular calls to <code>paint</code>
+   * , since <code>update</code> can cause irregular calls to <code>paint</code>
    * which then can end up in a situation where the former paint-job is overridden
-   * and thus a black screen occur. Which makes us saaad pandas.
+   * and thus a black screen occur (see above). And that makes us saaad pandas.
    * However: Keep in mind that the <code>update</code> function is there for
    * a reason. Don't ever just call paint and expect the whole thing to sort
    * itself out...
@@ -343,9 +343,7 @@ object View extends Canvas with Runnable {
    * to avoid double-buffering.
    * </p>
    */
-  override def update(g : AWTGraphics) {
-    paint(g)
-  }
+  override def update(g : AWTGraphics) { paint(g) }
 
   /**
    * Pans the view.
