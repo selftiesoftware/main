@@ -32,6 +32,7 @@ object Preferences extends scala.collection.mutable.HashMap[String, Any] {
   this += "colorUniverse"        -> "#DDDDDD".color
   this += "defaultScreenSize"    -> new Dimension(600, 400)
   this += "selectionDistance"    -> 5.0 * View.zoom
+  this += "zoomSpeed"            -> 0.5
 
   /**
    * Returns a boolean preference. Unless anything else is specified the defaulting value is set to true.
@@ -50,6 +51,11 @@ object Preferences extends scala.collection.mutable.HashMap[String, Any] {
   } catch {
     case _ => defaultValue
   }
+
+  /**
+   * Returns an int preference.
+   */
+  def int(name : String) = apply(name).asInstanceOf[Int]
 
   /**
    * Returns a double preference.

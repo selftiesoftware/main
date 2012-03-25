@@ -71,11 +71,6 @@ object Siigna extends Interface {
   val version = "v. 0.2.0"
 
   /**
-   * The zoom-speed. Defaults to 0.1 (i. e. 10%).
-   */
-  var zoomSpeed = 0.1
-
-  /**
    * Clears the display. NOT the interface. The interface can only be cleared by
    * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
    */
