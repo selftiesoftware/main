@@ -19,7 +19,7 @@ import java.awt.{Cursor}
 
 /**
  * The Siigna object provides access to various core elements of the software. It also functions
- * as the first <code>Interface</code> connected to the unique interface of each module.
+ * as the first <code>Interface</code> connected to the [[com.siigna.app.view.View]].
  */
 object Siigna extends Interface {
 
@@ -129,11 +129,6 @@ object Siigna extends Interface {
   def paperScale = Model.boundaryScale
 
   /**
-   * The physical TransformationMatrix.
-   */
-  def physical = TransformationMatrix(View.center, 1).flipY
-
-  /**
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
@@ -152,33 +147,6 @@ object Siigna extends Interface {
     this.interface = Some(interface)
 
     setCursor(interface.getCursor)
-  }
-
-  /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view, translated to a given point.
-   */
-  def transformationTo(point : Vector2D) : TransformationMatrix =
-    TransformationMatrix(View.pan + point, View.zoom).flipY
-  
-  /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view.
-   */
-  def virtual : TransformationMatrix = TransformationMatrix(View.pan, View.zoom).flipY
-
-  /**
-   * Returns a TransformationMatrix with a translation and scale that fits the
-   * given rectangle.
-   */
-  def virtualTransformationTo(rectangle : Rectangle2D) = {
-    // Calculates the difference between the size of the screen and the size of the
-    // boundary. This is then multiplied on the zoom level to give the exact
-    // scale for the TransformationMatrix.
-    val screenFactor = View.screen.width / Model.boundary.transform(virtual).width
-    val scaleFactor  = screenFactor * View.zoom
-
-    TransformationMatrix(View.center, scaleFactor).flipY
   }
 
 }
