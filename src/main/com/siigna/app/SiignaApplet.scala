@@ -230,17 +230,13 @@ class SiignaApplet extends Applet {
     // Resize the View...?
     View.setSize(this.getSize)
 
-    // Since the size of the component in some cases vary from the actual size (think menus and
-    // title-bars etc.) we set the size according to the actual width and height
-    Siigna.screen = Rectangle(Vector2D(0, 0), Vector2D(width, height))
-
     // Re-render the old background
     View.renderBackground
 
     // Pan the view if the pan isn't set
     // TODO: Refine this hack
     if (View.pan == Vector2D(0, 0))
-      View.pan(Siigna.screen.center)
+      View.pan(View.screen.center)
   }
 
 }

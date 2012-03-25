@@ -40,7 +40,7 @@ trait Display {
    * Paints a default frame with a given width and height
    */
   def paintFrame(graphics : Graphics, width : Int, height : Int, color : Color = backgroundColor) {
-    val center = Siigna.center
+    val center = View.center
     graphics setColor color
     graphics.g.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
   }
