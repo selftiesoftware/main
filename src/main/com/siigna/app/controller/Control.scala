@@ -24,7 +24,8 @@ import com.siigna.app.Siigna
  * TODO: Implement actors when applets can use them without permissions.
  */
 object Control extends Thread("Siigna Controller") {
-  
+
+
   /**
    * The last 10 events
    */

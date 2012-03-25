@@ -84,7 +84,7 @@ package object siigna extends com.siigna.util.Implicits {
   type DirectedGraph[V, A] = com.siigna.util.collection.DirectedGraph[V, A]
   lazy val DirectedGraph = com.siigna.util.collection.DirectedGraph
 
-  lazy val Preferences = com.siigna.util.collection.Preferences
+  lazy val Preferences, Pref = com.siigna.util.collection.Preferences
 
   // Events
   type Event = com.siigna.app.view.event.Event
