@@ -446,7 +446,7 @@ object View extends Canvas with Runnable {
   def zoom(point : Vector2D, delta : Double) {
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
     if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
-      val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.zoomSpeed)
+      val zoomFactor = scala.math.pow(2, -zoomDelta * Preferences.double("zoomSpeed"))
       if ((zoom > 0.000001 || zoomDelta < 0)) {
           zoom *= zoomFactor
         }
