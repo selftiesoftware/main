@@ -11,8 +11,6 @@
 
 package com.siigna.util.geom
 
-import com.siigna.app.model.shape.LineShape
-
 /**
  * A geometry designed for polylines
  */
