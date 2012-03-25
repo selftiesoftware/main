@@ -50,6 +50,26 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   override val center = (topLeft + bottomRight) / 2
 
   /**
+   * Returns the line spanning from the bottom left corner to the bottom right.
+   */
+  def borderBottom = Segment2D(bottomLeft, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the bottom left.
+   */
+  def borderLeft = Segment2D(topLeft, bottomLeft)
+  
+  /**
+   * Returns the line spanning from the top right corner to the bottom right. 
+   */
+  def borderRight = Segment2D(topRight, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the rop right.
+   */
+  def borderTop = Segment2D(topLeft, topRight)
+
+  /**
    * The boundary of the rectangle. In this case returns itself.
    */
   override def boundary = this
