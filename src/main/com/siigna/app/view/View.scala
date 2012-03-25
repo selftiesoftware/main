@@ -17,9 +17,9 @@ import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
-import java.awt.image.{VolatileImage}
-import java.awt.{Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
+import java.awt.image.{BufferedImage, VolatileImage}
 import com.siigna.app.model.shape.{TextShape, PolylineShape}
+import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -27,6 +27,12 @@ import com.siigna.app.model.shape.{TextShape, PolylineShape}
  * TODO: Cache(?)
  */
 object View extends Canvas with Runnable {
+
+  /**
+   * A background image that can be re-used to draw as background on the canvas.
+   * TODO: Rename to something more appropiate considering "cachedBackgroundImage"
+   */
+  private var backgroundImage : Option[Image] = None
 
   /**
    * A volatile image, used to utilize hardware acceleration and cancel out the double-buffering issue
@@ -38,7 +44,7 @@ object View extends Canvas with Runnable {
    * This variable stores a function that paints the boundary with a surrounding black border
    * and a version number in the upper right corner.
    * <br />
-   * This variable can be overridden with a function that paints a different
+   * Can be overridden with a function that paints a different background.
    */
   var drawBoundary : (Graphics, Rectangle2D, TransformationMatrix) => Unit = (graphics : Graphics, boundary : Rectangle2D, transformation : TransformationMatrix) => {
     // Draw a white rectangle inside the boundary of the current model.
@@ -129,56 +135,50 @@ object View extends Canvas with Runnable {
 
     // Define the boundary by first grabbing the boundary of the model, snapping it to the current view and saving it
     // in the boundary-value.
-    val offscreenBoundary = Model.boundary.transform(transformation)
-    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offscreenBoundary.topLeft.y, 0, getSize.height))
-    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offscreenBoundary.bottomRight.y, 0, getSize.height))
+    val offScreenBoundary = Model.boundary.transform(transformation)
+    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offScreenBoundary.topLeft.y, 0, getSize.height))
+    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offScreenBoundary.bottomRight.y, 0, getSize.height))
     val boundary          = Rectangle2D(topLeft, bottomRight)
 
     // Get the volatile image
-    var backgroundImage = cachedBackgroundImage.getOrElse(backBuffer)
+    var background = cachedBackgroundImage.getOrElse(backBuffer)
 
     // Loop the rendering.
     do {
       // Validate the backgroundImage
-      if (backgroundImage.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
-        backgroundImage = backBuffer
+      if (background.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
+        background = backBuffer
 
       // Define the buffer graphics as an instance of <code>Graphics2D</code>
       // (which is much nicer than just <code>Graphics</code>).
-      val graphics2D = backgroundImage.getGraphics.asInstanceOf[Graphics2D]
+      val graphics2D = background.getGraphics.asInstanceOf[Graphics2D]
 
       // Wraps the graphics-object in our own Graphics-wrapper (more simple API).
       val graphics = new Graphics(graphics2D)
 
       // Clear the view and draw the default background-color.
-      graphics2D setBackground("#DDDDDF".color)
-      graphics2D clearRect(0, 0, Siigna.screen.width.toInt, Siigna.screen.height.toInt)
+      if (backgroundImage.isDefined) graphics2D.drawImage(backgroundImage.get, 0, 0, this)
 
       // Draw the background
       drawBoundary(graphics, boundary, transformation)
 
       // Set up anti-aliasing
-      val antiAliasing = Preferences.boolean("anti-aliasing", true)
+      val antiAliasing = Preferences.boolean("antiAliasing", true)
       val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
       graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
       /***** MODEL *****/
-      // TODO: Cache the way it's written below.
-      // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
-      // isn't much bigger than the current view then draw the entire model and save the image as the
-      // last static image. This is done because it can save a lot of performance to save the static image
-      // for later, since most of the redrawing happens because of panning, which strictly doesn't require a redraw.
-      // Otherwise find the shapes inside the view-bound and paint them, without saving anything as static.
-      // Examines whether the cached image is valid and applicable.
+      // TODO: Cache
 
       // Draw model
       try {
         // TODO: Set the MBR for the model
-        //val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
-        Model map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Model
+        val mbr = Rectangle2D(Vector(0, 0).transform(transformation.inverse), Vector(getSize.width, getSize.height).transform(transformation.inverse))
+        Model(mbr) map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
         // Filter away shapes that are drawn in the dynamic layer and draw the rest.
         //Model.queryForShapesWithId(mbr).filterNot(e => dynamic.contains(e._1)).map(e => e._2.transform(transformation) ) foreach( graphics draw)
       } catch {
+        case e : InterruptedException => Log.info("View: Error while drawing Model, the view is shutting down.")
         case e => Log.error("View: Unable to draw Model: "+e)
       }
 
@@ -204,8 +204,8 @@ object View extends Canvas with Runnable {
 
       // Draw the image we get from the print-method on the view.
       // Parameters are (Image img, int x, int y, ImageObserver observer)
-      graphicsPanel drawImage(backgroundImage, 0, 0, this)
-    } while (backgroundImage.contentsLost) // Continue looping until the content isn't lost.
+      graphicsPanel drawImage(background, 0, 0, this)
+    } while (background.contentsLost) // Continue looping until the content isn't lost.
 
   // Catch unexpected errors
   } catch {
@@ -222,6 +222,33 @@ object View extends Canvas with Runnable {
       fpsCurrent += 1 // Add a counter
     }
   } }
+  /**
+   * Draws a background-image consisting of "chess checkered" fields.
+   */
+  def renderBackground() {
+    val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_BYTE_GRAY)
+    val g = image.getGraphics
+    val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
+    var x = 0
+    var y = 0
+
+    // Clear background
+    g setColor Preferences.color ("colorBackgroundDark")
+    g fillRect (0, 0, getSize.width, getSize.height)
+    g setColor Preferences.color ("colorBackgroundLight")
+
+    var evenRow = false
+    while (x < getSize.width) {
+      while (y < getSize.height) {
+        g.fillRect(x, y, size, size)
+        y += size << 1
+      }
+      x += size
+      y = if (evenRow) 0 else size
+      evenRow = !evenRow
+    }
+    backgroundImage = Some(image)
+  }
 
   /**
    * The active rendering-loop. Avoids paint-events from native Java.
