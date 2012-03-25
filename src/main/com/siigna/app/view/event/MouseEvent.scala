@@ -39,10 +39,10 @@ case class MouseDown (position : Vector2D, button : MouseButton, keys : Modifier
 case class MouseUp   (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseUp }
 case class MouseDrag (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDrag }
 case class MouseMove (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseMove }
-case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Int) extends MouseEvent { val symbol = 'MouseWheel }
+case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Double) extends MouseEvent { val symbol = 'MouseWheel }
 
 object MouseWheel
 {
-  def apply(wheel : Int)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
+  def apply(wheel : Double)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
     new MouseWheel(position, button, keys, wheel)
 }

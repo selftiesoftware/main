@@ -30,6 +30,11 @@ trait Rectangle {
   def circumference : Double
 
   /**
+   * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
+   */
+  def expand(that : T) : T
+
+  /**
    * The height of the rectangle
    */
   def height : Double
@@ -43,11 +48,6 @@ trait Rectangle {
    * Calculate the overlap between this and another rectangle. If two rectangles do not overlap the area is 0.
    */ 
   def overlap(that : T) : Double
-
-  /**
-   * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
-   */
-  def union(that : T) : T
 
   /**
    * The width of the rectangle

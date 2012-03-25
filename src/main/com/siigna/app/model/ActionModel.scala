@@ -15,6 +15,7 @@ import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.ImmutableShape
 import collection.parallel.immutable.ParHashMap
+import com.siigna.app.view.View
 
 
 /**
@@ -49,6 +50,9 @@ trait ActionModel {
       executed +:= action
       undone = Seq()
     }
+    
+    // Render the view
+    View.render()
   }
 
   /**
@@ -63,6 +67,9 @@ trait ActionModel {
       // Execute the event and add it to the executed list
       model = action.execute(model)
       executed +:= action
+      
+      // Render the view
+      View.render()
     } else {
       Log.warning("Model: No more actions to redo.")
     }
@@ -80,6 +87,9 @@ trait ActionModel {
       // Undo it and add it to the undone list
       model = action.undo(model)
       undone +:= action
+      
+      // Render the view
+      View.render()
     } else {
       Log.warning("Model: No more actions to undo.")
     }
