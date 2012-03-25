@@ -13,21 +13,25 @@ package com.siigna.util.collection
 
 import com.siigna.util.Implicits._
 import java.awt.{Dimension, Color}
+import com.siigna.app.view.View
 
 /**
  * Preferences used by Siigna.
  * We've made an object since we need to store several values when the program is initialized.
  */
-
-object Preferences extends scala.collection.mutable.ListMap[String, Any] {
+object Preferences extends scala.collection.mutable.HashMap[String, Any] {
 
   // Set initial values
-  this += "anti-aliasing"     -> true
-  this += "colorBackground"   -> "#F9F9F9".color
-  this += "colorDraw"         -> "#000000".color
-  this += "colorSelected"     -> "#7777FF".color
-  this += "colorUniverse"     -> "#DDDDDD".color
-  this += "defaultScreenSize" -> new Dimension(600, 400)
+  this += "antiAliasing"         -> true
+  this += "backgroundTileSize"   -> 50
+  this += "colorBackground"      -> "#F9F9F9".color
+  this += "colorBackgroundLight" -> "#E9E9E9".color
+  this += "colorBackgroundDark"  -> "#DADADA".color
+  this += "colorDraw"            -> "#000000".color
+  this += "colorSelected"        -> "#7777FF".color
+  this += "colorUniverse"        -> "#DDDDDD".color
+  this += "defaultScreenSize"    -> new Dimension(600, 400)
+  this += "selectionDistance"    -> 5.0 * View.zoom
 
   /**
    * Returns a boolean preference. Unless anything else is specified the defaulting value is set to true.
@@ -44,8 +48,13 @@ object Preferences extends scala.collection.mutable.ListMap[String, Any] {
   def color(name : String, defaultValue : Color = "#000000".color) = try {
     this(name).asInstanceOf[Color]
   } catch {
-    case _ =>
+    case _ => defaultValue
   }
+
+  /**
+   * Returns a double preference.
+   */
+  def double(name : String) = apply(name).asInstanceOf[Double]
 
   /**
    * Returns a specific value as an option of a given type. If the value doesn't not exist the method returns None.

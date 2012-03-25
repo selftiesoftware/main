@@ -62,6 +62,13 @@ trait Shape {
    * Calculates the closest distance to the shape in the given scale.
    */
   def distanceTo(point : Vector2D, scale : Double) : Double
+  
+  //def select() : DynamicShape // select everything
+  
+  //def select(rect : Rectangle2D) : Option[DynamicShape] // select fully included segments
+  
+  //def select(point : Vector2D) : Option[DynamicShape] // select shape close to the point
+  
 
   /**
    * Merge the new attributes in with the existing ones, eventually overwriting
