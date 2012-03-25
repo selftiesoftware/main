@@ -23,7 +23,7 @@ object Preferences extends scala.collection.mutable.HashMap[String, Any] {
 
   // Set initial values
   this += "antiAliasing"         -> true
-  this += "backgroundTileSize"   -> 50
+  this += "backgroundTileSize"   -> 12
   this += "colorBackground"      -> "#F9F9F9".color
   this += "colorBackgroundLight" -> "#E9E9E9".color
   this += "colorBackgroundDark"  -> "#DADADA".color
