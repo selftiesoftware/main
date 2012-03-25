@@ -11,9 +11,9 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.{DXFSection, DXFValue}
-import com.siigna.util.geom.{TransformationMatrix, Vector2D, Segment2D}
+import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D, Segment2D}
+import com.siigna.util.collection.{Preferences, Attributes}
 
 /**
  * This class draws a line segment.
@@ -35,6 +35,23 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   val geometry = new Segment2D(p1, p2)
 
   val points = Iterable(p1, p2)
+  
+  def select() = DynamicShape(attributes.int("id").get, transform)
+
+  def select(r : Rectangle2D) = if (r.contains(boundary)) Some(DynamicShape(attributes.int("id").get, transform)) else None
+  
+  def select(p : Vector2D) = {
+    if (distanceTo(p) > Preferences.double("selection-distance")) {
+      None
+    } else {
+      val f = (t : TransformationMatrix) => if (p.distanceTo(p1) < p.distanceTo(p2)) {
+        LineShape(p1.transform(t), p2, attributes)
+      } else {
+        LineShape(p1, p2.transform(t), attributes)
+      }
+      Some(DynamicShape(attributes.int("id").get, f))
+    }
+  }
 
   val start = p1
 
