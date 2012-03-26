@@ -18,10 +18,14 @@ import com.siigna.app.controller.Control
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
-import com.siigna.util.geom.{Vector2D, Rectangle}
+import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
 import java.awt.{BorderLayout, Dimension}
 import view.View
+
+// This is necessary to load the Model. It's multi-threaded so we do NOT want
+// it to start up in a module...
+import com.siigna.Model
 
 /**
  * The main class of Siigna.
@@ -87,7 +91,10 @@ class SiignaApplet extends Applet {
     })
     View.addMouseWheelListener(new MouseWheelListener {
       override def mouseWheelMoved(e : MouseWheelEvent) {
-        handleMouseEvent(e, MouseWheel(e getPreciseWheelRotation)) }
+        // getPreciseWheelRotation is only available in 1.7
+        val scroll = try {e.getPreciseWheelRotation} catch { case _ => e.getUnitsToScroll}
+        handleMouseEvent(e, MouseWheel(scroll))
+      }
     })
 
     // Allows specific KeyEvents to be detected.
@@ -102,6 +109,11 @@ class SiignaApplet extends Applet {
 
     // Start the paint-loop
     paintThread.start()
+
+    // Render!
+    View.pan(View.center)
+    View.renderBackground()
+    View.render()
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
