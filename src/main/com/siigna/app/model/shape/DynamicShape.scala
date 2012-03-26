@@ -14,18 +14,18 @@ package com.siigna.app.model.shape
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.app.model.Model
-import com.siigna.app.model.action.{TransformShape, Action}
+import com.siigna.app.model.action.{TransformShapes, TransformShape, Action}
 
 /**
- * A dynamic shape is a mutable wrapper for a regular Shape.
- * When altered, the dynamic shape saves the action required to alter the shape in the static layer, so the changes
- * can be made to the static version later on - when the shape is "demoted" back into the static layer.
+ * A dynamic shape is a mutable wrapper for a regular ImmutableShape(s).
+ * When altered, the dynamic shape saves the action required to alter the shape(s) in the static layer, so the changes
+ * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
- * @param id  The id of the wrapped shape.
- * @param f  The predicate that transforms the selected shape - or parts of it - into a new immutable shape
+ * @param ids  The ids of the wrapped shape(s).
+ * @param f  The predicate that transforms the selected shape(s) - or parts of them - into new immutable shape(s)
  * @see [[com.siigna.app.model.DynamicModel]]
  */
-case class DynamicShape(id : Int, f : TransformationMatrix => ImmutableShape) extends Shape
+case class DynamicShape(ids : Seq[Int], f : TransformationMatrix => ImmutableShape) extends Shape
                                             with (TransformationMatrix => ImmutableShape) {
 
   type T = DynamicShape
@@ -43,15 +43,15 @@ case class DynamicShape(id : Int, f : TransformationMatrix => ImmutableShape) ex
   def apply(t : TransformationMatrix) = f(t)
   
   /**
-   * The attributes of the underlying ImmutableShape.
+   * The attributes of the underlying ImmutableShapes.
    */
-  def attributes = Model(id).attributes
+  def attributes = Attributes()
 
   /**
-   * The boundary of the underlying ImmutableShape.
+   * The boundary of the underlying ImmutableShapes.
    * @return A Rectangle2D.
    */
-  def boundary = Model(id).boundary
+  def boundary = ids.map(Model(_)).foldLeft(Model(ids(0)).boundary)((a, b) => a.expand(b.boundary))
 
   /**
    * Calculates the distance from the vector and to the underlying ImmutableShape.
@@ -59,7 +59,7 @@ case class DynamicShape(id : Int, f : TransformationMatrix => ImmutableShape) ex
    * @param scale  The scale in which we are calculating.
    * @return  The length from the closest point of this shape to the point.
    */
-  def distanceTo(point: Vector2D, scale: Double) = Model(id).distanceTo(point)
+  def distanceTo(point: Vector2D, scale: Double) = ids.map(Model(_).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
 
@@ -70,10 +70,24 @@ case class DynamicShape(id : Int, f : TransformationMatrix => ImmutableShape) ex
    */
   def transform(transformation: TransformationMatrix) = {
     action = if (action.isDefined) {
-      Some(action.get.merge(TransformShape(id, transformation)))
+      Some(action.get.merge(TransformShapes(ids, transformation)))
     } else {
-      Some(TransformShape(id, transformation))
+      Some(TransformShapes(ids, transformation))
     }
     this
   }
+}
+
+/**
+ * Companion-object for the DynamicShape class.
+ */
+object DynamicShape {
+
+  /**
+   * A method to create a DynamicShape with only one id.
+   */
+  def apply(id : Int, f : TransformationMatrix => ImmutableShape) = {
+    new DynamicShape(Seq(id), f)
+  }
+  
 }

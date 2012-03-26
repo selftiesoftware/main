@@ -287,30 +287,32 @@ object View extends Canvas with Runnable {
    * in a local variable for use during drawing.
    */
   def renderBackground() {
-    // Create image
-    val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_BYTE_GRAY)
-    val g = image.getGraphics
-    val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
-    var x = 0
-    var y = 0
+    if (getSize.height > 0 && getSize.width > 0) {
+      // Create image
+      val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_BYTE_GRAY)
+      val g = image.getGraphics
+      val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
+      var x = 0
+      var y = 0
 
-    // Clear background
-    g setColor Preferences.color ("colorBackgroundDark")
-    g fillRect (0, 0, getSize.width, getSize.height)
-    g setColor Preferences.color ("colorBackgroundLight")
+      // Clear background
+      g setColor Preferences.color ("colorBackgroundDark")
+      g fillRect (0, 0, getSize.width, getSize.height)
+      g setColor Preferences.color ("colorBackgroundLight")
 
-    // Draw a chess-board pattern
-    var evenRow = false
-    while (x < getSize.width) {
-      while (y < getSize.height) {
-        g.fillRect(x, y, size, size)
-        y += size << 1
+      // Draw a chess-board pattern
+      var evenRow = false
+      while (x < getSize.width) {
+        while (y < getSize.height) {
+          g.fillRect(x, y, size, size)
+          y += size << 1
+        }
+        x += size
+        y = if (evenRow) 0 else size
+        evenRow = !evenRow
       }
-      x += size
-      y = if (evenRow) 0 else size
-      evenRow = !evenRow
+      cachedBackgroundImage = Some(image)
     }
-    cachedBackgroundImage = Some(image)
   }
 
  /**
