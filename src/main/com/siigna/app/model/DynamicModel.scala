@@ -11,28 +11,39 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.{ParMap, ParHashMap}
-import shape.{Shape, DynamicShape}
+import shape.{DynamicShape}
 
 /**
- * An immutable model containing [[com.siigna.app.model.shape.DynamicShape]]s.
+ * A mutable model containing one single [[com.siigna.app.model.shape.DynamicShape]].
  *
  * @tparam Key  The type of the keys in the Model.
  * @see [[com.siigna.app.model.Model]]
  */
 trait DynamicModel[Key] {
   
-  var dynamics : ParMap[Key, DynamicShape] = ParHashMap[Key, DynamicShape]()
+  var dynamic : Option[DynamicShape] = None
 
   /**
-   * Deselect the active shapes in the DynamicModel.
+   * Deselect the active shapes in the DynamicModel and apply the action waiting to be executed to the
+   * [[com.siigna.app.model.Model]].
    */
   def deselect() {
-    throw new UnsupportedOperationException("Not implemented")
+    if (dynamic.isDefined) {
+      if (dynamic.get.action.isDefined) {
+        Model execute dynamic.get.action.get
+      }
+      dynamic = None
+    }
   }
 
-  def select(id : Int) {
-    throw new UnsupportedOperationException("Not implemented")
+  /**
+   * Select a single shape.
+   * @param shape
+   */
+  def select(shape : DynamicShape) {
+    if (dynamic.isDefined) deselect()
+    
+    dynamic = Some(shape)
   }
 
 }

@@ -13,10 +13,10 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.{ImmutableShape, Shape}
 import com.siigna.app.model.Model
-import com.siigna.util.logging.Log
+import com.siigna.util.geom.Vector2D
 
 /**
- * Select objects. Even though this technically is not an action it is crucial to
+ * Select objects. This action is crucial to
  * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.ImmutableShape]]
  * and [[com.siigna.app.model.shape.DynamicShape]] that allows shapes to enter the
  * [[com.siigna.app.model.DynamicModel]]. DynamicShapes does not just duplicate shapes but also
@@ -25,36 +25,14 @@ import com.siigna.util.logging.Log
  *
  * TODO: Implement a class that selects only one shape.
  */
-class Select(ids : Traversable[Int]) extends VolatileAction {
-
-  def execute(model : Model) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-  def merge(action : Action) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-  def undo(model : Model) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-}
-
-/**
- * A companion object to the [[com.siigna.app.model.action.Select]] action.
- */
 object Select {
 
   /**
    * Selects one [[com.siigna.app.model.shape.ImmutableShape]].
    * @param shape  The shape to select.
    */
-  def apply(shape : ImmutableShape) {
-    /*Model.indexWhere(_ == shape) match {
-      case -1 => Log.info("Select: Unable to select shape, could not locate it in the model.")
-      case i => Model execute new Select(Seq(i))
-    }*/
+  def apply(id : Int) {
+    Model execute SelectShape(id)
   }
 
   /**
@@ -74,3 +52,39 @@ object Select {
   }
 
 }
+
+/**
+ * Selects a single shape.
+ * @param id  The id of the shape as the key in the [[com.siigna.app.model.Model]].
+ */
+case class SelectShape(id : Int) extends VolatileAction {
+  def execute(model: Model) = null
+
+  def merge(that: Action) = null
+
+  def undo(model: Model) = null
+}
+
+case class SelectShapeByPoint(id : Int, p : Vector2D) extends VolatileAction {
+  def execute(model: Model) = null
+
+  def merge(that: Action) = null
+
+  def undo(model: Model) = null
+}
+
+/*case class SelectShapes(ids : Traversable[Int]) extends VolatileAction {
+
+  def execute(model : Model) = {
+    throw new UnsupportedOperationException("Not yet implemented.")
+  }
+
+  def merge(action : Action) = {
+    throw new UnsupportedOperationException("Not yet implemented.")
+  }
+
+  def undo(model : Model) = {
+    throw new UnsupportedOperationException("Not yet implemented.")
+  }
+
+} */
