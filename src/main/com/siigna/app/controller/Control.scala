@@ -17,6 +17,7 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
+import com.siigna.app.model.Model
 
 /**
  * The Control controls the core of the software. Basically that includes
@@ -25,6 +26,10 @@ import com.siigna.app.Siigna
  */
 object Control extends Thread("Siigna Controller") {
 
+  // This may seem silly, but in fact we are instantiating the model.
+  // If this is not done here the modules cannot load, since the model
+  // uses threading... Pretty annoying really.
+  Model.isEmpty
 
   /**
    * The last 10 events
@@ -211,6 +216,7 @@ object Control extends Thread("Siigna Controller") {
             // Retrieve module
             val module : Module = modules.top
 
+            // Examine if the module has not yet been imported
             // Parse the events
             events = module.eventParser.parse(event :: events)
 

@@ -38,7 +38,7 @@ case object EndPoints extends EventSnap {
       val res = model.map(_ match {
         case s : ArcShape => closestPoints(s.geometry.vertices)
         case s : CircleShape => closestPoints(s.handles)
-        case s : ImageShape => closestPoints(s.geometry.vertices)
+        //case s : ImageShape => closestPoints(s.geometry.vertices)
         case LineShape(start, end, _) => closestTwo(start, end)
         case s : PolylineShape => closestPoints(s.geometry.vertices)
         case s : TextShape => closestPoints(s.geometry.vertices)

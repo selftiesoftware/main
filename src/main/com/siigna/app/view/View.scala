@@ -17,7 +17,7 @@ import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
-import java.awt.image.{BufferedImage, VolatileImage}
+import java.awt.image.{VolatileImage}
 import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 import com.siigna.app.model.shape.{ImmutableShape, TextShape, PolylineShape}
 
@@ -182,7 +182,7 @@ object View extends Canvas with Runnable {
         Siigna.paint(graphics, transformation)
       } catch {
         case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.", e)
-        case e => Log.error("View: Error while painting the modules.", e)
+        case e => Log.error("View: Unknown error while painting the modules.", e)
       }
 
       // Draw the image we get from the maneuvers above.
@@ -236,50 +236,55 @@ object View extends Canvas with Runnable {
    * In other words this is a cache function. Handy eh?
    */
   def render() {
-    // Create an image
-    var image = backBuffer
+    if (getSize.width > 0 && getSize.height > 0) try {
+      // Create an image
+      var image = backBuffer
 
-    do {
-      // Validate the backgroundImage
-      if (image.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
-        image = backBuffer
+      do {
+        // Validate the backgroundImage
+        if (image.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
+          image = backBuffer
 
-      // Set the graphics
-      val g = new Graphics(image.getGraphics.asInstanceOf[Graphics2D])
-      g.setColor(Preferences.color("colorDraw"))
+        // Set the graphics
+        val g = new Graphics(image.getGraphics.asInstanceOf[Graphics2D])
+        g.setColor(Preferences.color("colorDraw"))
 
-      // Draw background (if defined)
-      if (cachedBackgroundImage.isDefined) g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
+        // Draw background (if defined)
+        if (cachedBackgroundImage.isDefined) g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
 
-      // Draw a white rectangle inside the boundary of the current model.
-      g.g.setBackground(Color white)
-      g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+        // Draw a white rectangle inside the boundary of the current model.
+        g.g.setBackground(Color white)
+        g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
 
-      // Set anti-aliasing
-      val antiAliasing = Preferences.boolean("antiAliasing", true)
-      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
-      g.g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
+        // Set anti-aliasing
+        val antiAliasing = Preferences.boolean("antiAliasing", true)
+        val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+        g.g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
-      // Draw model
-      if (Model.size > 0) try {
-        val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-        Model(mbr) map(_ transform virtual) foreach(g draw) // Draw the entire Model
-      } catch {
-        case e : InterruptedException => Log.info("View: Error while drawing Model, the view is shutting down.")
-        case e => Log.error("View: Unable to draw Model: "+e)
-      }
+        // Draw model
+        if (Model.size > 0) try {
+          val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
+          Model(mbr) map(_ transform virtual) foreach(g draw) // Draw the entire Model
+        } catch {
+          case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error drawing!")
+          case e => Log.error("View: Unable to draw Model: "+e)
+        }
 
-      // Draw the boundary shape
-      g draw boundaryShape(boundary)
+        // Draw the boundary shape
+        g draw boundaryShape(boundary)
 
-      // Draw a version number
-      val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
-      g.draw(v)
+        // Draw a version number
+        val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
+        g.draw(v)
 
-    } while (image.contentsLost) // Continue looping until the content isn't lost.
+      } while (image.contentsLost) // Continue looping until the content isn't lost.
 
-    // Save the image
-    cachedForegroundImage = Some(image)
+      // Save the image
+      cachedForegroundImage = Some(image)
+    } catch {
+      case e : NullPointerException => Log.info("View: Error fetching volatile image - probably not ready yet.")
+      case e => Log.warning("View: Unknown error while painting the model: ", e)
+    }
   }
 
   /**
@@ -289,7 +294,7 @@ object View extends Canvas with Runnable {
   def renderBackground() {
     if (getSize.height > 0 && getSize.width > 0) {
       // Create image
-      val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_BYTE_GRAY)
+      val image = backBuffer
       val g = image.getGraphics
       val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
       var x = 0
@@ -323,8 +328,26 @@ object View extends Canvas with Runnable {
     // State that we're initiating
     Log.success("View: Initiating paint-loop.")
 
-    // Create peer
-    View.addNotify()
+    // Create peer or die trying!
+    try {
+      View.addNotify()
+    } catch {
+      case _ => {
+        try {
+          Thread.sleep(100)
+          View.addNotify()
+        } catch {
+          case _ => {
+            try {
+              Thread.sleep(1000)
+              View.addNotify()
+            } catch {
+              case _ => System.exit(-1) // Die!
+            }
+          }
+        }
+      }
+    }
 
     // Create a buffer strategy of 2
     View.createBufferStrategy(2)

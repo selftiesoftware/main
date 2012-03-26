@@ -24,7 +24,6 @@ package com.siigna.app.controller
 
 import java.lang.ClassLoader
 import java.net.{URL, URLClassLoader}
-
 import com.siigna.util.logging.Log
 
 /**
@@ -58,7 +57,7 @@ class ModuleLoader(private var urls : Array[URL], loader : ClassLoader) {
    *
    * @return Option[T] Some[T] if the module loads successfully and the resulting class is an instance of T, else None.
    */
-  def loadModule[T : Manifest](classPath : String, filePath : String) : Option[T] = {
+  def loadModule[Module : Manifest](classPath : String, filePath : String) : Option[Module] = {
     if (classPath == "") {
       Log.warning("JarLoader: Cannot load modules with empty classPath.")
       None
@@ -88,18 +87,30 @@ class ModuleLoader(private var urls : Array[URL], loader : ClassLoader) {
       }
 
       // Try and load the module!
-      val result : Option[T] = if (resource.isEmpty) None else try {
-        val instance = resource.get.getField("MODULE$").get(manifest.erasure).asInstanceOf[T]
+      val result : Option[Module] = if (resource.isEmpty) None else try {
+        val field = resource.get.getField("MODULE$")
+        val instance = field.get(manifest.erasure).asInstanceOf[Module]
         // Return!
         Some(instance)
       } catch {
-        case e => errors += ("JarLoader: Class found, but failed to cast to type T." -> Some(e))
-        None
+        case e : ExceptionInInitializerError => {
+          // If constructing via the MODULE$ field fails, try using the constructor instead.
+          try {
+            val constructors = resource.get.getDeclaredConstructors
+            constructors(0).setAccessible(true)
+            Some(constructors(0).newInstance())
+            None
+          } catch {
+            case err => errors += ("ModuleLoader: Module " + classPath + " was found but could not be initialized through MODULE$ field or constructor." -> Some(err))
+            None
+          }
+        }
+        case e => errors += ("ModuleLoader: Class found, but failed to cast to type T." -> Some(e)); None
       }
 
       // Print errors in case no modules was found
       if (result.isEmpty) {
-        errors.foreach(e => if (e._2.isDefined) Log.error(e._1, e._2) else Log.error(e._1))
+        errors.foreach(e => if (e._2.isDefined) Log.error(e._1, e._2.get) else Log.error(e._1))
       }
 
       // Return the result
