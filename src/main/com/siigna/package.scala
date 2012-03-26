@@ -35,7 +35,7 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Control = com.siigna.app.controller.Control
 
   // Model
-  lazy val Model = com.siigna.app.model.Model
+  val Model = com.siigna.app.model.Model
 
   // Module
   type Module = com.siigna.module.Module
@@ -53,8 +53,8 @@ package object siigna extends com.siigna.util.Implicits {
   type DynamicShape = com.siigna.app.model.shape.DynamicShape
   val DynamicShape = com.siigna.app.model.shape.DynamicShape
 
-  type ImageShape = com.siigna.app.model.shape.ImageShape
-  lazy val ImageShape = com.siigna.app.model.shape.ImageShape
+  //type ImageShape = com.siigna.app.model.shape.ImageShape
+  //lazy val ImageShape = com.siigna.app.model.shape.ImageShape
 
   type LineShape = com.siigna.app.model.shape.LineShape
   lazy val LineShape = com.siigna.app.model.shape.LineShape
