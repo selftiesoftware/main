@@ -66,7 +66,7 @@ trait ImmutableShape extends Shape {
    * Selects the entire shape and wraps it into a DynamicShape, so it can be manipulated dynamically.
    * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.DynamicShape]].
    */
-  def select() : DynamicShape = DynamicShape(attributes.int("id").get, transform)
+  def select() : DynamicShape = DynamicShape(attributes.int("id").get, transform(_))
 
   /**
    * Selects a shape by a rectangle. If the rectangle encloses the entire shape then select everything, but if
