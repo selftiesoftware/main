@@ -324,9 +324,12 @@ object Control extends Thread("Siigna Controller") {
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
 
-              //println ("her")
+              println ("her")
               //val ne1 = new pgsqlSaveShapes
-              //ne1.saveLine()
+              //ne1.saveShapes()
+              //val ne2 = new pgsqlDeleteData
+              //ne2.allDrawings()
+
             }
           }
           // Preload a module
