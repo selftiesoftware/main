@@ -139,18 +139,18 @@ object Branch {
 
 class Branch(val branchFactor : Int) extends Node {
 
-  private var map = Map[String, Rectangle2D]()
+  private var map = Map[Int, Rectangle2D]()
 
-  def add(key : String, value : Rectangle2D) = map = map + (key -> value)
+  def add(key : Int, value : Rectangle2D) = map = map + (key -> value)
   
-  def add(elem : (String, Rectangle2D)) = {
+  def add(elem : (Int, Rectangle2D)) = {
     map = map + elem
     this
   }
 
-  def add(elems : Map[String, Rectangle2D]) = map = map ++ elems
+  def add(elems : Map[Int, Rectangle2D]) = map = map ++ elems
 
-  def add(elems : Traversable[(String, Rectangle2D)]) = {
+  def add(elems : Traversable[(Int, Rectangle2D)]) = {
     map = map ++ elems
     this
   }
@@ -161,9 +161,9 @@ class Branch(val branchFactor : Int) extends Node {
   	if (map.isEmpty) Rectangle2D.empty
   	else map.values.reduceLeft((p1, p2) => (p1.expand(p2)))
 
-  def remove(elems : Map[String, Rectangle2D]) { map = map.--(elems.keys) }
+  def remove(elems : Map[Int, Rectangle2D]) { map = map.--(elems.keys) }
 
-  def remove(key : String, elem : Rectangle2D) { map = map.filterNot(_ == (key, elem)) }
+  def remove(key : Int, elem : Rectangle2D) { map = map.filterNot(_ == (key, elem)) }
 
   def size = map.size
 

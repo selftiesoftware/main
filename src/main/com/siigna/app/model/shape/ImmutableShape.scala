@@ -63,6 +63,28 @@ trait ImmutableShape extends Shape {
   def geometry : Geometry2D
 
   /**
+   * Selects the entire shape and wraps it into a DynamicShape, so it can be manipulated dynamically.
+   * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.DynamicShape]].
+   */
+  def select() : DynamicShape = DynamicShape(attributes.int("id").get, transform(_))
+
+  /**
+   * Selects a shape by a rectangle. If the rectangle encloses the entire shape then select everything, but if
+   * only a single point is enclosed (for example) then select that point and that point only. If nothing is
+   * enclosed, then return None. This comes in handy when a selection-box sweeps across the model.
+   * @param rect  The rectangle to base the selection on.
+   * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.DynamicShape]].
+   */
+  def select(rect : Rectangle2D) : Option[DynamicShape]
+
+  /**
+   * Select a shape by a single point. The part of the shape that is closes to that point will be selected.
+   * @param point  The point to base the selection on.
+   * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.DynamicShape]].
+   */
+  def select(point : Vector2D) : Option[DynamicShape] // select shape close to the point
+
+  /**
    * Returns a setAttributes of the shape. In other words return a shape with a new id,
    * but otherwise the same attributes.
    */

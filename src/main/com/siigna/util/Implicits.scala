@@ -42,16 +42,6 @@ abstract class Implicits {
   implicit def awtColorToRichColor(color : Color) = new RichColor(color)
 
   /**
-   * Implicitly converts a DynamicShape to an Option containing type Action.
-   */
-  //implicit def dynamicShapeToActionOption(shape : DynamicShape) = shape.action
-
-  /**
-   * Implicitly converts a Shape to a <code>Option[String]</code> representing it's id - if it exists in the model.
-   */
-  implicit def shapeToOptionString(shape : Shape) : Option[String] = Model.findId(_ == shape)
-
-  /**
    * Implicitly adds a color method on String objects. To use this
    * <code>import RichColor.stringToColor</code> in your code.
    *

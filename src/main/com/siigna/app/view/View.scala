@@ -18,8 +18,8 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.image.{VolatileImage}
-import java.awt.{Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
-import com.siigna.app.model.shape.{TextShape, PolylineShape}
+import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
+import com.siigna.app.model.shape.{ImmutableShape, TextShape, PolylineShape}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -29,31 +29,27 @@ import com.siigna.app.model.shape.{TextShape, PolylineShape}
 object View extends Canvas with Runnable {
 
   /**
+   * A background image that can be re-used to draw as background on the canvas.
+   * TODO: Rename to something more appropiate considering "cachedBackgroundImage"
+   */
+  private var cachedBackgroundImage : Option[Image] = None      
+
+  /**
+   * An image of the cachedBackgroundImage and the [[com.siigna.app.model.Model]], used for caching purposes.
+   */
+  private var cachedForegroundImage : Option[Image] = None
+
+  /**
    * A volatile image, used to utilize hardware acceleration and cancel out the double-buffering issue
    * that can cause flickering when repainting (see below).
    */
-  private var cachedBackgroundImage : Option[VolatileImage] = None
+  private var cachedVolatileImage : Option[VolatileImage] = None
 
   /**
-   * This variable stores a function that paints the boundary with a surrounding black border
-   * and a version number in the upper right corner.
-   * <br />
-   * This variable can be overridden with a function that paints a different
+   * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
-  var drawBoundary : (Graphics, Rectangle2D, TransformationMatrix) => Unit = (graphics : Graphics, boundary : Rectangle2D, transformation : TransformationMatrix) => {
-    // Draw a white rectangle inside the boundary of the current model.
-    graphics.g.setBackground(Color white)
-    graphics.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
-
-    // Draw a black border
-    val p = PolylineShape.fromRectangle(boundary).setAttribute("Color" -> "#555555".color)
-    graphics.draw(p)
-
-    // Draw a version number
-    val v = TextShape(Siigna.version, Vector2D(Siigna.screen.width - 80, 10), 10)
-    graphics.draw(v)
-  }
-
+  var boundaryShape : Rectangle2D => ImmutableShape = PolylineShape.fromRectangle(_).setAttribute("Color" -> "#AAAAAA".color)
+  
   /**
    * The frames in the current second.
    */
@@ -99,8 +95,31 @@ object View extends Canvas with Runnable {
   private def backBuffer(height : Int, width : Int) : VolatileImage =
     getGraphicsConfiguration.createCompatibleVolatileImage(if (height > 0) height else 1, if (width > 0) width else 1)
 
+  /**
+   * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
+   * */
+  def boundary = {
+    // Confines a coordinate within a lower and a higher boundary.
+    def confine(coordinate : Double, lower : Double, higher : Double) : Double =
+      if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
+
+    //
+    val offScreenBoundary = Model.boundary.transform(View.virtual)
+    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, screen.width),
+                                   confine(offScreenBoundary.topLeft.y, 0, getSize.height))
+    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, screen.width),
+                                   confine(offScreenBoundary.bottomRight.y, 0, getSize.height))
+    Rectangle2D(topLeft, bottomRight)
+  }
+
+  /**
+   * Returns the physical center of Siigna, relative from the top left corner
+   * of the screen.
+   */
+  def center = screen.center
+
  /**
-  * Draws the view.<br />
+  * Draws the [[com.siigna.app.model.Model]] and the [[com.siigna.module.Module]]s.<br />
   *
   * This function uses a hack that eliminates all flickering caused by
   * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
@@ -120,78 +139,42 @@ object View extends Canvas with Runnable {
   */
   def draw(graphicsPanel : AWTGraphics) { try {
     // Create a new transformation-matrix
-    val transformation : TransformationMatrix = Siigna.virtual
-
-    /**
-     * Confines a coordinate within a lower and a higher boundary.
-     */
-    def confine(coordinate : Double, lower : Double, higher : Double) : Double = if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
-
-    // Define the boundary by first grabbing the boundary of the model, snapping it to the current view and saving it
-    // in the boundary-value.
-    val offscreenBoundary = Model.boundary.transform(transformation)
-    val topLeft           = Vector(confine(offscreenBoundary.topLeft.x, 0, Siigna.screen.width),     confine(offscreenBoundary.topLeft.y, 0, getSize.height))
-    val bottomRight       = Vector(confine(offscreenBoundary.bottomRight.x, 0, Siigna.screen.width), confine(offscreenBoundary.bottomRight.y, 0, getSize.height))
-    val boundary          = Rectangle2D(topLeft, bottomRight)
+    val transformation : TransformationMatrix = virtual
 
     // Get the volatile image
-    var backgroundImage = cachedBackgroundImage.getOrElse(backBuffer)
+    var background = cachedVolatileImage.getOrElse(backBuffer)
 
     // Loop the rendering.
     do {
       // Validate the backgroundImage
-      if (backgroundImage.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
-        backgroundImage = backBuffer
+      if (background.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
+        background = backBuffer
 
       // Define the buffer graphics as an instance of <code>Graphics2D</code>
       // (which is much nicer than just <code>Graphics</code>).
-      val graphics2D = backgroundImage.getGraphics.asInstanceOf[Graphics2D]
+      val graphics2D = background.getGraphics.asInstanceOf[Graphics2D]
 
-      // Wraps the graphics-object in our own Graphics-wrapper (more simple API).
+      // Wraps the graphics-object in our own Graphics-wrapper (simpler API).
       val graphics = new Graphics(graphics2D)
 
-      // Clear the view and draw the default background-color.
-      graphics2D setBackground("#DDDDDF".color)
-      graphics2D clearRect(0, 0, Siigna.screen.width.toInt, Siigna.screen.height.toInt)
-
-      // Draw the background
-      drawBoundary(graphics, boundary, transformation)
-
-      // Set up anti-aliasing
-      val antiAliasing = Preferences.boolean("anti-aliasing", true)
-      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
-      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
-
-      /***** MODEL *****/
-      // TODO: Cache the way it's written below.
-      // If the number of the shapes in the Model is less than 1.000 and the boundary of the Model
-      // isn't much bigger than the current view then draw the entire model and save the image as the
-      // last static image. This is done because it can save a lot of performance to save the static image
-      // for later, since most of the redrawing happens because of panning, which strictly doesn't require a redraw.
-      // Otherwise find the shapes inside the view-bound and paint them, without saving anything as static.
-      // Examines whether the cached image is valid and applicable.
-
-      // Draw model
-      try {
-        // TODO: Set the MBR for the model
-        //val mbr = Rectangle(Vector(0, 0).transform(transformation.inverse), Vector(size.width, size.height).transform(transformation.inverse)).toMBR
-        Model map(_ transform transformation) foreach(graphics draw) // Draw the entire Model
-        // Filter away shapes that are drawn in the dynamic layer and draw the rest.
-        //Model.queryForShapesWithId(mbr).filterNot(e => dynamic.contains(e._1)).map(e => e._2.transform(transformation) ) foreach( graphics draw)
-      } catch {
-        case e => Log.error("View: Unable to draw Model: "+e)
+      // Draw the model
+      if (cachedForegroundImage.isDefined) {
+        graphics2D drawImage(cachedForegroundImage.get, 0, 0, this)
       }
 
+      // Enable anti-aliasing
+      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
       // Fetch and draw the dynamic layer.
-      // TODO: Cache this too
-      try {
+      // TODO: Draw and cache this
+      /*try {
         val dynamic = Model.dynamicShapes
         // 1: Draw the dynamic layer and a shadow of the old shape
         dynamic.values.map(_.shape.addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
         dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
-      }
+      }*/
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
@@ -199,13 +182,13 @@ object View extends Canvas with Runnable {
         Siigna.paint(graphics, transformation)
       } catch {
         case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.", e)
-        case e => Log.error("View: Error while painting the modules.", e)
+        case e => Log.error("View: Unknown error while painting the modules.", e)
       }
 
-      // Draw the image we get from the print-method on the view.
+      // Draw the image we get from the maneuvers above.
       // Parameters are (Image img, int x, int y, ImageObserver observer)
-      graphicsPanel drawImage(backgroundImage, 0, 0, this)
-    } while (backgroundImage.contentsLost) // Continue looping until the content isn't lost.
+      graphicsPanel drawImage(background, 0, 0, this)
+    } while (background.contentsLost) // Continue looping until the content isn't lost.
 
   // Catch unexpected errors
   } catch {
@@ -224,6 +207,120 @@ object View extends Canvas with Runnable {
   } }
 
   /**
+   * Pans the view.
+   */
+  def pan(endPoint : Vector2D) {
+    if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
+    render()
+  }
+
+  /**
+   * The physical TransformationMatrix.
+   */
+  def physical = TransformationMatrix(View.center, 1).flipY
+
+  /**
+   * Resizes the view to the given boundary.
+   */
+  override def resize(width : Int, height : Int) {
+    // Re-render the old background
+    renderBackground()
+
+    // Pan the view if the pan isn't set
+    if (View.pan == Vector2D(0, 0))
+      View.pan(View.screen.center)
+  }
+
+  /**
+   * Renders the model and stores the image in a local variable for use during drawing.
+   * In other words this is a cache function. Handy eh?
+   */
+  def render() {
+    if (getSize.width > 0 && getSize.height > 0) try {
+      // Create an image
+      var image = backBuffer
+
+      do {
+        // Validate the backgroundImage
+        if (image.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
+          image = backBuffer
+
+        // Set the graphics
+        val g = new Graphics(image.getGraphics.asInstanceOf[Graphics2D])
+        g.setColor(Preferences.color("colorDraw"))
+
+        // Draw background (if defined)
+        if (cachedBackgroundImage.isDefined) g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
+
+        // Draw a white rectangle inside the boundary of the current model.
+        g.g.setBackground(Color white)
+        g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+
+        // Set anti-aliasing
+        val antiAliasing = Preferences.boolean("antiAliasing", true)
+        val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+        g.g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
+
+        // Draw model
+        if (Model.size > 0) try {
+          val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
+          Model(mbr) map(_ transform virtual) foreach(g draw) // Draw the entire Model
+        } catch {
+          case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error drawing!")
+          case e => Log.error("View: Unable to draw Model: "+e)
+        }
+
+        // Draw the boundary shape
+        g draw boundaryShape(boundary)
+
+        // Draw a version number
+        val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
+        g.draw(v)
+
+      } while (image.contentsLost) // Continue looping until the content isn't lost.
+
+      // Save the image
+      cachedForegroundImage = Some(image)
+    } catch {
+      case e : NullPointerException => Log.info("View: Error fetching volatile image - probably not ready yet.")
+      case e => Log.warning("View: Unknown error while painting the model: ", e)
+    }
+  }
+
+  /**
+   * Renders a background-image consisting of "chess checkered" fields and stores it
+   * in a local variable for use during drawing.
+   */
+  def renderBackground() {
+    if (getSize.height > 0 && getSize.width > 0) {
+      // Create image
+      val image = backBuffer
+      val g = image.getGraphics
+      val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
+      var x = 0
+      var y = 0
+
+      // Clear background
+      g setColor Preferences.color ("colorBackgroundDark")
+      g fillRect (0, 0, getSize.width, getSize.height)
+      g setColor Preferences.color ("colorBackgroundLight")
+
+      // Draw a chess-board pattern
+      var evenRow = false
+      while (x < getSize.width) {
+        while (y < getSize.height) {
+          g.fillRect(x, y, size, size)
+          y += size << 1
+        }
+        x += size
+        y = if (evenRow) 0 else size
+        evenRow = !evenRow
+      }
+      cachedBackgroundImage = Some(image)
+    }
+  }
+
+ /**
    * The active rendering-loop. Avoids paint-events from native Java.
    * See: <a href="http://download.oracle.com/javase/tutorial/fullscreen/rendering.html">download.oracle.com/javase/tutorial/fullscreen/rendering.html</a>.
    */
@@ -231,8 +328,26 @@ object View extends Canvas with Runnable {
     // State that we're initiating
     Log.success("View: Initiating paint-loop.")
 
-    // Create peer
-    View.addNotify()
+    // Create peer or die trying!
+    try {
+      View.addNotify()
+    } catch {
+      case _ => {
+        try {
+          Thread.sleep(100)
+          View.addNotify()
+        } catch {
+          case _ => {
+            try {
+              Thread.sleep(1000)
+              View.addNotify()
+            } catch {
+              case _ => System.exit(-1) // Die!
+            }
+          }
+        }
+      }
+    }
 
     // Create a buffer strategy of 2
     View.createBufferStrategy(2)
@@ -261,6 +376,11 @@ object View extends Canvas with Runnable {
   } }
 
   /**
+   * The screen as a rectangle, given in physical coordinates.
+   */
+  def screen = Rectangle2D(0, 0, getSize.width, getSize.height)
+
+  /**
    * Initializes a pan in order to save the start-vector of the current pan
    * and the vector for the <code>pan</code> value.
    */
@@ -268,6 +388,13 @@ object View extends Canvas with Runnable {
     panPointOld   = pan
     panPointMouse = point
   }
+
+  /**
+   * Returns the TransformationMatrix for the current pan distance and zoom
+   * level of the view, translated to a given point.
+   */
+  def transformationTo(point : Vector2D) : TransformationMatrix =
+    TransformationMatrix(View.pan + point, View.zoom).flipY
 
   /**
    * Short explanation: Redirects the update-method to <code>paint</code>.
@@ -286,15 +413,15 @@ object View extends Canvas with Runnable {
    * situations that needs massive computer-power, where a sudden painting can
    * steal resources, or situations where you need to draw on layers
    * (which probably is the case in most of the software working with AWT - or
-   * Swing in particular), where it's handy to wait until all changes on a
-   * layers has been performed before drawing the whole thing all over. But
+   * Swing), where it's handy to wait until all changes on a
+   * layer has been performed before drawing the whole thing all over. But
    * for a program such as Siigna where the main task is to actually draw a
-   * Model, we don't need to put the task in line more than we need
+   * Model and modules, we don't need to put the task in line more than we need
    * to just get it done. Furthermore this jumping back and forth from
    * repaint-update-paint can be yet another source of double-buffering
-   * (see above), since <code>update</code> can cause irregular calls to <code>paint</code>
+   * , since <code>update</code> can cause irregular calls to <code>paint</code>
    * which then can end up in a situation where the former paint-job is overridden
-   * and thus a black screen occur. Which makes us saaad pandas.
+   * and thus a black screen occur (see above). And that makes us saaad pandas.
    * However: Keep in mind that the <code>update</code> function is there for
    * a reason. Don't ever just call paint and expect the whole thing to sort
    * itself out...
@@ -305,15 +432,26 @@ object View extends Canvas with Runnable {
    * to avoid double-buffering.
    * </p>
    */
-  override def update(g : AWTGraphics) {
-    paint(g)
-  }
+  override def update(g : AWTGraphics) { paint(g) }
 
   /**
-   * Pans the view.
+   * Returns the TransformationMatrix for the current pan distance and zoom
+   * level of the view.
    */
-  def pan(endPoint : Vector2D) {
-    if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
+  def virtual : TransformationMatrix = TransformationMatrix(View.pan, View.zoom).flipY
+
+  /**
+   * Returns a TransformationMatrix with a translation and scale that fits the
+   * given rectangle.
+   */
+  def virtualTransformationTo(rectangle : Rectangle2D) = {
+    // Calculates the difference between the size of the screen and the size of the
+    // boundary. This is then multiplied on the zoom level to give the exact
+    // scale for the TransformationMatrix.
+    val screenFactor = View.screen.width / Model.boundary.transform(virtual).width
+    val scaleFactor  = screenFactor * View.zoom
+
+    TransformationMatrix(View.center, scaleFactor).flipY
   }
 
   /**
@@ -325,16 +463,22 @@ object View extends Canvas with Runnable {
    *   <li>The zoom level are below 0.00001 or above 50</li>
    * </ol>
    * Also, if the delta is cropped at (+/-)10, to avoid touch-pad bugs with huge deltas etc.
+   *
+   * @param point  The center for the zoom-operation
+   * @param delta  The amount of zoomSpeed-units to zoom
+   * @see [[com.siigna.util.collection.Preferences]]
    */
-  def zoom(point : Vector2D, _delta : Int)
-  {
-    val delta = if (_delta > 10) 10 else if (_delta < -10) -10 else _delta
-    if (Siigna.navigation && (zoom < 50 || delta > 0)) {
-      val zoomFactor = scala.math.pow(2, -delta * Siigna.zoomSpeed)
-      if ((zoom > 0.000001 || delta < 0)) {
+  def zoom(point : Vector2D, delta : Double) {
+    val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
+    if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
+      val zoomFactor = scala.math.pow(2, -zoomDelta * Preferences.double("zoomSpeed"))
+      if ((zoom > 0.000001 || zoomDelta < 0)) {
           zoom *= zoomFactor
         }
       pan = (pan - point) * zoomFactor + point
+
+      // Render a new model.
+      render()
     }
   }
 

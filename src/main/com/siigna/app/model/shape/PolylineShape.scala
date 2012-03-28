@@ -12,9 +12,9 @@ package com.siigna.app.model.shape
 
 import collection.immutable.Vector
 
-import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{TransformationMatrix, PolylineGeometry, Rectangle2D, Vector2D}
+import com.siigna.util.geom.{CollectionGeometry, TransformationMatrix, Rectangle2D, Vector2D}
+import com.siigna.util.collection.{Preferences, Attributes}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -50,12 +50,53 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
     }
     tmp
   } else Seq[BasicShape]()
-  
 
-  // TODO: Fix this
-  def geometry = if (shapes.isEmpty) Rectangle2D.empty else PolylineGeometry(shapes.map(_.geometry))
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
 
-  def repr = this
+  def select(rect: Rectangle2D) =
+    if (rect.contains(geometry.boundary)) {
+      Some(select())
+    } else if (rect.intersects(geometry.boundary)) {
+      val touched = innerShapes.filter(s => rect.contains(s.point))
+      val f = (t : TransformationMatrix) => {
+        val start = if (rect.contains(startPoint)) startPoint.transform(t) else startPoint
+        val innerShapes = touched.map(_.transform(t))
+        new PolylineShape(start, innerShapes, attributes)
+      }
+      Some(DynamicShape(attributes.int("id").get, f))
+    } else None
+
+
+  def select(point: Vector2D) = {
+    val dSelect = Preferences.double("selectionDistance")
+    if (geometry.distanceTo(point) < dSelect) {
+      // Find the id of the closest shape
+      var closestId = 0
+      var dClosest = innerShapes(0).point.distanceTo(point)
+      for (x <- 1 until innerShapes.size) {
+        val d = innerShapes(x).point.distanceTo(point)
+        if (dClosest < d) {
+          dClosest = d
+          closestId = x
+        }
+      }
+      
+      // Create the dynamic shape
+      val dStart = startPoint.distanceTo(point)
+      if (dClosest < dSelect || dStart < dSelect) {
+        val f = (t : TransformationMatrix) => {
+          if (dClosest < dStart) {
+            val updated = innerShapes(closestId).transform(t)
+            PolylineShape(startPoint, innerShapes.updated(closestId, updated), attributes)
+          } else {
+            PolylineShape(startPoint.transform(t), innerShapes, attributes)
+          }
+        }
+        // Return the option... phew...
+        Some(DynamicShape(attributes.int("id").get, f))
+      } else None
+    } else None
+  }
 
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
@@ -63,7 +104,6 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
   def toDXF = DXFSection(List())
 
   def transform(t : TransformationMatrix) = new PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
-
 }
 
 /**
