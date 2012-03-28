@@ -17,7 +17,7 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
-import pgsql_handler._
+import com.siigna.app.model.Model
 
 /**
  * The Control controls the core of the software. Basically that includes
@@ -25,6 +25,11 @@ import pgsql_handler._
  * TODO: Implement actors when applets can use them without permissions.
  */
 object Control extends Thread("Siigna Controller") {
+
+  // This may seem silly, but in fact we are instantiating the model.
+  // If this is not done here the modules cannot load, since the model
+  // uses threading... Pretty annoying really.
+  Model.isEmpty
 
   /**
    * The last 10 events
@@ -211,6 +216,7 @@ object Control extends Thread("Siigna Controller") {
             // Retrieve module
             val module : Module = modules.top
 
+            // Examine if the module has not yet been imported
             // Parse the events
             events = module.eventParser.parse(event :: events)
 
@@ -323,6 +329,7 @@ object Control extends Thread("Siigna Controller") {
 	            } else {
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
+<<<<<<< HEAD
 
               println ("her")
               //val ne1 = new pgsqlSaveShapes
@@ -330,8 +337,11 @@ object Control extends Thread("Siigna Controller") {
               //val ne2 = new pgsqlDeleteData
               //ne2.allDrawings()
 
+=======
+>>>>>>> origin/master
             }
           }
+            
           // Preload a module
           case Preload(name, classPath, filePath) => {
             moduleBank.preload(name, classPath, filePath)

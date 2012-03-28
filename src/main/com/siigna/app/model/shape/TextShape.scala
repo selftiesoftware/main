@@ -87,7 +87,10 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
               position.transform(transformation),
               scale * transformation.scaleFactor,
               attributes)
-  
+
+  def select(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
+
+  def select(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
 }
 
 object TextShape

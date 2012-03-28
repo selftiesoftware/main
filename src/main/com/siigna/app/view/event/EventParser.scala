@@ -18,6 +18,7 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.shape.{ImmutableShape}
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.view.Graphics
+import collection.parallel.immutable.ParIterable
 
 /**
  * An <code>EventParser</code> that analyses a given list of events, and returns an
@@ -142,7 +143,7 @@ class EventParser {
     }
 
     // Perform 2D query
-    val model = Model.queryForShapes(Siigna.mousePosition, margin)
+    val model = Model(Siigna.mousePosition, margin)
 
     // Parse the track
     var newEvent = track.parse(events, model)
@@ -197,7 +198,7 @@ abstract class EventSnap {
   /**
    * Parses an event by the given snap-settings.
    */
-  def parse(event : Event, model : Iterable[ImmutableShape]) : Event
+  def parse(event : Event, model : ParIterable[ImmutableShape]) : Event
 }
 
 /**
@@ -221,6 +222,6 @@ abstract class EventTrack {
   /**
    * Parses a list into a single event.
    */
-  def parse(events : List[Event], model : Iterable[ImmutableShape]) : Event
+  def parse(events : List[Event], model : ParIterable[ImmutableShape]) : Event
   
 }

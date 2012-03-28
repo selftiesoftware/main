@@ -11,9 +11,9 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.collection.Attributes
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Circle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{Rectangle2D, Circle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.collection.{Preferences, Attributes}
 
 /**
  * This class represents a circle.
@@ -45,6 +45,10 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    * The distance to the closest handle from a given point.
    */
   def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
+
+  def select(rect: Rectangle2D) = if (rect.contains(geometry)) Some(select()) else None
+
+  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) Some(select()) else None
 
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 

@@ -62,7 +62,7 @@ object Interface {
 	   */
 	  lazy val crosshair : Cursor = {
 	    val pic     = new Array[Int](32 * 32)
-	    val color   = 0xAAEEEEFF
+	    val color   = 0x447788FF
 	    for (i <- 4 to 28) {
 	      if (i < 16 || i > 16) {
 	        pic(i + 16 * 32) = color
