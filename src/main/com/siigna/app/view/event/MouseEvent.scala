@@ -13,6 +13,9 @@ package com.siigna.app.view.event
 
 import com.siigna.util.geom.Vector2D
 
+//TODO: implement touch gestures (for track/touch pads)
+//TODO: why does MousebuttonNone not work in modules even though it is defined here?
+
 trait MouseButton
 final case object MouseButtonNone   extends MouseButton
 final case object MouseButtonLeft   extends MouseButton
@@ -36,10 +39,10 @@ case class MouseDown (position : Vector2D, button : MouseButton, keys : Modifier
 case class MouseUp   (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseUp }
 case class MouseDrag (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseDrag }
 case class MouseMove (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseMove }
-case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Int) extends MouseEvent { val symbol = 'MouseWheel }
+case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Double) extends MouseEvent { val symbol = 'MouseWheel }
 
 object MouseWheel
 {
-  def apply(wheel : Int)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
+  def apply(wheel : Double)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
     new MouseWheel(position, button, keys, wheel)
 }

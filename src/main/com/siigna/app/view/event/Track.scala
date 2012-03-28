@@ -13,18 +13,18 @@ package com.siigna.app.view.event
 
 import com.siigna.app.model.shape._
 import com.siigna.app.view.Graphics
-import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{Line, TransformationMatrix, Vector}
+import com.siigna.util.geom.{Line, TransformationMatrix}
+import collection.parallel.immutable.ParIterable
 
 object Track extends EventTrack {
 
   var isTracking = true
   var line : Option[LineShape] = None
 
-  def parse(events : List[Event], model : Iterable[ImmutableShape]) = {
+  def parse(events : List[Event], model : ParIterable[ImmutableShape]) = {
 
     // Filter out lines from the model
-    val lines : Iterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])
+    val lines : ParIterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])
 
     // Get the coordinates of the last 5 events
     val lastEvents = events.slice(0,5)

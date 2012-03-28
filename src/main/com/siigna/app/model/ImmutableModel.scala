@@ -11,11 +11,37 @@
 
 package com.siigna.app.model
 
+import shape.Shape
+import collection.parallel.immutable.ParMap
+import com.siigna.util.rtree.PRTree
+import shape.{ImmutableShape, Shape}
+
 /**
- * An immutable model containing immutable shapes.
+ * An immutable model containing shapes
+ * @tparam Key  The keys in the Model.
+ * @tparam Value  The shapes in the model.
  */
-trait ImmutableModel {
+trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
+                                    with GroupableModel[Key, Value] {
 
+  /**
+   * Add a shape to the model.
+   */
+  def add(key : Key, shape : Value) = build(shapes.+(key, shape).asInstanceOf[ParMap[Key, Value]])
 
+  /**
+   * Add several shapes to the model.
+   */
+  def add(shapes : Map[Key, Value]) = build(this.shapes ++ shapes)
+
+  /**
+   * Remove a shape from the model.
+   */
+  def remove(key: Key) = build(shapes - key)
+
+  /**
+   * Remove several shapes from the model.
+   */
+  def remove(keys: Traversable[Key]) = build(shapes.filterNot(i => keys.exists(_ == i._1)))
 
 }

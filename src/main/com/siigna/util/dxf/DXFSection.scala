@@ -87,10 +87,10 @@ case class DXFSection(values : Seq[DXFValue]) extends Addable[DXFValue, DXFSecti
             }
             case _ =>
           })
-          if (points.length > 1)
+          println(PolylineShape.fromPoints(points))
+          if (points.length > 1){
             Some(PolylineShape.fromPoints(points))
-          else
-            None
+          } else None
         }
         // Other stuff...
         case _ => None

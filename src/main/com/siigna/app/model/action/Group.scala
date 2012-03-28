@@ -18,7 +18,7 @@ import com.siigna.app.model.shape.{GroupShape, ImmutableShape}
  * Groups objects or merges objects into existing groups.
  */
 object Group {
-
+/*
   /**
    * Group a number of shapes.
    */
@@ -38,7 +38,7 @@ object Group {
 /**
  * Groups a number of shapes.
  */
-case class GroupAction(ids : Traversable[String]) extends Action {
+case class GroupAction(ids : Traversable[Int]) extends Action {
 
   def execute(model : Model) = {
     model.group(ids)
@@ -48,8 +48,8 @@ case class GroupAction(ids : Traversable[String]) extends Action {
   def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    model.ungroup(GroupShape(ids))
+    //model.ungroup(GroupShape(ids))
     model
   }
-
+   */
 }

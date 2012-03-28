@@ -12,8 +12,8 @@
 package com.siigna.app.model.shape
 
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Arc2D, TransformationMatrix, Vector2D}
-import com.siigna.util.collection.Attributes
+import com.siigna.util.geom.{Rectangle2D, Arc2D, TransformationMatrix, Vector2D}
+import com.siigna.util.collection.{Preferences, Attributes}
 
 /**
  * This class draws an arc.
@@ -38,6 +38,10 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   val geometry = Arc2D(center, radius, startAngle, angle)
 
+  def select(rect: Rectangle2D) = if (rect.contains(geometry)) Some(select()) else None
+
+  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) Some(select()) else None
+
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 
   // TODO: Export arcs.
@@ -48,7 +52,6 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
                radius * t.scaleFactor,
                startAngle, angle,
                attributes)
-
 }
 
 object ArcShape
