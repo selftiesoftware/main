@@ -31,7 +31,14 @@ class pgsqlSaveShapes {
   //Save shapes: Modtager sekvens af ImmutableShapes, og gemmer disse i databasen.
   //For at gemme alt i modellen: Indsæt "Model.seq" hvor metoden kaldes -
   //Model.seq (husk stort M) kører en metode på modellen, der returnerer en sekvens af alle shapes i modellen.
-  def saveShapes (shapes: Seq[com.siigna.app.model.shape.ImmutableShape]) = {
+
+
+  //Den, der skal bruges - men så skal der tilpasses der, hvor den kaldes...:
+  // def saveShapes (shapes: Seq[com.siigna.app.model.shape.ImmutableShape]) = {
+
+  //Den midlertidige:
+  def saveShapes () = {
+  val shapes = Model.seq
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
