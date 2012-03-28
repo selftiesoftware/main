@@ -17,21 +17,13 @@ package object siigna extends com.siigna.util.Implicits {
   type Action = com.siigna.app.model.action.Action
 
   lazy val Create = com.siigna.app.model.action.Create
-  type CreateShape = com.siigna.app.model.action.CreateShape
-  lazy val CreateShape = com.siigna.app.model.action.CreateShape
-  type CreateShapes = com.siigna.app.model.action.CreateShapes
-  lazy val CreateShapes = com.siigna.app.model.action.CreateShapes
 
-  lazy val Delete = com.siigna.app.model.action.Delete
-  type DeleteShape = com.siigna.app.model.action.DeleteShape
-  type DeleteShapes = com.siigna.app.model.action.DeleteShapes
+  //lazy val Delete = com.siigna.app.model.action.Delete
 
-  lazy val Deselect = com.siigna.app.model.action.Deselect
-  lazy val Select = com.siigna.app.model.action.Select
+  //lazy val Deselect = com.siigna.app.model.action.Deselect
+  //lazy val Select = com.siigna.app.model.action.Select
 
   lazy val Transform = com.siigna.app.model.action.Transform
-  type TransformShape = com.siigna.app.model.action.TransformShape
-  type TransformShapes = com.siigna.app.model.action.TransformShapes
 
   // Commands
   lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
@@ -43,8 +35,7 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Control = com.siigna.app.controller.Control
 
   // Model
-  type Model = com.siigna.app.model.Model
-  lazy val Model = com.siigna.app.model.Model
+  val Model = com.siigna.app.model.Model
 
   // Module
   type Module = com.siigna.module.Module
@@ -62,8 +53,8 @@ package object siigna extends com.siigna.util.Implicits {
   type DynamicShape = com.siigna.app.model.shape.DynamicShape
   val DynamicShape = com.siigna.app.model.shape.DynamicShape
 
-  type ImageShape = com.siigna.app.model.shape.ImageShape
-  lazy val ImageShape = com.siigna.app.model.shape.ImageShape
+  //type ImageShape = com.siigna.app.model.shape.ImageShape
+  //lazy val ImageShape = com.siigna.app.model.shape.ImageShape
 
   type LineShape = com.siigna.app.model.shape.LineShape
   lazy val LineShape = com.siigna.app.model.shape.LineShape
@@ -93,7 +84,7 @@ package object siigna extends com.siigna.util.Implicits {
   type DirectedGraph[V, A] = com.siigna.util.collection.DirectedGraph[V, A]
   lazy val DirectedGraph = com.siigna.util.collection.DirectedGraph
 
-  lazy val Preferences = com.siigna.util.collection.Preferences
+  lazy val Preferences, Pref = com.siigna.util.collection.Preferences
 
   // Events
   type Event = com.siigna.app.view.event.Event
@@ -117,6 +108,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   lazy val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
   lazy val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle
+  lazy val MouseButtonNone = com.siigna.app.view.event.MouseButtonNone
   lazy val MouseButtonRight = com.siigna.app.view.event.MouseButtonRight
 
   type MouseDown = com.siigna.app.view.event.MouseDown

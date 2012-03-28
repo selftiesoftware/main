@@ -19,7 +19,7 @@ import java.awt.{Cursor}
 
 /**
  * The Siigna object provides access to various core elements of the software. It also functions
- * as the first <code>Interface</code> connected to the unique interface of each module.
+ * as the first <code>Interface</code> connected to the [[com.siigna.app.view.View]].
  */
 object Siigna extends Interface {
 
@@ -66,26 +66,9 @@ object Siigna extends Interface {
   var printFormatMax = 297.0 - printMargin
 
   /**
-   * The screen as a rectangle, given in physical coordinates.
-   * TODO: Reverse control to def!
-   */
-  var screen : Rectangle2D = Rectangle(Vector(0, 0), Vector(0, 0))
-
-  /**
    * The version of Siigna.
    */
-  val version = "v. 0.1.15.4"
-
-  /**
-   * The zoom-speed. Defaults to 0.1 (i. e. 10%).
-   */
-  var zoomSpeed = 0.1
-
-  /**
-   * Returns the physical center of Siigna, relative from the top left corner
-   * of the screen.
-   */
-  def center = screen.center
+  val version = "v. 0.2.0"
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
@@ -141,11 +124,6 @@ object Siigna extends Interface {
   def paperScale = Model.boundaryScale
 
   /**
-   * The physical TransformationMatrix.
-   */
-  def physical = TransformationMatrix(center, 1).flipY
-
-  /**
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
@@ -164,33 +142,6 @@ object Siigna extends Interface {
     this.interface = Some(interface)
 
     setCursor(interface.getCursor)
-  }
-
-  /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view, translated to a given point.
-   */
-  def transformationTo(point : Vector2D) : TransformationMatrix =
-    TransformationMatrix(View.pan + point, View.zoom).flipY
-  
-  /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view.
-   */
-  def virtual : TransformationMatrix = TransformationMatrix(View.pan, View.zoom).flipY
-
-  /**
-   * Returns a TransformationMatrix with a translation and scale that fits the
-   * given rectangle.
-   */
-  def virtualTransformationTo(rectangle : Rectangle2D) = {
-    // Calculates the difference between the size of the screen and the size of the
-    // boundary. This is then multiplied on the zoom level to give the exact
-    // scale for the TransformationMatrix.
-    val screenFactor = screen.width / Model.boundary.transform(virtual).width
-    val scaleFactor  = screenFactor * View.zoom
-
-    TransformationMatrix(center, scaleFactor).flipY
   }
 
 }

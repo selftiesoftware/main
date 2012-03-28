@@ -18,10 +18,14 @@ import com.siigna.app.controller.Control
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
-import com.siigna.util.geom.{Vector2D, Rectangle}
+import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
 import java.awt.{BorderLayout, Dimension}
 import view.View
+
+// This is necessary to load the Model. It's multi-threaded so we do NOT want
+// it to start up in a module...
+import com.siigna.Model
 
 /**
  * The main class of Siigna.
@@ -86,7 +90,11 @@ class SiignaApplet extends Applet {
       override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
     })
     View.addMouseWheelListener(new MouseWheelListener {
-      override def mouseWheelMoved(e : MouseWheelEvent) { handleMouseEvent(e, MouseWheel(e getUnitsToScroll)) }
+      override def mouseWheelMoved(e : MouseWheelEvent) {
+        // getPreciseWheelRotation is only available in 1.7
+        val scroll = try {e.getPreciseWheelRotation} catch { case _ => e.getUnitsToScroll}
+        handleMouseEvent(e, MouseWheel(scroll))
+      }
     })
 
     // Allows specific KeyEvents to be detected.
@@ -101,6 +109,11 @@ class SiignaApplet extends Applet {
 
     // Start the paint-loop
     paintThread.start()
+
+    // Render!
+    View.pan(View.center)
+    View.renderBackground()
+    View.render()
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
@@ -147,7 +160,7 @@ class SiignaApplet extends Applet {
   {
     // Converts a physical point to a virtual one.
     def toVirtual(physical : Vector2D) = {
-      val r = physical.transform(Siigna.virtual.inverse)
+      val r = physical.transform(View.virtual.inverse)
       Siigna.mousePosition = r
       r
     }
@@ -195,17 +208,17 @@ class SiignaApplet extends Applet {
     // to dispatchEvent.
     val option : Option[Event] = event match {
 
-      case MouseWheel (point, button, keys, delta)  => if (Siigna.navigation) { View.zoom(point, delta); None }
+      case MouseWheel (point, _, _, delta)         => if (Siigna.navigation) { View.zoom(point, delta); None }
                                                        else Some(MouseWheel(toVirtual(point), button, keys, delta))
       case MouseDown  (point, MouseButtonMiddle, _) => View.startPan(point); None
       case MouseDrag  (point, MouseButtonMiddle, _) => View.pan(point); None
       case MouseUp    (point, MouseButtonMiddle, _) => View.pan(point); None
-      case MouseEnter (point, button, keys)         => Some(MouseEnter(toVirtual(point), button, keys))
-      case MouseExit  (point, button, keys)         => Some(MouseExit(toVirtual(point), button, keys))
-      case MouseDown  (point, button, keys)         => Some(MouseDown(toVirtual(point), button, keys))
-      case MouseUp    (point, button, keys)         => Some(MouseUp(toVirtual(point), button, keys))
-      case MouseDrag  (point, button, keys)         => Some(MouseDrag(toVirtual(point), button, keys))
-      case MouseMove  (point, button, keys)         => Some(MouseMove(toVirtual(point), button, keys))
+      case MouseEnter (point, _, _) => Some(MouseEnter(toVirtual(point), button, keys))
+      case MouseExit  (point, _, _) => Some(MouseExit(toVirtual(point), button, keys))
+      case MouseDown  (point, _, _) => Some(MouseDown(toVirtual(point), button, keys))
+      case MouseUp    (point, _, _) => Some(MouseUp(toVirtual(point), button, keys))
+      case MouseDrag  (point, _, _) => Some(MouseDrag(toVirtual(point), button, keys))
+      case MouseMove  (point, _, _) => Some(MouseMove(toVirtual(point), button, keys))
       case _ => Log.error("Did not expect event: " + event); None
     }
 
@@ -226,18 +239,7 @@ class SiignaApplet extends Applet {
   override def resize(width : Int, height : Int) {
     // Resize the view
     super.resize(width, height)
-
-    // Resize the View...?
-    View.setSize(this.getSize)
-
-    // Since the size of the component in some cases vary from the actual size (think menus and
-    // title-bars etc.) we set the size according to the actual width and height
-    Siigna.screen = Rectangle(Vector2D(0, 0), Vector2D(width, height))
-
-    // Pan the view if the pan isn't set
-    // TODO: Refine this hack
-    if (View.pan == Vector2D(0, 0))
-      View.pan(Siigna.screen.center)
+    View.resize(width, height)
   }
 
 }

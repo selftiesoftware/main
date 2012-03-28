@@ -39,20 +39,6 @@ class Graphics(val g : Graphics2D)
   def colorUniverse    = Preferences("colorUniverse").asInstanceOf[Color]
 
   /**
-   * Draw a number of shapes.
-   */
-  def draw(shapes : Iterable[Shape]) {
-    shapes foreach draw
-  }
-
-  /**
-   * Draws any number of given shapes.
-   */
-  def draw(shapes : Shape*) {
-    shapes foreach draw
-  }
-
-  /**
    * Draws a given shape.
    */
   def draw(shape : Shape) {
@@ -87,7 +73,7 @@ class Graphics(val g : Graphics2D)
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
           drawEllipse(s.center, s.a, s.b)
         }*/
-        case s : ImageShape       => {
+        /*case s : ImageShape       => {
           val color = attributes color("Color") getOrElse(colorBackground)
           val x = s.p1.x.toInt
           val y = s.p1.y.toInt
@@ -100,7 +86,7 @@ class Graphics(val g : Graphics2D)
                       x, y + height, x + width,        y, // The coordinates of the destination-rectangle
                       0, 0,          s.width,   s.height, // The coordinates of the source-rectangle
                       color, null)
-        }
+        }*/
         case s : LineShape        => {
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
           if (attributes.boolean("infinite").getOrElse(false))
@@ -183,7 +169,7 @@ class Graphics(val g : Graphics2D)
    * Draws an endless line.
    */
   def drawLine(p1 : Vector2D, p2 : Vector2D) {
-    val boundary = Siigna.screen
+    val boundary = View.screen
     val line = Line(p1, p2)
     val line1 = Line(boundary.topLeft, boundary.bottomLeft)
     val line2 = Line(boundary.topRight, boundary.bottomRight)

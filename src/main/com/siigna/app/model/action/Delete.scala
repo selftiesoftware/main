@@ -15,6 +15,7 @@ import com.siigna.app.model.shape.{DynamicShape, ImmutableShape, Shape}
 import com.siigna.util.logging.Log
 
 object Delete {
+  /*
   def apply(shape : Shape) { shape match {
     case s : ImmutableShape => {
       val id = Model.findId(_ == s)
@@ -91,5 +92,5 @@ case class DeleteShapes(shapes : Map[String, ImmutableShape]) extends Action {
   }
 
   def undo(model : Model) = model ++ shapes
-
+         */
 }
