@@ -329,6 +329,11 @@ object Control extends Thread("Siigna Controller") {
 	            } else {
 	              Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
 	            }
+              println ("her")
+              //val ne1 = new pgsqlSaveShapes
+              //ne1.saveShapes()
+              //val ne2 = new pgsqlDeleteData
+              //ne2.allDrawings()
             }
           }
             
