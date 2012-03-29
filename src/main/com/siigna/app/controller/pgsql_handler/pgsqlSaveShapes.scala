@@ -39,6 +39,7 @@ class pgsqlSaveShapes {
   //Den midlertidige:
   def saveShapes () = {
   val shapes = Model.seq
+    println (shapes)
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
@@ -69,7 +70,8 @@ class pgsqlSaveShapes {
     //                              Til søgestrengen "shapeType" lægges "4" til,
     //                              Til søgestrengen "coordinates" lægges "x1,y1,0" og "x2,y2,0" til
     //Øvrige:     println "ukendt".
-    shapes.foreach(shape => shape match {
+
+    shapes.foreach(tuple => tuple._2 match {
       case shape : LineShape => {
         val i:Int = shape.p1.x.toInt
         val j:Int = shape.p1.y.toInt
@@ -84,6 +86,7 @@ class pgsqlSaveShapes {
         queryStringCoordinates += l + ",0),"
       }
       case shape : PolylineShape => {
+        println ("Polyline")
         shapeTypes = shapeTypes :+ 3
         queryStringShapeType += "(3),"
         polylineSizes = polylineSizes :+ shape.shapes.length
@@ -110,7 +113,7 @@ class pgsqlSaveShapes {
           }
         })
       }
-      case _ => println("Ukendt")
+      case x => println("Ukendt - returnerede: " + x)
     })
 
 
