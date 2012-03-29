@@ -35,7 +35,7 @@ import collection.parallel.immutable.{ParMap}
  */
 sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     with SpatialModel[Int, ImmutableShape]
-                                                                    with DynamicModel[Int]
+                                                                    with DynamicModel
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
   def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
@@ -91,6 +91,11 @@ object Model extends ActionModel with SpatialModel[Int, ImmutableShape] with Par
    * Uses toInt since it always rounds down to an integer.
    */
   def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
+
+  /**
+   * Get the current selection.
+   */
+  def getSelection = model.getSelection
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
