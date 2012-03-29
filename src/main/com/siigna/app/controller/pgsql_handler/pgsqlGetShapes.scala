@@ -42,7 +42,7 @@ class pgsqlGetShapes {
     var resultSequencePointIdXYZCoordinatesY: Seq[Int] = Seq()
     var resultSequencePointIdXYZCoordinatesZ: Seq[Int] = Seq()
 
-    var resultSequenceShapes: Seq[Shape] = Seq()
+    var resultSequenceShapes: Seq[ImmutableShape] = Seq()
 
     //Virker ikke: Henter objektet med forbindelsesoplysninger
     //val createStatement: Statement = PgsqlConnectionInfo.GetConnectionAndStatement()
