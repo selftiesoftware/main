@@ -335,6 +335,7 @@ class pgsqlGetShapes {
     createStatement.close()
 
     //Data, der returneres
+
     (resultSequenceShapes)
   }
 }
