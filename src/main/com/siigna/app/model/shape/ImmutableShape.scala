@@ -82,7 +82,7 @@ trait ImmutableShape extends Shape {
    * @param point  The point to base the selection on.
    * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.DynamicShape]].
    */
-  def select(point : Vector2D) : Option[DynamicShape] // select shape close to the point
+  def select(point : Vector2D) : Option[DynamicShape]
 
   /**
    * Returns a setAttributes of the shape. In other words return a shape with a new id,
