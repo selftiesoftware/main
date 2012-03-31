@@ -29,7 +29,7 @@ object Select {
 
   /**
    * Selects one [[com.siigna.app.model.shape.ImmutableShape]].
-   * @param shape  The shape to select.
+   * @param id  The ID of the shape to select.
    */
   def apply(id : Int) {
     Model execute SelectShape(id)
@@ -40,7 +40,7 @@ object Select {
    * @param shapes  The shapes to select.
    */
   def apply(shapes : ImmutableShape*) {
-    //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
+
   }
 
   /**
@@ -58,19 +58,23 @@ object Select {
  * @param id  The id of the shape as the key in the [[com.siigna.app.model.Model]].
  */
 case class SelectShape(id : Int) extends VolatileAction {
-  def execute(model: Model) = null
 
-  def merge(that: Action) = null
+  def execute(model: Model) = {
+    model.select(Model(id).select())
+    model
+  }
 
-  def undo(model: Model) = null
+  def merge(that: Action) = throw new UnsupportedOperationException("A Select Action cannot be merged.")
 }
 
 case class SelectShapeByPoint(id : Int, p : Vector2D) extends VolatileAction {
-  def execute(model: Model) = null
+  def execute(model: Model) = {
+    val res = Model(id).select(p)
+    if (res.isDefined) model.select(res.get)
+    model
+  }
 
-  def merge(that: Action) = null
-
-  def undo(model: Model) = null
+  def merge(that: Action) = throw new UnsupportedOperationException("A Select Action cannot be merged.")
 }
 
 /*case class SelectShapes(ids : Traversable[Int]) extends VolatileAction {
