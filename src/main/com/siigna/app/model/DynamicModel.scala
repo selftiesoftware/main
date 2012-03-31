@@ -14,17 +14,21 @@ package com.siigna.app.model
 import shape.{DynamicShape}
 
 /**
- * A mutable model containing one single [[com.siigna.app.model.shape.DynamicShape]].
+ * A mutable model containing one single [[com.siigna.app.model.shape.DynamicShape]], representing one or more
+ * selected shapes.
  *
- * @tparam Key  The type of the keys in the Model.
  * @see [[com.siigna.app.model.Model]]
  */
-trait DynamicModel[Key] {
-  
-  var dynamic : Option[DynamicShape] = None
+trait DynamicModel {
 
   /**
-   * Deselect the active shapes in the DynamicModel and apply the action waiting to be executed to the
+   * The Dynamic Shape.
+   */
+  private var dynamic : Option[DynamicShape] = None
+
+  /**
+   * Deselect the [[com.siigna.app.model.shape.DynamicShape]] in the Model and apply the action(s)
+   * executed on the shape since it was selected.
    * [[com.siigna.app.model.Model]].
    */
   def deselect() {
@@ -37,8 +41,13 @@ trait DynamicModel[Key] {
   }
 
   /**
-   * Select a single shape.
-   * @param shape
+   * Returns the current selection if any.
+   */
+  def getSelection = dynamic
+
+  /**
+   * Select a single shape. If previous shapes has been selected, deselect it and select the given shape instead.
+   * @param shape  The shape to select
    */
   def select(shape : DynamicShape) {
     if (dynamic.isDefined) deselect()
