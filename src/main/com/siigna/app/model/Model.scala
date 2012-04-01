@@ -35,7 +35,6 @@ import collection.parallel.immutable.{ParMap}
  */
 sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     with SpatialModel[Int, ImmutableShape]
-                                                                    with DynamicModel[Int]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
   def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
@@ -45,7 +44,10 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
 /**
  * The model of Siigna.
  */
-object Model extends ActionModel with SpatialModel[Int, ImmutableShape] with ParMap[Int, ImmutableShape] {
+object Model extends ActionModel
+                with DynamicModel[Int]
+                with SpatialModel[Int, ImmutableShape]
+                with ParMap[Int, ImmutableShape] {
 
   /**
    * The boundary from the current content of the Model.
