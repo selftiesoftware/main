@@ -17,7 +17,6 @@ import shape.{DynamicShape}
  * A mutable model containing one single [[com.siigna.app.model.shape.DynamicShape]], representing one or more
  * selected shapes.
  *
- * @tparam Key  The type of the keys in the Model.
  * @see [[com.siigna.app.model.Model]]
  */
 trait DynamicModel {
@@ -58,5 +57,10 @@ trait DynamicModel {
     
     dynamic = Some(shape)
   }
+
+  /**
+   * Returns the selection - if any.
+   */
+  def selection = dynamic
 
 }
