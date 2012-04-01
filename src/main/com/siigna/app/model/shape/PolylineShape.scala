@@ -58,12 +58,11 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
       Some(select())
     } else if (rect.intersects(geometry.boundary)) {
       val touched = innerShapes.filter(s => rect.contains(s.point))
-      val f = (t : TransformationMatrix) => {
+      Some((t : TransformationMatrix) => {
         val start = if (rect.contains(startPoint)) startPoint.transform(t) else startPoint
         val innerShapes = touched.map(_.transform(t))
         new PolylineShape(start, innerShapes, attributes)
-      }
-      Some(DynamicShape(attributes.int("id").get, f))
+      })
     } else None
 
 
@@ -84,16 +83,15 @@ case class PolylineShape(private val startPoint : Vector2D, private val innerSha
       // Create the dynamic shape
       val dStart = startPoint.distanceTo(point)
       if (dClosest < dSelect || dStart < dSelect) {
-        val f = (t : TransformationMatrix) => {
+        Some((t : TransformationMatrix) => {
           if (dClosest < dStart) {
             val updated = innerShapes(closestId).transform(t)
             PolylineShape(startPoint, innerShapes.updated(closestId, updated), attributes)
           } else {
             PolylineShape(startPoint.transform(t), innerShapes, attributes)
           }
-        }
+        })
         // Return the option... phew...
-        Some(DynamicShape(attributes.int("id").get, f))
       } else None
     } else None
   }

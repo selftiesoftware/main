@@ -38,12 +38,11 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def select(r : Rectangle2D) = {
     if (r.contains(boundary)) {
-      val f = (t : TransformationMatrix) => if (r.contains(p1)) {
+      Some((t : TransformationMatrix) => if (r.contains(p1)) {
         LineShape(p1.transform(t), p1, attributes)
       } else if (r.contains(p2)) {
         LineShape(p1, p2.transform(t), attributes)
-      } else transform(t)
-      Some(DynamicShape(attributes.int("id").get, f))
+      } else transform(t))
     } else None
   }
   
@@ -51,12 +50,11 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     if (distanceTo(p) > Preferences.double("selectionDistance")) {
       None
     } else {
-      val f = (t : TransformationMatrix) => if (p.distanceTo(p1) < p.distanceTo(p2)) {
+      Some((t : TransformationMatrix) => if (p.distanceTo(p1) < p.distanceTo(p2)) {
         LineShape(p1.transform(t), p2, attributes)
       } else {
         LineShape(p1, p2.transform(t), attributes)
-      }
-      Some(DynamicShape(attributes.int("id").get, f))
+      })
     }
   }
 
@@ -79,9 +77,18 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 }
 
+/**
+ * Companion object for the LineShape. Contains shortcuts for instantiating LineShapes.
+ */
 object LineShape
 {
-  def apply(p1 : Vector2D, p2 : Vector2D) = new LineShape(p1, p2, Attributes())
-  def apply(line : Segment2D) : LineShape = LineShape(line.p1, line.p2)
+  def apply(p1 : Vector2D, p2 : Vector2D) : LineShape =
+    new LineShape(p1, p2, Attributes())
+
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : LineShape =
+    apply(Vector2D(x1, y2), Vector2D(x2, y2))
+
+  def apply(line : Segment2D) : LineShape =
+    LineShape(line.p1, line.p2)
 
 }
