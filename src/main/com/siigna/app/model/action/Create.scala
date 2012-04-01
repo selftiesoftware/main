@@ -81,7 +81,7 @@ case class CreateShape(id : Int, shape : ImmutableShape) extends Action {
  */
 case class CreateShapes(shapes : Map[Int, ImmutableShape]) extends Action {
 
-  require(shapes.size > 2, "Cannot initialize CreateShapes with one or no shapes.")
+  require(shapes.size > 1, "Cannot initialize CreateShapes with zero shapes.")
 
   def execute(model : Model) = model add shapes
 
