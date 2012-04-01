@@ -21,7 +21,7 @@ package object siigna extends com.siigna.util.Implicits {
   //lazy val Delete = com.siigna.app.model.action.Delete
 
   //lazy val Deselect = com.siigna.app.model.action.Deselect
-  //lazy val Select = com.siigna.app.model.action.Select
+  lazy val Select = com.siigna.app.model.action.Select
 
   lazy val Transform = com.siigna.app.model.action.Transform
 
