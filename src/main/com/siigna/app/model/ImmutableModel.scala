@@ -11,10 +11,8 @@
 
 package com.siigna.app.model
 
-import shape.Shape
 import collection.parallel.immutable.ParMap
-import com.siigna.util.rtree.PRTree
-import shape.{ImmutableShape, Shape}
+import shape.{Shape}
 
 /**
  * An immutable model containing shapes
