@@ -37,8 +37,16 @@ trait DynamicModel[Key] {
   }
 
   /**
-   * Select a single shape.
-   * @param shape
+   * Selects an entire shape based on its id.
+   * @param id  The id of the shape.
+   */
+  def select(id : Int) {
+    select(DynamicShape(id, Model(id).select()))
+  }
+  
+  /**
+   * Select a single shape with the given DynamicShape information.
+   * @param shape  The DynamicShape representing the selection.
    */
   def select(shape : DynamicShape) {
     if (dynamic.isDefined) deselect()
