@@ -38,4 +38,13 @@ trait Action {
  * An [[com.siigna.app.model.action.Action]] that is not stored in the [[com.siigna.app.model.Model]]
  * after execution and thus cannot be undone or redone.
  */
-trait VolatileAction extends Action
+trait VolatileAction extends Action {
+
+  /**
+   * A Volatile Action cannot undo.
+   */
+  override final def undo(model : Model) : Model = {
+    throw new UnsupportedOperationException("A VolatileAction can not be undone.")
+  }
+  
+}

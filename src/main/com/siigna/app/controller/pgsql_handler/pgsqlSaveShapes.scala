@@ -69,7 +69,8 @@ class pgsqlSaveShapes {
     //                              Til søgestrengen "shapeType" lægges "4" til,
     //                              Til søgestrengen "coordinates" lægges "x1,y1,0" og "x2,y2,0" til
     //Øvrige:     println "ukendt".
-    shapes.foreach(shape => shape match {
+
+    shapes.foreach(tuple => tuple._2 match {
       case shape : LineShape => {
         val i:Int = shape.p1.x.toInt
         val j:Int = shape.p1.y.toInt
@@ -84,6 +85,8 @@ class pgsqlSaveShapes {
         queryStringCoordinates += l + ",0),"
       }
       case shape : PolylineShape => {
+        println ("Polyline")
+        println (shape)
         shapeTypes = shapeTypes :+ 3
         queryStringShapeType += "(3),"
         polylineSizes = polylineSizes :+ shape.shapes.length
@@ -110,9 +113,8 @@ class pgsqlSaveShapes {
           }
         })
       }
-      case _ => println("Ukendt")
+      case x => println("Ukendt - returnerede: " + x)
     })
-
 
     //Querystreng til at gemme shapetyper og punkter færdiggøres:
 
@@ -123,6 +125,7 @@ class pgsqlSaveShapes {
     //Til coordinates søgestrengen tilføjes "returning point_id"
     queryStringShapeType += " RETURNING shape_id"
     queryStringCoordinates += " RETURNING point_id"
+    
     //Hvis søgestrengene er over den længde, de ville have, hvis intet var tilføet, udføres søgningerne.
     //Resultaterne gemmes i de to sekvenser: "shapeIds" og "pointIds"
     if (queryStringCoordinates.length > 100) {
@@ -137,7 +140,6 @@ class pgsqlSaveShapes {
       }
     }
 
-
     //Vi har shape- og point-ids. Nu skal property'er og shape-point-relationer laves.
 
     //Søgestrengene "propertyInt" og "shapePointRelation" påbegyndes:
@@ -147,16 +149,17 @@ class pgsqlSaveShapes {
     val shapeIdListIterator = shapeIds.iterator
     val pointIdListIterator = pointIds.iterator
     val polylineSizesListIterator = polylineSizes.iterator
+    val shapeTypesIterator = shapeTypes.iterator
 
     //Listen "shapeTypes" gennemgås, og parallelt hermed gennemgås "shapeId" og "pointId":
-    shapeTypes.foreach(shape => shape match {
+    shapeTypesIterator.foreach(shape => shape match {
       //ShapeType 1: Println "point"
       case 1 => println("point")
       //ShapeType 2: Til søgestrengen "shapePointRelation" lægges shape-id og de tilhørerende punkt-id'er:
       case 2 => {
-        val shapeId = shapeIdListIterator.next()
-        queryStringShapePointRelation += "(" + shapeId + "," + pointIdListIterator.next() + ")," +
-                                         "(" + shapeId + "," + pointIdListIterator.next() + "),"
+        val shapeIdCurrent = shapeIdListIterator.next()
+        queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdListIterator.next() + ")," +
+                                         "(" + shapeIdCurrent + "," + pointIdListIterator.next() + "),"
       }
       //ShapeType 3: Til søgestrengen "propertyInt" lægges (1000,"polylineSize"),
       //             Til søgestrengen "propertyInt" lægges (1001,"pointId"),(1002,"pointId") osv. for alle punkter.
@@ -164,41 +167,36 @@ class pgsqlSaveShapes {
       case 3 => {
         //Hvis det er en polyline findes id og længde. Punkt-id'er sættes i property,
         //query-streng til property og shape-point-relation laves
-        var pointIdsFromList = pointIdListIterator.next()
-        val shapeIdPolyline = shapeIdListIterator.next()
+        var shapeIdCurrent = shapeIdListIterator.next()
+        val shapeIdPolyline = shapeIdCurrent
         val polylineSize = polylineSizesListIterator.next()
         queryStringPropertyInt += "(1000," + polylineSize + "),"
-        //ShapeId og PointId for første punkt kommer med i shapePointRelation
-        queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdsFromList + "),"
-        //Første punkt kommer med i property - om det er startpunktet i en tom polylinje eller startpunktet i én med linjer i
-        queryStringPropertyInt += "(1001," + pointIdsFromList + "),"
-        //Hvis polylineSize > 0 er der også en shapetype 4, og det første punkt af denne kommer i shapePointRelation
-        var shapeIdPolylineSegment = 0
-        if (polylineSize > 0) {
-          shapeIdPolylineSegment = shapeIdListIterator.next()
-          queryStringShapePointRelation += "(" + shapeIdPolylineSegment + "," + pointIdsFromList + "),"
-        }
-        var i = 0
-        while (i<(polylineSize)) {
-          //For første punkt (i=0): Hvis der er mindst et linjestykke er startpunktet allerede med,
-          //og det overspringes i property, men medtages i shape_point_relation.
-          if (i>0) {
-            val pointIdsFromList2 = pointIdListIterator.next()
-            if (polylineSize > 0) {
-              shapeIdPolylineSegment = shapeIdListIterator.next()
-              queryStringShapePointRelation += "(" + shapeIdPolylineSegment + "," + pointIdsFromList2 + "),"
+        //Hvis polylineSize > 0 er der subshapes. Der laves løkke, der gennemløbes så mange gange som der er subshapes:
+        for (i <- 0 until polylineSize) {
+          //Næste shape i shapeType-listen er en subshape.
+          shapeTypesIterator.next() match {
+            //Hvis det er en linje:
+            case 4 => {
+              //Næste shapeId er linjesegmentet:
+              shapeIdCurrent = shapeIdListIterator.next()
+
+              //Subshapens id indsættes i propertyInt:
+              queryStringPropertyInt += "(" + (1001+i) + "," + shapeIdCurrent + "),"
+              var pointIdCurrent = pointIdListIterator.next()
+              //Hvis det er første subshape i linjen, kommer første punkt med i shapePointRelation for polylinjen:
+              if (i == 0) {queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdCurrent + "),"}
+              //ShapeId for linjesegmentet og punktId for de to punkter indsættes i shapePointRelation for dette:
+              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
+              pointIdCurrent = pointIdListIterator.next()
+              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
+              //ShapeId for punkt nummer to sættes i shapePointRelation for polylinjen:
+              queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdCurrent + "),"
             }
+            case x => println("Ukendt polyline subshape")
           }
-          pointIdsFromList = pointIdListIterator.next()
-          queryStringPropertyInt += "(" + (1002+i) + "," + pointIdsFromList + "),"
-          queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdsFromList + "),"
-          if (polylineSize > 0) {
-            queryStringShapePointRelation += "(" + shapeIdPolylineSegment + "," + pointIdsFromList + "),"
-          }
-          i=i+1
         }
       }
-      case 4 => println("polyline segment")
+      case 4 => println("polyline segment - burde ikke komme ud her, men allerede være ekspederet...")
       case _ => println("ukendt")
 
     })
@@ -207,7 +205,6 @@ class pgsqlSaveShapes {
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
     queryStringPropertyInt += " RETURNING property_int_id"
     queryStringShapePointRelation += " RETURNING shape_id"
-
 
     if (queryStringPropertyInt.length > 110) {
       val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
