@@ -32,7 +32,7 @@ object Select {
    * @param id  The ID of the shape to select.
    */
   def apply(id : Int) {
-    Model execute SelectShape(id)
+    Model select id
   }
 
   /**
@@ -40,7 +40,7 @@ object Select {
    * @param shapes  The shapes to select.
    */
   def apply(shapes : ImmutableShape*) {
-
+    throw new UnsupportedOperationException("Not implemented yet")
   }
 
   /**
@@ -48,47 +48,8 @@ object Select {
    * @param shapes  The shapes to select.
    */
   def apply(shapes : Traversable[ImmutableShape]) {
+    throw new UnsupportedOperationException("Not implemented yet")
     //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
   }
 
 }
-
-/**
- * Selects a single shape.
- * @param id  The id of the shape as the key in the [[com.siigna.app.model.Model]].
- */
-case class SelectShape(id : Int) extends VolatileAction {
-
-  def execute(model: Model) = {
-    model.select(Model(id).select())
-    model
-  }
-
-  def merge(that: Action) = throw new UnsupportedOperationException("A Select Action cannot be merged.")
-}
-
-case class SelectShapeByPoint(id : Int, p : Vector2D) extends VolatileAction {
-  def execute(model: Model) = {
-    val res = Model(id).select(p)
-    if (res.isDefined) model.select(res.get)
-    model
-  }
-
-  def merge(that: Action) = throw new UnsupportedOperationException("A Select Action cannot be merged.")
-}
-
-/*case class SelectShapes(ids : Traversable[Int]) extends VolatileAction {
-
-  def execute(model : Model) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-  def merge(action : Action) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-  def undo(model : Model) = {
-    throw new UnsupportedOperationException("Not yet implemented.")
-  }
-
-} */

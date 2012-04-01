@@ -45,7 +45,7 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
  * The model of Siigna.
  */
 object Model extends ActionModel
-                with DynamicModel[Int]
+                with DynamicModel
                 with SpatialModel[Int, ImmutableShape]
                 with ParMap[Int, ImmutableShape] {
 

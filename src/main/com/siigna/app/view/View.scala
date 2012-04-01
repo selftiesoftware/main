@@ -169,7 +169,7 @@ object View extends Canvas with Runnable {
       // TODO: Cache this
       try {
         //Model.dynamic.foreach(_addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
-        Model.dynamic.foreach(_ (transformation).foreach(graphics draw))
+        Model.selection.foreach(_ (transformation).foreach(graphics draw))
         //dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
