@@ -117,7 +117,7 @@ class pgsqlSaveShapes {
         queryStringCoordinates += "(" + shape.center.x + ","
         queryStringCoordinates += shape.center.y + ",0),"
         numbersOfPropertyInts = numbersOfPropertyInts :+ 1
-        propertyIntValues = propertyIntValues :+ shape.radius
+        propertyIntValues = propertyIntValues :+ shape.radius.toInt
       }
       case shape : com.siigna.app.model.shape.ArcShape => {
         val m = shape.attributes
@@ -126,9 +126,9 @@ class pgsqlSaveShapes {
         queryStringCoordinates += "(" + shape.center.x + ","
         queryStringCoordinates += shape.center.y + ",0),"
         numbersOfPropertyInts = numbersOfPropertyInts :+ 3
-        propertyIntValues = propertyIntValues :+ shape.radius
-        propertyIntValues = propertyIntValues :+ shape.startAngle
-        propertyIntValues = propertyIntValues :+ shape.angle
+        propertyIntValues = propertyIntValues :+ shape.radius.toInt
+        propertyIntValues = propertyIntValues :+ shape.startAngle.toInt
+        propertyIntValues = propertyIntValues :+ shape.angle.toInt
       }
       case x => println("Ukendt - returnerede: " + x)
     })
@@ -140,11 +140,12 @@ class pgsqlSaveShapes {
     queryStringCoordinates = queryStringCoordinates.take(queryStringCoordinates.length-1)
     //Til shapeType søgestrengen tilføjes "returning shape_id"
     queryStringShapeType += " RETURNING shape_id"
+    queryStringCoordinates += " RETURNING point_id"
 
     //Hvis søgestrengene er over den længde, de ville have, hvis intet var tilføet, udføres søgningerne.
     //Resultaterne gemmes i de to sekvenser: "shapeIds" og "pointIds"
     if (queryStringCoordinates.length > 100) {
-      val queryResultShapeIds: ResultSet = createStatement.executeUpdate(queryStringShapeType)
+      val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringShapeType)
       while (queryResultShapeIds.next()) {
         shapeIds = shapeIds :+ queryResultShapeIds.getInt("shape_id")
       }
