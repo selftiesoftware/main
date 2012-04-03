@@ -14,9 +14,9 @@ package com.siigna.app.model.action
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.Spec
 import com.siigna.util.geom.Vector2D
-import collection.parallel.immutable.ParHashMap
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.{ImmutableShape, LineShape}
+import collection.parallel.immutable.{ParMap, ParHashMap}
 
 /**
  * A test for the Create object and associated classes
@@ -53,7 +53,6 @@ class CreateTest extends Spec with ShouldMatchers {
 
     val map = Map(id -> line)
     val twoMap = Map(id -> line, 4123 -> LineShape(Vector2D(200, 200), Vector2D(300, 300)))
-    val shapes = Map(id -> line, 4123 -> LineShape(Vector2D(200, 200), Vector2D(300, 300)))
     val multiModel = model.add(twoMap)
     val action = CreateShapes(map)
 
@@ -87,7 +86,7 @@ class CreateTest extends Spec with ShouldMatchers {
 
     it("can create a single shape") {
       Create(line)
-
+      Model.shapes should equal(ParMap(0 -> line))
     }
 
   }
