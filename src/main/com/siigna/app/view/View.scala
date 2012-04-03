@@ -263,7 +263,7 @@ object View extends Canvas with Runnable {
         // Draw model
         if (Model.size > 0) try {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-          Model(mbr) map(_._2 transform virtual) foreach(g draw) // Draw the entire Model
+          Model(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Model
         } catch {
           case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error drawing!")
           case e => Log.error("View: Unable to draw Model: "+e)

@@ -198,7 +198,7 @@ abstract class EventSnap {
   /**
    * Parses an event by the given snap-settings.
    */
-  def parse(event : Event, model : ParMap[Int, ImmutableShape]) : Event
+  def parse(event : Event, model : Map[Int, ImmutableShape]) : Event
 }
 
 /**
@@ -222,6 +222,6 @@ abstract class EventTrack {
   /**
    * Parses a list into a single event.
    */
-  def parse(events : List[Event], model : ParMap[Int, ImmutableShape]) : Event
+  def parse(events : List[Event], model : Map[Int, ImmutableShape]) : Event
   
 }

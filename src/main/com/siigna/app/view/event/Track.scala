@@ -21,10 +21,10 @@ object Track extends EventTrack {
   var isTracking = true
   var line : Option[LineShape] = None
 
-  def parse(events : List[Event], model : ParMap[Int, ImmutableShape]) = {
+  def parse(events : List[Event], model : Map[Int, ImmutableShape]) = {
 
     // Filter out lines from the model
-    val lines : ParIterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])
+    val lines : Iterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])
 
     // Get the coordinates of the last 5 events
     val lastEvents = events.slice(0,5)

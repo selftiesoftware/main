@@ -21,12 +21,12 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  */
 case object CenterPoints extends EventSnap {
 
-  def parse(event : Event, model : ParMap[Int, ImmutableShape]) = event match {
+  def parse(event : Event, model : Map[Int, ImmutableShape]) = event match {
     case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
     case some => some
   }
 
-  def snap(point : Vector2D, model : ParMap[Int,  ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : Map[Int,  ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       val res = model.map(_._2.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
       if (res.distanceTo(point) * View.zoom <= 10) {

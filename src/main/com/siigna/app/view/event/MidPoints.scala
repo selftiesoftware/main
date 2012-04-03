@@ -20,13 +20,13 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  */
 case object MidPoints extends EventSnap {
 
-  def parse(event : Event, model : ParMap[Int, ImmutableShape]) = event match {
+  def parse(event : Event, model : Map[Int, ImmutableShape]) = event match {
     case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
     case some => some
   }
 
   // TODO: Finish this
-  def snap(point : Vector2D, model : ParMap[Int, ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : Map[Int, ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
       //val res = model.map(_ geometry match {
       //  case _ =>
