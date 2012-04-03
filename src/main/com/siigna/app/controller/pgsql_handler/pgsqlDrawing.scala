@@ -24,7 +24,7 @@ import java.sql._
 class pgsqlDrawing {
 
   //getLine: Modtager      shapeId og returnerer (PointId1, x1-, y1- og z1-koordinat (Int), PointId2, x2-, y2- og z2-koordinat (Int)).
-  def createNewDrawingWithName (drawingName: String, offsetX: Int, offsetY: Int, offsetZ: Int) = {
+  def createNewDrawingFromNameAndOffset (drawingName: String, offsetX: Int, offsetY: Int, offsetZ: Int) = {
 
     // Field variable definition
 
