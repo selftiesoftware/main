@@ -48,9 +48,14 @@ class pgsqlSaveShapes {
     var shapeIds: Seq[Int] = Seq()
     var pointIds: Seq[Int] = Seq()
     var propertyIntIds: Seq[Int] = Seq()
+    var propertyTextIds: Seq[Int] = Seq()
     var polylineSizes: Seq[Int] = Seq()
     var shapeTypes: Seq[Int] = Seq()
     var numbersOfPropertyInts: Seq[Int] = Seq()
+    var numbersOfPropertyTexts: Seq[Int] = Seq()
+    var propertyIntValues: Seq[Int] = Seq()
+    var propertyTextValues: Seq[String] = Seq()
+
 
 
 
@@ -87,30 +92,63 @@ class pgsqlSaveShapes {
         queryStringCoordinates += "(" + k + ","
         queryStringCoordinates += l + ",0),"
         numbersOfPropertyInts = numbersOfPropertyInts :+ 0
+        numbersOfPropertyTexts = numbersOfPropertyTexts :+ 0
       }
+        
       case shape : PolylineShape => {
         shapeTypes = shapeTypes :+ 3
         queryStringShapeType += "(3," + shape.shapes.length + "),"
         polylineSizes = polylineSizes :+ shape.shapes.length
         numbersOfPropertyInts = numbersOfPropertyInts :+ (shape.shapes.length)
+        numbersOfPropertyTexts = numbersOfPropertyTexts :+ 0
         queryStringCoordinates += "(" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
 
         shape.shapes.foreach(subShape => subShape match {
           case subShape : LineShape => {
-            //val i:Int = subShape.p1.x.toInt
-            //val j:Int = subShape.p1.y.toInt
-            val k:Int = subShape.p2.x.toInt
-            val l:Int = subShape.p2.y.toInt
+            val i:Int = subShape.p2.x.toInt
+            val j:Int = subShape.p2.y.toInt
             val m = subShape.attributes
             shapeTypes = shapeTypes :+ 4
             numbersOfPropertyInts = numbersOfPropertyInts :+ 0
+            numbersOfPropertyTexts = numbersOfPropertyTexts :+ 0
             queryStringShapeType += "(4,0),"
-            //queryStringCoordinates += "(" + i + ","
-            //queryStringCoordinates += j + ",0),"
-            queryStringCoordinates += "(" + k + ","
-            queryStringCoordinates += l + ",0),"
+            queryStringCoordinates += "(" + i + ","
+            queryStringCoordinates += j + ",0),"
           }
         })
+      }
+      case shape : com.siigna.app.model.shape.CircleShape => {
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 5
+        queryStringShapeType += "(5,0),"
+        queryStringCoordinates += "(" + shape.center.x + ","
+        queryStringCoordinates += shape.center.y + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 1
+        propertyIntValues = propertyIntValues :+ shape.radius.toInt
+        numbersOfPropertyTexts = numbersOfPropertyTexts :+ 0
+      }
+      case shape : com.siigna.app.model.shape.ArcShape => {
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 6
+        queryStringShapeType += "(6,0),"
+        queryStringCoordinates += "(" + shape.center.x + ","
+        queryStringCoordinates += shape.center.y + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 3
+        propertyIntValues = propertyIntValues :+ shape.radius.toInt
+        propertyIntValues = propertyIntValues :+ shape.startAngle.toInt
+        propertyIntValues = propertyIntValues :+ shape.angle.toInt
+        numbersOfPropertyTexts = numbersOfPropertyTexts :+ 0
+      }
+      case shape: com.siigna.app.model.shape.TextShape => {
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 7
+        queryStringShapeType += "(7,0),"
+        queryStringCoordinates += "(" + shape.position.x + ","
+        queryStringCoordinates += shape.position.y + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 1
+        propertyIntValues = propertyIntValues :+ shape.scale.toInt
+        propertyTextValues = propertyTextValues :+ shape.text
+        numbersOfPropertyTexts = numbersOfPropertyTexts :+ 1
       }
       case x => println("Ukendt - returnerede: " + x)
     })
@@ -121,10 +159,9 @@ class pgsqlSaveShapes {
     queryStringShapeType = queryStringShapeType.take(queryStringShapeType.length-1)
     queryStringCoordinates = queryStringCoordinates.take(queryStringCoordinates.length-1)
     //Til shapeType søgestrengen tilføjes "returning shape_id"
-    //Til coordinates søgestrengen tilføjes "returning point_id"
     queryStringShapeType += " RETURNING shape_id"
     queryStringCoordinates += " RETURNING point_id"
-    
+
     //Hvis søgestrengene er over den længde, de ville have, hvis intet var tilføet, udføres søgningerne.
     //Resultaterne gemmes i de to sekvenser: "shapeIds" og "pointIds"
     if (queryStringCoordinates.length > 100) {
@@ -141,14 +178,17 @@ class pgsqlSaveShapes {
 
     //Vi har shape- og point-ids. Nu skal property'er og shape-point-relationer laves.
 
-    //Søgestrengene "propertyInt" og "shapePointRelation" påbegyndes:
+    //Søgestrengene "propertyInt", "propertyText" og "shapePointRelation" påbegyndes:
     var queryStringPropertyInt: String = "INSERT INTO property_int (property_int_number,property_int_value) VALUES "
+    var queryStringPropertyText: String = "INSERT INTO property_text (property_text_number,property_text_value) VALUES "
     var queryStringShapePointRelation: String = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES "
     //Der laves iteratorer til at gå gennem sekvenserne "shapeId", "pointId" og "polylineSize":
     val shapeIdListIterator = shapeIds.iterator
     val pointIdListIterator = pointIds.iterator
     val polylineSizesListIterator = polylineSizes.iterator
     val shapeTypesIterator = shapeTypes.iterator
+    val propertyIntValuesIterator = propertyIntValues.iterator
+    val propertyTextValuesIterator = propertyTextValues.iterator
 
     //Listen "shapeTypes" gennemgås, og parallelt hermed gennemgås "shapeId" og "pointId":
     shapeTypesIterator.foreach(shape => shape match {
@@ -160,9 +200,6 @@ class pgsqlSaveShapes {
         queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdListIterator.next() + ")," +
                                          "(" + shapeIdCurrent + "," + pointIdListIterator.next() + "),"
       }
-      //ShapeType 3: Til søgestrengen "propertyInt" lægges (1000,"polylineSize"),
-      //             Til søgestrengen "propertyInt" lægges (1001,"pointId"),(1002,"pointId") osv. for alle punkter.
-      //             Til søgestrengen "shapePointRelation" lægges
       case 3 => {
         //Hvis det er en polyline findes id og længde. Punkt-id'er sættes i property,
         //query-streng til property og shape-point-relation laves
@@ -189,19 +226,41 @@ class pgsqlSaveShapes {
         }
       }
       case 4 => println("polyline segment - burde ikke komme ud her, men allerede være ekspederet...")
+      case 5 => {
+        queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+      }
+      case 6 => {
+        queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1001 + "," + propertyIntValuesIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1002 + "," + propertyIntValuesIterator.next() + "),"
+      }
+      case 7 => {
+        queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+        queryStringPropertyText += "(" + 1 + propertyTextValuesIterator.next() + "),"
+      }
       case _ => println("ukendt")
 
     })
     // Og tada- der gemmes
     queryStringPropertyInt = queryStringPropertyInt.take(queryStringPropertyInt.length-1)
+    queryStringPropertyText = queryStringPropertyText.take(queryStringPropertyText.length-1)
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
     queryStringPropertyInt += " RETURNING property_int_id"
+    queryStringPropertyText += " RETURNING property_text_id"
     queryStringShapePointRelation += " RETURNING shape_id"
 
     if (queryStringPropertyInt.length > 110) {
-      val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
-      while (queryResultShapeIds.next()) {
-        propertyIntIds = propertyIntIds :+ queryResultShapeIds.getInt("property_int_id")
+      val queryResultPropertyIntIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
+      while (queryResultPropertyIntIds.next()) {
+        propertyIntIds = propertyIntIds :+ queryResultPropertyIntIds.getInt("property_int_id")
+      }
+
+      val queryResultPropertyTextIds: ResultSet = createStatement.executeQuery(queryStringPropertyText)
+      while (queryResultPropertyTextIds.next()) {
+        propertyTextIds = propertyTextIds :+ queryResultPropertyTextIds.getInt("property_text_id")
       }
 
       val queryResultPointIds: ResultSet = createStatement.executeQuery(queryStringShapePointRelation)
@@ -212,23 +271,34 @@ class pgsqlSaveShapes {
 
     //Alle shapeIds gennemgås, og shapePropertyInt-relation samt drawing-shape-relationer laves:
     var queryStringShapePropertyIntRelation: String = "INSERT INTO shape_property_int_relation (shape_id,property_int_id) VALUES "
+    var queryStringShapePropertyTextRelation: String = "INSERT INTO shape_property_int_relation (shape_id,property_text_id) VALUES "
     var queryStringDrawingShapeRelation: String = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES "
     val numbersOfPropertyIntsIterator = numbersOfPropertyInts.iterator
+    val numbersOfPropertyTextsIterator = numbersOfPropertyTexts.iterator
     val propertyIntIdsIterator = propertyIntIds.iterator
+    val propertyTextIdsIterator = propertyTextIds.iterator
+
     shapeIds.foreach (shape => {
       queryStringDrawingShapeRelation += "( " + drawingId + "," + shape + "),"
       for (i <- 0 until numbersOfPropertyIntsIterator.next()) {
         queryStringShapePropertyIntRelation += "( " + shape + "," + propertyIntIdsIterator.next() + "),"
+      }
+      for (i <- 0 until numbersOfPropertyTextsIterator.next()) {
+        queryStringShapePropertyTextRelation += "( " + shape + "," + propertyTextIdsIterator.next() + "),"
       }
     })
 
 
     //Den færdiggøres og der gemmes:
     queryStringShapePropertyIntRelation = queryStringShapePropertyIntRelation.take(queryStringShapePropertyIntRelation.length-1)
+    queryStringShapePropertyTextRelation = queryStringShapePropertyTextRelation.take(queryStringShapePropertyTextRelation.length-1)
     queryStringDrawingShapeRelation = queryStringDrawingShapeRelation.take(queryStringDrawingShapeRelation.length-1)
     if (queryStringShapePropertyIntRelation.length > 77) {
       createStatement.executeUpdate(queryStringShapePropertyIntRelation)
       }
+    if (queryStringShapePropertyTextRelation.length > 77) {
+      createStatement.executeUpdate(queryStringShapePropertyTextRelation)
+    }
     if (queryStringDrawingShapeRelation.length > 65) {
       createStatement.executeUpdate(queryStringDrawingShapeRelation)
     }
