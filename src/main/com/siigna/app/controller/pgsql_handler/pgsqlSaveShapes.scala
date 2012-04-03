@@ -161,10 +161,10 @@ class pgsqlSaveShapes {
     //Til shapeType søgestrengen tilføjes "returning shape_id"
     queryStringShapeType += " RETURNING shape_id"
     queryStringCoordinates += " RETURNING point_id"
-
+    
     //Hvis søgestrengene er over den længde, de ville have, hvis intet var tilføet, udføres søgningerne.
     //Resultaterne gemmes i de to sekvenser: "shapeIds" og "pointIds"
-    if (queryStringCoordinates.length > 100) {
+    if (queryStringCoordinates.length > 87) {
       val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringShapeType)
       while (queryResultShapeIds.next()) {
         shapeIds = shapeIds :+ queryResultShapeIds.getInt("shape_id")
@@ -252,7 +252,7 @@ class pgsqlSaveShapes {
     queryStringPropertyText += " RETURNING property_text_id"
     queryStringShapePointRelation += " RETURNING shape_id"
 
-    if (queryStringPropertyInt.length > 110) {
+    if (queryStringPropertyInt.length > 100) {
       val queryResultPropertyIntIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
       while (queryResultPropertyIntIds.next()) {
         propertyIntIds = propertyIntIds :+ queryResultPropertyIntIds.getInt("property_int_id")
