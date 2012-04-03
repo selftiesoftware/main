@@ -31,8 +31,8 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
   /**
    * Query for shapes inside the given boundary.
    */
-  def apply(query : Rectangle2D) : ParIterable[Value] = {
-    shapes.filter((s : (Key, Value)) => query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry.boundary)).map(_._2)
+  def apply(query : Rectangle2D) : ParMap[Key, Value] = {
+    shapes.filter((s : (Key, Value)) => query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry.boundary))
   }
 
   /**
@@ -40,7 +40,7 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double = 5.0) : ParIterable[Value] = {
+  def apply(query : Vector2D, radius : Double = 5.0) : ParMap[Key, Value] = {
     apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
 

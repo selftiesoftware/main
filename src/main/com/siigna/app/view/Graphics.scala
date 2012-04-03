@@ -138,6 +138,15 @@ class Graphics(val g : Graphics2D)
   }
 
   /**
+   * Draws a point ... TODO write something clever
+   * @param point
+   */
+  def draw(point : Vector2D) {
+    setColor(new Color(50, 50, 50, 100))
+    drawCircle(point, 4, true)
+  }
+
+  /**
    * Draws a arc from a center-point, a radius and a start-angle and end-angle,
    * defined in degrees.
    */
@@ -152,9 +161,13 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a circle from a center-point and a radius
    */
-  def drawCircle(center : Vector2D, radius : Double)
+  def drawCircle(center : Vector2D, radius : Double, fill : Boolean = false)
   {
-    g drawArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
+    if (fill) {
+      g fillArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
+    } else {
+      g drawArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
+    }
   }
 
   /**

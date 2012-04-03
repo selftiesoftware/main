@@ -15,8 +15,8 @@ package com.siigna.app.model
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
-import shape.ImmutableShape
 import collection.parallel.immutable.{ParMap}
+import shape.{DynamicShape, ImmutableShape}
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -34,10 +34,13 @@ import collection.parallel.immutable.{ParMap}
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
 sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+                                                                    //with SelectableModel
                                                                     with SpatialModel[Int, ImmutableShape]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
   def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
+
+  //override var selection : Option[DynamicShape] = None
 
 }
 
@@ -45,7 +48,7 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
  * The model of Siigna.
  */
 object Model extends ActionModel
-                with DynamicModel
+                with SelectableModel
                 with SpatialModel[Int, ImmutableShape]
                 with ParMap[Int, ImmutableShape] {
 
@@ -99,6 +102,16 @@ object Model extends ActionModel
    */
   //def rtree = model.rtree
 
+  /**
+   * The current selection represented by a an Option of [[com.siigna.app.model.shape.DynamicShape]].
+   * @return  Some(DynamicShape) if a selection is active or None if nothing has been selected
+   */
+  //def selection : Option[DynamicShape] = model.selection
+
+  /**
+   * The shapes currently in the model.
+   * @return A ParMap containing shapes.
+   */
   def shapes = model.shapes
 
   //------------- Required by the ParMap trait -------------//
