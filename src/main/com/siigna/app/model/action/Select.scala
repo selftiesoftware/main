@@ -19,7 +19,7 @@ import com.siigna.util.geom.Vector2D
  * Select objects. This action is crucial to
  * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.ImmutableShape]]
  * and [[com.siigna.app.model.shape.DynamicShape]] that allows shapes to enter the
- * [[com.siigna.app.model.DynamicModel]]. DynamicShapes does not just duplicate shapes but also
+ * [[com.siigna.app.model.SelectableModel]]. DynamicShapes does not just duplicate shapes but also
  * contain information about smaller parts of a shape - if the user chose to only select a point for
  * instance - along with the transformation-matrix of the selection.
  *

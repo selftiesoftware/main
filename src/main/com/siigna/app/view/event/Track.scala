@@ -14,14 +14,14 @@ package com.siigna.app.view.event
 import com.siigna.app.model.shape._
 import com.siigna.app.view.Graphics
 import com.siigna.util.geom.{Line, TransformationMatrix}
-import collection.parallel.immutable.ParIterable
+import collection.parallel.immutable.{ParMap, ParIterable}
 
 object Track extends EventTrack {
 
   var isTracking = true
   var line : Option[LineShape] = None
 
-  def parse(events : List[Event], model : ParIterable[ImmutableShape]) = {
+  def parse(events : List[Event], model : ParMap[Int, ImmutableShape]) = {
 
     // Filter out lines from the model
     val lines : ParIterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])

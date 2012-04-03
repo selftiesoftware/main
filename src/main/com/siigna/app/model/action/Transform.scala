@@ -12,6 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
+import com.siigna.app.model.shape.ImmutableShape
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -28,64 +29,76 @@ object Transform {
   }
 
   /**
+   * Transform one shape with the given id with the given function, returning a ImmutableShape.
+   * @param id  The id of the shape
+   * @param transformation  The transformation matrix applied on the shape
+   * @param f  The function that returns the new shape, given a transformation matrix. 
+   */
+  def apply(id : Int, transformation : TransformationMatrix, f : TransformationMatrix => ImmutableShape) {
+    Model execute TransformShape(id, transformation, Some(f))
+  }
+
+  /**
    * Transforms several shapes with the given TransformationMatrix.
    * @param ids  The ids of the shapes
    * @param transformation The transformation to apply
    */
   def apply(ids : Traversable[Int], transformation : TransformationMatrix) {
-    Model execute TransformShapes(ids, transformation)
+    val m = ids.map(id => (id -> ((t : TransformationMatrix) => Model(id).transform(t)))).toMap
+    Model execute TransformShapes(m, transformation)
+  }
+
+  /**
+   * Transforms several shapes with the given TransformationMatrix and the given function.
+   * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
+   * @param transformation  The matrix to apply on the shapes
+   */
+  def apply(shapes : Map[Int, TransformationMatrix => ImmutableShape], transformation : TransformationMatrix) {
+    Model execute TransformShapes(shapes, transformation)
   }
 
 }
 
 /**
  * Transforms a shape with the given [[com.siigna.util.geom.TransformationMatrix]].
+ * @param id The id of the shape
+ * @param transformation  The TransformationMatrix containing the transformation
+ * @param f  The function to apply on the shape
  */
-case class TransformShape(id : Int, transformation : TransformationMatrix) extends Action {
+case class TransformShape(id : Int, transformation : TransformationMatrix, f : Option[TransformationMatrix => ImmutableShape] = None) extends Action {
 
-  def execute(model : Model) = model add (id, model.shapes(id).transform(transformation))
-
-  def merge(action : Action) = action match {
-    case TransformShape(idx : Int, trf : TransformationMatrix) =>
-      if (idx == id)
-        TransformShape(id, transformation.concatenate(trf))
-      else
-        SequenceAction(this, action)
-    case _ => SequenceAction(this, action)
+  def execute(model : Model) = if (f.isDefined) {
+    model add(id, f.get.apply(transformation))
+  } else {
+    model add(id, model.shapes(id).transform(transformation))
   }
+  
+  // TODO: Optimize
+  def merge(action : Action) = SequenceAction(this, action)
 
-  def undo(model : Model) = model add (id, model.shapes(id).transform(transformation.inverse))
+  def undo(model : Model) = if (f.isDefined) {
+    model add (id, f.get.apply(transformation.inverse))
+  } else {
+    model add (id, model.shapes(id).transform(transformation))
+  }
 
 }
 
 /**
  * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
-case class TransformShapes(ids : Traversable[Int], transformation : TransformationMatrix) extends Action {
+case class TransformShapes(shapes : Map[Int, TransformationMatrix => ImmutableShape], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    val map = ids.map(id => (id -> model.shapes(id).transform(transformation))).toMap
+    val map = shapes.map(f => (f._1 -> f._2(transformation))).toMap
     model add map
   }
 
-  def merge(that : Action) = that match {
-    case TransformShape(id, transformationOther) => {
-      if (transformation == transformationOther)
-        TransformShapes(ids.++(Traversable(id)), transformation)
-      else
-        SequenceAction(this, that)
-    }
-    case TransformShapes(idsOther, transformationOther) => {
-      if (ids == idsOther)
-        TransformShapes(ids, transformation.concatenate(transformationOther))
-      else
-        SequenceAction(this, that)
-    }
-    case _ => SequenceAction(this, that)
-  }
+  // TODO: Optimize
+  def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    val map = ids.map(id => (id -> model.shapes(id).transform(transformation.inverse))).toMap
+    val map = shapes.map(f => (f._1 -> f._2(transformation.inverse))).toMap
     model add map
   }
 }
