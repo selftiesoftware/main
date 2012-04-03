@@ -22,7 +22,7 @@ import com.siigna.app.model.shape.LineShape
  */
 class ModelSpec extends Spec with ShouldMatchers {
 
-  val model = new Model(ParHashMap())
+  val model = new Model(Map())
 
   describe("An immutable model") {
     val v1 = Vector(0, 0)
