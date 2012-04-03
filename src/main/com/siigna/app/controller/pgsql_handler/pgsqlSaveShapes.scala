@@ -37,7 +37,7 @@ class pgsqlSaveShapes {
   // def saveShapes (shapes: Seq[com.siigna.app.model.shape.ImmutableShape]) = {
 
   //Den midlertidige:
-  def saveShapes () = {
+  def saveShapesIntoDrawing (drawingId: Int) = {
   val shapes = Model.seq
 
     //Opretter forbindelse til serveren
@@ -50,10 +50,12 @@ class pgsqlSaveShapes {
     var propertyIntIds: Seq[Int] = Seq()
     var polylineSizes: Seq[Int] = Seq()
     var shapeTypes: Seq[Int] = Seq()
+    var numbersOfPropertyInts: Seq[Int] = Seq()
+
 
 
     //Søgestrengene "shapeType" og "coordinates" påbegyndes:
-    var queryStringShapeType: String = "INSERT INTO shape (shape_type) VALUES "
+    var queryStringShapeType: String = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES "
     var queryStringCoordinates: String = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES "
 
     //Går igennem shapesne i den modtagne liste:
@@ -69,6 +71,7 @@ class pgsqlSaveShapes {
     //                              Til søgestrengen "shapeType" lægges "4" til,
     //                              Til søgestrengen "coordinates" lægges "x1,y1,0" og "x2,y2,0" til
     //Øvrige:     println "ukendt".
+    //For alle lægges antallet af propertyInts til sekvensen numbersOfPropertyInts
 
     shapes.foreach(tuple => tuple._2 match {
       case shape : LineShape => {
@@ -78,36 +81,32 @@ class pgsqlSaveShapes {
         val l:Int = shape.p2.y.toInt
         val m = shape.attributes
         shapeTypes = shapeTypes :+ 2
-        queryStringShapeType += "(2),"
+        queryStringShapeType += "(2,0),"
         queryStringCoordinates += "(" + i + ","
         queryStringCoordinates += j + ",0),"
         queryStringCoordinates += "(" + k + ","
         queryStringCoordinates += l + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 0
       }
       case shape : PolylineShape => {
-        println ("Polyline")
-        println (shape)
         shapeTypes = shapeTypes :+ 3
-        queryStringShapeType += "(3),"
+        queryStringShapeType += "(3," + shape.shapes.length + "),"
         polylineSizes = polylineSizes :+ shape.shapes.length
-        //Til at indsætte startpunkt for tomme polylines - findes, men metoden til at hente det mangler.
-        /*
-        if (shape.shapes.length == 0) {
-          queryStringCoordinates += "(" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
-        } */
-        //Indtil dette laves indsættes et 0,0-punkt som startpunkt til tomme polylines. 
-            if (shape.shapes.length == 0) queryStringCoordinates += "(0,0,0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ (shape.shapes.length)
+        queryStringCoordinates += "(" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
+
         shape.shapes.foreach(subShape => subShape match {
           case subShape : LineShape => {
-            val i:Int = subShape.p1.x.toInt
-            val j:Int = subShape.p1.y.toInt
+            //val i:Int = subShape.p1.x.toInt
+            //val j:Int = subShape.p1.y.toInt
             val k:Int = subShape.p2.x.toInt
             val l:Int = subShape.p2.y.toInt
             val m = subShape.attributes
             shapeTypes = shapeTypes :+ 4
-            queryStringShapeType += "(4),"
-            queryStringCoordinates += "(" + i + ","
-            queryStringCoordinates += j + ",0),"
+            numbersOfPropertyInts = numbersOfPropertyInts :+ 0
+            queryStringShapeType += "(4,0),"
+            //queryStringCoordinates += "(" + i + ","
+            //queryStringCoordinates += j + ",0),"
             queryStringCoordinates += "(" + k + ","
             queryStringCoordinates += l + ",0),"
           }
@@ -170,7 +169,6 @@ class pgsqlSaveShapes {
         var shapeIdCurrent = shapeIdListIterator.next()
         val shapeIdPolyline = shapeIdCurrent
         val polylineSize = polylineSizesListIterator.next()
-        queryStringPropertyInt += "(1000," + polylineSize + "),"
         //Hvis polylineSize > 0 er der subshapes. Der laves løkke, der gennemløbes så mange gange som der er subshapes:
         for (i <- 0 until polylineSize) {
           //Næste shape i shapeType-listen er en subshape.
@@ -179,18 +177,12 @@ class pgsqlSaveShapes {
             case 4 => {
               //Næste shapeId er linjesegmentet:
               shapeIdCurrent = shapeIdListIterator.next()
-
               //Subshapens id indsættes i propertyInt:
-              queryStringPropertyInt += "(" + (1001+i) + "," + shapeIdCurrent + "),"
-              var pointIdCurrent = pointIdListIterator.next()
+              queryStringPropertyInt += "(" + (1000+i) + "," + shapeIdCurrent + "),"
               //Hvis det er første subshape i linjen, kommer første punkt med i shapePointRelation for polylinjen:
-              if (i == 0) {queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdCurrent + "),"}
-              //ShapeId for linjesegmentet og punktId for de to punkter indsættes i shapePointRelation for dette:
-              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
-              pointIdCurrent = pointIdListIterator.next()
-              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
-              //ShapeId for punkt nummer to sættes i shapePointRelation for polylinjen:
-              queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdCurrent + "),"
+              if (i == 0) {queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdListIterator.next() + "),"}
+              //ShapeId for linjesegmentet og punktId for "punkt to" i linjen indsættes i shapePointRelation for linjesegmentet:
+              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdListIterator.next() + "),"
             }
             case x => println("Ukendt polyline subshape")
           }
@@ -218,13 +210,28 @@ class pgsqlSaveShapes {
       }
     }
 
+    //Alle shapeIds gennemgås, og shapePropertyInt-relation samt drawing-shape-relationer laves:
+    var queryStringShapePropertyIntRelation: String = "INSERT INTO shape_property_int_relation (shape_id,property_int_id) VALUES "
+    var queryStringDrawingShapeRelation: String = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES "
+    val numbersOfPropertyIntsIterator = numbersOfPropertyInts.iterator
+    val propertyIntIdsIterator = propertyIntIds.iterator
+    shapeIds.foreach (shape => {
+      queryStringDrawingShapeRelation += "( " + drawingId + "," + shape + "),"
+      for (i <- 0 until numbersOfPropertyIntsIterator.next()) {
+        queryStringShapePropertyIntRelation += "( " + shape + "," + propertyIntIdsIterator.next() + "),"
+      }
+    })
 
 
-    var queryStringShapePropertyRelation: String = "INSERT INTO shape_property_relation (shape_id,property_id) VALUES "
-
-
-    //queryStringShapePropertyRelation += "(" + propertyIntIds + "," +
-
+    //Den færdiggøres og der gemmes:
+    queryStringShapePropertyIntRelation = queryStringShapePropertyIntRelation.take(queryStringShapePropertyIntRelation.length-1)
+    queryStringDrawingShapeRelation = queryStringDrawingShapeRelation.take(queryStringDrawingShapeRelation.length-1)
+    if (queryStringShapePropertyIntRelation.length > 77) {
+      createStatement.executeUpdate(queryStringShapePropertyIntRelation)
+      }
+    if (queryStringDrawingShapeRelation.length > 65) {
+      createStatement.executeUpdate(queryStringDrawingShapeRelation)
+    }
 
 
     //Luk forbindelsen
