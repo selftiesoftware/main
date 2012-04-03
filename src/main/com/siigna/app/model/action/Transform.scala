@@ -13,16 +13,33 @@ package com.siigna.app.model.action
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
 
+/**
+ * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
+ */
 object Transform {
 
+  /**
+   * Transform one shape with the given id with the given TransformationMatrix.
+   * @param id  The id of the shape to transform
+   * @param transformation  The transformation to apply
+   */
   def apply(id : Int, transformation : TransformationMatrix) {
     Model execute TransformShape(id, transformation)
+  }
+
+  /**
+   * Transforms several shapes with the given TransformationMatrix.
+   * @param ids  The ids of the shapes
+   * @param transformation The transformation to apply
+   */
+  def apply(ids : Traversable[Int], transformation : TransformationMatrix) {
+    Model execute TransformShapes(ids, transformation)
   }
 
 }
 
 /**
- * Transforms a shape.
+ * Transforms a shape with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
 case class TransformShape(id : Int, transformation : TransformationMatrix) extends Action {
 
@@ -42,7 +59,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix) exten
 }
 
 /**
- * Transforms a number of shapes.
+ * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
 case class TransformShapes(ids : Traversable[Int], transformation : TransformationMatrix) extends Action {
 
