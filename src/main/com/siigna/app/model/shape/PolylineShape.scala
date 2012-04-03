@@ -35,7 +35,7 @@ import com.siigna.util.collection.{Preferences, Attributes}
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
  */
-case class PolylineShape(private val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
+case class PolylineShape(val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
 
   type T = PolylineShape
 
