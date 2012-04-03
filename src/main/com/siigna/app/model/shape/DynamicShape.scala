@@ -22,7 +22,7 @@ import com.siigna.app.model.action.{TransformShapes, Action}
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
  * @param shapes  The ids of the wrapped shape(s).
- * @see [[com.siigna.app.model.SelectableModel]]
+ * @see [[com.siigna.app.model.MutableModel]]
  */
 case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape]) extends Shape
                                       with (TransformationMatrix => Traversable[ImmutableShape]) {
