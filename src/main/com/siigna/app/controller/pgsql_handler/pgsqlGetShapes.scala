@@ -137,8 +137,6 @@ class pgsqlGetShapes {
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }
       case 4 => {
-        coordinatesIterator.next()
-        coordinatesIterator.next()
         polylineSubshapes += (shapeIdIterator.next() -> new PolylineShape.PolylineLineShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next())))
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }

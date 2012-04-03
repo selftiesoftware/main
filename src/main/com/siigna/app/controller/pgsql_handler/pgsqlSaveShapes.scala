@@ -93,25 +93,20 @@ class pgsqlSaveShapes {
         queryStringShapeType += "(3," + shape.shapes.length + "),"
         polylineSizes = polylineSizes :+ shape.shapes.length
         numbersOfPropertyInts = numbersOfPropertyInts :+ (shape.shapes.length)
-        //Til at indsætte startpunkt for tomme polylines - findes, men metoden til at hente det mangler.
-        /*
-        if (shape.shapes.length == 0) {
-          queryStringCoordinates += "(" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
-        } */
-        //Indtil dette laves indsættes et 0,0-punkt som startpunkt til tomme polylines. 
-            if (shape.shapes.length == 0) queryStringCoordinates += "(0,0,0),"
+        queryStringCoordinates += "(" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
+
         shape.shapes.foreach(subShape => subShape match {
           case subShape : LineShape => {
-            val i:Int = subShape.p1.x.toInt
-            val j:Int = subShape.p1.y.toInt
+            //val i:Int = subShape.p1.x.toInt
+            //val j:Int = subShape.p1.y.toInt
             val k:Int = subShape.p2.x.toInt
             val l:Int = subShape.p2.y.toInt
             val m = subShape.attributes
             shapeTypes = shapeTypes :+ 4
             numbersOfPropertyInts = numbersOfPropertyInts :+ 0
             queryStringShapeType += "(4,0),"
-            queryStringCoordinates += "(" + i + ","
-            queryStringCoordinates += j + ",0),"
+            //queryStringCoordinates += "(" + i + ","
+            //queryStringCoordinates += j + ",0),"
             queryStringCoordinates += "(" + k + ","
             queryStringCoordinates += l + ",0),"
           }
@@ -184,13 +179,10 @@ class pgsqlSaveShapes {
               shapeIdCurrent = shapeIdListIterator.next()
               //Subshapens id indsættes i propertyInt:
               queryStringPropertyInt += "(" + (1000+i) + "," + shapeIdCurrent + "),"
-              var pointIdCurrent = pointIdListIterator.next()
               //Hvis det er første subshape i linjen, kommer første punkt med i shapePointRelation for polylinjen:
-              if (i == 0) {queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdCurrent + "),"}
-              //ShapeId for linjesegmentet og punktId for de to punkter indsættes i shapePointRelation for dette:
-              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
-              pointIdCurrent = pointIdListIterator.next()
-              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdCurrent + "),"
+              if (i == 0) {queryStringShapePointRelation += "(" + shapeIdPolyline + "," + pointIdListIterator.next() + "),"}
+              //ShapeId for linjesegmentet og punktId for "punkt to" i linjen indsættes i shapePointRelation for linjesegmentet:
+              queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdListIterator.next() + "),"
             }
             case x => println("Ukendt polyline subshape")
           }
