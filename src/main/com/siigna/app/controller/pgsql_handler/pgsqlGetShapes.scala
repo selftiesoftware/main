@@ -142,12 +142,12 @@ class pgsqlGetShapes {
       }
       case 5 => {
         shapeIdIterator.next()
-        resultSequenceShapes = resultSequenceShapes :+ CircleShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next())
+        resultSequenceShapes = resultSequenceShapes :+ new com.siigna.app.model.shape.CircleShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),attributes)
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }
       case 6 => {
         shapeIdIterator.next()
-        resultSequenceShapes = resultSequenceShapes :+ ArcShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),propertyIntValueIterator.next(),propertyIntValueIterator.next())
+        resultSequenceShapes = resultSequenceShapes :+ new ArcShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),propertyIntValueIterator.next(),propertyIntValueIterator.next(),attributes)
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }
       case x => println ("Ukendt shape")
