@@ -20,7 +20,8 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  */
 trait SpatialModel[Key, Value <: ImmutableShape] {
 
-  def shapes : ParMap[Key, Value]
+  // TODO: Remove this in favour of the tree
+  def shapes : Map[Key, Value]
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
@@ -31,7 +32,7 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
   /**
    * Query for shapes inside the given boundary.
    */
-  def apply(query : Rectangle2D) : ParMap[Key, Value] = {
+  def apply(query : Rectangle2D) : Map[Key, Value] = {
     shapes.filter((s : (Key, Value)) => query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry.boundary))
   }
 
@@ -40,7 +41,7 @@ trait SpatialModel[Key, Value <: ImmutableShape] {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double = 5.0) : ParMap[Key, Value] = {
+  def apply(query : Vector2D, radius : Double = 5.0) : Map[Key, Value] = {
     apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
   }
 

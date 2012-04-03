@@ -17,6 +17,7 @@ import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParMap}
 import shape.{DynamicShape, ImmutableShape}
+import collection.immutable.MapProxy
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -33,12 +34,12 @@ import shape.{DynamicShape, ImmutableShape}
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+sealed class Model(val shapes : Map[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
                                                                     //with SelectableModel
                                                                     with SpatialModel[Int, ImmutableShape]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : ParMap[Int, ImmutableShape]) = new Model(coll)
+  def build(coll : Map[Int, ImmutableShape]) = new Model(coll)
 
   //override var selection : Option[DynamicShape] = None
 
@@ -50,7 +51,7 @@ sealed class Model(val shapes : ParMap[Int, ImmutableShape]) extends ImmutableMo
 object Model extends ActionModel
                 with SelectableModel
                 with SpatialModel[Int, ImmutableShape]
-                with ParMap[Int, ImmutableShape] {
+                with MapProxy[Int, ImmutableShape] {
 
   /**
    * The boundary from the current content of the Model.
@@ -114,12 +115,7 @@ object Model extends ActionModel
    */
   def shapes = model.shapes
 
-  //------------- Required by the ParMap trait -------------//
-  def +[U >: ImmutableShape](kv : (Int, U)) = model.shapes.+[U](kv)
-  def -(key : Int) = model.shapes.-(key)
-  def get(key : Int) = model.shapes.get(key)
-  def seq = model.shapes.seq
-  def size = model.shapes.size
-  def splitter = model.shapes.iterator.asInstanceOf[IterableSplitter[(Int, ImmutableShape)]]
-  
+  //------------- Required by the MapProxy trait -------------//
+  def self = model.shapes
+
 }
