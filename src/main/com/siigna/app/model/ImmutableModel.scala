@@ -20,12 +20,12 @@ import shape.{Shape}
  * @tparam Value  The shapes in the model.
  */
 trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
-                                    with GroupableModel[Key, Value] {
+                                             with GroupableModel[Key, Value] {
 
   /**
    * Add a shape to the model.
    */
-  def add(key : Key, shape : Value) = build(shapes.+(key, shape).asInstanceOf[ParMap[Key, Value]])
+  def add(key : Key, shape : Value) = build(shapes.+((key, shape)))
 
   /**
    * Add several shapes to the model.

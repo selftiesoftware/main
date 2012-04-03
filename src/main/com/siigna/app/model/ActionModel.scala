@@ -26,7 +26,7 @@ trait ActionModel extends SelectableModel {
   /**
    * The underlying immutable model of Siigna.
    */
-  @volatile protected var model = new Model(ParHashMap[Int, ImmutableShape]())
+  @volatile protected var model = new Model(Map[Int, ImmutableShape]())
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.

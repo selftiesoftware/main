@@ -11,10 +11,6 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.ParMap
-import shape.ImmutableShape
-
-
 /**
  * Trait that provides necessary information to build a model with a
  * [[scala.collection.parallel.immutable.ParHashMap]] containing the given types.
@@ -26,12 +22,12 @@ trait ModelBuilder[Key, Value] {
    * @param coll  The map of keys and shapes.
    * @return A new (immutable) Model.
    */
-  protected def build(coll : ParMap[Key, Value]) : Model
+  protected def build(coll : Map[Key, Value]) : Model
 
   /**
    * The shapes used to perform actions upon.
-   * @return A ParHashMap containing the shapes.
+   * @return A Map containing the shapes.
    */
-  def shapes : ParMap[Key, Value]
+  def shapes : Map[Key, Value]
   
 }
