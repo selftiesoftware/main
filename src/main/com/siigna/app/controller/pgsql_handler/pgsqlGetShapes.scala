@@ -140,6 +140,11 @@ class pgsqlGetShapes {
         polylineSubshapes += (shapeIdIterator.next() -> new PolylineShape.PolylineLineShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next())))
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }
+      case 5 => {
+        shapeIdIterator.next()
+        resultSequenceShapes = resultSequenceShapes :+ CircleShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next())
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
       case x => println ("Ukendt shape")
     })
 
