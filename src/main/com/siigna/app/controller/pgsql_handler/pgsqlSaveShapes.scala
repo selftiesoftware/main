@@ -89,17 +89,6 @@ class pgsqlSaveShapes {
         queryStringCoordinates += l + ",0),"
         numbersOfPropertyInts = numbersOfPropertyInts :+ 0
       }
-      case shape : com.siigna.app.model.shape.CircleShape => {
-        val i:Int = shape.center.x
-        val j:Int = shape.center.y
-        val m = shape.attributes
-        shapeTypes = shapeTypes :+ 5
-        queryStringShapeType += "(5,0),"
-        queryStringCoordinates += "(" + i + ","
-        queryStringCoordinates += j + ",0),"
-        numbersOfPropertyInts = numbersOfPropertyInts :+ 1
-        propertyIntValues = propertyIntValues :+ shape.radius
-      }
         
       case shape : PolylineShape => {
         shapeTypes = shapeTypes :+ 3
@@ -120,6 +109,26 @@ class pgsqlSaveShapes {
             queryStringCoordinates += j + ",0),"
           }
         })
+      }
+      case shape : com.siigna.app.model.shape.CircleShape => {
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 5
+        queryStringShapeType += "(5,0),"
+        queryStringCoordinates += "(" + shape.center.x + ","
+        queryStringCoordinates += shape.center.y + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 1
+        propertyIntValues = propertyIntValues :+ shape.radius
+      }
+      case shape : com.siigna.app.model.shape.ArcShape => {
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 6
+        queryStringShapeType += "(6,0),"
+        queryStringCoordinates += "(" + shape.center.x + ","
+        queryStringCoordinates += shape.center.y + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 3
+        propertyIntValues = propertyIntValues :+ shape.radius
+        propertyIntValues = propertyIntValues :+ shape.startAngle
+        propertyIntValues = propertyIntValues :+ shape.angle
       }
       case x => println("Ukendt - returnerede: " + x)
     })
@@ -197,6 +206,12 @@ class pgsqlSaveShapes {
       case 5 => {
         queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
         queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+      }
+      case 6 => {
+        queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1001 + "," + propertyIntValuesIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1002 + "," + propertyIntValuesIterator.next() + "),"
       }
       case _ => println("ukendt")
 
