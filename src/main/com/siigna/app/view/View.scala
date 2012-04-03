@@ -166,15 +166,14 @@ object View extends Canvas with Runnable {
       graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
       // Fetch and draw the dynamic layer.
-      // TODO: Draw and cache this
-      /*try {
-        val dynamic = Model.dynamicShapes
-        // 1: Draw the dynamic layer and a shadow of the old shape
-        dynamic.values.map(_.shape.addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
-        dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
+      // TODO: Cache this
+      try {
+        //Model.dynamic.foreach(_addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
+        Model.selection.foreach(_ (transformation).foreach(graphics draw))
+        //dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
-      }*/
+      }
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
@@ -365,7 +364,7 @@ object View extends Canvas with Runnable {
       } catch {
         case e => Log.warning("View: Could not create graphics-object.")
       }
-
+      
       // Terminate the thread if it's been interrupted
       if (Thread.currentThread().isInterrupted)
         throw new InterruptedException()

@@ -41,18 +41,26 @@ trait DynamicModel {
   }
 
   /**
-   * Returns the current selection if any.
+   * Selects an entire shape based on its id.
+   * @param id  The id of the shape.
    */
-  def getSelection = dynamic
-
+  def select(id : Int) {
+    select(DynamicShape(id, Model(id).select()))
+  }
+  
   /**
-   * Select a single shape. If previous shapes has been selected, deselect it and select the given shape instead.
-   * @param shape  The shape to select
+   * Select a single shape with the given DynamicShape information.
+   * @param shape  The DynamicShape representing the selection.
    */
   def select(shape : DynamicShape) {
     if (dynamic.isDefined) deselect()
     
     dynamic = Some(shape)
   }
+
+  /**
+   * Returns the selection - if any.
+   */
+  def selection = dynamic
 
 }
