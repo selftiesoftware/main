@@ -51,6 +51,7 @@ class pgsqlSaveShapes {
     var polylineSizes: Seq[Int] = Seq()
     var shapeTypes: Seq[Int] = Seq()
     var numbersOfPropertyInts: Seq[Int] = Seq()
+    var propertyIntValues: Seq[Int] = Seq()
 
 
 
@@ -88,6 +89,18 @@ class pgsqlSaveShapes {
         queryStringCoordinates += l + ",0),"
         numbersOfPropertyInts = numbersOfPropertyInts :+ 0
       }
+      case shape : com.siigna.app.model.shape.CircleShape => {
+        val i:Int = shape.center.x
+        val j:Int = shape.center.y
+        val m = shape.attributes
+        shapeTypes = shapeTypes :+ 5
+        queryStringShapeType += "(5,0),"
+        queryStringCoordinates += "(" + i + ","
+        queryStringCoordinates += j + ",0),"
+        numbersOfPropertyInts = numbersOfPropertyInts :+ 1
+        propertyIntValues = propertyIntValues :+ shape.radius
+      }
+        
       case shape : PolylineShape => {
         shapeTypes = shapeTypes :+ 3
         queryStringShapeType += "(3," + shape.shapes.length + "),"
@@ -97,18 +110,14 @@ class pgsqlSaveShapes {
 
         shape.shapes.foreach(subShape => subShape match {
           case subShape : LineShape => {
-            //val i:Int = subShape.p1.x.toInt
-            //val j:Int = subShape.p1.y.toInt
-            val k:Int = subShape.p2.x.toInt
-            val l:Int = subShape.p2.y.toInt
+            val i:Int = subShape.p2.x.toInt
+            val j:Int = subShape.p2.y.toInt
             val m = subShape.attributes
             shapeTypes = shapeTypes :+ 4
             numbersOfPropertyInts = numbersOfPropertyInts :+ 0
             queryStringShapeType += "(4,0),"
-            //queryStringCoordinates += "(" + i + ","
-            //queryStringCoordinates += j + ",0),"
-            queryStringCoordinates += "(" + k + ","
-            queryStringCoordinates += l + ",0),"
+            queryStringCoordinates += "(" + i + ","
+            queryStringCoordinates += j + ",0),"
           }
         })
       }
@@ -121,14 +130,12 @@ class pgsqlSaveShapes {
     queryStringShapeType = queryStringShapeType.take(queryStringShapeType.length-1)
     queryStringCoordinates = queryStringCoordinates.take(queryStringCoordinates.length-1)
     //Til shapeType søgestrengen tilføjes "returning shape_id"
-    //Til coordinates søgestrengen tilføjes "returning point_id"
     queryStringShapeType += " RETURNING shape_id"
-    queryStringCoordinates += " RETURNING point_id"
-    
+
     //Hvis søgestrengene er over den længde, de ville have, hvis intet var tilføet, udføres søgningerne.
     //Resultaterne gemmes i de to sekvenser: "shapeIds" og "pointIds"
     if (queryStringCoordinates.length > 100) {
-      val queryResultShapeIds: ResultSet = createStatement.executeQuery(queryStringShapeType)
+      val queryResultShapeIds: ResultSet = createStatement.executeUpdate(queryStringShapeType)
       while (queryResultShapeIds.next()) {
         shapeIds = shapeIds :+ queryResultShapeIds.getInt("shape_id")
       }
@@ -149,6 +156,7 @@ class pgsqlSaveShapes {
     val pointIdListIterator = pointIds.iterator
     val polylineSizesListIterator = polylineSizes.iterator
     val shapeTypesIterator = shapeTypes.iterator
+    val propertyIntValuesIterator = propertyIntValues.iterator
 
     //Listen "shapeTypes" gennemgås, og parallelt hermed gennemgås "shapeId" og "pointId":
     shapeTypesIterator.foreach(shape => shape match {
@@ -160,9 +168,6 @@ class pgsqlSaveShapes {
         queryStringShapePointRelation += "(" + shapeIdCurrent + "," + pointIdListIterator.next() + ")," +
                                          "(" + shapeIdCurrent + "," + pointIdListIterator.next() + "),"
       }
-      //ShapeType 3: Til søgestrengen "propertyInt" lægges (1000,"polylineSize"),
-      //             Til søgestrengen "propertyInt" lægges (1001,"pointId"),(1002,"pointId") osv. for alle punkter.
-      //             Til søgestrengen "shapePointRelation" lægges
       case 3 => {
         //Hvis det er en polyline findes id og længde. Punkt-id'er sættes i property,
         //query-streng til property og shape-point-relation laves
@@ -189,6 +194,10 @@ class pgsqlSaveShapes {
         }
       }
       case 4 => println("polyline segment - burde ikke komme ud her, men allerede være ekspederet...")
+      case 5 => {
+        queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
+        queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
+      }
       case _ => println("ukendt")
 
     })
