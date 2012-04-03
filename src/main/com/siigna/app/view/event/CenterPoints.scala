@@ -14,21 +14,21 @@ package com.siigna.app.view.event
 import com.siigna.app.model.shape.{ImmutableShape}
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.View
-import collection.parallel.immutable.ParIterable
+import collection.parallel.immutable.{ParMap, ParIterable}
 
 /**
  * A hook for parsing points that snaps to center-points on objects.
  */
 case object CenterPoints extends EventSnap {
 
-  def parse(event : Event, model : ParIterable[ImmutableShape]) = event match {
+  def parse(event : Event, model : ParMap[Int, ImmutableShape]) = event match {
     case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
     case some => some
   }
 
-  def snap(point : Vector2D, model : ParIterable[ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : ParMap[Int,  ImmutableShape]) : Vector2D = {
     if (!model.isEmpty) {
-      val res = model.map(_.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
+      val res = model.map(_._2.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
       if (res.distanceTo(point) * View.zoom <= 10) {
         res
       }
