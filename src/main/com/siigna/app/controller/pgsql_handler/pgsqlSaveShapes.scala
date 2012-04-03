@@ -239,7 +239,7 @@ class pgsqlSaveShapes {
       case 7 => {
         queryStringShapePointRelation += "(" + shapeIdListIterator.next() + "," + pointIdListIterator.next() + "),"
         queryStringPropertyInt += "(" + 1000 + "," + propertyIntValuesIterator.next() + "),"
-        queryStringPropertyText += "(" + 1 + propertyTextValuesIterator.next() + "),"
+        queryStringPropertyText += "(" + 1 +"," + propertyTextValuesIterator.next() + "),"
       }
       case _ => println("ukendt")
 
@@ -258,14 +258,16 @@ class pgsqlSaveShapes {
         propertyIntIds = propertyIntIds :+ queryResultPropertyIntIds.getInt("property_int_id")
       }
 
-      val queryResultPropertyTextIds: ResultSet = createStatement.executeQuery(queryStringPropertyText)
-      while (queryResultPropertyTextIds.next()) {
-        propertyTextIds = propertyTextIds :+ queryResultPropertyTextIds.getInt("property_text_id")
-      }
-
       val queryResultPointIds: ResultSet = createStatement.executeQuery(queryStringShapePointRelation)
       while (queryResultPointIds.next()) {
         pointIds = pointIds :+ queryResultPointIds.getInt("shape_id")
+      }
+    }
+
+    if (queryStringPropertyText.length > 110) {
+      val queryResultPropertyTextIds: ResultSet = createStatement.executeQuery(queryStringPropertyText)
+      while (queryResultPropertyTextIds.next()) {
+        propertyTextIds = propertyTextIds :+ queryResultPropertyTextIds.getInt("property_text_id")
       }
     }
 
