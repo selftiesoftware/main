@@ -35,6 +35,8 @@ class pgsqlGetShapes {
     var resultSequenceNumberOfPropertyInts: Seq[Int] = Seq()
     var resultSequencePropertyIntNumber: Seq[Int] = Seq()
     var resultSequencePropertyIntValue: Seq[Int] = Seq()
+    var resultSequencePropertyTextNumber: Seq[Int] = Seq()
+    var resultSequencePropertyTextValue: Seq[String] = Seq()
     var resultSequenceCoordinates: Seq[Int] = Seq()
     var polylineInfo: Seq[Int] = Seq()
     var resultSequenceShapes: Seq[ImmutableShape] = Seq()
@@ -76,6 +78,16 @@ class pgsqlGetShapes {
           "WHERE drawing_id = " + drawingId + ") as t1 " +
         "ON t1.shape_id = t2.shape_id) " +
       "ON t2.point_id = t3.point_id"
+    val query5: String = "" +
+      "SELECT property_text_number,property_text_value " +
+      "FROM property_text as t3 " +
+      "JOIN (shape_property_text_relation as t2 " +
+      "JOIN (" +
+      "SELECT shape_id "+
+      "FROM drawing_shape_relation " +
+      "WHERE drawing_id = " + drawingId + ") as t1 " +
+      "ON t1.shape_id = t2.shape_id) " +
+      "ON t2.property_text_id = t3.property_text_id"
 
     createStatement.execute(query1)
     val queryResult1: ResultSet = createStatement.getResultSet
@@ -110,12 +122,19 @@ class pgsqlGetShapes {
       resultSequenceCoordinates = resultSequenceCoordinates :+ queryResult4.getInt("y_coordinate")
       //resultSequenceCoordinates = resultSequenceCoordinates :+ queryResult4.getInt("z_coordinate")
     }
+    createStatement.execute(query5)
+    val queryResult5: ResultSet = createStatement.getResultSet
+    while (queryResult5.next()) {
+      resultSequencePropertyTextNumber = resultSequencePropertyTextNumber :+ queryResult3.getInt("property_text_number")
+      resultSequencePropertyTextValue = resultSequencePropertyTextValue :+ queryResult3.getString("property_text_value")
+    }
 
     val shapeIdIterator = resultSequenceShapeId.iterator
 
     val numberOfPropertyIntsIterator = resultSequenceNumberOfPropertyInts.iterator
     var numberOfPropertyInts = numberOfPropertyIntsIterator.next()
     val propertyIntValueIterator = resultSequencePropertyIntValue.iterator
+    val propertyTextValueIterator = resultSequencePropertyTextValue.iterator
     val coordinatesIterator = resultSequenceCoordinates.iterator
 
     resultSequenceShapeType.foreach(shapeType => shapeType match {
@@ -148,6 +167,11 @@ class pgsqlGetShapes {
       case 6 => {
         shapeIdIterator.next()
         resultSequenceShapes = resultSequenceShapes :+ new ArcShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),propertyIntValueIterator.next(),propertyIntValueIterator.next(),attributes)
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 7 => {
+        shapeIdIterator.next()
+        resultSequenceShapes = resultSequenceShapes :+ new TextShape(propertyTextValueIterator.next(),Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),attributes)
         numberOfPropertyInts = numberOfPropertyIntsIterator.next()
       }
       case x => println ("Ukendt shape")
