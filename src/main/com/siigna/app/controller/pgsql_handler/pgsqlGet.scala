@@ -45,7 +45,7 @@ class pgsqlGet {
     (resultSequence)
   }
 
-  def getShapesInDrawingFromDrawingId (drawingId: Int) = {
+  def allShapesInDrawingFromDrawingId (drawingId: Int) = {
 
     //Opretter forbindelse til databasen og laver createStatement variabel.
     var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
