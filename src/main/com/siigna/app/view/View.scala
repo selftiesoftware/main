@@ -17,9 +17,9 @@ import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
-import java.awt.image.{VolatileImage}
 import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 import com.siigna.app.model.shape.{ImmutableShape, TextShape, PolylineShape}
+import java.awt.image.{BufferedImage, VolatileImage}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -222,12 +222,13 @@ object View extends Canvas with Runnable {
    * Resizes the view to the given boundary.
    */
   override def resize(width : Int, height : Int) {
+    // Pan the view if the pan isn't set
+    if (View.pan == Vector2D(0, 0)) {
+      View.pan(View.screen.center)
+    }
+
     // Re-render the old background
     renderBackground()
-
-    // Pan the view if the pan isn't set
-    if (View.pan == Vector2D(0, 0))
-      View.pan(View.screen.center)
   }
 
   /**
@@ -248,8 +249,11 @@ object View extends Canvas with Runnable {
         val g = new Graphics(image.getGraphics.asInstanceOf[Graphics2D])
         g.setColor(Preferences.color("colorDraw"))
 
-        // Draw background (if defined)
-        if (cachedBackgroundImage.isDefined) g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
+        // Render background (if empty)
+        if (cachedBackgroundImage.isEmpty){ renderBackground() }
+
+        // Draw the background
+        g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
 
         // Draw a white rectangle inside the boundary of the current model.
         g.g.setBackground(Color white)
@@ -293,7 +297,7 @@ object View extends Canvas with Runnable {
   def renderBackground() {
     if (getSize.height > 0 && getSize.width > 0) {
       // Create image
-      val image = backBuffer
+      val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics
       val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
       var x = 0
