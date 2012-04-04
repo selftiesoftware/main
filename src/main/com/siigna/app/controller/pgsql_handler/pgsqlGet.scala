@@ -18,6 +18,179 @@ import com.siigna.util.geom.Vector2D
 
 class pgsqlGet {
 
+  //Returnerer map af id -> immutableshape
+  def allShapesInDrawingFromDrawingIdWithDatabaseId (drawingId: Int) = {
+
+    //Opretter forbindelse til databasen og laver createStatement variabel.
+    var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    var createStatement: Statement = databaseConnection.createStatement()
+
+    var drawing_name: String = ""
+    var drawingOffsetX: Int = 0
+    var drawingOffsetY: Int = 0
+    var drawingOffsetZ: Int = 0
+    var resultSequenceShapeType: Seq[Int] = Seq()
+    var resultSequenceShapeId: Seq[Int] = Seq()
+    var resultSequenceNumberOfPropertyInts: Seq[Int] = Seq()
+    var resultSequencePropertyIntNumber: Seq[Int] = Seq()
+    var resultSequencePropertyIntValue: Seq[Int] = Seq()
+    var resultSequencePropertyTextNumber: Seq[Int] = Seq()
+    var resultSequencePropertyTextValue: Seq[String] = Seq()
+    var resultSequenceCoordinates: Seq[Int] = Seq()
+    var polylineInfo: Seq[Int] = Seq()
+    var resultSequenceShapes: Map[Int,ImmutableShape] = Map()
+    var polylineSubshapes: Map[Int,com.siigna.app.model.shape.PolylineShape.InnerPolylineShape] = Map()
+    var polylineSubshapeSeq: Seq[com.siigna.app.model.shape.PolylineShape.InnerPolylineShape] = Seq()
+    val attributes: com.siigna.util.collection.Attributes = com.siigna.util.collection.Attributes()
+
+    val query1: String = "" +
+      "SELECT drawing_name,drawing_offset_x,drawing_offset_y,drawing_offset_z " +
+      "FROM drawing " +
+      "WHERE drawing_id = " + drawingId
+
+    val query2: String = "" +
+      "SELECT t2.shape_type,t2.shape_id,t2.number_of_property_ints " +
+      "FROM shape as t2 " +
+      "JOIN (" +
+      "SELECT shape_id "+
+      "FROM drawing_shape_relation " +
+      "WHERE drawing_id = " + drawingId + ") as t1 "+
+      "ON t1.shape_id = t2.shape_id"
+
+    val query3: String = "" +
+      "SELECT property_int_number,property_int_value " +
+      "FROM property_int as t3 " +
+      "JOIN (shape_property_int_relation as t2 " +
+      "JOIN (" +
+      "SELECT shape_id "+
+      "FROM drawing_shape_relation " +
+      "WHERE drawing_id = " + drawingId + ") as t1 " +
+      "ON t1.shape_id = t2.shape_id) " +
+      "ON t2.property_int_id = t3.property_int_id"
+    val query4: String = "" +
+      "SELECT x_coordinate,y_coordinate " +
+      "FROM point as t3 " +
+      "JOIN (shape_point_relation as t2 " +
+      "JOIN (" +
+      "SELECT shape_id "+
+      "FROM drawing_shape_relation " +
+      "WHERE drawing_id = " + drawingId + ") as t1 " +
+      "ON t1.shape_id = t2.shape_id) " +
+      "ON t2.point_id = t3.point_id"
+    val query5: String = "" +
+      "SELECT property_text_number,property_text_value " +
+      "FROM property_text as t3 " +
+      "JOIN (shape_property_text_relation as t2 " +
+      "JOIN (" +
+      "SELECT shape_id "+
+      "FROM drawing_shape_relation " +
+      "WHERE drawing_id = " + drawingId + ") as t1 " +
+      "ON t1.shape_id = t2.shape_id) " +
+      "ON t2.property_text_id = t3.property_text_id"
+
+    createStatement.execute(query1)
+    val queryResult1: ResultSet = createStatement.getResultSet
+    while (queryResult1.next()) {
+      drawing_name = queryResult1.getString("drawing_name")
+      drawingOffsetX = queryResult1.getInt("drawing_offset_x")
+      drawingOffsetY = queryResult1.getInt("drawing_offset_y")
+      drawingOffsetZ = queryResult1.getInt("drawing_offset_z")
+    }
+
+    createStatement.execute(query2)
+    val queryResult2: ResultSet = createStatement.getResultSet
+    while (queryResult2.next()) {
+      resultSequenceShapeType = resultSequenceShapeType :+ queryResult2.getInt("shape_type")
+      resultSequenceShapeId = resultSequenceShapeId :+ queryResult2.getInt("shape_id")
+      resultSequenceNumberOfPropertyInts = resultSequenceNumberOfPropertyInts :+ queryResult2.getInt("number_of_property_ints")
+    }
+    resultSequenceNumberOfPropertyInts = resultSequenceNumberOfPropertyInts :+ 0
+
+
+    createStatement.execute(query3)
+    val queryResult3: ResultSet = createStatement.getResultSet
+    while (queryResult3.next()) {
+      resultSequencePropertyIntNumber = resultSequencePropertyIntNumber :+ queryResult3.getInt("property_int_number")
+      resultSequencePropertyIntValue = resultSequencePropertyIntValue :+ queryResult3.getInt("property_int_value")
+    }
+
+    createStatement.execute(query4)
+    val queryResult4: ResultSet = createStatement.getResultSet
+    while (queryResult4.next()) {
+      resultSequenceCoordinates = resultSequenceCoordinates :+ queryResult4.getInt("x_coordinate")
+      resultSequenceCoordinates = resultSequenceCoordinates :+ queryResult4.getInt("y_coordinate")
+      //resultSequenceCoordinates = resultSequenceCoordinates :+ queryResult4.getInt("z_coordinate")
+    }
+    createStatement.execute(query5)
+    val queryResult5: ResultSet = createStatement.getResultSet
+    while (queryResult5.next()) {
+      resultSequencePropertyTextNumber = resultSequencePropertyTextNumber :+ queryResult3.getInt("property_text_number")
+      resultSequencePropertyTextValue = resultSequencePropertyTextValue :+ queryResult3.getString("property_text_value")
+    }
+
+    val shapeIdIterator = resultSequenceShapeId.iterator
+
+    val numberOfPropertyIntsIterator = resultSequenceNumberOfPropertyInts.iterator
+    var numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+    val propertyIntValueIterator = resultSequencePropertyIntValue.iterator
+    val propertyTextValueIterator = resultSequencePropertyTextValue.iterator
+    val coordinatesIterator = resultSequenceCoordinates.iterator
+
+    resultSequenceShapeType.foreach(shapeType => shapeType match {
+      case 1 => println("Point")
+      case 2 => {
+        resultSequenceShapes += (shapeIdIterator.next() -> LineShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),Vector2D(coordinatesIterator.next(),coordinatesIterator.next())))
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 3 => {
+        //For polylines skal findes startpunkt, seq af subshapes samt attributter:
+        polylineInfo = polylineInfo :+ shapeIdIterator.next()
+        polylineInfo = polylineInfo :+ numberOfPropertyInts
+        for (i <- 0 until numberOfPropertyInts) {
+          polylineInfo = polylineInfo :+ propertyIntValueIterator.next()
+        }
+        polylineInfo = polylineInfo :+ coordinatesIterator.next()
+        polylineInfo = polylineInfo :+ coordinatesIterator.next()
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 4 => {
+        polylineSubshapes += (shapeIdIterator.next() -> new PolylineShape.PolylineLineShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next())))
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 5 => {
+        resultSequenceShapes += (shapeIdIterator.next() -> new com.siigna.app.model.shape.CircleShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),attributes))
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 6 => {
+        resultSequenceShapes += (shapeIdIterator.next() -> new ArcShape(Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),propertyIntValueIterator.next(),propertyIntValueIterator.next(),attributes))
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case 7 => {
+        resultSequenceShapes += (shapeIdIterator.next() -> new TextShape(propertyTextValueIterator.next(),Vector2D(coordinatesIterator.next(),coordinatesIterator.next()),propertyIntValueIterator.next(),attributes))
+        numberOfPropertyInts = numberOfPropertyIntsIterator.next()
+      }
+      case x => println ("Ukendt shape")
+    })
+
+    val polylineInfoIterator = polylineInfo.iterator
+
+    while (polylineInfoIterator.hasNext) {
+      val polylineId = polylineInfoIterator.next()
+      val polylineNumberOfSubshapes = polylineInfoIterator.next()
+      polylineSubshapeSeq = Seq()
+      for (i <- 0 until polylineNumberOfSubshapes) {
+        polylineSubshapeSeq = polylineSubshapeSeq :+ polylineSubshapes(polylineInfoIterator.next())
+      }
+      resultSequenceShapes += (polylineId -> PolylineShape(Vector2D(polylineInfoIterator.next(),polylineInfoIterator.next()),polylineSubshapeSeq,attributes))
+    }
+
+    //Luk forbindelsen
+    createStatement.close()
+
+    //Data, der returneres
+    (resultSequenceShapes)
+  }
+
   //Returnerer en sequence af drawingName1,drawingId1,drawingName2,drawingName2, osv.
   def allDrawingNamesAndIds() = {
 
@@ -45,14 +218,12 @@ class pgsqlGet {
     (resultSequence)
   }
 
-  def allShapesInDrawingFromDrawingId (drawingId: Int) = {
+  def allShapesInDrawingFromDrawingIdWithoutDatabaseId (drawingId: Int) = {
 
     //Opretter forbindelse til databasen og laver createStatement variabel.
     var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     var createStatement: Statement = databaseConnection.createStatement()
 
-    var resultSequenceInt: Seq[Int] = Seq()
-    var resultSequenceString: Seq[String] = Seq()
     var drawing_name: String = ""
     var drawingOffsetX: Int = 0
     var drawingOffsetY: Int = 0
