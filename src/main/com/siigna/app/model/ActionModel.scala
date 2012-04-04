@@ -21,7 +21,7 @@ import com.siigna.app.view.View
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends SelectableModel {
+trait ActionModel {
 
   /**
    * The underlying immutable model of Siigna.

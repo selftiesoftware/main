@@ -35,13 +35,13 @@ import collection.immutable.MapProxy
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
 sealed class Model(val shapes : Map[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
-                                                                    //with SelectableModel
+                                                                    with MutableModel
                                                                     with SpatialModel[Int, ImmutableShape]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : Map[Int, ImmutableShape]) = new Model(coll)
-
-  //override var selection : Option[DynamicShape] = None
+  def build(coll : Map[Int, ImmutableShape]) = {
+    new Model(coll)
+  }
 
 }
 
@@ -107,7 +107,7 @@ object Model extends ActionModel
    * The current selection represented by a an Option of [[com.siigna.app.model.shape.DynamicShape]].
    * @return  Some(DynamicShape) if a selection is active or None if nothing has been selected
    */
-  //def selection : Option[DynamicShape] = model.selection
+  def selection : Option[DynamicShape] = model.selection
 
   /**
    * The shapes currently in the model.
