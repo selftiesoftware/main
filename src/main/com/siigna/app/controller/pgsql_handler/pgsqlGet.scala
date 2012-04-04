@@ -16,9 +16,9 @@ import java.sql._
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.Vector2D
 
-class pgsqlGetShapes {
+class pgsqlGet {
 
-  def getDrawingFromId (drawingId: Int) = {
+  def getShapesInDrawingFromDrawingId (drawingId: Int) = {
 
     //Opretter forbindelse til databasen og laver createStatement variabel.
     var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
