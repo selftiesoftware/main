@@ -18,6 +18,33 @@ import com.siigna.util.geom.Vector2D
 
 class pgsqlGet {
 
+  //Returnerer en sequence af drawingName1,drawingId1,drawingName2,drawingName2, osv.
+  def allDrawingNamesAndIds() = {
+
+    var resultSequence: Seq[Int] = Seq()
+
+    var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    var createStatement: Statement = databaseConnection.createStatement()
+
+    var query = "SELECT drawing_name,drawing_id FROM drawing"
+
+    val queryResult: ResultSet = createStatement.executeQuery(query)
+    queryResult.next()
+    val drawingId = queryResult.getInt("point_id")
+
+    while (queryResult.next()) {
+      resultSequence = resultSequence :+ queryResult.getInt("drawing_name")
+      resultSequence = resultSequence :+ queryResult.getInt("drawing_id")
+    }
+
+    //Luk forbindelsen
+    createStatement.close()
+
+    //Data, der returneres
+
+    (resultSequence)
+  }
+
   def getShapesInDrawingFromDrawingId (drawingId: Int) = {
 
     //Opretter forbindelse til databasen og laver createStatement variabel.
