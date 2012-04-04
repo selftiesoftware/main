@@ -34,7 +34,7 @@ class pgsqlSave {
 
 
   //Den, der skal bruges
-  def saveMapOfShapesIntoDrawing (shapes: Map[Int,com.siigna.app.model.shape.ImmutableShape],drawingId: Int) = {
+  def mapOfShapesIntoDrawing (shapes: Map[Int,com.siigna.app.model.shape.ImmutableShape],drawingId: Int) = {
 
   //Den midlertidige:
   //def saveMapOfShapesIntoDrawing (drawingId: Int) = {
