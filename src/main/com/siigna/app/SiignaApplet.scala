@@ -72,6 +72,9 @@ class SiignaApplet extends Applet {
     // Add the view to the applet
     add(View, BorderLayout.CENTER)
 
+    // Misc initialization
+    setVisible(true); setFocusable(true); requestFocus(); validate()
+
     // Add event listeners
     View.addKeyListener(new KeyListener {
       override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
@@ -102,21 +105,12 @@ class SiignaApplet extends Applet {
 
     // Set the correct position of the screen
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
-    setPreferredSize(dimension)
 
     // Start the controller
     Control.start()
 
     // Start the paint-loop
     paintThread.start()
-
-    // Render!
-    View.pan(View.center)
-    View.renderBackground()
-    View.render()
-
-    // Misc initialization
-    setVisible(true); setFocusable(true); requestFocus()
   }
 
   /**
@@ -234,12 +228,14 @@ class SiignaApplet extends Applet {
   }
 
   /**
-   * Resizes the view.
+   * Overrides resize to force the underlying View to resize.
+   * @param width  The width of the entire frame
+   * @param height  The height of the entire frame
    */
   override def resize(width : Int, height : Int) {
-    // Resize the view
     super.resize(width, height)
     View.resize(width, height)
+    View.render()
   }
 
 }
