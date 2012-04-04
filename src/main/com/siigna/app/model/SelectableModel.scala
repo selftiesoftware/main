@@ -11,53 +11,33 @@
 
 package com.siigna.app.model
 
-import shape.{DynamicShape}
+import shape.DynamicShape
 
 /**
- * A selectable model containing one single [[com.siigna.app.model.shape.DynamicShape]], representing one or more
- * selected shapes.
- *
- * @see [[com.siigna.app.model.Model]]
+ * A model that can be selected and deselected.
  */
 trait SelectableModel {
 
   /**
-   * Deselect the [[com.siigna.app.model.shape.DynamicShape]] in the Model and apply the action(s)
-   * executed on the shape since it was selected.
-   * [[com.siigna.app.model.Model]].
+   * The MutableModel on which the selections can be performed.
    */
-  def deselect() {
-    if (selection.isDefined) {
-      if (selection.get.action.isDefined) {
-        Model execute selection.get.action.get
-      }
-      selection = None
-    }
-  }
+  protected def model : MutableModel
+
+  /**
+   * Deselects selected shapes in the Model and apply the action(s) executed on the shapes since selection.
+   */
+  def deselect() { model.deselect() }
 
   /**
    * Selects an entire shape based on its id.
    * @param id  The id of the shape.
    */
-  def select(id : Int) {
-    select(DynamicShape(id, Model(id).select()))
-  }
-  
-  /**
-   * Select a single shape with the given DynamicShape information.
-   * @param shape  The DynamicShape representing the selection.
-   */
-  def select(shape : DynamicShape) {
-    if (selection.isDefined) deselect()
-    
-    selection = Some(shape)
-  }
+  def select(id : Int) { model select id }
 
   /**
-   * The current selection, represented by a [[com.siigna.app.model.shape.DynamicShape]] containing
-   * ways to convert a DynamicShape to one or more [[com.siigna.app.model.shape.ImmutableShape]] depending on
-   * the number of shapes included in the selection..
-   */
-  var selection : Option[DynamicShape] = None
+  * Select a single shape as written in the given DynamicShape.
+  * @param shape  The DynamicShape representing the selection.
+  */
+  def select(shape : DynamicShape) { model select shape }
 
 }
