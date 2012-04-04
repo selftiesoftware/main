@@ -17,7 +17,7 @@
 
   //import java.lang.String
 
-  object pgsqlDeleteData {
+  object pgsqlDelete {
 
     def allDrawings () {
 
@@ -46,7 +46,7 @@
 
     }
 
-    def deleteDrawingFromId (drawingId: Int) {
+    def singleDrawing (drawingId: Int) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
 

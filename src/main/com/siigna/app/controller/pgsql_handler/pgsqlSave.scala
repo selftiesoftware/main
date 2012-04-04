@@ -17,7 +17,7 @@ import com.siigna.util.collection.Attributes
 
 //import java.lang.String
 
-class pgsqlSaveShapes {
+class pgsqlSave {
 
   Class.forName("org.postgresql.Driver")
 
@@ -33,12 +33,12 @@ class pgsqlSaveShapes {
   //Model.seq (husk stort M) kører en metode på modellen, der returnerer en sekvens af alle shapes i modellen.
 
 
-  //Den, der skal bruges - men så skal der tilpasses der, hvor den kaldes...:
-  // def saveShapes (shapes: Seq[com.siigna.app.model.shape.ImmutableShape]) = {
+  //Den, der skal bruges
+  def saveMapOfShapesIntoDrawing (shapes: Map[Int,com.siigna.app.model.shape.ImmutableShape],drawingId: Int) = {
 
   //Den midlertidige:
-  def saveShapesIntoDrawing (drawingId: Int) = {
-  val shapes = Model.seq
+  //def saveMapOfShapesIntoDrawing (drawingId: Int) = {
+  //val shapes = Model.seq
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
