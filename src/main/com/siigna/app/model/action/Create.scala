@@ -55,6 +55,11 @@ object Create {
     }
   }
 
+  //DENNE DEF ER LAVET AF NIELS - VIRKER MED FLERE SHAPES, MEN VED IKKE HVAD DER SKER MED TOM MAP ELLER MAP MED EN SHAPE
+  def apply(shapes : Map[Int,ImmutableShape]) {
+    Model execute CreateShapes(shapes)
+  }
+
 }
 
 /**
