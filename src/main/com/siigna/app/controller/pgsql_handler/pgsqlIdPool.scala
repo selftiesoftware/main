@@ -29,6 +29,9 @@ class pgsqlIdPool {
     }
     val shapeId = shapeIds.head
     shapeIds = shapeIds.tail
+
+    databaseConnection.close()
+
     (shapeId)
   }
 
@@ -46,6 +49,9 @@ class pgsqlIdPool {
     }
     val drawingId = drawingIds.head
     drawingIds = drawingIds.tail
+
+    databaseConnection.close()
+
     (drawingId)
   }
 }
