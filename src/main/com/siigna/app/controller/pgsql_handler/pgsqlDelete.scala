@@ -9,13 +9,6 @@
    */
 
   import java.sql._
-  import com.siigna.app.model.Model
-  import com.siigna.app.model.shape.{PolylineShape, LineShape}
-  import com.siigna.util.geom.Vector2D
-  import com.siigna.util.collection.Attributes
-
-
-  //import java.lang.String
 
   object pgsqlDelete {
 
