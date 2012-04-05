@@ -16,7 +16,7 @@ class pgsqlIdPool {
   var drawingIds: Seq[Int] = Seq()
 
   def getNewShapeId() = {
-    if (shapeIds.length() < 5) {
+    if (shapeIds.length < 5) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
       for (i <- 0 until 10) {
@@ -33,11 +33,11 @@ class pgsqlIdPool {
   }
 
   def getNewDrawingId() = {
-    if (drawingIds.length() < 2) {
+    if (drawingIds.length < 2) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
       for (i <- 0 until 3) {
-        val query: String = "INSERT INTO drawing (drawing_name) VALUES ("Unnamed") RETURNING drawing_id"
+        val query: String = "INSERT INTO drawing (drawing_name) VALUES (\"Unnamed\") RETURNING drawing_id"
         val queryResult: ResultSet = createStatement.executeQuery(query)
         while (queryResult.next()) {
           drawingIds = drawingIds :+ queryResult.getInt("shape_id")
