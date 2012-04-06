@@ -36,7 +36,7 @@ object pgsqlIdPool {
   }
 
   def getNewDrawingId() = {
-    if (drawingIds.length < 2) {
+    if (drawingIds.length < 1) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
       val query: String = "INSERT INTO drawing (drawing_name) VALUES ('Unnamed') RETURNING drawing_id"
