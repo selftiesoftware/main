@@ -250,17 +250,13 @@ class pgsqlSave {
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
     queryStringPropertyInt += " RETURNING property_int_id"
     queryStringPropertyText += " RETURNING property_text_id"
-    queryStringShapePointRelation += " RETURNING shape_id"
 
-    if (queryStringPropertyInt.length > 100) {
+    if (queryStringShapePointRelation.length()>59) createStatement.execute(queryStringShapePointRelation)
+
+    if (queryStringPropertyInt.length > 99) {
       val queryResultPropertyIntIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
       while (queryResultPropertyIntIds.next()) {
         propertyIntIds = propertyIntIds :+ queryResultPropertyIntIds.getInt("property_int_id")
-      }
-
-      val queryResultPointIds: ResultSet = createStatement.executeQuery(queryStringShapePointRelation)
-      while (queryResultPointIds.next()) {
-        pointIds = pointIds :+ queryResultPointIds.getInt("shape_id")
       }
     }
 
