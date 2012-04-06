@@ -11,9 +11,17 @@ package com.siigna.app.model.drawing
 object activeDrawing {
 
   var drawingId: Option[Int] = None
+  var drawingName: Option[String] = None
+  var offsetX: Option[Int] = None
+  var offsetY: Option[Int] = None
+  var offsetZ: Option[Int] = None
 
-  def setId(id:Int) {
+  def setActiveDrawingId(id:Int) {
     drawingId = Some(id)
   }
 
+  def setActiveDrawingName(id:Int,name:String) {
+    com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
+    drawingName = Some(name)
+  }
 }
