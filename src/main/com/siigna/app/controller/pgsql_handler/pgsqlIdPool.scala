@@ -10,7 +10,7 @@ package com.siigna.app.controller.pgsql_handler
 
 import java.sql._
 
-class pgsqlIdPool {
+object pgsqlIdPool {
 
   var shapeIds: Seq[Int] = Seq()
   var drawingIds: Seq[Int] = Seq()
@@ -31,6 +31,7 @@ class pgsqlIdPool {
     val shapeId = shapeIds.head
     shapeIds = shapeIds.tail
 
+    //Data, der returneres
     (shapeId)
   }
 
