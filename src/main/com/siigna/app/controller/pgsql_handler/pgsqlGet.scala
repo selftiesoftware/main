@@ -218,20 +218,20 @@ class pgsqlGet {
     (resultSequence)
   }
 
-  def drawingNameFromId(drawingId:Int) {
+  def drawingNameFromId(drawingId:Int) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
 
     val query:String = "SELECT drawing_name FROM drawing WHERE drawing_id = "+drawingId
     val resultSet: ResultSet = createStatement.executeQuery(query)
     resultSet.next()
-
+    val drawingName = resultSet.getString("drawing_name")
     databaseConnection.close()
-
-    (resultSet.getString("drawing_name"))
+    println (drawingName)
+    (drawingName)
   }
 
-  def drawingIdFromName(drawingName:String) {
+  def drawingIdFromName(drawingName:String) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
 
