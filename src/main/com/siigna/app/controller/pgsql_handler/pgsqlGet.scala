@@ -16,7 +16,7 @@ import java.sql._
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.Vector2D
 
-object pgsqlGet {
+class pgsqlGet {
 
   //Returnerer map af id -> immutableshape
   def allShapesInDrawingFromDrawingIdWithDatabaseId (drawingId: Int) = {
