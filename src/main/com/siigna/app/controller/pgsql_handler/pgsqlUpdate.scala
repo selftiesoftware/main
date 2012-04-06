@@ -97,7 +97,7 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
-  def singleLineInCurrentDrawing (drawingId:Int,ShapeId:Int) = {
+  def lineshapeInCurrentDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
@@ -109,7 +109,7 @@ object pgsqlUpdate {
 
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (2,0) RETURNING shape_id"
-    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + shape.p1.x + "," + shape.p1.y + ",0),(" + shape.p2.x + "," + shape.p2.y + ",0) RETURNING point_id"
+    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.p1.x + "," + newShape.p1.y + ",0),(" + newShape.p2.x + "," + newShape.p2.y + ",0) RETURNING point_id"
 
     val queryResultShape: ResultSet = createStatement.executeQuery(queryShape)
     queryResultShape.next()
