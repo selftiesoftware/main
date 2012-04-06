@@ -228,6 +228,8 @@ class pgsqlGet {
 
     databaseConnection.close()
 
+    println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
+    
     (resultSet.getString("drawing_name"))
   }
 
@@ -238,6 +240,8 @@ class pgsqlGet {
     val query:String = "SELECT drawing_id FROM drawing WHERE drawing_name = "+drawingName
     val resultSet: ResultSet = createStatement.executeQuery(query)
     resultSet.next()
+    println ("Drawing id for drawing with name "+drawingName+" retrieved from database")
+
 
     databaseConnection.close()
 
