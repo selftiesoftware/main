@@ -251,7 +251,7 @@ object pgsqlGet {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
 
-    val query:String = "SELECT drawing_id FROM drawing WHERE drawing_name = "+drawingName
+    val query:String = "SELECT drawing_id FROM drawing WHERE drawing_name = '"+drawingName+"'"
     val resultSet: ResultSet = createStatement.executeQuery(query)
     resultSet.next()
     println ("Drawing id for drawing with name "+drawingName+" retrieved from database")
