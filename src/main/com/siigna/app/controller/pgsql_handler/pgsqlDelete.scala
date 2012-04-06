@@ -49,4 +49,16 @@
       //Luk forbindelsen
       databaseConnection.close()
     }
+
+    def allShapesInDrawingAndDropsDrawing (drawingId: Int) {
+      val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+      val createStatement: Statement = databaseConnection.createStatement()
+
+      val query = "DELETE FROM drawing,drawing_shape_relation WHERE drawing_id = " + drawingId
+      createStatement.execute(query)
+
+      //Luk forbindelsen
+      databaseConnection.close()
+    }
+
   }
