@@ -39,11 +39,11 @@ object pgsqlIdPool {
     if (drawingIds.length < 2) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
+      val query: String = "INSERT INTO drawing (drawing_name) VALUES ('Unnamed') RETURNING drawing_id"
       for (i <- 0 until 3) {
-        val query: String = "INSERT INTO drawing (drawing_name) VALUES ("Unnamed") RETURNING drawing_id"
         val queryResult: ResultSet = createStatement.executeQuery(query)
         while (queryResult.next()) {
-          drawingIds = drawingIds :+ queryResult.getInt("shape_id")
+          drawingIds = drawingIds :+ queryResult.getInt("drawing_id")
         }
       }
       databaseConnection.close()
