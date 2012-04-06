@@ -30,7 +30,6 @@ object View extends Canvas with Runnable {
 
   /**
    * A background image that can be re-used to draw as background on the canvas.
-   * TODO: Rename to something more appropiate considering "cachedBackgroundImage"
    */
   private var cachedBackgroundImage : Option[Image] = None      
 
@@ -88,12 +87,6 @@ object View extends Canvas with Runnable {
   private def backBuffer : VolatileImage = {
     getGraphicsConfiguration.createCompatibleVolatileImage(getSize width, getSize height)
   }
-
-  /**
-   * Creates a Volatile Image with a given width and height.
-   */
-  private def backBuffer(height : Int, width : Int) : VolatileImage =
-    getGraphicsConfiguration.createCompatibleVolatileImage(if (height > 0) height else 1, if (width > 0) width else 1)
 
   /**
    * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
