@@ -24,4 +24,8 @@ object activeDrawing {
     com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
     drawingName = Some(name)  }
 
+  /*def getAllDrawingInfoFromDatabase(id:Int) {
+    val returned = new com.siigna.app.controller.pgsql_handler.pgsqlGet
+    (drawingName,offsetX,offsetY,offsetZ) = returned.drawingDataFromId(id)
+  }*/
 }
