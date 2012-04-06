@@ -53,7 +53,7 @@ object Model extends ActionModel
                 with SpatialModel[Int, ImmutableShape]
                 with MapProxy[Int, ImmutableShape] {
   
-  var drawingId: Option[Int] = None
+
 
   /**
    * The boundary from the current content of the Model.
