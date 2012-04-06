@@ -227,8 +227,7 @@ class pgsqlGet {
     resultSet.next()
 
     databaseConnection.close()
-
-    println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
+    //println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
     
     (resultSet.getString("drawing_name"))
   }
