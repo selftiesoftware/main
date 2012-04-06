@@ -232,6 +232,21 @@ class pgsqlGet {
     (resultSet.getString("drawing_name"))
   }
 
+  def drawingDataFromId(drawingId:Int) = {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+
+    val query:String = "SELECT drawing_name,drawing_offset_x,drawing_offset_y,zdrawing_offset_z FROM drawing WHERE drawing_id = "+drawingId
+    val resultSet: ResultSet = createStatement.executeQuery(query)
+    resultSet.next()
+
+    databaseConnection.close()
+
+    println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
+
+    (resultSet.getString("drawing_name"),resultSet.getString("drawing_offset_x"),resultSet.getString("drawing_offset_y"),resultSet.getString("drawing_offset_z"))
+  }
+
   def drawingIdFromName(drawingName:String) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
