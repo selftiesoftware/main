@@ -253,13 +253,16 @@ object pgsqlGet {
 
     val query:String = "SELECT drawing_id FROM drawing WHERE drawing_name = '"+drawingName+"'"
     val resultSet: ResultSet = createStatement.executeQuery(query)
-    resultSet.next()
-    println ("Drawing id for drawing with name "+drawingName+" retrieved from database")
+    var resultSequence: Seq[Int] = Seq()
+    while (resultSet.next()) {
+      resultSequence = resultSequence :+ resultSet.getInt("drawing_id")
+      println ("Drawing id for drawing with name "+drawingName+" retrieved from database")
+    }
 
     println ("Retrieved drawing name from id")
     databaseConnection.close()
 
-    (resultSet.getString("drawing_id"))
+    (resultSequence)
   }
 
   def allShapesInDrawingFromDrawingIdWithoutDatabaseId (drawingId: Int) = {

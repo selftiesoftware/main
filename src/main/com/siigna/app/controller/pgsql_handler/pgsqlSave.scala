@@ -56,9 +56,6 @@ object pgsqlSave {
     var propertyIntValues: Seq[Int] = Seq()
     var propertyTextValues: Seq[String] = Seq()
 
-
-
-
     //Søgestrengene "shapeType" og "coordinates" påbegyndes:
     var queryStringShapeType: String = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES "
     var queryStringCoordinates: String = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES "
