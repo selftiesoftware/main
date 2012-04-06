@@ -17,7 +17,7 @@ import com.siigna.util.collection.Attributes
 
 //import java.lang.String
 
-class pgsqlSave {
+object pgsqlSave {
 
   Class.forName("org.postgresql.Driver")
 
