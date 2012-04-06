@@ -13,7 +13,7 @@ object activeDrawing {
   var drawingId: Option[Int] = None
 
   def setId(id:Int) {
-    drawingId = id
+    drawingId = Some(id)
   }
 
 }
