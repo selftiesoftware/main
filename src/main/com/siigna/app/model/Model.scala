@@ -52,6 +52,8 @@ object Model extends ActionModel
                 with SelectableModel
                 with SpatialModel[Int, ImmutableShape]
                 with MapProxy[Int, ImmutableShape] {
+  
+
 
   /**
    * The boundary from the current content of the Model.
