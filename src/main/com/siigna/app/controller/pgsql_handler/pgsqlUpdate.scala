@@ -95,7 +95,7 @@ object pgsqlUpdate {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
 
-    val query:String = "UPDATE drawing SET drawing_name = "+DrawingName+" WHERE drawing_id = "+drawingId
+    val query:String = "UPDATE drawing SET drawing_name = '"+DrawingName+"' WHERE drawing_id = "+drawingId
     createStatement.execute(query)
     println ("Drawing renamed in database")
     databaseConnection.close()
