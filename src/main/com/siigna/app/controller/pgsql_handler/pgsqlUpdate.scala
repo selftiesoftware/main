@@ -64,7 +64,7 @@ object pgsqlUpdate {
       queryPropertyInt += "("+(1000+i)+","+shapeIds(i)+"),"
     }
     queryShape = queryShape.take(queryShape.length-1)
-    createStatement.execute(queryPoint)
+    createStatement.execute(queryShape)
     queryPoint = queryPoint.take(queryPoint.length-1)
     createStatement.execute(queryPoint)
     queryPropertyInt = queryPropertyInt.take(queryPropertyInt.length-1)
@@ -97,73 +97,42 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
-  /*def singleCircleInCurrentDrawing (drawingId:Int,ShapeId:Int,shape:com.siigna.app.model.shape.CircleShape) = {
+  def singleLineInCurrentDrawing (drawingId:Int,ShapeId:Int) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-
-    //Variable deklareres:
 
     //Først slettes den gamle drawing-shape-relation
     val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
     createStatement.execute(query)
 
     //Shape og Point ekspederes:
-    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (5,"+shape.shapes.length+"),"
-    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + shape.startPoint.x + "," + shape.startPoint.y + ",0),"
-    //Subshapes i polylinjen gennemgås:
-    shape.shapes.foreach(subShape => subShape match {
-      case subShape : com.siigna.app.model.shape.LineShape => {
-        queryShape += "(4,0),"
-        queryPoint += "("+subShape.p2.x.toInt+","+subShape.p2.y.toInt+",0),"
-      }
-    })
-    queryShape = queryShape.take(queryShape.length-1)
-    queryShape += " RETURNING shape_id"
-    queryPoint = queryPoint.take(queryPoint.length-1)
-    queryPoint += " RETURNING point_id"
+    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (2,0) RETURNING shape_id"
+    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + shape.p1.x + "," + shape.p1.y + ",0),(" + shape.p2.x + "," + shape.p2.y + ",0) RETURNING point_id"
 
     val queryResultShape: ResultSet = createStatement.executeQuery(queryShape)
-    while (queryResultShape.next()) {
-      shapeIds = shapeIds :+ queryResultShape.getInt("shape_id")
-    }
-    val queryResultPoint: ResultSet = createStatement.executeQuery(queryPoint)
-    while (queryResultPoint.next()) {
-      pointIds = pointIds :+ queryResultPoint.getInt("point_id")
-    }
+    queryResultShape.next()
+    val newShapeId:Int = queryResultShape.getInt("shape_id")
 
-    //drawing_shape_relation, shape_point_relation samt property_int:
-    queryShape = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES "
-    queryPoint = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES "
-    var queryPropertyInt = "INSERT INTO property_int (property_int_number,property_int_value) VALUES "
-    for (i <- 0 until shapeIds.length) {
-      queryShape += "("+drawingId+","+shapeIds(i)+"),"
-      queryPoint += "("+shapeIds(i)+","+pointIds(i)+"),"
-      queryPropertyInt += "("+(1000+i)+","+shapeIds(i)+"),"
-    }
-    queryShape = queryShape.take(queryShape.length-1)
+    val queryResultPoint: ResultSet = createStatement.executeQuery(queryPoint)
+    queryResultPoint.next()
+    val pointId1 = queryResultPoint.getInt("point_id")
+    val pointId2 = queryResultPoint.getInt("point_id")
+
+    //drawing_shape_relation, shape_point_relation:
+    queryShape = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES ("+drawingId+","+newShapeId+")"
+    queryPoint = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES ("+newShapeId+","+pointId1+"),("+newShapeId+","+pointId2+")"
+
+    createStatement.execute(queryShape)
     createStatement.execute(queryPoint)
-    queryPoint = queryPoint.take(queryPoint.length-1)
-    createStatement.execute(queryPoint)
-    queryPropertyInt = queryPropertyInt.take(queryPropertyInt.length-1)
-    queryPropertyInt += " RETURNING property_int_id"
-    val queryResultPropertyInt: ResultSet = createStatement.executeQuery(queryPropertyInt)
-    while (queryResultPropertyInt.next()) {
-      propertyIntIds = propertyIntIds :+ queryResultPropertyInt.getInt("property_int")
-    }
-    //ShapePropertyIntRelation:
-    var queryShapePropertyIntRelation = "INSERT INTO shape_property_int_relation (shape_id,property_int_id) VALUES "
-    propertyIntIds.foreach (propertyInt => queryShapePropertyIntRelation += "("+shapeIds(0)+","+propertyInt+"),")
-    queryShapePropertyIntRelation = queryShapePropertyIntRelation.take(queryShapePropertyIntRelation.length-1)
-    createStatement.execute(queryShapePropertyIntRelation)
 
     //Luk forbindelsen
     databaseConnection.close()
 
     //Data, der returneres
-    (shapeIds(0))
+    (newShapeId)
 
-  } */
+  }
 
 }
