@@ -15,5 +15,9 @@ object activeDrawing {
   def setId(id:Int) {
     drawingId = Some(id)
   }
+  
+  def setName(id:Int,name:String) {
+    com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
+  }
 
 }
