@@ -26,11 +26,6 @@ import com.siigna.app.model.Model
  */
 object Control extends Thread("Siigna Controller") {
 
-  // This may seem silly, but in fact we are instantiating the model.
-  // If this is not done here the modules cannot load, since the model
-  // uses threading... Pretty annoying really.
-  Model.isEmpty
-
   /**
    * The last 10 events
    */
@@ -162,6 +157,7 @@ object Control extends Thread("Siigna Controller") {
    * Lastly we check for pending commands and takes care of them.
    */
   override def run() { try {
+
     // Initialize the Default module and Menu module.
     Preload('Default)
     Preload('Menu)
