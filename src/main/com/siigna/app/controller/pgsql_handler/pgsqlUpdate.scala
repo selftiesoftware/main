@@ -97,7 +97,7 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
-  def lineshapeInCurrentDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
+  def singleLineshapeInCurrentDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
