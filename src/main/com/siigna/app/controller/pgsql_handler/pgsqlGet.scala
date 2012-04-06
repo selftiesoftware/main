@@ -218,6 +218,19 @@ class pgsqlGet {
     (resultSequence)
   }
 
+  def drawingNameFromId(drawingId:Int) {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+
+    val query:String = "SELECT drawing_name FROM drawing WHERE drawing_id = "+drawingId
+    val resultSet: ResultSet = createStatement.executeQuery(query)
+    resultSet.next()
+
+    databaseConnection.close()
+
+    (resultSet.getString("drawing_name"))
+  }
+
   def allShapesInDrawingFromDrawingIdWithoutDatabaseId (drawingId: Int) = {
 
     //Opretter forbindelse til databasen og laver createStatement variabel.
