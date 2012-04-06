@@ -17,7 +17,7 @@ import com.siigna.util.collection.Attributes
 
 //import java.lang.String
 
-class pgsqlSaveShapes {
+object pgsqlSave {
 
   Class.forName("org.postgresql.Driver")
 
@@ -33,12 +33,12 @@ class pgsqlSaveShapes {
   //Model.seq (husk stort M) kører en metode på modellen, der returnerer en sekvens af alle shapes i modellen.
 
 
-  //Den, der skal bruges - men så skal der tilpasses der, hvor den kaldes...:
-  // def saveShapes (shapes: Seq[com.siigna.app.model.shape.ImmutableShape]) = {
+  //Den, der skal bruges
+  def mapOfShapesIntoDrawing (shapes: Map[Int,com.siigna.app.model.shape.ImmutableShape],drawingId: Int) = {
 
   //Den midlertidige:
-  def saveShapesIntoDrawing (drawingId: Int) = {
-  val shapes = Model.seq
+  //def saveMapOfShapesIntoDrawing (drawingId: Int) = {
+  //val shapes = Model.seq
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
@@ -55,9 +55,6 @@ class pgsqlSaveShapes {
     var numbersOfPropertyTexts: Seq[Int] = Seq()
     var propertyIntValues: Seq[Int] = Seq()
     var propertyTextValues: Seq[String] = Seq()
-
-
-
 
     //Søgestrengene "shapeType" og "coordinates" påbegyndes:
     var queryStringShapeType: String = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES "
@@ -250,17 +247,13 @@ class pgsqlSaveShapes {
     queryStringShapePointRelation = queryStringShapePointRelation.take(queryStringShapePointRelation.length-1)
     queryStringPropertyInt += " RETURNING property_int_id"
     queryStringPropertyText += " RETURNING property_text_id"
-    queryStringShapePointRelation += " RETURNING shape_id"
 
-    if (queryStringPropertyInt.length > 100) {
+    if (queryStringShapePointRelation.length()>59) createStatement.execute(queryStringShapePointRelation)
+
+    if (queryStringPropertyInt.length > 99) {
       val queryResultPropertyIntIds: ResultSet = createStatement.executeQuery(queryStringPropertyInt)
       while (queryResultPropertyIntIds.next()) {
         propertyIntIds = propertyIntIds :+ queryResultPropertyIntIds.getInt("property_int_id")
-      }
-
-      val queryResultPointIds: ResultSet = createStatement.executeQuery(queryStringShapePointRelation)
-      while (queryResultPointIds.next()) {
-        pointIds = pointIds :+ queryResultPointIds.getInt("shape_id")
       }
     }
 

@@ -9,15 +9,8 @@
    */
 
   import java.sql._
-  import com.siigna.app.model.Model
-  import com.siigna.app.model.shape.{PolylineShape, LineShape}
-  import com.siigna.util.geom.Vector2D
-  import com.siigna.util.collection.Attributes
 
-
-  //import java.lang.String
-
-  object pgsqlDeleteData {
+  object pgsqlDelete {
 
     def allDrawings () {
 
@@ -46,7 +39,18 @@
 
     }
 
-    def deleteDrawingFromId (drawingId: Int) {
+    def allShapesInDrawingButKeepsDrawing (drawingId: Int) {
+      val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+      val createStatement: Statement = databaseConnection.createStatement()
+
+      val query = "DELETE FROM drawing_shape_relation WHERE drawing_id = " + drawingId
+      createStatement.execute(query)
+
+      //Luk forbindelsen
+      databaseConnection.close()
+    }
+
+    def allShapesInDrawingAndDropsDrawing (drawingId: Int) {
       val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
       val createStatement: Statement = databaseConnection.createStatement()
 
@@ -56,4 +60,5 @@
       //Luk forbindelsen
       databaseConnection.close()
     }
+
   }
