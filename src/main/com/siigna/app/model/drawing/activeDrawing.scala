@@ -16,16 +16,22 @@ object activeDrawing {
   var offsetY: Option[Int] = None
   var offsetZ: Option[Int] = None
 
-  def setActiveDrawingId(id:Int) {
+  def readActiveDrawingId(id:Int) {
     drawingId = Some(id)
   }
   
-  def setActiveDrawingName(id:Int,name:String) {
-    com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
-    drawingName = Some(name)  }
+  def readActiveDrawingName(name:String) {
+    drawingName = Some(name)
+  }
 
-  /*def getAllDrawingInfoFromDatabase(id:Int) {
+  def updateActiveDrawingNameInDatabase(id:Int,name:String) {
+    com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
+    drawingName = Some(name)
+  }
+
+  /*def getDrawingInfoFromDatabase(id:Int) = {
     val returned = new com.siigna.app.controller.pgsql_handler.pgsqlGet
-    (drawingName,offsetX,offsetY,offsetZ) = returned.drawingDataFromId(id)
+    (drawingName) = returned.drawingNameFromId(id)
+    (drawingName)
   }*/
 }
