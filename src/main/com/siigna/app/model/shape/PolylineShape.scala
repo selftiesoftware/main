@@ -19,7 +19,7 @@ import com.siigna.util.collection.{Preferences, Attributes}
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
  * [[com.siigna.app.model.shape.PolylineShape]] to construct a Polylineshape!</b> The default
- * constructor uses a [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape] to ensure
+ * constructor uses a [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]] to ensure
  * that data is not being duplicated in the long list of lines and/or arcs.
  *
  * Available attributes:
@@ -35,7 +35,7 @@ import com.siigna.util.collection.{Preferences, Attributes}
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
  */
-case class PolylineShape(val startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
+case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends ImmutableShape {
 
   type T = PolylineShape
 
