@@ -55,6 +55,11 @@ object Create {
     }
   }
 
+  //DENNE DEF ER LAVET AF NIELS - VIRKER MED FLERE SHAPES, MEN VED IKKE HVAD DER SKER MED TOM MAP ELLER MAP MED EN SHAPE
+  def apply(shapes : Map[Int,ImmutableShape]) {
+    Model execute CreateShapes(shapes)
+  }
+
 }
 
 /**
@@ -81,7 +86,7 @@ case class CreateShape(id : Int, shape : ImmutableShape) extends Action {
  */
 case class CreateShapes(shapes : Map[Int, ImmutableShape]) extends Action {
 
-  require(shapes.size > 1, "Cannot initialize CreateShapes with zero shapes.")
+  require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
 
   def execute(model : Model) = model add shapes
 
