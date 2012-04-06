@@ -90,13 +90,14 @@ object pgsqlUpdate {
 
   }
 
-
-  def renameDrawing(drawingId:Int,DrawingName:String) {
+  def renameDrawing(drawingId:Int,drawingName:String) {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
 
-    val query:String = "UPDATE drawing SET drawing_name = '"+DrawingName+"' WHERE drawing_id = "+drawingId
+    val query:String = "UPDATE drawing SET drawing_name = '"+drawingName+"' WHERE drawing_id = "+drawingId
     createStatement.execute(query)
+    //Opdaterer ActiveDrawing-variabler med det nye navn
+    com.siigna.app.model.drawing.activeDrawing.loadActiveDrawingNameVariable(drawingName)
     println ("Drawing renamed in database")
     databaseConnection.close()
   }

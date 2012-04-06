@@ -16,11 +16,11 @@ object activeDrawing {
   var offsetY: Option[Int] = None
   var offsetZ: Option[Int] = None
 
-  def readActiveDrawingId(id:Int) {
+  def loadActiveDrawingIdVariable(id:Int) {
     drawingId = Some(id)
   }
   
-  def readActiveDrawingName(name:String) {
+  def loadActiveDrawingNameVariable(name:String) {
     drawingName = Some(name)
   }
 
