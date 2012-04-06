@@ -31,6 +31,7 @@ object pgsqlIdPool {
     val shapeId = shapeIds.head
     shapeIds = shapeIds.tail
 
+    //Data, der returneres
     (shapeId)
   }
 
