@@ -97,7 +97,7 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
-  def singleCircleInCurrentDrawing (drawingId:Int,ShapeId:Int,shape:com.siigna.app.model.shape.CircleShape) = {
+  /*def singleCircleInCurrentDrawing (drawingId:Int,ShapeId:Int,shape:com.siigna.app.model.shape.CircleShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
@@ -164,6 +164,6 @@ object pgsqlUpdate {
     //Data, der returneres
     (shapeIds(0))
 
-  }
+  } */
 
 }
