@@ -144,7 +144,7 @@ object pgsqlUpdate {
     val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
     createStatement.execute(query)
     //Shape og Point ekspederes:
-    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (2,1) RETURNING shape_id"
+    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (5,1) RETURNING shape_id"
     var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.center.x + "," + newShape.center.y + ",0) RETURNING point_id"
     var queryPropertyInt = "INSERT INTO property_int (property_int_number,property_int_value) VALUES (1000,"+newShape.radius+") RETURNING property_int_id"
 
@@ -158,7 +158,7 @@ object pgsqlUpdate {
 
     val queryResultPropertyInt: ResultSet = createStatement.executeQuery(queryPropertyInt)
     queryResultPropertyInt.next()
-    val propertyIntId:Int = queryResultPropertyInt.getInt("shape_id")
+    val propertyIntId:Int = queryResultPropertyInt.getInt("property_int_id")
 
     //drawing_shape_relation, shape_point_relation:
     queryShape = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES ("+drawingId+","+newShapeId+")"
@@ -169,6 +169,53 @@ object pgsqlUpdate {
     createStatement.execute(queryPropertyInt)
 
     println ("Circle shape updated in database")
+
+    //Luk forbindelsen
+    databaseConnection.close()
+
+    //Data, der returneres
+    (newShapeId)
+
+  }
+
+  def singleArcShapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.ArcShape) = {
+
+    //Opretter forbindelse til serveren
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+    //Først slettes den gamle drawing-shape-relation
+    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
+    createStatement.execute(query)
+    //Shape og Point ekspederes:
+    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (6,3) RETURNING shape_id"
+    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.center.x + "," + newShape.center.y + ",0) RETURNING point_id"
+    var queryPropertyInt = "INSERT INTO property_int (property_int_number,property_int_value) VALUES (1000,"+newShape.radius+"),(1001,"+newShape.startAngle+"),(1002,"+newShape.angle+") RETURNING property_int_id"
+
+    val queryResultShape: ResultSet = createStatement.executeQuery(queryShape)
+    queryResultShape.next()
+    val newShapeId:Int = queryResultShape.getInt("shape_id")
+
+    val queryResultPoint: ResultSet = createStatement.executeQuery(queryPoint)
+    queryResultPoint.next()
+    val pointId = queryResultPoint.getInt("point_id")
+
+    val queryResultPropertyInt: ResultSet = createStatement.executeQuery(queryPropertyInt)
+    queryResultPropertyInt.next()
+    val propertyIntId1:Int = queryResultPropertyInt.getInt("property_int_id")
+    queryResultPropertyInt.next()
+    val propertyIntId2:Int = queryResultPropertyInt.getInt("property_int_id")
+    queryResultPropertyInt.next()
+    val propertyIntId3:Int = queryResultPropertyInt.getInt("property_int_id")
+
+    //drawing_shape_relation, shape_point_relation:
+    queryShape = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES ("+drawingId+","+newShapeId+")"
+    queryPoint = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES ("+newShapeId+","+pointId+")"
+    queryPropertyInt = "INSERT INTO shape_property_int_relation (shape_id,property_int_id) VALUES ("+newShapeId+","+propertyIntId1+"),("+newShapeId+","+propertyIntId2+"),("+newShapeId+","+propertyIntId3+")"
+    createStatement.execute(queryShape)
+    createStatement.execute(queryPoint)
+    createStatement.execute(queryPropertyInt)
+
+    println ("Arc shape updated in database")
 
     //Luk forbindelsen
     databaseConnection.close()
