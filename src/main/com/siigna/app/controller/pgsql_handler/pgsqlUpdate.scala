@@ -15,7 +15,7 @@ object pgsqlUpdate {
 
   //Modtager drawingId, det eksisterene shapeId samt en polylineshape.
   //Returnerer nyt shape Id (den oprindelige shape kunne bruges i en anden tegning - og den skal ikke ændres)
-  def singlePolylineInDrawing (drawingId:Int,ShapeId:Int,shape:com.siigna.app.model.shape.PolylineShape) = {
+  def singlePolylineInDrawing (drawingId:Int,shapeId:Int,shape:com.siigna.app.model.shape.PolylineShape) = {
     
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
@@ -27,8 +27,10 @@ object pgsqlUpdate {
     var propertyIntIds: Seq[Int] = Seq()
 
     //Først slettes den gamle drawing-shape-relation
-    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
-    createStatement.execute(query)
+    if (shapeId != 0 ) {
+      val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + shapeId
+      createStatement.execute(query)
+    }
 
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (3,"+shape.shapes.length+"),"
@@ -99,14 +101,15 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
-  def singleLineshapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
+  def singleLineshapeInDrawing (drawingId:Int,shapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-    //Først slettes den gamle drawing-shape-relation
-    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
-    createStatement.execute(query)
+    if (shapeId != 0 ) {
+      val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + shapeId
+      createStatement.execute(query)
+    }
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (2,0) RETURNING shape_id"
     var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.p1.x + "," + newShape.p1.y + ",0),(" + newShape.p2.x + "," + newShape.p2.y + ",0) RETURNING point_id"
@@ -135,14 +138,15 @@ object pgsqlUpdate {
 
   }
 
-  def singleCircleShapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.CircleShape) = {
+  def singleCircleShapeInDrawing (drawingId:Int,shapeId:Int,newShape: com.siigna.app.model.shape.CircleShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-    //Først slettes den gamle drawing-shape-relation
-    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
-    createStatement.execute(query)
+    if (shapeId != 0 ) {
+      val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + shapeId
+      createStatement.execute(query)
+    }
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (5,1) RETURNING shape_id"
     var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.center.x + "," + newShape.center.y + ",0) RETURNING point_id"
@@ -178,14 +182,15 @@ object pgsqlUpdate {
 
   }
 
-  def singleArcShapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.ArcShape) = {
+  def singleArcShapeInDrawing (drawingId:Int,shapeId:Int,newShape: com.siigna.app.model.shape.ArcShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-    //Først slettes den gamle drawing-shape-relation
-    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
-    createStatement.execute(query)
+    if (shapeId != 0 ) {
+      val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + shapeId
+      createStatement.execute(query)
+    }
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (6,3) RETURNING shape_id"
     var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.center.x + "," + newShape.center.y + ",0) RETURNING point_id"
@@ -225,14 +230,16 @@ object pgsqlUpdate {
 
   }
 
-  def singleTextShapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.TextShape) = {
+  def singleTextShapeInDrawing (drawingId:Int,shapeId:Int,newShape: com.siigna.app.model.shape.TextShape) = {
 
     //Opretter forbindelse til serveren
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-    //Først slettes den gamle drawing-shape-relation
-    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
-    createStatement.execute(query)
+    //Først slettes den gamle drawing-shape-relation - hvis der er en (shape Id ikke lig 0)
+    if (shapeId != 0 ) {
+      val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + shapeId
+      createStatement.execute(query)
+    }
     //Shape og Point ekspederes:
     var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (7,0) RETURNING shape_id"
     var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.position.x + "," + newShape.position.y + ",0) RETURNING point_id"
