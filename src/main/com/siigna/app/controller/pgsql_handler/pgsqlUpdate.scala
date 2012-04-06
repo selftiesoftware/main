@@ -225,4 +225,47 @@ object pgsqlUpdate {
 
   }
 
+  def singleTextShapeInDrawing (drawingId:Int,ShapeId:Int,newShape: com.siigna.app.model.shape.TextShape) = {
+
+    //Opretter forbindelse til serveren
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+    //Først slettes den gamle drawing-shape-relation
+    val query: String = "DELETE FROM drawing_shape_relation WHERE shape_id = " + ShapeId
+    createStatement.execute(query)
+    //Shape og Point ekspederes:
+    var queryShape = "INSERT INTO shape (shape_type,number_of_property_ints) VALUES (7,0) RETURNING shape_id"
+    var queryPoint = "INSERT INTO point (x_coordinate, y_coordinate, z_coordinate) VALUES (" + newShape.position.x + "," + newShape.position.y + ",0) RETURNING point_id"
+    var queryPropertyText = "INSERT INTO property_text (property_text_number,property_text_value) VALUES (1,"+newShape.text+") RETURNING property_text_id"
+
+    val queryResultShape: ResultSet = createStatement.executeQuery(queryShape)
+    queryResultShape.next()
+    val newShapeId:Int = queryResultShape.getInt("shape_id")
+
+    val queryResultPoint: ResultSet = createStatement.executeQuery(queryPoint)
+    queryResultPoint.next()
+    val pointId = queryResultPoint.getInt("point_id")
+
+    val queryResultPropertyText: ResultSet = createStatement.executeQuery(queryPropertyText)
+    queryResultPropertyText.next()
+    val propertyTextId:Int = queryResultPropertyText.getInt("property_text_id")
+
+    //drawing_shape_relation, shape_point_relation:
+    queryShape = "INSERT INTO drawing_shape_relation (drawing_id,shape_id) VALUES ("+drawingId+","+newShapeId+")"
+    queryPoint = "INSERT INTO shape_point_relation (shape_id,point_id) VALUES ("+newShapeId+","+pointId+")"
+    queryPropertyText = "INSERT INTO shape_property_text_relation (shape_id,property_text_id) VALUES ("+newShapeId+","+propertyTextId+")"
+    createStatement.execute(queryShape)
+    createStatement.execute(queryPoint)
+    createStatement.execute(queryPropertyText)
+
+    println ("Text shape updated in database")
+
+    //Luk forbindelsen
+    databaseConnection.close()
+
+    //Data, der returneres
+    (newShapeId)
+
+  }
+
 }
