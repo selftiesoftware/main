@@ -20,12 +20,14 @@ object AppletParameters {
     applet = Some(newApplet) 
   }
   
-  def getParameters(parameterName: Option[String]) = {
+  def getParametersInt(parameterName: Option[String]) = {
+    var parameter: Option[Int] = None
     if (applet.isDefined) {
-    val parameter = applet.get.getParameter(parameterName.get)
+    parameter = Some(applet.get.getParameter(parameterName.get).toInt)
     (parameter)
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
     }
+    (parameter)
   }
 }
