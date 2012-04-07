@@ -1,5 +1,7 @@
 package com.siigna.app.model.drawing
 
+import com.siigna.app.controller.pgsql_handler.pgsqlGet
+
 /**
  * Created by IntelliJ IDEA.
  * User: Niels Egholm
@@ -15,6 +17,16 @@ object activeDrawing {
   var offsetX: Option[Int] = None
   var offsetY: Option[Int] = None
   var offsetZ: Option[Int] = None
+  var creatorName: Option[String] = None
+  var creatorId: Option[String] = None
+
+  def setContributorName(name:String) {
+    creatorName = Some(name)
+  }
+
+  def setContributorId(id:Int) {
+    creatorId = Some(id)
+  }
 
   def loadActiveDrawingIdVariable(id:Int) {
     drawingId = Some(id)
