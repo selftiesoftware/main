@@ -17,15 +17,15 @@ object activeDrawing {
   var offsetX: Option[Int] = None
   var offsetY: Option[Int] = None
   var offsetZ: Option[Int] = None
-  var creatorName: Option[String] = None
-  var creatorId: Option[Int] = None
+  var contributorName: Option[String] = None
+  var contributorId: Option[Int] = None
 
   def setContributorName(name:String) {
-    creatorName = Some(name)
+    contributorName = Some(name)
   }
 
   def setContributorId(id:Int) {
-    creatorId = Some(id)
+    contributorId = Some(id)
   }
 
   def loadActiveDrawingIdVariable(id:Int) {
