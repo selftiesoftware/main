@@ -18,7 +18,7 @@ object activeDrawing {
   var offsetY: Option[Int] = None
   var offsetZ: Option[Int] = None
   var creatorName: Option[String] = None
-  var creatorId: Option[String] = None
+  var creatorId: Option[Int] = None
 
   def setContributorName(name:String) {
     creatorName = Some(name)
