@@ -308,6 +308,23 @@ object pgsqlSave {
 
   }
 
+  def lastActiveDrawingIdIntoContributorData(userId:Int,drawingId:Int) {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+
+    val query:String = "INSERT INTO property_int (property_int_number,property_int_value) VALUES (1,"+drawingId+") RETURNING property_int_id"
+    val queryResult: ResultSet = createStatement.executeQuery(query)
+    queryResult.next()
+    val propertyId:Int = queryResult.getInt("property_int_id")
+    val query2 = "INSERT INTO contributor_basic_property_int_relation (contributor_id,property_int_id) VALUES ("+userId+","+propertyId+")"
+    createStatement.execute(query2)
+
+    println ("Updated \"last active drawing\" for current user to current drawing in the database")
+    databaseConnection.close()
+  }
+
+
+
 }
 
 
