@@ -97,7 +97,7 @@ object pgsqlUpdate {
     val query:String = "UPDATE drawing SET drawing_name = '"+drawingName+"' WHERE drawing_id = "+drawingId
     createStatement.execute(query)
     //Opdaterer ActiveDrawing-variabler med det nye navn
-    com.siigna.app.model.drawing.activeDrawing.loadActiveDrawingNameVariable(drawingName)
+    com.siigna.app.model.drawing.activeDrawing.setActiveDrawingName(drawingName)
     println ("Drawing renamed in database")
     databaseConnection.close()
   }
