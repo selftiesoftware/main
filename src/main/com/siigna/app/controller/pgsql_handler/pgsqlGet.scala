@@ -232,6 +232,21 @@ object pgsqlGet {
     (resultSet.getString("contributor_name"))
   }
 
+  /*def contributorIdFromNameAndPassword(name:String,password:String) = {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+
+    val query:String = "SELECT contributor_name FROM contributor WHERE contributor_id = "+id
+    val resultSet: ResultSet = createStatement.executeQuery(query)
+    resultSet.next()
+
+    databaseConnection.close()
+    println ("Contributor name for contributor with id "+id+" retrieved from database")
+
+    (resultSet.getString("contributor_name"))
+  }*/
+
+
   def drawingNameFromId(drawingId:Int) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
