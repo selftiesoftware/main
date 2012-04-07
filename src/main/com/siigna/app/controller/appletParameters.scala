@@ -20,11 +20,17 @@ object AppletParameters {
     applet = Some(newApplet) 
   }
   
-  def getParametersInt(parameterName: String) = {
+  def getParametersInt(parameterName: Option[String]) = {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
-    parameter = Some(applet.get.getParameter(parameterName).toInt)
-    (parameter)
+      //Hvis appletten ikke er startet fra hjemmesiden kan der ikke hentes brugerid herfra - 1 indsættes.
+      try { (parameter = Some(applet.get.getParameter(parameterName.get).toInt))
+      } catch {
+        case e: java.lang.NullPointerException => {
+          println("No contributor logged in at Siigna.com homepage. Setting user to Anonymous. If you are connected to the internet, you may log into the Siigna applet from the .")
+          parameter = Some (3)
+        }
+      }
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
     }
