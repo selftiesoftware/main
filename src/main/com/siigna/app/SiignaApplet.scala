@@ -66,6 +66,9 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
+    // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
+    com.siigna.app.controller.AppletParameters.setApplet(this)
+
     // Set the layout
     setLayout(new BorderLayout())
 
