@@ -246,6 +246,19 @@ object pgsqlGet {
     (resultSet.getString("contributor_id"))
   }
 
+  def contributorsLastActiveDrawing(userId:Int) = {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+    var drawingId: Option[Int] = None
+
+    val query:String = "SELECT property_int_value FROM property_int as t3 JOIN (contributor as t2 JOIN contributor_basic_property_int_relation as t1 ON t1.contributor_id = t2.contributor_id) ON t1.property_int_id = t3.property_int_id WHERE property_int_number=1 AND t2.contributor_id = "+userId
+    val queryResult: ResultSet = createStatement.executeQuery(query)
+    while (queryResult.next()) {
+        drawingId = Some(queryResult.getInt("property_int_value"))
+    }
+    databaseConnection.close()
+    (drawingId)
+  }
 
   def drawingNameFromId(drawingId:Int) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
