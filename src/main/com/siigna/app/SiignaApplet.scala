@@ -69,6 +69,9 @@ class SiignaApplet extends Applet {
     // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
     com.siigna.app.controller.AppletParameters.setApplet(this)
 
+    // Henter info om aktiv bruger og aktiv tegning
+    com.siigna.app.model.drawing.activeDrawing.getInfoOnUserAndDrawingAtStartup()
+
     // Set the layout
     setLayout(new BorderLayout())
 
