@@ -1,6 +1,7 @@
 package com.siigna.app.model.drawing
 
 import com.siigna.app.controller.pgsql_handler.{pgsqlIdPool, pgsqlGet}
+import com.siigna._
 
 
 /**
@@ -48,7 +49,13 @@ object activeDrawing {
   setContributorName(pgsqlGet.contributorNameFromId(contributorId.get))
   //read drawing ID from database
   var lastActiveDrawing: Option[Int] = pgsqlGet.contributorsLastActiveDrawing(contributorId.get)
-  if (lastActiveDrawing.isEmpty) {
+    if (lastActiveDrawing.isDefined) {
+      //Henter tegningen, hvis der er en gammel:
+      println ("Loading last active drawing...")
+      val shapes: Map[Int,ImmutableShape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
+      Create(shapes)
+    }
+    if (lastActiveDrawing.isEmpty) {
     println ("Brugeren har ikke nogle tidligere aktive tegninger i Siigna, eller den seneste aktive tegning er slettet. Der startes en ny tegning...")
     lastActiveDrawing = Some(pgsqlIdPool.getNewDrawingId())
     //Gemmer denne nye tegning som starttegning
