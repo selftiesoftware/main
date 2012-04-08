@@ -55,7 +55,10 @@ object Create {
     }
   }
 
-  //DENNE DEF ER LAVET AF NIELS - VIRKER MED FLERE SHAPES, MEN VED IKKE HVAD DER SKER MED TOM MAP ELLER MAP MED EN SHAPE
+  /**
+   * Creates several shapes
+   * @param shapes  A map containing a number of ids and shapes.
+   */
   def apply(shapes : Map[Int,ImmutableShape]) {
     Model execute CreateShapes(shapes)
   }
@@ -63,7 +66,8 @@ object Create {
 }
 
 /**
- * Creates a shape with an associated ID.
+ * Creates a shape with an associated id.
+ * This action should not be instantiated directly, but created through the <code>Create</code> object.
  */
 case class CreateShape(id : Int, shape : ImmutableShape) extends Action {
 
@@ -82,7 +86,7 @@ case class CreateShape(id : Int, shape : ImmutableShape) extends Action {
 
 /**
  * Creates several shapes.
- * This action cannot be instantiated directly, but needs to be called through the <code>Create</code> object.
+ * This action should not be instantiated directly, but created through the <code>Create</code> object.
  */
 case class CreateShapes(shapes : Map[Int, ImmutableShape]) extends Action {
 
