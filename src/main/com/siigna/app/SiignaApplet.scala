@@ -225,7 +225,14 @@ class SiignaApplet extends Applet {
     }
 
     // Dispatch the event if it wasn't caught above
-    if (option.isDefined) Controller ! option.get
+    if (option.isDefined) dispatchEvent(option.get)
+  }
+
+  /**
+   * The overall event-handler. Dispatches event on to the controller.
+   */
+  private def dispatchEvent(event : Event) {
+    Control dispatchEvent(event)
   }
 
   /**

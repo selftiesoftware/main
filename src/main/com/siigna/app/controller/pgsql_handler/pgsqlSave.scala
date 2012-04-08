@@ -319,7 +319,7 @@ object pgsqlSave {
     val query2 = "INSERT INTO contributor_basic_property_int_relation (contributor_id,property_int_id) VALUES ("+userId+","+propertyId+")"
     createStatement.execute(query2)
 
-    println ("Updated \"last active drawing\" for current user to current drawing in the database")
+    println ("Set \"last active drawing\" for current user to current drawing in the database")
     databaseConnection.close()
   }
 
