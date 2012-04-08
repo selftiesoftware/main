@@ -130,7 +130,7 @@ object View extends Canvas with Runnable {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
-  def draw(graphicsPanel : AWTGraphics) { try {
+  def draw(graphicsPanel : AWTGraphics) { if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = virtual
 
