@@ -105,7 +105,7 @@ object Siigna extends Interface {
    * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
    * needs to use/reverse some of the transformations that already have been applied to the view.
    * <br />
-   * The painting eludes the normal event-based thread communication, since the <code>Control<code>
+   * The painting eludes the normal event-based thread communication, since the <code>Controller<code>
    * mechanism runs on it's own thread and we'd like to make sure that the painting happens instantly.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {

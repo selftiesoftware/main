@@ -29,10 +29,9 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
   lazy val Goto = com.siigna.app.controller.command.Goto
   lazy val Preload = com.siigna.app.controller.command.Preload
-  lazy val Send = com.siigna.app.controller.command.Send
 
   // Controller
-  lazy val Control = com.siigna.app.controller.Control
+  lazy val Controller = com.siigna.app.controller.Controller
 
   // Model
   val Model = com.siigna.app.model.Model

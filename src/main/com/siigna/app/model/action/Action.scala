@@ -15,7 +15,7 @@ import com.siigna.app.model.Model
 /**
  * An action is an immutable representation of a state-change in the model and <b>the only way</b> to alter shapes and groups in the Model.
  */
-trait Action {
+trait Action extends Serializable {
 
   /**
    * Executes the action on a given model.
