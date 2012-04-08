@@ -83,6 +83,7 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
       }
     }
 
+    println(selectionDistance, startDistance, closestDistance)
     // If the startDistance for the start point is below the selectionDistance, return
     if (startDistance <= selectionDistance) {
       Some((t : TransformationMatrix) => PolylineShape(startPoint.transform(t), innerShapes, attributes))
