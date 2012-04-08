@@ -9,24 +9,10 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
+package com.siigna.app.controller.command.remote
 
 /**
- * The basic interface for all events in the system
+ * A [[com.siigna.app.controller.command.Command]] sent by the server to indicate success of a previous
+ * sent Command.
  */
-trait Event
-{
-  
-  /**
-   * A symbolic name for a given event.
-   */
-  def symbol : Symbol
-
-}
-
-/**
- * ModifierKeys used to match further information in a given event.
- * Arguments are listed as follows: Shift - Controller - Alt
- */
-case class ModifierKeys(shift : Boolean, ctrl : Boolean, alt : Boolean)
-
+case class Success(command : RemoteCommand)
