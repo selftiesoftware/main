@@ -85,16 +85,6 @@ case class Vector2D(x : Double, y : Double) extends Vector {
   def confine(rectangle : Rectangle2D) = Vector2D(
     if (x < rectangle.xMin) rectangle.xMin else if (x > rectangle.xMax) rectangle.xMax else x,
     if (y < rectangle.yMin) rectangle.yMin else if (y > rectangle.yMax) rectangle.yMax else y)
-
-  /**
-   * Changes x by the given value.
-   */
-  def changeX(delta : Double) = new Vector2D(x + delta, y)
-
-  /**
-   * Changes y by the given value.
-   */
-  def changeY(delta : Double) = new Vector2D(x, y + delta)
   
   /**
    * Gets the distance to another vector.
