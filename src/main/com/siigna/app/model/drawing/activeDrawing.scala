@@ -53,7 +53,7 @@ object activeDrawing {
       //Henter tegningen, hvis der er en gammel:
       println ("Loading last active drawing...")
       val shapes: Map[Int,ImmutableShape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
-      Create(shapes)
+      if (shapes.size > 0 ) {Create(shapes)} else {println("Drawing is empty.")}
     }
     if (lastActiveDrawing.isEmpty) {
     println ("Brugeren har ikke nogle tidligere aktive tegninger i Siigna, eller den seneste aktive tegning er slettet. Der startes en ny tegning...")
