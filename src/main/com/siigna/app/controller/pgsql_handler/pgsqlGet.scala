@@ -190,6 +190,112 @@ object pgsqlGet {
     //Data, der returneres
     (resultSequenceShapes)
   }
+  
+  def allShapesOneAtATimeSlowAndSafe (drawingId: Int) = {
+
+    //Opretter forbindelse til databasen og laver createStatement variabel.
+    var databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    var createStatement: Statement = databaseConnection.createStatement()
+
+    val attributes: com.siigna.util.collection.Attributes = com.siigna.util.collection.Attributes()
+    var resultSequenceShapes: Map[Int,ImmutableShape] = Map()
+    var resultSequenceShapeTypeAndId: Map[Int,Int] = Map()
+    var resultSequenceShapeIdAndNumberOfPropertyInts: Map[Int,Int] = Map()
+
+    println ("Now retrieving your drawing one shape at a time - it might take a while...")
+    var query = "SELECT shape_type,shape_id,number_of_property_ints FROM shape as t1 JOIN drawing_shape_relation as t2 ON t1.shape_id = t2.shape_id WHERE drawing_id = "+drawingId
+
+    createStatement.executeQuery(query)
+    val queryResult: ResultSet = createStatement.getResultSet
+    while (queryResult.next()) {
+      resultSequenceShapeTypeAndId += (queryResult.getInt("shape_id") -> queryResult.getInt("shape_type"))
+      resultSequenceShapeIdAndNumberOfPropertyInts += (queryResult.getInt("shape_id") -> queryResult.getInt("number_of_property_ints"))
+    }
+
+    resultSequenceShapeTypeAndId.foreach(shapeId => shapeId._2 match {
+      case 1 => println("Point")
+      case 2 => {
+        query = "select x_coordinate,y_coordinate FROM point JOIN shape_point_relation WHERE shape_id = "+shapeId._1
+        createStatement.executeQuery(query)
+        val queryResult: ResultSet = createStatement.getResultSet
+        queryResult.next()
+        val x1 = queryResult.getInt("x_coordinate")
+        val y1 = queryResult.getInt("y_coordinate")
+        queryResult.next()
+        val x2 = queryResult.getInt("x_coordinate")
+        val y2 = queryResult.getInt("y_coordinate")
+        resultSequenceShapes += (shapeId._1 -> LineShape(Vector2D(x1,y1),Vector2D(x2,y2)))
+      }
+      case 3 => {
+        var polylineSubshapeSeq: Seq[com.siigna.app.model.shape.PolylineShape.InnerPolylineShape] = Seq()
+        query = "select x_coordinate,y_coordinate FROM point JOIN shape_point_relation WHERE shape_id = "+shapeId._1
+        createStatement.executeQuery(query)
+        var queryResult: ResultSet = createStatement.getResultSet
+        queryResult.next()
+        val x1 = queryResult.getInt("x_coordinate")
+        val y1 = queryResult.getInt("y_coordinate")
+        query = "select property_int_number,property_int_value FROM property_int JOIN shape_property_int_relation WHERE shape_id = "+shapeId._1+" ORDER BY property_int_number"
+        createStatement.executeQuery(query)
+        queryResult = createStatement.getResultSet
+        var resultSequence: Seq[Int] = Seq()
+        while (queryResult.next()) {
+          resultSequence = resultSequence :+ (queryResult.getInt("property_int_value"))
+        }
+        resultSequence.foreach (propertyIntValue => {
+          if (propertyIntValue > 999) {
+            query = "select x_coordinate,y_coordinate FROM point JOIN shape_point_relation WHERE shape_id = "+propertyIntValue
+            createStatement.executeQuery(query)
+            val queryResult: ResultSet = createStatement.getResultSet
+            queryResult.next()
+            polylineSubshapeSeq = polylineSubshapeSeq :+ new PolylineShape.PolylineLineShape(Vector2D(queryResult.getInt("x_coordinate"),queryResult.getInt("y_coordinate")))
+          }
+        })
+        resultSequenceShapes += (shapeId._1 -> PolylineShape(Vector2D(x1,y1),polylineSubshapeSeq,attributes))
+      }
+      case 4 => {
+      }
+      case 5 => {
+        query = "select x_coordinate,y_coordinate FROM point JOIN shape_point_relation WHERE shape_id = "+shapeId._1
+        createStatement.executeQuery(query)
+        var queryResult: ResultSet = createStatement.getResultSet
+        queryResult.next()
+        val x1 = queryResult.getInt("x_coordinate")
+        val y1 = queryResult.getInt("y_coordinate")
+        query = "select property_int_value FROM property_int JOIN shape_property_int_relation WHERE shape_id = "+shapeId._1+" AND property_int_number = 1000"
+        queryResult = createStatement.getResultSet
+        queryResult.next()
+        resultSequenceShapes += (shapeId._1 -> new com.siigna.app.model.shape.CircleShape(Vector2D(x1,y1),queryResult.getInt("property_int_value"),attributes))
+      }
+      case 6 => {
+        query = "select x_coordinate,y_coordinate FROM point JOIN shape_point_relation WHERE shape_id = "+shapeId._1
+        createStatement.executeQuery(query)
+        var queryResult: ResultSet = createStatement.getResultSet
+        queryResult.next()
+        val x1 = queryResult.getInt("x_coordinate")
+        val y1 = queryResult.getInt("y_coordinate")
+        query = "select property_int_number,property_int_value FROM property_int JOIN shape_property_int_relation WHERE shape_id = "+shapeId._1+" ORDER BY property_int_number"
+        createStatement.executeQuery(query)
+        queryResult = createStatement.getResultSet
+        queryResult.next()
+        val radius = queryResult.getInt("property_int_value")
+        queryResult.next()
+        val startAngle = queryResult.getInt("property_int_value")
+        queryResult.next()
+        val angle = queryResult.getInt("property_int_value")
+        resultSequenceShapes += (shapeId._1 -> new ArcShape(Vector2D(x1,y1),radius,startAngle,angle,attributes))
+      }
+      case 7 => {
+        println ("Textshapes ikke inkluderet - var ikke med da dette blev lavet. Brok dig til Niels.")
+      }
+      case x => println ("Ukendt shape")
+    })
+
+    //Luk forbindelsen
+    createStatement.close()
+
+    //Data, der returneres
+    (resultSequenceShapes)
+  }
 
   //Returnerer en sequence af drawingName1,drawingId1,drawingName2,drawingName2, osv.
   def allDrawingNamesAndIds() = {
@@ -263,15 +369,16 @@ object pgsqlGet {
   def drawingNameFromId(drawingId:Int) = {
     val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
     val createStatement: Statement = databaseConnection.createStatement()
-
+    var drawingName: Option[String] = None
+    
     val query:String = "SELECT drawing_name FROM drawing WHERE drawing_id = "+drawingId
     val resultSet: ResultSet = createStatement.executeQuery(query)
-    resultSet.next()
-
+    if (resultSet.next()) {
+      drawingName = Some (resultSet.getString("drawing_name"))
+      println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
+    }
     databaseConnection.close()
-    println ("Drawing name for drawing with id "+drawingId+" retrieved from database")
-    
-    (resultSet.getString("drawing_name"))
+    (drawingName)
   }
 
   def drawingDataFromId(drawingId:Int) = {
