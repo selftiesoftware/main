@@ -10,13 +10,13 @@
  */
 package com.siigna.app.controller.command
 
-import com.siigna.app.controller.Control
+import com.siigna.app.controller.Controller
 
 /**
- * Commands that the modules can use to instruct the controller.
+ * Commands that can be used to instruct the controller.
  */
 trait Command {
 
   // Dispatches the command
-  Control.dispatchCommand(this)
+  Controller ! this
 }
