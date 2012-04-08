@@ -135,7 +135,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Geo
    * Displays a set of vectors as the center along with
    * four vectors which is set on the East, South, West and North side of the circumference.
    */
-  lazy val vertices = Seq(center, center.changeX(radius), center.changeY(-radius), center.changeX(-radius), center.changeY(radius))
+  lazy val vertices = Seq(center, center + Vector2D(radius, 0), center - Vector2D(0, radius), center - Vector2D(radius, 0), center + Vector2D(0, radius))
   
 }
 

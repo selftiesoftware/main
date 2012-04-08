@@ -15,6 +15,7 @@ import model.Model
 import view._
 import com.siigna.util.geom._
 import java.awt.{Cursor}
+import com.siigna.util.collection.Preferences
 
 
 /**
@@ -122,6 +123,11 @@ object Siigna extends Interface {
    * Returns the paper scale of the current model.
    */
   def paperScale = Model.boundaryScale
+
+  /**
+   * The selection-distance.
+   */
+  def selectionDistance = Preferences.double("selectionDistance") * View.zoom
 
   /**
    * Set's the current cursor of Siigna. Overrides the current value.
