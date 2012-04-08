@@ -63,7 +63,7 @@ object activeDrawing {
   }
   setActiveDrawingId(lastActiveDrawing.get)
   //read drawing title
-  setActiveDrawingName(pgsqlGet.drawingNameFromId(drawingId.get))
+  setActiveDrawingName(pgsqlGet.drawingNameFromId(drawingId.get).get)
   }
 
   /*def getDrawingInfoFromDatabase(id:Int) = {
