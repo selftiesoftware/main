@@ -62,6 +62,12 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
+    // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
+    com.siigna.app.controller.AppletParameters.setApplet(this)
+
+    // Henter info om aktiv bruger og aktiv tegning
+    //com.siigna.app.model.drawing.activeDrawing.getInfoOnUserAndDrawingAtStartup()
+
     // Set the layout
     setLayout(new BorderLayout())
 
@@ -98,6 +104,9 @@ class SiignaApplet extends Applet {
 
     // Allows specific KeyEvents to be detected.
     setFocusTraversalKeysEnabled(false)
+
+    // Set the correct position of the screen
+    val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
 
     // Start the controller
     Control.start()
@@ -194,8 +203,9 @@ class SiignaApplet extends Applet {
     // Pan (using middle button) and zoom (using wheel) or otherwise dispatch
     // to dispatchEvent.
     val option : Option[Event] = event match {
+
       case MouseWheel (point, _, _, delta)         => if (Siigna.navigation) { View.zoom(point, delta); None }
-                                                      else Some(MouseWheel(toVirtual(point), button, keys, delta))
+                                                       else Some(MouseWheel(toVirtual(point), button, keys, delta))
       case MouseDown  (point, MouseButtonMiddle, _) => View.startPan(point); None
       case MouseDrag  (point, MouseButtonMiddle, _) => View.pan(point); None
       case MouseUp    (point, MouseButtonMiddle, _) => View.pan(point); None
