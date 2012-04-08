@@ -232,7 +232,7 @@ class SiignaApplet extends Applet {
    * The overall event-handler. Dispatches event on to the controller.
    */
   private def dispatchEvent(event : Event) {
-    Control dispatchEvent(event)
+    Controller ! event
   }
 
   /**
