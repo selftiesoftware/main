@@ -39,9 +39,7 @@ sealed class Model(val shapes : Map[Int, ImmutableShape]) extends ImmutableModel
                                                                     with SpatialModel[Int, ImmutableShape]
                                                                     with ModelBuilder[Int, ImmutableShape] {
 
-  def build(coll : Map[Int, ImmutableShape]) = {
-    new Model(coll)
-  }
+  def build(coll : Map[Int, ImmutableShape]) = { new Model(coll) }
 
 }
 
@@ -52,8 +50,6 @@ object Model extends ActionModel
                 with SelectableModel
                 with SpatialModel[Int, ImmutableShape]
                 with MapProxy[Int, ImmutableShape] {
-  
-
 
   /**
    * The boundary from the current content of the Model.
