@@ -14,7 +14,6 @@ package com.siigna.app.model
 import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.ImmutableShape
-import collection.parallel.immutable.ParHashMap
 import com.siigna.app.view.View
 
 
