@@ -68,6 +68,12 @@ case class TransformationMatrix(t : AffineTransform)
     TransformationMatrix(t createInverse)
 
   /**
+   * Examines if this TransformationMatrix is "empty" that is an identity-transformation.
+   * @return True if no transformations are made by this transformation or False if any scale, rotation or translation has been set.
+   */
+  def isEmpty = t.isIdentity()
+
+  /**
    * Determines whether this transformation y-axis has been flipped.
    */
   def isFlippedY = (t.getScaleY < 0)
