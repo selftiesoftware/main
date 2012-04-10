@@ -168,7 +168,7 @@ object Controller extends Actor {
           }
         }
         case event : Event => {
-          // Check whether the event is forwarded, and thus needs to be discarded
+          /*// Check whether the event is forwarded, and thus needs to be discarded
           if (isForwardedEvent) {
             // If there is a forwarded event and the head of the queue is a ModuleEvent
             // the ModuleEvent has been placed in front of the forwarded Event
@@ -183,7 +183,8 @@ object Controller extends Actor {
               isForwardedEvent = false
             }
           // Otherwise no forwarded events exist and we're good to go!
-          } else if (modules.size > 0) {
+          } else*/
+          if (modules.size > 0) {
 
             // Retrieve module
             val module : Module = modules.top
