@@ -17,12 +17,11 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
-import actors.{Actor, SuspendActorControl}
-import actors.remote.RemoteActor._
-import remote._
 import com.siigna.app.model.action.Action
-import util.control.ControlThrowable
+import actors.Actor
+import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
+import remote._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -31,9 +30,6 @@ import actors.remote.{RemoteActor, Node}
  * TODO: Implement this as one single actor.
  */
 object Controller extends Actor {
-
-  // Set classloader
-  RemoteActor.classLoader = getClass.getClassLoader
 
   /**
    * The last 10 events
@@ -89,6 +85,9 @@ object Controller extends Actor {
     // Define the sink
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
+    // Set remote class loader
+    RemoteActor.classLoader = getClass.getClassLoader
+
     // Register the client
     // TODO: Insert drawing-id here
     sink ! Register(None)
@@ -97,9 +96,17 @@ object Controller extends Actor {
     loop {
       react {
         case action : Action => sink ! action
-        case success : Success => {
-          success.command match {
-            case Register(id) => Log.info("Registered drawing id " + id)
+        case command : RemoteCommand => {
+          Log.debug("Controller: Received remote command: " + command)
+
+          command match {
+            case success : Success => {
+              success.command match {
+                case Register(id) => Log.info("Registered drawing id " + id)
+              }
+            }
+            case Register(i) => // Catch annoying local mirror-commands
+            case _ => Log.warning("Controller: Received unknown remote command: " + command)
           }
         }
         case command : Command => {
