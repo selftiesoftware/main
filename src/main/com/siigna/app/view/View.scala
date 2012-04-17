@@ -130,7 +130,7 @@ object View extends Canvas with Runnable {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
-  def draw(graphicsPanel : AWTGraphics) { try {
+  def draw(graphicsPanel : AWTGraphics) { if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = virtual
 
@@ -160,13 +160,11 @@ object View extends Canvas with Runnable {
 
       // Fetch and draw the dynamic layer.
       // TODO: Cache this
-      /*try {
-        //Model.dynamic.foreach(_addAttribute("Color" -> "#FF9999".color).transform(transformation)).foreach(graphics draw)
-        Model.selection.foreach(_ (transformation).foreach(graphics draw))
-        //dynamic.values.map(_.immutableShape.addAttribute("Color" -> "#DDDDDD".color).transform(transformation)).foreach(graphics draw)
+      try {
+        Model.selection.foreach(_ (transformation) foreach(s => graphics draw s.setAttribute("Color" -> Preferences.color("colorSelected"))))
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
-      }*/
+      }
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.

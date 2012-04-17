@@ -11,6 +11,7 @@
 
 package com.siigna.app.model
 
+import action.{TransformShapes, Action}
 import shape.{DynamicShape}
 
 /**
@@ -30,9 +31,21 @@ trait MutableModel extends SelectableModel {
    */
   override def deselect() {
     if (selection.isDefined) {
-      if (selection.get.action.isDefined) {
-        Model execute selection.get.action.get
+      val t = selection.get.getTransformation
+      val s = selection.get
+      var action : Option[Action] = if (!t.isEmpty) {
+        Some(TransformShapes(s.shapes, t))
+      } else None
+      
+      if (selection.get.action.isDefined && action.isDefined) {
+        action = Some(action.get.merge(s.action.get))
+      } else if (selection.get.action.isDefined) {
+        action = Some(s.action.get)
       }
+
+      // Execute action
+      if (action.isDefined) Model execute action.get
+      
       selection = None
     }
   }
