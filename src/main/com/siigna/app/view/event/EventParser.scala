@@ -27,7 +27,7 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  * <br />
  * For each module a <code>EventParser</code> is attached, which filters every event
  * that comes in. The events are not filtered if the module is not the last in the module-chain. 
- * Read more about the [[com.siigna.app.view.ModuleInterface]] and the [[com.siigna.app.controller.Control]].
+ * Read more about the [[com.siigna.app.view.ModuleInterface]] and the [[com.siigna.app.controller.Controller]].
  */
 class EventParser {
 

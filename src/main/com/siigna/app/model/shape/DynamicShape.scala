@@ -15,6 +15,7 @@ import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.app.model.Model
 import com.siigna.app.model.action.{TransformShapes, Action}
+import com.siigna.app.view.View
 
 /**
  * A dynamic shape is a mutable wrapper for a regular ImmutableShape(s).
@@ -35,11 +36,17 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
   var action : Option[Action] = None
 
   /**
+   * Stores a private transformation matrix that indicates the translation applied to the
+   * Dynamic Shape since creation.
+   */
+  private var transformation : TransformationMatrix = TransformationMatrix()
+
+  /**
    * Applies a given transformation on the DynamicShape
    * @param t  The transformation to apply.
    * @return An ImmutableShape as the result of the applied transformation.
    */
-  def apply(t : TransformationMatrix) = shapes.values.map(_ (t))
+  def apply(t : TransformationMatrix) = shapes.values.map(_ (transformation) transform t)
   
   /**
    * The attributes of the underlying ImmutableShapes.
@@ -60,6 +67,12 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
    */
   def distanceTo(point: Vector2D, scale: Double) = shapes.map(s => Model(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
 
+  /**
+   * Returns the current transformation applied to the shape.
+   * @return  The transformation as a [[com.siigna.util.geom.TransformationMatrix]].
+   */
+  def getTransformation = transformation
+
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
 
   /**
@@ -68,11 +81,9 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
    * @param transformation  The TransformationMatrix to apply to the shape.
    */
   def transform(transformation: TransformationMatrix) = {
-    action = if (action.isDefined) {
-      Some(action.get.merge(TransformShapes(shapes, transformation)))
-    } else {
-      Some(TransformShapes(shapes, transformation))
-    }
+    // Store the transformation
+    this.transformation = transformation
+    // Return this
     this
   }
 }
