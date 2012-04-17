@@ -102,6 +102,17 @@ object pgsqlUpdate {
     databaseConnection.close()
   }
 
+  def lastActiveDrawingIdIntoContributorData(userId:Int,drawingId:Int) {
+    val databaseConnection: Connection = DriverManager.getConnection("jdbc:postgresql://siigna.com/siigna_world","siigna_world_user","s11gn@TUR")
+    val createStatement: Statement = databaseConnection.createStatement()
+
+    val query:String = "UPDATE property_int SET property_int_value = "+drawingId+" WHERE property_int_id = (SELECT t1.property_int_id FROM property_int as t1 JOIN contributor_basic_property_int_relation as t2 ON t1.property_int_id = t2.property_int_id WHERE property_int_number = 1 AND contributor_id = "+userId+" LIMIT 1)"
+    createStatement.execute(query)
+
+    println ("Updated \"last active drawing\" for current user to current drawing in the database")
+    databaseConnection.close()
+  }
+
   def singleLineshapeInDrawing (drawingId:Int,shapeId:Int,newShape: com.siigna.app.model.shape.LineShape) = {
 
     //Opretter forbindelse til serveren

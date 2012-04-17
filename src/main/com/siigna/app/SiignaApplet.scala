@@ -11,10 +11,11 @@ package com.siigna.app
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+import controller.command.{ForwardTo, Preload}
 import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
 
 import java.applet.Applet
-import com.siigna.app.controller.Control
+import com.siigna.app.controller.Controller
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Preferences
@@ -48,7 +49,7 @@ class SiignaApplet extends Applet {
     paintThread.interrupt()
 
     // Stop the controller by interruption so we're sure the controller shuts it
-    Control.interrupt()
+    Controller ! 'exit
 
     // Stop the applet
     super.destroy()
@@ -109,10 +110,16 @@ class SiignaApplet extends Applet {
     val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
 
     // Start the controller
-    Control.start()
+    Controller.start()
 
     // Start the paint-loop
     paintThread.start()
+
+    // Preload modules
+    Preload('Default)
+    Preload('Menu)
+    Preload('Selection)
+    ForwardTo('Default)
   }
 
   /**
@@ -130,7 +137,7 @@ class SiignaApplet extends Applet {
 
     // If they key-code equals a modifier key, nothing bad can happen..
     if (isModifier) {
-      dispatchEvent( constructor(getCorrectCase(code), keys) )
+      Controller ! constructor(getCorrectCase(code), keys)
 
     // If it doesn't check if a key is being hid by
     // a modifier key and return the key it that's the case
@@ -140,9 +147,9 @@ class SiignaApplet extends Applet {
         else if (e.isAltDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
         else Array[Char]()
       if (!array.isEmpty) { // If there are elements in the character-array pass them on
-        dispatchEvent( constructor(getCorrectCase(array(0)), keys) )
+        Controller ! constructor(getCorrectCase(array(0)), keys)
       } else { // Otherwise we accept the original char for the event
-        dispatchEvent( constructor(getCorrectCase(code), keys) )
+        Controller ! constructor(getCorrectCase(code), keys)
       }
     }
   }
@@ -152,8 +159,7 @@ class SiignaApplet extends Applet {
    * dispatched even in MouseMove and MouseDrag, and dispatches them to
    * EventHandler by filling in the correct constructor-parameters.
    */
-  private def handleMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event)
-  {
+  private def handleMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event) {
     // Converts a physical point to a virtual one.
     def toVirtual(physical : Vector2D) = {
       val r = physical.transform(View.virtual.inverse)
@@ -226,7 +232,7 @@ class SiignaApplet extends Applet {
    * The overall event-handler. Dispatches event on to the controller.
    */
   private def dispatchEvent(event : Event) {
-    Control dispatchEvent(event)
+    Controller ! event
   }
 
   /**
