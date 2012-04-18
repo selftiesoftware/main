@@ -22,7 +22,7 @@ import actors.Actor
 import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
 import com.siigna.app.model.Model
-import com.siigna.app.controller.remote.{Register, RemoteCommand, Success}
+import remote._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -34,6 +34,8 @@ object Controller extends Actor {
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
+  
+  var client : Option[Client] = None
 
   /**
    * The last 10 events
@@ -91,7 +93,7 @@ object Controller extends Actor {
 
     // Register the client
     // TODO: Insert drawing-id here
-    sink ! Register(Some(0), Some(0))
+    sink ! Register(None, None)
 
     // Loop
     loop {
@@ -103,7 +105,13 @@ object Controller extends Actor {
           command match {
             case success : Success => {
               success.command match {
-                case Register(user, drawing) => Log.info("Registered drawing id " + user)
+                case Client(id) => {
+                  client = Some(Client(id))
+                  Log.info("Registered client with id " + id)
+
+                  sink ! GetDrawing(0, client.get)
+                }
+                case _ =>
               }
             }
             case Register(_, _) => // Catch annoying local mirror-commands
