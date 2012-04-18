@@ -1,4 +1,4 @@
-package com.siigna.server
+package com.siigna.app.controller.remote
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
@@ -12,7 +12,7 @@ package com.siigna.server
  */
 
 /**
- * A [[com.siigna.app.controller.command.Command]] sent by the server to indicate success of a previous
+ * A [[com.siigna.app.controller.command.Command]] sent by the remote to indicate success of a previous
  * sent Command.
  */
-case class Success(command: RemoteCommand)
+case class Success(command : RemoteCommand)

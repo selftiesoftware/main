@@ -1,6 +1,4 @@
-package com.siigna.server
-
-import com.siigna.server.RemoteCommand
+package com.siigna.app.controller.remote
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
@@ -13,11 +11,9 @@ import com.siigna.server.RemoteCommand
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+import com.siigna.app.controller.command.Command
+
 /**
- * A [[com.siigna.app.controller.command.remote.RemoteCommand]] that signals that the client wishes to
- * register any actions received in the drawing with the given id. If no id is given, we assume the client
- * wishes to register a new drawing.
- *
- * @param drawingId  The id of the drawing to register. None if the server should create an entirely new drawing.
+ * An [[com.siigna.app.model.action.Action]] that can be sent over the network to the Siigna Universe.
  */
-case class Register(userId: Option[Int], drawingId: Option[Int]) extends RemoteCommand
+trait RemoteCommand extends Command with Serializable
