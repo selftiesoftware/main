@@ -24,7 +24,7 @@ object AppletParameters {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
       //Hvis appletten ikke er startet fra hjemmesiden kan der ikke hentes brugerid herfra - 1 indsættes.
-      try { (parameter = Some(applet.get.getParameter(parameterName.get).toInt))
+      try { (parameter = Some(applet.get.getParameter(parameterName.get)))
       } catch {
         case e: java.lang.NullPointerException => {
           println("No contributor logged in at Siigna.com homepage. Setting user to Anonymous. If you are connected to the internet, you may log into the Siigna applet from the menu.")
