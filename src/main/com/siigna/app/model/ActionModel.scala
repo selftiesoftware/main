@@ -15,6 +15,7 @@ import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.ImmutableShape
 import com.siigna.app.view.View
+import com.siigna.app.controller.Controller
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
