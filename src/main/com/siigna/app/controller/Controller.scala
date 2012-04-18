@@ -22,7 +22,7 @@ import actors.Actor
 import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
 import com.siigna.app.model.Model
-import com.siigna.server.{Register, RemoteCommand, Success}
+import com.siigna.app.controller.remote.{Register, RemoteCommand, Success}
 
 /**
  * The Controller controls the core of the software. Basically that includes
