@@ -21,7 +21,8 @@ import com.siigna.app.model.action.Action
 import actors.Actor
 import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
-import remote._
+import com.siigna.app.model.Model
+import com.siigna.server.{Register, RemoteCommand, Success}
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -30,6 +31,9 @@ import remote._
  * TODO: Implement this as one single actor.
  */
 object Controller extends Actor {
+
+  // Set remote class loader
+  RemoteActor.classLoader = getClass.getClassLoader
 
   /**
    * The last 10 events
@@ -85,27 +89,24 @@ object Controller extends Actor {
     // Define the sink
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
-    // Set remote class loader
-    RemoteActor.classLoader = getClass.getClassLoader
-
     // Register the client
     // TODO: Insert drawing-id here
-    sink ! Register(None)
+    sink ! Register(Some(0), Some(0))
 
     // Loop
     loop {
       react {
-        case action : Action => sink ! action
+        case action : Action => Model execute action
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
 
           command match {
             case success : Success => {
               success.command match {
-                case Register(id) => Log.info("Registered drawing id " + id)
+                case Register(user, drawing) => Log.info("Registered drawing id " + user)
               }
             }
-            case Register(i) => // Catch annoying local mirror-commands
+            case Register(_, _) => // Catch annoying local mirror-commands
             case _ => Log.warning("Controller: Received unknown remote command: " + command)
           }
         }
