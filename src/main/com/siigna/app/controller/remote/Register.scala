@@ -12,7 +12,7 @@ package com.siigna.app.controller.remote
  */
 
 /**
- * A [[com.siigna.app.controller.command.remote.RemoteCommand]] that signals that the client wishes to
+ * A [[com.siigna.app.controller.remote.RemoteCommand]] that signals that the client wishes to
  * register any actions received in the drawing with the given id. If no id is given, we assume the client
  * wishes to register a new drawing.
  *
