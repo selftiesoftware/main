@@ -98,23 +98,34 @@ object Controller extends Actor {
     // Loop
     loop {
       react {
-        case action : Action => Model execute action
+        case action : Action => {
+          Model execute action
+          println("Controller recieved action: "+action)
+        }
+
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
+          println("Kommando modtaget i controller: " + command)
 
           command match {
             case success : Success => {
               success.command match {
                 case Client(id) => {
                   client = Some(Client(id))
-                  Log.info("Registered client with id " + id)
+                  Log.info("Controller registered client with id " + id)
 
-                  sink ! GetDrawing(0, client.get)
+                  println("1")
+                  var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
+                  if (!drawingId.isDefined) drawingId = Some(1)
+                  sink ! GetDrawing(drawingId.get, client.get)
+                  println("2")
+
                 }
                 case _ =>
               }
             }
             case Register(_, _) => // Catch annoying local mirror-commands
+
             case _ => Log.warning("Controller: Received unknown remote command: " + command)
           }
         }
