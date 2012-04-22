@@ -1,16 +1,5 @@
 package com.siigna.app.model.drawing
-
-import com.siigna.app.controller.pgsql_handler.{pgsqlIdPool, pgsqlGet}
 import com.siigna._
-
-
-/**
- * Created by IntelliJ IDEA.
- * User: Niels Egholm
- * Date: 06-04-12
- * Time: 16:17
- * To change this template use File | Settings | File Templates.
- */
 
 object activeDrawing {
 
@@ -21,6 +10,11 @@ object activeDrawing {
   var offsetZ: Option[Int] = None
   var contributorName: Option[String] = None
   var contributorId: Option[Int] = None
+
+  def getDrawingIdFromHomepage() = {
+    drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
+    (drawingId)
+  }
 
   def setContributorName(name:String) {
     contributorName = Some(name)
@@ -38,7 +32,7 @@ object activeDrawing {
     drawingName = Some(name)
   }
 
-  def updateActiveDrawingNameInDatabase(id:Int,name:String) {
+  /*def updateActiveDrawingNameInDatabase(id:Int,name:String) {
     com.siigna.app.controller.pgsql_handler.pgsqlUpdate.renameDrawing(id,name)
     drawingName = Some(name)
   }
@@ -70,5 +64,5 @@ object activeDrawing {
     val returned = new com.siigna.app.controller.pgsql_handler.pgsqlGet
     (drawingName) = returned.drawingNameFromId(id)
     (drawingName)
-  }*/
+  }*/ */
 }

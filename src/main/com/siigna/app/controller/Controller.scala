@@ -17,12 +17,12 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
-import actors.{Actor, SuspendActorControl}
-import actors.remote.RemoteActor._
-import remote._
 import com.siigna.app.model.action.Action
-import util.control.ControlThrowable
+import actors.Actor
+import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
+import com.siigna.app.model.Model
+import remote._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -32,8 +32,10 @@ import actors.remote.{RemoteActor, Node}
  */
 object Controller extends Actor {
 
-  // Set classloader
+  // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
+  
+  var client : Option[Client] = None
 
   /**
    * The last 10 events
@@ -91,15 +93,41 @@ object Controller extends Actor {
 
     // Register the client
     // TODO: Insert drawing-id here
-    sink ! Register(None)
+    sink ! Register(None, None)
 
     // Loop
     loop {
       react {
-        case action : Action => sink ! action
-        case success : Success => {
-          success.command match {
-            case Register(id) => Log.info("Registered drawing id " + id)
+        case action : Action => {
+          Model execute action
+          println("Controller recieved action: "+action)
+        }
+
+        case command : RemoteCommand => {
+          Log.debug("Controller: Received remote command: " + command)
+          println("Kommando modtaget i controller: " + command)
+
+          command match {
+            case success : Success => {
+              success.command match {
+                case Client(id) => {
+                  client = Some(Client(id))
+                  Log.info("Controller registered client with id " + id)
+                  AppletParameters.setClientId(id)
+
+                  println("1")
+                  var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
+                  if (!drawingId.isDefined) drawingId = Some(1)
+                  sink ! GetDrawing(drawingId.get, client.get)
+                  println("2")
+
+                }
+                case _ =>
+              }
+            }
+            case Register(_, _) => // Catch annoying local mirror-commands
+
+            case _ => Log.warning("Controller: Received unknown remote command: " + command)
           }
         }
         case command : Command => {

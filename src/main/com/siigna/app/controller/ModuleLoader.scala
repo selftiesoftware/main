@@ -29,7 +29,7 @@ import com.siigna.util.logging.Log
 /**
  * An object that loads scala class files from remote locations.
  * TODO: Split the tasks up, so the actual class-loading is done in one function etc.
- * TODO: Add a remote system for finding vars - includes setting up a server!
+ * TODO: Add a remote system for finding vars - includes setting up a remote!
  * -> val url = new URL("jar:http://siigna.com/module/"+moduleName+".jar!/")
  */
 class ModuleLoader(private var urls : Array[URL], loader : ClassLoader) {
