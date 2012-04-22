@@ -14,4 +14,9 @@ package com.siigna.app.controller.remote
 /**
  * A client represented by an unique identifier.
  */
-case class Client(id : Long) extends RemoteCommand
+case class Client(id : Long) extends RemoteCommand {
+  def get = {
+    val clientId = id
+    (clientId)
+  }
+}
