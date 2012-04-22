@@ -1,6 +1,7 @@
 package com.siigna.app.controller
 
 import java.applet.Applet
+import remote.RemoteCommand
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,6 +16,7 @@ import java.applet.Applet
 object AppletParameters {
 
   private var applet : Option[Applet] = None
+  var clientId: Long = 0
 
   def setApplet (newApplet: Applet) { 
     applet = Some(newApplet) 
@@ -53,4 +55,11 @@ object AppletParameters {
     (parameter)
   }
 
+  def getClientId = {
+      (clientId)
+  }
+
+  def setClientId(newId:Long) {
+      clientId = newId
+  }
 }
