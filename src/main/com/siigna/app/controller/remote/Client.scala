@@ -9,10 +9,9 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.command.remote
+package com.siigna.app.controller.remote
 
 /**
- * A [[com.siigna.app.controller.command.Command]] sent by the server to indicate success of a previous
- * sent Command.
+ * A client represented by an unique identifier.
  */
-case class Success(command : RemoteCommand)
+case class Client(id : Long) extends RemoteCommand
