@@ -113,6 +113,7 @@ object Controller extends Actor {
                 case Client(id) => {
                   client = Some(Client(id))
                   Log.info("Controller registered client with id " + id)
+                  AppletParameters.setClientId(id)
 
                   println("1")
                   var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
