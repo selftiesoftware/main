@@ -16,4 +16,4 @@ import remote.RemoteCommand
 /**
  * A client represented by an unique identifier.
  */
-case class Client(id: Long) extends Serializable
+case class Client(id: Long)
