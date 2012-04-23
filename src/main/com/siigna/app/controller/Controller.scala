@@ -92,8 +92,9 @@ object Controller extends Actor {
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
     // Register the client
+    // Remember: When remote commands are created, they are sent to the controller immediately
     // TODO: Insert drawing-id here
-    sink ! Register(None, None)
+    Register(None, None)
 
     // Loop
     loop {
