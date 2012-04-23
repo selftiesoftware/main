@@ -119,8 +119,9 @@ object Controller extends Actor {
               success.command match {
 
                 // Successful registration of the client
-                case Client(id) => {
-                  client = Some(Client(id))
+                case r : Register => {
+                  client = Some(r.client)
+                  val id = client.get.id
                   Log.info("Controller registered client with id " + id)
                   AppletParameters.setClientId(id)
 

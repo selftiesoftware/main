@@ -12,8 +12,17 @@ package com.siigna.app.controller.remote
  */
 
 import com.siigna.app.controller.command.Command
+import com.siigna.app.controller.Client
 
 /**
  * An [[com.siigna.app.model.action.Action]] that can be sent over the network to the Siigna Universe.
  */
-trait RemoteCommand extends Command with Serializable
+trait RemoteCommand extends Command with Serializable {
+
+  /**
+   * The client who are sending this command.
+   * @return The client associated with the command.
+   */
+  def client : Client
+  
+}

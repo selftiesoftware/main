@@ -11,8 +11,9 @@
 
 package com.siigna.app.controller.remote
 
-/**
- *
- */
+import com.siigna.app.controller.Client
 
-case class GetNewShapeId(client : Client)
+/**
+ * Remember to comment!!
+ */
+case class GetNewShapeId(client : Client) extends RemoteCommand
