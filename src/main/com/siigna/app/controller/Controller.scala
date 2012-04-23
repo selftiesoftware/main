@@ -124,7 +124,7 @@ object Controller extends Actor {
                   val id = client.get.id
                   Log.info("Controller registered client with id " + id)
                   AppletParameters.setClient(client)
-
+                  println("Sætter klient: "+client)
                   println("1")
                   var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
                   if (!drawingId.isDefined) drawingId = Some(1)
