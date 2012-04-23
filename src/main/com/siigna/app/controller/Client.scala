@@ -1,7 +1,3 @@
-package com.siigna.app.controller
-
-import remote.RemoteCommand
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -12,6 +8,10 @@ import remote.RemoteCommand
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
+
+package com.siigna.app.controller
+
+import remote.RemoteCommand
 
 /**
  * A client represented by an unique identifier.
