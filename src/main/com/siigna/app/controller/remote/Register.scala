@@ -1,5 +1,7 @@
 package com.siigna.app.controller.remote
 
+import com.siigna.app.controller.Client
+
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -18,4 +20,8 @@ package com.siigna.app.controller.remote
  *
  * @param drawingId  The id of the drawing to register. None if the remote should create an entirely new drawing.
  */
-case class Register(userId: Option[Int], drawingId: Option[Int]) extends RemoteCommand
+case class Register(userId: Option[Int], drawingId: Option[Int]) extends RemoteCommand {
+
+  val client = Client(0L)
+
+}
