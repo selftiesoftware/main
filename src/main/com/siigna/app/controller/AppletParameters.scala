@@ -55,11 +55,11 @@ object AppletParameters {
     (parameter)
   }
 
-  def getClientId = {
+  def getClient = {
       (clientReference)
   }
 
-  def setClientId(newClient:Long) {
+  def setClient(newClient:Option[Client]) {
     clientReference = newClient
   }
 }
