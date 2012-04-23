@@ -52,7 +52,7 @@ object Controller extends Actor {
    * The Module Bank used to fetch modules from external sources.
    */
   private val moduleBank = new ModuleBank()
-  
+
   /**
    * The interval with which to check for incoming events and actions. Defaults to 5.
    */
@@ -96,25 +96,34 @@ object Controller extends Actor {
     // TODO: Insert drawing-id here
     Register(None, None)
 
-    // Loop
+    // Loop and react on incoming messages
     loop {
       react {
+
+        // Forward incoming actions to the server
         case action : Action => {
           Model execute action
           println("Controller recieved action: "+action)
         }
 
+        // Handle remote commands
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
           println("Kommando modtaget i controller: " + command)
 
+          // Match the received command
           command match {
+            // Catch successes - we know these are from the server
             case success : Success => {
+              // Examine what was successful
               success.command match {
-                case Client(id) => {
-                  client = Some(Client(id))
+
+                // Successful registration of the client
+                case r : Register => {
+                  client = Some(r.client)
+                  val id = client.get.id
                   Log.info("Controller registered client with id " + id)
-                  AppletParameters.setClientId(id)
+                  AppletParameters.setClient(client)
 
                   println("1")
                   var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
@@ -126,11 +135,13 @@ object Controller extends Actor {
                 case _ =>
               }
             }
-            case Register(_, _) => // Catch annoying local mirror-commands
-
-            case _ => Log.warning("Controller: Received unknown remote command: " + command)
+            // Forward everything else to the server. If it is not a Success type we can be
+            // sure the remote command are meant to be forwarded to the server
+            case _ => sink ! command
           }
         }
+
+        // Handle ordinary commands (from the modules)
         case command : Command => {
           Log.debug("Controller: Received command: " + command)
 

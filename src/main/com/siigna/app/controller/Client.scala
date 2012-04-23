@@ -1,6 +1,10 @@
+package com.siigna.app.controller
+
+import remote.RemoteCommand
+
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
- * to Share — to copy, distribute and transmit the work, 
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
+ * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -9,11 +13,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.remote
-
-import com.siigna.app.controller.Client
-
 /**
- * Remember to comment!
+ * A client represented by an unique identifier.
  */
-case class GetDrawing(id : Int, client : Client) extends RemoteCommand
+case class Client(id: Long)
