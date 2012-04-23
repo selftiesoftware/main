@@ -16,7 +16,7 @@ import java.applet.Applet
 object AppletParameters {
 
   private var applet : Option[Applet] = None
-  var clientId: Long = 0
+  var clientReference: Option[Client] = None
 
   def setApplet (newApplet: Applet) { 
     applet = Some(newApplet) 
@@ -55,11 +55,11 @@ object AppletParameters {
     (parameter)
   }
 
-  def getClientId = {
-      (clientId)
+  def getClient = {
+      (clientReference)
   }
 
-  def setClientId(newId:Long) {
-      clientId = newId
+  def setClient(newClient:Option[Client]) {
+    clientReference = newClient
   }
 }
