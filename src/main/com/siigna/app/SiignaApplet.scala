@@ -113,9 +113,6 @@ class SiignaApplet extends Applet {
     // Allows specific KeyEvents to be detected.
     setFocusTraversalKeysEnabled(false)
 
-    // Set the correct position of the screen
-    val dimension : Dimension = Preferences("defaultScreenSize").asInstanceOf[Dimension]
-
     // Start the controller - ends up with calling act() method in Controller.
     Controller.start()
 
