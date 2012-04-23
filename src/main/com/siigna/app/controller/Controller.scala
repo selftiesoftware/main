@@ -52,7 +52,7 @@ object Controller extends Actor {
    * The Module Bank used to fetch modules from external sources.
    */
   private val moduleBank = new ModuleBank()
-  
+
   /**
    * The interval with which to check for incoming events and actions. Defaults to 5.
    */
