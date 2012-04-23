@@ -56,7 +56,7 @@ object AppletParameters {
   }
 
   def getClient = {
-      (clientReference)
+      (clientReference.get)
   }
 
   def setClient(newClient:Option[Client]) {
