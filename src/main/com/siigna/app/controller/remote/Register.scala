@@ -20,8 +20,4 @@ import com.siigna.app.controller.Client
  *
  * @param drawingId  The id of the drawing to register. None if the remote should create an entirely new drawing.
  */
-case class Register(userId: Option[Int], drawingId: Option[Int]) extends RemoteCommand {
-
-  val client = Client(0L)
-
-}
+case class Register(userId: Option[Int], drawingId: Option[Int], client : Client = Client(0L)) extends RemoteCommand
