@@ -15,4 +15,8 @@ package com.siigna.app.controller.remote
  * A [[com.siigna.app.controller.command.Command]] sent by the remote to indicate success of a previous
  * sent Command.
  */
-case class Success(command : RemoteCommand) extends RemoteCommand
+case class Success(command : RemoteCommand) extends RemoteCommand {
+
+  def client = command.client
+
+}
