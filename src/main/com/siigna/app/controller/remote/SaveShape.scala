@@ -12,6 +12,10 @@
 package com.siigna.app.controller.remote
 
 /**
- * A client represented by an unique identifier.
+ *
  */
-case class Client(id : Long) extends RemoteCommand
+import com.siigna.app.model.shape.ImmutableShape
+import com.siigna.app.controller.Client
+
+case class SaveShape(shape :ImmutableShape, client : Client)
+
