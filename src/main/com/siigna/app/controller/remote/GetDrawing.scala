@@ -11,7 +11,9 @@
 
 package com.siigna.app.controller.remote
 
+import com.siigna.app.controller.Client
+
 /**
- *
+ * Remember to comment!
  */
-case class GetDrawing(id : Int, client : Client)
+case class GetDrawing(id : Int, client : Client) extends RemoteCommand
