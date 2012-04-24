@@ -13,6 +13,7 @@ package com.siigna.app.model.action
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, ImmutableShape, Shape}
+import com.siigna.app.controller.AppletParameters
 
 /**
 * An object that allows you to create one or multiple shapes.
@@ -21,7 +22,7 @@ object Create {
   
   private var id = 0;
   
-  private def getId = { id += 1; id; }
+  private def getId = { id = AppletParameters.getNewShapeId; id; }
   
   def apply(shape : ImmutableShape) { 
     val id = shape.attributes.int("id").getOrElse(getId)
