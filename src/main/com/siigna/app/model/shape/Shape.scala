@@ -17,8 +17,42 @@ import com.siigna.util.geom.{TransformationMatrix, Rectangle2D, Vector2D}
 import com.siigna.app.view.View
 
 /**
- * The highest trait for objects that are shape-like in the hierarchy. This includes having a boundary, a distance to a
- * point in a 2D-space and a set of attributes. 
+ * The highest trait for objects that are shape-like in the hierarchy.
+ * <br />
+ * Shapes are what Siigna is made of. Every drawing is executed upon shapes, and the "database of Siigna" - the [[com.siigna.app.model.Model]]
+ * - is made of Shapes, which is used to draw upon the [[com.siigna.app.view.View]] so the users can see what they're editing.
+ * <br />
+ * The shape hierarchy looks like this:
+ * <pre>
+ *
+ *               Shape
+ *                 |
+ *      /----------+-----------\
+ *  ImmutableShape       DynamicShape
+ *   (immutable)          (mutable)
+ *   |    |    |
+ *   |    |  CollectionShape (contains several shapes)
+ *   |    |      |
+ *   |    |      +--- GroupShape
+ *   |    |      |
+ *   |    |      +--- PolylineShape
+ *   |    |
+ *   |  BasicShape (used in PolylineShape)
+ *   |      |
+ *   |      +----- ArcShape
+ *   |      |
+ *   |      +----- LineShape
+ *   |
+ *  EnclosedShape (encapsulates a given area)
+ *     |
+ *     +--- CircleShape
+ *     |
+ *     +--- RectangleShape
+ *            |
+ *            +--- ImageShape
+ *            |
+ *            +--- TextShape
+ * </pre>
  */
 trait Shape {
 
