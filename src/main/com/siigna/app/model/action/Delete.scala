@@ -11,13 +11,13 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{DynamicShape, ImmutableShape, Shape}
+import com.siigna.app.model.shape.{DynamicShape, Shape, ShapeLike}
 import com.siigna.util.logging.Log
 
 object Delete {
   /*
-  def apply(shape : Shape) { shape match {
-    case s : ImmutableShape => {
+  def apply(shape : ShapeLike) { shape match {
+    case s : Shape => {
       val id = Model.findId(_ == s)
       if (id.isDefined)
         Model(DeleteShape(id.get, s))
@@ -29,19 +29,19 @@ object Delete {
     case _ =>
   } }
 
-  def apply(shape1 : ImmutableShape, shape2 : ImmutableShape, shapes : ImmutableShape*) {
+  def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
     apply(Iterable(shape1, shape2) ++ shapes)
   }
 
-  def apply(shapes : Traversable[Shape]) {
-    var shapesToDelete = Map[String, ImmutableShape]()
+  def apply(shapes : Traversable[ShapeLike]) {
+    var shapesToDelete = Map[String, Shape]()
     shapes.foreach{ s => s match {
         case DynamicShape(id, shape) => {
           if (!shapesToDelete.contains(id)) {
             shapesToDelete = shapesToDelete + (id -> shape)
           }
         }
-        case s : ImmutableShape => {
+        case s : Shape => {
           val id = Model.findId(_ == s)
           if (id.isDefined && !shapesToDelete.contains(id.get)) {
             shapesToDelete = shapesToDelete + (id.get -> s)
@@ -63,12 +63,12 @@ object Delete {
 /**
  * Deletes a shape.
  */
-case class DeleteShape(id : String, shape : ImmutableShape) extends Action {
+case class DeleteShape(id : String, shape : Shape) extends Action {
 
   def execute(model : Model) = model - id
 
   def merge(that : Action) = that match {
-    case DeleteShape(i : String, s : ImmutableShape) =>
+    case DeleteShape(i : String, s : Shape) =>
       if (i == id) this
       else DeleteShapes(Map((id -> shape), (i -> s)))
     case _ => SequenceAction(this, that)
@@ -81,13 +81,13 @@ case class DeleteShape(id : String, shape : ImmutableShape) extends Action {
 /**
  * Deletes a number of shapes.
  */
-case class DeleteShapes(shapes : Map[String, ImmutableShape]) extends Action {
+case class DeleteShapes(shapes : Map[String, Shape]) extends Action {
 
   def execute(model : Model) = model -- shapes.keys
 
   def merge(that : Action) = that match {
-    case CreateShape(i : String, s : ImmutableShape) => DeleteShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[String, ImmutableShape]) => DeleteShapes(shapes ++ s)
+    case CreateShape(i : String, s : Shape) => DeleteShapes(shapes + (i -> s))
+    case CreateShapes(s : Map[String, Shape]) => DeleteShapes(shapes ++ s)
     case _ => SequenceAction(this, that)
   }
 

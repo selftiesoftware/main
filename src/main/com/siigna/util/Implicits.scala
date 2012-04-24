@@ -13,7 +13,7 @@ package com.siigna.util
 
 import com.siigna.util.geom.{Rectangle, Vector}
 import java.awt.Color
-import com.siigna.app.model.shape.Shape
+import com.siigna.app.model.shape.ShapeLike
 import com.siigna.app.model.Model
 
 //import com.siigna.app.model.shape.DynamicShape

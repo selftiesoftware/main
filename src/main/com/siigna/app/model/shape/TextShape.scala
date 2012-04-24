@@ -32,7 +32,7 @@ import com.siigna.util.geom._
  *
  * TODO: Redo this! Completely.
  */
-case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends ImmutableShape {
+case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends Shape {
 
   type T = TextShape
 
