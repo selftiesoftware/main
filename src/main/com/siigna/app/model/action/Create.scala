@@ -14,6 +14,7 @@ import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, ImmutableShape, Shape}
 import com.siigna.app.controller.AppletParameters
+import com.siigna.app.controller.remote.SaveShape
 
 /**
 * An object that allows you to create one or multiple shapes.
@@ -31,6 +32,9 @@ object Create {
   
   def apply(id : Int, shape : ImmutableShape) {
     Model execute CreateShape(id, shape)
+    println("Active drawong: "+com.siigna.app.model.drawing.activeDrawing.drawingId)
+    SaveShape(com.siigna.app.model.drawing.activeDrawing.drawingId.get,id,shape,AppletParameters.getClient)
+    println("SaveShape Sendt fra Create")
   }
 
   def apply[T <: ImmutableShape](collection : CollectionShape[T]) {
