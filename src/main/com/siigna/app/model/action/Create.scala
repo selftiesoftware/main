@@ -12,7 +12,9 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
-import com.siigna.app.model.shape.{CollectionShape, Shape, ShapeLike}
+import com.siigna.app.controller.AppletParameters
+import com.siigna.app.controller.remote.SaveShape
+import com.siigna.app.model.shape.{CollectionShape, Shape}
 
 /**
 * An object that allows you to create one or multiple shapes.
@@ -21,7 +23,7 @@ object Create {
   
   private var id = 0;
   
-  private def getId = { id += 1; id; }
+  private def getId = { id = AppletParameters.getNewShapeId; id; }
   
   def apply(shape : Shape) {
     val id = shape.attributes.int("id").getOrElse(getId)
@@ -30,6 +32,9 @@ object Create {
   
   def apply(id : Int, shape : Shape) {
     Model execute CreateShape(id, shape)
+    println("Active drawong: "+com.siigna.app.model.drawing.activeDrawing.drawingId)
+    SaveShape(com.siigna.app.model.drawing.activeDrawing.drawingId.get,id,shape,AppletParameters.getClient)
+    println("SaveShape Sendt fra Create")
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
