@@ -124,24 +124,32 @@ object Controller extends Actor {
                   val id = client.get.id
                   Log.info("Controller registered client with id " + id)
                   AppletParameters.setClient(client)
-
+                  println("Sætter klient: "+client)
                   println("1")
                   var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
                   if (!drawingId.isDefined) drawingId = Some(1)
                   sink ! GetDrawing(drawingId.get, client.get)
                   println("2")
-
+                  //get a specified number of new shapeIds from the server, ready to use for new shapes
+                  GetNewShapeIds(2,AppletParameters.getClient)
                 }
                 case _ =>
               }
-            }
+            }            
             // Forward everything else to the server. If it is not a Success type we can be
             // sure the remote command are meant to be forwarded to the server
             case _ => sink ! command
           }
         }
+        case command : NewShapeId => {
+          AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
+        }
+        case command : NewShapeIds => {
+          AppletParameters.receiveNewShapeIds(command.retrieveNewShapeIds)
+        }
 
-        // Handle ordinary commands (from the modules)
+
+        // Handle ordinary commands (from the modules), and RemoteMessages:
         case command : Command => {
           Log.debug("Controller: Received command: " + command)
 
