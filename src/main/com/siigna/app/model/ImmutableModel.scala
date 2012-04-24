@@ -12,14 +12,14 @@
 package com.siigna.app.model
 
 import collection.parallel.immutable.ParMap
-import shape.{Shape}
+import shape.{ShapeLike}
 
 /**
  * An immutable model containing shapes
  * @tparam Key  The keys in the Model.
  * @tparam Value  The shapes in the model.
  */
-trait ImmutableModel[Key, Value <: Shape] extends ModelBuilder[Key, Value]
+trait ImmutableModel[Key, Value <: ShapeLike] extends ModelBuilder[Key, Value]
                                              with GroupableModel[Key, Value] {
 
   /**

@@ -46,7 +46,7 @@ object activeDrawing {
     if (lastActiveDrawing.isDefined) {
       //Henter tegningen, hvis der er en gammel:
       println ("Loading last active drawing...")
-      val shapes: Map[Int,ImmutableShape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
+      val shapes: Map[Int,Shape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
       if (shapes.size > 0 ) {Create(shapes)} else {println("Drawing is empty.")}
     }
     if (lastActiveDrawing.isEmpty) {
