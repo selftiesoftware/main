@@ -18,6 +18,7 @@ import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParMap}
 import shape.{DynamicShape, Shape}
 import collection.immutable.MapProxy
+import com.siigna.app.model.DynamicShape
 
 /**
  * An immutable model with two layers: an static and dynamic.
