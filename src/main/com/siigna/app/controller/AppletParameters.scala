@@ -75,7 +75,8 @@ object AppletParameters {
       try { (parameter = Some(applet.get.getParameter(parameterName).toInt))
       } catch {
         case e: java.lang.NullPointerException => {
-          println("No drawing Id provided from homepage.")
+          println("No drawing Id provided from homepage. Setting drawingId to 1.")
+          parameter = Some(1)
         }
       }
     } else {
