@@ -11,8 +11,9 @@ object activeDrawing {
   var contributorName: Option[String] = None
   var contributorId: Option[Int] = None
 
-  def getDrawingIdFromHomepage() = {
+  def getDrawingIdFromHomepage = {
     drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
+    println("DrawingIdRetrieved"+drawingId)
     (drawingId)
   }
 
