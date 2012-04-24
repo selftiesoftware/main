@@ -17,5 +17,5 @@ package com.siigna.app.controller.remote
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.controller.Client
 
-case class SaveShape(shape :Shape, client : Client)
+case class SaveShape(drawingId : Int, shapeId : Int, shape : Shape, client : Client) extends RemoteCommand
 
