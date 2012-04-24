@@ -11,6 +11,7 @@
 
 package com.siigna.app.model
 
+import com.siigna.app.model.DynamicShape
 import shape.DynamicShape
 
 /**
