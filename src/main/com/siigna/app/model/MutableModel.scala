@@ -70,7 +70,7 @@ trait MutableModel extends SelectableModel {
 
   /**
    * The current selection, represented by a [[com.siigna.app.model.shape.DynamicShape]] containing
-   * ways to convert a DynamicShape to one or more [[com.siigna.app.model.shape.ImmutableShape]] depending on
+   * ways to convert a DynamicShape to one or more [[com.siigna.app.model.shape.Shape]] depending on
    * the number of shapes included in the selection..
    */
   var selection : Option[DynamicShape] = None

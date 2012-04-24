@@ -12,7 +12,7 @@
 package com.siigna.app.view.event
 
 import com.siigna.util.geom._
-import com.siigna.app.model.shape.ImmutableShape
+import com.siigna.app.model.shape.Shape
 import collection.parallel.immutable.{ParMap, ParIterable}
 
 /**
@@ -20,13 +20,13 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  */
 case object MidPoints extends EventSnap {
 
-  def parse(event : Event, model : Map[Int, ImmutableShape]) = event match {
+  def parse(event : Event, model : Map[Int, Shape]) = event match {
     case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
     case some => some
   }
 
   // TODO: Finish this
-  def snap(point : Vector2D, model : Map[Int, ImmutableShape]) : Vector2D = {
+  def snap(point : Vector2D, model : Map[Int, Shape]) : Vector2D = {
     if (!model.isEmpty) {
       //val res = model.map(_ geometry match {
       //  case _ =>

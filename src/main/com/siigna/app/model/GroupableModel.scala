@@ -11,10 +11,10 @@
 
 package com.siigna.app.model
 
-import shape.Shape
+import shape.ShapeLike
 
 /**
- * A model that can group and ungroup [[com.siigna.app.model.shape.ImmutableShape]]s.
+ * A model that can group and ungroup [[com.siigna.app.model.shape.Shape]]s.
  * 
  * @tparam Key  The type of the keys to group.
  * @tparam Value  The type of the values inside the Model.

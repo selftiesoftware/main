@@ -21,7 +21,7 @@ object Track extends EventTrack {
   var isTracking = true
   var line : Option[LineShape] = None
 
-  def parse(events : List[Event], model : Map[Int, ImmutableShape]) = {
+  def parse(events : List[Event], model : Map[Int, Shape]) = {
 
     // Filter out lines from the model
     val lines : Iterable[LineShape] = model.filter(_.isInstanceOf[LineShape]).map(_.asInstanceOf[LineShape])
