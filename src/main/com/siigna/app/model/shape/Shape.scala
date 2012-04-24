@@ -103,7 +103,7 @@ trait Shape extends ShapeLike with (ShapePart => Option[Shape]) {
 
   /**
    * Selects the entire shape and wraps it into a DynamicShape, so it can be manipulated dynamically.
-   * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.DynamicShape]].
+   * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.ShapePart]].
    */
   def select() : ShapePart
 
@@ -112,14 +112,14 @@ trait Shape extends ShapeLike with (ShapePart => Option[Shape]) {
    * only a single point is enclosed (for example) then select that point and that point only. If nothing is
    * enclosed, then return None. This comes in handy when a selection-box sweeps across the model.
    * @param rect  The rectangle to base the selection on.
-   * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.DynamicShape]].
+   * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapePart]].
    */
   def select(rect : Rectangle2D) : ShapePart
 
   /**
    * Select a shape by a single point. The part of the shape that is closes to that point will be selected.
    * @param point  The point to base the selection on.
-   * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.DynamicShape]].
+   * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapePart]].
    */
   def select(point : Vector2D) : ShapePart // select shape close to the point
 

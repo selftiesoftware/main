@@ -10,7 +10,7 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
+import com.siigna.app.model.{DynamicShape, Model}
 import com.siigna.app.model.shape.{DynamicShape, Shape, ShapeLike}
 import com.siigna.util.logging.Log
 

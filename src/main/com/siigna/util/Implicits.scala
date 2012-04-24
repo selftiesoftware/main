@@ -16,7 +16,7 @@ import java.awt.Color
 import com.siigna.app.model.shape.ShapeLike
 import com.siigna.app.model.Model
 
-//import com.siigna.app.model.shape.DynamicShape
+//import com.siigna.app.model.DynamicShape
 
 /**
  * Contains several implicit definitions which are collected in a single object
