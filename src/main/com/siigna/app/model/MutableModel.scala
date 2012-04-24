@@ -12,6 +12,7 @@
 package com.siigna.app.model
 
 import action.{TransformShapes, Action}
+import com.siigna.app.model.DynamicShape
 import shape.{DynamicShape}
 
 /**
