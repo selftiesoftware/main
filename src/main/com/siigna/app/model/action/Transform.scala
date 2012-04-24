@@ -12,7 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.ImmutableShape
+import com.siigna.app.model.shape.Shape
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -29,12 +29,12 @@ object Transform {
   }
 
   /**
-   * Transform one shape with the given id with the given function, returning a ImmutableShape.
+   * Transform one shape with the given id with the given function, returning a Shape.
    * @param id  The id of the shape
    * @param transformation  The transformation matrix applied on the shape
    * @param f  The function that returns the new shape, given a transformation matrix. 
    */
-  def apply(id : Int, transformation : TransformationMatrix, f : TransformationMatrix => ImmutableShape) {
+  def apply(id : Int, transformation : TransformationMatrix, f : TransformationMatrix => Shape) {
     Model execute TransformShape(id, transformation, Some(f))
   }
 
@@ -53,7 +53,7 @@ object Transform {
    * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply(shapes : Map[Int, TransformationMatrix => ImmutableShape], transformation : TransformationMatrix) {
+  def apply(shapes : Map[Int, TransformationMatrix => Shape], transformation : TransformationMatrix) {
     Model execute TransformShapes(shapes, transformation)
   }
 
@@ -65,7 +65,7 @@ object Transform {
  * @param transformation  The TransformationMatrix containing the transformation
  * @param f  The function to apply on the shape
  */
-case class TransformShape(id : Int, transformation : TransformationMatrix, f : Option[TransformationMatrix => ImmutableShape] = None) extends Action {
+case class TransformShape(id : Int, transformation : TransformationMatrix, f : Option[TransformationMatrix => Shape] = None) extends Action {
 
   def execute(model : Model) = if (f.isDefined) {
     model add(id, f.get.apply(transformation))
@@ -87,7 +87,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 /**
  * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
-case class TransformShapes(shapes : Map[Int, TransformationMatrix => ImmutableShape], transformation : TransformationMatrix) extends Action {
+case class TransformShapes(shapes : Map[Int, TransformationMatrix => Shape], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
     val map = shapes.map(f => (f._1 -> f._2(transformation))).toMap

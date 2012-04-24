@@ -18,15 +18,15 @@ import com.siigna.app.model.action.{TransformShapes, Action}
 import com.siigna.app.view.View
 
 /**
- * A dynamic shape is a mutable wrapper for a regular ImmutableShape(s).
+ * A dynamic shape is a mutable wrapper for a regular Shape(s).
  * When altered, the dynamic shape saves the action required to alter the shape(s) in the static layer, so the changes
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
  * @param shapes  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape]) extends Shape
-                                      with (TransformationMatrix => Traversable[ImmutableShape]) {
+case class DynamicShape(shapes : Map[Int, TransformationMatrix => Shape]) extends ShapeLike
+                                      with (TransformationMatrix => Traversable[Shape]) {
 
   type T = DynamicShape
 
@@ -37,14 +37,14 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
 
   /**
    * Stores a private transformation matrix that indicates the translation applied to the
-   * Dynamic Shape since creation.
+   * Dynamic ShapeLike since creation.
    */
   private var transformation : TransformationMatrix = TransformationMatrix()
 
   /**
    * Applies a given transformation on the DynamicShape
    * @param t  The transformation to apply.
-   * @return An ImmutableShape as the result of the applied transformation.
+   * @return An Shape as the result of the applied transformation.
    */
   def apply(t : TransformationMatrix) = shapes.values.map(_ (transformation) transform t)
   
@@ -60,7 +60,7 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
   def boundary = shapes.map(s => Model(s._1)).foldLeft(Model(shapes.head._1).boundary)((a, b) => a.expand(b.boundary))
 
   /**
-   * Calculates the distance from the vector and to the underlying ImmutableShape.
+   * Calculates the distance from the vector and to the underlying Shape.
    * @param point  The point to calculate the distance to.
    * @param scale  The scale in which we are calculating.
    * @return  The length from the closest point of this shape to the point.
@@ -76,7 +76,7 @@ case class DynamicShape(shapes : Map[Int, TransformationMatrix => ImmutableShape
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
 
   /**
-   * Transforms the underlying ImmutableShape by adding a TransformShape action to the list of actions
+   * Transforms the underlying Shape by adding a TransformShape action to the list of actions
    * applied to this DynamicShape
    * @param transformation  The TransformationMatrix to apply to the shape.
    */
@@ -96,7 +96,7 @@ object DynamicShape {
   /**
    * A method to create a DynamicShape with only one id.
    */
-  def apply(id : Int, f : TransformationMatrix => ImmutableShape) = {
+  def apply(id : Int, f : TransformationMatrix => Shape) = {
     new DynamicShape(Map(id -> f))
   }
   

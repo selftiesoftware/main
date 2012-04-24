@@ -15,7 +15,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.Spec
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{ImmutableShape, LineShape}
+import com.siigna.app.model.shape.{Shape, LineShape}
 import collection.parallel.immutable.{ParMap, ParHashMap}
 
 /**

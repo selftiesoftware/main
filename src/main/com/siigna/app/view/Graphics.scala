@@ -41,7 +41,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a given shape.
    */
-  def draw(shape : Shape) {
+  def draw(shape : ShapeLike) {
 
     val attributes = shape.attributes
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())

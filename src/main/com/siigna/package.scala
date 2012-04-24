@@ -43,8 +43,8 @@ package object siigna extends com.siigna.util.Implicits {
   type Module = com.siigna.module.Module
 
   // Shapes
-  type ImmutableShape = com.siigna.app.model.shape.ImmutableShape
-  type Shape = com.siigna.app.model.shape.Shape
+  type ImmutableShape = com.siigna.app.model.shape.Shape
+  type Shape = com.siigna.app.model.shape.ShapeLike
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape

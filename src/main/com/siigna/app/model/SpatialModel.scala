@@ -12,13 +12,13 @@
 package com.siigna.app.model
 
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import shape.{ImmutableShape}
+import shape.{Shape}
 import collection.parallel.immutable.{ParMap, ParIterable}
 
 /**
  * An interface that supplies
  */
-trait SpatialModel[Key, Value <: ImmutableShape] {
+trait SpatialModel[Key, Value <: Shape] {
 
   // TODO: Remove this in favour of the tree
   def shapes : Map[Key, Value]
