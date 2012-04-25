@@ -70,12 +70,6 @@ class SiignaApplet extends Applet {
     //get the active user, if a log in was performed at www.siigna.com
     com.siigna.app.controller.AppletParameters.getContributorNameFromHomepage
 
-    //gets the active drawing, if one was selected at www.siigna.com, or null if none was received
-    val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-    //If one was received, it is set as active drawing. Otherwise a new drawing is created
-    if (requestDrawingId.isDefined)
-      com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
-
     // Henter info om aktiv bruger og aktiv tegning
     //com.siigna.app.model.drawing.activeDrawing.getInfoOnUserAndDrawingAtStartup()
 
