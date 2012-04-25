@@ -43,16 +43,6 @@ object AppletParameters {
   }
 
   /**
-   * Retrieves drawingId sent with param tag from html when starting applet
-   * @return
-   */
-  def getDrawingIdFromHomepage = {
-    drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-    println("DrawingIdRetrieved"+drawingId)
-    (drawingId)
-  }
-
-  /**
    * Returnerer en shapeId fra "banken". Kontrollerer, hvor mange id'er, der er tilbage i banken.
    * Hvis der er under et vist antal anmodes om "en ny portion".
    * @return
