@@ -75,9 +75,6 @@ class SiignaApplet extends Applet {
     //If one was received, it is set as active drawing. Otherwise a new drawing is created
     if (requestDrawingId.isDefined) {
       com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
-    } else {
-      //Indsæt kode, der laver ny drawing her
-    }
 
     // Henter info om aktiv bruger og aktiv tegning
     //com.siigna.app.model.drawing.activeDrawing.getInfoOnUserAndDrawingAtStartup()
