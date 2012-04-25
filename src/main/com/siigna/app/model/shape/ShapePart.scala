@@ -56,4 +56,9 @@ case class LargeShapePart(x : Array[Int]) extends ShapePart
  *
  * @param x The Int signalling which parts of the shape has been selected.
  */
-case class SmallShapePart(x : Int) extends ShapePart
+case class SmallShapePart(x : Int) extends ShapePart {
+
+  assert(x > 0, "The small shape part must be larger than zero")
+  assert(x < 30, "The small shape part cannot be larger than 30")
+
+}
