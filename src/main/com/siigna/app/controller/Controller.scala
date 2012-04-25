@@ -97,6 +97,7 @@ object Controller extends Actor {
     // TODO: Insert drawing-id here
     println("Registering")
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
+    println ("Registreringsforesp sendt")
 
     // Loop and react on incoming messages
     loop {
