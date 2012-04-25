@@ -12,8 +12,6 @@
 package com.siigna.app.model
 
 import action.{TransformShapes, Action}
-import com.siigna.app.model.Selection
-import shape.{DynamicShape}
 
 /**
  * A selectable model containing one single [[com.siigna.app.model.Selection]], representing one or more
