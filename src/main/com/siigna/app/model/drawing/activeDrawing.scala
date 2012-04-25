@@ -3,7 +3,6 @@ import com.siigna._
 
 object activeDrawing {
 
-  var drawingId: Option[Int] = None
   var drawingName: Option[String] = None
   var offsetX: Option[Int] = None
   var offsetY: Option[Int] = None
@@ -11,22 +10,12 @@ object activeDrawing {
   var contributorName: Option[String] = None
   var contributorId: Option[Int] = None
 
-  def getDrawingIdFromHomepage = {
-    drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-    println("DrawingIdRetrieved"+drawingId)
-    (drawingId)
-  }
-
   def setContributorName(name:String) {
     contributorName = Some(name)
   }
 
   def setContributorId(id:Int) {
     contributorId = Some(id)
-  }
-
-  def setActiveDrawingId(id:Int) {
-    drawingId = Some(id)
   }
   
   def setActiveDrawingName(name:String) {
