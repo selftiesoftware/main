@@ -94,6 +94,8 @@ object AppletParameters {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
       //Hvis der er sendt param tag fra html med det angivne navn returneres det.
+      println("Her")
+      println(applet.get.getParameter(parameterName))
       if (applet.get.getParameter(parameterName) != null)
         parameter = Some(applet.get.getParameter(parameterName).toInt)
     } else {
