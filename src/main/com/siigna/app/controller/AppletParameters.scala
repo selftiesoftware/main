@@ -95,13 +95,8 @@ object AppletParameters {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
       //Hvis appletten ikke er startet fra hjemmesiden kan der ikke hentes brugerid herfra - 1 indsættes.
-      try { (parameter = Some(applet.get.getParameter(parameterName).toInt))
-      } catch {
-        case e: java.lang.NullPointerException => {
-          println("No drawing Id provided from homepage. Setting drawingId to 1.")
-          parameter = Some(1)
-        }
-      }
+      if (!applet.get.getParameter(parameterName).isEmpty)
+        parameter = Some(applet.get.getParameter(parameterName).toInt)
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
     }
