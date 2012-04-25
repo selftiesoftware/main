@@ -128,7 +128,11 @@ object AppletParameters {
    * @param newId
    */
   def setDrawingId(newId:Int) {
-    remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+    if(drawingId.isDefined) {
+      remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+    } else {
+      remote.RegisterWithDrawingId(newId,clientReference.get)
+    }
     drawingId = Some(newId)
   }
 
