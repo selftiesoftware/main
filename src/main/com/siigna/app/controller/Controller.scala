@@ -96,7 +96,7 @@ object Controller extends Actor {
     // Remember that commands are sent to the controller immediately after creation
     // TODO: Insert drawing-id here
     println("Registering")
-    Register(AppletParameters.contributorName, AppletParameters.drawingId)
+    Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
     // Loop and react on incoming messages
     loop {
@@ -128,10 +128,8 @@ object Controller extends Actor {
                   //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
                   AppletParameters.setClient(client)
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
-                  if (AppletParameters.drawingId.isDefined) {
-                    var drawingId = com.siigna.app.controller.AppletParameters.drawingId
-                    if (!drawingId.isDefined) drawingId = Some(1)
-                    sink ! GetDrawing(drawingId.get, client.get)
+                  if (AppletParameters.readDrawingIdAsOption.isDefined) {
+                    sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
                   } else {
                     GetNewDrawingId(getClient)
                   }
