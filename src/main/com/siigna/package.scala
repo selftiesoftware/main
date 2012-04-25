@@ -37,6 +37,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Controller
   lazy val Controller = com.siigna.app.controller.Controller
+  val AppletParameters = com.siigna.app.controller.AppletParameters
 
   // Model
   val Model = com.siigna.app.model.Model

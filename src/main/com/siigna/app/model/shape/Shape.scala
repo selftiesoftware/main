@@ -33,9 +33,14 @@ import com.siigna.util.geom._
  * <br />
  * The shape hierarchy looks like this:
  * <pre>
+ *
+ *             ShapeLike
+ *                 |
+ *                 +--------+ Selection
+ *                 |
  *               Shape
  *                 |
- *      /----------+-----------\
+ *      +----------+-----------+
  *      |          |           |
  *      |          |        CollectionShape (contains several shapes)
  *      |          |             |
@@ -53,7 +58,7 @@ import com.siigna.util.geom._
  *          |
  *          +--- CircleShape
  *          |
- *          +--- RectangleShape
+ *          +--- RectangleShape (TODO: Here and below)
  *                 |
  *                 +--- ImageShape
  *                 |
