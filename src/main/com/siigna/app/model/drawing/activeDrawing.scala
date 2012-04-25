@@ -3,7 +3,6 @@ import com.siigna._
 
 object activeDrawing {
 
-  var drawingId: Option[Int] = None
   var drawingName: Option[String] = None
   var offsetX: Option[Int] = None
   var offsetY: Option[Int] = None
@@ -11,22 +10,12 @@ object activeDrawing {
   var contributorName: Option[String] = None
   var contributorId: Option[Int] = None
 
-  def getDrawingIdFromHomepage = {
-    drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-    println("DrawingIdRetrieved"+drawingId)
-    (drawingId)
-  }
-
   def setContributorName(name:String) {
     contributorName = Some(name)
   }
 
   def setContributorId(id:Int) {
     contributorId = Some(id)
-  }
-
-  def setActiveDrawingId(id:Int) {
-    drawingId = Some(id)
   }
   
   def setActiveDrawingName(name:String) {
@@ -47,7 +36,7 @@ object activeDrawing {
     if (lastActiveDrawing.isDefined) {
       //Henter tegningen, hvis der er en gammel:
       println ("Loading last active drawing...")
-      val shapes: Map[Int,Shape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
+      val shapes: Map[Int,ImmutableShape] = pgsqlGet.allShapesInDrawingFromDrawingIdWithDatabaseId(lastActiveDrawing.get)
       if (shapes.size > 0 ) {Create(shapes)} else {println("Drawing is empty.")}
     }
     if (lastActiveDrawing.isEmpty) {

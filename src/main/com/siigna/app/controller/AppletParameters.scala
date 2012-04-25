@@ -20,6 +20,10 @@ object AppletParameters {
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
+  private var drawingId: Option[Int] = None
+  var contributorName: Option[String] = None
+
+
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
@@ -27,6 +31,23 @@ object AppletParameters {
    */
   def getClient = {
     (clientReference.get)
+  }
+
+  /**
+   * Retrieves contributorName sent with param tag from html when starting applet
+   * @return
+   */
+  def getContributorNameFromHomepage = {
+    contributorName = com.siigna.app.controller.AppletParameters.getParametersString("contributorName")
+    (contributorName)
+  }
+
+  /**
+   * Returns drawingId as option
+   * @return
+   */
+  def readDrawingIdAsOption = {
+    (drawingId)
   }
 
   /**
@@ -65,19 +86,18 @@ object AppletParameters {
 
   /**
    * Fremfinder parametre, der er integers, der er sendt ved opstart af applet fra "param"-tags fra HTML
+   * Hvis intet tag med det angivne navn er sat returneres Option[None]
    * @param parameterName
    * @return
    */
   def getParametersInt(parameterName: String) = {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
-      //Hvis appletten ikke er startet fra hjemmesiden kan der ikke hentes brugerid herfra - 1 indsættes.
-      try { (parameter = Some(applet.get.getParameter(parameterName).toInt))
+      //Hvis der er sendt param tag fra html med det angivne navn returneres det.
+      try {
+        parameter = Some(applet.get.getParameter(parameterName).toInt)
       } catch {
-        case e: java.lang.NullPointerException => {
-          println("No drawing Id provided from homepage. Setting drawingId to 1.")
-          parameter = Some(1)
-        }
+        case _ => parameter = None
       }
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
@@ -101,6 +121,19 @@ object AppletParameters {
   def receiveNewShapeIds(shapeIds:Seq[Int]) {
     shapeIdBank = shapeIdBank ++ shapeIds
     println("shapeIdBank is now: "+shapeIdBank)
+  }
+
+  /**
+   * Registers new drawing Id with the server and sets drawingId-variable to new drawing id.
+   * @param newId
+   */
+  def setDrawingId(newId:Int) {
+    if(drawingId.isDefined) {
+      remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+    } else {
+      remote.RegisterWithDrawingId(newId,clientReference.get)
+    }
+    drawingId = Some(newId)
   }
 
   /**

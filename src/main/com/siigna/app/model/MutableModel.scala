@@ -21,6 +21,13 @@ import action.{TransformShapes, Action}
  */
 trait MutableModel extends SelectableModel {
 
+  /**
+   * The current selection, represented by a [[com.siigna.app.model.Selection]] containing
+   * ways to convert a Selection to one or more [[com.siigna.app.model.shape.Shape]] depending on
+   * the number of shapes included in the selection..
+   */
+  var selection : Option[Selection] = None
+
   def model = this
 
   /**
@@ -66,12 +73,5 @@ trait MutableModel extends SelectableModel {
     
     selection = Some(shape)
   }
-
-  /**
-   * The current selection, represented by a [[com.siigna.app.model.shape.Selection]] containing
-   * ways to convert a Selection to one or more [[com.siigna.app.model.shape.Shape]] depending on
-   * the number of shapes included in the selection..
-   */
-  var selection : Option[Selection] = None
 
 }

@@ -1,7 +1,3 @@
-package com.siigna.app.controller.remote
-
-import com.siigna.app.controller.Client
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -13,11 +9,12 @@ import com.siigna.app.controller.Client
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+package com.siigna.app.controller.remote
+
+import com.siigna.app.controller.Client
+import com.siigna.app.controller.Client
+
 /**
- * A [[com.siigna.app.controller.remote.RemoteCommand]] that signals that the client wishes to
- * register any actions received in the drawing with the given id. If no id is given, we assume the client
- * wishes to register a new drawing.
- *
- * @param drawingId  The id of the drawing to register. None if the remote should create an entirely new drawing.
+ * Remember to comment!!
  */
-case class Register(contributorName: Option[String], drawingId: Option[Int], client : Client = Client(0L)) extends RemoteCommand
+case class RegisterWithDrawingId (DrawingId:Int, client : Client) extends RemoteCommand

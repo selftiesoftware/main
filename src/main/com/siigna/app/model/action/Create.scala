@@ -12,9 +12,9 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
+import com.siigna.app.model.shape.{CollectionShape, Shape}
 import com.siigna.app.controller.AppletParameters
 import com.siigna.app.controller.remote.SaveShape
-import com.siigna.app.model.shape.{CollectionShape, Shape}
 
 /**
 * An object that allows you to create one or multiple shapes.
@@ -32,9 +32,8 @@ object Create {
   
   def apply(id : Int, shape : Shape) {
     Model execute CreateShape(id, shape)
-    println("Active drawong: "+com.siigna.app.model.drawing.activeDrawing.drawingId)
-    SaveShape(com.siigna.app.model.drawing.activeDrawing.drawingId.get,id,shape,AppletParameters.getClient)
-    println("SaveShape Sendt fra Create")
+    //Sends the shape to the server for saving in database and forwarding to other users
+    SaveShape(com.siigna.app.controller.AppletParameters.readDrawingIdAsOption.get,id,shape,AppletParameters.getClient)
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
