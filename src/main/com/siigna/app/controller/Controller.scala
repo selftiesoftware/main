@@ -101,7 +101,6 @@ object Controller extends Actor {
     // Loop and react on incoming messages
     loop {
       react {
-
         // Forward incoming actions to the server
         case action : Action => {
           Model execute action
