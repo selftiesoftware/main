@@ -86,14 +86,15 @@ object AppletParameters {
 
   /**
    * Fremfinder parametre, der er integers, der er sendt ved opstart af applet fra "param"-tags fra HTML
+   * Hvis intet tag med det angivne navn er sat returneres Option[None]
    * @param parameterName
    * @return
    */
   def getParametersInt(parameterName: String) = {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
-      //Hvis appletten ikke er startet fra hjemmesiden kan der ikke hentes brugerid herfra - 1 indsættes.
-      if (!applet.get.getParameter(parameterName).isEmpty)
+      //Hvis der er sendt param tag fra html med det angivne navn returneres det.
+      if (applet.get.getParameter(parameterName) != null)
         parameter = Some(applet.get.getParameter(parameterName).toInt)
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
