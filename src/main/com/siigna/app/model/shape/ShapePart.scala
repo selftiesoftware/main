@@ -25,7 +25,7 @@ package com.siigna.app.model.shape
  * <br >
  * An
  */
-trait ShapePart
+trait ShapePart extends Serializable
 
 /**
  * An EmptyShapePart is a ShapePart with no information and thus represents an empty Shape subset.
