@@ -26,13 +26,12 @@ import shape.{ShapeLike, Shape}
  * @param shapes  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class DynamicShape(shapes: Map[Int, TransformationMatrix => Shape]) extends ShapeLike
-with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(shapes: Map[Int, TransformationMatrix => Shape]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
 
-  type T = DynamicShape
+  type T = Selection
 
   /**
-   * The underlying action with which this DynamicShape has been changed since creation, if any.
+   * The underlying action with which this Selection has been changed since creation, if any.
    */
   var action: Option[Action] = None
 
@@ -43,7 +42,7 @@ with (TransformationMatrix => Traversable[Shape]) {
   private var transformation: TransformationMatrix = TransformationMatrix()
 
   /**
-   * Applies a given transformation on the DynamicShape
+   * Applies a given transformation on the Selection
    * @param t  The transformation to apply.
    * @return An Shape as the result of the applied transformation.
    */
@@ -78,7 +77,7 @@ with (TransformationMatrix => Traversable[Shape]) {
 
   /**
    * Transforms the underlying Shape by adding a TransformShape action to the list of actions
-   * applied to this DynamicShape
+   * applied to this Selection
    * @param transformation  The TransformationMatrix to apply to the shape.
    */
   def transform(transformation: TransformationMatrix) = {
@@ -90,15 +89,15 @@ with (TransformationMatrix => Traversable[Shape]) {
 }
 
 /**
- * Companion-object for the DynamicShape class.
+ * Companion-object for the Selection class.
  */
-object DynamicShape {
+object Selection {
 
   /**
-   * A method to create a DynamicShape with only one id.
+   * A method to create a Selection with only one id.
    */
   def apply(id: Int, f: TransformationMatrix => Shape) = {
-    new DynamicShape(Map(id -> f))
+    new Selection(Map(id -> f))
   }
 
 }

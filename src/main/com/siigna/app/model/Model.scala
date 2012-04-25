@@ -18,7 +18,7 @@ import collection.parallel.IterableSplitter
 import collection.parallel.immutable.{ParMap}
 import shape.{DynamicShape, Shape}
 import collection.immutable.MapProxy
-import com.siigna.app.model.DynamicShape
+import com.siigna.app.model.Selection
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -103,10 +103,10 @@ object Model extends ActionModel
   //def rtree = model.rtree
 
   /**
-   * The current selection represented by a an Option of [[com.siigna.app.model.shape.DynamicShape]].
-   * @return  Some(DynamicShape) if a selection is active or None if nothing has been selected
+   * The current selection represented by a an Option of [[com.siigna.app.model.shape.Selection]].
+   * @return  Some(Selection) if a selection is active or None if nothing has been selected
    */
-  def selection : Option[DynamicShape] = model.selection
+  def selection : Option[Selection] = model.selection
 
   /**
    * The shapes currently in the model.
