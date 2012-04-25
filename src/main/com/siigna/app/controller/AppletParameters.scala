@@ -20,7 +20,7 @@ object AppletParameters {
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
-  var drawingId: Option[Int] = None
+  private var drawingId: Option[Int] = None
   var contributorName: Option[String] = None
 
 
@@ -40,6 +40,14 @@ object AppletParameters {
   def getContributorNameFromHomepage = {
     contributorName = com.siigna.app.controller.AppletParameters.getParametersString("contributorName")
     (contributorName)
+  }
+
+  /**
+   * Returns drawingId as option
+   * @return
+   */
+  def readDrawingIdAsOption = {
+    (drawingId)
   }
 
   /**
@@ -112,12 +120,12 @@ object AppletParameters {
   }
 
   /**
-   * Sets id of active drawing to drawingId-variable, and registers it with the server
-   * @param id
+   * Registers new drawing Id with the server and sets drawingId-variable to new drawing id.
+   * @param newId
    */
-  def setDrawingId(id:Int) {
-    drawingId = Some(id)
-
+  def setDrawingId(newId:Int) {
+    remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+    drawingId = Some(newId)
   }
 
   /**
