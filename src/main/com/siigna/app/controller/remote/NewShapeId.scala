@@ -11,8 +11,6 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.controller.Client
-
 /**
  * Remember to comment!!
  */

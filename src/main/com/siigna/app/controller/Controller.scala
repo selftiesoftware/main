@@ -23,6 +23,7 @@ import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
 import com.siigna.app.model.Model
 import remote._
+import com.siigna.app.controller.AppletParameters._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -36,6 +37,8 @@ object Controller extends Actor {
   RemoteActor.classLoader = getClass.getClassLoader
   
   var client : Option[Client] = None
+
+  var isNewDrawing : Boolean = true
 
   /**
    * The last 10 events
@@ -94,12 +97,11 @@ object Controller extends Actor {
     // Register the client
     // Remember: When remote commands are created, they are sent to the controller immediately
     // TODO: Insert drawing-id here
-    Register(None, None)
+    Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
     // Loop and react on incoming messages
     loop {
       react {
-
         // Forward incoming actions to the server
         case action : Action => {
           Model execute action
@@ -123,13 +125,16 @@ object Controller extends Actor {
                   client = Some(r.client)
                   val id = client.get.id
                   Log.info("Controller registered client with id " + id)
+                  //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
                   AppletParameters.setClient(client)
-                  println("Sætter klient: "+client)
-                  println("1")
-                  var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
-                  if (!drawingId.isDefined) drawingId = Some(1)
-                  sink ! GetDrawing(drawingId.get, client.get)
-                  println("2")
+                  //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
+                  if (AppletParameters.readDrawingIdAsOption.isDefined) {
+                    sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
+                    isNewDrawing = false
+                  } else {
+                    GetNewDrawingId(getClient)
+                    isNewDrawing = true
+                  }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
                 }
@@ -140,6 +145,10 @@ object Controller extends Actor {
             // sure the remote command are meant to be forwarded to the server
             case _ => sink ! command
           }
+        }
+
+        case command : NewDrawingId => {
+          AppletParameters.setDrawingId(command.retrieveNewDrawingId)
         }
         case command : NewShapeId => {
           AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
