@@ -306,6 +306,7 @@ object Controller extends Actor {
         }
         // Exit
         case 'exit => Log.info("Controller is shutting down"); exit()
+
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
       }
