@@ -32,9 +32,8 @@ object Create {
   
   def apply(id : Int, shape : ImmutableShape) {
     Model execute CreateShape(id, shape)
-    println("Active drawong: "+com.siigna.app.model.drawing.activeDrawing.drawingId)
-    SaveShape(com.siigna.app.model.drawing.activeDrawing.drawingId.get,id,shape,AppletParameters.getClient)
-    println("SaveShape Sendt fra Create")
+    //Sends the shape to the server for saving in database and forwarding to other users
+    SaveShape(com.siigna.app.controller.AppletParameters.drawingId.get,id,shape,AppletParameters.getClient)
   }
 
   def apply[T <: ImmutableShape](collection : CollectionShape[T]) {
