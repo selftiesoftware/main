@@ -127,6 +127,11 @@ object Controller extends Actor {
                   Log.info("Controller registered client with id " + id)
                   //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
                   AppletParameters.setClient(client)
+                  //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
+                  val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
+                  //If one was received, it is set as active drawing. Otherwise a new drawing is created
+                  if (requestDrawingId.isDefined)
+                    com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
