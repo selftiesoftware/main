@@ -11,22 +11,20 @@ package com.siigna.app.model
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import com.siigna.app.model.Model
-import com.siigna.app.model.action.{TransformShapes, Action}
-import com.siigna.app.view.View
-import shape.{ShapeLike, Shape}
+import shape.{ShapePart, ShapeLike, Shape}
 
 /**
- * A dynamic shape is a mutable wrapper for a regular Shape(s).
- * When altered, the dynamic shape saves the action required to alter the shape(s) in the static layer, so the changes
+ * A Selection is a mutable wrapper for a regular Shape(s).
+ * When altered, the selection saves the action required to alter the shape(s) in the static layer, so the changes
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
  * @param shapes  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(shapes: Map[Int, TransformationMatrix => Shape]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(var shapes: collection.Map[Int, ShapePart]) extends ShapeLike {
 
   type T = Selection
 
@@ -42,13 +40,6 @@ case class Selection(shapes: Map[Int, TransformationMatrix => Shape]) extends Sh
   private var transformation: TransformationMatrix = TransformationMatrix()
 
   /**
-   * Applies a given transformation on the Selection
-   * @param t  The transformation to apply.
-   * @return An Shape as the result of the applied transformation.
-   */
-  def apply(t: TransformationMatrix) = shapes.values.map(_(transformation) transform t)
-
-  /**
    * The attributes of the underlying ImmutableShapes.
    */
   def attributes = Attributes()
@@ -58,6 +49,20 @@ case class Selection(shapes: Map[Int, TransformationMatrix => Shape]) extends Sh
    * @return A Rectangle2D.
    */
   def boundary = shapes.map(s => Model(s._1)).foldLeft(Model(shapes.head._1).boundary)((a, b) => a.expand(b.boundary))
+
+  /**
+   * Deletes the [[com.siigna.app.model.shape.ShapePart]] associated with the given id, if it exists and remove the
+   * part from the Model with a [[com.siigna.app.model.action.DeleteShapePart]] action.
+   * @param id  The id of the shape.
+   */
+  def delete(id : Int) {
+    if (shapes.contains(id)) {
+      val part = shapes(id)
+      // Execute action
+      Delete(id, part)
+      shapes = shapes.-(id)
+    }
+  }
 
   /**
    * Calculates the distance from the vector and to the underlying Shape.
@@ -96,8 +101,8 @@ object Selection {
   /**
    * A method to create a Selection with only one id.
    */
-  def apply(id: Int, f: TransformationMatrix => Shape) = {
-    new Selection(Map(id -> f))
+  def apply(id: Int, part : ShapePart) = {
+    new Selection(Map(id -> part))
   }
 
 }

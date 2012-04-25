@@ -16,7 +16,7 @@ import com.siigna.app.model.Selection
 import shape.{DynamicShape}
 
 /**
- * A selectable model containing one single [[com.siigna.app.model.shape.DynamicShape]], representing one or more
+ * A selectable model containing one single [[com.siigna.app.model.Selection]], representing one or more
  * selected shapes.
  *
  * @see [[com.siigna.app.model.Model]]
@@ -26,7 +26,7 @@ trait MutableModel extends SelectableModel {
   def model = this
 
   /**
-   * Deselect the [[com.siigna.app.model.shape.DynamicShape]] in the Model and apply the action(s)
+   * Deselect the [[com.siigna.app.model.Selection]] in the Model and apply the action(s)
    * executed on the shape since it was selected.
    * [[com.siigna.app.model.Model]].
    */
