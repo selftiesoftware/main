@@ -125,13 +125,16 @@ object Controller extends Actor {
                   client = Some(r.client)
                   val id = client.get.id
                   Log.info("Controller registered client with id " + id)
+                  //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
                   AppletParameters.setClient(client)
-                  println("Sætter klient: "+client)
-                  println("1")
-                  var drawingId = com.siigna.app.controller.AppletParameters.drawingId
-                  if (!drawingId.isDefined) drawingId = Some(1)
-                  sink ! GetDrawing(drawingId.get, client.get)
-                  println("2")
+                  //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
+                  if (AppletParameters.drawingId.isDefined) {
+                    var drawingId = com.siigna.app.controller.AppletParameters.drawingId
+                    if (!drawingId.isDefined) drawingId = Some(1)
+                    sink ! GetDrawing(drawingId.get, client.get)
+                  } else {
+
+                  }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
                 }
