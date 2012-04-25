@@ -60,7 +60,7 @@ import com.siigna.util.geom._
  *                 +--- TextShape
  * </pre>
  */
-trait Shape extends ShapeLike with (ShapePart => Option[Shape]) {
+trait Shape extends ShapeLike with (ShapePart => Shape) {
 
   type T <: Shape
 
@@ -97,12 +97,17 @@ trait Shape extends ShapeLike with (ShapePart => Option[Shape]) {
   def boundary : Rectangle2D = geometry.boundary
 
   /**
+   * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns None.
+   */
+  def delete(part : ShapePart) : Option[Shape]
+
+  /**
    * The basic geometric object for the shape.
    */
   def geometry : Geometry2D
 
   /**
-   * Selects the entire shape and wraps it into a DynamicShape, so it can be manipulated dynamically.
+   * Selects the entire shape and wraps it into a Selection, so it can be manipulated dynamically.
    * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.ShapePart]].
    */
   def select() : ShapePart
@@ -152,7 +157,7 @@ trait BasicShape extends Shape {
   /**
    * The basic geometric object for the shape.
    */
-  def geometry : GeometryBasic2D
+  override def geometry : GeometryBasic2D
 
   /**
    * Returns a setAttributes of the shape. In other words return a shape with a new id,

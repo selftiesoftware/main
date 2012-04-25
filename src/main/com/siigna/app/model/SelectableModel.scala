@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import com.siigna.app.model.DynamicShape
+import com.siigna.app.model.Selection
 import shape.DynamicShape
 
 /**
@@ -36,9 +36,9 @@ trait SelectableModel {
   def select(id : Int) { model select id }
 
   /**
-  * Select a single shape as written in the given DynamicShape.
-  * @param shape  The DynamicShape representing the selection.
+  * Select a single shape as written in the given Selection.
+  * @param shape  The Selection representing the selection.
   */
-  def select(shape : DynamicShape) { model select shape }
+  def select(shape : Selection) { model select shape }
 
 }

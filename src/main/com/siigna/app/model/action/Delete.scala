@@ -10,7 +10,7 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.{DynamicShape, Model}
+import com.siigna.app.model.{Selection, Model}
 import com.siigna.app.model.shape.{DynamicShape, Shape, ShapeLike}
 import com.siigna.util.logging.Log
 
@@ -22,7 +22,7 @@ object Delete {
       if (id.isDefined)
         Model(DeleteShape(id.get, s))
     }
-    case s : DynamicShape => {
+    case s : Selection => {
       Model.deselect(s)
       Model(DeleteShape(s.id, s.immutableShape))
     }
@@ -36,7 +36,7 @@ object Delete {
   def apply(shapes : Traversable[ShapeLike]) {
     var shapesToDelete = Map[String, Shape]()
     shapes.foreach{ s => s match {
-        case DynamicShape(id, shape) => {
+        case Selection(id, shape) => {
           if (!shapesToDelete.contains(id)) {
             shapesToDelete = shapesToDelete + (id -> shape)
           }

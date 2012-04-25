@@ -12,7 +12,7 @@
 package com.siigna.app.model
 
 import action.{TransformShapes, Action}
-import com.siigna.app.model.DynamicShape
+import com.siigna.app.model.Selection
 import shape.{DynamicShape}
 
 /**
@@ -56,24 +56,24 @@ trait MutableModel extends SelectableModel {
    * @param id  The id of the shape.
    */
   override def select(id : Int) {
-    select(DynamicShape(id, Model(id).select()))
+    select(Selection(id, Model(id).select()))
   }
   
   /**
-   * Select a single shape with the given DynamicShape information.
-   * @param shape  The DynamicShape representing the selection.
+   * Select a single shape with the given Selection information.
+   * @param shape  The Selection representing the selection.
    */
-  override def select(shape : DynamicShape) {
+  override def select(shape : Selection) {
     if (selection.isDefined) deselect()
     
     selection = Some(shape)
   }
 
   /**
-   * The current selection, represented by a [[com.siigna.app.model.shape.DynamicShape]] containing
-   * ways to convert a DynamicShape to one or more [[com.siigna.app.model.shape.Shape]] depending on
+   * The current selection, represented by a [[com.siigna.app.model.shape.Selection]] containing
+   * ways to convert a Selection to one or more [[com.siigna.app.model.shape.Shape]] depending on
    * the number of shapes included in the selection..
    */
-  var selection : Option[DynamicShape] = None
+  var selection : Option[Selection] = None
 
 }

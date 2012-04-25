@@ -11,7 +11,7 @@
 
 package com
 
-import siigna.app.model.DynamicShape
+import siigna.app.model.Selection
 
 package object siigna extends com.siigna.util.Implicits {
 
