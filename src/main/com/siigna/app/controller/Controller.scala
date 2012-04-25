@@ -23,6 +23,7 @@ import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
 import com.siigna.app.model.Model
 import remote._
+import com.siigna.app.controller.AppletParameters._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -94,7 +95,8 @@ object Controller extends Actor {
     // Register the client
     // Remember that commands are sent to the controller immediately after creation
     // TODO: Insert drawing-id here
-    Register(None, None)
+    println("Registering")
+    Register(AppletParameters.contributorName, AppletParameters.drawingId)
 
     // Loop and react on incoming messages
     loop {
@@ -126,7 +128,7 @@ object Controller extends Actor {
                   AppletParameters.setClient(client)
                   println("Sætter klient: "+client)
                   println("1")
-                  var drawingId = com.siigna.app.model.drawing.activeDrawing.drawingId
+                  var drawingId = com.siigna.app.controller.AppletParameters.drawingId
                   if (!drawingId.isDefined) drawingId = Some(1)
                   sink ! GetDrawing(drawingId.get, client.get)
                   println("2")

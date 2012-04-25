@@ -20,6 +20,10 @@ object AppletParameters {
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
+  var drawingId: Option[Int] = None
+  var contributorName: Option[String] = None
+
+
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
@@ -27,6 +31,25 @@ object AppletParameters {
    */
   def getClient = {
     (clientReference.get)
+  }
+
+  /**
+   * Retrieves contributorName sent with param tag from html when starting applet
+   * @return
+   */
+  def getContributorNameFromHomepage = {
+    contributorName = com.siigna.app.controller.AppletParameters.getParametersString("contributorName")
+    (contributorName)
+  }
+
+  /**
+   * Retrieves drawingId sent with param tag from html when starting applet
+   * @return
+   */
+  def getDrawingIdFromHomepage = {
+    drawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
+    println("DrawingIdRetrieved"+drawingId)
+    (drawingId)
   }
 
   /**
@@ -101,6 +124,14 @@ object AppletParameters {
   def receiveNewShapeIds(shapeIds:Seq[Int]) {
     shapeIdBank = shapeIdBank ++ shapeIds
     println("shapeIdBank is now: "+shapeIdBank)
+  }
+
+  /**
+   * Sets id of active drawing to drawingIdvariable, and registers it with the server
+   * @param id
+   */
+  def setActiveDrawingId(id:Int) {
+    drawingId = Some(id)
   }
 
   /**
