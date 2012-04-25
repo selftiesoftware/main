@@ -38,6 +38,8 @@ object Controller extends Actor {
   
   var client : Option[Client] = None
 
+  var isNewDrawing : Boolean = true
+
   /**
    * The last 10 events
    */
@@ -130,8 +132,10 @@ object Controller extends Actor {
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
+                    isNewDrawing = false
                   } else {
                     GetNewDrawingId(getClient)
+                    isNewDrawing = true
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
