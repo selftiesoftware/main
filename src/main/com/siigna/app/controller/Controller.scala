@@ -143,6 +143,10 @@ object Controller extends Actor {
             case _ => sink ! command
           }
         }
+
+        case command : NewDrawingId => {
+          AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
+        }
         case command : NewShapeId => {
           AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
         }
