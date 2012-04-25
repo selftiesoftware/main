@@ -94,10 +94,11 @@ object AppletParameters {
     var parameter: Option[Int] = None
     if (applet.isDefined) {
       //Hvis der er sendt param tag fra html med det angivne navn returneres det.
-      println("Her")
-      println(applet.get.getParameter(parameterName))
-      if (applet.get.getParameter(parameterName) != null)
+      try {
         parameter = Some(applet.get.getParameter(parameterName).toInt)
+      } catch {
+        case _ => parameter = None
+      }
     } else {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
     }
