@@ -133,7 +133,7 @@ object Controller extends Actor {
                     if (!drawingId.isDefined) drawingId = Some(1)
                     sink ! GetDrawing(drawingId.get, client.get)
                   } else {
-
+                    GetNewDrawingId(getClient)
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
@@ -148,7 +148,7 @@ object Controller extends Actor {
         }
 
         case command : NewDrawingId => {
-          AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
+          AppletParameters.drawingId = command.retrieveNewDrawingId
         }
         case command : NewShapeId => {
           AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
