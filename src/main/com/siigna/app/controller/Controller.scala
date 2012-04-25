@@ -148,7 +148,7 @@ object Controller extends Actor {
         }
 
         case command : NewDrawingId => {
-          AppletParameters.drawingId = command.retrieveNewDrawingId
+          AppletParameters.setDrawingId(command.retrieveNewDrawingId)
         }
         case command : NewShapeId => {
           AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
