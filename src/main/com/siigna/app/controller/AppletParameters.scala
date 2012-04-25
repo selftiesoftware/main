@@ -127,11 +127,12 @@ object AppletParameters {
   }
 
   /**
-   * Sets id of active drawing to drawingIdvariable, and registers it with the server
+   * Sets id of active drawing to drawingId-variable, and registers it with the server
    * @param id
    */
-  def setActiveDrawingId(id:Int) {
+  def setDrawingId(id:Int) {
     drawingId = Some(id)
+
   }
 
   /**
