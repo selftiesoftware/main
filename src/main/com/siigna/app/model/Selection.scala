@@ -14,17 +14,17 @@ package com.siigna.app.model
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import shape.{ShapePart, ShapeLike, Shape}
+import shape.{PartialShape, Shape, ShapePart, ShapeLike}
 
 /**
  * A Selection is a mutable wrapper for a regular Shape(s).
  * When altered, the selection saves the action required to alter the shape(s) in the static layer, so the changes
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
- * @param shapes  The ids of the wrapped shape(s).
+ * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var shapes: collection.Map[Int, ShapePart]) extends ShapeLike {
+case class Selection(var parts: Map[Int, ShapePart]) extends ShapeLike {
 
   type T = Selection
 
@@ -48,7 +48,7 @@ case class Selection(var shapes: collection.Map[Int, ShapePart]) extends ShapeLi
    * The boundary of the underlying ImmutableShapes.
    * @return A Rectangle2D.
    */
-  def boundary = shapes.map(s => Model(s._1)).foldLeft(Model(shapes.head._1).boundary)((a, b) => a.expand(b.boundary))
+  def boundary = parts.map(s => Model(s._1)).foldLeft(Model(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
 
   /**
    * Deletes the [[com.siigna.app.model.shape.ShapePart]] associated with the given id, if it exists and remove the
@@ -56,11 +56,11 @@ case class Selection(var shapes: collection.Map[Int, ShapePart]) extends ShapeLi
    * @param id  The id of the shape.
    */
   def delete(id : Int) {
-    if (shapes.contains(id)) {
-      val part = shapes(id)
+    if (parts.contains(id)) {
+      val part = parts(id)
       // Execute action
       Delete(id, part)
-      shapes = shapes.-(id)
+      parts = parts.-(id)
     }
   }
 
@@ -70,13 +70,23 @@ case class Selection(var shapes: collection.Map[Int, ShapePart]) extends ShapeLi
    * @param scale  The scale in which we are calculating.
    * @return  The length from the closest point of this shape to the point.
    */
-  def distanceTo(point: Vector2D, scale: Double) = shapes.map(s => Model(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
+  def distanceTo(point: Vector2D, scale: Double) = parts.map(s => Model(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
 
   /**
    * Returns the current transformation applied to the shape.
    * @return  The transformation as a [[com.siigna.util.geom.TransformationMatrix]].
    */
   def getTransformation = transformation
+
+  /**
+   * Retrieves the current shapes of the selection.
+   * @return A map containing the ids and the shapes used in the current selection.
+   */
+  def shapes : Map[Int, Shape] = {
+    parts.map((t : (Int, ShapePart)) => {
+      (t._1 -> Model(t._1))
+    })
+  }
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
 

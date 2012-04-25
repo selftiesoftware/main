@@ -11,9 +11,6 @@
 
 package com.siigna.app.model
 
-import com.siigna.app.model.Selection
-import shape.DynamicShape
-
 /**
  * A model that can be selected and deselected.
  */

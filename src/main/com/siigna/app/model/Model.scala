@@ -14,11 +14,8 @@ package com.siigna.app.model
 
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import collection.parallel.IterableSplitter
-import collection.parallel.immutable.{ParMap}
-import shape.{DynamicShape, Shape}
+import shape.{Shape}
 import collection.immutable.MapProxy
-import com.siigna.app.model.Selection
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -103,7 +100,7 @@ object Model extends ActionModel
   //def rtree = model.rtree
 
   /**
-   * The current selection represented by a an Option of [[com.siigna.app.model.shape.Selection]].
+   * The current selection represented by a an Option of [[com.siigna.app.model.Selection]].
    * @return  Some(Selection) if a selection is active or None if nothing has been selected
    */
   def selection : Option[Selection] = model.selection

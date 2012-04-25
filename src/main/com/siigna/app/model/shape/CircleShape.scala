@@ -40,15 +40,25 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   val handleW = Vector2D(center.x - radius, center.y)
   val handleS = Vector2D(center.x, center.y - radius)
   val handles = Seq(handleE, handleN, handleW, handleS)
+  
+  def apply(part : ShapePart) = part match {
+    case FullShapePart | SmallShapePart(_) => Some(new PartialShape(transform))
+    case _ => None
+  }
+
+  def delete(part: ShapePart) = part match {
+    case SmallShapePart(_) | FullShapePart => None
+    case _ => Some(this)
+  }
 
   /**
    * The distance to the closest handle from a given point.
    */
   def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def select(rect: Rectangle2D) = if (rect.contains(geometry)) Some(select()) else None
+  def select(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapePart else EmptyShapePart
 
-  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) Some(select()) else None
+  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapePart else EmptyShapePart
 
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 

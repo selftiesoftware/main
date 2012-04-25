@@ -60,7 +60,7 @@ import com.siigna.util.geom._
  *                 +--- TextShape
  * </pre>
  */
-trait Shape extends ShapeLike with (ShapePart => Shape) {
+trait Shape extends ShapeLike with (ShapePart => Option[PartialShape]) {
 
   type T <: Shape
 
@@ -107,10 +107,10 @@ trait Shape extends ShapeLike with (ShapePart => Shape) {
   def geometry : Geometry2D
 
   /**
-   * Selects the entire shape and wraps it into a Selection, so it can be manipulated dynamically.
+   * Selects the entire shape, so it can be manipulated dynamically.
    * @return  The shape wrapped into a corresponding [[com.siigna.app.model.shape.ShapePart]].
    */
-  def select() : ShapePart
+  def select() = FullShapePart
 
   /**
    * Selects a shape by a rectangle. If the rectangle encloses the entire shape then select everything, but if

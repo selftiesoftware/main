@@ -161,7 +161,7 @@ object View extends Canvas with Runnable {
       // Fetch and draw the dynamic layer.
       // TODO: Cache this
       try {
-        Model.selection.foreach(_ (transformation) foreach(s => graphics draw s.setAttribute("Color" -> Preferences.color("colorSelected"))))
+        Model.selection.foreach(_.shapes foreach(s => graphics draw s._2.transform(transformation).setAttribute("Color" -> Preferences.color("colorSelected"))))
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
       }

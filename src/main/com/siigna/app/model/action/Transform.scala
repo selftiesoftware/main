@@ -44,7 +44,7 @@ object Transform {
    * @param transformation The transformation to apply
    */
   def apply(ids : Traversable[Int], transformation : TransformationMatrix) {
-    val m = ids.map(id => (id -> ((t : TransformationMatrix) => Model(id).transform(t)))).toMap
+    val m = ids.map(id => (id -> Model(id))).toMap
     Model execute TransformShapes(m, transformation)
   }
 
@@ -53,7 +53,7 @@ object Transform {
    * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply(shapes : Map[Int, TransformationMatrix => Shape], transformation : TransformationMatrix) {
+  def apply(shapes : Map[Int, Shape], transformation : TransformationMatrix) {
     Model execute TransformShapes(shapes, transformation)
   }
 
@@ -87,10 +87,10 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 /**
  * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
-case class TransformShapes(shapes : Map[Int, TransformationMatrix => Shape], transformation : TransformationMatrix) extends Action {
+case class TransformShapes(shapes : Map[Int, Shape], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    val map = shapes.map(f => (f._1 -> f._2(transformation))).toMap
+    val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation))).toMap
     model add map
   }
 
@@ -98,7 +98,7 @@ case class TransformShapes(shapes : Map[Int, TransformationMatrix => Shape], tra
   def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    val map = shapes.map(f => (f._1 -> f._2(transformation.inverse))).toMap
+    val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation.inverse))).toMap
     model add map
   }
 }

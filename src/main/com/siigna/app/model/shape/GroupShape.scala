@@ -29,6 +29,12 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 
   type T = GroupShape
 
+  def apply(part : ShapePart) = None
+
+  def delete(part : ShapePart) = {
+    None
+  }
+
   def select(rect: Rectangle2D) = null
 
   def select(point: Vector2D) = null
