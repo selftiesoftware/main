@@ -13,7 +13,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.{Shape, ShapeLike}
 import com.siigna.util.geom.Vector2D
-import com.siigna.app.model.{DynamicShape, Model}
+import com.siigna.app.model.{Selection, Model}
 
 /**
  * Select objects. This action is crucial to
