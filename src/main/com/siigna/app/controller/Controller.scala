@@ -206,7 +206,7 @@ object Controller extends Actor {
 
                 // If continue is set, prepend the newest event to the event-queue
                 // and remove the newest event form the event-list
-                if (continue) {
+                if (continue && !events.isEmpty) {
                   this ! events.head
                   events = events.tail
 
