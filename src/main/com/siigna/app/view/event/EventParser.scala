@@ -15,7 +15,7 @@ import java.awt.event.{KeyEvent => AWTKeyEvent}
 
 import com.siigna.app.model.Model
 import com.siigna.app.Siigna
-import com.siigna.app.model.shape.{ImmutableShape}
+import com.siigna.app.model.shape.{Shape}
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.view.Graphics
 import collection.parallel.immutable.{ParMap, ParIterable}
@@ -198,7 +198,7 @@ abstract class EventSnap {
   /**
    * Parses an event by the given snap-settings.
    */
-  def parse(event : Event, model : Map[Int, ImmutableShape]) : Event
+  def parse(event : Event, model : Map[Int, Shape]) : Event
 }
 
 /**
@@ -222,6 +222,6 @@ abstract class EventTrack {
   /**
    * Parses a list into a single event.
    */
-  def parse(events : List[Event], model : Map[Int, ImmutableShape]) : Event
+  def parse(events : List[Event], model : Map[Int, Shape]) : Event
   
 }

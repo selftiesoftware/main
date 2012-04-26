@@ -128,6 +128,14 @@ object AppletParameters {
    * @param newId
    */
   def setDrawingId(newId:Int) {
+    drawingId = Some(newId)
+  }
+
+  /**
+   * Registers new drawing Id with the server and sets drawingId-variable to new drawing id.
+   * @param newId
+   */
+  def setDrawingIdAndRegisterItWithTheServer(newId:Int) {
     if(drawingId.isDefined) {
       remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
     } else {
