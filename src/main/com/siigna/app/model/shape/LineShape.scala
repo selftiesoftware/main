@@ -36,29 +36,41 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   val points = Iterable(p1, p2)
 
+  def apply(part : ShapePart) = part match {
+    case SmallShapePart(1) => Some(new PartialShape((t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes)))
+    case SmallShapePart(2) => Some(new PartialShape((t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes)))
+    case FullShapePart => Some(new PartialShape(transform))
+    case _ => None
+  }
+
   def select(r : Rectangle2D) = {
     if (r.contains(boundary)) {
-      Some((t : TransformationMatrix) => if (r.contains(p1)) {
-        LineShape(p1.transform(t), p1, attributes)
+      if (r.contains(p1)) {
+        SmallShapePart(1)
       } else if (r.contains(p2)) {
-        LineShape(p1, p2.transform(t), attributes)
-      } else transform(t))
-    } else None
+        SmallShapePart(2)
+      } else EmptyShapePart
+    } else EmptyShapePart
   }
   
   def select(p : Vector2D) = {
     if (distanceTo(p) > Preferences.double("selectionDistance")) {
-      None
+      EmptyShapePart
     } else {
-      Some((t : TransformationMatrix) => if (p.distanceTo(p1) < p.distanceTo(p2)) {
-        LineShape(p1.transform(t), p2, attributes)
+      if (p.distanceTo(p1) < p.distanceTo(p2)) {
+        SmallShapePart(1)
       } else {
-        LineShape(p1, p2.transform(t), attributes)
-      })
+        SmallShapePart(2)
+      }
     }
   }
 
   val start = p1
+  
+  def delete(part : ShapePart) : Option[Shape] = part match {
+    case SmallShapePart(_) | FullShapePart => None
+    case _ => Some(this)
+  }
 
   def setAttributes(attributes : Attributes) = LineShape(p1, p2, attributes)
 

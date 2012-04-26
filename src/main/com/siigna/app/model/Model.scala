@@ -14,16 +14,14 @@ package com.siigna.app.model
 
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import collection.parallel.IterableSplitter
-import collection.parallel.immutable.{ParMap}
-import shape.{DynamicShape, ImmutableShape}
+import shape.{Shape}
 import collection.immutable.MapProxy
 
 /**
  * An immutable model with two layers: an static and dynamic.
  * <br />
  * The static part is basically a long list of all the
- * [[com.siigna.app.model.shape.ImmutableShape]]s and their keys in the Model.
+ * [[com.siigna.app.model.shape.Shape]]s and their keys in the Model.
  * <br />
  * The dynamic part allows selecting parts of the global immutable layer. These shapes can be altered
  * without changes in the static layer which allows for significant performance benefits. When the
@@ -34,12 +32,12 @@ import collection.immutable.MapProxy
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : Map[Int, ImmutableShape]) extends ImmutableModel[Int, ImmutableShape]
+sealed class Model(val shapes : Map[Int, Shape]) extends ImmutableModel[Int, Shape]
                                                                     with MutableModel
-                                                                    with SpatialModel[Int, ImmutableShape]
-                                                                    with ModelBuilder[Int, ImmutableShape] {
+                                                                    with SpatialModel[Int, Shape]
+                                                                    with ModelBuilder[Int, Shape] {
 
-  def build(coll : Map[Int, ImmutableShape]) = { new Model(coll) }
+  def build(coll : Map[Int, Shape]) = { new Model(coll) }
 
 }
 
@@ -48,8 +46,8 @@ sealed class Model(val shapes : Map[Int, ImmutableShape]) extends ImmutableModel
  */
 object Model extends ActionModel
                 with SelectableModel
-                with SpatialModel[Int, ImmutableShape]
-                with MapProxy[Int, ImmutableShape] {
+                with SpatialModel[Int, Shape]
+                with MapProxy[Int, Shape] {
 
   /**
    * The boundary from the current content of the Model.
@@ -102,10 +100,10 @@ object Model extends ActionModel
   //def rtree = model.rtree
 
   /**
-   * The current selection represented by a an Option of [[com.siigna.app.model.shape.DynamicShape]].
-   * @return  Some(DynamicShape) if a selection is active or None if nothing has been selected
+   * The current selection represented by a an Option of [[com.siigna.app.model.Selection]].
+   * @return  Some(Selection) if a selection is active or None if nothing has been selected
    */
-  def selection : Option[DynamicShape] = model.selection
+  def selection : Option[Selection] = model.selection
 
   /**
    * The shapes currently in the model.

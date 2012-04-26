@@ -17,7 +17,7 @@ import com.siigna.util.geom.{Geometry2D, CollectionGeometry, Rectangle2D}
  * A trait for immutable shapes containing other immutable shapes.
  * @tparam T  The type of shapes inside the collection.
  */
-trait CollectionShape[G <: ImmutableShape] extends ImmutableShape with Iterable[G] {
+trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 
   // TODO: Fix this
   def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
