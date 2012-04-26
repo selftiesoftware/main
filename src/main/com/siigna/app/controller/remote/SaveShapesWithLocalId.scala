@@ -14,7 +14,7 @@ package com.siigna.app.controller.remote
 /**
  *
  */
-import com.siigna.app.model.shape.ImmutableShape
 import com.siigna.app.controller.Client
+import com.siigna.app.model.shape.Shape
 
-case class SaveShapesWithLocalId (drawingId:Int,shapes:Map[Int,ImmutableShape],client:Client) extends RemoteCommand
+case class SaveShapesWithLocalId (drawingId:Int,shapes:Map[Int,Shape],client:Client) extends RemoteCommand
