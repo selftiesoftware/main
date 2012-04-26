@@ -1,5 +1,3 @@
-package com.siigna.app.controller.remote
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -11,11 +9,12 @@ package com.siigna.app.controller.remote
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+package com.siigna.app.controller.remote
+
 /**
- * A [[com.siigna.app.controller.command.Command]] sent by the server to indicate success of a previously
- * sent Command.
+ * A class indicating failure. Used by the server to inform the client when something went wrong.
  */
-case class Success(command : RemoteCommand) extends RemoteCommand {
+case class Failure(command : RemoteCommand) extends RemoteCommand {
 
   def client = command.client
 

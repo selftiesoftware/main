@@ -13,7 +13,7 @@ package com.siigna.app.model
 
 import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
-import shape.ImmutableShape
+import shape.Shape
 import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
 
@@ -25,7 +25,7 @@ trait ActionModel {
   /**
    * The underlying immutable model of Siigna.
    */
-  @volatile protected var model = new Model(Map[Int, ImmutableShape]())
+  @volatile protected var model = new Model(Map[Int, Shape]())
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.

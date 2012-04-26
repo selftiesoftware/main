@@ -12,7 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.util.logging.Log
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{GroupShape, ImmutableShape}
+import com.siigna.app.model.shape.{GroupShape, Shape}
 
 /**
  * Groups objects or merges objects into existing groups.
@@ -22,7 +22,7 @@ object Group {
   /**
    * Group a number of shapes.
    */
-  def apply(shapes : Traversable[ImmutableShape]) {
+  def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
       val ids = Model.findIds(shapes)
       if (ids.size > 1) {

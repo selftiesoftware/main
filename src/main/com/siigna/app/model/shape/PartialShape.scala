@@ -11,17 +11,16 @@
 
 package com.siigna.app.model.shape
 
+import com.siigna.util.geom.{TransformationMatrix}
+
 /**
- * A PartialShape is an accessor for a shape through a given combination of the shape.
+ * A PartialShape is a function that allows for a shape to be partially transformed.
  */
-trait PartialShape extends PartialFunction[PartialShape, ImmutableShape] {
+class PartialShape(f : (TransformationMatrix => Shape)) extends (TransformationMatrix => Shape) {
 
   /**
-   * The id of the shape
-   * @return
+   * Transforms the PartialShape with a given matrix.
    */
-  def id : Int
-
+  def apply(t : TransformationMatrix) = f(t)
+  
 }
-
-trait SimplePartialShape extends PartialShape
