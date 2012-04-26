@@ -31,16 +31,27 @@ import com.siigna.util.collection.{Preferences, Attributes}
  *
  * TODO: Middle point should be middle of arc, not random point on circumference.
  */
-case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape
-{
+case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape {
 
   type T = ArcShape
 
   val geometry = Arc2D(center, radius, startAngle, angle)
 
-  def select(rect: Rectangle2D) = if (rect.contains(geometry)) Some(select()) else None
+  // TODO: What about selection "arc-points"??
+  def apply(part : ShapePart) = part match {
+    case FullShapePart => Some(new PartialShape(transform))
+    case SmallShapePart(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
+    case _ => None
+  }
 
-  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) Some(select()) else None
+  def delete(part: ShapePart) = part match {
+    case SmallShapePart(_) | FullShapePart => None
+    case _ => Some(this)
+  }
+
+  def select(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapePart else EmptyShapePart
+
+  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapePart else EmptyShapePart
 
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 

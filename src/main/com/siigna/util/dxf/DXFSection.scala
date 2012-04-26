@@ -29,7 +29,7 @@ case class DXFSection(values : Seq[DXFValue]) extends Addable[DXFValue, DXFSecti
 
   def repr = this
 
-  def toShape : Option[Shape] = {
+  def toShape : Option[ShapeLike] = {
     try {
       values.head match {
         // Arc
@@ -97,7 +97,7 @@ case class DXFSection(values : Seq[DXFValue]) extends Addable[DXFValue, DXFSecti
       }
     } catch {
       case e => {
-        Debug.warning("DXFSection: Failed to parse section to Shape. Returned error: "+e)
+        Debug.warning("DXFSection: Failed to parse section to ShapeLike. Returned error: "+e)
         None
       }
     }
