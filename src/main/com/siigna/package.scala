@@ -11,6 +11,8 @@
 
 package com
 
+import siigna.app.model.Selection
+
 package object siigna extends com.siigna.util.Implicits {
 
   // Actions
@@ -40,21 +42,21 @@ package object siigna extends com.siigna.util.Implicits {
   // Model
   val Model = com.siigna.app.model.Model
 
+  type Selection = com.siigna.app.model.Selection
+  val Selection = com.siigna.app.model.Selection
+
   // Module
   type Module = com.siigna.module.Module
 
   // Shapes
-  type ImmutableShape = com.siigna.app.model.shape.ImmutableShape
-  type Shape = com.siigna.app.model.shape.Shape
+  type ImmutableShape = com.siigna.app.model.shape.Shape
+  type Shape = com.siigna.app.model.shape.ShapeLike
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape
 
   type CircleShape = com.siigna.app.model.shape.CircleShape
   lazy val CircleShape = com.siigna.app.model.shape.CircleShape
-
-  type DynamicShape = com.siigna.app.model.shape.DynamicShape
-  val DynamicShape = com.siigna.app.model.shape.DynamicShape
 
   //type ImageShape = com.siigna.app.model.shape.ImageShape
   //lazy val ImageShape = com.siigna.app.model.shape.ImageShape
