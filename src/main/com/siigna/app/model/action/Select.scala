@@ -11,13 +11,13 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{ImmutableShape, Shape}
-import com.siigna.app.model.Model
+import com.siigna.app.model.shape.{Shape, ShapeLike}
 import com.siigna.util.geom.Vector2D
+import com.siigna.app.model.{Selection, Model}
 
 /**
  * Select objects. This action is crucial to
- * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.ImmutableShape]]
+ * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.Shape]]
  * and [[com.siigna.app.model.shape.DynamicShape]] that allows shapes to enter the
  * [[com.siigna.app.model.MutableModel]]. DynamicShapes does not just duplicate shapes but also
  * contain information about smaller parts of a shape - if the user chose to only select a point for
@@ -28,7 +28,7 @@ import com.siigna.util.geom.Vector2D
 object Select {
 
   /**
-   * Selects one [[com.siigna.app.model.shape.ImmutableShape]].
+   * Selects one [[com.siigna.app.model.shape.Shape]].
    * @param id  The ID of the shape to select.
    */
   def apply(id : Int) {
@@ -36,18 +36,18 @@ object Select {
   }
 
   /**
-   * Selects several [[com.siigna.app.model.shape.ImmutableShape]]s.
+   * Selects several [[com.siigna.app.model.shape.Shape]]s.
    * @param shapes  The shapes to select.
    */
-  def apply(shapes : ImmutableShape*) {
+  def apply(shapes : Shape*) {
     throw new UnsupportedOperationException("Not implemented yet")
   }
 
   /**
-   * Selects several [[com.siigna.app.model.shape.ImmutableShape]]s.
+   * Selects several [[com.siigna.app.model.shape.Shape]]s.
    * @param shapes  The shapes to select.
    */
-  def apply(shapes : Traversable[ImmutableShape]) {
+  def apply(shapes : Traversable[Shape]) {
     throw new UnsupportedOperationException("Not implemented yet")
     //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
   }

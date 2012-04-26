@@ -18,7 +18,7 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
-import com.siigna.app.model.shape.{ImmutableShape, TextShape, PolylineShape}
+import com.siigna.app.model.shape.{Shape, TextShape, PolylineShape}
 import java.awt.image.{BufferedImage, VolatileImage}
 
 /**
@@ -47,7 +47,7 @@ object View extends Canvas with Runnable {
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
-  var boundaryShape : Rectangle2D => ImmutableShape = PolylineShape.fromRectangle(_).setAttribute("Color" -> "#AAAAAA".color)
+  var boundaryShape : Rectangle2D => Shape = PolylineShape.fromRectangle(_).setAttribute("Color" -> "#AAAAAA".color)
   
   /**
    * The frames in the current second.
@@ -161,7 +161,7 @@ object View extends Canvas with Runnable {
       // Fetch and draw the dynamic layer.
       // TODO: Cache this
       try {
-        Model.selection.foreach(_ (transformation) foreach(s => graphics draw s.setAttribute("Color" -> Preferences.color("colorSelected"))))
+        Model.selection.foreach(_.shapes foreach(s => graphics draw s._2.transform(transformation).setAttribute("Color" -> Preferences.color("colorSelected"))))
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
       }

@@ -95,11 +95,9 @@ object Controller extends Actor {
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
     // Register the client
-    // Remember that commands are sent to the controller immediately after creation
+    // Remember: When remote commands are created, they are sent to the controller immediately
     // TODO: Insert drawing-id here
-    println("Registering")
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
-    println ("Registreringsforesp sendt")
 
     // Loop and react on incoming messages
     loop {
@@ -127,13 +125,9 @@ object Controller extends Actor {
                   client = Some(r.client)
                   val id = client.get.id
                   Log.info("Controller registered client with id " + id)
+                  println("Registerdel kører")
                   //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
                   AppletParameters.setClient(client)
-                  //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
-                  val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-                  //If one was received, it is set as active drawing. Otherwise a new drawing is created
-                  if (requestDrawingId.isDefined)
-                    com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
@@ -155,7 +149,7 @@ object Controller extends Actor {
         }
 
         case command : NewDrawingId => {
-          AppletParameters.setDrawingId(command.retrieveNewDrawingId)
+          AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }
         case command : NewShapeId => {
           AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)

@@ -32,7 +32,7 @@ import com.siigna.util.geom._
  *
  * TODO: Redo this! Completely.
  */
-case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends ImmutableShape {
+case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends Shape {
 
   type T = TextShape
 
@@ -46,9 +46,16 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
+  def apply(part : ShapePart) = None
+
   def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
   def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
+
+  def delete(part: ShapePart) = part match {
+    case FullShapePart | SmallShapePart(_) => None
+    case _ => Some(this)
+  }
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)
 
@@ -70,6 +77,10 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
+  def select(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
+
+  def select(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
+
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
   def toDXF = DXFSection(DXFValue(0, "TEXT"),
@@ -88,9 +99,6 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
               scale * transformation.scaleFactor,
               attributes)
 
-  def select(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
-
-  def select(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
 }
 
 object TextShape
