@@ -31,8 +31,10 @@ object Create {
   }
   
   def apply(id : Int, shape : ImmutableShape) {
+    println("Id, shape: "+id+shape)
     Model execute CreateShape(id, shape)
     //Sends the shape to the server for saving in database and forwarding to other users
+    println("Sender saveshape-kommando:"+com.siigna.app.controller.AppletParameters.readDrawingIdAsOption)
     SaveShape(com.siigna.app.controller.AppletParameters.readDrawingIdAsOption.get,id,shape,AppletParameters.getClient)
   }
 
