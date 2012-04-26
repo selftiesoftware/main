@@ -23,11 +23,17 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  * @param attributes  Attributes to be applied on the shapes in the collection.
  * TODO: Implement additions and subtractions
  */
-case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) extends CollectionShape[ImmutableShape] {
+case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends CollectionShape[Shape] {
 
   throw new UnsupportedOperationException("Not implemented yet")
 
   type T = GroupShape
+
+  def apply(part : ShapePart) = None
+
+  def delete(part : ShapePart) = {
+    None
+  }
 
   def select(rect: Rectangle2D) = null
 
@@ -53,6 +59,6 @@ case class GroupShape(shapes : Seq[ImmutableShape], attributes : Attributes) ext
  */
 object GroupShape {
 
-  def apply(shapes : Traversable[ImmutableShape]) = new GroupShape(shapes.toSeq, Attributes())
+  def apply(shapes : Traversable[Shape]) = new GroupShape(shapes.toSeq, Attributes())
 
 }
