@@ -105,7 +105,7 @@ class ModuleLoader(private var urls : Array[URL], loader : ClassLoader) {
             None
           }
         }
-        case e => errors += ("ModuleLoader: Class found, but failed to cast to type T." -> Some(e)); None
+        case e => errors += ("ModuleLoader: Class found, but failed to cast to Module." -> Some(e)); None
       }
 
       // Print errors in case no modules was found
