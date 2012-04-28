@@ -148,6 +148,10 @@ object Controller extends Actor {
           }
         }
 
+        case command : DrawingName => {
+          AppletParameters.setDrawingName(command.retrieveDrawingNameAsOption)
+        }
+
         case command : NewDrawingId => {
           AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }
