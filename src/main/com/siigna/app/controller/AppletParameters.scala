@@ -24,7 +24,9 @@ object AppletParameters {
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
 
-
+  def getApplet = {
+    (applet.get)
+  }
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
