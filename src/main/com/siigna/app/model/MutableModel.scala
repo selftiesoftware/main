@@ -11,7 +11,9 @@
 
 package com.siigna.app.model
 
-import action.{TransformShapes, Action}
+import action.{TransformShapeParts, Transform, TransformShapes, Action}
+import shape.Shape
+
 
 /**
  * A selectable model containing one single [[com.siigna.app.model.Selection]], representing one or more
@@ -40,7 +42,10 @@ trait MutableModel extends SelectableModel {
       val t = selection.get.getTransformation
       val s = selection.get
       var action : Option[Action] = if (!t.isEmpty) {
-        Some(TransformShapes(s.shapes, t))
+        // TODO: Do this in the Transform action instead...
+        val parts = s.parts.map(e => (e._1 -> Model(e._1).apply(e._2).map(_ apply(t)).getOrElse(None)))
+        val xs = parts.filter(_._2 != None).asInstanceOf[Map[Int, Shape]]
+        Some(TransformShapes(xs, t))
       } else None
       
       if (selection.get.action.isDefined && action.isDefined) {
@@ -61,7 +66,7 @@ trait MutableModel extends SelectableModel {
    * @param id  The id of the shape.
    */
   override def select(id : Int) {
-    select(Selection(id, Model(id).select()))
+    select(Selection(id, Model(id).getPart))
   }
   
   /**

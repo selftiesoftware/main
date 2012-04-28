@@ -96,14 +96,6 @@ class Graphics(val g : Graphics2D)
           //draw(s.p1)
           //draw(s.p2)
         }
-        case s : TextShape        => {
-          val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
-          val shape : TextShape = if (adjustToScale) {
-            s.copy(scale = s.scale * Model.boundaryScale)
-          } else s
-          // Draw!
-          drawText(shape.layout, shape.position - shape.boundaryPosition - shape.alignmentPosition)
-        }
         /** COLLECTION SHAPES **/
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {
@@ -132,13 +124,21 @@ class Graphics(val g : Graphics2D)
 
 
         }
+        case s : TextShape        => {
+          val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
+          val shape : TextShape = if (adjustToScale) {
+            s.copy(scale = s.scale * Model.boundaryScale)
+          } else s
+          // Draw!
+          drawText(shape.layout, shape.position - shape.boundaryPosition - shape.alignmentPosition)
+        }
         case _ =>
       }
     }
   }
 
   /**
-   * Draws a point ... TODO write something clever
+   * Draws a point ... TODO: write something clever
    * @param point
    */
   def draw(point : Vector2D) {
