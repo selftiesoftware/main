@@ -157,6 +157,10 @@ object AppletParameters {
     }
     drawingId = Some(newId)
   }
+  
+  def setDrawingName(newDrawingName:Option[String]) {
+    drawingName=newDrawingName
+  }
 
   /**
    * Modtager en instans af "Applet", der har modtaget informationer
