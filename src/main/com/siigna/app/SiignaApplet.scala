@@ -39,6 +39,8 @@ class SiignaApplet extends Applet {
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
   private var mouseButtonRight  = false
+  var hasTitle: Boolean = false
+
 
   private val paintThread = new Thread(View, "Siigna view")
 
@@ -74,9 +76,12 @@ class SiignaApplet extends Applet {
     val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
     //If one was received, it is set as active drawing.
     println("requestDrawingId:"+requestDrawingId)
-    if (requestDrawingId.isDefined)
+    if (requestDrawingId.isDefined) {
       com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
-
+      hasTitle = true
+    } else {
+      hasTitle = false
+    }
     // Set the layout
     setLayout(new BorderLayout())
 
