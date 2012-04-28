@@ -14,7 +14,7 @@ package com.siigna.app.model
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import shape.{PartialShape, Shape, ShapePart, ShapeLike}
+import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
 
 /**
  * A Selection is a mutable wrapper for a regular Shape(s).
@@ -24,7 +24,7 @@ import shape.{PartialShape, Shape, ShapePart, ShapeLike}
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapePart]) extends ShapeLike {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike {
 
   type T = Selection
 
@@ -51,7 +51,7 @@ case class Selection(var parts: Map[Int, ShapePart]) extends ShapeLike {
   def boundary = parts.map(s => Model(s._1)).foldLeft(Model(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
 
   /**
-   * Deletes the [[com.siigna.app.model.shape.ShapePart]] associated with the given id, if it exists and remove the
+   * Deletes the [[com.siigna.app.model.shape.ShapeSelector]] associated with the given id, if it exists and remove the
    * part from the Model with a [[com.siigna.app.model.action.DeleteShapePart]] action.
    * @param id  The id of the shape.
    */
@@ -83,7 +83,7 @@ case class Selection(var parts: Map[Int, ShapePart]) extends ShapeLike {
    * @return A map containing the ids and the shapes used in the current selection.
    */
   def shapes : Map[Int, Shape] = {
-    parts.map((t : (Int, ShapePart)) => {
+    parts.map((t : (Int, ShapeSelector)) => {
       (t._1 -> Model(t._1))
     })
   }
@@ -111,7 +111,7 @@ object Selection {
   /**
    * A method to create a Selection with only one id.
    */
-  def apply(id: Int, part : ShapePart) = {
+  def apply(id: Int, part : ShapeSelector) = {
     new Selection(Map(id -> part))
   }
 

@@ -29,15 +29,17 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 
   type T = GroupShape
 
-  def apply(part : ShapePart) = None
+  def apply(part : ShapeSelector) = None
 
-  def delete(part : ShapePart) = {
+  def delete(part : ShapeSelector) = {
     None
   }
 
-  def select(rect: Rectangle2D) = null
+  def getPart(rect: Rectangle2D) = EmptyShapeSelector
 
-  def select(point: Vector2D) = null
+  def getPart(point: Vector2D) = EmptyShapeSelector
+
+  def getVertices(selector: ShapeSelector) = Seq()
 
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
