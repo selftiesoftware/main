@@ -96,7 +96,6 @@ object Controller extends Actor {
 
     // Register the client
     // Remember: When remote commands are created, they are sent to the controller immediately
-    // TODO: Insert drawing-id here
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
     // Loop and react on incoming messages
@@ -130,6 +129,7 @@ object Controller extends Actor {
                   AppletParameters.setClient(client)
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
+                    println("Sending get drawing command to server")
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
                     isNewDrawing = false
                   } else {
