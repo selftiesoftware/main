@@ -22,8 +22,7 @@ object AppletParameters {
   var drawingIdBank: Seq[Int] = Seq()
   private var drawingId: Option[Int] = None
   var contributorName: Option[String] = None
-
-
+  var drawingName: Option[String] = Some("Unnamed")
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
@@ -111,7 +110,6 @@ object AppletParameters {
    */
   def receiveNewShapeId(shapeId:Int) {
     shapeIdBank = shapeIdBank :+ shapeId
-    println("shapeIdBank is now: "+shapeIdBank)
   }
 
   /**
@@ -121,6 +119,22 @@ object AppletParameters {
   def receiveNewShapeIds(shapeIds:Seq[Int]) {
     shapeIdBank = shapeIdBank ++ shapeIds
     println("shapeIdBank is now: "+shapeIdBank)
+  }
+
+  /**
+   * Saves a new name for the active drawing, ans sets the drawingNamw var to the new name.
+   * @param newName
+   */
+  def saveNewDrawingName(newName: String) = {
+    var messageReturned: Option[String] = None
+    if(drawingId.isDefined) {
+      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.clientReference.get)
+      drawingName = Some(newName)
+      messageReturned = Some("Drawing name changed to "+drawingName.get)
+    } else {
+      messageReturned = Some("No drawing Id was set. Drawing name not changed")
+    }
+    (messageReturned)
   }
 
   /**
