@@ -41,7 +41,6 @@ class SiignaApplet extends Applet {
   private var mouseButtonRight  = false
   var hasTitle: Boolean = false
 
-
   private val paintThread = new Thread(View, "Siigna view")
 
   /**
@@ -61,6 +60,10 @@ class SiignaApplet extends Applet {
     System.exit(0)
   }
 
+  def returnHasTitleStatus = {
+    (hasTitle)
+  }
+
   /**
    * Initializes the view. Sets panning to the center of the screen and
    * adds EventListeners.
@@ -77,6 +80,7 @@ class SiignaApplet extends Applet {
     //If one was received, it is set as active drawing.
     println("requestDrawingId:"+requestDrawingId)
     if (requestDrawingId.isDefined) {
+
       com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
       hasTitle = true
     } else {
