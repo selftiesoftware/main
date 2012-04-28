@@ -37,6 +37,7 @@ object Controller extends Actor {
   RemoteActor.classLoader = getClass.getClassLoader
   
   var client : Option[Client] = None
+  var hasTitle: Boolean = false
 
   /**
    * The last 10 events
@@ -128,10 +129,12 @@ object Controller extends Actor {
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
                     println("Sending get drawing command to server")
-                    sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
+                    sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
+                    hasTitle = true
                   } else {
                     GetNewDrawingId(getClient)
+                    hasTitle = false
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
@@ -147,6 +150,7 @@ object Controller extends Actor {
 
         case command : DrawingName => {
           AppletParameters.setDrawingName(command.retrieveDrawingNameAsOption)
+          println("Drawing name received from gontroller and set in AppletParameters: "+AppletParameters.readDrawingNameAsOption)
         }
 
         case command : NewDrawingId => {
