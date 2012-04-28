@@ -37,7 +37,6 @@ object Controller extends Actor {
   RemoteActor.classLoader = getClass.getClassLoader
   
   var client : Option[Client] = None
-  var hasTitle: Boolean = false
 
   /**
    * The last 10 events
@@ -131,10 +130,8 @@ object Controller extends Actor {
                     println("Sending get drawing command to server")
                     sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
-                    hasTitle = true
                   } else {
                     GetNewDrawingId(getClient)
-                    hasTitle = false
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
