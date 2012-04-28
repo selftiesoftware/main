@@ -16,5 +16,5 @@ import com.siigna.app.controller.Client
 /**
  * Remember to comment!!
  */
-case class GetDrawingTitle (drawingId:String, client : Client) extends RemoteCommand
+case class GetDrawingTitle (drawingId:Int, client : Client) extends RemoteCommand
 
