@@ -16,13 +16,15 @@ import remote.{GetNewShapeIds, GetNewShapeId}
 
 object AppletParameters {
 
+  private var drawingId: Option[Int] = None
+  var drawingName: Option[String] = None
+  var contributorName: Option[String] = None
   private var applet : Option[Applet] = None
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
-  private var drawingId: Option[Int] = None
-  var contributorName: Option[String] = None
-  var drawingName: Option[String] = None
+
+
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
