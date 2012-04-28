@@ -12,40 +12,40 @@
 package com.siigna.app.model.shape
 
 /**
- * A ShapePart is a part of a shape represented in various ways. This class exists so we can access small parts of
+ * A ShapeSelector is a part of a shape represented in various ways. This class exists so we can access small parts of
  * one single shape instead of creating new sub-instances of the shape.
  * <br />
- * A SmallShapePart indicates that a part of the shape has been selected and that the part is small enough to be
+ * A SmallShapeSelector indicates that a part of the shape has been selected and that the part is small enough to be
  * represented by one Int.
  * <br />
- * A LargeShapePart indicates that a part of the shape has been selected but the part (or the shape) is too big
+ * A LargeShapeSelector indicates that a part of the shape has been selected but the part (or the shape) is too big
  * to be identified via an Int.
  * <br />
- * An EmptyShapePart indicates that the selection is empty.
+ * An EmptyShapeSelector indicates that the selection is empty.
  * <br >
  * An
  */
-trait ShapePart extends Serializable
+trait ShapeSelector extends Serializable
 
 /**
- * An EmptyShapePart is a ShapePart with no information and thus represents an empty Shape subset.
+ * An EmptyShapeSelector is a ShapeSelector with no information and thus represents an empty Shape subset.
  */
-case object EmptyShapePart extends ShapePart
+case object EmptyShapeSelector extends ShapeSelector
 
 /**
- * A FullShapePart signals that the ShapePart contains the entire shape. No sub-selection magic is needed.
+ * A FullShapeSelector signals that the ShapeSelector contains the entire shape. No sub-selection magic is needed.
  */
-case object FullShapePart extends ShapePart
+case object FullShapeSelector extends ShapeSelector
 
 /**
- * A LargePartialShape is a set of Ints where each position in each integer represents one selectable
+ * A LargeShapeSelector is a set of Ints where each position in each integer represents one selectable
  * part of a shape.
  * @param x
  */
-case class LargeShapePart(x : Array[Int]) extends ShapePart
+case class LargeShapeSelector(x : Array[Int]) extends ShapeSelector
 
 /**
- * A SmallShapePart is basically an Int where each part of the shape represents one position
+ * A SmallShapeSelector is basically an Int where each part of the shape represents one position
  * in the binary system. It can thus be identified which parts of the shape are selected and which
  * are not. <b>The specific implementation varies for each shape</b>, but the standard is to use numbers
  * <i>1 to length</i> to indicate which part has been selected.
@@ -56,7 +56,7 @@ case class LargeShapePart(x : Array[Int]) extends ShapePart
  *
  * @param x The Int signalling which parts of the shape has been selected.
  */
-case class SmallShapePart(x : Int) extends ShapePart {
+case class SmallShapeSelector(x : Int) extends ShapeSelector {
 
   assert(x > 0, "The small shape part must be larger than zero")
   assert(x < 30, "The small shape part cannot be larger than 30")
