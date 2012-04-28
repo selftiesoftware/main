@@ -41,13 +41,13 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   val handleS = Vector2D(center.x, center.y - radius)
   val handles = Seq(handleE, handleN, handleW, handleS)
   
-  def apply(part : ShapePart) = part match {
-    case FullShapePart | SmallShapePart(_) => Some(new PartialShape(transform))
+  def apply(part : ShapeSelector) = part match {
+    case FullShapeSelector | SmallShapeSelector(_) => Some(new PartialShape(transform))
     case _ => None
   }
 
-  def delete(part: ShapePart) = part match {
-    case SmallShapePart(_) | FullShapePart => None
+  def delete(part: ShapeSelector) = part match {
+    case SmallShapeSelector(_) | FullShapeSelector => None
     case _ => Some(this)
   }
 
@@ -56,9 +56,15 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    */
   def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def select(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapePart else EmptyShapePart
+  def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapeSelector else EmptyShapeSelector
 
-  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapePart else EmptyShapePart
+  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapeSelector else EmptyShapeSelector
+
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector => geometry.vertices
+    case SmallShapeSelector(1) => Seq(center)
+    case _ => Seq()
+  }
 
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 

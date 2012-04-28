@@ -11,11 +11,11 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{ShapePart, Shape, ShapeLike}
+import com.siigna.app.model.shape.{ShapeSelector, Shape, ShapeLike}
 
 object Delete {
   
-  def apply(id : Int, part : ShapePart) {
+  def apply(id : Int, part : ShapeSelector) {
     Model execute DeleteShapePart(id, Model(id), part)
   }
   
@@ -40,9 +40,9 @@ case class DeleteShape(id : Int, shape : Shape) extends Action {
 }
 
 /**
- * Deletes a ShapePart.
+ * Deletes a ShapeSelector.
  */
-case class DeleteShapePart(id : Int, shape : Shape, part : ShapePart) extends Action {
+case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
   
   def execute(model : Model) = {
     val x = shape.delete(part);
