@@ -46,14 +46,14 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
-  def apply(part : ShapePart) = None
+  def apply(part : ShapeSelector) = None
 
   def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
   def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
 
-  def delete(part: ShapePart) = part match {
-    case FullShapePart | SmallShapePart(_) => None
+  def delete(part: ShapeSelector) = part match {
+    case FullShapeSelector | SmallShapeSelector(_) => None
     case _ => Some(this)
   }
 
@@ -77,9 +77,11 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-  def select(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
+  def getPart(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
 
-  def select(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
+  def getPart(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
+
+  def getVertices(selector: ShapeSelector) = throw new UnsupportedOperationException("Not yet implemented")
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 

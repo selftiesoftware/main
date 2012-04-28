@@ -138,7 +138,7 @@ class Graphics(val g : Graphics2D)
   }
 
   /**
-   * Draws a point ... TODO write something clever
+   * Draws a point ... TODO: write something clever
    * @param point
    */
   def draw(point : Vector2D) {
