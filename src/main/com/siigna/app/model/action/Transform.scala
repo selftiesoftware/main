@@ -12,7 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.Shape
+import com.siigna.app.model.shape.{ShapeSelector, Shape}
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -53,10 +53,9 @@ object Transform {
    * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply(shapes : Map[Int, Shape], transformation : TransformationMatrix) {
+  def apply[T : Manifest](shapes : Map[Int, Shape], transformation : TransformationMatrix) {
     Model execute TransformShapes(shapes, transformation)
   }
-
 }
 
 /**
@@ -82,6 +81,24 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
     model add (id, model.shapes(id).transform(transformation))
   }
 
+}
+
+case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
+  
+  def execute(model : Model) = {
+    val parts = shapes.map(e => (e._1 -> Model(e._1).apply(e._2).map(_ apply(transformation))))
+    val xs = parts.filter(_._2 == None).asInstanceOf[Map[Int, Shape]]  
+    model add xs
+  }
+
+  def merge(that : Action) = SequenceAction(this, that)
+
+  def undo(model : Model) = {
+    val parts = shapes.map(e => (e._1 -> Model(e._1).apply(e._2).map(_ apply(transformation.inverse))))
+    val xs = parts.filter(_._2 == None).asInstanceOf[Map[Int, Shape]]
+    model add xs
+  }
+  
 }
 
 /**
