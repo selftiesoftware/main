@@ -38,20 +38,26 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
   val geometry = Arc2D(center, radius, startAngle, angle)
 
   // TODO: What about selection "arc-points"??
-  def apply(part : ShapePart) = part match {
-    case FullShapePart => Some(new PartialShape(transform))
-    case SmallShapePart(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
+  def apply(part : ShapeSelector) = part match {
+    case FullShapeSelector => Some(new PartialShape(transform))
+    case SmallShapeSelector(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
     case _ => None
   }
 
-  def delete(part: ShapePart) = part match {
-    case SmallShapePart(_) | FullShapePart => None
+  def delete(part: ShapeSelector) = part match {
+    case SmallShapeSelector(_) | FullShapeSelector => None
     case _ => Some(this)
   }
 
-  def select(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapePart else EmptyShapePart
+  def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapeSelector else EmptyShapeSelector
 
-  def select(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapePart else EmptyShapePart
+  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapeSelector else EmptyShapeSelector
+
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector => geometry.vertices
+    case SmallShapeSelector(1) => Seq(center)
+    case _ => Seq()
+  }
 
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 

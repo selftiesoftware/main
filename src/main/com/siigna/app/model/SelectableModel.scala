@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import shape.{FullShapePart, EmptyShapePart, ShapePart}
+import shape.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
 
 /**
@@ -36,15 +36,15 @@ trait SelectableModel {
   def select(id : Int) { model select id }
 
   /**
-   * Selects a part of a shape based on its id. If the ShapePart is a FullShapePart then select the
+   * Selects a part of a shape based on its id. If the ShapeSelector is a FullShapeSelector then getPart the
    * entire shape, if the part is empty then do nothing.
    * @param id  The id of the shape
-   * @param part  The part of the shape to select
+   * @param part  The part of the shape to getPart
    */
-  def select(id : Int, part : ShapePart) {
+  def select(id : Int, part : ShapeSelector) {
     part match {
-      case EmptyShapePart =>
-      case FullShapePart => select(id)
+      case EmptyShapeSelector =>
+      case FullShapeSelector => select(id)
       case _ => model select Selection(id, part)
     }
   }
@@ -59,7 +59,7 @@ trait SelectableModel {
    * Select every shape in the Model.
    */
   def selectAll() {
-    model select Selection(Model.map(i => i._1 -> i._2.select))
+    model select Selection(Model.map(i => i._1 -> i._2.getPart))
   }
 
 }
