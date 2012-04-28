@@ -22,7 +22,7 @@ object AppletParameters {
   var drawingIdBank: Seq[Int] = Seq()
   private var drawingId: Option[Int] = None
   var contributorName: Option[String] = None
-  var drawingName: Option[String] = Some("Unnamed")
+  var drawingName: Option[String] = None
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
@@ -41,13 +41,6 @@ object AppletParameters {
     (contributorName)
   }
 
-  /**
-   * Returns drawingId as option
-   * @return
-   */
-  def readDrawingIdAsOption = {
-    (drawingId)
-  }
 
   /**
    * Returnerer en shapeId fra "banken". Kontrollerer, hvor mange id'er, der er tilbage i banken.
@@ -102,6 +95,23 @@ object AppletParameters {
       println ("AppletParameters ved ikke hvilken applet der skla bruges - kald medoden setApplet")
     }
     (parameter)
+  }
+
+
+  /**
+   * Returns drawingId as option
+   * @return
+   */
+  def readDrawingIdAsOption = {
+    (drawingId)
+  }
+
+  /**
+   * Returns drawingName as option
+   * @return
+   */
+  def readDrawingNameAsOption = {
+    (drawingName)
   }
 
   /**

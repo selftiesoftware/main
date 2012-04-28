@@ -38,8 +38,6 @@ object Controller extends Actor {
   
   var client : Option[Client] = None
 
-  var isNewDrawing : Boolean = true
-
   /**
    * The last 10 events
    */
@@ -131,10 +129,9 @@ object Controller extends Actor {
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
                     println("Sending get drawing command to server")
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
-                    isNewDrawing = false
+                    sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                   } else {
                     GetNewDrawingId(getClient)
-                    isNewDrawing = true
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
