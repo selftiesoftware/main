@@ -46,9 +46,7 @@ object Select {
   def apply(r : Rectangle2D) {
     // TODO: Find everything close to the rectangle
     val selection = Model(r).map(t => t._1 -> t._2.getPart(r))
-    println("Selected: " + selection)
     val filtered = selection.filter(_._2 != EmptyShapeSelector)
-    println("Selected: " + filtered)
     Model.select(Selection(filtered))
   }
 
