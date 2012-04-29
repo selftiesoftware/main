@@ -75,10 +75,9 @@ class SiignaApplet extends Applet {
 
     //get the active user, if a log in was performed at www.siigna.com
     AppletParameters.getContributorNameFromHomepage
-
     //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
     AppletParameters.getDrawingIdFromHomepage
-    //If one was received, it is set as active drawing.
+
     if (AppletParameters.getDrawingId.isDefined)
     {
       AppletParameters.drawingIdReceivedAtStartup = true
