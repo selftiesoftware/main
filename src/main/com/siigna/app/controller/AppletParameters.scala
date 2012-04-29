@@ -24,6 +24,7 @@ object AppletParameters {
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
   var drawingIdReceivedAtStartup: Boolean = false
+  var drawingOwner: Option[String] = None
 
   def getApplet = {
     (applet.get)
@@ -69,6 +70,10 @@ object AppletParameters {
     shapeIdBank = shapeIdBank.tail
     if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
     (shapeId)
+  }
+  
+  def getDrawingOwnerAsOption = {
+    (drawingOwner)
   }
 
   /**
@@ -187,6 +192,10 @@ object AppletParameters {
   
   def setDrawingName(newDrawingName:Option[String]) {
     drawingName=newDrawingName
+  }
+  
+  def setDrawingOwner (newDrawingOwner:String) {
+    drawingOwner = Some(newDrawingOwner)
   }
 
   /**
