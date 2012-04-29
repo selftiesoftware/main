@@ -23,6 +23,7 @@ object AppletParameters {
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
+  var drawingIdReceivedAtStartup: Boolean = false
 
   def getApplet = {
     (applet.get)
@@ -36,13 +37,25 @@ object AppletParameters {
     (clientReference.get)
   }
 
+  def getDrawingId = {
+    (drawingId)
+  }
+  
   /**
-   * Retrieves contributorName sent with param tag from html when starting applet
+   * Retrieves contributorName sent with param tag from html when starting applet, and sets the variable.
    * @return
    */
-  def getContributorNameFromHomepage = {
-    contributorName = com.siigna.app.controller.AppletParameters.getParametersString("contributorName")
-    (contributorName)
+  def getContributorNameFromHomepage {
+    contributorName = AppletParameters.getParametersString("contributorName")
+  }
+
+  /**
+   * Retrieves drawing id sent with param tag from html when starting applet, and saves this value to the variable,
+   * returns the variable as option, or None if it is not set.
+   * @return
+   */
+  def getDrawingIdFromHomepage {
+    drawingId = AppletParameters.getParametersInt("drawingId")
   }
 
 
