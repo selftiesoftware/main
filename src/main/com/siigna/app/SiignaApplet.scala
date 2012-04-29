@@ -24,6 +24,7 @@ import java.lang.Thread
 import java.awt.{BorderLayout, Dimension}
 import view.View
 import com.siigna
+import com.siigna.app.controller.AppletParameters
 
 /**
  * The main class of Siigna.
@@ -70,21 +71,19 @@ class SiignaApplet extends Applet {
    */
   override def init() {
     // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
-    com.siigna.app.controller.AppletParameters.setApplet(this)
+    AppletParameters.setApplet(this)
 
     //get the active user, if a log in was performed at www.siigna.com
-    com.siigna.app.controller.AppletParameters.getContributorNameFromHomepage
+    AppletParameters.getContributorNameFromHomepage
 
     //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
-    val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
+    AppletParameters.getDrawingIdFromHomepage
     //If one was received, it is set as active drawing.
-    println("requestDrawingId:"+requestDrawingId)
-    if (requestDrawingId.isDefined) {
-
-      com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
-      hasTitle = true
+    if (AppletParameters.getDrawingId.isDefined)
+    {
+      AppletParameters.drawingIdReceivedAtStartup = true
     } else {
-      hasTitle = false
+      AppletParameters.drawingIdReceivedAtStartup = false
     }
     // Set the layout
     setLayout(new BorderLayout())
