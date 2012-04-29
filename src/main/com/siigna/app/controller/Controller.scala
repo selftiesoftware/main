@@ -38,8 +38,6 @@ object Controller extends Actor {
   
   var client : Option[Client] = None
 
-  var isNewDrawing : Boolean = true
-
   /**
    * The last 10 events
    */
@@ -96,7 +94,6 @@ object Controller extends Actor {
 
     // Register the client
     // Remember: When remote commands are created, they are sent to the controller immediately
-    // TODO: Insert drawing-id here
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
     // Loop and react on incoming messages
@@ -130,11 +127,12 @@ object Controller extends Actor {
                   AppletParameters.setClient(client)
                   //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
                   if (AppletParameters.readDrawingIdAsOption.isDefined) {
+                    println("Sending get drawing command to server")
+                    sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
-                    isNewDrawing = false
+                    GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
                   } else {
                     GetNewDrawingId(getClient)
-                    isNewDrawing = true
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
                   GetNewShapeIds(2,AppletParameters.getClient)
@@ -148,6 +146,19 @@ object Controller extends Actor {
           }
         }
 
+        case command : DrawingName => {
+          AppletParameters.setDrawingName(command.retrieveDrawingNameAsOption)
+          println("Drawing name received from gontroller and set in AppletParameters: "+AppletParameters.readDrawingNameAsOption)
+        }
+
+        case command : DrawingOwner => {
+          AppletParameters.setDrawingOwner(command.retrieveDrawingOwnerAsOption.get)
+        }
+
+        case command : ErrorMessage => {
+          println("Error recieved from server. Error is: "+command.retrieveErrorMessageAsOption.get)
+        }  
+          
         case command : NewDrawingId => {
           AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }

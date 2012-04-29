@@ -24,6 +24,7 @@ import java.lang.Thread
 import java.awt.{BorderLayout, Dimension}
 import view.View
 import com.siigna
+import com.siigna.app.controller.AppletParameters
 
 /**
  * The main class of Siigna.
@@ -39,6 +40,7 @@ class SiignaApplet extends Applet {
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
   private var mouseButtonRight  = false
+  var hasTitle: Boolean = false
 
   private val paintThread = new Thread(View, "Siigna view")
 
@@ -59,24 +61,29 @@ class SiignaApplet extends Applet {
     System.exit(0)
   }
 
+  def returnHasTitleStatus = {
+    (hasTitle)
+  }
+
   /**
    * Initializes the view. Sets panning to the center of the screen and
    * adds EventListeners.
    */
   override def init() {
     // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
-    com.siigna.app.controller.AppletParameters.setApplet(this)
+    AppletParameters.setApplet(this)
 
     //get the active user, if a log in was performed at www.siigna.com
-    com.siigna.app.controller.AppletParameters.getContributorNameFromHomepage
-
+    AppletParameters.getContributorNameFromHomepage
     //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
-    val requestDrawingId = com.siigna.app.controller.AppletParameters.getParametersInt("drawingId")
-    //If one was received, it is set as active drawing.
-    println("requestDrawingId:"+requestDrawingId)
-    if (requestDrawingId.isDefined)
-      com.siigna.app.controller.AppletParameters.setDrawingId(requestDrawingId.get)
+    AppletParameters.getDrawingIdFromHomepage
 
+    if (AppletParameters.getDrawingId.isDefined)
+    {
+      AppletParameters.drawingIdReceivedAtStartup = true
+    } else {
+      AppletParameters.drawingIdReceivedAtStartup = false
+    }
     // Set the layout
     setLayout(new BorderLayout())
 
