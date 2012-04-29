@@ -130,6 +130,7 @@ object Controller extends Actor {
                     println("Sending get drawing command to server")
                     sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
+                    GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
                   } else {
                     GetNewDrawingId(getClient)
                   }
@@ -148,6 +149,10 @@ object Controller extends Actor {
         case command : DrawingName => {
           AppletParameters.setDrawingName(command.retrieveDrawingNameAsOption)
           println("Drawing name received from gontroller and set in AppletParameters: "+AppletParameters.readDrawingNameAsOption)
+        }
+
+        case command : DrawingOwner => {
+          AppletParameters.setDrawingOwner(command.retrieveDrawingOwnerAsOption.get)
         }
 
         case command : NewDrawingId => {
