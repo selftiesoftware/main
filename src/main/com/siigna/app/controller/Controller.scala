@@ -155,6 +155,10 @@ object Controller extends Actor {
           AppletParameters.setDrawingOwner(command.retrieveDrawingOwnerAsOption.get)
         }
 
+        case command : ErrorMessage => {
+          println("Error recieved from server. Error is: "+command.retrieveErrorMessageAsOption.get)
+        }  
+          
         case command : NewDrawingId => {
           AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }
