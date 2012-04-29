@@ -16,14 +16,19 @@ import remote.{GetNewShapeIds, GetNewShapeId}
 
 object AppletParameters {
 
+  private var drawingId: Option[Int] = None
+  var drawingName: Option[String] = None
+  var contributorName: Option[String] = None
   private var applet : Option[Applet] = None
   var clientReference: Option[Client] = None
   var shapeIdBank: Seq[Int] = Seq()
   var drawingIdBank: Seq[Int] = Seq()
-  private var drawingId: Option[Int] = None
-  var contributorName: Option[String] = None
+  var drawingIdReceivedAtStartup: Boolean = false
+  var drawingOwner: Option[String] = None
 
-
+  def getApplet = {
+    (applet.get)
+  }
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
@@ -33,22 +38,27 @@ object AppletParameters {
     (clientReference.get)
   }
 
+  def getDrawingId = {
+    (drawingId)
+  }
+  
   /**
-   * Retrieves contributorName sent with param tag from html when starting applet
+   * Retrieves contributorName sent with param tag from html when starting applet, and sets the variable.
    * @return
    */
-  def getContributorNameFromHomepage = {
-    contributorName = com.siigna.app.controller.AppletParameters.getParametersString("contributorName")
-    (contributorName)
+  def getContributorNameFromHomepage {
+    contributorName = AppletParameters.getParametersString("contributorName")
   }
 
   /**
-   * Returns drawingId as option
+   * Retrieves drawing id sent with param tag from html when starting applet, and saves this value to the variable,
+   * returns the variable as option, or None if it is not set.
    * @return
    */
-  def readDrawingIdAsOption = {
-    (drawingId)
+  def getDrawingIdFromHomepage {
+    drawingId = AppletParameters.getParametersInt("drawingId")
   }
+
 
   /**
    * Returnerer en shapeId fra "banken". Kontrollerer, hvor mange id'er, der er tilbage i banken.
@@ -60,6 +70,10 @@ object AppletParameters {
     shapeIdBank = shapeIdBank.tail
     if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
     (shapeId)
+  }
+  
+  def getDrawingOwnerAsOption = {
+    (drawingOwner)
   }
 
   /**
@@ -105,13 +119,29 @@ object AppletParameters {
     (parameter)
   }
 
+
+  /**
+   * Returns drawingId as option
+   * @return
+   */
+  def readDrawingIdAsOption = {
+    (drawingId)
+  }
+
+  /**
+   * Returns drawingName as option
+   * @return
+   */
+  def readDrawingNameAsOption = {
+    (drawingName)
+  }
+
   /**
    * Saves a new shapeId into the shapeIdBank variable
    * @param shapeId
    */
   def receiveNewShapeId(shapeId:Int) {
     shapeIdBank = shapeIdBank :+ shapeId
-    println("shapeIdBank is now: "+shapeIdBank)
   }
 
   /**
@@ -121,6 +151,22 @@ object AppletParameters {
   def receiveNewShapeIds(shapeIds:Seq[Int]) {
     shapeIdBank = shapeIdBank ++ shapeIds
     println("shapeIdBank is now: "+shapeIdBank)
+  }
+
+  /**
+   * Saves a new name for the active drawing, ans sets the drawingNamw var to the new name.
+   * @param newName
+   */
+  def saveNewDrawingName(newName: String) = {
+    var messageReturned: Option[String] = None
+    if(drawingId.isDefined) {
+      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.clientReference.get)
+      drawingName = Some(newName)
+      messageReturned = Some("Drawing name changed to "+drawingName.get)
+    } else {
+      messageReturned = Some("No drawing Id was set. Drawing name not changed")
+    }
+    (messageReturned)
   }
 
   /**
@@ -142,6 +188,14 @@ object AppletParameters {
       remote.RegisterWithDrawingId(newId,clientReference.get)
     }
     drawingId = Some(newId)
+  }
+  
+  def setDrawingName(newDrawingName:Option[String]) {
+    drawingName=newDrawingName
+  }
+  
+  def setDrawingOwner (newDrawingOwner:String) {
+    drawingOwner = Some(newDrawingOwner)
   }
 
   /**
