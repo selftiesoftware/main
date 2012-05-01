@@ -50,6 +50,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
+  type ShapeSelector = com.siigna.app.model.shape.ShapeSelector
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape
@@ -62,6 +63,8 @@ package object siigna extends com.siigna.util.Implicits {
 
   type LineShape = com.siigna.app.model.shape.LineShape
   lazy val LineShape = com.siigna.app.model.shape.LineShape
+
+  type PartialShape = com.siigna.app.model.shape.PartialShape
 
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
   lazy val PolylineShape = com.siigna.app.model.shape.PolylineShape
