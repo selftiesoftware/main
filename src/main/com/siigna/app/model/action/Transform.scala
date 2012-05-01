@@ -53,8 +53,12 @@ object Transform {
    * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply[T : Manifest](shapes : Map[Int, Shape], transformation : TransformationMatrix) {
-    Model execute TransformShapes(shapes, transformation)
+  def apply[T](shapes : Map[Int, T], transformation : TransformationMatrix)(implicit m : Manifest[T]) {
+    if (m <:< manifest[ShapeSelector]) { // Match shape selectors
+      Model execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapeSelector]], transformation)
+    } else if (m <:< manifest[Shape]) { // Match shapes
+      Model execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]], transformation)
+    } // If no match, do nothing
   }
 }
 
