@@ -77,7 +77,8 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
         Some(this)
       } else if (ids.size == 0) { // Oh dear, no points left!
         None
-      } else { // Otherwise we're somewhere in between
+      } else { // Otherwise we're somewhere between 0 and everything
+        // Filter all the removed parts away
         val inner = innerShapes.filter(ids.contains(_))
         if (includeStart) { // Is the start point included?
           Some(PolylineShape(startPoint, inner, attributes))
