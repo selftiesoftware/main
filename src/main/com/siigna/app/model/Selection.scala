@@ -24,7 +24,7 @@ import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
 
   type T = Selection
 
@@ -38,6 +38,14 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike {
    * Dynamic ShapeLike since creation.
    */
   private var transformation: TransformationMatrix = TransformationMatrix()
+
+  /**
+   * Applies a transformation matrix to the selected part of the contained shapes and returns the resulting shapes.
+   * @param t  The transformation matrix to be applied.
+   */
+  def apply(t : TransformationMatrix) = {
+    parts.map(p => Model(p._1).apply(p._2)).collect{case Some(p : PartialShape) => p.apply(t) }
+  }
 
   /**
    * The attributes of the underlying ImmutableShapes.
