@@ -12,7 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.{ShapeSelector, Shape}
+import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -84,19 +84,15 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 }
 
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
-  
+
   def execute(model : Model) = {
-    val parts = shapes.map(e => (e._1 -> Model(e._1).apply(e._2).map(_ apply(transformation))))
-    val xs = parts.filter(_._2 == None).asInstanceOf[Map[Int, Shape]]  
-    model add xs
+    model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
   def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    val parts = shapes.map(e => (e._1 -> Model(e._1).apply(e._2).map(_ apply(transformation.inverse))))
-    val xs = parts.filter(_._2 == None).asInstanceOf[Map[Int, Shape]]
-    model add xs
+    model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
   }
   
 }
