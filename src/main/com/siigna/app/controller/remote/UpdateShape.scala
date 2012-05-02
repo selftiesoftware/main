@@ -17,4 +17,4 @@ package com.siigna.app.controller.remote
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.controller.Client
 
-case class UpdateShape (drawingId : Int, shapeId : Int, shape : Shape, client : Client) extends RemoteCommand
+case class UpdateShape(drawingId : Int, shapeId : Int, oldShape:Shape, newShape : Shape, client : Client) extends RemoteCommand
