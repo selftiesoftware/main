@@ -63,13 +63,16 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 
   def getPart(p : Vector2D) = {
-    if (distanceTo(p) > Preferences.double("selectionDistance")) {
+    val selectionDistance = Preferences.double("selectionDistance")
+    if (distanceTo(p) > selectionDistance) {
       EmptyShapeSelector
     } else {
-      if (p.distanceTo(p1) < p.distanceTo(p2)) {
+      if (p.distanceTo(p1) < p.distanceTo(p2) && p.distanceTo(p1) <= selectionDistance) {
         SmallShapeSelector(1)
-      } else {
+      } else if (p.distanceTo(p2) < p.distanceTo(p1) && p.distanceTo(p2) <= selectionDistance) {
         SmallShapeSelector(2)
+      } else {
+        FullShapeSelector
       }
     }
   }
