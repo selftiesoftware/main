@@ -14,7 +14,6 @@ package com.siigna.app.view
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._
 import java.awt.geom.{Arc2D => JavaArc}
-import com.siigna.app.Siigna
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape._
 import com.siigna.util.collection.Preferences
@@ -38,6 +37,11 @@ class Graphics(val g : Graphics2D)
   def colorSelected    = Preferences("colorSelected").asInstanceOf[Color]
   def colorUniverse    = Preferences("colorUniverse").asInstanceOf[Color]
 
+  /**
+   * Draws a number of shapes.
+   */
+  def draw(shapes : Traversable[Shape]) { shapes foreach draw }
+  
   /**
    * Draws a given shape.
    */
