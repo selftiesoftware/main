@@ -10,12 +10,9 @@
  */
 package com.siigna.app.model.shape
 
-import collection.immutable.Vector
-
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
 import com.siigna.util.geom._
-import com.siigna.app.Siigna
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -35,6 +32,7 @@ import com.siigna.app.Siigna
  * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
+ * TODO: Implement more robust geometry for PolylineShapes
  */
 case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends Shape {
 
@@ -98,18 +96,6 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
 
   def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
 
-  /**
-   * The shapes inside the PolylineShape
-   */
-  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
-    val tmp = new Array[BasicShape](innerShapes.size)
-    tmp(0) = innerShapes.head.apply(startPoint)
-    for (i <- 1 until innerShapes.size) {
-      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
-    }
-    tmp
-  } else Seq[BasicShape]()
-
   def getPart(rect: Rectangle2D) =
     if (rect.contains(geometry.boundary)) {
       FullShapeSelector
@@ -123,13 +109,34 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
         }
         SmallShapeSelector(x)
       } else {
-        // TODO: Write this
-        EmptyShapeSelector
+        EmptyShapeSelector // TODO: Write this
       }
     } else EmptyShapeSelector
 
 
   def getPart(point: Vector2D) = {
+    if (innerShapes.size < 30) {
+      // Set the x-value and test the first shape (startPoint included)
+      var x = shapes(0).getPart(point) match {
+        case FullShapeSelector => 3 // Point one and two = three
+        case SmallShapeSelector(p) => p
+        case _ => 0
+      }
+
+      // Iterate the shapes to find the ones who matches
+      for (i <- 1 until shapes.size) {
+        shapes(i).getPart(point) match {
+          case FullShapeSelector => x = x | ((1 << i) + (2 << i)) // Include both numbers
+          case SmallShapeSelector(p) => x = x | (p << i)
+          case _ =>
+        }
+      }
+
+      // Return
+      if (x > 0) {
+        SmallShapeSelector(x)
+      } else EmptyShapeSelector
+    } else EmptyShapeSelector // TODO: Write this
     /*val selectionDistance = Siigna.selectionDistance
     // Find the distance to the start point
     val startDistance = startPoint.distanceTo(point)
@@ -183,11 +190,22 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
         })
       } else None // Otherwise selection is empty
     }*/
-    EmptyShapeSelector
   }
 
   // TODO: Write this
   def getVertices(selector: ShapeSelector) = Seq()
+
+  /**
+   * The shapes inside the PolylineShape
+   */
+  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
+    val tmp = new Array[BasicShape](innerShapes.size)
+    tmp(0) = innerShapes.head.apply(startPoint)
+    for (i <- 1 until innerShapes.size) {
+      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
+    }
+    tmp
+  } else Seq[BasicShape]()
 
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
