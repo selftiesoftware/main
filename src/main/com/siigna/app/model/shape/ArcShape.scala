@@ -49,7 +49,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case _ => Some(this)
   }
 
-  def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapeSelector else EmptyShapeSelector
+  def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullShapeSelector else EmptyShapeSelector
 
   def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapeSelector else EmptyShapeSelector
 
