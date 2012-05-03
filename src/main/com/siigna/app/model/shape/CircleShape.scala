@@ -29,17 +29,6 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   type T = CircleShape
 
   val geometry = Circle2D(center, radius)
-
-  /**
-   * Graphical handles for the circle.
-   * A handle is a point on a circle used for visual feedback and manipulation
-   * of the circle.
-   */
-  val handleE = Vector2D(center.x + radius, center.y)
-  val handleN = Vector2D(center.x, center.y + radius)
-  val handleW = Vector2D(center.x - radius, center.y)
-  val handleS = Vector2D(center.x, center.y - radius)
-  val handles = Seq(handleE, handleN, handleW, handleS)
   
   def apply(part : ShapeSelector) = part match {
     case FullShapeSelector | SmallShapeSelector(_) => Some(new PartialShape(transform))
@@ -54,7 +43,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   /**
    * The distance to the closest handle from a given point.
    */
-  def distanceToHandlesFrom(point : Vector2D) = handles.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
+  def distanceToHandlesFrom(point : Vector2D) = geometry.vertices.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
   def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullShapeSelector else EmptyShapeSelector
 
