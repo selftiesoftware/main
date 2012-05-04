@@ -10,12 +10,9 @@
  */
 package com.siigna.app.model.shape
 
-import collection.immutable.Vector
-
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
 import com.siigna.util.geom._
-import com.siigna.app.Siigna
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -35,6 +32,7 @@ import com.siigna.app.Siigna
  * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
  * TODO: Do an apply(shapes : BasicShape*)..
  * TODO: Implement additions and subtractions
+ * TODO: Implement more robust geometry for PolylineShapes
  */
 case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends Shape {
 
@@ -43,21 +41,27 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
   def apply(part : ShapeSelector) = part match {
     case FullShapeSelector => Some(new PartialShape(transform))
     case SmallShapeSelector(x) => {
-      val includeStart = (x & 1) == 1
-      var ids = Seq[Int]()
-      for (i <- 0 until innerShapes.size) { // Check all the binary positions
-        if ((2 << i & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
-          ids :+= i
+      // Create a function that transforms the selected parts of the polyline
+      val transformInner = (t : TransformationMatrix) => {
+        val arr = new Array[PolylineShape.InnerPolylineShape](innerShapes.size)
+        for (i <- 0 until innerShapes.size) { // Check all the binary positions
+          arr(i) = (if (((2 << i) & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
+            innerShapes(i).transform(t)
+          } else innerShapes(i))
         }
+        arr
       }
 
-      val inner = innerShapes.filter(ids.contains(_))
-
-      Some(new PartialShape((t : TransformationMatrix) => if (includeStart) {
-        PolylineShape(startPoint.transform(t), inner.map(_.transform(t)), attributes)
-      } else {
-        PolylineShape(startPoint, inner.map(_.transform(t)), attributes)
-      }))
+      Some(new PartialShape((t : TransformationMatrix) =>
+        PolylineShape(
+          // Test if the start point is included (binary position 1)
+          if ((x & 1) == 1) { startPoint.transform(t) } else { startPoint },
+          // Transform the inner shapes that are a part of the selection
+          transformInner(t),
+          // Forward the attributes as is
+          attributes
+        )
+      ))
     }
     case _ => None
   }
@@ -98,18 +102,6 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
 
   def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
 
-  /**
-   * The shapes inside the PolylineShape
-   */
-  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
-    val tmp = new Array[BasicShape](innerShapes.size)
-    tmp(0) = innerShapes.head.apply(startPoint)
-    for (i <- 1 until innerShapes.size) {
-      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
-    }
-    tmp
-  } else Seq[BasicShape]()
-
   def getPart(rect: Rectangle2D) =
     if (rect.contains(geometry.boundary)) {
       FullShapeSelector
@@ -123,76 +115,74 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
         }
         SmallShapeSelector(x)
       } else {
-        // TODO: Write this
-        EmptyShapeSelector
+        EmptyShapeSelector // TODO: Write this
       }
     } else EmptyShapeSelector
 
 
   def getPart(point: Vector2D) = {
-    /*val selectionDistance = Siigna.selectionDistance
-    // Find the distance to the start point
-    val startDistance = startPoint.distanceTo(point)
-
-    // Find the id of the closest point
-    var closestId = 0
-    var closestDistance = innerShapes(0).point.distanceTo(point)
-    for (x <- 1 until innerShapes.size) {
-      val d = innerShapes(x).point.distanceTo(point)
-      if (d < closestDistance) {
-        closestDistance = d
-        closestId = x
+    if (innerShapes.size < 30) {
+      // Set the x-value and test the first shape (startPoint included)
+      var x = shapes(0).getPart(point) match {
+        case FullShapeSelector => 3 // Point one and two = three
+        case SmallShapeSelector(p) => p
+        case _ => 0
       }
-    }
 
-    println(selectionDistance, startDistance, closestDistance)
-    // If the startDistance for the start point is below the selectionDistance, return
-    if (startDistance <= selectionDistance) {
-      Some((t : TransformationMatrix) => PolylineShape(startPoint.transform(t), innerShapes, attributes))
-      
-    // If the closestDistance for the closest point is below the selectionDistance, return
-    } else if (closestDistance <= selectionDistance) {
-      Some((t : TransformationMatrix) => PolylineShape(startPoint, innerShapes.updated(closestId, innerShapes(closestId).transform(t)), attributes))
-    
-    // Otherwise test the distances to previous and following line segments
-    } else {
-      def segmentDistance(p : Vector2D) = Segment(innerShapes(closestId) point, p).distanceTo(point)
-      val dPrevious  = if (closestId > 0) segmentDistance(innerShapes(closestId - 1).point)
-                       else segmentDistance(startPoint)
-      val dFollowing = if (closestId < innerShapes.size - 1) segmentDistance(innerShapes(closestId + 1).point)
-                       else java.lang.Double.POSITIVE_INFINITY
-      
-      // Find the closest point
-      var closestToStart = false
-      val closestShapeId = if (dPrevious <= dFollowing && dPrevious <= selectionDistance) {
-        closestToStart = closestId == 0
-        closestId - 1
-      } else if (dFollowing < dPrevious && dFollowing <= selectionDistance) {
-        closestId + 1
-      } else -1
-      
-      // Create the selection
-      if (closestShapeId >= 0 || closestToStart) {
-        Some((t : TransformationMatrix) => {
-          if (closestToStart) {
-            PolylineShape(startPoint.transform(t), innerShapes.updated(closestId, innerShapes(closestId).transform(t)), attributes)
-          } else {
-            PolylineShape(startPoint, innerShapes.updated(closestId, innerShapes(closestId).transform(t))
-                                                 .updated(closestShapeId, innerShapes(closestShapeId).transform(t)), attributes)
-          }
-        })
-      } else None // Otherwise selection is empty
-    }*/
-    EmptyShapeSelector
+      // Iterate the shapes to find the ones who matches
+      for (i <- 1 until shapes.size) {
+        shapes(i).getPart(point) match {
+          case FullShapeSelector => x = x | ((1 << i) + (2 << i)) // Include both numbers
+          case SmallShapeSelector(p) => x = x | (p << i)
+          case _ =>
+        }
+      }
+
+      // Return
+      if (x > 0) {
+        SmallShapeSelector(x)
+      } else EmptyShapeSelector
+    } else EmptyShapeSelector // TODO: Write this
   }
 
-  // TODO: Write this
-  def getVertices(selector: ShapeSelector) = Seq()
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector => geometry.vertices
+    case SmallShapeSelector(x) => {
+      var inner = Seq[Vector2D]()
+      
+      // Add startPoint
+      if ((x & 1) == 1) { inner :+= startPoint }
+      
+      // Check all the binary positions for matches
+      for (i <- 0 until innerShapes.size) { 
+        if (((2 << i) & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
+          inner :+= innerShapes(i).point
+        }
+      }
+      
+      inner
+    }
+    case _ => Seq()
+  }
+
+  /**
+   * The shapes inside the PolylineShape
+   */
+  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
+    val tmp = new Array[BasicShape](innerShapes.size)
+    tmp(0) = innerShapes.head.apply(startPoint)
+    for (i <- 1 until innerShapes.size) {
+      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
+    }
+    tmp
+  } else Seq[BasicShape]()
 
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
   // TODO: export polylines.
   def toDXF = DXFSection(List())
+
+  override def toString = "PolylineShape[" + startPoint + "," + innerShapes + "]"
 
   def transform(t : TransformationMatrix) = new PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
 }
