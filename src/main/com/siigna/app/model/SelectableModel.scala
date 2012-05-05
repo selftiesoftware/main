@@ -36,6 +36,12 @@ trait SelectableModel {
   def select(id : Int) { model select id }
 
   /**
+   * Selects several shapes based on their ids.
+   * @param ids  The id's of the shapes to select.
+   */
+  def select(ids : Traversable[Int]) { model select ids }
+
+  /**
    * Selects a part of a shape based on its id. If the ShapeSelector is a FullShapeSelector then getPart the
    * entire shape, if the part is empty then do nothing.
    * @param id  The id of the shape
