@@ -25,7 +25,7 @@ import com.siigna.util.geom._
  *  - Color        Color   The color of the lines in the Polyline.
  *  - StrokeWidth  Double  The width of the linestroke used to draw.
  *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
- *                    in the PolylineShape.
+ *                         in the PolylineShape.
  * </pre>
  *
  * @param startPoint  The starting point of the PolylineShape.

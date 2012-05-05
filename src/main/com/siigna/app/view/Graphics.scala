@@ -93,7 +93,7 @@ class Graphics(val g : Graphics2D)
         }*/
         case s : LineShape        => {
           setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
-          if (attributes.boolean("infinite").getOrElse(false))
+          if (attributes.boolean("Infinite").getOrElse(false))
             drawLine(s.p1, s.p2)
           else
             drawSegment(s.p1, s.p2)
