@@ -68,7 +68,7 @@ object AppletParameters {
   def getNewShapeId = {
     val shapeId = shapeIdBank.head
     shapeIdBank = shapeIdBank.tail
-    if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
+    if (shapeIdBank.length<10) GetNewShapeIds(20,com.siigna.app.controller.AppletParameters.getClient)
     (shapeId)
   }
   
