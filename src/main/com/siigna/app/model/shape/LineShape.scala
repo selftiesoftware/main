@@ -21,6 +21,7 @@ import com.siigna.util.collection.{Preferences, Attributes}
  * You can use the following attributes:
  * <pre>
  *  - Color        Color                 The color of the line.
+ *  - Infinite     Boolean               If true, draws an endless line with the same equation as the given line.
  *  - StrokeWidth  Double                The width of the linestroke used to draw.
  *  - Transform    TransformationMatrix  A matrix to dynamically transform the shape when drawing.
  * </pre>
