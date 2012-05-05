@@ -30,6 +30,7 @@ import com.siigna.util.collection.{Preferences, Attributes}
  * @param angle  The angles the arc is spanning.
  *
  * TODO: Middle point should be middle of arc, not random point on circumference.
+ * TODO: Refactor so shape-parts include handles
  */
 case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape {
 
