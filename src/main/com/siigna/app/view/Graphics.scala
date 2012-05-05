@@ -36,16 +36,11 @@ class Graphics(val g : Graphics2D)
   def colorDraw        = Preferences("colorDraw").asInstanceOf[Color]
   def colorSelected    = Preferences("colorSelected").asInstanceOf[Color]
   def colorUniverse    = Preferences("colorUniverse").asInstanceOf[Color]
-
-  /**
-   * Draws a number of shapes.
-   */
-  def draw(shapes : Traversable[Shape]) { shapes foreach draw }
   
   /**
    * Draws a given shape.
    */
-  def draw(shape : ShapeLike) {
+  def draw(shape : Shape) {
 
     val attributes = shape.attributes
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
