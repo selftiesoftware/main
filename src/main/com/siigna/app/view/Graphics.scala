@@ -142,11 +142,12 @@ class Graphics(val g : Graphics2D)
   }
 
   /**
-   * Draws a point ... TODO: write something clever
-   * @param point
+   * Draws a circle with a radius of 4 pixels around the given point. The color defaults to a transparent grey.
+   * @param point  The point to draw.
+   * @param color  The color to draw the point in.
    */
-  def draw(point : Vector2D) {
-    setColor(new Color(50, 50, 50, 100))
+  def draw(point : Vector2D, color : Color = new Color(50, 50, 50, 100)) {
+    setColor(color)
     drawCircle(point, 4, true)
   }
 
