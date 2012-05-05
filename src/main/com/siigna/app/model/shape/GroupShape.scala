@@ -28,7 +28,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 
   throw new UnsupportedOperationException("Not implemented yet")
 
-  override type T = GroupShape
+  type T = GroupShape
 
   def apply(part : ShapeSelector) = None
 

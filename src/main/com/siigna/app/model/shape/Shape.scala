@@ -189,8 +189,6 @@ trait BasicShape extends Shape {
  * @tparam G  The type of shapes inside the collection.
  */
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
-
-  type T = CollectionShape[G]
   
   // TODO: Fix this - how?
   def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
