@@ -155,10 +155,9 @@ class Graphics(val g : Graphics2D)
    * Draws a arc from a center-point, a radius and a start-angle and end-angle,
    * defined in degrees.
    */
-  def drawArc(center : Vector2D, radius : Double, startAngle : Double, arcAngle : Double)
-  {
-    // We're using this instead of the function 'drawArc', since Arc2D is using
-    // doubles and are more precise.
+  def drawArc(center : Vector2D, radius : Double, startAngle : Double, arcAngle : Double) {
+    // We're using Arc2D.Double instead of the function 'drawArc', since Arc2D.Double is using
+    // doubles (weird enough) and are thus more precise.
     val arc2d = new JavaArc.Double(center.x - radius, center.y - radius, radius * 2, radius * 2, startAngle, arcAngle, JavaArc.OPEN)
     g draw(arc2d)
   }
@@ -166,8 +165,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a circle from a center-point and a radius
    */
-  def drawCircle(center : Vector2D, radius : Double, fill : Boolean = false)
-  {
+  def drawCircle(center : Vector2D, radius : Double, fill : Boolean = false) {
     if (fill) {
       g fillArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
     } else {
@@ -178,8 +176,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws an ellipse from a center-point and the vertical and horizontal radius
    */
-  def drawEllipse(center : Vector2D, a : Double, b : Double)
-  {
+  def drawEllipse(center : Vector2D, a : Double, b : Double) {
     g drawOval(center.x.toInt - a.toInt, center.y.toInt - b.toInt, (a * 2).toInt, (b * 2).toInt)
   }
 
@@ -199,8 +196,7 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a rectangle from two points
    */
-  def drawRectangle(p1 : Vector2D, p2 : Vector2D)
-  {
+  def drawRectangle(p1 : Vector2D, p2 : Vector2D) {
     val topLeft     = Vector(scala.math.min(p1.x, p2.x), scala.math.max(p1.y, p2.y))
     val topRight    = Vector(scala.math.max(p1.x, p2.x), scala.math.max(p1.y, p2.y))
     val bottomLeft  = Vector(scala.math.min(p1.x, p2.x), scala.math.min(p1.y, p2.y))
@@ -215,16 +211,14 @@ class Graphics(val g : Graphics2D)
   /**
    * Draws a line-segment (limited by two points) from two points
    */
-  def drawSegment(p1 : Vector2D, p2 : Vector2D)
-  {
+  def drawSegment(p1 : Vector2D, p2 : Vector2D) {
     g drawLine(p1.x.toInt, p1.y.toInt, p2.x.toInt, p2.y.toInt)
   }
 
   /**
    * Draws text using Javas TextLayout feature.
    */
-  def drawText(layout : TextLayout, position : Vector2D)
-  {
+  def drawText(layout : TextLayout, position : Vector2D) {
     layout draw(g, position.x.toFloat, position.y.toFloat)
   }
 
@@ -233,8 +227,7 @@ class Graphics(val g : Graphics2D)
    *
    * @param  color  the pen color to use.
    */
-  def setColor(color : Color)
-  {
+  def setColor(color : Color) {
     g setColor color
   }
 
@@ -243,15 +236,14 @@ class Graphics(val g : Graphics2D)
    *
    * @param  width  the pen width to use.
    */
-  def setStrokeWidth(width : Double)
-  {
+  def setStrokeWidth(width : Double) {
     g setStroke(new BasicStroke(width.asInstanceOf[Float]))
   }
 
   /**
    * Transforms the graphics-object by a given TransformationMatrix.
    */
-  def transform(t : TransformationMatrix) = {
+  def transform(t : TransformationMatrix) {
     t transform(g)
   }
 
