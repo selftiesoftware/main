@@ -69,7 +69,7 @@ object Siigna extends Interface {
   /**
    * The version of Siigna.
    */
-  val version = "v. 0.2.5"
+  val version = "v. 0.3"
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
