@@ -36,7 +36,7 @@ import com.siigna.util.geom._
  */
 case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
-  override type T = PolylineShape
+  type T = PolylineShape
   
   def apply(part : ShapeSelector) = part match {
     case FullShapeSelector => Some(new PartialShape(transform))
@@ -164,7 +164,7 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
   }   
 
   def join(shape: BasicShape) = PolylineShape(startPoint, innerShapes :+ (shape match {
-    case ArcShape(p, _, _, _) => new PolylineShape.PolylineLineShape(p) // TODO: Use PolylineArcShape!
+    case ArcShape(p, _, _, _, _) => new PolylineShape.PolylineLineShape(p) // TODO: Use PolylineArcShape!
     case LineShape(p1, p2, _) => new PolylineShape.PolylineLineShape(p2)
   }), attributes)
 
