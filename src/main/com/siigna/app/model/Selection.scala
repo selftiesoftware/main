@@ -1,5 +1,3 @@
-package com.siigna.app.model
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -10,6 +8,7 @@ package com.siigna.app.model
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
+package com.siigna.app.model
 
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
@@ -17,7 +16,16 @@ import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
 
 /**
- * A Selection is a mutable wrapper for a regular Shape(s).
+ * A Selection is a mutable wrapper for parts of a regular Shape(s).
+ *
+ * <br />
+ * A selection does not store entire shapes (that would be annoyingly expensive!) but instead remembers
+ * subsets of shapes (the [[com.siigna.app.model.shape.ShapeSelector]]s). These subsets can be given to
+ * the shapes stored in the model and through the [[com.siigna.app.model.shape.Shape.apply]] method
+ * the shapes will provide [[com.siigna.app.model.shape.PartialShape]]s which can be used to manipulate
+ * these subsets.
+ *
+ * <br />
  * When altered, the selection saves the action required to alter the shape(s) in the static layer, so the changes
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
