@@ -21,13 +21,14 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  *
  * @param shapes  The shapes stored in the GroupShape.
  * @param attributes  Attributes to be applied on the shapes in the collection.
- * TODO: Implement additions and subtractions
+ *
+ * TODO: Implement this.
  */
 case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends CollectionShape[Shape] {
 
   throw new UnsupportedOperationException("Not implemented yet")
 
-  type T = GroupShape
+  override type T = GroupShape
 
   def apply(part : ShapeSelector) = None
 
@@ -40,6 +41,10 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
   def getPart(point: Vector2D) = EmptyShapeSelector
 
   def getVertices(selector: ShapeSelector) = Seq()
+
+  def join(shape: Shape) = throw new UnsupportedOperationException("Not yet implemented")
+
+  def join(shapes: Traversable[Shape]) = throw new UnsupportedOperationException("Not yet implemented")
 
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
