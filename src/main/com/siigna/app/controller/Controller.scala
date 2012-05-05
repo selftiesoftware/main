@@ -135,7 +135,7 @@ object Controller extends Actor {
                     GetNewDrawingId(getClient)
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
-                  GetNewShapeIds(2,AppletParameters.getClient)
+                  GetNewShapeIds(20,AppletParameters.getClient)
                 }
                 case _ =>
               }
