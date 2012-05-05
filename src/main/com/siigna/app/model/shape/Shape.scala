@@ -185,6 +185,39 @@ trait BasicShape extends Shape {
 }
 
 /**
+ * A trait for immutable shapes containing other immutable shapes.
+ * @tparam G  The type of shapes inside the collection.
+ */
+trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
+  
+  // TODO: Fix this - how?
+  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
+
+  /**
+   * Joins this CollectionShape with a single new shape and forms a new CollectionShape.
+   * @param shape  The shape to insert into the CollectionShape.
+   * @return  A new CollectionShape with the new shape included.
+   */
+  def join(shape : G) : T
+
+  /**
+   * Joins this CollectionShape with the given shapes and forms a new CollectionShape.
+   * @param shapes  The shapes to insert into the CollectionShape.
+   * @return  A new CollectionShape with the new shapes included.
+   */
+  def join(shapes : Traversable[G]) : T
+  
+  def iterator = shapes.toIterator
+
+  /**
+   * The inner shapes of the collection.
+   */
+  def shapes : Traversable[G]
+
+}
+
+
+/**
  * A shape that's closed, that is to say a shape that encases a closed space.
  */
 trait EnclosedShape extends Shape {

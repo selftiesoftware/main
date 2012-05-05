@@ -25,7 +25,7 @@ import com.siigna.util.geom._
  *  - Color        Color   The color of the lines in the Polyline.
  *  - StrokeWidth  Double  The width of the linestroke used to draw.
  *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
- *                    in the PolylineShape.
+ *                         in the PolylineShape.
  * </pre>
  *
  * @param startPoint  The starting point of the PolylineShape.
@@ -34,7 +34,7 @@ import com.siigna.util.geom._
  * TODO: Implement additions and subtractions
  * TODO: Implement more robust geometry for PolylineShapes
  */
-case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends Shape {
+case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   type T = PolylineShape
   
@@ -100,8 +100,6 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
     case EmptyShapeSelector => Some(this)
   }
 
-  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
-
   def getPart(rect: Rectangle2D) =
     if (rect.contains(geometry.boundary)) {
       FullShapeSelector
@@ -163,7 +161,14 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
       inner
     }
     case _ => Seq()
-  }
+  }   
+
+  def join(shape: BasicShape) = PolylineShape(startPoint, innerShapes :+ (shape match {
+    case ArcShape(p, _, _, _, _) => new PolylineShape.PolylineLineShape(p) // TODO: Use PolylineArcShape!
+    case LineShape(p1, p2, _) => new PolylineShape.PolylineLineShape(p2)
+  }), attributes)
+
+  def join(shapes: Traversable[BasicShape]) = null
 
   /**
    * The shapes inside the PolylineShape
