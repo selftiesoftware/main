@@ -13,9 +13,11 @@ package com.siigna.app.model
 
 import shape.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
-
 /**
- * A model that can be selected and deselected.
+ * A trait that provides an interface to manipulate a [[com.siigna.app.model.MutableModel]] and through
+ * that a [[com.siigna.app.model.Selection]].
+ * @see MutableModel
+ * @see Selection
  */
 trait SelectableModel {
 

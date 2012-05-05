@@ -16,10 +16,21 @@ import shape.{PartialShape, Shape}
 
 
 /**
- * A selectable model containing one single [[com.siigna.app.model.Selection]], representing one or more
- * selected shapes.
+ * A model with a mutable "layer" that, if not empty, consists of a single [[com.siigna.app.model.Selection]],
+ * representing parts of one or more selected shapes.
  *
- * @see [[com.siigna.app.model.Model]]
+ * <br />
+ * The MutableModel is a way to dynamically manipulate the underlying [[com.siigna.app.model.ImmutableModel]]
+ * through a temporary "dynamic layer" that can be changed and updated without any effect on the actual
+ * shapes. This can be very useful (and give enourmous performance benefits) when you need to alter shapes
+ * many times before storing any final changes.
+ *
+ * <br />
+ * The actual selection consists of a map of Ints and [[com.siigna.app.model.shape.ShapeSelector]]s.
+ *
+ * @see Model
+ * @see Selection
+ * @see ShapeSelector
  */
 trait MutableModel extends SelectableModel {
 
