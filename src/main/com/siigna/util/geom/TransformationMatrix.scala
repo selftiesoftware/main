@@ -17,16 +17,12 @@ import java.awt.geom.{AffineTransform, Point2D}
 /**
  * A wrapper class for the AffineTransform-class from AWT.
  * Used for geometrical manipulation of any kind.
- * TODO: Something is horribly wrong with concatenation!
- * Test-case: Vector(0, 0).flipY = Vector(0, 184) !!
- * Later..: Can't find the problem...
  *
  * @param t  The transformation matrix derived from AWT.
  *
  * TODO: Create a 3D representation as well.
  */
-case class TransformationMatrix(t : AffineTransform)
-{
+case class TransformationMatrix(t : AffineTransform) {
 
   def this() = this(new AffineTransform)
 
@@ -71,7 +67,7 @@ case class TransformationMatrix(t : AffineTransform)
    * Examines if this TransformationMatrix is "empty" that is an identity-transformation.
    * @return True if no transformations are made by this transformation or False if any scale, rotation or translation has been set.
    */
-  def isEmpty = t.isIdentity()
+  def isEmpty = t.isIdentity
 
   /**
    * Determines whether this transformation y-axis has been flipped.
@@ -95,7 +91,7 @@ case class TransformationMatrix(t : AffineTransform)
    * this transformation.
    */
   def rotate(degrees : Double, point : Vector2D) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point x, point y)))
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
 
   /**
    * Scales a transformation by a factor and concatenates it with this
@@ -103,6 +99,20 @@ case class TransformationMatrix(t : AffineTransform)
    */
   def scale(factor : Double) =
     TransformationMatrix(operation(_ scale(factor, factor)))
+
+  /**
+   * Scales a transformation by a factor, but translates it before and after so the scale operation
+   * is based in the given coordinates.
+   * @param factor  The factor with which to scale
+   * @param point  The base point of the scale
+   * @return  A new transformation matrix with the applied transformation
+   */
+  def scale(factor : Double, point : Vector2D) =
+    TransformationMatrix(operation(a => {
+      a.translate(point.x, point.y)
+      a.scale(factor, factor)
+      a.translate(-point.x, -point.y)
+    }))
 
   /**
    * Returns the scale (zoom) factor of this transformation.
