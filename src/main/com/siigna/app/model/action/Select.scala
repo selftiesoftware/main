@@ -16,19 +16,31 @@ import com.siigna.util.geom.{Rectangle2D, Vector2D}
 import com.siigna.app.model.shape.{EmptyShapeSelector, Shape, ShapeLike}
 
 /**
- * Select objects. This action is crucial to
- * manipulating shapes, since this is the link between [[com.siigna.app.model.shape.Shape]]
- * and [[com.siigna.app.model.shape.DynamicShape]] that allows shapes to enter the
- * [[com.siigna.app.model.MutableModel]]. DynamicShapes does not just duplicate shapes but also
- * contain information about smaller parts of a shape - if the user chose to only getPart a point for
- * instance - along with the transformation-matrix of the selection.
+ * An object that provides shortcuts to select objects in the model. Selections are crucial
+ * to manipulating [[com.siigna.app.model.shape.Shape]]s, since they can provide dynamic
+ * manipulation on everything ranging from subsets of a single shape to a large collection
+ * of whole shapes.
  *
- * TODO: Implement a class that selects only one shape.
+ * <br />
+ * These selections are stored in the [[com.siigna.app.model.Selection]] class which is
+ * stored in the [[com.siigna.app.model.MutableModel]]. Each time a model changes the selection
+ * are destroyed.
+ *
+ * <br />
+ * Selection does not duplicate the shapes, since this would take up way too much space, but
+ * contains information about which parts of the shapes are selected (the
+ * [[com.siigna.app.model.shape.ShapeSelector]]). If a user chooses to select only one point of
+ * a larger shape for instance, the selection has to support this.
+ *
+ * @see Model
+ * @see MutableModel
+ * @see Selection
+ * @see Shape
  */
 object Select {
 
   /**
-   * Selects one [[com.siigna.app.model.shape.Shape]].
+   * Selects one whole [[com.siigna.app.model.shape.Shape]].
    * @param id  The ID of the shape to getPart.
    */
   def apply(id : Int) {
@@ -52,19 +64,18 @@ object Select {
 
   /**
    * Selects several [[com.siigna.app.model.shape.Shape]]s.
-   * @param shapes  The shapes to getPart.
+   * @param ids  The id's of the shapes to select.
    */
-  def apply(shapes : Shape*) {
-    throw new UnsupportedOperationException("Not implemented yet")
+  def apply(ids : Int*) {
+    Model select ids
   }
 
   /**
    * Selects several [[com.siigna.app.model.shape.Shape]]s.
-   * @param shapes  The shapes to getPart.
+   * @param ids The shapes to select.
    */
-  def apply(shapes : Traversable[Shape]) {
-    throw new UnsupportedOperationException("Not implemented yet")
-    //Model execute new Select(shapes.map(s => Model.indexWhere(_ == s)).filter(_ >= 0))
+  def apply(ids : Traversable[Int]) {
+    Model select ids
   }
 
 }

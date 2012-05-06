@@ -13,9 +13,11 @@ package com.siigna.app.model
 
 import shape.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
-
 /**
- * A model that can be selected and deselected.
+ * A trait that provides an interface to manipulate a [[com.siigna.app.model.MutableModel]] and through
+ * that a [[com.siigna.app.model.Selection]].
+ * @see MutableModel
+ * @see Selection
  */
 trait SelectableModel {
 
@@ -34,6 +36,12 @@ trait SelectableModel {
    * @param id  The id of the shape.
    */
   def select(id : Int) { model select id }
+
+  /**
+   * Selects several shapes based on their ids.
+   * @param ids  The id's of the shapes to select.
+   */
+  def select(ids : Traversable[Int]) { model select ids }
 
   /**
    * Selects a part of a shape based on its id. If the ShapeSelector is a FullShapeSelector then getPart the
