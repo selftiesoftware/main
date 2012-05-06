@@ -32,4 +32,8 @@ class TransformationMatrixSpec extends FunSuite with ShouldMatchers {
     t3.concatenate(t4) should equal (TransformationMatrix(Vector(-10, 100.5), 0))
   }
 
+  //TODO: Something is horribly wrong with concatenation!
+  //Test-case: Vector(0, 0).flipY = Vector(0, 184) !!
+  //Later..: Can't find the problem...
+
 }
