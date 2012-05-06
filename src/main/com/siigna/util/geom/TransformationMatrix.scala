@@ -17,16 +17,12 @@ import java.awt.geom.{AffineTransform, Point2D}
 /**
  * A wrapper class for the AffineTransform-class from AWT.
  * Used for geometrical manipulation of any kind.
- * TODO: Something is horribly wrong with concatenation!
- * Test-case: Vector(0, 0).flipY = Vector(0, 184) !!
- * Later..: Can't find the problem...
  *
  * @param t  The transformation matrix derived from AWT.
  *
  * TODO: Create a 3D representation as well.
  */
-case class TransformationMatrix(t : AffineTransform)
-{
+case class TransformationMatrix(t : AffineTransform) {
 
   def this() = this(new AffineTransform)
 
@@ -71,7 +67,7 @@ case class TransformationMatrix(t : AffineTransform)
    * Examines if this TransformationMatrix is "empty" that is an identity-transformation.
    * @return True if no transformations are made by this transformation or False if any scale, rotation or translation has been set.
    */
-  def isEmpty = t.isIdentity()
+  def isEmpty = t.isIdentity
 
   /**
    * Determines whether this transformation y-axis has been flipped.
@@ -95,7 +91,7 @@ case class TransformationMatrix(t : AffineTransform)
    * this transformation.
    */
   def rotate(degrees : Double, point : Vector2D) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point x, point y)))
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
 
   /**
    * Scales a transformation by a factor and concatenates it with this
@@ -103,6 +99,33 @@ case class TransformationMatrix(t : AffineTransform)
    */
   def scale(factor : Double) =
     TransformationMatrix(operation(_ scale(factor, factor)))
+
+  /**
+   * Scales a transformation by a factor on the first dimension and a factor on the second dimension.
+   * Before and after applying the transformation we translate the matrix to the given point so the
+   * transformation is done with the point as its center. This allows for funky mirror- or
+   * 1d-transformations.
+   * @param xFactor  The scale for the first dimension
+   * @param yFactor  The scala for the second dimension
+   * @param point  The base point for the scale transformation
+   * @return  A new scaled TransformationMatrix
+   */
+  def scale(xFactor : Double, yFactor : Double, point : Vector2D) =
+    TransformationMatrix(operation(_ scale(xFactor, yFactor), point))
+
+  /**
+   * Scales a transformation by a factor, but translates it before and after so the scale operation
+   * is based in the given coordinates.
+   * @param factor  The factor with which to scale
+   * @param point  The base point of the scale
+   * @return  A new scale TransformationMatrix
+   */
+  def scale(factor : Double, point : Vector2D) =
+    TransformationMatrix(operation(a => {
+      a.translate(point.x, point.y)
+      a.scale(factor, factor)
+      a.translate(-point.x, -point.y)
+    }))
 
   /**
    * Returns the scale (zoom) factor of this transformation.
@@ -140,12 +163,27 @@ case class TransformationMatrix(t : AffineTransform)
   def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta.x, delta.y)))
   
   /**
-   * Performs a operation on the affine transformation which is wrapped by this
+   * Performs an operation on the affine transformation which is wrapped by this
    * transformation.
+   * @param op  The operation to perform
    */
   protected def operation(op : AffineTransform => Unit) = {
     val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
     op(newAffineTransform)
+    newAffineTransform
+  }
+
+  /**
+   * Performs an operation on the affine transform beneath this TransformationMatrix but translates the
+   * matrix before and after the operation so the given point becomes the base for the operation.
+   * @param op  The operation to perform
+   * @param point  The base point for the operation
+   */
+  protected def operation(op : AffineTransform => Unit, point : Vector2D) = {
+    val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
+    newAffineTransform.translate(point.x, point.y)
+    op(newAffineTransform)
+    newAffineTransform.translate(-point.x, -point.y)
     newAffineTransform
   }
 
