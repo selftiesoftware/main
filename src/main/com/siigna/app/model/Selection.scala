@@ -15,6 +15,7 @@ import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
+import collection.immutable.MapProxy
 
 /**
  * A Selection is a mutable wrapper for a regular Shape(s).
@@ -24,7 +25,9 @@ import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(protected var parts: Map[Int, ShapeSelector]) extends ShapeLike
+                                                            with MapProxy[Int, ShapeSelector]
+                                                            with (TransformationMatrix => Traversable[Shape]) {
 
   type T = Selection
 
@@ -95,6 +98,8 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
       (t._1 -> Model(t._1))
     })
   }
+  
+  def self = parts
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
 
