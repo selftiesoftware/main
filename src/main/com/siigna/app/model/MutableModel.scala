@@ -43,7 +43,7 @@ trait MutableModel extends SelectableModel {
       val s = selection.get
       var action : Option[Action] = if (!t.isEmpty) {
         // TODO: Do this in the Transform action instead...
-        val parts = s.parts.map(e => e._1 -> e._2)
+        val parts = s.map(e => e._1 -> e._2)
         Some(TransformShapeParts(parts, t))
       } else None
       
