@@ -16,10 +16,21 @@ import shape.{PartialShape, Shape}
 
 
 /**
- * A selectable model containing one single [[com.siigna.app.model.Selection]], representing one or more
- * selected shapes.
+ * A model with a mutable "layer" that, if not empty, consists of a single [[com.siigna.app.model.Selection]],
+ * representing parts of one or more selected shapes.
  *
- * @see [[com.siigna.app.model.Model]]
+ * <br />
+ * The MutableModel is a way to dynamically manipulate the underlying [[com.siigna.app.model.ImmutableModel]]
+ * through a temporary "dynamic layer" that can be changed and updated without any effect on the actual
+ * shapes. This can be very useful (and give enourmous performance benefits) when you need to alter shapes
+ * many times before storing any final changes.
+ *
+ * <br />
+ * The actual selection consists of a map of Ints and [[com.siigna.app.model.shape.ShapeSelector]]s.
+ *
+ * @see Model
+ * @see Selection
+ * @see ShapeSelector
  */
 trait MutableModel extends SelectableModel {
 
@@ -43,7 +54,7 @@ trait MutableModel extends SelectableModel {
       val s = selection.get
       var action : Option[Action] = if (!t.isEmpty) {
         // TODO: Do this in the Transform action instead...
-        val parts = s.parts.map(e => e._1 -> e._2)
+        val parts = s.map(e => e._1 -> e._2)
         Some(TransformShapeParts(parts, t))
       } else None
       
@@ -70,12 +81,12 @@ trait MutableModel extends SelectableModel {
   
   /**
    * Select a single shape with the given Selection information.
-   * @param shape  The Selection representing the selection.
+   * @param selection  The Selection representing the selection.
    */
-  override def select(shape : Selection) {
-    if (selection.isDefined) deselect()
+  override def select(selection : Selection) {
+    if (this.selection.isDefined) deselect()
     
-    selection = Some(shape)
+    this.selection = Some(selection)
   }
 
 }

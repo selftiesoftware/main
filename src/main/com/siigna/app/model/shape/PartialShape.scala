@@ -14,7 +14,15 @@ package com.siigna.app.model.shape
 import com.siigna.util.geom.{TransformationMatrix}
 
 /**
- * A PartialShape is a function that allows for a shape to be partially transformed.
+ * A PartialShape allows for a shape to be partially manipulated.
+ *
+ * <br/>
+ * The PartialShape is actually a function receiving a [[com.siigna.util.geom.TransformationMatrix]]
+ * so it can apply the matrix on the selected parts of the shape.
+ *
+ * @see MutableModel
+ * @see Select
+ * @see Selection
  */
 class PartialShape(f : (TransformationMatrix => Shape)) extends (TransformationMatrix => Shape) {
 
