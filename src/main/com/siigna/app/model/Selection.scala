@@ -13,8 +13,8 @@ package com.siigna.app.model
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
-import collection.immutable.MapProxy
+import collection.mutable.{Map, MapProxy}
+import shape._
 
 /**
  * A Selection is a mutable wrapper for parts of a regular Shape(s).
@@ -33,7 +33,7 @@ import collection.immutable.MapProxy
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(protected var parts: Map[Int, ShapeSelector]) extends ShapeLike
+case class Selection(protected val parts: Map[Int, ShapeSelector]) extends ShapeLike
                                                             with MapProxy[Int, ShapeSelector]
                                                             with (TransformationMatrix => Traversable[Shape]) {
 
@@ -79,7 +79,7 @@ case class Selection(protected var parts: Map[Int, ShapeSelector]) extends Shape
       val part = parts(id)
       // Execute action
       Delete(id, part)
-      parts = parts.-(id)
+      parts - id
     }
   }
 
@@ -110,6 +110,22 @@ case class Selection(protected var parts: Map[Int, ShapeSelector]) extends Shape
   def self = parts
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
+
+  /**
+   * Switches a selection on or off depending on its current state.
+   * @param id  The id of the shape whose part we wish to toggle
+   * @param selector  The selector describing which part(s) of the shape to select
+   */
+  def toggle(id : Int, selector : ShapeSelector) {
+    if (parts contains id) {
+      parts(id) match {
+        case FullShapeSelector => parts - id
+        case EmptyShapeSelector => parts + (id -> selector)
+        case LargeShapeSelector => // No clue what to do here
+        case s : SmallShapeSelector => parts + (id -> s ^ selector)
+      }
+    } else parts + (id -> selector)
+  }
 
   override def toString = "Selection[" + parts + "]"
 
