@@ -55,10 +55,14 @@ object Select {
     Model.select(id, Model(id).getPart(r))
   }
   
-  def apply(r : Rectangle2D) {
-    // TODO: Find everything close to the rectangle
-    val selection = Model(r).map(t => t._1 -> t._2.getPart(r))
-    val filtered = selection.filter(_._2 != EmptyShapeSelector)
+  def apply(r : Rectangle2D, enclosed : Boolean = true) {
+    val filtered = if (enclosed) {
+      val selection = Model(r).map(t => t._1 -> t._2.getPart(r))
+      selection.filter(_._2 != EmptyShapeSelector)
+    } else {
+      val selection = Model(r).map(t => t._1 -> t._2.getPart)
+      selection.filter(_._2 != EmptyShapeSelector)
+    }
     Model.select(Selection(filtered))
   }
 
