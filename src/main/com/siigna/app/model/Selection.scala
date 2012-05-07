@@ -13,7 +13,7 @@ package com.siigna.app.model
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import collection.mutable.{Map, MapProxy}
+import collection.immutable.{Map, MapProxy}
 import shape._
 
 /**
@@ -33,9 +33,8 @@ import shape._
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(protected val parts: Map[Int, ShapeSelector]) extends ShapeLike
-                                                            with MapProxy[Int, ShapeSelector]
-                                                            with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike
+                                                            with MapProxy[Int, ShapeSelector] {
 
   type T = Selection
 
@@ -79,7 +78,7 @@ case class Selection(protected val parts: Map[Int, ShapeSelector]) extends Shape
       val part = parts(id)
       // Execute action
       Delete(id, part)
-      parts - id
+      parts = parts - id
     }
   }
 
@@ -119,10 +118,10 @@ case class Selection(protected val parts: Map[Int, ShapeSelector]) extends Shape
   def toggle(id : Int, selector : ShapeSelector) {
     if (parts contains id) {
       parts(id) match {
-        case FullShapeSelector => parts - id
-        case EmptyShapeSelector => parts + (id -> selector)
-        case LargeShapeSelector => // No clue what to do here
-        case s : SmallShapeSelector => parts + (id -> s ^ selector)
+        case FullShapeSelector => parts = parts - id
+        case EmptyShapeSelector => parts = parts + (id -> selector)
+        case LargeShapeSelector(_) => // No clue what to do here
+        case s : SmallShapeSelector => parts = parts + (id -> s.^(selector))
       }
     } else parts + (id -> selector)
   }

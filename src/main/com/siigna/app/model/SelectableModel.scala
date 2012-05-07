@@ -59,9 +59,9 @@ trait SelectableModel {
 
   /**
   * Select a single shape as written in the given Selection.
-  * @param shape  The Selection representing the selection.
+  * @param selection  The Selection representing the selection.
   */
-  def select(shape : Selection) { model select shape }
+  def select(selection : Selection) { model select selection }
 
   /**
    * Select every shape in the Model.
