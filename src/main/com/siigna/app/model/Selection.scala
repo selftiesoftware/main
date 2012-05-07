@@ -1,5 +1,3 @@
-package com.siigna.app.model
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -10,21 +8,33 @@ package com.siigna.app.model
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
+package com.siigna.app.model
 
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
+import collection.immutable.{Map, MapProxy}
+import shape._
 
 /**
- * A Selection is a mutable wrapper for a regular Shape(s).
+ * A Selection is a mutable wrapper for parts of a regular Shape(s).
+ *
+ * <br />
+ * A selection does not store entire shapes (that would be annoyingly expensive!) but instead remembers
+ * subsets of shapes (the [[com.siigna.app.model.shape.ShapeSelector]]s). These subsets can be given to
+ * the shapes stored in the model and through the [[com.siigna.app.model.shape.Shape.apply]] method
+ * the shapes will provide [[com.siigna.app.model.shape.PartialShape]]s which can be used to manipulate
+ * these subsets.
+ *
+ * <br />
  * When altered, the selection saves the action required to alter the shape(s) in the static layer, so the changes
  * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
  *
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike
+                                                            with MapProxy[Int, ShapeSelector] {
 
   type T = Selection
 
@@ -68,7 +78,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
       val part = parts(id)
       // Execute action
       Delete(id, part)
-      parts = parts.-(id)
+      parts = parts - id
     }
   }
 
@@ -95,8 +105,26 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
       (t._1 -> Model(t._1))
     })
   }
+  
+  def self = parts
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
+
+  /**
+   * Switches a selection on or off depending on its current state.
+   * @param id  The id of the shape whose part we wish to toggle
+   * @param selector  The selector describing which part(s) of the shape to select
+   */
+  def toggle(id : Int, selector : ShapeSelector) {
+    if (parts contains id) {
+      parts(id) match {
+        case FullShapeSelector => parts = parts - id
+        case EmptyShapeSelector => parts = parts + (id -> selector)
+        case LargeShapeSelector(_) => // No clue what to do here
+        case s : SmallShapeSelector => parts = parts + (id -> s.^(selector))
+      }
+    } else parts + (id -> selector)
+  }
 
   override def toString = "Selection[" + parts + "]"
 
