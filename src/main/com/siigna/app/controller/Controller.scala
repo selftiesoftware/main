@@ -101,7 +101,7 @@ object Controller extends Actor {
       react {
         // Forward incoming actions to the server
         case action : Action => {
-          Model execute action
+          Model execute(action, false)
           println("Controller recieved action: "+action)
         }
 
