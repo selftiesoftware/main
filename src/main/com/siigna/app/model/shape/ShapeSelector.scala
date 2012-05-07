@@ -25,24 +25,44 @@ package com.siigna.app.model.shape
  * <br >
  * An
  */
-trait ShapeSelector extends Serializable
+trait ShapeSelector extends Serializable {
+
+  /**
+   * Merges this selector with another selector by binary xor operation.
+   * @param that  The other shape selector
+   * @return A new shape selector
+   */
+  def ^(that : ShapeSelector) : ShapeSelector
+
+}
 
 /**
  * An EmptyShapeSelector is a ShapeSelector with no information and thus represents an empty Shape subset.
  */
-case object EmptyShapeSelector extends ShapeSelector
+case object EmptyShapeSelector extends ShapeSelector {
+
+  def ^(that : ShapeSelector) = that
+
+}
 
 /**
  * A FullShapeSelector signals that the ShapeSelector contains the entire shape. No sub-selection magic is needed.
  */
-case object FullShapeSelector extends ShapeSelector
+case object FullShapeSelector extends ShapeSelector {
+
+  def ^(that : ShapeSelector) = that
+
+}
 
 /**
  * A LargeShapeSelector is a set of Ints where each position in each integer represents one selectable
  * part of a shape.
  * @param x
  */
-case class LargeShapeSelector(x : Array[Int]) extends ShapeSelector
+case class LargeShapeSelector(x : Array[Int]) extends ShapeSelector {
+
+  def ^(that : ShapeSelector) = throw new UnsupportedOperationException("Not implemented yet")
+}
 
 /**
  * A SmallShapeSelector is basically an Int where each part of the shape represents one position
@@ -60,5 +80,11 @@ case class SmallShapeSelector(x : Int) extends ShapeSelector {
 
   assert(x > 0, "The small shape part must be larger than zero")
   assert(x < 30, "The small shape part cannot be larger than 30")
+
+  def ^(that : ShapeSelector) = that match {
+    case SmallShapeSelector(y) => SmallShapeSelector(x ^ y)
+    case LargeShapeSelector(_) => throw new UnsupportedOperationException("Not yet implemented")
+    case _ => this
+  }
 
 }
