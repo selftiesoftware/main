@@ -81,12 +81,12 @@ trait MutableModel extends SelectableModel {
   
   /**
    * Select a single shape with the given Selection information.
-   * @param shape  The Selection representing the selection.
+   * @param selection  The Selection representing the selection.
    */
-  override def select(shape : Selection) {
-    if (selection.isDefined) deselect()
+  override def select(selection : Selection) {
+    if (this.selection.isDefined) deselect()
     
-    selection = Some(shape)
+    this.selection = Some(selection)
   }
 
 }
