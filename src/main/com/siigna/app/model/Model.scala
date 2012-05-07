@@ -12,10 +12,14 @@
 package com.siigna.app.model
 
 
+import action.CreateShape
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.{Shape}
 import collection.immutable.MapProxy
+import com.siigna.app.controller.remote.GetNewShapeIds._
+import com.siigna.app.controller.remote.{RemoteAction, GetNewShapeIds}
+import com.siigna.app.controller.{Controller, AppletParameters}
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -48,6 +52,62 @@ object Model extends ActionModel
                 with SelectableModel
                 with SpatialModel[Int, Shape]
                 with MapProxy[Int, Shape] {
+
+
+  var localShapeId: Int = 0
+  var shapeIdBank: Seq[Int] = Seq()
+  var shapesWithLocalShapeId: Seq[Int] = Seq()
+
+
+  /**
+   * Hvis der er od'er i "banken: Returnerer en shapeId fra "banken".
+   * Hvis der ikke er gives et "lokalt id", og dette føjes til listen over shapes med lokale id'er.
+   * Kontrollerer, hvor mange id'er, der er tilbage i banken.
+   * Hvis der er under et vist antal anmodes om "en ny portion".
+   * @return
+   */
+  def getNewShapeId = {
+    var shapeId: Int = -1
+
+    if (shapeIdBank.length > 0) {
+      shapeId = shapeIdBank.head
+      shapeIdBank = shapeIdBank.tail
+    } else {
+      shapeId = localShapeId
+      shapesWithLocalShapeId = shapesWithLocalShapeId :+ localShapeId
+      localShapeId = localShapeId - 1
+    }
+
+    if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
+    shapeId
+  }
+
+  /**
+   * Saves a sequence of new shapeIds into the shapeIdBank variable
+   * @param shapeIds
+   */
+  def receiveNewShapeIds(shapeIds: Seq[Int]) {
+    shapeIdBank = shapeIdBank ++ shapeIds
+    shapesWithLocalShapeId.foreach(localId => {
+      if (shapeIdBank.length > 0){
+        //Funktion, der opdaterer lokalt id med id fra serveren. Mangler metode...
+        val bankId = shapeIdBank.head
+        shapeIdBank = shapeIdBank.tail
+
+        val shape = Model(localId)
+        model remove localId
+        model.add(bankId, shape)
+        //Funktion, der gemmer og videresender de shapes, der nu har fået en global id
+        Controller ! RemoteAction(AppletParameters.drawingId.get, AppletParameters.getClient, CreateShape(bankId, shape))
+
+        // Remove the id from the local bank
+        shapesWithLocalShapeId = shapesWithLocalShapeId.tail
+      }
+    })
+    println("shapeIdBank is now, after replacement of local Ids: "+shapeIdBank)
+    println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
+    if (shapeIdBank.length<5) GetNewShapeIds(10,com.siigna.app.controller.AppletParameters.getClient)
+  }
 
   /**
    * The boundary from the current content of the Model.

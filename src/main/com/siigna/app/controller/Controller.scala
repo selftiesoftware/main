@@ -135,7 +135,7 @@ object Controller extends Actor {
                     GetNewDrawingId(getClient)
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
-                  GetNewShapeIds(2,AppletParameters.getClient)
+                  GetNewShapeIds(2, AppletParameters.getClient)
                 }
                 case _ =>
               }
@@ -162,11 +162,8 @@ object Controller extends Actor {
         case command : NewDrawingId => {
           AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }
-        case command : NewShapeId => {
-          AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
-        }
         case command : NewShapeIds => {
-          AppletParameters.receiveNewShapeIds(command.retrieveNewShapeIds)
+          Model.receiveNewShapeIds(command.retrieveNewShapeIds)
         }
 
 

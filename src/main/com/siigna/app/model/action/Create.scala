@@ -23,7 +23,7 @@ object Create {
   
   private var id = 0;
   
-  private def getId = { id = AppletParameters.getNewShapeId; id; }
+  private def getId = { id = Model.getNewShapeId; id; }
   
   def apply(shape : Shape) {
     val id = shape.attributes.int("id").getOrElse(getId)
@@ -32,8 +32,6 @@ object Create {
   
   def apply(id : Int, shape : Shape) {
     Model execute CreateShape(id, shape)
-    //Sends the shape to the server for saving in database and forwarding to other users
-    SaveShape(com.siigna.app.controller.AppletParameters.readDrawingIdAsOption.get,id,shape,AppletParameters.getClient)
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
