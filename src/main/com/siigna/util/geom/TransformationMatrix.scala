@@ -101,11 +101,24 @@ case class TransformationMatrix(t : AffineTransform) {
     TransformationMatrix(operation(_ scale(factor, factor)))
 
   /**
+   * Scales a transformation by a factor on the first dimension and a factor on the second dimension.
+   * Before and after applying the transformation we translate the matrix to the given point so the
+   * transformation is done with the point as its center. This allows for funky mirror- or
+   * 1d-transformations.
+   * @param xFactor  The scale for the first dimension
+   * @param yFactor  The scala for the second dimension
+   * @param point  The base point for the scale transformation
+   * @return  A new scaled TransformationMatrix
+   */
+  def scale(xFactor : Double, yFactor : Double, point : Vector2D) =
+    TransformationMatrix(operation(_ scale(xFactor, yFactor), point))
+
+  /**
    * Scales a transformation by a factor, but translates it before and after so the scale operation
    * is based in the given coordinates.
    * @param factor  The factor with which to scale
    * @param point  The base point of the scale
-   * @return  A new transformation matrix with the applied transformation
+   * @return  A new scale TransformationMatrix
    */
   def scale(factor : Double, point : Vector2D) =
     TransformationMatrix(operation(a => {
@@ -150,12 +163,27 @@ case class TransformationMatrix(t : AffineTransform) {
   def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta.x, delta.y)))
   
   /**
-   * Performs a operation on the affine transformation which is wrapped by this
+   * Performs an operation on the affine transformation which is wrapped by this
    * transformation.
+   * @param op  The operation to perform
    */
   protected def operation(op : AffineTransform => Unit) = {
     val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
     op(newAffineTransform)
+    newAffineTransform
+  }
+
+  /**
+   * Performs an operation on the affine transform beneath this TransformationMatrix but translates the
+   * matrix before and after the operation so the given point becomes the base for the operation.
+   * @param op  The operation to perform
+   * @param point  The base point for the operation
+   */
+  protected def operation(op : AffineTransform => Unit, point : Vector2D) = {
+    val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
+    newAffineTransform.translate(point.x, point.y)
+    op(newAffineTransform)
+    newAffineTransform.translate(-point.x, -point.y)
     newAffineTransform
   }
 
