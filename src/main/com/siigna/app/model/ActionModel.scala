@@ -15,7 +15,8 @@ import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.Shape
 import com.siigna.app.view.View
-import com.siigna.app.controller.Controller
+import com.siigna.app.controller.remote.RemoteAction
+import com.siigna.app.controller.{AppletParameters, Controller}
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -52,6 +53,9 @@ trait ActionModel {
     
     // Render the view
     View.render()
+
+    // Create the remote command and dispatch it
+    RemoteAction(AppletParameters.getDrawingId.get, AppletParameters.getClient, action)
   }
 
   /**
