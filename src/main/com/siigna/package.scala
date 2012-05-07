@@ -32,9 +32,6 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Goto = com.siigna.app.controller.command.Goto
   lazy val Preload = com.siigna.app.controller.command.Preload
 
-  // RemoteCommands
-  lazy val GetNewShapeId = com.siigna.app.controller.remote.GetNewShapeId
-
   // Controller
   lazy val Controller = com.siigna.app.controller.Controller
   val AppletParameters = com.siigna.app.controller.AppletParameters
