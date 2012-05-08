@@ -11,8 +11,7 @@
 
 package com.siigna.app.model
 
-import action.{TransformShapeParts, Transform, TransformShapes, Action}
-import shape.{PartialShape, Shape}
+import action.{TransformShapeParts, Action}
 
 
 /**
