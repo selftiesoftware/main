@@ -15,6 +15,7 @@ import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import collection.immutable.{Map, MapProxy}
 import shape._
+import collection.mutable.BitSet
 
 /**
  * A Selection is a mutable wrapper for parts of a regular Shape(s).
@@ -118,10 +119,17 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike
   def toggle(id : Int, selector : ShapeSelector) {
     if (parts contains id) {
       parts(id) match {
-        case FullShapeSelector => parts = parts - id
-        case EmptyShapeSelector => parts = parts + (id -> selector)
-        case LargeShapeSelector(_) => // No clue what to do here
-        case s : SmallShapeSelector => parts = parts + (id -> s.^(selector))
+        case CollectionSelector(xs) => parts = parts + (id -> CollectionSelector({
+          val set = BitSet()
+          for (i <- 0 to xs.max) {
+            if (!xs(i)) set + i
+          }
+          set
+        }))
+        case EmptySelector          => parts = parts + (id -> selector)
+        case FullSelector           => parts = parts - id
+        case LineShape.Selector(x)  => parts = parts + (id -> LineShape.Selector(!x))
+        case _ =>
       }
     } else parts + (id -> selector)
   }

@@ -113,9 +113,9 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
 
   /**
    * Returns the entire shape, so it can be manipulated dynamically.
-   * @return  A [[com.siigna.app.model.shape.FullShapeSelector]].
+   * @return  A [[com.siigna.app.model.shape.FullSelector]].
    */
-  def getPart = FullShapeSelector
+  def getPart = FullSelector
 
   /**
    * Gets part of the shape by a rectangle. If the rectangle encloses the entire shape then return everything, but if
@@ -191,7 +191,7 @@ trait BasicShape extends Shape {
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
   
   // TODO: Fix this - how?
-  def geometry = if (shapes.isEmpty) Rectangle2D.empty else CollectionGeometry(shapes.map(_.geometry))
+  def geometry : CollectionGeometry = CollectionGeometry(shapes.map(_.geometry))
 
   /**
    * Joins this CollectionShape with a single new shape and forms a new CollectionShape.
@@ -212,7 +212,7 @@ trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
   /**
    * The inner shapes of the collection.
    */
-  def shapes : Traversable[G]
+  def shapes : Seq[G]
 
 }
 
