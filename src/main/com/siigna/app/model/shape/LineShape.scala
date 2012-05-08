@@ -14,6 +14,7 @@ package com.siigna.app.model.shape
 import com.siigna.util.dxf.{DXFSection, DXFValue}
 import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D, Segment2D}
 import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.app.model.shape.LineShape.Selector
 
 /**
  * This class draws a line segment.
@@ -40,48 +41,53 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   val start = p1
 
   def apply(part : ShapeSelector) = part match {
-    case SmallShapeSelector(1) => Some(new PartialShape((t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes)))
-    case SmallShapeSelector(2) => Some(new PartialShape((t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes)))
-    case FullShapeSelector => Some(new PartialShape(transform))
+    case Selector(xs) => {
+      Some(new PartialShape((t : TransformationMatrix) => LineShape(
+        if(xs)  p1.transform(t) else p1,
+        if(!xs) p2.transform(t) else p2,
+        attributes)))
+    }
+    case FullSelector => Some(new PartialShape(transform))
     case _ => None
   }
 
   def delete(part : ShapeSelector) : Option[Shape] = part match {
-    case SmallShapeSelector(_) | FullShapeSelector => None
+    case Selector(_) | FullSelector => None
     case _ => Some(this)
   }
 
   def getPart(r : Rectangle2D) = {
     if (r.intersects(boundary)) {
-      if (r.contains(p1) && r.contains(p2)) {
-        FullShapeSelector
-      } else if (r.contains(p1)) {
-        SmallShapeSelector(1)
-      } else if (r.contains(p2)) {
-        SmallShapeSelector(2)
-      } else EmptyShapeSelector
-    } else EmptyShapeSelector
+      val cond1 = r.contains(p1)
+      val cond2 = r.contains(p2)
+      if (cond1 && cond2) {
+        FullSelector
+      } else if (cond1) {
+        Selector(true)
+      } else if (cond2) {
+        Selector(false)
+      } else EmptySelector
+    } else EmptySelector
   }
 
   def getPart(p : Vector2D) = {
     val selectionDistance = Preferences.double("selectionDistance")
     if (distanceTo(p) > selectionDistance) {
-      EmptyShapeSelector
+      EmptySelector
     } else {
       if (p.distanceTo(p1) < p.distanceTo(p2) && p.distanceTo(p1) <= selectionDistance) {
-        SmallShapeSelector(1)
+        Selector(true)
       } else if (p.distanceTo(p2) < p.distanceTo(p1) && p.distanceTo(p2) <= selectionDistance) {
-        SmallShapeSelector(2)
+        Selector(false)
       } else {
-        FullShapeSelector
+        FullSelector
       }
     }
   }
 
   def getVertices(selector: ShapeSelector) = selector match {
-    case FullShapeSelector => geometry.vertices
-    case SmallShapeSelector(1) => Seq(p1)
-    case SmallShapeSelector(2) => Seq(p2)
+    case FullSelector => geometry.vertices
+    case Selector(x) => Seq(if(x) p1 else p2)
     case _ => Seq()
   }
 
@@ -102,13 +108,20 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
               p2 transform(transformation),
               attributes)
   }
+  
 }
 
 /**
  * Companion object for the LineShape. Contains shortcuts for instantiating LineShapes.
  */
-object LineShape
-{
+object LineShape {
+
+  /**
+   * The selector specific for LineShapes.
+   * @param part  A boolean flag indicating if the first point is a part of the selection (true) or the second point (false).
+   */
+  sealed case class Selector(part : Boolean) extends ShapeSelector
+
   def apply(p1 : Vector2D, p2 : Vector2D) : LineShape =
     new LineShape(p1, p2, Attributes())
 
