@@ -92,6 +92,8 @@ object Controller extends Actor {
     // Define the sink
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
+    println(sink)
+
     // Register the client
     // Remember: When remote commands are created, they are sent to the controller immediately
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
@@ -131,11 +133,13 @@ object Controller extends Actor {
                     sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
                     GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
-                  } else {
-                    GetNewDrawingId(getClient)
+                  } else if (client.isDefined) {
+                    GetNewDrawingId(client.get)
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
-                  GetNewShapeIds(2, AppletParameters.getClient)
+                  if (client.isDefined) {
+                    GetNewShapeIds(20,client.get)
+                  }
                 }
                 case _ =>
               }
@@ -313,6 +317,7 @@ object Controller extends Actor {
         }
         // Exit
         case 'exit => Log.info("Controller is shutting down"); exit()
+
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
       }

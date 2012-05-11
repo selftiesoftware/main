@@ -11,8 +11,7 @@
 
 package com.siigna.app.model
 
-import action.{TransformShapeParts, Transform, TransformShapes, Action}
-import shape.{PartialShape, Shape}
+import action.{TransformShapeParts, Action}
 
 
 /**
@@ -54,7 +53,7 @@ trait MutableModel extends SelectableModel {
       val s = selection.get
       var action : Option[Action] = if (!t.isEmpty) {
         // TODO: Do this in the Transform action instead...
-        val parts = s.parts.map(e => e._1 -> e._2)
+        val parts = s.map(e => e._1 -> e._2)
         Some(TransformShapeParts(parts, t))
       } else None
       
@@ -81,12 +80,12 @@ trait MutableModel extends SelectableModel {
   
   /**
    * Select a single shape with the given Selection information.
-   * @param shape  The Selection representing the selection.
+   * @param selection  The Selection representing the selection.
    */
-  override def select(shape : Selection) {
-    if (selection.isDefined) deselect()
+  override def select(selection : Selection) {
+    if (this.selection.isDefined) deselect()
     
-    selection = Some(shape)
+    this.selection = Some(selection)
   }
 
 }
