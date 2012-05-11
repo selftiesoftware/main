@@ -36,9 +36,9 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
     None
   }
 
-  def getPart(rect: Rectangle2D) = EmptyShapeSelector
+  def getPart(rect: Rectangle2D) = EmptySelector
 
-  def getPart(point: Vector2D) = EmptyShapeSelector
+  def getPart(point: Vector2D) = EmptySelector
 
   def getVertices(selector: ShapeSelector) = Seq()
 

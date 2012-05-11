@@ -78,7 +78,10 @@ object Model extends ActionModel
       localShapeId = localShapeId - 1
     }
 
-    if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
+    val client = AppletParameters.getClient
+    if (shapeIdBank.length < 2 && client.isDefined) {
+      GetNewShapeIds(2, client.get)
+    }
     shapeId
   }
 
@@ -97,8 +100,12 @@ object Model extends ActionModel
         val shape = Model(localId)
         model remove localId
         model.add(bankId, shape)
+
         //Funktion, der gemmer og videresender de shapes, der nu har fået en global id
-        Controller ! RemoteAction(AppletParameters.drawingId.get, AppletParameters.getClient, CreateShape(bankId, shape))
+        val client = AppletParameters.getClient
+        if (client.isDefined) {
+          Controller ! RemoteAction(AppletParameters.drawingId.get, client.get, CreateShape(bankId, shape))
+        }
 
         // Remove the id from the local bank
         shapesWithLocalShapeId = shapesWithLocalShapeId.tail
@@ -106,7 +113,10 @@ object Model extends ActionModel
     })
     println("shapeIdBank is now, after replacement of local Ids: "+shapeIdBank)
     println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
-    if (shapeIdBank.length<5) GetNewShapeIds(10,com.siigna.app.controller.AppletParameters.getClient)
+    val client = com.siigna.app.controller.AppletParameters.getClient
+    if (shapeIdBank.length < 5 && client.isDefined) {
+      GetNewShapeIds(10, client.get)
+    }
   }
 
   /**
