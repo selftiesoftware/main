@@ -11,54 +11,36 @@
 
 package com.siigna.app.model.shape
 
+import collection.BitSet
+
 /**
- * A ShapeSelector is a part of a shape represented in various ways. This class exists so we can access small parts of
- * one single shape instead of creating new sub-instances of the shape.
- * <br />
- * A SmallShapeSelector indicates that a part of the shape has been selected and that the part is small enough to be
- * represented by one Int.
- * <br />
- * A LargeShapeSelector indicates that a part of the shape has been selected but the part (or the shape) is too big
- * to be identified via an Int.
- * <br />
- * An EmptyShapeSelector indicates that the selection is empty.
- * <br >
- * An
+ * A ShapeSelector is a part of a shape represented in various ways. This class exists so we can 
+ * access small parts of one single shape instead of creating new sub-instances of the shape.
+ * Using ShapeSelectors it can thus be identified which parts of the shape are selected and which 
+ * are not. 
+ * 
+ * <br /><b>Note: The specific implementation varies for each shape</b>, but the standard is to 
+ * use an number of booleans equal to the number of segments in the shape to indicate which part has 
+ * been selected (true) or not selected (false).
  */
 trait ShapeSelector extends Serializable
 
 /**
- * An EmptyShapeSelector is a ShapeSelector with no information and thus represents an empty Shape subset.
+ * An EmptySelector is a ShapeSelector with no information and thus represents an empty Shape subset.
  */
-case object EmptyShapeSelector extends ShapeSelector
+case object EmptySelector extends ShapeSelector
 
 /**
- * A FullShapeSelector signals that the ShapeSelector contains the entire shape. No sub-selection magic is needed.
+ * A FullSelector signals that the ShapeSelector contains the entire shape. No sub-selection magic is needed.
  */
-case object FullShapeSelector extends ShapeSelector
+case object FullSelector extends ShapeSelector
 
 /**
- * A LargeShapeSelector is a set of Ints where each position in each integer represents one selectable
- * part of a shape.
- * @param x
- */
-case class LargeShapeSelector(x : Array[Int]) extends ShapeSelector
-
-/**
- * A SmallShapeSelector is basically an Int where each part of the shape represents one position
- * in the binary system. It can thus be identified which parts of the shape are selected and which
- * are not. <b>The specific implementation varies for each shape</b>, but the standard is to use numbers
- * <i>1 to length</i> to indicate which part has been selected.
+ * A CollectionSelector is a selector for [[com.siigna.app.model.shape.CollectionShape]]s.
+ * It is basically a BitSet where each boolean represents one part of the collection.
  *
- * Note: For shapes with selectable parts > 30 a ComplexPartialShape is needed since Int only supports 30
- * positions of positive numbers.
- * TODO: Use negative bits as well.
- *
- * @param x The Int signalling which parts of the shape has been selected.
+ * @param xs The BitSet indicating which parts of a CollectionShape has been selected.
+ * @see BitSet
+ * @see CollectionShape
  */
-case class SmallShapeSelector(x : Int) extends ShapeSelector {
-
-  assert(x > 0, "The small shape part must be larger than zero")
-  assert(x < 30, "The small shape part cannot be larger than 30")
-
-}
+case class CollectionSelector(xs : BitSet) extends ShapeSelector

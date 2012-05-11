@@ -11,8 +11,9 @@
 package com.siigna.app.model.shape
 
 import com.siigna.util.dxf.DXFSection
-import com.siigna.util.collection.{Attributes}
 import com.siigna.util.geom._
+import collection.mutable.BitSet
+import com.siigna.util.collection.{Preferences, Attributes}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -36,18 +37,21 @@ import com.siigna.util.geom._
  */
 case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
+  require(startPoint != null, "Cannot create a polyline without a starting point")
+  require(!innerShapes.isEmpty, "Cannot create a polyline without shapes")
+
   type T = PolylineShape
   
   def apply(part : ShapeSelector) = part match {
-    case FullShapeSelector => Some(new PartialShape(transform))
-    case SmallShapeSelector(x) => {
+    case FullSelector => Some(new PartialShape(transform))
+    case CollectionSelector(xs) => {
       // Create a function that transforms the selected parts of the polyline
       val transformInner = (t : TransformationMatrix) => {
         val arr = new Array[PolylineShape.InnerPolylineShape](innerShapes.size)
-        for (i <- 0 until innerShapes.size) { // Check all the binary positions
-          arr(i) = (if (((2 << i) & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
+        for (i <- 0 until innerShapes.size) {
+          arr(i) = if (xs contains (i + 1)) {
             innerShapes(i).transform(t)
-          } else innerShapes(i))
+          } else innerShapes(i)
         }
         arr
       }
@@ -55,7 +59,7 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
       Some(new PartialShape((t : TransformationMatrix) =>
         PolylineShape(
           // Test if the start point is included (binary position 1)
-          if ((x & 1) == 1) { startPoint.transform(t) } else { startPoint },
+          if (xs(0)) { startPoint.transform(t) } else { startPoint },
           // Transform the inner shapes that are a part of the selection
           transformInner(t),
           // Forward the attributes as is
@@ -67,93 +71,98 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
   }
   
   def delete(part : ShapeSelector) = part match {
-    case FullShapeSelector => None
-    case SmallShapeSelector(x) => {
-      val includeStart = (x & 1) == 1
-      var ids = Seq[Int]()
-      for (i <- 0 until innerShapes.size) { // Check all the binary positions
-        if ((2 << i & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
-          ids :+= i
-        }
-      }
+    case FullSelector => None
+    case CollectionSelector(xs) => {
+      val deleteStart = xs(0)
 
-      if (includeStart && ids.size == innerShapes.size) { // Everything is selected!
-        Some(this)
-      } else if (ids.size == 0) { // Oh dear, no points left!
+      if (deleteStart && xs.size == (innerShapes.size - 1)) { // Everything is selected!
         None
-      } else { // Otherwise we're somewhere between 0 and everything
-        // Filter all the removed parts away
-        val inner = innerShapes.filter(ids.contains(_))
-        if (includeStart) { // Is the start point included?
+      } else if (xs.size == 0) { // Nothing is selected, carry on...
+        Some(this)
+      } else {
+        // Otherwise we're somewhere between 0 and everything
+        // First filter all the removed parts away - remember startPoint occupies the 0-position
+        val inner = xs.-(0).map(i => innerShapes(i - 1)).toSeq
+
+        if (deleteStart && inner.size > 1) { // Is the start point included? Then we need at least two shapes
+          Some(PolylineShape(inner.head.point, inner.tail, attributes))
+        } else if (inner.size > 0) { // Otherwise we need at least one inner shape
           Some(PolylineShape(startPoint, inner, attributes))
-        } else if (ids.size == 1) { // No points left to use as start!
-          None
-        } else { // Phew!
-          Some(PolylineShape(inner(0).point, inner.slice(1, inner.size), attributes))
-        }
+        } else Some(this) // Fair enough...
       }
     }
-    case LargeShapeSelector(xs) => {
-      // TODO: Write this
-      None
-    }
-    case EmptyShapeSelector => Some(this)
+    case EmptySelector => Some(this)
   }
 
   def getPart(rect: Rectangle2D) =
     if (rect.contains(geometry.boundary)) {
-      FullShapeSelector
+      FullSelector
     } else if (rect.intersects(geometry.boundary)) {
-      if (innerShapes.size < 30) {
-        var x = if (rect.contains(startPoint)) 1 else 0
-        for (i <- 0 until innerShapes.size) {
-          if (rect.contains(innerShapes(i).point)) {
-            x = x | (1 << (i + 2)) // Add two since we already included the startPoint (1) and innerShapes begins with index 1
-          }
+      val set = BitSet()
+      // Add the start point if it is inside the rectangle
+      if (rect.contains(startPoint)) {
+        set + 0
+      }
+      // Iterate inner shapes
+      for (i <- 0 until innerShapes.size) {
+        if (rect.contains(innerShapes(i).point)) {
+          set  + (i + 1) // Add one since we already included the startPoint (at index 0)
         }
-        SmallShapeSelector(x)
-      } else {
-        EmptyShapeSelector // TODO: Write this
       }
-    } else EmptyShapeSelector
+      CollectionSelector(set)
+    } else EmptySelector
 
-
-  def getPart(point: Vector2D) = {
+  def getPart(point: Vector2D) = { // TODO: Test this
     if (innerShapes.size < 30) {
-      // Set the x-value and test the first shape (startPoint included)
-      var x = shapes(0).getPart(point) match {
-        case FullShapeSelector => 3 // Point one and two = three
-        case SmallShapeSelector(p) => p
-        case _ => 0
-      }
-
+      val set = BitSet()
+      
       // Iterate the shapes to find the ones who matches
       for (i <- 1 until shapes.size) {
         shapes(i).getPart(point) match {
-          case FullShapeSelector => x = x | ((1 << i) + (2 << i)) // Include both numbers
-          case SmallShapeSelector(p) => x = x | (p << i)
+          case FullSelector => { // Include both numbers
+            if (set.size <= 1) {
+              set + (i, i + 1)
+            } else {
+              set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
+                case Some(n) => set - n; set + i
+                case None => // Don't add the new shape since it's further away
+              }
+            }
+          }
+          case LineShape.Selector(x) => {
+            if (set.size > 1) {
+              set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
+                case Some(n) => set - n; set + i
+                case None => // Don't add the new shape since it's further away
+              }
+            } else {
+              set + (if(x) i else i + 1)
+            }
+          }
           case _ =>
         }
       }
 
       // Return
-      if (x > 0) {
-        SmallShapeSelector(x)
-      } else EmptyShapeSelector
-    } else EmptyShapeSelector // TODO: Write this
+      if (set.size == shapes.size + 1) {
+        FullSelector
+      } else if (set.size > 0) {
+        CollectionSelector(set)
+      } else EmptySelector
+    } else EmptySelector // TODO: Write this
   }
 
   def getVertices(selector: ShapeSelector) = selector match {
-    case FullShapeSelector => geometry.vertices
-    case SmallShapeSelector(x) => {
+    case FullSelector => geometry.vertices
+    case CollectionSelector(xs) => {
       var inner = Seq[Vector2D]()
       
       // Add startPoint
-      if ((x & 1) == 1) { inner :+= startPoint }
+      if (xs(0)) { inner :+= startPoint }
       
       // Check all the binary positions for matches
-      for (i <- 0 until innerShapes.size) { 
-        if (((2 << i) & x) == (2 << i)) { // Remember to start from 2 since the startPoint occupies the first position
+      for (i <- 1 until innerShapes.size) {
+        if (xs(i)) {
           inner :+= innerShapes(i).point
         }
       }

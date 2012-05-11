@@ -13,7 +13,9 @@ package com.siigna.app.model
 import action.{Delete, Action}
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
+import collection.immutable.{Map, MapProxy}
+import shape._
+import collection.mutable.BitSet
 
 /**
  * A Selection is a mutable wrapper for parts of a regular Shape(s).
@@ -32,7 +34,8 @@ import shape.{PartialShape, Shape, ShapeSelector, ShapeLike}
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with (TransformationMatrix => Traversable[Shape]) {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike
+                                                            with MapProxy[Int, ShapeSelector] {
 
   type T = Selection
 
@@ -76,7 +79,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
       val part = parts(id)
       // Execute action
       Delete(id, part)
-      parts = parts.-(id)
+      parts = parts - id
     }
   }
 
@@ -103,8 +106,33 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
       (t._1 -> Model(t._1))
     })
   }
+  
+  def self = parts
 
   def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
+
+  /**
+   * Switches a selection on or off depending on its current state.
+   * @param id  The id of the shape whose part we wish to toggle
+   * @param selector  The selector describing which part(s) of the shape to select
+   */
+  def toggle(id : Int, selector : ShapeSelector) {
+    if (parts contains id) {
+      parts(id) match {
+        case CollectionSelector(xs) => parts = parts + (id -> CollectionSelector({
+          val set = BitSet()
+          for (i <- 0 to xs.max) {
+            if (!xs(i)) set + i
+          }
+          set
+        }))
+        case EmptySelector          => parts = parts + (id -> selector)
+        case FullSelector           => parts = parts - id
+        case LineShape.Selector(x)  => parts = parts + (id -> LineShape.Selector(!x))
+        case _ =>
+      }
+    } else parts + (id -> selector)
+  }
 
   override def toString = "Selection[" + parts + "]"
 

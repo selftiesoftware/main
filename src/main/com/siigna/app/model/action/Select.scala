@@ -13,7 +13,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.{Selection, Model}
 import com.siigna.util.geom.{Rectangle2D, Vector2D}
-import com.siigna.app.model.shape.{EmptyShapeSelector, Shape, ShapeLike}
+import com.siigna.app.model.shape.{EmptySelector, Shape, ShapeLike}
 
 /**
  * An object that provides shortcuts to select objects in the model. Selections are crucial
@@ -55,10 +55,14 @@ object Select {
     Model.select(id, Model(id).getPart(r))
   }
   
-  def apply(r : Rectangle2D) {
-    // TODO: Find everything close to the rectangle
-    val selection = Model(r).map(t => t._1 -> t._2.getPart(r))
-    val filtered = selection.filter(_._2 != EmptyShapeSelector)
+  def apply(r : Rectangle2D, enclosed : Boolean = true) {
+    val filtered = if (enclosed) {
+      val selection = Model(r).map(t => t._1 -> t._2.getPart(r))
+      selection.filter(_._2 != EmptySelector)
+    } else {
+      val selection = Model(r).map(t => t._1 -> t._2.getPart)
+      selection.filter(_._2 != EmptySelector)
+    }
     Model.select(Selection(filtered))
   }
 

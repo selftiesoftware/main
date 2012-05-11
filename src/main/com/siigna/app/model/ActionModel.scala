@@ -55,8 +55,9 @@ trait ActionModel {
     View.render()
 
     // Create the remote command and dispatch it
-    if (propagate) {
-      RemoteAction(AppletParameters.getDrawingId.get, AppletParameters.getClient, action)
+    val client = AppletParameters.getClient
+    if (propagate && client.isDefined) {
+      RemoteAction(AppletParameters.getDrawingId.get, client.get, action)
     }
   }
 

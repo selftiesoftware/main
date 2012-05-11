@@ -15,6 +15,10 @@ import com.siigna.app.model.shape.{ShapeSelector, Shape, ShapeLike}
 
 object Delete {
   
+  def apply(id : Int) {
+    Model execute DeleteShape(id, Model(id))
+  }
+  
   def apply(id : Int, part : ShapeSelector) {
     Model execute DeleteShapePart(id, Model(id), part)
   }
