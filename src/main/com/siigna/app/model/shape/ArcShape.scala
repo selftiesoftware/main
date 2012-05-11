@@ -40,23 +40,23 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   // TODO: What about selection "arc-points"??
   def apply(part : ShapeSelector) = part match {
-    case FullShapeSelector => Some(new PartialShape(transform))
-    case SmallShapeSelector(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
+    case FullSelector => Some(new PartialShape(transform))
+    //case PartialSelector(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
     case _ => None
   }
 
   def delete(part: ShapeSelector) = part match {
-    case SmallShapeSelector(_) | FullShapeSelector => None
+    //case PartialSelector(_) | FullSelector => None
     case _ => Some(this)
   }
 
-  def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullShapeSelector else EmptyShapeSelector
+  def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullShapeSelector else EmptyShapeSelector
+  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullSelector else EmptySelector
 
   def getVertices(selector: ShapeSelector) = selector match {
-    case FullShapeSelector => geometry.vertices
-    case SmallShapeSelector(1) => Seq(center)
+    case FullSelector => geometry.vertices
+    //case PartialSelector(1) => Seq(center)
     case _ => Seq()
   }
 
@@ -70,6 +70,9 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
                radius * t.scaleFactor,
                startAngle, angle,
                attributes)
+  
+  //protected sealed case class ArcShapeSelector()
+
 }
 
 object ArcShape

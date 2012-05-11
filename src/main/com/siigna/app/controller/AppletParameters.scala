@@ -21,22 +21,18 @@ object AppletParameters {
   var drawingName: Option[String] = None
   var contributorName: Option[String] = None
   var applet : Option[Applet] = None
-  var clientReference: Option[Client] = None
+  var client: Option[Client] = None
   var drawingIdBank: Seq[Int] = Seq()
   var drawingIdReceivedAtStartup: Boolean = false
   var drawingOwner: Option[String] = None
   
-  def getApplet = {
-    (applet.get)
-  }
+  def getApplet = applet
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
    * @return
    */
-  def getClient = {
-    (clientReference.get)
-  }
+  def getClient = client
 
   def getDrawingId = {
     (drawingId)
@@ -131,8 +127,8 @@ object AppletParameters {
    */
   def saveNewDrawingName(newName: String) = {
     var messageReturned: Option[String] = None
-    if(drawingId.isDefined && clientReference.isDefined) {
-      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.clientReference.get)
+    if(drawingId.isDefined && client.isDefined) {
+      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.client.get)
       drawingName = Some(newName)
       messageReturned = Some("Drawing name changed to "+drawingName.get)
     } else {
@@ -155,9 +151,9 @@ object AppletParameters {
    */
   def setDrawingIdAndRegisterItWithTheServer(newId:Int) {
     if(drawingId.isDefined) {
-      remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+      remote.RegisterWithNewDrawingId(drawingId.get,newId,client.get)
     } else {
-      remote.RegisterWithDrawingId(newId,clientReference.get)
+      remote.RegisterWithDrawingId(newId,client.get)
     }
     drawingId = Some(newId)
   }
@@ -184,6 +180,6 @@ object AppletParameters {
    * @param newClient
    */
   def setClient(newClient:Option[Client]) {
-    clientReference = newClient
+    client = newClient
   }
 }
