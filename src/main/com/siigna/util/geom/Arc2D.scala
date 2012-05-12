@@ -63,17 +63,17 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     val maxY = if (crop(startAngle - 90)  > crop(endAngle - 90))   radius else math.max(startY, endY)
 
     // Return the corresponding rectangle
-    Rectangle2D(Vector2D(center.x + minX, center.y + minY), Vector2D(center.x + maxX, center.y + maxY))
+    Rectangle2D(center.x + minX, center.y + minY, center.x + maxX, center.y + maxY)
   }
 
   def closestPoint(vector : Vector2D) = (vector - center).unit * radius
 
-  def distanceTo(arc : Arc2D) = java.lang.Double.POSITIVE_INFINITY
-  def distanceTo(circle : Circle2D) = java.lang.Double.POSITIVE_INFINITY
-  def distanceTo(ellipse : Ellipse2D) = java.lang.Double.POSITIVE_INFINITY
-  def distanceTo(line : Line2D) = java.lang.Double.POSITIVE_INFINITY
-  def distanceTo(rectangle : Rectangle2D) = java.lang.Double.POSITIVE_INFINITY
-  def distanceTo(segment : Segment2D) = java.lang.Double.POSITIVE_INFINITY
+  def distanceTo(arc : Arc2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
 
   def distanceTo(p : Vector2D) =
   {
@@ -113,13 +113,13 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     bindTo360(angle - startAngle) <= this.angle
   }
 
-  def intersects(arc : Arc2D) = false
-  def intersects(circle : Circle2D) = false
-  def intersects(ellipse : Ellipse2D) = false
-  def intersects(line : Line2D) = false
-  def intersects(rectangle : Rectangle2D) = false
-  def intersects(segment : Segment2D) = false
-  def intersects(vector : Vector2D) = false
+  def intersects(arc : Arc2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(vector : Vector2D) = throw new UnsupportedOperationException("Not implemented")
 
   /**
    * Returns a list of points, defined as the intersection(s) between the
@@ -138,12 +138,12 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     }
   }
 
-  def intersections(circle : Circle2D) = Set.empty
-  def intersections(ellipse : Ellipse2D) = Set.empty
-  def intersections(line : Line2D) = Set.empty
-  def intersections(rectangle : Rectangle2D) = Set.empty
-  def intersections(segment : Segment2D) = Set.empty
-  def intersections(vector : Vector2D) = Set.empty
+  def intersections(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersections(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersections(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersections(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersections(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersections(vector : Vector2D) = throw new UnsupportedOperationException("Not implemented")
 
   def transform(t : TransformationMatrix) =
     new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)

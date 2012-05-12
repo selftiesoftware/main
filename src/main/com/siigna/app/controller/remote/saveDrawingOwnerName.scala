@@ -17,4 +17,4 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.Client
 
-case class saveDrawingOwnerName (drawingId:Int, ownerName:String, client : Client) extends RemoteCommand
+case class SaveDrawingOwnerName (drawingId:Int, ownerName:String, client : Client) extends RemoteCommand

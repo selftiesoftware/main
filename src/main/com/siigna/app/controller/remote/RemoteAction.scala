@@ -11,10 +11,10 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.model.action.Action
 import com.siigna.app.controller.Client
+import com.siigna.app.model.action.Action
 
 /**
- * An action meant to be sent over the network.
+ *
  */
 case class RemoteAction(drawingId : Int, client : Client, action : Action) extends RemoteCommand
