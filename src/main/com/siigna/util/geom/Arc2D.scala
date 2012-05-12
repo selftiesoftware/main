@@ -45,20 +45,25 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
   /**
    * Calculates the boundary of the arc.
+   * Thanks to: http://groups.google.com/group/comp.graphics.algorithms/browse_thread/thread/1adbcc734e44d024/79201c57a09149fe?lnk=gst&q=%22arc+%27bounding+box%27%22#79201c57a09149fe
    */
   def boundary = {
-    // First we find the angles in radians for use later on
-    val startAngleCos = math.cos(math.toRadians(startAngle))
-    val startAngleSin = math.sin(math.toRadians(startAngle))
-    val endAngleCos = math.cos(math.toRadians(endAngle))
-    val endAngleSin = math.sin(math.toRadians(endAngle))
-    // Then we discover which angle have the least and the largest bounds and then we multiply that to the radius and
-    // finally add the value to the center point to get two coordinates we can parse as a rectangle.
-    val minX = math.min(startAngleCos, endAngleCos)
-    val maxX = math.max(startAngleCos, endAngleCos)
-    val minY = math.min(startAngleSin, endAngleSin)
-    val maxY = math.max(startAngleSin, endAngleSin)
-    Rectangle(minX, minY, maxX, maxY)
+    def crop(a : Double) = if (a > 360) a - 360 else if (a < 0) a + 360 else a
+    
+    // First we find the coordinates for the ends of the arc
+    val startX = math.cos(math.toRadians(startAngle)) * radius
+    val startY = math.sin(math.toRadians(startAngle)) * radius
+    val endX   = math.cos(math.toRadians(endAngle)) * radius
+    val endY   = math.sin(math.toRadians(endAngle)) * radius
+
+    // Locate the extremes (remember 0 degrees is 3 o'clock)
+    val minX = if (crop(startAngle - 180) > crop(endAngle - 180)) -radius else math.min(startY, endX)
+    val maxX = if (startAngle             > endAngle)              radius else math.max(startX, endX)
+    val minY = if (crop(startAngle - 270) > crop(endAngle - 270)) -radius else math.min(startY, endY)
+    val maxY = if (crop(startAngle - 90)  > crop(endAngle - 90))   radius else math.max(startY, endY)
+
+    // Return the corresponding rectangle
+    Rectangle2D(Vector2D(center.x + minX, center.y + minY), Vector2D(center.x + maxX, center.y + maxY))
   }
 
   def closestPoint(vector : Vector2D) = (vector - center).unit * radius
