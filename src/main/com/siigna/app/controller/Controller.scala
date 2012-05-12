@@ -360,9 +360,6 @@ object Controller extends Actor {
       Siigna.setInterface(module.interface)
     }
 
-    // Give the paint-function to the interface
-    module.interface.setPaint(module.paint)
-
     // Unchain the module if it happens to be chained
     if (module.interface.isChained)
       module.interface.unchain()

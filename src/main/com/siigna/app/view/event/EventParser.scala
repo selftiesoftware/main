@@ -103,7 +103,6 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    Track.paint(graphics, transformation)
     snap.foreach(_.paint(graphics, transformation))
   }
 
