@@ -15,7 +15,8 @@ import com.siigna.app.model.action.{VolatileAction, Action}
 import com.siigna.util.logging.Log
 import shape.Shape
 import com.siigna.app.view.View
-import com.siigna.app.controller.Controller
+import com.siigna.app.controller.remote.RemoteAction
+import com.siigna.app.controller.{AppletParameters, Controller}
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -41,7 +42,7 @@ trait ActionModel {
    * Execute an action, list it as executed and clear the undone stack to make way for a new actions
    * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).
    */
-  def execute(action: Action) {
+  def execute(action: Action, propagate : Boolean = true) {
     model = action.execute(model)
 
     // Only store the action if it is not volatile
@@ -52,6 +53,12 @@ trait ActionModel {
     
     // Render the view
     View.render()
+
+    // Create the remote command and dispatch it
+    val client = AppletParameters.getClient
+    if (propagate && client.isDefined) {
+      RemoteAction(AppletParameters.getDrawingId.get, client.get, action)
+    }
   }
 
   /**
