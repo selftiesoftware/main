@@ -12,34 +12,27 @@
 package com.siigna.app.controller
 
 import java.applet.Applet
-import remote.{GetNewShapeIds, GetNewShapeId}
+import remote.{GetNewShapeIds}
 import com.siigna.app.model._
 import com.siigna.app.controller.remote.SaveShape
 object AppletParameters {
 
-  private var drawingId: Option[Int] = None
+  var drawingId: Option[Int] = None
   var drawingName: Option[String] = None
   var contributorName: Option[String] = None
-  private var applet : Option[Applet] = None
-  var clientReference: Option[Client] = None
-  var shapeIdBank: Seq[Int] = Seq()
+  var applet : Option[Applet] = None
+  var client: Option[Client] = None
   var drawingIdBank: Seq[Int] = Seq()
   var drawingIdReceivedAtStartup: Boolean = false
   var drawingOwner: Option[String] = None
-  var localShapeId:Int = 0
-  var shapesWithLocalShapeId: Seq[Int] = Seq()
   
-  def getApplet = {
-    (applet.get)
-  }
+  def getApplet = applet
 
   /**
    * Returnerer Client, der er gemt i variablen clientReference
    * @return
    */
-  def getClient = {
-    (clientReference.get)
-  }
+  def getClient = client
 
   def getDrawingId = {
     (drawingId)
@@ -60,29 +53,6 @@ object AppletParameters {
    */
   def getDrawingIdFromHomepage {
     drawingId = AppletParameters.getParametersInt("drawingId")
-  }
-
-
-  /**
-   * Hvis der er od'er i "banken: Returnerer en shapeId fra "banken". 
-   * Hvis der ikke er gives et "lokalt id", og dette føjes til listen over shapes med lokale id'er.
-   * Kontrollerer, hvor mange id'er, der er tilbage i banken.
-   * Hvis der er under et vist antal anmodes om "en ny portion".
-   * @return
-   */
-  def getNewShapeId = {
-    var shapeId:Int = 0
-    
-    if (shapeIdBank.length > 0) {
-      shapeId = shapeIdBank.head
-      shapeIdBank = shapeIdBank.tail
-    } else {
-      shapeId = localShapeId
-      shapesWithLocalShapeId = shapesWithLocalShapeId :+ localShapeId
-      localShapeId = localShapeId + 1
-    }
-    if (shapeIdBank.length<2) GetNewShapeIds(2,com.siigna.app.controller.AppletParameters.getClient)
-    (shapeId)
   }
   
   def getDrawingOwnerAsOption = {
@@ -149,47 +119,7 @@ object AppletParameters {
     (drawingName)
   }
 
-  /**
-   * Saves a new shapeId into the shapeIdBank variable
-   * @param shapeId
-   */
-  def receiveNewShapeId(shapeId:Int) {
-    println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
-    shapeIdBank = shapeIdBank :+ shapeId
-    println("shapeIdBank is now: "+shapeIdBank)
-    shapesWithLocalShapeId.foreach(localId => {
-      if (shapeIdBank.length > 0){
-        //Funktion, der opdaterer lokalt id med id fra serveren. Mangler metode...
 
-        //Funktion, der gemmer og videresender de shapes, der nu har fået en global id
-        //SaveShape(drawingId.get,shapeIdFromBank,shape,clientReference.get)
-      } 
-    })
-    println("shapeIdBank is now, after replacement of local Ids: "+shapeIdBank)
-    println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
-    if (shapeIdBank.length<5) GetNewShapeIds(10,com.siigna.app.controller.AppletParameters.getClient)
-  }
-
-  /**
-   * Saves a sequence of new shapeIds into the shapeIdBank variable
-   * @param shapeIds
-   */
-  def receiveNewShapeIds(shapeIds:Seq[Int]) {
-    println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
-    shapeIdBank = shapeIdBank ++ shapeIds
-    println("shapeIdBank is now: "+shapeIdBank)
-    shapesWithLocalShapeId.foreach(localId => {
-      if (shapeIdBank.length > 0){
-        //Funktion, der opdaterer lokalt id med id fra serveren. Mangler metode...
-
-        //Funktion, der gemmer og videresender de shapes, der nu har fået en global id
-        //SaveShape(drawingId.get,shapeIdFromBank,shape,clientReference.get)
-      }
-    })
-    println("shapeIdBank is now, after replacement of local Ids: "+shapeIdBank)
-    println("Shapes with local Ids are now: " + shapesWithLocalShapeId)
-    if (shapeIdBank.length<5) GetNewShapeIds(10,com.siigna.app.controller.AppletParameters.getClient)
-  }
 
   /**
    * Saves a new name for the active drawing, ans sets the drawingNamw var to the new name.
@@ -197,8 +127,8 @@ object AppletParameters {
    */
   def saveNewDrawingName(newName: String) = {
     var messageReturned: Option[String] = None
-    if(drawingId.isDefined && clientReference.isDefined) {
-      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.clientReference.get)
+    if(drawingId.isDefined && client.isDefined) {
+      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.client.get)
       drawingName = Some(newName)
       messageReturned = Some("Drawing name changed to "+drawingName.get)
     } else {
@@ -221,9 +151,9 @@ object AppletParameters {
    */
   def setDrawingIdAndRegisterItWithTheServer(newId:Int) {
     if(drawingId.isDefined) {
-      remote.RegisterWithNewDrawingId(drawingId.get,newId,clientReference.get)
+      remote.RegisterWithNewDrawingId(drawingId.get,newId,client.get)
     } else {
-      remote.RegisterWithDrawingId(newId,clientReference.get)
+      remote.RegisterWithDrawingId(newId,client.get)
     }
     drawingId = Some(newId)
   }
@@ -250,6 +180,6 @@ object AppletParameters {
    * @param newClient
    */
   def setClient(newClient:Option[Client]) {
-    clientReference = newClient
+    client = newClient
   }
 }
