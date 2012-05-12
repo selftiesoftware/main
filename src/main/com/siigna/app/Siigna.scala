@@ -14,6 +14,7 @@ import com.siigna.util.logging.Log
 import model.Model
 import view._
 import com.siigna.util.geom._
+import event.Track
 import java.awt.{Cursor}
 import com.siigna.util.collection.Preferences
 
@@ -109,6 +110,9 @@ object Siigna extends Interface {
    * mechanism runs on it's own thread and we'd like to make sure that the painting happens instantly.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
+    // Paint the tracking - if needed
+    Track.paint(graphics, transformation)
+
     // Paint the interface
     if (interface.isDefined) interface.get.paint(graphics, transformation)
 

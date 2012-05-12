@@ -15,6 +15,7 @@ import java.awt.Cursor
 
 import com.siigna.app.Siigna
 import com.siigna.util.geom.TransformationMatrix
+import com.siigna.module.Module
 
 /**
  * Every Module is given an unique instance of ModuleInterface to access graphical stuff. The
@@ -24,7 +25,7 @@ import com.siigna.util.geom.TransformationMatrix
  * paint-call is forwarded to the chained instance as well. In this way every active module
  * gets painted, starting from the first one initialized to the latest.
  */
-class ModuleInterface extends Interface {
+class ModuleInterface(module : Module) extends Interface {
 
   /**
    * The chained interface, if any.
@@ -35,11 +36,6 @@ class ModuleInterface extends Interface {
    * The cursor of the current interface, if any.
    */
   protected var cursor : Cursor = Interface.Cursors.crosshair
-
-  /**
-   * A paint-function that the interface should paint on every paint-tick.
-   */
-  private var paint : Option[(Graphics, TransformationMatrix) => Unit] = None
 
   /**
    * Chain the interface to another interface.
@@ -71,8 +67,11 @@ class ModuleInterface extends Interface {
    * If the interface is chaining to another interface then we let that interface paint.
    */
   def paint(graphics : Graphics, transformation: TransformationMatrix) {
+    // Paint the event-snaps of the module
+    module.eventParser.paint(graphics, transformation)
+
     // Paint the current paint-function, if defined
-    if (paint.isDefined) paint.get.apply(graphics, transformation)
+    module.paint(graphics, transformation)
 
     // Paint the chain
     if (chain.isDefined) chain.get.paint(graphics, transformation)
@@ -95,11 +94,6 @@ class ModuleInterface extends Interface {
     cursor = newCursor
     Siigna.setCursor(cursor)
   }
-
-  /**
-   * Set the paint-function.
-   */
-  def setPaint(f : (Graphics, TransformationMatrix) => Unit) { paint = Some(f) }
 
   /**
    * Unchains any interfaces from this interface.
