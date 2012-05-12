@@ -4,4 +4,4 @@ api/
 doc/
 docs/
 out/
-cmd.bat
+*.bat

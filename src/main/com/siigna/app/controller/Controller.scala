@@ -92,6 +92,8 @@ object Controller extends Actor {
     // Define the sink
     val sink = select(Node("siigna.com", 20004), 'siigna)
 
+    println(sink)
+
     // Register the client
     // Remember: When remote commands are created, they are sent to the controller immediately
     Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
@@ -101,7 +103,7 @@ object Controller extends Actor {
       react {
         // Forward incoming actions to the server
         case action : Action => {
-          Model execute action
+          Model execute(action, false)
           println("Controller recieved action: "+action)
         }
 
@@ -131,11 +133,13 @@ object Controller extends Actor {
                     sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
                     sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
                     GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
-                  } else {
-                    GetNewDrawingId(getClient)
+                  } else if (client.isDefined) {
+                    GetNewDrawingId(client.get)
                   }
                   //get a specified number of new shapeIds from the server, ready to use for new shapes
-                  GetNewShapeIds(20,AppletParameters.getClient)
+                  if (client.isDefined) {
+                    GetNewShapeIds(20,client.get)
+                  }
                 }
                 case _ =>
               }
@@ -162,11 +166,8 @@ object Controller extends Actor {
         case command : NewDrawingId => {
           AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
         }
-        case command : NewShapeId => {
-          AppletParameters.receiveNewShapeId(command.retrieveNewShapeId)
-        }
         case command : NewShapeIds => {
-          AppletParameters.receiveNewShapeIds(command.retrieveNewShapeIds)
+          Model.receiveNewShapeIds(command.retrieveNewShapeIds)
         }
 
 
