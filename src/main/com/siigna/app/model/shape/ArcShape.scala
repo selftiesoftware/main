@@ -11,7 +11,7 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.dxf.DXFSection
+//import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom.{Rectangle2D, Arc2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.{Preferences, Attributes}
 
@@ -63,7 +63,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 
   // TODO: Export arcs.
-  def toDXF = DXFSection(List())
+  //def toDXF = DXFSection(List())
 
   def transform(t : TransformationMatrix) =
       ArcShape(t.transform(center),

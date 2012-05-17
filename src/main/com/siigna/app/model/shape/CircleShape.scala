@@ -11,7 +11,7 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.dxf.DXFSection
+//import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom.{Rectangle2D, Circle2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.{Preferences, Attributes}
 
@@ -58,7 +58,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 
   // TODO export circles
-  def toDXF = DXFSection(List())
+  //def toDXF = DXFSection(List())
 
   def transform(t : TransformationMatrix) =
     CircleShape(center transform(t), radius * t.scaleFactor, attributes)

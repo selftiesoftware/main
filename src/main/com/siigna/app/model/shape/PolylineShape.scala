@@ -10,7 +10,6 @@
  */
 package com.siigna.app.model.shape
 
-import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom._
 import collection.mutable.BitSet
 import com.siigna.util.collection.{Preferences, Attributes}
@@ -194,7 +193,7 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
   // TODO: export polylines.
-  def toDXF = DXFSection(List())
+  //def toDXF = DXFSection(List())
 
   override def toString = "PolylineShape[" + startPoint + "," + innerShapes + "]"
 

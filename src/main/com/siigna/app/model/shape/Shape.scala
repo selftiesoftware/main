@@ -12,7 +12,7 @@
 package com.siigna.app.model.shape
 
 import com.siigna.util.collection.Attributes
-import com.siigna.util.dxf.DXFSection
+//import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom._
 
 /**
@@ -149,7 +149,7 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
   /**
    * Returns a DXFSection with the given shape represented.
    */
-  def toDXF : DXFSection
+  //def toDXF : DXFSection
 
   /**
    * Applies a transformation to the shape.
