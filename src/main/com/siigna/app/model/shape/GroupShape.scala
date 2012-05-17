@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.app.model.Model
 import com.siigna.util.collection.Attributes
-import com.siigna.util.dxf.{DXFValue, DXFSection}
+//import com.siigna.util.dxf.{DXFValue, DXFSection}
 import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
 
 /**
@@ -52,7 +52,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
    */
   def setAttributes(attributes : Attributes) : GroupShape = copy(attributes = attributes)
 
-  def toDXF = new DXFSection(Seq())
+  //def toDXF = new DXFSection(Seq())
 
   /**
    * Applies a transformation to the shape.
