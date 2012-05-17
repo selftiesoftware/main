@@ -11,7 +11,7 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.dxf.{DXFSection, DXFValue}
+//import com.siigna.util.dxf.{DXFSection, DXFValue}
 import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D, Segment2D}
 import com.siigna.util.collection.{Preferences, Attributes}
 import com.siigna.app.model.shape.LineShape.Selector
@@ -93,6 +93,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def setAttributes(attributes : Attributes) = LineShape(p1, p2, attributes)
 
+  /*
   def toDXF = DXFSection(DXFValue(0, "LWPOLYLINE"),
                          DXFValue(5, scala.util.Random.nextString(4)),
                          DXFValue(100, "AcDbEntity"),
@@ -100,6 +101,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
                          DXFValue(62, 1)) +
               DXFSection.fromVector(p1) +
               DXFSection.fromVector(p2)
+  */
 
   override def toString() = "LineShape[" + p1 + ", " + p2 + "]"
 

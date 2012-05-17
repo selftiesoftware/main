@@ -15,7 +15,6 @@ import java.awt.Font
 import java.awt.font._
 
 import com.siigna.util.collection.Attributes
-import com.siigna.util.dxf.{DXFSection, DXFValue}
 import com.siigna.util.geom._
 
 /**
@@ -85,6 +84,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
+  /*
   def toDXF = DXFSection(DXFValue(0, "TEXT"),
                          DXFValue(5, scala.util.Random.nextString(4)),
                          DXFValue(100, "AcDbEntity"),
@@ -93,6 +93,8 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
                          DXFValue(40, fontSize)) // TODO: + position.toDXF +
               DXFSection(DXFValue(1, text),
                          DXFValue(100, "AcDbText"))
+
+*/
 
   // TODO: Should we be able to scale the text-factor?
   def transform(transformation : TransformationMatrix) =
