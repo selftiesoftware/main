@@ -13,7 +13,8 @@ package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom.{Rectangle2D, Arc2D, TransformationMatrix, Vector2D}
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
+import com.siigna.app.Siigna
 
 /**
  * This class draws an arc.
@@ -52,7 +53,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullSelector else EmptySelector
+  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").getOrElse(5.0)) FullSelector else EmptySelector
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices

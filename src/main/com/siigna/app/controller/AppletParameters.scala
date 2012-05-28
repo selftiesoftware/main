@@ -128,7 +128,7 @@ object AppletParameters {
   def saveNewDrawingName(newName: String) = {
     var messageReturned: Option[String] = None
     if(drawingId.isDefined && client.isDefined) {
-      com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.client.get)
+      //com.siigna.app.controller.remote.SaveDrawingName(drawingId.get,newName,AppletParameters.client.get)
       drawingName = Some(newName)
       messageReturned = Some("Drawing name changed to "+drawingName.get)
     } else {
@@ -151,9 +151,9 @@ object AppletParameters {
    */
   def setDrawingIdAndRegisterItWithTheServer(newId:Int) {
     if(drawingId.isDefined) {
-      remote.RegisterWithNewDrawingId(drawingId.get,newId,client.get)
+      //remote.RegisterWithNewDrawingId(drawingId.get,newId,client.get)
     } else {
-      remote.RegisterWithDrawingId(newId,client.get)
+      //remote.RegisterWithDrawingId(newId,client.get)
     }
     drawingId = Some(newId)
   }
