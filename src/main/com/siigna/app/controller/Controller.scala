@@ -19,11 +19,8 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.app.model.action.Action
 import actors.Actor
-import actors.remote.RemoteActor._
-import actors.remote.{RemoteActor, Node}
 import com.siigna.app.model.Model
 import remote._
-import com.siigna.app.controller.AppletParameters._
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -32,11 +29,6 @@ import com.siigna.app.controller.AppletParameters._
  * TODO: Implement this as one single actor.
  */
 object Controller extends Actor {
-
-  // Set remote class loader
-  RemoteActor.classLoader = getClass.getClassLoader
-  
-  var client : Option[Client] = None
 
   /**
    * The last 10 events
@@ -89,14 +81,6 @@ object Controller extends Actor {
    * The actor also handles commands and the 'exit symbol.
    */
   def act() {
-    // Define the sink
-    val sink = select(Node("siigna.com", 20004), 'siigna)
-
-    println(sink)
-
-    // Register the client
-    // Remember: When remote commands are created, they are sent to the controller immediately
-    Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
     // Loop and react on incoming messages
     loop {
@@ -107,71 +91,10 @@ object Controller extends Actor {
           println("Controller recieved action: "+action)
         }
 
-        // Handle remote commands
-        case command : RemoteCommand => {
-          Log.debug("Controller: Received remote command: " + command)
-          println("Kommando modtaget i controller: " + command)
+        // Forward remote commands to the RemoteController
+        case command : RemoteCommand => { RemoteController(command) }
 
-          // Match the received command
-          command match {
-            // Catch successes - we know these are from the server
-            case success : Success => {
-              // Examine what was successful
-              success.command match {
-
-                // Successful registration of the client
-                case r : Register => {
-                  client = Some(r.client)
-                  val id = client.get.id
-                  Log.info("Controller registered client with id " + id)
-                  println("Registerdel kører")
-                  //Gemmer klienten, der identificerer appletten overfor serveren, i AppletParameters
-                  AppletParameters.setClient(client)
-                  //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
-                  if (AppletParameters.readDrawingIdAsOption.isDefined) {
-                    println("Sending get drawing command to server")
-                    sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
-                    sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
-                    GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
-                  } else if (client.isDefined) {
-                    GetNewDrawingId(client.get)
-                  }
-                  //get a specified number of new shapeIds from the server, ready to use for new shapes
-                  if (client.isDefined) {
-                    GetNewShapeIds(20,client.get)
-                  }
-                }
-                case _ =>
-              }
-            }            
-            // Forward everything else to the server. If it is not a Success type we can be
-            // sure the remote command are meant to be forwarded to the server
-            case _ => sink ! command
-          }
-        }
-
-        case command : DrawingName => {
-          AppletParameters.setDrawingName(command.retrieveDrawingNameAsOption)
-          println("Drawing name received from gontroller and set in AppletParameters: "+AppletParameters.readDrawingNameAsOption)
-        }
-
-        case command : DrawingOwner => {
-          AppletParameters.setDrawingOwner(command.retrieveDrawingOwnerAsOption.get)
-        }
-
-        case command : ErrorMessage => {
-          println("Error recieved from server. Error is: "+command.retrieveErrorMessageAsOption.get)
-        }  
-          
-        case command : NewDrawingId => {
-          AppletParameters.setDrawingIdAndRegisterItWithTheServer(command.retrieveNewDrawingId)
-        }
-        case command : NewShapeIds => {
-          Model.receiveNewShapeIds(command.retrieveNewShapeIds)
-        }
-
-
-        // Handle ordinary commands (from the modules), and RemoteMessages:
+        // Handle ordinary commands (from the modules):
         case command : Command => {
           Log.debug("Controller: Received command: " + command)
 

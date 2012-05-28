@@ -12,7 +12,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.geom._
 import collection.mutable.BitSet
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
 
 /**
  * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object

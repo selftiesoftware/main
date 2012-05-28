@@ -16,8 +16,9 @@ import java.awt.font._
 import java.awt.geom.{Arc2D => JavaArc}
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape._
-import com.siigna.util.collection.Preferences
 import com.siigna.util.geom._
+import com.siigna.util.Implicits._
+import com.siigna.app.Siigna
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -32,10 +33,9 @@ class Graphics(val g : Graphics2D)
    */
   lazy val fontRenderContext = g getFontRenderContext()
 
-  def colorBackground  = Preferences("colorBackground").asInstanceOf[Color]
-  def colorDraw        = Preferences("colorDraw").asInstanceOf[Color]
-  def colorSelected    = Preferences("colorSelected").asInstanceOf[Color]
-  def colorUniverse    = Preferences("colorUniverse").asInstanceOf[Color]
+  def colorBackground  = Siigna.color("colorBackground").getOrElse("#F9F9F9".color)
+  def colorDraw        = Siigna.color("colorDraw").getOrElse("#000000".color)
+  def colorSelected    = Siigna.color("colorSelected").getOrElse("#7777FF".color)
   
   /**
    * Draws a given shape.

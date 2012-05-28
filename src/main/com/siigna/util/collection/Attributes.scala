@@ -11,14 +11,11 @@
 
 package com.siigna.util.collection
 
-import java.awt.Color
-
 import scala.collection.immutable.Map
-import com.siigna.util.geom.{Vector2D, TransformationMatrix, Vector}
 
 /**
- * Represents a set of attributes for a shape, a group of shapes, a layer and
- * other objects that might need it.
+ * Represents a set of immutable attributes for a shape, a group of shapes
+ * and other objects that might need it.
  *
  * <p>
  * You can create some attributes directly using the constructor:
@@ -43,9 +40,9 @@ import com.siigna.util.geom.{Vector2D, TransformationMatrix, Vector}
  *
  * @author Bjarke Walling <bjarke.walling@gmail.com>
  *
- * @param  attributesMap  a map of keys and their values.
+ * @param  self  a map of keys and their values.
  */
-case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any] {
+case class Attributes(self : Map[String, Any]) extends Map[String, Any] with AttributesLike {
 
   /**
    * Creates an empty instance of attributes.
@@ -111,7 +108,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes containing the new attribute.
    */
   def +[T >: Any](attribute : (String, T)) =
-    Attributes(attributesMap + attribute)
+    Attributes(self + attribute)
 
   /**
    * Adds two or more attributes to this set of attributes.
@@ -122,7 +119,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes containing the new attributes.
    */
   override def +[T >: Any](attribute1 : (String, T), attribute2 : (String, T), attributes : (String, T)*) =
-    Attributes(attributesMap + attribute1 + attribute2 ++ attributes)
+    Attributes(self + attribute1 + attribute2 ++ attributes)
 
   /**
    * Merges two sets of attributes, or a set of attribute and an iterator.
@@ -133,7 +130,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a merged set of attributes.
    */
   def ++[T >: Any](attributes : Iterator[(String, T)]) =
-    Attributes(attributesMap ++ attributes)
+    Attributes(self ++ attributes)
 
   /**
    * Merges two sets of attributes, or a set of attribute and a collection.
@@ -152,7 +149,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a merged set of attributes.
    */
   def ++[T >: Any](attributes : Iterable[(String, T)]) =
-    Attributes(attributesMap ++ attributes)
+    Attributes(self ++ attributes)
 
   /**
    * Removes an attribute from this set of attributes. It does not fail if the
@@ -171,7 +168,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  attributeName  the name of the attribute you want to remove.
    * @return  a set of attributes without the attribute you removed.
    */
-  def -(attributeName : String) = Attributes(attributesMap - attributeName)
+  def -(attributeName : String) = Attributes(self - attributeName)
 
   /**
    * Removes two or more attributes to this set of attributes.
@@ -182,7 +179,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes without the attributes you removed.
    */
   override def -(attributeName1 : String, attributeName2 : String, attributeNames : String*) =
-    Attributes(attributesMap - attributeName1 - attributeName2 -- attributeNames)
+    Attributes(self - attributeName1 - attributeName2 -- attributeNames)
 
   /**
    * Removes all attributes from this set of attributes, defined by an
@@ -196,7 +193,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes without the attributes you removed.
    */
   def --(attributeNames : Iterator[String]) =
-    Attributes(attributesMap -- attributeNames)
+    Attributes(self -- attributeNames)
 
   /**
    * Removes all attributes from this set of attributes, defined by a
@@ -210,83 +207,9 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes without the attributes you removed.
    */
   def --(attributeNames : Iterable[String]) =
-    Attributes(attributesMap -- attributeNames)
+    Attributes(self -- attributeNames)
 
-  /**
-   * Gets an attribute value as an optional boolean. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.boolean("TextItalic") match {
-   *     case Some(italic) => println("Italic text: " + italic)
-   *     case None         => println("Italic text: maybe")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes boolean "TextItalic" getOrElse false )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute boolean value.
-   */
-  def boolean(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Boolean])
 
-  /**
-   * Gets an attribute value as an optional color. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.color("Background") match {
-   *     case Some(background) => println("Bg color: " + background)
-   *     case None             => println("Transparent background.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes color "Background" getOrElse Color.black )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute color value.
-   */
-  def color(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Color])
-
-  /**
-   * Gets an attribute value as an optional double. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.double("Size") match {
-   *     case Some(size) => println("Size: " + size)
-   *     case None       => println("Unknown size.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes double "Size" getOrElse 12.0 )
-   * </pre>
-   * </p>
-   *
-   * <p>
-   * TODO: This method should accept values stored as Int (and other numeric types).
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute double value.
-   */
-  def double(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Double])
 
   /**
    * Creates a new iterator for all the attributes in this set. This is
@@ -294,17 +217,17 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    *
    * @return the new iterator
    */
-  def iterator = attributesMap iterator
+  def iterator = self iterator
 
   /**
    * This method removes all the attributes for which the predicate returns
    * false.
    *
-   * @param  prediacte  a prediacte over key-value pairs.
+   * @param  predicate  a prediacte over key-value pairs.
    * @return  an updated set of attributes.
    */
   override def filter(predicate : ((String, Any)) => Boolean) =
-    Attributes(attributesMap filter(predicate))
+    Attributes(self filter(predicate))
 
   /**
    * Check if this set of attributes contains the given attribute and return
@@ -313,46 +236,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  attributeName  the attribute name of interest.
    * @return  Some(value) if the attribute exists, None if it does not.
    */
-  override def get(attributeName : String) = attributesMap get attributeName
-
-  /**
-   * Get the value of an attribute if it exists and can be converted to a
-   * certain type.
-   *
-   * @param  attributeName   the attribute name of interest.
-   * @param  typeConversion  a function that converts the value to a certain type.
-   * @return  Some(value) if attribute found and typeConversion succeeds, None otherwise.
-   */
-  protected def getAsType[T](attributeName : String, typeConversion : Any => T) : Option[T] =
-    try {
-      Some(typeConversion(attributesMap(attributeName)))
-    } catch {
-      case _ => None
-    }
-
-  /**
-   * Gets an attribute value as an optional integer. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.int("Count") match {
-   *     case Some(count) => println("Number of items: " + count)
-   *     case None        => println("Unknown number of items.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes int "Count" getOrElse 0 )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute integer value.
-   */
-  def int(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Int])
+  override def get(attributeName : String) = self get attributeName
 
   /**
    * Intersects this set of attributes with that set of attributes. The result
@@ -362,38 +246,14 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  that  attributes to intersect with.
    * @return  the attributes that are in both sets of attributes.
    */
-  def intersect(that : Attributes) = Attributes(Map() ++ (Set() ++ attributesMap).&(Set() ++ that.attributesMap))
+  def intersect(that : Attributes) = Attributes(Map() ++ (Set() ++ self).&(Set() ++ that.self))
 
   /**
    * The number of attributes.
    *
    * @return the number of key-value pairs.
    */
-  override def size = attributesMap size
-
-  /**
-   * Gets an attribute value as an optional string. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.string("Name") match {
-   *     case Some(name) => println("The name is: " + name)
-   *     case None       => println("Unknown name.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes string "Name" getOrElse "Unknown" )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute string value.
-   */
-  def string(attributeName : String) = getAsType(attributeName, _.asInstanceOf[String])
+  override def size = self size
 
   /**
    * Defines the prefix of this object's <code>toString</code> representation.
@@ -408,31 +268,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  an updated set of attributes.
    */
   def transform(transformation : (String, Any) => Any) =
-    Attributes(attributesMap transform(transformation))
-
-  /**
-   * Gets an attribute value as an optional TransformationMatrix. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.transformationMatrix("Transform") match {
-   *     case Some(matrix) => println("I'm transformed by: " + matrix)
-   *     case None       => println("Unknown matrix.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes string "Name" getOrElse "TransformationMatrix" )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute string value.
-   */
-  def transformationMatrix(attributeName : String) = getAsType(attributeName, _.asInstanceOf[TransformationMatrix])
+    Attributes(self transform(transformation))
 
   /**
    * This method allows one to create a new set of attributes with an additional
@@ -455,31 +291,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @param  value          the value of the attribute to add.
    * @return  an updated set of attributes.
    */
-  def update[V >: Any](attributeName : String, value : V) = Attributes(attributesMap updated(attributeName, value))
-
-  /**
-   * Gets an attribute value as an optional Vector2D. This means no exceptions
-   * are thrown. You can either use pattern matching or the getOrElse feature
-   * to provide a default value.
-   *
-   * <p>
-   * Examples:
-   * <pre>
-   *   // Using pattern matching.
-   *   attributes.vector("Direction") match {
-   *     case Some(direction) => println("Direction: " + direction)
-   *     case None            => println("Unknown direction.")
-   *   }
-   *
-   *   // Using default value.
-   *   println( attributes vector "Direction" getOrElse Vector2D(0, 0) )
-   * </pre>
-   * </p>
-   *
-   * @param  attributeName  the name of attribute to look up.
-   * @return  an optional attribute vector value.
-   */
-  def vector2D(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Vector2D])
+  def update[V >: Any](attributeName : String, value : V) = Attributes(self updated(attributeName, value))
 
   /**
    * The same set of attributes with a given default function.
@@ -488,7 +300,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes with a default function.
    */
   override def withDefault[T >: Any](default : String => T) =
-    Attributes(attributesMap withDefault(default))
+    Attributes(self withDefault(default))
 
   /**
    * The same set of attributes with a given default value.
@@ -497,8 +309,7 @@ case class Attributes(attributesMap : Map[String, Any]) extends Map[String, Any]
    * @return  a set of attributes with a default value.
    */
   override def withDefaultValue[T >: Any](defaultValue : T) =
-    Attributes(attributesMap withDefaultValue(defaultValue))
-
+    Attributes(self withDefaultValue(defaultValue))
 }
 
 object Attributes {
