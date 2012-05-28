@@ -10,30 +10,22 @@
  */
 package com.siigna.app
 
-import com.siigna.util.logging.Log
 import model.Model
 import view._
 import com.siigna.util.geom._
 import event.Track
 import java.awt.{Cursor}
-import com.siigna.util.collection.Preferences
-
 
 /**
  * The Siigna object provides access to various core elements of the software. It also functions
  * as the first <code>Interface</code> connected to the [[com.siigna.app.view.View]].
  */
-object Siigna extends Interface {
+object Siigna extends Interface with SiignaAttributes {
 
   /**
    * The active display, if any.
    */
   protected var display : Option[Display] = None
-
-  /**
-   * Counts the frames per second. Don't set this if you want the correct answer..
-   */
-  var fps : Double = 0
 
   /**
    * The active ModuleInterface.
@@ -51,21 +43,6 @@ object Siigna extends Interface {
    * are still able to react.
    */
   var navigation = true
-
-  /**
-   * The printmargin of the paper to print on.
-   */
-  var printMargin   = 13.0
-
-  /**
-   * The minimum print format. Default is the A4-size.
-   */
-  var printFormatMin = 210.0 - printMargin
-
-  /**
-   * The maximum print format. Default is the A4-size.
-   */
-  var printFormatMax = 297.0 - printMargin
 
   /**
    * The version of Siigna.
@@ -131,7 +108,7 @@ object Siigna extends Interface {
   /**
    * The selection-distance.
    */
-  def selectionDistance = Preferences.double("selectionDistance") * View.zoom
+  def selectionDistance = int("selectionDistance").getOrElse(1) * View.zoom
 
   /**
    * Set's the current cursor of Siigna. Overrides the current value.

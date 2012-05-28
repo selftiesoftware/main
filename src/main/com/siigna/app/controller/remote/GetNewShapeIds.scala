@@ -16,4 +16,4 @@ import com.siigna.app.controller.Client
 /**
  * Remember to comment!!
  */
-case class GetNewShapeIds(numbersOfShapeIdsRequired:Int,client : Client) extends RemoteCommand
+case class GetNewShapeIds(numbersOfShapeIdsRequired : Int, client : Client) extends RemoteCommand

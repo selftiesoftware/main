@@ -13,8 +13,9 @@ package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.{DXFSection, DXFValue}
 import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D, Segment2D}
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
 import com.siigna.app.model.shape.LineShape.Selector
+import com.siigna.app.Siigna
 
 /**
  * This class draws a line segment.
@@ -71,7 +72,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 
   def getPart(p : Vector2D) = {
-    val selectionDistance = Preferences.double("selectionDistance")
+    val selectionDistance = Siigna.double("selectionDistance").getOrElse(5.0)
     if (distanceTo(p) > selectionDistance) {
       EmptySelector
     } else {
