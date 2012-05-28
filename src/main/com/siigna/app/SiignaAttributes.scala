@@ -76,5 +76,18 @@ trait SiignaAttributes extends MapProxy[String, Any] with AttributesLike {
     "selectionDistance"    -> 5.0,
     "zoomSpeed"            -> 0.5
   )
+  
+  /**
+   * Toggles a boolean value or sets it to true if it does not exist. If there already are a
+   * non-boolean value assigned to that name, nothing happens.
+   */
+  def toggle(key : String) {
+    val bool = boolean(key)
+    if (bool.isDefined) {
+      update(key, !bool.get)
+    } else if (!isDefinedAt(key)) {
+      this.+(key -> true)
+    }
+  }
 
 }
