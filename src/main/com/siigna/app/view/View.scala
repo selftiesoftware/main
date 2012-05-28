@@ -12,7 +12,6 @@
 package com.siigna.app.view
 
 import com.siigna.util.Implicits._
-import com.siigna.util.collection.Preferences
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
@@ -184,16 +183,6 @@ object View extends Canvas with Runnable {
   } catch {
     case e => Log.error("View: Unknown critical error encountered while painting.", e)
 
-  } finally {
-    // Count the fps
-    val nextSecond = System.currentTimeMillis() * 0.001 + 1
-    if (fpsSecond + 1 < nextSecond) { // Shift the second and save the fps
-      fpsSecond = nextSecond
-      Siigna.fps = fpsCurrent
-      fpsCurrent = 0
-    } else {
-      fpsCurrent += 1 // Add a counter
-    }
   } }
 
   /**
@@ -238,7 +227,7 @@ object View extends Canvas with Runnable {
 
         // Set the graphics
         val g = new Graphics(image.getGraphics.asInstanceOf[Graphics2D])
-        g.setColor(Preferences.color("colorDraw"))
+        g.setColor(Siigna.color("colorDraw").getOrElse(Color.BLACK))
 
         // Render background (if empty)
         if (cachedBackgroundImage.isEmpty){ renderBackground() }
@@ -251,7 +240,7 @@ object View extends Canvas with Runnable {
         g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
 
         // Set anti-aliasing
-        val antiAliasing = Preferences.boolean("antiAliasing", true)
+        val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
         val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
         g.g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
@@ -290,14 +279,14 @@ object View extends Canvas with Runnable {
       // Create image
       val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics
-      val size = Preferences.get[Int]("backgroundTileSize").getOrElse(20)
+      val size = Siigna.int("backgroundTileSize").getOrElse(12)
       var x = 0
       var y = 0
 
       // Clear background
-      g setColor Preferences.color ("colorBackgroundDark")
+      g setColor Siigna.color("colorBackgroundDark").getOrElse("#DADADA".color)
       g fillRect (0, 0, getSize.width, getSize.height)
-      g setColor Preferences.color ("colorBackgroundLight")
+      g setColor Siigna.color("colorBackgroundLight").getOrElse("E9E9E9".color)
 
       // Draw a chess-board pattern
       var evenRow = false
@@ -460,12 +449,12 @@ object View extends Canvas with Runnable {
    *
    * @param point  The center for the zoom-operation
    * @param delta  The amount of zoomSpeed-units to zoom
-   * @see [[com.siigna.util.collection.Preferences]]
+   * @see [[com.siigna.app.SiignaAttributes]]
    */
   def zoom(point : Vector2D, delta : Double) {
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
     if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
-      val zoomFactor = scala.math.pow(2, -zoomDelta * Preferences.double("zoomSpeed"))
+      val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
       if ((zoom > 0.000001 || zoomDelta < 0)) {
           zoom *= zoomFactor
         }

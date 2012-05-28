@@ -18,7 +18,6 @@ import java.applet.Applet
 import com.siigna.app.controller.Controller
 import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
-import com.siigna.util.collection.Preferences
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
 import java.awt.{BorderLayout, Dimension}

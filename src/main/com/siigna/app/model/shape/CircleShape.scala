@@ -13,7 +13,8 @@ package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom.{Rectangle2D, Circle2D, TransformationMatrix, Vector2D}
-import com.siigna.util.collection.{Preferences, Attributes}
+import com.siigna.util.collection.{Attributes}
+import com.siigna.app.Siigna
 
 /**
  * This class represents a circle.
@@ -47,7 +48,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
 
   def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullSelector else EmptySelector
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Preferences.double("selectionDistance")) FullSelector else EmptySelector
+  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.int("selectionDistance").getOrElse(5)) FullSelector else EmptySelector
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices
@@ -56,9 +57,6 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   }
 
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
-
-  // TODO export circles
-  //def toDXF = DXFSection(List())
 
   def transform(t : TransformationMatrix) =
     CircleShape(center transform(t), radius * t.scaleFactor, attributes)

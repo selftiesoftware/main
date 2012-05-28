@@ -18,8 +18,9 @@ import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.{Shape}
 import collection.immutable.MapProxy
 import com.siigna.app.controller.remote.GetNewShapeIds._
-import com.siigna.app.controller.remote.{RemoteAction, GetNewShapeIds}
 import com.siigna.app.controller.{Controller, AppletParameters}
+import com.siigna.app.controller.remote.{RemoteAction, GetNewShapeIds}
+import com.siigna.util.collection.Attributes
 
 /**
  * An immutable model with two layers: an static and dynamic.
@@ -41,7 +42,7 @@ sealed class Model(val shapes : Map[Int, Shape]) extends ImmutableModel[Int, Sha
                                                                     with SpatialModel[Int, Shape]
                                                                     with ModelBuilder[Int, Shape] {
 
-  def build(coll : Map[Int, Shape]) = { new Model(coll) }
+  def build(coll : Map[Int, Shape]) = new Model(coll)
 
 }
 
@@ -53,11 +54,15 @@ object Model extends ActionModel
                 with SpatialModel[Int, Shape]
                 with MapProxy[Int, Shape] {
 
-
   var localShapeId: Int = 0
   var shapeIdBank: Seq[Int] = Seq()
   var shapesWithLocalShapeId: Seq[Int] = Seq()
 
+  /**
+   * The attributes of the model containing name, title, owner and other attributes
+   * fetched from the server, necessary for Siigna.
+   */
+  var attributes = Attributes()
 
   /**
    * Hvis der er od'er i "banken: Returnerer en shapeId fra "banken".
@@ -134,8 +139,9 @@ object Model extends ActionModel
     //val proportion   = 1.41421356
 
     // Saves the format, as the format with the margin subtracted
-    var aFormatMin = Siigna.printFormatMin
-    var aFormatMax = Siigna.printFormatMax
+    val printMargin = Siigna.double("printMargin").getOrElse(13.0)
+    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0) - printMargin
+    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0) - printMargin
 
     // If the format is too small for the least proportion, then up the size
     // one format.
@@ -162,7 +168,7 @@ object Model extends ActionModel
   /**
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.printFormatMax).toInt
+  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0)).toInt
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.

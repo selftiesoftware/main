@@ -12,7 +12,6 @@ package com.siigna.app
  */
 
 import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
-import com.siigna.util.collection.Preferences
 import java.awt.{BorderLayout, Dimension, Frame}
 
 /**
@@ -88,7 +87,7 @@ class ApplicationWindow extends Frame
   })
 
   // Set preferred size
-  setPreferredSize(Preferences("defaultScreenSize").asInstanceOf[Dimension])
+  setPreferredSize(Siigna("defaultScreenSize").asInstanceOf[Dimension])
 
   // Start the applet
   applet.init()
