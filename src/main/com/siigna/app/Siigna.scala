@@ -22,7 +22,7 @@ import java.awt.{Cursor}
  * <p>It also functions as the first <code>Interface</code> connected
  * to the [[com.siigna.app.view.View]].</p>
  *
- * <p>See {@link http://github.com/siigna/main/wiki} for more information</p>
+ * <p>See {http://github.com/siigna/main/wiki} for more information</p>
  */
 object Siigna extends Interface with SiignaAttributes {
 
