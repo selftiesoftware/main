@@ -100,55 +100,54 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
       val set = BitSet()
       // Add the start point if it is inside the rectangle
       if (rect.contains(startPoint)) {
-        set + 0
+        set add 0
       }
       // Iterate inner shapes
       for (i <- 0 until innerShapes.size) {
         if (rect.contains(innerShapes(i).point)) {
-          set  + (i + 1) // Add one since we already included the startPoint (at index 0)
+          set add (i + 1) // Add one since we already included the startPoint (at index 0)
         }
       }
       CollectionSelector(set)
     } else EmptySelector
 
   def getPart(point: Vector2D) = { // TODO: Test this
-    if (innerShapes.size < 30) {
-      val set = BitSet()
-      
-      // Iterate the shapes to find the ones who matches
-      for (i <- 1 until shapes.size) {
-        shapes(i).getPart(point) match {
-          case FullSelector => { // Include both numbers
-            if (set.size <= 1) {
-              set + (i, i + 1)
-            } else {
-              set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
-                case Some(n) => set - n; set + i
-                case None => // Don't add the new shape since it's further away
-              }
-            }
-          }
-          case LineShape.Selector(x) => {
-            if (set.size > 1) {
-              set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
-                case Some(n) => set - n; set + i
-                case None => // Don't add the new shape since it's further away
-              }
-            } else {
-              set + (if(x) i else i + 1)
-            }
-          }
-          case _ =>
-        }
-      }
+    val set = BitSet()
 
-      // Return
-      if (set.size == shapes.size + 1) {
-        FullSelector
-      } else if (set.size > 0) {
-        CollectionSelector(set)
-      } else EmptySelector
-    } else EmptySelector // TODO: Write this
+    // Iterate the shapes to find the ones who matches
+    for (i <- 0 until shapes.size) {
+      shapes(i).getPart(point) match {
+        case FullSelector => { // Include both numbers
+          if (set.size <= 1) {
+            set add i
+            set add (i + 1)
+          } else { // ... but only allow one segment to be selected as max
+            set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
+              case Some(n) => set remove n; set add i
+              case None => // Don't add the new shape since it's further away
+            }
+          }
+        }
+        case LineShape.Selector(x) => {
+          if (set.size > 1) { // Only allow one segment to be selected as max
+            set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
+              case Some(n) => set remove n; set add i; set add (i + 1)
+              case None => // Don't add the new shape since it's further away
+            }
+          } else {
+            set add (if (x) i else i + 1)
+          }
+        }
+        case _ =>
+      }
+    }
+
+    // Return
+    if (set.size == shapes.size + 1) {
+      FullSelector
+    } else if (set.size > 0) {
+      CollectionSelector(set)
+    } else EmptySelector
   }
 
   def getVertices(selector: ShapeSelector) = selector match {
@@ -160,9 +159,9 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
       if (xs(0)) { inner :+= startPoint }
       
       // Check all the binary positions for matches
-      for (i <- 1 until innerShapes.size) {
+      for (i <- 1 to innerShapes.size) {
         if (xs(i)) {
-          inner :+= innerShapes(i).point
+          inner :+= innerShapes(i - 1).point // Subtract one to account for the startPoint
         }
       }
       
@@ -179,7 +178,8 @@ case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[Po
   def join(shapes: Traversable[BasicShape]) = null
 
   /**
-   * The shapes inside the PolylineShape
+   * The inner shapes the PolylineShape consists of in terms of regular
+   * [[com.siigna.app.model.shape.Shape]]s.
    */
   def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
     val tmp = new Array[BasicShape](innerShapes.size)
