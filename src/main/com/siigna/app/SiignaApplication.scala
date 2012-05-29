@@ -60,10 +60,12 @@ class ApplicationWindow extends Frame
 
   // Add the applet to the application.
   add(applet, BorderLayout.CENTER)
+
+  // Set the title of the application
   setTitle("Siigna")
 
-  // Setup event handler for when the window is closed (user press the X
-  // button). In this case we dispose the window, which in the end terminates
+  // Setup event handlers for when the window is closed.
+  // We dispose the window, which in the end terminates
   // the program.
   addWindowListener(new WindowListener {
     override def windowActivated(e: WindowEvent)   { }
@@ -72,10 +74,12 @@ class ApplicationWindow extends Frame
     override def windowIconified(e: WindowEvent)   { }
     override def windowClosed(e: WindowEvent)      { }
     override def windowOpened(e: WindowEvent)      { }
-    override def windowClosing(e: WindowEvent)     { applet.destroy(); dispose() }
+    override def windowClosing(e: WindowEvent)     {
+      applet.destroy()
+      dispose()
+    }
   })
 
-  // TODO: Add full screen mode.
   addComponentListener(new ComponentListener {
     override def componentHidden  (e : ComponentEvent) { }
     override def componentMoved   (e : ComponentEvent) { }
@@ -87,7 +91,13 @@ class ApplicationWindow extends Frame
   })
 
   // Set preferred size
-  setPreferredSize(Siigna("defaultScreenSize").asInstanceOf[Dimension])
+  setPreferredSize(
+    try {
+      Siigna.get("defaultScreenSize").asInstanceOf[Dimension]
+    } catch {
+      case _ => new Dimension(600, 400)
+    }
+  )
 
   // Start the applet
   applet.init()
