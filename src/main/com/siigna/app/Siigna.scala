@@ -17,8 +17,12 @@ import event.Track
 import java.awt.{Cursor}
 
 /**
- * The Siigna object provides access to various core elements of the software. It also functions
- * as the first <code>Interface</code> connected to the [[com.siigna.app.view.View]].
+ * <p>The Siigna object provides access to various core elements of the software.</p>
+ *
+ * <p>It also functions as the first <code>Interface</code> connected
+ * to the [[com.siigna.app.view.View]].</p>
+ *
+ * <p>See {@link http://github.com/siigna/main/wiki} for more information</p>
  */
 object Siigna extends Interface with SiignaAttributes {
 
