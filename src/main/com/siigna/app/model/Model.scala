@@ -17,7 +17,6 @@ import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.{Shape}
 import collection.immutable.MapProxy
-import com.siigna.app.controller.remote.GetNewShapeIds._
 import com.siigna.app.controller.{Controller, AppletParameters}
 import com.siigna.app.controller.remote.{RemoteAction, GetNewShapeIds}
 import com.siigna.util.collection.Attributes
