@@ -39,7 +39,7 @@ class EventParser {
   /**
    * A boolean value of whether the EventParser is enable or not. Defaults to true.
    */
-  var enabled : Boolean = true
+  protected var enabled : Boolean = true
 
   /**
    * The size of the list the EventParser returns. Defaults to 10.
@@ -82,6 +82,16 @@ class EventParser {
   }
 
   /**
+   * Disables the EventParser. The EventParser is enabled per default.
+   */
+  def disable() { enabled = false }
+
+  /**
+   * Enables the EventParser. The EventParser is enabled per default.
+   */
+  def enable() { enabled = true }
+
+  /**
    * Examines whether the EventParser is snapping to the given Snap.
    *
    * @param snapper  The snap we are examining.
@@ -97,7 +107,7 @@ class EventParser {
    * Returns the most recent mouse position seen from the event-parsers perspective. This coordinate
    * is (often) not the same as the views since the snap and track functionalities used by this parser
    * is included.
-   * @return A Vector2D which is empty if the event has not received any mouse events yet.
+   * @return A Vector2D which is empty if the event has not received any mouseevents yet.
    */
   def mousePosition = mouse
 
