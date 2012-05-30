@@ -49,6 +49,13 @@ trait Module extends Serializable {
   var isActive = false
 
   /**
+   * The current mouse position interpreted by the module. This coordinate takes snap and track
+   * into account and is thus not the same as the mouse position seen on the screen.
+   * @return
+   */
+  def mousePosition = eventParser.mousePosition
+
+  /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.
    */
   final var state : Symbol = 'Start

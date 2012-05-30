@@ -20,9 +20,8 @@ import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
-import java.awt.{BorderLayout, Dimension}
+import java.awt.{BorderLayout}
 import view.View
-import com.siigna
 import com.siigna.app.controller.AppletParameters
 
 /**
@@ -39,7 +38,6 @@ class SiignaApplet extends Applet {
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
   private var mouseButtonRight  = false
-  var hasTitle: Boolean = false
 
   private val paintThread = new Thread(View, "Siigna view")
 
@@ -58,10 +56,6 @@ class SiignaApplet extends Applet {
 
     // Stop the system
     System.exit(0)
-  }
-
-  def returnHasTitleStatus = {
-    (hasTitle)
   }
 
   /**
