@@ -10,6 +10,7 @@
  */
 package com.siigna.app
 
+import controller.Client
 import model.Model
 import view._
 import com.siigna.util.geom._
@@ -37,7 +38,9 @@ object Siigna extends Interface with SiignaAttributes {
   private var interface : Option[ModuleInterface] = None
 
   /**
-   * The current position of the mouse.
+   * The current position of the mouse. This does not take snap and track into account. Use
+   * [[com.siigna.module.Module.mousePosition]] if you are searching for the mouse coordinate
+   * used by the given Module.
    */
   var mousePosition = Vector2D(0, 0)
 

@@ -16,9 +16,9 @@ import java.awt.event.{KeyEvent => AWTKeyEvent}
 import com.siigna.app.model.Model
 import com.siigna.app.Siigna
 import com.siigna.app.model.shape.{Shape}
-import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.view.Graphics
 import collection.parallel.immutable.{ParMap, ParIterable}
+import com.siigna.util.geom.{Vector2D, TransformationMatrix}
 
 /**
  * An <code>EventParser</code> that analyses a given list of events, and returns an
@@ -34,12 +34,12 @@ class EventParser {
   /**
    * The default snap-modules.
    */
-  var defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
+  protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
   
   /**
    * A boolean value of whether the EventParser is enable or not. Defaults to true.
    */
-  private var enabled : Boolean = true
+  var enabled : Boolean = true
 
   /**
    * The size of the list the EventParser returns. Defaults to 10.
@@ -49,6 +49,11 @@ class EventParser {
    * Thus it's only inside the current module that the list-sizing is applicable.
    */
   var listSize : Int = 10
+
+  /**
+   * The most recent MouseMove or MouseDrag event received by the event-parser.
+   */
+  protected var mouse : Vector2D = Vector2D.empty
 
   /**
    * The margin of the graphical query done by the parser i. e. how large a space is included in the search
@@ -77,16 +82,6 @@ class EventParser {
   }
 
   /**
-   * Disables the EventParser. The EventParser is enabled per default.
-   */
-  def disable() { enabled = false }
-
-  /**
-   * Enables the EventParser. The EventParser is enabled per default.
-   */
-  def enable() { enabled = true }
-
-  /**
    * Examines whether the EventParser is snapping to the given Snap.
    *
    * @param snapper  The snap we are examining.
@@ -97,6 +92,14 @@ class EventParser {
    * Examines whether the EventParser is tracking or not.
    */
   def isTracking = track.isTracking
+
+  /**
+   * Returns the most recent mouse position seen from the event-parsers perspective. This coordinate
+   * is (often) not the same as the views since the snap and track functionalities used by this parser
+   * is included.
+   * @return A Vector2D which is empty if the event has not received any mouse events yet.
+   */
+  def mousePosition = mouse
 
   /**
    * Let the track and the snappers paint. This is handy if a track, for instance, wishes to show some kind
@@ -136,9 +139,9 @@ class EventParser {
       case KeyDown(AWTKeyEvent.CHAR_UNDEFINED, _) :: tail => tail
       case KeyUp(AWTKeyEvent.CHAR_UNDEFINED,_ ) :: tail   => tail
       // Merges mouse events to avoid ridiculously long lists of MouseMove or MouseDrag.
-      case (e : MouseMove) :: (_ : MouseMove) :: tail => e :: tail
-      case (e : MouseDrag) :: (_ : MouseDrag) :: tail => e :: tail
-      case events => events
+      case (e : MouseMove) :: (_ : MouseMove) :: tail => mouse = e.position; e :: tail
+      case (e : MouseDrag) :: (_ : MouseDrag) :: tail => mouse = e.position; e :: tail
+      case _ => list
     }
 
     // Perform 2D query
