@@ -49,7 +49,7 @@ class Graphics(val g : Graphics2D)
     // Retrieve the color-value
     val color = attributes color("Color") getOrElse(colorDraw)
 
-    // Set the drawing-color
+    // Set the server-color
     setColor(color)
     
     if (attributes.boolean("Visible") != Some(false)) {
@@ -218,7 +218,7 @@ class Graphics(val g : Graphics2D)
   }
 
   /**
-   * Sets the pen color to use for drawing (including text).
+   * Sets the pen color to use for server (including text).
    *
    * @param  color  the pen color to use.
    */
@@ -227,7 +227,7 @@ class Graphics(val g : Graphics2D)
   }
 
   /**
-   * Sets the pen width to use for drawing (excluding text).
+   * Sets the pen width to use for server (excluding text).
    *
    * @param  width  the pen width to use.
    */

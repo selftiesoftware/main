@@ -1,6 +1,7 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.Client
+import com.siigna.app.model.server.User
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
@@ -14,10 +15,13 @@ import com.siigna.app.controller.Client
  */
 
 /**
- * A [[com.siigna.app.controller.remote.RemoteCommand]] that signals that the client wishes to
- * register any actions received in the drawing with the given id. If no id is given, we assume the client
- * wishes to register a new drawing.
+ * <p>A [[com.siigna.app.controller.remote.RemoteCommand]] that signals that the client wishes to
+ * register on the server with the given user and drawing id.</p>
+ * <p>If no user is given there is a possibility the user is denied access or the like.</p>
+ * <p>If no drawing id is given we assume we would like to create a new drawing.</p>
  *
- * @param drawingId  The id of the drawing to register. None if the remote should create an entirely new drawing.
+ * @param user  The user logged in, or None if no user is present.
+ * @param drawingId  The id of the server to register. None if the remote should create an entirely new server.
+ * @param client  The unique client associated with this Siigna instance. The default value is overriden by the server.
  */
-case class Register(contributorName: Option[String], drawingId: Option[Int], client : Client = Client(0L)) extends RemoteCommand
+case class Register(user: Option[User], drawingId: Option[Int], client : Client = Client(0L)) extends RemoteCommand

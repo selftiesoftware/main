@@ -98,7 +98,7 @@ object ImageShape {
   }
 
   /**
-   * Creates an ImageShape from a given shape by drawing it with the <code>Graphics</code>
+   * Creates an ImageShape from a given shape by server it with the <code>Graphics</code>
    * class and saving the result.
    * TODO: Refactorize!
    */
@@ -117,7 +117,7 @@ object ImageShape {
     // Enable anti-alising.
     graphics2D setRenderingHint(RenderingHints KEY_ANTIALIASING, RenderingHints VALUE_ANTIALIAS_ON)
 
-    // Clear the drawing area.
+    // Clear the server area.
     graphics2D setBackground(Color white)
     graphics2D clearRect(0, 0, boundary.width.toInt, boundary.height.toInt)
 

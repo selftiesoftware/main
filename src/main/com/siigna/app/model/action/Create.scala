@@ -13,17 +13,18 @@ package com.siigna.app.model.action
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
-import com.siigna.app.controller.AppletParameters
 import com.siigna.app.controller.remote.SaveShape
 
 /**
 * An object that allows you to create one or multiple shapes.
 */
 object Create {
-  
-  private var id = 0;
-  
-  private def getId = { id = Model.getNewShapeId; id; }
+
+  /**
+   * Retrieves a unique id for the shape.
+   * @return  An integer identifying the shape.
+   */
+  private def getId = Model.getId
   
   def apply(shape : Shape) {
     val id = shape.attributes.int("id").getOrElse(getId)
