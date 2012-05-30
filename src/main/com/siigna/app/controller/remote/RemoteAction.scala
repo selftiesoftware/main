@@ -17,4 +17,4 @@ import com.siigna.app.controller.Client
 /**
  * An action meant to be sent over the network.
  */
-case class RemoteAction(drawingId : Int, client : Client, action : Action) extends RemoteCommand
+case class RemoteAction(client : Client, action : Action) extends RemoteCommand

@@ -25,7 +25,7 @@ import com.siigna.app.Siigna
  *  - Color        Color                 The color of the line.
  *  - Infinite     Boolean               If true, draws an endless line with the same equation as the given line.
  *  - StrokeWidth  Double                The width of the linestroke used to draw.
- *  - Transform    TransformationMatrix  A matrix to dynamically transform the shape when drawing.
+ *  - Transform    TransformationMatrix  A matrix to dynamically transform the shape when server.
  * </pre>
  * TODO: Update useable attributes.
  */
