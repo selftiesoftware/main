@@ -82,17 +82,24 @@ object Controller extends Actor {
    */
   def act() {
 
+    // Register the client
+    // Remember: When remote commands are created, they are sent to the controller immediately
+    Register(Siigna.user, Siigna.drawing.id)
+
     // Loop and react on incoming messages
     loop {
       react {
         // Forward incoming actions to the server
         case action : Action => {
           Model execute(action, false)
-          println("Controller recieved action: "+action)
+          Log.debug("Controller: Recieved action: " + action)
         }
 
         // Forward remote commands to the RemoteController
-        case command : RemoteCommand => { RemoteController(command) }
+        case command : RemoteCommand => {
+          Log.debug("Controller: Received remote command: " + command)
+          RemoteController(command) 
+        }
 
         // Handle ordinary commands (from the modules):
         case command : Command => {

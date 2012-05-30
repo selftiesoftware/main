@@ -13,74 +13,68 @@ package com.siigna.app.controller
 
 import com.siigna.util.logging.Log
 import remote._
-import com.siigna.app.controller.AppletParameters._
 import com.siigna.app.model.Model
 import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
+import com.siigna.app.Siigna
+import com.siigna.app.model.server.Drawing
 
 /**
  * An object whose sole responsibility is to handle incoming requests and .
  */
-object RemoteController extends PartialFunction[RemoteCommand, Unit] {
+protected[app] object RemoteController extends PartialFunction[RemoteCommand, Unit] {
+
+  // Define the sink
+  val sink = select(Node("siigna.com", 20004), 'siigna)
+
+  /**
+   * The unique identifier for this client.
+   */
+  var client : Option[Client] = None
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
-
-  var client : Option[Client] = None
-
-  // Define the sink
-  protected val sink = select(Node("siigna.com", 20004), 'siigna)
-
-  // Register the client
-  // Remember: When remote commands are created, they are sent to the controller immediately
-  Register(AppletParameters.contributorName, AppletParameters.readDrawingIdAsOption)
 
   /**
    * Examines the input command and handles it appropriately.
    * @param command  The RemoteCommand to process.
    */
-  def apply(command : RemoteCommand) {
+  def apply(command : RemoteCommand) { 
+    try {
+      command match {
+          // Catch successes - we know these are from the server
+          case success : Success => {
+            // Examine what was successful
+            success.command match {
+  
+              // Successful registration of the client
+              case r : Register => {
+                // Log the received client
+                Log.info("RemoteController: Registered client: " + r.client)
+  
+                // Store the client
+                client = Some(r.client)
 
-    Log.debug("Controller: Received remote command: " + command)
-    command match {
-        // Catch successes - we know these are from the server
-        case success : Success => {
-          // Examine what was successful
-          success.command match {
-
-            // Successful registration of the client
-            case r : Register => {
-              client = Some(r.client)
-              val id = client.get.id
-              Log.info("Controller registered client with id " + id)
-
-              AppletParameters.setClient(client)
-              //Hvis der er kommet en aktiv tegning fra hjemmesiden hentes den, ellers laves der en ny:
-              if (AppletParameters.readDrawingIdAsOption.isDefined) {
-                println("Sending get drawing command to server")
-                //sink ! GetDrawingTitle(AppletParameters.readDrawingIdAsOption.get, client.get)
-                //sink ! GetDrawing(AppletParameters.readDrawingIdAsOption.get, client.get)
-                //GetDrawingOwnerName(readDrawingIdAsOption.get,client.get)
-              } else if (client.isDefined) {
-                GetNewDrawingId(client.get)
+                // Store the drawing id
+                if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
+                
+                Log.debug("RemoteController: Sucessfully registered client: " + client)
               }
-              //get a specified number of new shapeIds from the server, ready to use for new shapes
-              if (client.isDefined) {
-                GetNewShapeIds(20,client.get)
-              }
+              case _ => Log.warning("RemoteController: Received unknown success: " + success)
             }
-            case _ =>
           }
-        }
-        case failure : Failure => {
-          Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
-        }
-
-        // Forward everything else to the server. If it is not a Success type we can be
-        // sure the remote command are meant to be forwarded to the server
-        case _ => sink ! command
-    }
-
+          case failure : Failure => {
+            Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
+          }
+  
+          // Forward everything else to the server. If it is not a Success type we can be
+          // sure the remote command are meant to be forwarded to the server
+          case _ => sink ! command
+      }
+  
+    } catch {
+      case e => Log.warning("RemoteController: Warning while processing remote command.", e)
+    } 
   }
 
   /**

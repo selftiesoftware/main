@@ -21,8 +21,8 @@ import com.siigna.util.logging.Log
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
 import java.awt.{BorderLayout}
+import model.server.{Drawing, User}
 import view.View
-import com.siigna.app.controller.AppletParameters
 
 /**
  * The main class of Siigna.
@@ -59,24 +59,34 @@ class SiignaApplet extends Applet {
   }
 
   /**
+   * Attempts to retrieve a parameter as a type.
+   * @param name  The name of the parameter.
+   * @tparam T  The type of the expected parameter.
+   * @return  Some[T] if the value was found and converted correctly, otherwise None.
+   */
+  protected def getParameter[T](name : String) : Option[T] = {
+    try {
+      Some(super.getParameter(name).asInstanceOf[T])
+    } catch { 
+      case _ => None 
+    }
+  } 
+
+  /**
    * Initializes the view. Sets panning to the center of the screen and
    * adds EventListeners.
    */
   override def init() {
-    // Sætter siigna applet til aktiv applet i applet parameters, så data herfra kan hentes:
-    AppletParameters.setApplet(this)
+    // Start by reading the applet parameters 
+    
+    // Get the active user, if a log in was performed at www.siigna.com
+    val userName = getParameter[String]("contributorName")
+    if (userName.isDefined) Siigna.user = Some(User(userName.get))
 
-    //get the active user, if a log in was performed at www.siigna.com
-    AppletParameters.getContributorNameFromHomepage
-    //gets the active drawing, if one was selected at www.siigna.com, or None if none was received
-    AppletParameters.getDrawingIdFromHomepage
+    // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
+    val drawingId = getParameter[Int]("drawingId")
+    if (drawingId.isDefined) Siigna.drawing = Drawing(drawingId.get)
 
-    if (AppletParameters.getDrawingId.isDefined)
-    {
-      AppletParameters.drawingIdReceivedAtStartup = true
-    } else {
-      AppletParameters.drawingIdReceivedAtStartup = false
-    }
     // Set the layout
     setLayout(new BorderLayout())
 

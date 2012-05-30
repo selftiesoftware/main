@@ -18,7 +18,7 @@ import com.siigna.util.geom._
 /**
  * A Shape that (basically) can be drawn and transformed.
  * <br />
- * Shapes are what Siigna is made of. Every action performed by the user on the drawing is executed upon shapes,
+ * Shapes are what Siigna is made of. Every action performed by the user on the server is executed upon shapes,
  * and the "database of Siigna" - the [[com.siigna.app.model.Model]] - consists of Shapes, that are taken and used
  * by the [[com.siigna.app.view.View]] the create the visible parts of Siigna, to let the users see what they're editing.
  * <br />

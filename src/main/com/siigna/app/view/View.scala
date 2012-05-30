@@ -115,11 +115,11 @@ object View extends Canvas with Runnable {
   *
   * This function uses a hack that eliminates all flickering caused by
   * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
-  * Instead of drawing everything on the views Graphics-object immediately it
+  * Instead of server everything on the views Graphics-object immediately it
   * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
   * when iterating through the DOM. When the image has been drawn, it then
   * returns the image with the graphical informations. This is done in
-  * order to avoid the software from drawing several times on the view at
+  * order to avoid the software from server several times on the view at
   * the same time (which is done when iterating through the DOM), and then
   * potentially clearing paint-methods that are in the making. This can
   * create 'black-outs' (also known as double-buffering) which makes us
@@ -212,7 +212,7 @@ object View extends Canvas with Runnable {
   }
 
   /**
-   * Renders the model and stores the image in a local variable for use during drawing.
+   * Renders the model and stores the image in a local variable for use during server.
    * In other words this is a cache function. Handy eh?
    */
   def render() {
@@ -249,7 +249,7 @@ object View extends Canvas with Runnable {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
           Model(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Model
         } catch {
-          case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error drawing!")
+          case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
           case e => Log.error("View: Unable to draw Model: "+e)
         }
 
@@ -272,7 +272,7 @@ object View extends Canvas with Runnable {
 
   /**
    * Renders a background-image consisting of "chess checkered" fields and stores it
-   * in a local variable for use during drawing.
+   * in a local variable for use during server.
    */
   def renderBackground() {
     if (getSize.height > 0 && getSize.width > 0) {
@@ -387,7 +387,7 @@ object View extends Canvas with Runnable {
    * illogical for smaller ones. When the software needs to draw on a
    * panel it calls the <code>repaint</code>-function, which then dispatches
    * the request on to <code>update</code>. This function waits until the
-   * program has the capacity for drawing and then calls <code>paint</code> to
+   * program has the capacity for server and then calls <code>paint</code> to
    * do the dirty-work.
    * </p>
    *
@@ -397,7 +397,7 @@ object View extends Canvas with Runnable {
    * steal resources, or situations where you need to draw on layers
    * (which probably is the case in most of the software working with AWT - or
    * Swing), where it's handy to wait until all changes on a
-   * layer has been performed before drawing the whole thing all over. But
+   * layer has been performed before server the whole thing all over. But
    * for a program such as Siigna where the main task is to actually draw a
    * Model and modules, we don't need to put the task in line more than we need
    * to just get it done. Furthermore this jumping back and forth from

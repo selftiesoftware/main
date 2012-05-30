@@ -14,7 +14,7 @@ package com.siigna.app.view
 import java.awt.image.BufferedImage
 
 /**
- * PaintFilters are filters that can be applied on the view before drawing.
+ * PaintFilters are filters that can be applied on the view before server.
  * This allows modules to for example add a blur to the view or other visual
  * effects.
  */

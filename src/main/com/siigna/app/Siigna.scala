@@ -10,8 +10,9 @@
  */
 package com.siigna.app
 
-import controller.Client
+import controller.{RemoteController, Client}
 import model.Model
+import model.server.{User, Drawing}
 import view._
 import com.siigna.util.geom._
 import event.Track
@@ -26,6 +27,13 @@ import java.awt.{Cursor}
  * <p>See {http://github.com/siigna/main/wiki} for more information</p>
  */
 object Siigna extends Interface with SiignaAttributes {
+
+  /**
+   * The active drawing for this client. The drawing does not necessarily contain all
+   * the relevant information and can thus be an [[com.siigna.app.model.server.IllegalDrawing]].
+   * Otherwise the drawing is an instance of [[com.siigna.app.model.server.LegalDrawing]].
+   */
+  var drawing : Drawing = Drawing()
 
   /**
    * The active display, if any.
@@ -52,6 +60,11 @@ object Siigna extends Interface with SiignaAttributes {
   var navigation = true
 
   /**
+   * The current user logged in to Siigna, if any.
+   */
+  var user : Option[User] = None
+
+  /**
    * The version of Siigna.
    */
   val version = "v. 0.3"
@@ -61,6 +74,12 @@ object Siigna extends Interface with SiignaAttributes {
    * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
    */
   def clearDisplay() { display = None }
+
+  /**
+   * The signature for this client, if any. This is set as soon as connection with the
+   * server is established.
+   */
+  def client : Option[Client] = RemoteController.client
 
   /**
    * Saves a given display.

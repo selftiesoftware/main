@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
- * to Share — to copy, distribute and transmit the work, 
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
+ * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -9,12 +9,9 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.remote
-
-import com.siigna.app.controller.Client
+package com.siigna.app.model.server
 
 /**
- * A RemoteCommand capable of retrieving a given attribute, related to the current drawing,
- * from the server.
+ * A User is identified by a single name.
  */
-case class GetAttribute(name : String, value : Option[Any], client : Client) extends RemoteCommand
+case class User(name : String)
