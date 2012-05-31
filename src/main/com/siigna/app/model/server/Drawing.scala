@@ -44,48 +44,48 @@ object Drawing {
 
   /**
    * Creates a drawing instance with no information attached.
-   * @return  An empty IllegalDrawing.
+   * @return  An empty InvalidDrawing.
    */
-  def apply() = new IllegalDrawing(None, None, None)
+  def apply() = new InvalidDrawing(None, None, None)
 
   /**
    * Creates a drawing instance with an id attached.
    * @param id  The unique id of the drawing.
-   * @return An IllegalDrawing.
+   * @return An InvalidDrawing.
    */
-  def apply(id : Int) = new IllegalDrawing(Some(id), None, None)
+  def apply(id : Int) = new InvalidDrawing(Some(id), None, None)
 
   /**
    * Creates a drawing instance with a owner attached.
    * @param owner  The user that owns the drawing.
-   * @return An IllegalDrawing.
+   * @return An InvalidDrawing.
    */
-  def apply(owner : User) = new IllegalDrawing(None, Some(owner), None)
+  def apply(owner : User) = new InvalidDrawing(None, Some(owner), None)
 
   /**
    * Creates a drawing instance with a owner attached.
    * @param title  The title of the drawing.
-   * @return An IllegalDrawing.
+   * @return An InvalidDrawing.
    */
-  def apply(title : String) = new IllegalDrawing(None, None, Some(title))
+  def apply(title : String) = new InvalidDrawing(None, None, Some(title))
 
   /**
    * Creates a drawing instance with an id, owner and title attached.
    * @param id  The unique id of the drawing.
    * @param owner  The user that owns the drawing.
    * @param title  The title of the drawing.
-   * @return A LegalDrawing.
+   * @return A ValidDrawing.
    */
-  def apply(id : Int, owner : User, title : String) = new LegalDrawing(Some(id), Some(owner), Some(title))
+  def apply(id : Int, owner : User, title : String) = new ValidDrawing(Some(id), Some(owner), Some(title))
 
 }
 
 /**
  * A drawing which does not satisfy the demands set by the server to have an id, title and owner.
  */
-sealed case class IllegalDrawing(id : Option[Int], owner : Option[User], title : Option[String]) extends Drawing
+sealed case class InvalidDrawing(id : Option[Int], owner : Option[User], title : Option[String]) extends Drawing
 
 /**
- * A drawing which satisfies the demands set by the server to shave an id, title and owner.
+ * A drawing which satisfies the demands set by the server to have an id, title and owner.
  */
-sealed case class LegalDrawing(id : Some[Int], owner : Some[User], title : Some[String]) extends Drawing
+sealed case class ValidDrawing(id : Some[Int], owner : Some[User], title : Some[String]) extends Drawing
