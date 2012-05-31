@@ -30,8 +30,8 @@ object Siigna extends Interface with SiignaAttributes {
 
   /**
    * The active drawing for this client. The drawing does not necessarily contain all
-   * the relevant information and can thus be an [[com.siigna.app.model.server.IllegalDrawing]].
-   * Otherwise the drawing is an instance of [[com.siigna.app.model.server.LegalDrawing]].
+   * the relevant information and can thus be an [[com.siigna.app.model.server.InvalidDrawing]].
+   * Otherwise the drawing is an instance of [[com.siigna.app.model.server.ValidDrawing]].
    */
   var drawing : Drawing = Drawing()
 
