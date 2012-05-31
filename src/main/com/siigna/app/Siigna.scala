@@ -105,6 +105,12 @@ object Siigna extends Interface with SiignaAttributes {
   def getInterface = interface
 
   /**
+   * Examines whether the user has been logged in from the Siigna website.
+   * @return True if the user is logged in, false otherwise.
+   */
+  def isLoggedIn = user.isDefined
+
+  /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
    * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
    * needs to use/reverse some of the transformations that already have been applied to the view.
