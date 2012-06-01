@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
+ * to Share — to copy, distribute and transmit the work, 
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -11,10 +11,10 @@
 
 package com.siigna.app.controller.remote
 
-/**
- *
- */
-import com.siigna.app.model.shape.Shape
 import com.siigna.app.controller.Client
 
-case class UpdateShape(drawingId : Int, shapeId : Int, oldShape:Shape, newShape : Shape, client : Client) extends RemoteCommand
+/**
+ * A RemoteCommand capable of retrieving a given attribute, related to the current server,
+ * from the remote sink.
+ */
+case class Get(name : String, value : Option[Any], client : Client) extends RemoteCommand

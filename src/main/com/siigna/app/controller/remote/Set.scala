@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
+ * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
+ * to Share — to copy, distribute and transmit the work, 
  * to Remix — to adapt the work
  *
  * Under the following conditions:
@@ -11,11 +11,9 @@
 
 package com.siigna.app.controller.remote
 
-/**
- *
- */
-import com.siigna.app.model.shape.Shape
 import com.siigna.app.controller.Client
 
-case class SaveShape(drawingId : Int, shapeId : Int, shape : Shape, client : Client) extends RemoteCommand
-
+/**
+ * A RemoteCommand capable of setting a given attribute to a given value.
+ */
+case class Set(name : String, value : Any, client : Client) extends RemoteCommand
