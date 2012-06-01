@@ -20,20 +20,23 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.server.Drawing
 
 /**
- * An object whose sole responsibility is to handle incoming requests and .
+ * An object whose sole responsibility is to handle incoming and outgoing
+ * [[com.siigna.app.controller.remote.RemoteCommand]]s.
  */
 protected[app] object RemoteController extends PartialFunction[RemoteCommand, Unit] {
 
-  // Define the sink
+  // Set remote class loader
+  RemoteActor.classLoader = getClass.getClassLoader
+
+  /**
+   * The connection to the server (sink).
+   */
   val sink = select(Node("siigna.com", 20004), 'siigna)
 
   /**
    * The unique identifier for this client.
    */
   var client : Option[Client] = None
-
-  // Set remote class loader
-  RemoteActor.classLoader = getClass.getClassLoader
 
   /**
    * Examines the input command and handles it appropriately.
