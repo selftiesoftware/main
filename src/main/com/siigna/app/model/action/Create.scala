@@ -13,7 +13,6 @@ package com.siigna.app.model.action
 import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
-import com.siigna.app.controller.remote.SaveShape
 
 /**
 * An object that allows you to create one or multiple shapes.

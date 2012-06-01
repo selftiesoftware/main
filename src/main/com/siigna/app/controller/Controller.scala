@@ -52,19 +52,6 @@ object Controller extends Actor {
   var sleepTime = 5
 
   /**
-   * A boolean value to indicate whether an event has been used to forward to a module and sent back again
-   * when the module ended. If so it should not be sent back since it could create an endless loop.
-   * <br />
-   * Imagine a module forwarding an event, ending and then putting the last event back
-   * in the event-queue, which again are given to the same module. This could result in an endless loop.
-   * <br />
-   * The variable resets every time a new event gets into the queue.
-   * <br />
-   * P.s. Yes I am aware that no scaladoc is generated from private members.
-   */
-  private var isForwardedEvent = false
-
-  /**
    * The running part of the controller.
    *
    * It consists of a loop that exists until 'exit is given, or the system is exiting (naturally).
@@ -168,22 +155,6 @@ object Controller extends Actor {
           }
         }
         case event : Event => {
-          /*// Check whether the event is forwarded, and thus needs to be discarded
-          if (isForwardedEvent) {
-            // If there is a forwarded event and the head of the queue is a ModuleEvent
-            // the ModuleEvent has been placed in front of the forwarded Event
-            // - then enqueue the event again and destroy the next event
-            if (event.isInstanceOf[ModuleEvent] && mailboxSize > 1) {
-              this ! event
-
-            // Otherwise the event is forwarded and we can simply ignore it and set
-            // isForwardedEvent to false
-            } else {
-              // Stop the inhumane destruction of events
-              isForwardedEvent = false
-            }
-          // Otherwise no forwarded events exist and we're good to go!
-          } else*/
           if (modules.size > 0) {
 
             // Retrieve module
@@ -253,16 +224,6 @@ object Controller extends Actor {
       }
     }
   }
-
-  /**
-   * Shortcut for propagating events.
-   */
-  def apply(event : Event) { this ! event; isForwardedEvent = false }
-
-  /**
-   * Shortcut for propagating messages.
-   */
-  def apply(command : Command) { this ! command }
   
   /**
    * Return the last 10 parsed events currently stored in the controller.
@@ -302,7 +263,7 @@ object Controller extends Actor {
     true
   } catch {
     // Log the failure
-    case e => Log.warning("Controller: Failed to initialize the interface of " + module + ". The module will (probably) still run, but without a graphical output.")
+    case e => Log.warning("Controller: Failed to initialize the interface of " + module + ". The module will (probably) still run, but without a graphical output.", e)
     false
   }
 
@@ -322,9 +283,6 @@ object Controller extends Actor {
       // Store the head of the event-list in the event-queue.
       if (continue) {
         this ! events.head
-
-        // Set the most dangerous isForwardedEvent variable!
-        isForwardedEvent = true
 
         // Store the tail of the events in the next module in the module stack.
         events = events.tail
