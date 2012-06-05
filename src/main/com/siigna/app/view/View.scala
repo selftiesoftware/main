@@ -46,7 +46,7 @@ object View extends Canvas with Runnable {
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
-  var boundaryShape : Rectangle2D => Shape = PolylineShape.fromRectangle(_).setAttribute("Color" -> "#AAAAAA".color)
+  var boundaryShape : Rectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
   
   /**
    * The frames in the current second.
