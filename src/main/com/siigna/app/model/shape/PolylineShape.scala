@@ -15,18 +15,22 @@ import collection.mutable.BitSet
 import com.siigna.util.collection.{Attributes}
 
 /**
- * A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
+ * <p>A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
  * [[com.siigna.app.model.shape.PolylineShape]] to construct a Polylineshape!</b> The default
  * constructor uses a [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]] to ensure
- * that data is not being duplicated in the long list of lines and/or arcs.
+ * that data is not being duplicated in the long list of lines and/or arcs.</p>
  *
- * Available attributes:
+ * <p>PolylineShapes can by convention not contain two duplicate points. If any situation
+ * should arise (transformation, addition etc.) that could result in two equal points, one
+ * of them is removed.</p>
+ *
+ * <p>Available attributes:
  * <pre>
  *  - Color        Color   The color of the lines in the Polyline.
  *  - StrokeWidth  Double  The width of the linestroke used to draw.
  *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
  *                         in the PolylineShape.
- * </pre>
+ * </pre></p>
  *
  * @param startPoint  The starting point of the PolylineShape.
  * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
@@ -52,7 +56,8 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
             innerShapes(i).transform(t)
           } else innerShapes(i)
         }
-        arr
+        // Make sure there are no duplicate points
+        arr.distinct
       }
 
       Some(new PartialShape((t : TransformationMatrix) =>
@@ -197,7 +202,7 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
 
   override def toString = "PolylineShape[" + startPoint + "," + innerShapes + "]"
 
-  def transform(t : TransformationMatrix) = new PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
+  def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)).distinct, attributes)
 }
 
 /**
@@ -233,7 +238,7 @@ object PolylineShape {
    * A LineShape representation used inside a PolylineShape.
    * @param point  The point given to create a LineShape.
    */
-  sealed class PolylineLineShape(val point : Vector2D) extends InnerPolylineShape {
+  sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = LineShape(v, point)
     override def toString = "PolylineLineShape(" + point + ")"
     def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
@@ -244,7 +249,7 @@ object PolylineShape {
    * @param middle  The center point of the arc
    * @param point The point given to create a LineShape.
    */
-  sealed class PolylineArcShape(val middle : Vector2D, val point : Vector2D) extends InnerPolylineShape {
+  sealed case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = ArcShape(v, middle, point)
     override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
     def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
@@ -270,13 +275,12 @@ object PolylineShape {
    * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
    */
   def apply(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
-    val startPoint = points.head
-    var lines = points.tail.toSeq.view.distinct.map(p => new PolylineLineShape(p))
+    val lines = points.tail.toSeq.distinct.map(p => new PolylineLineShape(p))
 
-    // Close the shape, if requested
-    if (closed) lines = lines :+ new PolylineLineShape(startPoint) else lines
-
-    PolylineShape(startPoint, lines, Attributes())
+    PolylineShape(points.head,
+                  // Close the shape, if requested
+                  if (closed) lines :+ new PolylineLineShape(points.head) else lines,
+                  Attributes())
   }
 
   /**
