@@ -34,7 +34,7 @@ import com.siigna.util.collection.{Attributes}
  * TODO: Implement additions and subtractions
  * TODO: Implement more robust geometry for PolylineShapes
  */
-case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
+sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   require(startPoint != null, "Cannot create a polyline without a starting point")
   require(!innerShapes.isEmpty, "Cannot create a polyline without shapes")
@@ -260,17 +260,18 @@ object PolylineShape {
    *
    * @param points  The points to use.
    */
-  def fromPoints(points : Vector2D*) : PolylineShape = fromPoints(points.toIterable)
+  def apply(points : Vector2D*) : PolylineShape = apply(points.toIterable)
 
   /**
-   * Creates a PolylineShape from a collection of points.
+   * Creates a PolylineShape from a collection of points. If two points are equal in
+   * the collection, one of them is filtered out to avoid overlapping points.
    *
-   * @param points  The collection of points to use
+   * @param points  The collection of points to use. Duplicates are removed.
    * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
    */
-  def fromPoints(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
+  def apply(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
     val startPoint = points.head
-    var lines = points.tail.toSeq.map(p => new PolylineLineShape(p))
+    var lines = points.tail.toSeq.view.distinct.map(p => new PolylineLineShape(p))
 
     // Close the shape, if requested
     if (closed) lines = lines :+ new PolylineLineShape(startPoint) else lines
@@ -281,6 +282,6 @@ object PolylineShape {
   /**
    * Returns a PolylineShape with four lines, representing the given Rectangle.
    */
-  def fromRectangle(rect : Rectangle2D) = fromPoints(rect.vertices :+ rect.vertices.head)
+  def apply(rect : Rectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
 
 }

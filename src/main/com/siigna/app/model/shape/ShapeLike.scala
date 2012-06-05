@@ -17,7 +17,14 @@ import com.siigna.util.geom.{TransformationMatrix, Rectangle2D, Vector2D}
 import com.siigna.app.view.View
 
 /**
- * The highest trait for objects that are shape-like in the hierarchy.
+ * <p>The highest trait for objects that are shape-like in Siigna.
+ * Shape-like objects have attributes, a Minimum-Bounding Rectangle, information
+ * about its distance to other objects and an ability to be transformed with
+ * a [[com.siigna.util.geom.TransformationMatrix]].</p>
+ *
+ * <p>ShapeLike has been made to describe items that contains spatial information
+ * like Shapes, but should not be stored or otherwise treated like a regular Shape.
+ * As an example a [[com.siigna.app.model.Selection]] extends ShapeLike.</p>
  */
 trait ShapeLike {
 
@@ -51,11 +58,6 @@ trait ShapeLike {
    */
   def boundary : Rectangle2D
 
-  /**
-   * Calculates the closest distance to the shape using the views current zoom
-   * scale.
-   */
-  def distanceTo(point : Vector2D) : Double = distanceTo(point, View.zoom)
 
   /**
    * Calculates the closest distance to the shape in the given scale.
