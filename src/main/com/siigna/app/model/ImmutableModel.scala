@@ -11,8 +11,7 @@
 
 package com.siigna.app.model
 
-import collection.parallel.immutable.ParMap
-import shape.{ShapeLike}
+import shape.ShapeLike
 
 /**
  * An immutable model containing shapes

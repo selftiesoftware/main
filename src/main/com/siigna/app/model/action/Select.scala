@@ -13,7 +13,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.{Selection, Model}
 import com.siigna.util.geom.{Rectangle2D, Vector2D}
-import com.siigna.app.model.shape.{ShapeSelector, EmptySelector, Shape, ShapeLike}
+import com.siigna.app.model.shape.{ShapeSelector, EmptySelector, Shape}
 
 /**
  * An object that provides shortcuts to select objects in the model. Selections are crucial

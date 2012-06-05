@@ -11,7 +11,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{ShapeSelector, Shape, ShapeLike}
+import com.siigna.app.model.shape.{ShapeSelector, Shape}
 
 object Delete {
   
