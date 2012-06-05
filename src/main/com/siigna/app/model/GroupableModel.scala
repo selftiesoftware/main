@@ -11,7 +11,6 @@
 
 package com.siigna.app.model
 
-import shape.ShapeLike
 
 /**
  * A model that can group and ungroup [[com.siigna.app.model.shape.Shape]]s.

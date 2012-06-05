@@ -12,6 +12,8 @@
 package com.siigna.app.model.shape
 
 import com.siigna.util.collection.Attributes
+import com.siigna.app.view.View
+
 //import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom._
 
@@ -90,6 +92,12 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
    * TODO: Refactor to addAttributes
    */
   override def addAttributes(attributes : (String, Any)*) = setAttributes(this.attributes ++ attributes)
+  
+  /**
+   * Calculates the closest distance to the shape using the views current zoom
+   * scale.
+   */
+  def distanceTo(point : Vector2D) : Double = distanceTo(point, View.zoom)
 
   /**
    * Calculates the closest distance to the shape in the given scale.
@@ -145,11 +153,6 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
    * but otherwise the same attributes.
    */
   def setAttributes(attributes : Attributes) : T
-
-  /**
-   * Returns a DXFSection with the given shape represented.
-   */
-  //def toDXF : DXFSection
 
   /**
    * Applies a transformation to the shape.
