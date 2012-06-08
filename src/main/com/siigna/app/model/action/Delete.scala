@@ -10,8 +10,8 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
 import com.siigna.app.model.shape.{ShapeSelector, Shape}
+import com.siigna.app.model.{Selection, Model}
 
 object Delete {
   
@@ -23,8 +23,9 @@ object Delete {
     Model execute DeleteShapePart(id, Model(id), part)
   }
   
-  def apply(shapes : Map[Int, ShapeSelector]) {
-    Model execute DeleteShapeParts(shapes)
+  def apply(selection : Selection) {
+    Model execute DeleteShapeParts(selection.parts)
+    Model deselect()
   }
   
 }
