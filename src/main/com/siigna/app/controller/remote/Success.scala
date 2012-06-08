@@ -15,6 +15,7 @@ package com.siigna.app.controller.remote
  * A [[com.siigna.app.controller.command.Command]] sent by the server to indicate success of a previously
  * sent Command.
  */
+@SerialVersionUID(2456145823519863123)
 case class Success(command : RemoteCommand) extends RemoteCommand {
 
   def client = command.client
