@@ -24,4 +24,5 @@ import com.siigna.app.model.server.User
  * @param drawingId  The id of the server to register. None if the remote should create an entirely new server.
  * @param client  The unique client associated with this Siigna instance. The default value is overridden by the server.
  */
+@SerialVersionUID(-7846625106224809939)
 case class Register(user : User, drawingId : Option[Int], client : Client = Client()) extends RemoteCommand
