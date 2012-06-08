@@ -18,6 +18,7 @@ package com.siigna.util.geom
  * @param xMax  The largest x-value
  * @param yMax  The largest y-value
  */
+@SerialVersionUID(-1453115647)
 case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle with GeometryEnclosed2D {
 
   type T = Rectangle2D
