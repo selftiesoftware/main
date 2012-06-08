@@ -68,6 +68,7 @@ object Transform {
  * @param transformation  The TransformationMatrix containing the transformation
  * @param f  The function to apply on the shape
  */
+@SerialVersionUID(292701996)
 case class TransformShape(id : Int, transformation : TransformationMatrix, f : Option[TransformationMatrix => Shape] = None) extends Action {
 
   def execute(model : Model) = if (f.isDefined) {
@@ -87,6 +88,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 
 }
 
+@SerialVersionUID(-1080215160)
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
@@ -104,6 +106,7 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
 /**
  * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
  */
+@SerialVersionUID(-91684555)
 case class TransformShapes(shapes : Map[Int, Shape], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {

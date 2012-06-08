@@ -13,6 +13,7 @@ package com.siigna.util.geom
 /**
  * An endless mathematically representation of a line with infinite length. 
  */
+@SerialVersionUID(1415950217)
 case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
   
   import java.lang.Double.POSITIVE_INFINITY
