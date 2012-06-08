@@ -17,5 +17,5 @@ import com.siigna.app.controller.Client
 /**
  * An action meant to be sent over the network.
  */
-@SerialVersionUID(4973623669373280106)
+@SerialVersionUID(-483774129)
 case class RemoteAction(client : Client, action : Action) extends RemoteCommand
