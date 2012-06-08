@@ -21,14 +21,19 @@ import com.siigna.app.model.action.Action
 import actors.Actor
 import com.siigna.app.model.Model
 import remote._
+import actors.remote.RemoteActor._
+import actors.remote.Node._
+import actors.remote.{RemoteActor, Node}
+import com.siigna.app.model.server.User
 
 /**
  * The Controller controls the core of the software. Basically that includes
  * dealing with the event-flow to the modules.
- *
- * TODO: Implement this as one single actor.
  */
 object Controller extends Actor {
+
+  // Set remote class loader
+  RemoteActor.classLoader = getClass.getClassLoader
 
   /**
    * A boolean flag to indicate if this controller has been successfully registered with the server.
@@ -52,7 +57,7 @@ object Controller extends Actor {
   private val moduleBank = new ModuleBank()
 
   /**
-   * The interval with which to check for incoming events and actions. Defaults to 5.
+   * The interval with which to check for incomin   g events and actions. Defaults to 5.
    */
   var sleepTime = 5
 
@@ -73,12 +78,18 @@ object Controller extends Actor {
    * The actor also handles commands and the 'exit symbol.
    */
   def act() {
-
+    // Define the sink
+    val sink = select(Node("siigna.com", 20004), 'siigna)
+    
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined) {
       Register(Siigna.user.get, Siigna.drawing.id)
     }
+
+    // TEST!!!!
+    //isConnected = true
+    //Register(User("Jens"), Some(211))
 
     // Loop and react on incoming messages
     loop {
@@ -92,7 +103,8 @@ object Controller extends Actor {
         // Forward remote commands to the RemoteController
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
-          RemoteController(command) 
+          // Handle it through RemoteController
+          RemoteController(command, sink)
         }
 
         // Handle ordinary commands (from the modules):
@@ -209,7 +221,7 @@ object Controller extends Actor {
                   false
                 }
                 case unknown => {
-                  Log.debug("Controller: Received object "+unknown+" from the ending module " + module +
+                  Log.debug("Controller: Received object " + unknown + " from the ending module " + module +
                     ", but not reacting since it is not a Module Event.")
                   true
                 }
