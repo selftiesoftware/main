@@ -42,6 +42,7 @@ import scala.collection.immutable.Map
  *
  * @param  self  a map of keys and their values.
  */
+@SerialVersionUID(725462088)
 case class Attributes(self : Map[String, Any]) extends Map[String, Any] with AttributesLike {
 
   /**
