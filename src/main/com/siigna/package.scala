@@ -19,10 +19,8 @@ package object siigna extends com.siigna.util.Implicits {
   type Action = com.siigna.app.model.action.Action
 
   lazy val Create = com.siigna.app.model.action.Create
-
   lazy val Delete = com.siigna.app.model.action.Delete
   lazy val Select = com.siigna.app.model.action.Select
-
   lazy val Transform = com.siigna.app.model.action.Transform
 
   // Commands
