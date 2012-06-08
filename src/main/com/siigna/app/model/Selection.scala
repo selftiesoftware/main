@@ -69,37 +69,6 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
   def boundary = parts.map(s => Model(s._1)).foldLeft(Model(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
 
   /**
-   * Deletes the [[com.siigna.app.model.shape.ShapeSelector]] associated with the given id, if it exists and remove the
-   * part from the Model with a [[com.siigna.app.model.action.DeleteShapePart]] action.
-   * 
-   * If the deletion results in an empty selection, the selection is removed from the model. 
-   * @param id  The id of the shape.
-   */
-  def delete(id : Int) {
-    if (parts.contains(id)) {
-      val part = parts(id)
-      // Execute action
-      Delete(id, part)
-      parts = parts - id
-    }
-    
-    // If the selection is empty, brute-force remove it
-    if (parts.isEmpty) Model.selection = None
-  }
-
-  /**
-   * Deletes all the [[com.siigna.app.model.shape.ShapeSelector]]s associated with shapes in the selection. In other
-   * words the entire selection is removed from the model. After the remove operation the selection will be set to
-   * None in the model.
-   */
-  def delete() {
-    if (!shapes.isEmpty) {
-      Delete(parts)
-      Model.selection = None
-    }
-  }
-
-  /**
    * Calculates the distance from the vector and to the underlying Shape.
    * @param point  The point to calculate the distance to.
    * @param scale  The scale in which we are calculating.
