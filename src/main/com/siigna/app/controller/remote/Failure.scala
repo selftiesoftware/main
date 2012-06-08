@@ -14,6 +14,7 @@ package com.siigna.app.controller.remote
 /**
  * A class indicating failure. Used by the server to inform the client when something went wrong.
  */
+@SerialVersionUID(-4167830441718217609)
 case class Failure(command : RemoteCommand, message : String = "") extends RemoteCommand {
 
   def client = command.client
