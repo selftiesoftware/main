@@ -11,9 +11,9 @@
 
 package com.siigna.app.controller
 
-import remote.RemoteCommand
-
 /**
- * A client represented by an unique identifier.
+ * A client represented by a unique identifier.
+ * @param id  The unique identifier of the client, given by the server. Zero if no id has been given.
+ * @param drawing  A unique identifier of the drawing, the client is currently drawing upon. Zero if no drawing is active.
  */
-case class Client(id: Long)
+case class Client(id : Long = 0L, drawing : Int = 0)
