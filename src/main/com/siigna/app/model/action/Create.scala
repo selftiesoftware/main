@@ -71,6 +71,7 @@ object Create {
  * Creates a shape with an associated id.
  * This action should not be instantiated directly, but created through the <code>Create</code> object.
  */
+@SerialVersionUID(1359225221)
 case class CreateShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model add (id, shape)
@@ -90,6 +91,7 @@ case class CreateShape(id : Int, shape : Shape) extends Action {
  * Creates several shapes.
  * This action should not be instantiated directly, but created through the <code>Create</code> object.
  */
+@SerialVersionUID(-385734936)
 case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
