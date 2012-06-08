@@ -170,7 +170,7 @@ object View extends Canvas with Runnable {
       try {
         Siigna.paint(graphics, transformation)
       } catch {
-        case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.", e)
+        case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
         case e => Log.error("View: Unknown error while painting the modules.", e)
       }
 
