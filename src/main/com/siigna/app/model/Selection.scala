@@ -82,6 +82,10 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
     }
   }
 
+  def delete {
+    if (!shapes.isEmpty) Delete(parts)
+  }
+
   /**
    * Calculates the distance from the vector and to the underlying Shape.
    * @param point  The point to calculate the distance to.
