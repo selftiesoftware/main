@@ -20,8 +20,8 @@ import com.siigna.app.model.server.User
  * <p>If no user is given there is a possibility the user is denied access or the like.</p>
  * <p>If no drawing id is given we assume we would like to create a new drawing.</p>
  *
- * @param user  The user logged in, or None if no user is present.
+ * @param user  The user logged in.
  * @param drawingId  The id of the server to register. None if the remote should create an entirely new server.
- * @param client  The unique client associated with this Siigna instance. The default value is overriden by the server.
+ * @param client  The unique client associated with this Siigna instance. The default value is overridden by the server.
  */
-case class Register(user: Option[User], drawingId: Option[Int], client : Client = Client(0L)) extends RemoteCommand
+case class Register(user : User, drawingId : Option[Int], client : Client = Client()) extends RemoteCommand

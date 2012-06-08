@@ -72,7 +72,7 @@ protected[app] object RemoteController extends PartialFunction[RemoteCommand, Un
   
           // Forward everything else to the server. If it is not a Success type we can be
           // sure the remote command are meant to be forwarded to the server
-          case _ => sink ! command
+          case _ => if (Controller.isOnline) sink ! command
       }
   
     } catch {

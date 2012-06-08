@@ -10,7 +10,7 @@
  */
 package com.siigna.app
 
-import controller.{RemoteController, Client}
+import controller.{Controller, RemoteController, Client}
 import model.Model
 import model.server.{User, Drawing}
 import view._
@@ -109,6 +109,12 @@ object Siigna extends Interface with SiignaAttributes {
    * @return True if the user is logged in, false otherwise.
    */
   def isLoggedIn = user.isDefined
+
+  /**
+   * Examines whether this client is connected with the server.
+   * @return True if the connection has been established correctly, false otherwise.
+   */
+  def isOnline = Controller.isOnline
 
   /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the

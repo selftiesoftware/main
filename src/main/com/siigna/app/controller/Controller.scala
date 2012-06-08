@@ -31,6 +31,11 @@ import remote._
 object Controller extends Actor {
 
   /**
+   * A boolean flag to indicate if this controller has been successfully registered with the server.
+   */
+  protected var isConnected = false
+
+  /**
    * The last 10 events
    */
   private var events : List[Event] = List()
@@ -69,9 +74,11 @@ object Controller extends Actor {
    */
   def act() {
 
-    // Register the client
+    // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
-    Register(Siigna.user, Siigna.drawing.id)
+    if (Siigna.user.isDefined) {
+      Register(Siigna.user.get, Siigna.drawing.id)
+    }
 
     // Loop and react on incoming messages
     loop {
@@ -229,6 +236,12 @@ object Controller extends Actor {
    * Return the last 10 parsed events currently stored in the controller.
    */
   def getEvents = events
+
+  /**
+   * Examines if this controller has interacted and is registered with the server.
+   * @return True if the server can be reached and the client has been registered correctly, false otherwise.
+   */
+  def isOnline = isConnected
 
   /**
    * Initializes a module by setting the starting state to 'Start and chaining the modules
