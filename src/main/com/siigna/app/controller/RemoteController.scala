@@ -11,27 +11,17 @@
 
 package com.siigna.app.controller
 
+import actors.AbstractActor
 import com.siigna.util.logging.Log
-import remote._
-import com.siigna.app.model.Model
-import actors.remote.RemoteActor._
-import actors.remote.{RemoteActor, Node}
 import com.siigna.app.Siigna
 import com.siigna.app.model.server.Drawing
+import remote._
 
 /**
  * An object whose sole responsibility is to handle incoming and outgoing
  * [[com.siigna.app.controller.remote.RemoteCommand]]s.
  */
-protected[app] object RemoteController extends PartialFunction[RemoteCommand, Unit] {
-
-  // Set remote class loader
-  RemoteActor.classLoader = getClass.getClassLoader
-
-  /**
-   * The connection to the server (sink).
-   */
-  val sink = select(Node("siigna.com", 20004), 'siigna)
+protected[app] object RemoteController {
 
   /**
    * The unique identifier for this client.
@@ -42,7 +32,7 @@ protected[app] object RemoteController extends PartialFunction[RemoteCommand, Un
    * Examines the input command and handles it appropriately.
    * @param command  The RemoteCommand to process.
    */
-  def apply(command : RemoteCommand) { 
+  def apply(command : RemoteCommand, sink : AbstractActor) {
     try {
       command match {
           // Catch successes - we know these are from the server
