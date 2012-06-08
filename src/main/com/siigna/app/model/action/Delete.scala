@@ -23,6 +23,10 @@ object Delete {
     Model execute DeleteShapePart(id, Model(id), part)
   }
   
+  def apply(shapes : Map[Int, ShapeSelector]) {
+    Model execute DeleteShapeParts(shapes)
+  }
+  
 }
 
 /**
@@ -58,6 +62,34 @@ case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extend
   def merge(that : Action) = SequenceAction(this, that)
   
   def undo(model : Model) = model add (id, shape)
+  
+}
+
+/**
+ * Deletes a ShapeSelector.
+ */
+case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
+  
+  private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
+  
+  def execute(model : Model) = {
+    // Create a map of shapes that can be deleted
+    var xs = Map[Int, Shape]()
+    shapes.foreach(t => {
+      val (id, part) = t
+      val x = Model(id).delete(part);
+      if (x.isDefined) {
+        xs = xs + (id -> x.get)
+      }
+    })
+    // Replace the shapes in the model if defined
+    if (xs.isEmpty) model
+    else model.add(xs)
+  }
+  
+  def merge(that : Action) = SequenceAction(this, that)
+  
+  def undo(model : Model) = model add oldShapes
   
 }
 
