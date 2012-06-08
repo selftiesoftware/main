@@ -74,9 +74,11 @@ case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
   private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
   
   def execute(model : Model) = {
-    // Create a map of shapes that can be deleted
+    // Create a map of shapes with deleted parts
     var xs = Map[Int, Shape]()
+    // Create a seq of shapes that are completely removed
     var cs = Seq[Int]()
+    // Iterate through shapes
     shapes.foreach(t => {
       val (id, part) = t
       val x = Model(id).delete(part)
