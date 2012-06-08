@@ -33,6 +33,7 @@ object Delete {
 /**
  * Deletes a shape.
  */
+@SerialVersionUID(320024820)
 case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
@@ -51,6 +52,7 @@ case class DeleteShape(id : Int, shape : Shape) extends Action {
 /**
  * Deletes a ShapeSelector.
  */
+@SerialVersionUID(-1303124189)
 case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
   
   def execute(model : Model) = {
@@ -69,6 +71,7 @@ case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extend
 /**
  * Deletes a ShapeSelector.
  */
+@SerialVersionUID(-1068568626)
 case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
   
   private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
@@ -102,6 +105,7 @@ case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
 /**
  * Deletes a number of shapes.
  */
+@SerialVersionUID(-1408705883)
 case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys

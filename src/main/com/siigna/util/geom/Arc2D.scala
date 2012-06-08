@@ -19,6 +19,7 @@ package com.siigna.util.geom
  * @param startAngle  The starting angle of the arc. In degrees between 0 and 360.
  * @param angle The number of degrees the arc is spanning.
  */
+@SerialVersionUID(-1174359692)
 case class Arc2D(override val center : Vector2D, radius : Double, startAngle : Double, angle : Double) extends Arc with GeometryBasic2D {
 
   type T = Arc2D
