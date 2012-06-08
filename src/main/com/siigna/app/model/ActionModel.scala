@@ -56,7 +56,7 @@ trait ActionModel {
     View.render()
 
     // Create the remote command and dispatch it
-    if (propagate && Siigna.client.isDefined) {
+    if (propagate && Siigna.isOnline) {
       RemoteAction(Siigna.client.get, action)
     }
   }
