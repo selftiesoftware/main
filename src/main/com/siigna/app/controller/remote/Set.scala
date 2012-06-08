@@ -16,5 +16,5 @@ import com.siigna.app.controller.Client
 /**
  * A RemoteCommand capable of setting a given attribute to a given value.
  */
-@SerialVersionUID(-7459193692839035921)
+@SerialVersionUID(-1041843852)
 case class Set(name : String, value : Any, client : Client) extends RemoteCommand
