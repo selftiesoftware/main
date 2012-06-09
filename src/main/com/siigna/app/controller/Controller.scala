@@ -24,7 +24,7 @@ import remote._
 import actors.remote.RemoteActor._
 import actors.remote.Node._
 import actors.remote.{RemoteActor, Node}
-import com.siigna.app.model.server.User
+import com.siigna.app.model.server.{Drawing, User}
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -83,13 +83,13 @@ object Controller extends Actor {
     
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
-    if (Siigna.user.isDefined) {
-      Register(Siigna.user.get, Siigna.drawing.id)
+    if (Siigna.user.isDefined && Siigna.drawing.id.isDefined) {
+      Register(Siigna.user.get, Client(0, Drawing()))
     }
 
     // TEST!!!!
     //isConnected = true
-    //Register(User("Jens"), Some(211))
+    //Register(User("Jens"), Client(0, Drawing(211)))
 
     // Loop and react on incoming messages
     loop {
