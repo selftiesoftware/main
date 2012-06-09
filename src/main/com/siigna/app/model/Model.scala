@@ -102,9 +102,13 @@ object Model extends ActionModel
   }
 
   /**
+   * The scale of the height and width boundary of the model, or in other words, the relation between the height
+   * and width of the paper and the maximum print scale.
+   *
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale = (scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0)).toInt
+  def boundaryScale =
+    math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1)
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
