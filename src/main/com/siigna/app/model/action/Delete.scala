@@ -23,6 +23,10 @@ object Delete {
     Model execute DeleteShapePart(id, Model(id), part)
   }
   
+  def apply(ids : Traversable[Int]) {
+    Model execute DeleteShapes(ids.map(i => i -> Model(i)).toMap)
+  }
+  
   def apply(selection : Selection) {
     Model deselect()
     Model execute DeleteShapeParts(selection.parts)
