@@ -52,8 +52,12 @@ object Create {
         if (id > 0) remote = remote + (id -> s)
         else        local  = local + (id -> s)
       })
-      if (!remote.isEmpty) Model execute CreateShapes(remote)
-      if (!local.isEmpty)  Model execute(CreateShapes(remote), true)
+      if (!remote.isEmpty) {
+        Model execute CreateShapes(remote)
+      }
+      if (!local.isEmpty) {
+        Model execute(CreateShapes(local), true)
+      }
     } else if (shapes.size == 1) {
       apply(shapes.head)
     } else {
