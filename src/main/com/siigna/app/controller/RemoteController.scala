@@ -42,7 +42,11 @@ protected[app] object RemoteController {
         }
         // Remote actions
         case RemoteAction(_, action, undo) => {
-          Model undo Some(action)
+          if (undo) {
+            Model undo Some(action)
+          } else {
+            Model execute action
+          }
         }
         // Catch successes - we know these are from the server
         case success : Success => {
