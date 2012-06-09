@@ -83,9 +83,11 @@ object Drawing {
 /**
  * A drawing which does not satisfy the demands set by the server to have an id, title and owner.
  */
+@SerialVersionUID(-283970341)
 sealed case class InvalidDrawing(id : Option[Int], owner : Option[User], title : Option[String]) extends Drawing
 
 /**
  * A drawing which satisfies the demands set by the server to have an id, title and owner.
  */
+@SerialVersionUID(1835505403)
 sealed case class ValidDrawing(id : Some[Int], owner : Some[User], title : Some[String]) extends Drawing
