@@ -62,11 +62,11 @@ object Controller extends Actor {
   var sleepTime = 5
 
   /**
-   * The running part of the controller.
+   * <p>The running part of the controller.</p>
    *
-   * It consists of a loop that exists until 'exit is given, or the system is exiting (naturally).
+   * <p>It consists of a loop that exists until 'exit is given, or the system is exiting (naturally).</p>
    *
-   * In the loop we first examine whether there is pending events. If so we:
+   * <p>In the loop we first examine whether there is pending events. If so we:
    * <ol>
    *   <li>Set the state of the active module.</li>
    *   <li>React on the given event by executing the state given by the state machine.</li>
@@ -75,7 +75,7 @@ object Controller extends Actor {
    *       modules can react on it.</li>
    * </ol>
    *
-   * The actor also handles commands and the 'exit symbol.
+   * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
     // Define the sink
