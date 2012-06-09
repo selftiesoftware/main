@@ -65,8 +65,8 @@ protected[app] object RemoteController {
               // Get shape-ids for the id-bank
               Get(ShapeIdentifier, Some(4), r.client)
 
-              // Store the drawing id
-              if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
+              // Store the drawing
+              Siigna.drawing = r.client.drawing
               
               Log.debug("RemoteController: Sucessfully registered client: " + client)
             }

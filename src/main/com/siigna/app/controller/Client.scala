@@ -11,10 +11,12 @@
 
 package com.siigna.app.controller
 
+import com.siigna.app.model.server.Drawing
+
 /**
  * A client represented by a unique identifier.
  * @param id  The unique identifier of the client, given by the server. Zero if no id has been given.
  * @param drawing  A unique identifier of the drawing, the client is currently drawing upon. Zero if no drawing is active.
  */
 @SerialVersionUID(-1673622368)
-case class Client(id : Long = 0L, drawing : Int = 0)
+case class Client(id : Long = 0L, drawing : Drawing = Drawing())
