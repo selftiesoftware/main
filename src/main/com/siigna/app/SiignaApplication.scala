@@ -105,6 +105,9 @@ class ApplicationWindow extends Frame
   // Show the window. The program is running.
   setVisible(true)
 
+  // Request focus
+  requestFocus()
+
   // Pack the elements of this window. The panel requests a certain size.
   pack()
 
