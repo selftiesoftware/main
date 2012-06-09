@@ -50,6 +50,9 @@ trait ActionModel {
    * @param remote  A flag indicating if the action executed should not be distributed to other clients.
    */
   def execute(action: Action, remote : Boolean = true) {
+    Log.debug("Model: Executing " + (if (remote) "remote" else "local") + " action: " + action)
+    
+    // Execute in model 
     model = action.execute(model)
 
     // Only store the action if it is not volatile and remote (no need to store non-remote)
@@ -75,10 +78,17 @@ trait ActionModel {
       // Retrieve the event
       val action = undone.head
       undone = undone.tail
+      
+      Log.debug("Model: Redoing action: " + action)
 
       // Execute the event and add it to the executed list
       model = action.execute(model)
       executed +:= action
+      
+      // Send to server
+      if (Siigna.client.isDefined) {
+        RemoteAction(Siigna.client.get, action)
+      }
       
       // Render the view
       View.render()
@@ -88,17 +98,30 @@ trait ActionModel {
   }
 
   /**
-   * Undo an action and put it in the list of undone actions.
+   * <p>Undo an action and put it in the list of undone actions.</p>
+   * 
+   * <p>If the method receives an action it assumes it is received from the server, 
+   * since local actions can be undone by fetching them from the executed actions.</p>
    */
-  def undo() {
-    if (executed.size > 0) {
+  def undo(remote : Option[Action] = None) {
+    if (executed.size > 0 || remote.isDefined) {
       // Retrieve the action
-      val action = executed.head
-      executed = executed.tail
+      val action = if (remote.isDefined) remote.get else {
+        val a = executed.head
+        executed = executed.tail
+        a
+      }
+      
+      Log.debug("Model: Undoing action " + action)
 
       // Undo it and add it to the undone list
       model = action.undo(model)
       undone +:= action
+      
+      // Send to server if the client is defined and the action isn't set
+      if (Siigna.client.isDefined && remote.isEmpty) {
+        RemoteAction(Siigna.client.get, action, true)
+      }
       
       // Render the view
       View.render()
