@@ -42,7 +42,7 @@ import scala.collection.immutable.Map
  *
  * @param  self  a map of keys and their values.
  */
-@SerialVersionUID(725462088)
+@SerialVersionUID(1171008500)
 case class Attributes(self : Map[String, Any]) extends Map[String, Any] with AttributesLike {
 
   /**
@@ -207,10 +207,8 @@ case class Attributes(self : Map[String, Any]) extends Map[String, Any] with Att
    * @param  attributeNames  a collection of names of attributes to remove.
    * @return  a set of attributes without the attributes you removed.
    */
-  def --(attributeNames : Iterable[String]) =
+  def --(attributeNames : Traversable[String]) =
     Attributes(self -- attributeNames)
-
-
 
   /**
    * Creates a new iterator for all the attributes in this set. This is
@@ -218,7 +216,7 @@ case class Attributes(self : Map[String, Any]) extends Map[String, Any] with Att
    *
    * @return the new iterator
    */
-  def iterator = self iterator
+  def iterator = self.iterator
 
   /**
    * This method removes all the attributes for which the predicate returns
@@ -254,7 +252,7 @@ case class Attributes(self : Map[String, Any]) extends Map[String, Any] with Att
    *
    * @return the number of key-value pairs.
    */
-  override def size = self size
+  override def size = self.size
 
   /**
    * Defines the prefix of this object's <code>toString</code> representation.
