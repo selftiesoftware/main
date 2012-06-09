@@ -31,7 +31,7 @@ object Create {
   }
   
   def apply(id : Int, shape : Shape) {
-    Model execute CreateShape(id, shape)
+    Model execute(CreateShape(id, shape), id > 0)
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
@@ -45,11 +45,15 @@ object Create {
 
   def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
-      val map = shapes.map(s => {
+      var remote = Map[Int, Shape]()
+      var local  = Map[Int, Shape]()
+      shapes.foreach(s => {
         val id = s.attributes.int("id").getOrElse(getId)
-        (id -> s)
-      }).toMap
-      Model execute CreateShapes(map)
+        if (id > 0) remote = remote + (id -> s)
+        else        local  = local + (id -> s)
+      })
+      if (!remote.isEmpty) Model execute CreateShapes(remote)
+      if (!local.isEmpty)  Model execute(CreateShapes(remote), true)
     } else if (shapes.size == 1) {
       apply(shapes.head)
     } else {

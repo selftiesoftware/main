@@ -16,6 +16,7 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.app.model.server.Drawing
 import remote._
+import com.siigna.app.model.Model
 
 /**
  * An object whose sole responsibility is to handle incoming and outgoing
@@ -39,6 +40,15 @@ protected[app] object RemoteController {
           case success : Success => {
             // Examine what was successful
             success.command match {
+
+              // Successful get shape identifiers command
+              case Get(ShapeIdentifier, value, _) => {
+                try {
+                  Model.setIdBank(value.get.asInstanceOf[Seq[Int]])
+                } catch {
+                  case e => Log.warning("Unknown input for shape identifiers: " + value)
+                }
+              }
   
               // Successful registration of the client
               case r : Register => {
@@ -47,6 +57,9 @@ protected[app] object RemoteController {
   
                 // Store the client
                 client = Some(r.client)
+
+                // Get shape-ids for the id-bank
+                Get(ShapeIdentifier, Some(4), r.client)
 
                 // Store the drawing id
                 if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
