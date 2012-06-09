@@ -70,28 +70,6 @@ import com.siigna.util.geom._
 trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
 
   type T <: Shape
-
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attribute  the new attributes to merge in.
-   * @return  a shape with the updated attributes.
-   *
-   * TODO: Refactor to addAttribute
-   */
-  override def addAttribute(attribute : (String, Any)) = setAttributes(attributes + attribute)
-
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attributes  the new attributes to merge in.
-   * @return  a shape with the updated attributes.
-   *
-   * TODO: Refactor to addAttributes
-   */
-  override def addAttributes(attributes : (String, Any)*) = setAttributes(this.attributes ++ attributes)
   
   /**
    * Calculates the closest distance to the shape using the views current zoom

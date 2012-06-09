@@ -146,7 +146,7 @@ object Siigna extends Interface with SiignaAttributes {
   /**
    * The selection-distance.
    */
-  def selectionDistance = int("selectionDistance").getOrElse(1) * View.zoom
+  def selectionDistance : Double = int("selectionDistance").getOrElse(1) * View.zoom
 
   /**
    * Set's the current cursor of Siigna. Overrides the current value.
