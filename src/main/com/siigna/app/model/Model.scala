@@ -107,8 +107,8 @@ object Model extends ActionModel
    *
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale =
-    math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1)
+  def boundaryScale : Int =
+    math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1).toInt
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
