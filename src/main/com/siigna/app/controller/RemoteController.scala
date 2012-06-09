@@ -40,14 +40,6 @@ protected[app] object RemoteController {
         case failure : Failure => {
           Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
         }
-        // Remote actions
-        case RemoteAction(_, action, undo) => {
-          if (undo) {
-            Model undo Some(action)
-          } else {
-            Model execute action
-          }
-        }
         // Catch successes - we know these are from the server
         case success : Success => {
           // Examine what was successful
@@ -77,6 +69,15 @@ protected[app] object RemoteController {
               if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
               
               Log.debug("RemoteController: Sucessfully registered client: " + client)
+            }
+
+            // Remote actions
+            case RemoteAction(_, action, undo) => {
+              if (undo) {
+                Model undo Some(action)
+              } else {
+                Model execute(action, false)
+              }
             }
             case _ => Log.warning("RemoteController: Received unknown success: " + success)
           }
