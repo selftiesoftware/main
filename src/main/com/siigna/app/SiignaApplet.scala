@@ -59,33 +59,27 @@ class SiignaApplet extends Applet {
   }
 
   /**
-   * Attempts to retrieve a parameter as a type.
-   * @param name  The name of the parameter.
-   * @tparam T  The type of the expected parameter.
-   * @return  Some[T] if the value was found and converted correctly, otherwise None.
-   */
-  protected def getParameter[T](name : String) : Option[T] = {
-    try {
-      Some(super.getParameter(name).asInstanceOf[T])
-    } catch { 
-      case _ => None 
-    }
-  } 
-
-  /**
    * Initializes the view. Sets panning to the center of the screen and
    * adds EventListeners.
    */
   override def init() {
-    // Start by reading the applet parameters 
-    
-    // Get the active user, if a log in was performed at www.siigna.com
-    val userName = getParameter[String]("contributorName")
-    if (userName.isDefined) Siigna.user = Some(User(userName.get))
+    // Start by reading the applet parameters
+    try {
+      // Get the active user, if a log in was performed at www.siigna.com
+      val userName = getParameter("contributorName")
+      if (userName != null) {
+        Log.debug("Applet: Found user: " + userName)
+        Siigna.user = Some(User(userName))
+      }
 
-    // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-    val drawingId = getParameter[Int]("drawingId")
-    if (drawingId.isDefined) Siigna.drawing = Drawing(drawingId.get)
+      // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
+      val drawingId = getParameter("drawingId")
+      if (drawingId != null) try {
+        val id = drawingId.toInt
+        Log.debug("Applet: Found drawing: " + id)
+        Siigna.drawing = Drawing(id)
+      }
+    } catch { case _ => }
 
     // Set the layout
     setLayout(new BorderLayout())
