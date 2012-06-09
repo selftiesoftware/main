@@ -88,18 +88,12 @@ object Controller extends Actor {
     }
 
     // TEST!!!!
-    //isConnected = true
-    //Register(User("Jens"), Some(211))
+    isConnected = true
+    Register(User("Jens"), Some(211))
 
     // Loop and react on incoming messages
     loop {
       react {
-        // Forward incoming actions to the server
-        case action : Action => {
-          Model execute(action, false)
-          Log.debug("Controller: Recieved action: " + action)
-        }
-
         // Forward remote commands to the RemoteController
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)

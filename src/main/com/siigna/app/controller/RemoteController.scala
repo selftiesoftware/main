@@ -36,46 +36,51 @@ protected[app] object RemoteController {
   def apply(command : RemoteCommand, sink : AbstractActor) {
     try {
       command match {
-          // Catch successes - we know these are from the server
-          case success : Success => {
-            // Examine what was successful
-            success.command match {
+        // Failure
+        case failure : Failure => {
+          Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
+        }
+        // Remote actions
+        case RemoteAction(_, action, undo) => {
+          Model undo Some(action)
+        }
+        // Catch successes - we know these are from the server
+        case success : Success => {
+          // Examine what was successful
+          success.command match {
 
-              // Successful get shape identifiers command
-              case Get(ShapeIdentifier, value, _) => {
-                try {
-                  Model.setIdBank(value.get.asInstanceOf[Seq[Int]])
-                } catch {
-                  case e => Log.warning("Unknown input for shape identifiers: " + value)
-                }
+            // Successful get shape identifiers command
+            case Get(ShapeIdentifier, value, _) => {
+              try {
+                Model.setIdBank(value.get.asInstanceOf[Seq[Int]])
+              } catch {
+                case e => Log.warning("Unknown input for shape identifiers: " + value)
               }
-  
-              // Successful registration of the client
-              case r : Register => {
-                // Log the received client
-                Log.info("RemoteController: Registered client: " + r.client)
-  
-                // Store the client
-                client = Some(r.client)
-
-                // Get shape-ids for the id-bank
-                Get(ShapeIdentifier, Some(4), r.client)
-
-                // Store the drawing id
-                if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
-                
-                Log.debug("RemoteController: Sucessfully registered client: " + client)
-              }
-              case _ => Log.warning("RemoteController: Received unknown success: " + success)
             }
+
+            // Successful registration of the client
+            case r : Register => {
+              // Log the received client
+              Log.info("RemoteController: Registered client: " + r.client)
+
+              // Store the client
+              client = Some(r.client)
+
+              // Get shape-ids for the id-bank
+              Get(ShapeIdentifier, Some(4), r.client)
+
+              // Store the drawing id
+              if (r.drawingId.isDefined) Siigna.drawing = Drawing(r.drawingId.get)
+              
+              Log.debug("RemoteController: Sucessfully registered client: " + client)
+            }
+            case _ => Log.warning("RemoteController: Received unknown success: " + success)
           }
-          case failure : Failure => {
-            Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
-          }
-  
-          // Forward everything else to the server. If it is not a Success type we can be
-          // sure the remote command are meant to be forwarded to the server
-          case _ => if (Controller.isOnline) sink ! command
+        }
+
+        // Forward everything else to the server. If it is not a Success type we can be
+        // sure the remote command are meant to be forwarded to the server
+        case _ => if (Controller.isOnline) sink ! command
       }
   
     } catch {
