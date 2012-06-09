@@ -51,7 +51,7 @@ trait ShapeLike {
    * @param  attributes  the new attributes to merge in.
    * @return  a shape with the updated attributes.
    */
-  def addAttributes(attributes : (String, Any)*) = setAttributes(this.attributes ++ attributes)
+  def addAttributes(attributes : Attributes) = setAttributes(this.attributes ++ attributes)
 
   /**
    * Returns a rectangle that includes the entire shape.
@@ -63,6 +63,21 @@ trait ShapeLike {
    * Calculates the closest distance to the shape in the given scale.
    */
   def distanceTo(point : Vector2D, scale : Double) : Double
+
+  /**
+   * Removes one attribute from the set of current attributes, if it exists.
+   *
+   * @param attribute  The attribute to remove.
+   * @return  A ShapeLike with the attribute removed.
+   */
+  def removeAttribute(attribute : String) = setAttributes(attributes - attribute)
+
+  /**
+   * Remotes a set of attributes from the current attributes, if they exist.
+   * @param attributes  The attributes to remove
+   * @return  A ShapeLike with the attributes removed.
+   */
+  def removeAttributes(attributes : Traversable[String]) = setAttributes(this.attributes.--(attributes))
 
   /**
    * Merge the new attributes in with the existing ones, eventually overwriting
