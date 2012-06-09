@@ -93,7 +93,7 @@ object Controller extends Actor {
 
     // Loop and react on incoming messages
     loop {
-      react {
+      receive {
         // Forward remote commands to the RemoteController
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
@@ -182,7 +182,7 @@ object Controller extends Actor {
               module.eventHandler.stateMap(module.state -> events.head.symbol) match {
                 case Some(s : Symbol) => if (module.state != s) {
                   module.state = s
-                  Log.info("Controller: Succesfully changed the state of the " + module + " to "+s)
+                  Log.debug("Controller: Succesfully changed the state of the " + module + " to "+s)
                 }
                 case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
               }
