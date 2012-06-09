@@ -93,7 +93,7 @@ object Controller extends Actor {
 
     // Loop and react on incoming messages
     loop {
-      receive {
+      react {
         // Forward remote commands to the RemoteController
         case command : RemoteCommand => {
           Log.debug("Controller: Received remote command: " + command)
