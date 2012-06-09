@@ -40,14 +40,20 @@ trait ActionModel {
   private var undone = Seq[Action]()
 
   /**
-   * Execute an action, list it as executed and clear the undone stack to make way for a new actions
-   * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).
+   * <p>Execute an action, list it as executed and clear the undone stack to make way for a new actions
+   * (if it is not a [[com.siigna.app.model.action.VolatileAction]]).</p>
+   *
+   * <p>If the local flag is set the action is not distributed to the server. If the flag is false the
+   * action is not store in the model either.</p>
+   *
+   * @param action  The action to execute.
+   * @param remote  A flag indicating if the action executed should not be distributed to other clients.
    */
-  def execute(action: Action, propagate : Boolean = true) {
+  def execute(action: Action, remote : Boolean = true) {
     model = action.execute(model)
 
-    // Only store the action if it is not volatile
-    if (!action.isInstanceOf[VolatileAction]) {
+    // Only store the action if it is not volatile and remote (no need to store non-remote)
+    if (!action.isInstanceOf[VolatileAction] && remote) {
       executed +:= action
       undone = Seq()
     }
@@ -56,7 +62,7 @@ trait ActionModel {
     View.render()
 
     // Create the remote command and dispatch it
-    if (propagate && Siigna.isOnline) {
+    if (remote && Siigna.isOnline) {
       RemoteAction(Siigna.client.get, action)
     }
   }
