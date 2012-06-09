@@ -34,3 +34,4 @@ trait RemoteCommand extends Command with Serializable {
   def client : Client
   
 }
+
