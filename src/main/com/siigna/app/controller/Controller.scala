@@ -84,7 +84,11 @@ object Controller extends Actor {
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined && Siigna.drawing.id.isDefined) {
-      Register(Siigna.user.get, Client(0, Drawing()))
+      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Siigna.drawing.id.get)
+      Register(Siigna.user.get, Client(0, Drawing(Siigna.drawing.id.get)))
+    } else if (Siigna.user.isDefined) {
+      Log.debug("Controller: Registering with user " + Siigna.user)
+      Register(Siigna.user.get, Client())
     }
 
     // TEST!!!!
