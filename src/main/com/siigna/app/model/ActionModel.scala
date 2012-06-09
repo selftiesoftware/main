@@ -88,6 +88,7 @@ trait ActionModel {
       // Send to server
       if (Siigna.client.isDefined) {
         RemoteAction(Siigna.client.get, action)
+        Log.debug("Model: Sending action to server.")
       }
       
       // Render the view
@@ -112,7 +113,7 @@ trait ActionModel {
         a
       }
       
-      Log.debug("Model: Undoing action " + action)
+      Log.debug("Model: Undoing " + (if (remote.isDefined) "remote" else "local") + " action " + action)
 
       // Undo it and add it to the undone list
       model = action.undo(model)
