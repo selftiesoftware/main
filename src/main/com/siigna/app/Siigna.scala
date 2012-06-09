@@ -141,7 +141,7 @@ object Siigna extends Interface with SiignaAttributes {
   /**
    * Returns the paper scale of the current model.
    */
-  def paperScale = Model.boundaryScale
+  def paperScale : Int = Model.boundaryScale
 
   /**
    * The selection-distance.
