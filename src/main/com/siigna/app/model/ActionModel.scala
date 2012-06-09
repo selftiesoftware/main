@@ -67,6 +67,7 @@ trait ActionModel {
     // Create the remote command and dispatch it
     if (remote && Siigna.isOnline) {
       RemoteAction(Siigna.client.get, action)
+      Log.debug("Forwarding action to server: " + action)
     }
   }
 
@@ -122,6 +123,7 @@ trait ActionModel {
       // Send to server if the client is defined and the action isn't set
       if (Siigna.client.isDefined && remote.isEmpty) {
         RemoteAction(Siigna.client.get, action, true)
+        Log.debug("Forwarding undoing action to server: " + action)
       }
       
       // Render the view
