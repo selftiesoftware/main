@@ -66,7 +66,7 @@ object Create {
    * @param shapes  A map containing a number of ids and shapes.
    */
   def apply(shapes : Map[Int,Shape]) {
-    Model execute CreateShapes(shapes)
+    if (!shapes.isEmpty) Model execute CreateShapes(shapes)
   }
 
 }
