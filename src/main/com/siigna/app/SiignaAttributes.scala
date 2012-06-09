@@ -11,10 +11,10 @@
 
 package com.siigna.app
 
-import java.awt.Dimension
 import com.siigna.util.collection.AttributesLike
+import collection.mutable.{Map}
+import java.awt.Dimension
 import com.siigna.util.Implicits._
-import collection.mutable.{Map, MapProxy}
 
 /**
  * <p>Attributes such as selection distance, anti-aliasing etc. for the Siigna application
@@ -55,26 +55,27 @@ import collection.mutable.{Map, MapProxy}
  * </dl>
  * </p>
  */
-trait SiignaAttributes extends MapProxy[String, Any] with AttributesLike {
+trait SiignaAttributes extends Map[String, Any] with AttributesLike {
 
   /**
    * The attributes of Siigna.
    */
-  def self = Map[String, Any](
-    "antiAliasing"         -> true,
-    "backgroundTileSize"   -> 12,
-    "colorBackground"      -> "#F9F9F9".color,
-    "colorBackgroundLight" -> "#E9E9E9".color,
-    "colorBackgroundDark"  -> "#DADADA".color,
-    "colorDraw"            -> "#000000".color,
-    "colorSelected"        -> "#7777FF".color,
-    "defaultScreenSize"    -> new Dimension(600, 400),
-    "printMargin"          -> 13.0,
-    "printFormatMin"       -> 210.0,
-    "printFormatMax"       -> 297.0,
-    "selectionDistance"    -> 5.0,
-    "zoomSpeed"            -> 0.5
-  )
+  def self = toMap
+
+  // Set the values
+  this("antiAliasing")          = true
+  this("backgroundTileSize")    = 12
+  this("colorBackground")       = "#F9F9F9".color
+  this("colorBackgroundLight")  = "#E9E9E9".color
+  this("colorBackgroundDark")   = "#DADADA".color
+  this("colorDraw")             = "#000000".color
+  this("colorSelected")         = "#7777FF".color
+  this("defaultScreenSize")     = new Dimension(600, 400)
+  this("printMargin")           = 13.0
+  this("printFormatMin")        = 210.0
+  this("printFormatMax")        = 297.0
+  this("selectionDistance")     = 5.0
+  this("zoomSpeed")             = 0.5
   
   /**
    * Toggles a boolean value or sets it to true if it does not exist. If there already is a

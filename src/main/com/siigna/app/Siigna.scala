@@ -16,7 +16,8 @@ import model.server.{User, Drawing}
 import view._
 import com.siigna.util.geom._
 import event.Track
-import java.awt.{Cursor}
+import collection.mutable.HashMap
+import java.awt.{Dimension, Cursor}
 
 /**
  * <p>The Siigna object provides access to various core elements of the software.</p>
@@ -26,7 +27,7 @@ import java.awt.{Cursor}
  *
  * <p>See {http://github.com/siigna/main/wiki} for more information</p>
  */
-object Siigna extends Interface with SiignaAttributes {
+object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
    * The active drawing for this client. The drawing does not necessarily contain all
