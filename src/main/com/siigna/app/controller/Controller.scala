@@ -92,8 +92,8 @@ object Controller extends Actor {
     }
 
     // TEST!!!!
-    //isConnected = true
-    //Register(User("Jens"), Client(0, Drawing(211)))
+    isConnected = true
+    Register(User("Jens"), Client(0, Drawing(211)))
 
     // Loop and react on incoming messages
     loop {
@@ -234,7 +234,16 @@ object Controller extends Actor {
           }
         }
         // Exit
-        case 'exit => Log.info("Controller is shutting down"); exit()
+        case 'exit => {
+          Log.info("Controller is shutting down")
+          // Close connection to the server
+          if (Siigna.client.isDefined) {
+            sink ! Unregister(Siigna.client.get)
+          }
+
+          // Quit the thread
+          exit()
+        }
 
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
