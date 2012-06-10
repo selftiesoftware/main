@@ -59,7 +59,10 @@ object Select {
     val filtered = if (enclosed) {
       Model(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
     } else {
-      Model(r).map(t => t._1 -> t._2.getPart).collect{case (i : Int, p : ShapeSelector) => i -> p}
+      var parts = Map[Int, ShapeSelector]()
+      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
+      Model(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
+      parts
     }
     Model.select(Selection(filtered))
   }

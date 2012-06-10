@@ -88,7 +88,8 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
   def boundary : Rectangle2D = geometry.boundary
 
   /**
-   * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns None.
+   * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns an
+   * empty list. If, however, removing the part means splitting the shape up in several shapes, the .
    */
   def delete(part : ShapeSelector) : Option[Shape]
 
