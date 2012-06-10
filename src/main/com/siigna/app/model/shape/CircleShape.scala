@@ -46,9 +46,20 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    */
   def distanceToHandlesFrom(point : Vector2D) = geometry.vertices.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def getPart(rect: Rectangle2D) = if (rect.contains(geometry)) FullSelector else EmptySelector
+  def getPart(rect: Rectangle2D) = 
+    if (rect.contains(geometry)) FullSelector 
+    else {
+      val contains = geometry.vertices.exists(p => rect.contains(p))
+      if (contains) {
+        FullSelector
+      } else EmptySelector
+    }
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.int("selectionDistance").getOrElse(5)) FullSelector else EmptySelector
+  def getPart(point: Vector2D) =
+    if (distanceTo(point) > Siigna.int("selectionDistance").getOrElse(5)) EmptySelector
+    else {
+      FullSelector
+    }
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices
@@ -60,17 +71,16 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
 
   def transform(t : TransformationMatrix) =
     CircleShape(center transform(t), radius * t.scaleFactor, attributes)
-
-  /**
-   * The selector for CircleShapes.
-   *
-   */
-  //protected sealed case class CircleShapeSelector() extends ShapeSelector[CircleShape]
   
 }
 
 object CircleShape
-{
+{                     
+
+  /**
+   * The selector for CircleShapes.
+   */
+  sealed case class CircleShapeSelector(part : Boolean) extends ShapeSelector
 
   def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
 
