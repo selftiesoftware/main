@@ -36,28 +36,9 @@ trait ShapeLike {
   def attributes : Attributes
 
   /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attribute  the new attribute to merge in.
-   * @return  a shape with the updated attributes.
-   */
-  def addAttribute(attribute : (String, Any)) = setAttribute(attribute)
-
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attributes  the new attributes to merge in.
-   * @return  a shape with the updated attributes.
-   */
-  def addAttributes(attributes : Attributes) = setAttributes(this.attributes ++ attributes)
-
-  /**
    * Returns a rectangle that includes the entire shape.
    */
   def boundary : Rectangle2D
-
 
   /**
    * Calculates the closest distance to the shape in the given scale.
@@ -89,9 +70,22 @@ trait ShapeLike {
   def setAttribute(attribute : (String, Any)) = setAttributes(attributes + attribute)
 
   /**
-   * Returns a new shape with a new set of attributes.
+   * Merge the new attributes in with the existing ones, eventually overwriting
+   * attributes with new values.
+   *
+   * @param  attributes  the new attributes to merge in.
+   * @return  a shape with the updated attributes.
    */
   def setAttributes(attributes : Attributes) : T
+  
+  /**
+   * Merge the new attributes in with the existing ones, eventually overwriting
+   * attributes with new values.
+   *
+   * @param  attributes  the new attributes to merge in.
+   * @return  a shape with the updated attributes.
+   */
+  def setAttributes(attributes : (String, Any)*) : T = setAttributes(this.attributes ++ attributes)
 
   /**
    * Applies a transformation to the shape.
