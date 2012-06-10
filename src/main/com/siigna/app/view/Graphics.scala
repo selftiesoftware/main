@@ -98,9 +98,6 @@ class Graphics(val g : Graphics2D)
         /** COLLECTION SHAPES **/
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {
-          // Set the color
-          setColor(attributes color("Color") getOrElse(colorDraw))
-
           // Examine the raster attribute
           val raster = attributes color "raster"
 
