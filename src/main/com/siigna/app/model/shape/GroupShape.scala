@@ -33,7 +33,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
   def apply(part : ShapeSelector) = None
 
   def delete(part : ShapeSelector) = {
-    None
+    Nil
   }
 
   def getPart(rect: Rectangle2D) = EmptySelector
