@@ -160,7 +160,12 @@ object View extends Canvas with Runnable {
       // Fetch and draw the dynamic layer.
       // TODO: Cache this
       try {
-        Model.selection.foreach(_.foreach(i => Model(i._1).getVertices(i._2).foreach(p => graphics draw transformation.transform(p))))
+        val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
+        Model.selection.foreach(_.foreach(i => {
+          Model(i._1).getVertices(i._2).foreach(p => {
+            graphics.draw(transformation.transform(p), color)
+          })
+        }))
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: "+e)
       }
