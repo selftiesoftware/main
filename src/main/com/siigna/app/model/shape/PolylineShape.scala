@@ -13,6 +13,8 @@ package com.siigna.app.model.shape
 import com.siigna.util.geom._
 import collection.mutable.BitSet
 import com.siigna.util.collection.{Attributes}
+import collection.Seq
+import com.siigna.app.model.shape.PolylineShape.InnerPolylineShape
 
 /**
  * <p>A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -75,27 +77,55 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   }
   
   def delete(part : ShapeSelector) = part match {
-    case FullSelector => None
+    case FullSelector => Nil
     case CollectionSelector(xs) => {
       val deleteStart = xs(0)
 
       if (deleteStart && xs.size == (innerShapes.size - 1)) { // Everything is selected!
-        None
+        Nil
       } else if (xs.size == 0) { // Nothing is selected, carry on...
-        Some(this)
+        Seq(this)
       } else {
-        // Otherwise we're somewhere between 0 and everything
-        // First filter all the removed parts away - remember startPoint occupies the 0-position
-        val inner = xs.-(0).map(i => innerShapes(i - 1)).toSeq
-
-        if (deleteStart && inner.size > 1) { // Is the start point included? Then we need at least two shapes
-          Some(PolylineShape(inner.head.point, inner.tail, attributes))
-        } else if (inner.size > 0) { // Otherwise we need at least one inner shape
-          Some(PolylineShape(startPoint, inner, attributes))
-        } else Some(this) // Fair enough...
+        // Find the number of groups in the selection
+        var group = 0
+        var groups = Seq[Seq[Int]]()
+        xs.reduceLeft((a : Int, b : Int) => {
+          // Create the seq if necessary
+          if (groups.size >= group) {
+            groups = groups :+ Seq(a)
+          } else {
+            groups = groups.updated(group, groups(group) :+ a)
+          }
+          
+          // Test if they are in different groups
+          if (a != (b - 1)) group += 1
+          b
+        })
+        
+        
+        // If there are zero groups
+        if (groups.size == 0) Nil
+        // ... Or if there are several
+        else {
+          groups.map(s => {
+            val inner = s.map(i => innerShapes(i - 1))
+            // No group can exist with 0 size
+            if (s.size == 0) Nil
+            // If the start point should be removed and we only have one point the shape should be deleted entirely
+            else if (s == 0 && deleteStart && s.size < 2) None
+            // Create a polyline with the start point if required
+            else if (s == 0 && !deleteStart) {
+              Some(PolylineShape(startPoint, inner, attributes))
+            // Treat everything else
+            } else {
+              val inner = groups(0).map(i => innerShapes(i - 1))
+              Seq(PolylineShape(inner.head.point, inner.tail, attributes))
+            }
+          }).collect{ case Some(s : Shape) => s }
+        } 
       }
     }
-    case EmptySelector => Some(this)
+    case EmptySelector => Seq(this)
   }
 
   def getPart(rect: Rectangle2D) =
