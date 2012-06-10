@@ -69,6 +69,7 @@ trait SiignaAttributes extends Map[String, Any] with AttributesLike {
   this("colorBackgroundLight")  = "#E9E9E9".color
   this("colorBackgroundDark")   = "#DADADA".color
   this("colorDraw")             = "#000000".color
+  this("colorHover")            = "#22FFFF".color
   this("colorSelected")         = "#7777FF".color
   this("defaultScreenSize")     = new Dimension(600, 400)
   this("printMargin")           = 13.0
