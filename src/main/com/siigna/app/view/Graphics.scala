@@ -121,7 +121,6 @@ class Graphics(val g : Graphics2D)
             s.shapes.foreach(s => draw(s.setAttributes(attributes)))
           }
 
-
         }
         case s : TextShape        => {
           val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
