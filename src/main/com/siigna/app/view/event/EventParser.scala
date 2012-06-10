@@ -142,7 +142,7 @@ class EventParser {
    *     and return the list.</li>
    * </ol>
    */
-  def parse(list : List[Event]) : List[Event] = if (enabled && list.lengthCompare(0) > 0) {
+  def parse(list : List[Event]) : List[Event] = if (!list.isEmpty) {
     // Merges any sequences of events that doesn't provide additional info.
     val events = list match {
       // Removes unknown KeyEvents.
@@ -151,20 +151,24 @@ class EventParser {
       // Merges mouse events to avoid ridiculously long lists of MouseMove or MouseDrag.
       case (e : MouseMove) :: (_ : MouseMove) :: tail => mouse = e.position; e :: tail
       case (e : MouseDrag) :: (_ : MouseDrag) :: tail => mouse = e.position; e :: tail
+      case (e : MouseMove) :: tail => mouse = e.position; e :: tail
+      case (e : MouseDrag) :: tail => mouse = e.position; e :: tail
       case _ => list
     }
 
-    // Perform 2D query
-    val model = Model(Siigna.mousePosition, margin)
+    if (enabled) {
+      // Perform 2D query
+      val model = Model(Siigna.mousePosition, margin)
 
-    // Parse the track
-    var newEvent = track.parse(events, model)
-    
-    // Parse the snap
-    snap foreach {a => newEvent = a.parse(newEvent, model)}
+      // Parse the track
+      var newEvent = track.parse(events, model)
 
-    // Return the edited list and slice the list to the size defined in <code>listSize</code>.
-    newEvent :: events.tail.slice(0, listSize - 1)
+      // Parse the snap
+      snap foreach {a => newEvent = a.parse(newEvent, model)}
+
+      // Return the edited list and slice the list to the size defined in <code>listSize</code>.
+      newEvent :: events.tail.slice(0, listSize - 1)
+    } else list
   } else list
 
   /**
