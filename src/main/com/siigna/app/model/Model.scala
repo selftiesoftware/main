@@ -108,8 +108,20 @@ object Model extends ActionModel
    * Uses toInt since it always rounds down to an integer.
    */
   def boundaryScale : Int =
-    math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1).toInt
-  
+
+Siigna.double("printFormatMax").getOrElse(297.0).toInt
+
+
+
+  //bDividedRounded/formatDividedRounded
+
+  //do the same for the current boundary size.
+
+  //divide the two results.
+
+
+  math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1).toInt
+
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
    */
