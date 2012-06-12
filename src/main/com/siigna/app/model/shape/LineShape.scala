@@ -52,9 +52,9 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     case _ => None
   }
 
-  def delete(part : ShapeSelector) : Option[Shape] = part match {
-    case Selector(_) | FullSelector => None
-    case _ => Some(this)
+  def delete(part : ShapeSelector) = part match {
+    case Selector(_) | FullSelector => Nil
+    case _ => Seq(this)
   }
 
   def getPart(r : Rectangle2D) = {

@@ -48,7 +48,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def delete(part: ShapeSelector) = part match {
     //case PartialSelector(_) | FullSelector => None
-    case _ => Some(this)
+    case _ => Seq(this)
   }
 
   def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
