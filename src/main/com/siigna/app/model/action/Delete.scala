@@ -38,7 +38,7 @@ object Delete {
  * Deletes a shape.
  */
 @SerialVersionUID(320024820)
-case class DeleteShape(id : Int, shape : Shape) extends Action {
+sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
 
@@ -57,31 +57,36 @@ case class DeleteShape(id : Int, shape : Shape) extends Action {
  * Deletes a ShapeSelector.
  */
 @SerialVersionUID(-1303124189)
-case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
+sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
   
   val parts = shape.delete(part); 
   var partIds = Seq[Int]()
   
   def execute(model : Model) = {
-    /*if (parts.size == 0) {
+    if (parts.size == 0) {
+      // Remove the shape if no parts result from the deletion
       model.remove(id)
     } else if (parts.size == 1) {
+      // Replace the shape if the deletion result in one shape
       model.add(id, parts(0))
     } else {
-      model.remove(id).add(parts.map(s => Model.getId -> s).toMap)
-    }*/
-    model
+      // Create the new shapes through a CreateAction
+      // since we don't know if there are enough local id's
+      Create(parts)
+
+      // Remove the shape
+      model.remove(id)
+    }
   }
   
   def merge(that : Action) = SequenceAction(this, that)
   
-  def undo(model : Model) = { /*
+  def undo(model : Model) = {
     if (parts.size <= 1) {
       model.add(id, shape)
     } else {
-      model.remove()
-    }*/
-    model
+      model.remove(id)
+    }
   }
   
 }
@@ -91,7 +96,7 @@ case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extend
  */
 @SerialVersionUID(-1068568626)
 case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
-  
+
   private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
   
   def execute(model : Model) = {/*
