@@ -19,14 +19,8 @@ import com.siigna.app.model.shape.{CollectionShape, Shape}
 */
 object Create {
 
-  /**
-   * Retrieves a unique id for the shape.
-   * @return  An integer identifying the shape.
-   */
-  private def getId = Model.getId
-  
   def apply(shape : Shape) {
-    val id = shape.attributes.int("id").getOrElse(getId)
+    val id = getId
     apply(id, shape)
   }
   
@@ -35,7 +29,7 @@ object Create {
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    val id = collection.attributes.int("id").getOrElse(getId)
+    val id = getId
     apply(id, collection)
   }
 
@@ -48,7 +42,7 @@ object Create {
       var remote = Map[Int, Shape]()
       var local  = Map[Int, Shape]()
       shapes.foreach(s => {
-        val id = s.attributes.int("id").getOrElse(getId)
+        val id = getId
         if (id > 0) remote = remote + (id -> s)
         else        local  = local + (id -> s)
       })
@@ -76,41 +70,31 @@ object Create {
 }
 
 /**
- * Creates a shape with an associated id.
- * This action should not be instantiated directly, but created through the <code>Create</code> object.
+ * <p>Creates a shape with an associated id.</p>
+ *
+ * @define actionFactory [[com.siigna.app.model.action.Create]]
+ * $actionDescription
  */
-@SerialVersionUID(1359225221)
+@SerialVersionUID(-1099507104)
 case class CreateShape(id : Int, shape : Shape) extends Action {
-
+  
   def execute(model : Model) = model add (id, shape)
 
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) =>
-      if (s == shape) this
-      else CreateShapes(Map(id -> shape, i -> s))
-    case _ => SequenceAction(this, that)
-  }
-
-  def undo(model : Model) = model remove (id)
+  def undo(model : Model) = model remove id
 
 }
 
 /**
  * Creates several shapes.
- * This action should not be instantiated directly, but created through the <code>Create</code> object.
+ * @define actionFactory [[com.siigna.app.model.action.Create]]
+ * $actionDescription
  */
-@SerialVersionUID(-385734936)
+@SerialVersionUID(1827663026)
 case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
-
+  
   def execute(model : Model) = model add shapes
-
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) => CreateShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[Int, Shape]) => CreateShapes(shapes ++ s)
-    case _ => SequenceAction(this, that)
-  }
 
   def undo(model : Model) = model remove shapes.keys
 }
