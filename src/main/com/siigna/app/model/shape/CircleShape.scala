@@ -45,7 +45,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
 
   def delete(part: ShapeSelector) = part match {
     //case PartialSelector(_) | FullSelector => None
-    case _ => Some(this)
+    case _ => Seq(this)
   }
 
   /**

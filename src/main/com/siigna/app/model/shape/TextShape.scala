@@ -52,8 +52,8 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
   def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
 
   def delete(part: ShapeSelector) = part match {
-    case FullSelector => None
-    case _ => Some(this)
+    case FullSelector => Nil
+    case _ => Seq(this)
   }
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)

@@ -89,9 +89,10 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
 
   /**
    * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns an
-   * empty list. If, however, removing the part means splitting the shape up in several shapes, the .
+   * empty list. If, however, removing the part means splitting the shape up in several shapes, the method returns
+   * several shapes that should be created when the part is removed.
    */
-  def delete(part : ShapeSelector) : Option[Shape]
+  def delete(part : ShapeSelector) : Seq[Shape]
 
   /**
    * The basic geometric object for the shape.
