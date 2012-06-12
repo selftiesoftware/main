@@ -32,13 +32,13 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   val geometry = Circle2D(center, radius)
   
   def apply(part : ShapeSelector) = part match {
-    case CircleShape.Selector(xs) => {
-      Some(new PartialShape((t : TransformationMatrix) => LineShape(
-        if(xs)  center.transform(t) else center,
-        if(!xs) p2.transform(t)
-        else p2,
-        attributes)))
-    }
+    //case CircleShape.Selector(xs) => {
+      //Some(new PartialShape((t : TransformationMatrix) => LineShape(
+      //  if(xs)  center.transform(t) else center,
+      //  if(!xs) p2.transform(t)
+      //  else p2,
+      //  attributes)))
+    //}
     case FullSelector => Some(new PartialShape(transform))
     case _ => None
   }
