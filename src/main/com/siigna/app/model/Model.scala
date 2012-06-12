@@ -62,11 +62,11 @@ object Model extends ActionModel
 
   /**
    * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>without margin</b>.
+   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
    * This is done in order to make sure that the print viewed on page is the
    * actual print you get.
    *
-   * @return A rectangle in an A-paper format (margin exclusive). The scale is given in <code>boundaryScale</code>.
+   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   def boundary = {
     val newBoundary  = model.mbr
@@ -100,6 +100,38 @@ object Model extends ActionModel
                 Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
     }
   }
+  //the boundary without print margin
+  def boundaryWithoutMargin = {
+    val newBoundary  = model.mbr
+    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center       = newBoundary.center
+    //val proportion   = 1.41421356
+
+    // Saves the format
+    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
+    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
+
+    // If the format is too small for the least proportion, then up the size
+    // one format.
+    // TODO: Optimize!
+    val list = List[Double](2, 2.5, 2)
+    var take = 0 // which element to "take" from the above list
+    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
+      val factor = list(take)
+      aFormatMin *= factor
+      aFormatMax *= factor
+      take = if (take < 2) take + 1 else 0
+    }
+
+    // Set the boundary-rectangle.
+    if (size.x >= size.y) {
+      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
+                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+    } else {
+      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
+                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+    }
+  }
 
   /**
    * The scale of the height and width boundary of the model, or in other words, the relation between the height
@@ -108,19 +140,7 @@ object Model extends ActionModel
    * Uses toInt since it always rounds down to an integer.
    */
   def boundaryScale : Int =
-
-Siigna.double("printFormatMax").getOrElse(297.0).toInt
-
-
-
-  //bDividedRounded/formatDividedRounded
-
-  //do the same for the current boundary size.
-
-  //divide the two results.
-
-
-  math.max((scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt), 1).toInt
+    math.ceil((scala.math.max(boundaryWithoutMargin.width, boundaryWithoutMargin.height) / (Siigna.double("printFormatMax").getOrElse(297.0)).toInt)).toInt
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
