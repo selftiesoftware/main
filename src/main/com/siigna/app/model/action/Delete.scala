@@ -42,13 +42,6 @@ sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
 
-  def merge(that : Action) = that match {
-    case DeleteShape(i : Int, s : Shape) =>
-      if (i == id) this
-      else DeleteShapes(Map((id -> shape), (i -> s)))
-    case _ => SequenceAction(this, that)
-  }
-
   def undo(model : Model) = model.add(id, shape)
 
 }
@@ -78,8 +71,6 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
       model.remove(id)
     }
   }
-  
-  def merge(that : Action) = SequenceAction(this, that)
   
   def undo(model : Model) = {
     if (parts.size <= 1) {
@@ -119,8 +110,6 @@ case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
     }*/ model
   }
   
-  def merge(that : Action) = SequenceAction(this, that)
-  
   def undo(model : Model) = model //model add oldShapes
   
 }
@@ -132,12 +121,6 @@ case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
 case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys
-
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) => DeleteShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[Int, Shape]) => DeleteShapes(shapes ++ s)
-    case _ => SequenceAction(this, that)
-  }
 
   def undo(model : Model) = model add shapes
 }

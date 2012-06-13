@@ -44,37 +44,17 @@ trait Action extends Serializable {
   def execute(model : Model) : Model
 
   /**
+   * The method merges this action in with another action, so this action is performed first.
+   */
+  def merge(that : Action) = that match {
+    case SequenceAction(acts : Seq[Action]) => SequenceAction(Seq(this) ++ acts)
+    case _ => SequenceAction(this, that)
+  }
+
+  /**
    * Undo the action on a given model.
    */
   def undo(model : Model) : Model
-
-}
-
-/**
- * A Local Action is an action intended to be kept locally. It is mainly used in cases where Siigna is
- * creating shapes, which depends on the number of local ids available in the [[com.siigna.app.model.RemoteActionModel]].
- * A LocalAction then has to take these number into account and be stored for later, when enough
- * ids are received from the server.
- */
-trait LocalAction extends Action {
-
-  /**
-   * A map of all the shapes with local ids in this action. Will not be serialized.
-   * @return  A map of negative integers and their corresponding shapes.
-   */
-  @transient def localShapes : Map[Int, Shape]
-
-  /**
-   * A map of all the shapes with remote ids used by this action. Will not be serialized.
-   * @return  A map of positive integers and their corresponding shapes.
-   */
-  @transient def remoteIds : Map[Int, Shape]
-
-  /**
-   * Copies the action to a new instance where the local ids are replaced with remote. Will not be serialized.
-   * @param shapes  A map of the remote integers to their corresponding shapes, replacing the <code>localShapes</code>.
-   */
-  @transient def copyWithNewIds(shapes : Map[Int, Shape])
 
 }
 

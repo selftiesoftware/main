@@ -20,51 +20,25 @@ import com.siigna.app.model.shape.{CollectionShape, Shape}
 object Create {
 
   def apply(shape : Shape) {
-    val id = getId
-    apply(id, shape)
-  }
-  
-  def apply(id : Int, shape : Shape) {
-    Model execute(CreateShape(id, shape), id > 0)
+    Model.executeWithIds(Seq(shape), CreateShapes(_))
   }
 
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    val id = getId
-    apply(id, collection)
+    apply(collection)
   }
 
   def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
-    apply(Traversable(shape1, shape2) ++ shapes)
+    apply(Iterable(shape1, shape2) ++ shapes)
   }
 
   def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
-      var remote = Map[Int, Shape]()
-      var local  = Map[Int, Shape]()
-      shapes.foreach(s => {
-        val id = getId
-        if (id > 0) remote = remote + (id -> s)
-        else        local  = local + (id -> s)
-      })
-      if (!remote.isEmpty) {
-        Model execute CreateShapes(remote)
-      }
-      if (!local.isEmpty) {
-        Model execute(CreateShapes(local), true)
-      }
+      Model.executeWithIds(shapes.toIterable, CreateShapes(_))
     } else if (shapes.size == 1) {
       apply(shapes.head)
     } else {
-      Log.info("Create: Create was called with an empty Traversable.")
+      Log.info("Create: Create was called with an empty collection of shapes.")
     }
-  }
-
-  /**
-   * Creates several shapes
-   * @param shapes  A map containing a number of ids and shapes.
-   */
-  def apply(shapes : Map[Int,Shape]) {
-    if (!shapes.isEmpty) Model execute CreateShapes(shapes)
   }
 
 }
@@ -75,7 +49,7 @@ object Create {
  * @define actionFactory [[com.siigna.app.model.action.Create]]
  * $actionDescription
  */
-@SerialVersionUID(-1099507104)
+@SerialVersionUID(71837821)
 case class CreateShape(id : Int, shape : Shape) extends Action {
   
   def execute(model : Model) = model add (id, shape)
@@ -89,7 +63,7 @@ case class CreateShape(id : Int, shape : Shape) extends Action {
  * @define actionFactory [[com.siigna.app.model.action.Create]]
  * $actionDescription
  */
-@SerialVersionUID(1827663026)
+@SerialVersionUID(-1426451986)
 case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
