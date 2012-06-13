@@ -28,6 +28,16 @@ import com.siigna.app.view.View
 trait RemoteActionModel extends ActionModel {
 
   /**
+   * An action that is only executed locally.
+   * @param shapes  The shapes with local ids.
+   * @param f  A function transforming the action to a
+   */
+  sealed private class LocalAction(shapes : Map[Int, Shape], f : Map[Int, Shape] => Action) extends Action {
+    def execute(model : Model) = f(shapes).execute(model)
+    def undo(model : Model) = f(shapes).undo(model)
+  }
+
+  /**
    * An integer to keep track of the local ids.
    */
   protected var localCounter = 0
@@ -36,11 +46,6 @@ trait RemoteActionModel extends ActionModel {
    * A queue of unique ids received from the server.
    */
   protected var idBank : Seq[Int] = Seq()
-  
-  /**
-   * A queue of all the shapes with local ids that needs new ids.
-   */
-  protected var localActions : Seq[Action] = Seq()
 
   def execute(action : Action) { execute(action, true) }
 
