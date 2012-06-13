@@ -12,7 +12,6 @@
 package com.siigna.app.model
 
 import action.{VolatileAction, Action, CreateShape, DeleteShape}
-import com.siigna.app.controller.Controller
 import com.siigna.app.controller.remote._
 import com.siigna.app.Siigna
 import shape.Shape
@@ -23,29 +22,29 @@ import com.siigna.app.view.View
  * <p>A RemoteActionModel with the responsibilities to keep track of actions (and information regarding
  * the actions) relevant in the communications between the client and the server.</p>
  * <p>An example is the unique shape id necessary for each shape, which can not be served locally before the
- * server has approved the id. To solve this the action is only applied locally, but not sent remotely.
+ * server has approved the id. To solve this the action is only applied locally, but not sent remotely.</p>
  */
 trait RemoteActionModel extends ActionModel {
 
   /**
    * An action that is only executed locally.
-   * @param shapes  The shapes with local ids.
-   * @param f  A function transforming the action to a
+   * @param shapes  The shapes mapped to local ids.
+   * @param f  A function that executes the action with the given shapes and ids.
    */
-  sealed private class LocalAction(shapes : Map[Int, Shape], f : Map[Int, Shape] => Action) extends Action {
+  sealed private case class LocalAction(shapes : Map[Int, Shape], f : Map[Int, Shape] => Action) extends Action {
     def execute(model : Model) = f(shapes).execute(model)
     def undo(model : Model) = f(shapes).undo(model)
   }
 
   /**
-   * An integer to keep track of the local ids.
+   * A stream of a negative integers used for local ids.
    */
-  protected var localCounter = 0
+  protected var localIdStream = Stream.iterate(-1)(i => if (i - 1 > 0) -1 else i - 1).iterator
 
   /**
    * A queue of unique ids received from the server.
    */
-  protected var idBank : Seq[Int] = Seq()
+  protected var remoteIds : Seq[Int] = Seq()
 
   def execute(action : Action) { execute(action, true) }
 
@@ -54,8 +53,7 @@ trait RemoteActionModel extends ActionModel {
    * (if they are not instances of [[com.siigna.app.model.action.VolatileAction]]) and sends it to .</p>
    * es
    * <p>If the local flag is set the action is not distributed to the server. If the flag is false the
-   * action is not store in the model either.<
-   * /p>
+   * action is not store in the model either.</p>
    * @param action  The action to execute.
    * @param remote  A flag indicating if the action executed should not be distributed to other clients.
    */
@@ -83,27 +81,34 @@ trait RemoteActionModel extends ActionModel {
 
   /**
    * Assigns the given number of elements an id before giving them to the action and executing it.
-   * If the assigned ids are from the local
+   * If the assigned ids are from local ids, then the action is stored as a local action until further 
+   * ids have been received from the pool.
    *
    * @param shapes  The shapes to be given ids.
    * @param f  A function transforming a map with the ids and shapes into the action to be executed.
-   * @tparam T  The type of the elements.
+   *
+   * TODO: Create an executeWithId
    */
-  def executeWithIds(shapes : Seq[Shape], f : Map[Int, Shape] => Action) {
-    if (idBank.size >= id) {
-      val id = idBank.head
-      idBank = idBank.tail
-      id
-    } else {
-      localCounter -= 1 // Decrement by one (avoid collision with server ids)
-      localIds = localIds :+ localCounter
+  def executeWithIds(shapes : Iterable[Shape], f : Map[Int, Shape] => Action) {
+    // Do we have enough ids?
+    if (remoteIds.size >= shapes.size) { // Yes!
+      // Retrieve the ids
+      val (ids, bank) = remoteIds.splitAt(shapes.size)
+      remoteIds = bank
+
+      // Execute the action with the remote ids
+      execute(f(ids.zip(shapes).toMap))
+    } else { // ... No ...
+      // Decrement the counter by the number of shapes (avoid collision with server ids)
+      val ids = localIdStream.take(shapes.size).toSeq
+
+      // Execute the action wrapped in a local action
+      execute(new LocalAction(ids.zip(shapes).toMap, f), false)
 
       // Send a request for more ID's
       if (Siigna.client.isDefined) {
-        Get(ShapeIdentifier, Some(localIds.size + 5), Siigna.client.get)
+        Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
       }
-
-      localCounter
     }
   }
   
@@ -120,7 +125,7 @@ trait RemoteActionModel extends ActionModel {
       executed +:= action
       
       // Send to server
-      if (Siigna.client.isDefined) {
+      if (Siigna.client.isDefined && !action.isInstanceOf[LocalAction]) {
         RemoteAction(Siigna.client.get, action)
         Log.debug("Model: Sending action to server.")
       }
@@ -133,32 +138,59 @@ trait RemoteActionModel extends ActionModel {
   }
   
   def setIdBank(xs : Seq[Int]) {
-    // If there are no local ids, then just save the ids
-    if (localIds.isEmpty) {
-      idBank ++= xs
+    // Store the ids
+    var ids = remoteIds ++ xs
 
-    // Otherwise we can use them to replace local ids
-    } else {
-      xs.foreach(id => {
-        // Store the local id if we can't use it
-        if (localIds.isEmpty) idBank :+ id
-        // Otherwise store it for the local id
-        else {
-          // Get the id and the shape
-          val localId = localIds.head
-          val shape = ActionModel(localId)
+    // A method that updates the local action in a given collection
+    def updateLocalActions(cs : Seq[Action], undo : Boolean) = {
+      cs.map(action => action match {
+        // Update a local action only if there's ids enough
+        case LocalAction(shapes, f) if (shapes.size <= ids.size) => {
+          // Retrieve the ids
+          val (remote, remainder) = ids.splitAt(shapes.size)
+          ids = remainder
 
-          // Remove the used id
-          localIds = localIds.tail
-          
-          // Delete the shape (locally)
-          Model execute(DeleteShape(localId, shape), false)
-          
-          // Add the shape with the new id (remotely)
-          Model execute(CreateShape(id, shape), true)
+          // Replace the ids og the shapes with the remote ids
+          val remoteAction = f(remote.zip(shapes).map(t => {
+            val id = t._1
+            val (local, shape) = t._2
+
+            // Replace the id in the model (if it exists)
+            if (model.shapes.contains(local))
+              model = model.remove(local).add(id, shape)
+
+            // Return the new remote id mapped to the same old shape
+            id -> shape
+          }).toMap)
+
+          // Send to server
+          if (Siigna.client.isDefined) {
+            RemoteAction(Siigna.client.get, remoteAction, undo)
+            Log.debug("Model: Sending action to server.")
+          }
+
+          // Return
+          remoteAction
         }
+        case LocalAction(shapes, _) => {
+          // Request more ids!
+          if (Siigna.client.isDefined) {
+            Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
+          }
+          action
+        }
+        case a => a
       })
     }
+
+    // Check the undone actions for instances of LocalAction
+    undone = updateLocalActions(undone, true)
+
+    // Check the executed actions for instances of LocalAction
+    if (ids.size > 0) executed = updateLocalActions(executed, false)
+
+    // Update the remote ids
+    remoteIds = ids
   }
   
   def undo { undo(None) }
@@ -185,7 +217,7 @@ trait RemoteActionModel extends ActionModel {
       undone +:= action
       
       // Send to server if the client is defined and the action isn't set
-      if (Siigna.client.isDefined && remote.isEmpty) {
+      if (Siigna.client.isDefined && remote.isEmpty && !action.isInstanceOf[LocalAction]) {
         RemoteAction(Siigna.client.get, action, true)
         Log.debug("Forwarding undoing action to server: " + action)
       }

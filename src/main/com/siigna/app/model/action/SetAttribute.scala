@@ -62,7 +62,7 @@ case class SetSingleAttribute(ids : Traversable[Int], name : String, value : Any
   
   def execute(model: Model) = model.add(ids.map(i => i -> Model(i).setAttribute(name, value)).toMap)
 
-  def merge(that: Action) = throw new UnsupportedOperationException("Not yet implemented.")
+  //def merge(that: Action) = throw new UnsupportedOperationException("Not yet implemented.")
 
   def undo(model: Model) = model.add(oldValues.map(i => {
     i._1 -> (if (i._2.isDefined) {

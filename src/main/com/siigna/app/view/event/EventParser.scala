@@ -158,7 +158,7 @@ class EventParser {
 
     if (enabled) {
       // Perform 2D query
-      val model = ActionModel(Siigna.mousePosition, margin)
+      val model = Model(Siigna.mousePosition, margin)
 
       // Parse the track
       var newEvent = track.parse(events, model)

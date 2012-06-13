@@ -57,11 +57,11 @@ object Select {
   
   def apply(r : Rectangle2D, enclosed : Boolean = true) {
     val filtered = if (enclosed) {
-      ActionModel(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
+      Model(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
     } else {
       var parts = Map[Int, ShapeSelector]()
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-      ActionModel(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
+      Model(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
       parts
     }
     Model.select(Selection(filtered))
