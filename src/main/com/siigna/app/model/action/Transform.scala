@@ -76,9 +76,10 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
   } else {
     model add(id, model.shapes(id).transform(transformation))
   }
-  
-  // TODO: Optimize
-  def merge(action : Action) = SequenceAction(this, action)
+
+
+  // TODO: Implement and optimize
+  // def merge(that : Action)
 
   def undo(model : Model) = if (f.isDefined) {
     model add (id, f.get.apply(transformation.inverse))
@@ -95,7 +96,8 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
     model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
-  def merge(that : Action) = SequenceAction(this, that)
+  // TODO: Implement and optimize
+  //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
     model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
@@ -114,8 +116,8 @@ case class TransformShapes(shapes : Map[Int, Shape], transformation : Transforma
     model add map
   }
 
-  // TODO: Optimize
-  def merge(that : Action) = SequenceAction(this, that)
+  // TODO: Implement and optimize
+  //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
     val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation.inverse))).toMap
