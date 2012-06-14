@@ -46,6 +46,66 @@ trait RemoteActionModel extends ActionModel {
    */
   protected var remoteIds : Seq[Int] = Seq()
 
+  /**
+   * Adds a number of remote ids to the id-pool.
+   * @param xs  The remote ids to add.
+   */
+  def addRemoteIds(xs : Seq[Int]) {
+    // Store the ids
+    var ids = remoteIds ++ xs
+
+    // A method that updates the local action in a given collection
+    def updateLocalActions(cs : Seq[Action], undo : Boolean) = {
+      cs.map(action => action match {
+        // Update a local action only if there's ids enough
+        case LocalAction(shapes, f) if (shapes.size <= ids.size) => {
+          // Retrieve the ids
+          val (remote, remainder) = ids.splitAt(shapes.size)
+          ids = remainder
+
+          // Replace the ids og the shapes with the remote ids
+          val remoteAction = f(remote.zip(shapes).map(t => {
+            val id = t._1
+            val (local, shape) = t._2
+
+            // Replace the id in the model (if it exists)
+            if (model.shapes.contains(local))
+              model = model.remove(local).add(id, shape)
+
+            // Return the new remote id mapped to the same old shape
+            id -> shape
+          }).toMap)
+
+          // Send to server
+          if (Siigna.client.isDefined) {
+            RemoteAction(Siigna.client.get, remoteAction, undo)
+            Log.debug("Model: Sending action to server.")
+          }
+
+          // Return
+          remoteAction
+        }
+        case LocalAction(shapes, _) => {
+          // Request more ids!
+          if (Siigna.client.isDefined) {
+            Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
+          }
+          action
+        }
+        case a => a
+      })
+    }
+
+    // Check the undone actions for instances of LocalAction
+    undone = updateLocalActions(undone, true)
+
+    // Check the executed actions for instances of LocalAction
+    if (ids.size > 0) executed = updateLocalActions(executed, false)
+
+    // Update the remote ids
+    remoteIds = ids
+  }
+
   def execute(action : Action) { execute(action, true) }
 
   /**
@@ -63,8 +123,9 @@ trait RemoteActionModel extends ActionModel {
     // Execute in the model
     model = action.execute(model)
 
-    // Only store the action if it is not volatile and remote (no need to store non-remote)
-    if (!action.isInstanceOf[VolatileAction] && remote) {
+    // Store the action if it is a local action, 
+    // but not if it is volatile or remote (no need to store non-remote)
+    if (action.isInstanceOf[LocalAction] || (!action.isInstanceOf[VolatileAction] && remote)) {
       executed +:= action
       undone = Seq()
     }
@@ -137,62 +198,6 @@ trait RemoteActionModel extends ActionModel {
     }
   }
   
-  def setIdBank(xs : Seq[Int]) {
-    // Store the ids
-    var ids = remoteIds ++ xs
-
-    // A method that updates the local action in a given collection
-    def updateLocalActions(cs : Seq[Action], undo : Boolean) = {
-      cs.map(action => action match {
-        // Update a local action only if there's ids enough
-        case LocalAction(shapes, f) if (shapes.size <= ids.size) => {
-          // Retrieve the ids
-          val (remote, remainder) = ids.splitAt(shapes.size)
-          ids = remainder
-
-          // Replace the ids og the shapes with the remote ids
-          val remoteAction = f(remote.zip(shapes).map(t => {
-            val id = t._1
-            val (local, shape) = t._2
-
-            // Replace the id in the model (if it exists)
-            if (model.shapes.contains(local))
-              model = model.remove(local).add(id, shape)
-
-            // Return the new remote id mapped to the same old shape
-            id -> shape
-          }).toMap)
-
-          // Send to server
-          if (Siigna.client.isDefined) {
-            RemoteAction(Siigna.client.get, remoteAction, undo)
-            Log.debug("Model: Sending action to server.")
-          }
-
-          // Return
-          remoteAction
-        }
-        case LocalAction(shapes, _) => {
-          // Request more ids!
-          if (Siigna.client.isDefined) {
-            Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
-          }
-          action
-        }
-        case a => a
-      })
-    }
-
-    // Check the undone actions for instances of LocalAction
-    undone = updateLocalActions(undone, true)
-
-    // Check the executed actions for instances of LocalAction
-    if (ids.size > 0) executed = updateLocalActions(executed, false)
-
-    // Update the remote ids
-    remoteIds = ids
-  }
-  
   def undo { undo(None) }
   
   /**
@@ -209,12 +214,14 @@ trait RemoteActionModel extends ActionModel {
         executed = executed.tail
         a
       }
-      
+
       Log.debug("Model: Undoing " + (if (remote.isDefined) "remote" else "local") + " action " + action)
 
-      // Undo it and add it to the undone list
+      // Undo it
       model = action.undo(model)
-      undone +:= action
+
+      // ... and add it to the undone list, but only if it is local
+      if (remote.isEmpty) undone +:= action
       
       // Send to server if the client is defined and the action isn't set
       if (Siigna.client.isDefined && remote.isEmpty && !action.isInstanceOf[LocalAction]) {
