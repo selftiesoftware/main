@@ -15,102 +15,79 @@ import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
 
 /**
-* An object that allows you to create one or multiple shapes.
+* An object that allows you to create one or more shapes.
 */
 object Create {
 
   /**
-   * Retrieves a unique id for the shape.
-   * @return  An integer identifying the shape.
+   * Creates a single shape.
+   * @param shape  The shape to create.
    */
-  private def getId = Model.getId
-  
   def apply(shape : Shape) {
-    val id = shape.attributes.int("id").getOrElse(getId)
-    apply(id, shape)
-  }
-  
-  def apply(id : Int, shape : Shape) {
-    Model execute(CreateShape(id, shape), id > 0)
-  }
-
-  def apply[T <: Shape](collection : CollectionShape[T]) {
-    val id = collection.attributes.int("id").getOrElse(getId)
-    apply(id, collection)
-  }
-
-  def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
-    apply(Traversable(shape1, shape2) ++ shapes)
-  }
-
-  def apply(shapes : Traversable[Shape]) {
-    if (shapes.size > 1) {
-      var remote = Map[Int, Shape]()
-      var local  = Map[Int, Shape]()
-      shapes.foreach(s => {
-        val id = s.attributes.int("id").getOrElse(getId)
-        if (id > 0) remote = remote + (id -> s)
-        else        local  = local + (id -> s)
-      })
-      if (!remote.isEmpty) {
-        Model execute CreateShapes(remote)
-      }
-      if (!local.isEmpty) {
-        Model execute(CreateShapes(local), true)
-      }
-    } else if (shapes.size == 1) {
-      apply(shapes.head)
-    } else {
-      Log.info("Create: Create was called with an empty Traversable.")
-    }
+    Model.executeWithIds(Seq(shape), CreateShapes(_))
   }
 
   /**
-   * Creates several shapes
-   * @param shapes  A map containing a number of ids and shapes.
+   * Creates a single collection shape. This method is created to avoid collision with shapes : Traversable[Shape]
+   * @param collection  The CollectionShape to create
+   * @tparam T  The type of the entries in the shape.
    */
-  def apply(shapes : Map[Int,Shape]) {
-    if (!shapes.isEmpty) Model execute CreateShapes(shapes)
+  def apply[T <: Shape](collection : CollectionShape[T]) {
+    Model.executeWithIds(Seq(collection), CreateShapes(_))
+  }
+
+  /**
+   * Creates several shapes.
+   * @param shape1  The first shape to create.
+   * @param shape2  The second shape to create.
+   * @param shapes  Any other shapes (optional).
+   */
+  def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
+    apply(Iterable(shape1, shape2) ++ shapes)
+  }
+
+  /**
+   * Creates a number of shapes.
+   * @param shapes  The shapes to create.
+   */
+  def apply(shapes : Traversable[Shape]) {
+    if (shapes.size > 1) {
+      Model.executeWithIds(shapes.toIterable, CreateShapes(_))
+    } else if (shapes.size == 1) {
+      apply(shapes.head)
+    } else {
+      Log.info("Create: Create was called with an empty collection of shapes.")
+    }
   }
 
 }
 
 /**
- * Creates a shape with an associated id.
- * This action should not be instantiated directly, but created through the <code>Create</code> object.
+ * <p>Creates a shape with an associated id.</p>
+ *
+ * @define actionFactory [[com.siigna.app.model.action.Create]]
+ * $actionDescription
  */
-@SerialVersionUID(1359225221)
+@SerialVersionUID(71837821)
 case class CreateShape(id : Int, shape : Shape) extends Action {
-
+  
   def execute(model : Model) = model add (id, shape)
 
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) =>
-      if (s == shape) this
-      else CreateShapes(Map(id -> shape, i -> s))
-    case _ => SequenceAction(this, that)
-  }
-
-  def undo(model : Model) = model remove (id)
+  def undo(model : Model) = model remove id
 
 }
 
 /**
  * Creates several shapes.
- * This action should not be instantiated directly, but created through the <code>Create</code> object.
+ * @define actionFactory [[com.siigna.app.model.action.Create]]
+ * $actionDescription
  */
-@SerialVersionUID(-385734936)
+@SerialVersionUID(-1426451986)
 case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
-
+  
   def execute(model : Model) = model add shapes
-
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) => CreateShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[Int, Shape]) => CreateShapes(shapes ++ s)
-    case _ => SequenceAction(this, that)
-  }
 
   def undo(model : Model) = model remove shapes.keys
 }

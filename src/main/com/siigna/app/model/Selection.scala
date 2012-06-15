@@ -18,18 +18,18 @@ import shape._
 import collection.mutable.BitSet
 
 /**
- * A Selection is a mutable wrapper for parts of a regular Shape(s).
+ * <p>A Selection is a mutable wrapper for parts of a regular Shape(s).</p>
  *
- * <br />
+ * <p>
  * A selection does not store entire shapes (that would be annoyingly expensive!) but instead remembers
  * subsets of shapes (the [[com.siigna.app.model.shape.ShapeSelector]]s). These subsets can be given to
  * the shapes stored in the model and through the [[com.siigna.app.model.shape.Shape.apply]] method
  * the shapes will provide [[com.siigna.app.model.shape.PartialShape]]s which can be used to manipulate
- * these subsets.
+ * these subsets.</p>
  *
- * <br />
+ * <p>
  * When altered, the selection saves the action required to alter the shape(s) in the static layer, so the changes
- * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.
+ * can be made to the static version later on - when the shape(s) are "demoted" back into the static layer.</p>
  *
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
@@ -39,15 +39,16 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
   type T = Selection
 
   /**
-   * The underlying action with which this Selection has been changed since creation, if any.
-   */
-  var action: Option[Action] = None
-
-  /**
    * Stores a private transformation matrix that indicates the translation applied to the
    * Selection since creation.
    */
-  private var transformation: TransformationMatrix = TransformationMatrix()
+  private var transformation : TransformationMatrix = TransformationMatrix()
+
+  /**
+   * Stores a private attribute variable with values that have been applied to the Selection since
+   * creation.
+   */
+  private var attribute : Attributes = Attributes()
 
   /**
    * Applies a transformation matrix to the selected part of the contained shapes and returns the resulting shapes.
@@ -60,7 +61,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
   /**
    * The attributes of the underlying ImmutableShapes.
    */
-  def attributes = Attributes()
+  def attributes = attribute
 
   /**
    * The boundary of the underlying ImmutableShapes.
@@ -88,13 +89,16 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
    */
   def shapes : Map[Int, Shape] = {
     parts.map((t : (Int, ShapeSelector)) => {
-      (t._1 -> Model(t._1))
+      (t._1 -> Model(t._1).setAttributes(attributes))
     })
   }
   
   def self = parts
 
-  def setAttributes(attributes: Attributes) = this // TODO: Create some kind of (set/create/update)attribute action
+  def setAttributes(attributes: Attributes) = {
+    this.attribute = attributes
+    this
+  }
 
   /**
    * Switches a selection on or off depending on its current state.
