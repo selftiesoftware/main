@@ -12,51 +12,16 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
-
-/**
- * Creates actions to set a single attribute on any number of shapes.
- */
-object SetAttribute {
-  
-  def apply (id : Int, name : String, value : Any) {
-    Model execute new SetSingleAttribute(Traversable(id), name, value)
-  }
-  
-  def apply(ids : Traversable[Int], name : String, value : Any) { 
-    Model execute new SetSingleAttribute(ids, name, value)
-  }
-  
-}
-
-/* TODO: Create a SetAttributes
-object SetAttributes {
-  
-  def apply(id : Int, attributes : Attributes) {
-    Model execute new SetAttributes(Traversable(id), attributes)
-  }
-  
-  def apply(id : Int, attributes : Map[String, Any]) {
-    Model execute new SetAttributes(Traversable(id), Attributes(attributes))
-  }
-  
-  def apply(ids : Traversable[Int], attributes : Attributes) {
-    Model execute new SetAttributes(ids, attributes)
-  }
-
-  def apply(ids : Traversable[Int], attributes : Map[String, Any]) {
-    Model execute new SetAttributes(ids, Attributes(attributes))
-  }
-  
-} */
+import com.siigna.util.collection.Attributes
 
 /**
  * Sets a single attribute on a number of shapes to the given value.
- * @param ids  The ids of the shapes to set the attribute on.'
+ * @param ids  The ids of the shapes to set the attribute on.
  * @param name  The name of the attribute
  * @param value  The value of the attribute
  */
 @SerialVersionUID(-955468992)
-case class SetSingleAttribute(ids : Traversable[Int], name : String, value : Any) extends Action {
+case class SetAttribute(ids : Traversable[Int], name : String, value : Any) extends Action {
   
   val oldValues : Map[Int, Option[Any]] = ids.map(i => i -> Model(i).attributes.get(name)).toMap
   
@@ -72,4 +37,24 @@ case class SetSingleAttribute(ids : Traversable[Int], name : String, value : Any
     })
   }))
   
+}
+
+/**
+ * Sets a number of attributes on a number of shapes to the given value.
+ * @param ids  The ids of the shapes to set the attribute on.
+ * @param attributes  The attributes to set.
+ */
+@SerialVersionUID(-1003577121)
+case class SetAttributes(ids : Traversable[Int], attributes : Attributes) extends Action {
+
+  val oldValues : Map[Int, Attributes] = ids.map(i => i -> Model(i).attributes).toMap
+
+  def execute(model: Model) = model.add(ids.map(i => i -> Model(i).setAttributes(attributes)).toMap)
+
+  //def merge(that: Action) = throw new UnsupportedOperationException("Not yet implemented.")
+
+  def undo(model: Model) = model.add(oldValues.map(i => {
+    i._1 -> Model(i._1).setAttributes(i._2)
+  }))
+
 }
