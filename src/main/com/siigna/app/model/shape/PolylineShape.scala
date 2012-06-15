@@ -79,50 +79,41 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   def delete(part : ShapeSelector) = part match {
     case FullSelector => Nil
     case CollectionSelector(xs) => {
-      val deleteStart = xs(0)
 
-      if (deleteStart && xs.size == (innerShapes.size - 1)) { // Everything is selected!
+      if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
         Nil
       } else if (xs.size == 0) { // Nothing is selected, carry on...
         Seq(this)
       } else {
-        // Find the number of groups in the selection
-        var group = 0
-        var groups = Seq[Seq[Int]]()
-        xs.reduceLeft((a : Int, b : Int) => {
-          // Create the seq if necessary
-          if (groups.size >= group) {
-            groups = groups :+ Seq(a)
-          } else {
-            groups = groups.updated(group, groups(group) :+ a)
+        // Find groups in the selection and return them
+        var groups    = Seq[PolylineShape]() // The sequence of groups
+        var low       = 0                    // The value for the lower bound of the current group
+        xs.-(0) foreach { x =>
+          // Subtract one since we're not dealing with the startPoint
+          val i = x - 1
+          // Split the polylineshape at the given index and store the remainder if non-empty
+          val group = innerShapes.slice(low, i)
+          println(group)
+          // Create the group if
+          if (group.size > 0 && low == 0 && !xs(0)) { // Size == 1 but start point included
+            groups = groups :+ PolylineShape(startPoint, group, attributes)
+          } else if (group.size > 1) {                      // Size > 2 and no start point
+            groups = groups :+ PolylineShape(group.head.point, group.tail, attributes)
           }
-          
-          // Test if they are in different groups
-          if (a != (b - 1)) group += 1
-          b
-        })
-        
-        
-        // If there are zero groups
-        if (groups.size == 0) Nil
-        // ... Or if there are several
-        else {
-          groups.map(s => {
-            val inner = s.map(i => innerShapes(i - 1))
-            // No group can exist with 0 size
-            if (s.size == 0) Nil
-            // If the start point should be removed and we only have one point the shape should be deleted entirely
-            else if (s == 0 && deleteStart && s.size < 2) None
-            // Create a polyline with the start point if required
-            else if (s == 0 && !deleteStart) {
-              Some(PolylineShape(startPoint, inner, attributes))
-            // Treat everything else
-            } else {
-              val inner = groups(0).map(i => innerShapes(i - 1))
-              Seq(PolylineShape(inner.head.point, inner.tail, attributes))
-            }
-          }).collect{ case Some(s : Shape) => s }
-        } 
+
+          // Update the lowest bound for the next group
+          low = i + 1
+        }
+
+        // Add the remaining tail elements (if there are more than 2)
+        if (low < innerShapes.size - 1) {
+          val elems = innerShapes.drop(low) 
+          groups = groups :+ PolylineShape(elems.head.point, elems.tail, attributes)
+        }
+
+        println(groups)
+
+        groups
       }
     }
     case EmptySelector => Seq(this)
