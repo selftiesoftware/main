@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import action.{TransformShapeParts, Action}
+import action.{SetAttributes, TransformShapeParts, Action}
 import com.siigna.util.logging.Log
 
 
@@ -50,22 +50,27 @@ trait MutableModel extends SelectableModel {
    */
   override def deselect() {
     if (selection.isDefined) {
+      val a = selection.get.attributes
       val t = selection.get.getTransformation
       val s = selection.get
-      var action : Option[Action] = if (!t.isEmpty) {
-        // TODO: Do this in the Transform action instead...
-        val parts = s.map(e => e._1 -> e._2)
-        Some(TransformShapeParts(parts, t))
+
+      // Find the transformation
+      val transformAction : Option[Action] = if (!t.isEmpty) {
+        Some(TransformShapeParts(s, t))
       } else None
-      
-      if (selection.get.action.isDefined && action.isDefined) {
-        action = Some(action.get.merge(s.action.get))
-      } else if (selection.get.action.isDefined) {
-        action = Some(s.action.get)
-      }
+
+      val attributeAction : Option[Action] = if (!a.isEmpty) {
+        Some(SetAttributes(s.keys, a))
+      } else None
 
       // Execute action
-      if (action.isDefined) Model execute action.get
+      if (transformAction.isDefined && attributeAction.isDefined) {
+        Model execute transformAction.get.merge(attributeAction.get)
+      } else if (transformAction.isDefined) {
+        Model execute transformAction.get
+      } else if (attributeAction.isDefined) {
+        Model execute attributeAction.get
+      }
       
       selection = None
     }
