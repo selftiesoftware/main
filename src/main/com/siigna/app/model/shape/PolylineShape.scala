@@ -93,7 +93,6 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
           val i = x - 1
           // Split the polylineshape at the given index and store the remainder if non-empty
           val group = innerShapes.slice(low, i)
-          println(group)
           // Create the group if
           if (group.size > 0 && low == 0 && !xs(0)) { // Size == 1 but start point included
             groups = groups :+ PolylineShape(startPoint, group, attributes)
@@ -110,8 +109,6 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
           val elems = innerShapes.drop(low) 
           groups = groups :+ PolylineShape(elems.head.point, elems.tail, attributes)
         }
-
-        println(groups)
 
         groups
       }
