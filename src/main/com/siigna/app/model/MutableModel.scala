@@ -12,6 +12,7 @@
 package com.siigna.app.model
 
 import action.{TransformShapeParts, Action}
+import com.siigna.util.logging.Log
 
 
 /**
@@ -86,6 +87,8 @@ trait MutableModel extends SelectableModel {
     if (this.selection.isDefined) deselect()
     
     this.selection = Some(selection)
+
+    Log.success("Model: Selected " + selection)
   }
 
 }
