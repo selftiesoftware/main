@@ -19,7 +19,7 @@ case class SequenceAction(actions : Seq[Action]) extends Action {
 
   def execute(model : Model) : Model = actions.foldLeft(model)((m, action) => action.execute(m))
 
-  def merge(that : Action) = that match {
+  override def merge(that : Action) = that match {
     case SequenceAction(acts : Seq[Action]) => SequenceAction(actions ++ acts)
     case _ => SequenceAction(actions :+ that)
   }
@@ -28,6 +28,9 @@ case class SequenceAction(actions : Seq[Action]) extends Action {
 
 }
 
+/**
+ * Factory object to [[com.siigna.app.model.action.SequenceAction]].
+ */
 object SequenceAction {
 
   def apply(action1 : Action, action2 : Action) = new SequenceAction(Seq(action1, action2))
