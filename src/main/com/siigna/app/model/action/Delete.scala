@@ -20,7 +20,19 @@ object Delete {
   }
   
   def apply(id : Int, part : ShapeSelector) {
-    Model execute DeleteShapePart(id, Model(id), part)
+    apply(Map[Int, ShapeSelector](id -> part))
+  }
+  
+  def apply(shapes : Map[Int, ShapeSelector]) {
+    val oldShapes = shapes.map(t => t._1 -> Model(t._1))
+    val newShapes = shapes.map(t => Model(t._1).delete(t._2)).flatten
+    
+    // Does the deletion result in new shapes?
+    if (newShapes.isEmpty) { // No - that's easy!
+      Model execute DeleteShapes(oldShapes)
+    } else { // Yes - now we need the magic
+      Model.executeWithIds(newShapes, DeleteShapeParts(oldShapes, _))
+    }
   }
   
   def apply(ids : Traversable[Int]) {
@@ -29,7 +41,7 @@ object Delete {
   
   def apply(selection : Selection) {
     Model deselect()
-    Model execute DeleteShapeParts(selection.parts)
+    apply(selection.parts)
   }
   
 }
@@ -38,16 +50,9 @@ object Delete {
  * Deletes a shape.
  */
 @SerialVersionUID(320024820)
-case class DeleteShape(id : Int, shape : Shape) extends Action {
+sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
-
-  def merge(that : Action) = that match {
-    case DeleteShape(i : Int, s : Shape) =>
-      if (i == id) this
-      else DeleteShapes(Map((id -> shape), (i -> s)))
-    case _ => SequenceAction(this, that)
-  }
 
   def undo(model : Model) = model.add(id, shape)
 
@@ -57,82 +62,59 @@ case class DeleteShape(id : Int, shape : Shape) extends Action {
  * Deletes a ShapeSelector.
  */
 @SerialVersionUID(-1303124189)
-case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
+sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
   
   val parts = shape.delete(part); 
   var partIds = Seq[Int]()
   
   def execute(model : Model) = {
-    /*if (parts.size == 0) {
+    if (parts.size == 0) {
+      // Remove the shape if no parts result from the deletion
       model.remove(id)
     } else if (parts.size == 1) {
+      // Replace the shape if the deletion result in one shape
       model.add(id, parts(0))
     } else {
-      model.remove(id).add(parts.map(s => Model.getId -> s).toMap)
-    }*/
-    model
+      // Create the new shapes through a CreateAction
+      // since we don't know if there are enough local id's
+      Create(parts)
+
+      // Remove the shape
+      model.remove(id)
+    }
   }
   
-  def merge(that : Action) = SequenceAction(this, that)
-  
-  def undo(model : Model) = { /*
+  def undo(model : Model) = {
     if (parts.size <= 1) {
       model.add(id, shape)
     } else {
-      model.remove()
-    }*/
-    model
+      model.remove(id)
+    }
   }
   
 }
 
 /**
- * Deletes a ShapeSelector.
+ * Deletes a part of a shape represented as a shape selector.
  */
-@SerialVersionUID(-1068568626)
-case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
+@SerialVersionUID(1143887988)
+case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) extends Action {
   
-  private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
+  def execute(model : Model) = 
+    model.remove(oldShapes.keys).add(newShapes)
   
-  def execute(model : Model) = {/*
-    // Create a map of shapes with deleted parts
-    var xs = Map[Int, Shape]()
-    // Create a seq of shapes that are completely removed
-    var cs = Seq[Int]()
-    // Iterate through shapes
-    shapes.foreach(t => {
-      val (id, part) = t
-      val x = Model(id).delete(part)
-      if (x.isDefined) {
-        xs = xs + (id -> x.get)
-      } else cs = cs :+ id
-    })
-    // Replace the shapes in the model if defined
-    if (xs.isEmpty && cs.isEmpty) model
-    else {
-      model.remove(cs).add(xs)
-    }*/ model
-  }
-  
-  def merge(that : Action) = SequenceAction(this, that)
-  
-  def undo(model : Model) = model //model add oldShapes
+  def undo(model : Model) = 
+    model.remove(newShapes.keys).add(oldShapes)
   
 }
 
 /**
  * Deletes a number of shapes.
  */
-@SerialVersionUID(-1408705883)
+@SerialVersionUID(-113196732)
 case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys
-
-  def merge(that : Action) = that match {
-    case CreateShape(i : Int, s : Shape) => DeleteShapes(shapes + (i -> s))
-    case CreateShapes(s : Map[Int, Shape]) => DeleteShapes(shapes ++ s)
-    case _ => SequenceAction(this, that)
-  }
 
   def undo(model : Model) = model add shapes
 }

@@ -48,8 +48,7 @@ sealed class Model(val shapes : Map[Int, Shape]) extends ImmutableModel[Int, Sha
 /**
  * The model of Siigna.
  */
-object Model extends ActionModel
-                with RemoteModel
+object Model extends RemoteActionModel
                 with SelectableModel
                 with SpatialModel[Int, Shape]
                 with MapProxy[Int, Shape] {
