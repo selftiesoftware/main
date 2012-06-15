@@ -48,7 +48,7 @@ protected[app] object RemoteController {
             // Successful get shape identifiers command
             case Get(ShapeIdentifier, value, _) => {
               try {
-                Model.setIdBank(value.get.asInstanceOf[Seq[Int]])
+                Model.addRemoteIds(value.get.asInstanceOf[Seq[Int]])
               } catch {
                 case e => Log.warning("Unknown input for shape identifiers: " + value)
               }

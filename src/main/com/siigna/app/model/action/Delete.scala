@@ -20,7 +20,19 @@ object Delete {
   }
   
   def apply(id : Int, part : ShapeSelector) {
-    Model execute DeleteShapePart(id, Model(id), part)
+    apply(Map[Int, ShapeSelector](id -> part))
+  }
+  
+  def apply(shapes : Map[Int, ShapeSelector]) {
+    val oldShapes = shapes.map(t => t._1 -> Model(t._1))
+    val newShapes = shapes.map(t => Model(t._1).delete(t._2)).flatten
+    
+    // Does the deletion result in new shapes?
+    if (newShapes.isEmpty) { // No - that's easy!
+      Model execute DeleteShapes(oldShapes)
+    } else { // Yes - now we need the magic
+      Model.executeWithIds(newShapes, DeleteShapeParts(oldShapes, _))
+    }
   }
   
   def apply(ids : Traversable[Int]) {
@@ -29,7 +41,7 @@ object Delete {
   
   def apply(selection : Selection) {
     Model deselect()
-    Model execute DeleteShapeParts(selection.parts)
+    apply(selection.parts)
   }
   
 }
@@ -83,41 +95,23 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
 }
 
 /**
- * Deletes a ShapeSelector.
+ * Deletes a part of a shape represented as a shape selector.
  */
-@SerialVersionUID(-1068568626)
-case class DeleteShapeParts(shapes : Map[Int, ShapeSelector]) extends Action {
-
-  private val oldShapes = shapes.map(t => t._1 -> Model(t._1))
+@SerialVersionUID(1143887988)
+case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) extends Action {
   
-  def execute(model : Model) = {/*
-    // Create a map of shapes with deleted parts
-    var xs = Map[Int, Shape]()
-    // Create a seq of shapes that are completely removed
-    var cs = Seq[Int]()
-    // Iterate through shapes
-    shapes.foreach(t => {
-      val (id, part) = t
-      val x = Model(id).delete(part)
-      if (x.isDefined) {
-        xs = xs + (id -> x.get)
-      } else cs = cs :+ id
-    })
-    // Replace the shapes in the model if defined
-    if (xs.isEmpty && cs.isEmpty) model
-    else {
-      model.remove(cs).add(xs)
-    }*/ model
-  }
+  def execute(model : Model) = 
+    model.remove(oldShapes.keys).add(newShapes)
   
-  def undo(model : Model) = model //model add oldShapes
+  def undo(model : Model) = 
+    model.remove(newShapes.keys).add(oldShapes)
   
 }
 
 /**
  * Deletes a number of shapes.
  */
-@SerialVersionUID(-1408705883)
+@SerialVersionUID(-113196732)
 case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys

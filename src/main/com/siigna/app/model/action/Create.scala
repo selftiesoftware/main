@@ -15,22 +15,41 @@ import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
 
 /**
-* An object that allows you to create one or multiple shapes.
+* An object that allows you to create one or more shapes.
 */
 object Create {
 
+  /**
+   * Creates a single shape.
+   * @param shape  The shape to create.
+   */
   def apply(shape : Shape) {
     Model.executeWithIds(Seq(shape), CreateShapes(_))
   }
 
+  /**
+   * Creates a single collection shape. This method is created to avoid collision with shapes : Traversable[Shape]
+   * @param collection  The CollectionShape to create
+   * @tparam T  The type of the entries in the shape.
+   */
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    apply(collection)
+    Model.executeWithIds(Seq(collection), CreateShapes(_))
   }
 
+  /**
+   * Creates several shapes.
+   * @param shape1  The first shape to create.
+   * @param shape2  The second shape to create.
+   * @param shapes  Any other shapes (optional).
+   */
   def apply(shape1 : Shape, shape2 : Shape, shapes : Shape*) {
     apply(Iterable(shape1, shape2) ++ shapes)
   }
 
+  /**
+   * Creates a number of shapes.
+   * @param shapes  The shapes to create.
+   */
   def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
       Model.executeWithIds(shapes.toIterable, CreateShapes(_))
