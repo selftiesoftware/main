@@ -65,11 +65,11 @@ trait MutableModel extends SelectableModel {
 
       // Execute action
       if (transformAction.isDefined && attributeAction.isDefined) {
-        Model execute transformAction.get.merge(attributeAction.get)
+        Drawing execute transformAction.get.merge(attributeAction.get)
       } else if (transformAction.isDefined) {
-        Model execute transformAction.get
+        Drawing execute transformAction.get
       } else if (attributeAction.isDefined) {
-        Model execute attributeAction.get
+        Drawing execute attributeAction.get
       }
       
       selection = None
@@ -81,7 +81,7 @@ trait MutableModel extends SelectableModel {
    * @param id  The id of the shape.
    */
   override def select(id : Int) {
-    select(Selection(id, Model(id).getPart))
+    select(Selection(id, Drawing(id).getPart))
   }
   
   /**

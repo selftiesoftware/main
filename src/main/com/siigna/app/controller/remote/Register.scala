@@ -25,4 +25,4 @@ import com.siigna.app.model.server.User
  * @param client  The unique client associated with this Siigna instance. The default value is overridden by the server.
  */
 @SerialVersionUID(2137272511)
-case class Register(user : User, client : Client = Client()) extends RemoteCommand
+case class Register(user : User, drawingId : Option[Int], client : Client = Client()) extends RemoteCommand

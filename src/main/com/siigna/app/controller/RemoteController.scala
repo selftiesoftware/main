@@ -13,10 +13,8 @@ package com.siigna.app.controller
 
 import actors.AbstractActor
 import com.siigna.util.logging.Log
-import com.siigna.app.Siigna
-import com.siigna.app.model.server.Drawing
+import com.siigna.app.model.Drawing
 import remote._
-import com.siigna.app.model.Model
 
 /**
  * An object whose sole responsibility is to handle incoming and outgoing
@@ -48,7 +46,7 @@ protected[app] object RemoteController {
             // Successful get shape identifiers command
             case Get(ShapeIdentifier, value, _) => {
               try {
-                Model.addRemoteIds(value.get.asInstanceOf[Seq[Int]])
+                Drawing.addRemoteIds(value.get.asInstanceOf[Seq[Int]])
               } catch {
                 case e => Log.warning("Unknown input for shape identifiers: " + value)
               }
@@ -64,9 +62,6 @@ protected[app] object RemoteController {
 
               // Get shape-ids for the id-bank
               Get(ShapeIdentifier, Some(4), r.client)
-
-              // Store the drawing
-              Siigna.drawing = r.client.drawing
               
               Log.debug("RemoteController: Sucessfully registered client: " + client)
             }
@@ -74,9 +69,9 @@ protected[app] object RemoteController {
             // Remote actions
             case RemoteAction(_, action, undo) => {
               if (undo) {
-                Model undo Some(action)
+                Drawing undo Some(action)
               } else {
-                Model execute(action, false)
+                Drawing execute(action, false)
               }
             }
             case _ => Log.warning("RemoteController: Received unknown success: " + success)

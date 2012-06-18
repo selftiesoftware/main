@@ -67,7 +67,7 @@ trait SelectableModel {
    * Select every shape in the Model.
    */
   def selectAll() {
-    model select Selection(Model.map(i => i._1 -> i._2.getPart))
+    model select Selection(Drawing.map(i => i._1 -> i._2.getPart))
   }
 
 }

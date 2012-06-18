@@ -12,13 +12,13 @@
 package com.siigna.app.view
 
 import com.siigna.util.Implicits._
-import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
 import com.siigna.app.model.shape.{Shape, TextShape, PolylineShape}
 import java.awt.image.{BufferedImage, VolatileImage}
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * The View. The view is responsible for painting the appropriate
@@ -96,7 +96,7 @@ object View extends Canvas with Runnable {
       if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
 
     //
-    val offScreenBoundary = Model.boundary.transform(View.virtual)
+    val offScreenBoundary = Drawing.boundary.transform(View.virtual)
     val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, screen.width),
                                    confine(offScreenBoundary.topLeft.y, 0, getSize.height))
     val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, screen.width),
@@ -161,8 +161,8 @@ object View extends Canvas with Runnable {
       // TODO: Cache this
       try {
         val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
-        Model.selection.foreach(_.foreach(i => {
-          Model(i._1).getVertices(i._2).foreach(p => {
+        Drawing.selection.foreach(_.foreach(i => {
+          Drawing(i._1).getVertices(i._2).foreach(p => {
             graphics.draw(transformation.transform(p), color)
           })
         }))
@@ -250,12 +250,12 @@ object View extends Canvas with Runnable {
         g.g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
         // Draw model
-        if (Model.size > 0) try {
+        if (Drawing.size > 0) try {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-          Model(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Model
+          Drawing(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
         } catch {
           case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-          case e => Log.error("View: Unable to draw Model: "+e)
+          case e => Log.error("View: Unable to draw Drawing: "+e)
         }
 
         // Draw the boundary shape
@@ -271,7 +271,7 @@ object View extends Canvas with Runnable {
       cachedForegroundImage = Some(image)
     } catch {
       case e : NullPointerException => Log.info("View: Error fetching volatile image - probably not ready yet.")
-      case e => Log.warning("View: Unknown error while painting the model: ", e)
+      case e => Log.warning("View: Unknown error while painting the Drawing: ", e)
     }
   }
 
@@ -404,7 +404,7 @@ object View extends Canvas with Runnable {
    * Swing), where it's handy to wait until all changes on a
    * layer has been performed before server the whole thing all over. But
    * for a program such as Siigna where the main task is to actually draw a
-   * Model and modules, we don't need to put the task in line more than we need
+   * Drawing and modules, we don't need to put the task in line more than we need
    * to just get it done. Furthermore this jumping back and forth from
    * repaint-update-paint can be yet another source of double-buffering
    * , since <code>update</code> can cause irregular calls to <code>paint</code>
@@ -436,7 +436,7 @@ object View extends Canvas with Runnable {
     // Calculates the difference between the size of the screen and the size of the
     // boundary. This is then multiplied on the zoom level to give the exact
     // scale for the TransformationMatrix.
-    val screenFactor = View.screen.width / Model.boundary.transform(virtual).width
+    val screenFactor = View.screen.width / Drawing.boundary.transform(virtual).width
     val scaleFactor  = screenFactor * View.zoom
 
     TransformationMatrix(View.center, scaleFactor).flipY

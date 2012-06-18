@@ -11,12 +11,12 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.{ShapeSelector, Shape}
-import com.siigna.app.model.{Selection, Model}
+import com.siigna.app.model.{Drawing, Model, Selection}
 
 object Delete {
   
   def apply(id : Int) {
-    Model execute DeleteShape(id, Model(id))
+    Drawing execute DeleteShape(id, Drawing(id))
   }
   
   def apply(id : Int, part : ShapeSelector) {
@@ -24,23 +24,23 @@ object Delete {
   }
   
   def apply(shapes : Map[Int, ShapeSelector]) {
-    val oldShapes = shapes.map(t => t._1 -> Model(t._1))
-    val newShapes = shapes.map(t => Model(t._1).delete(t._2)).flatten
+    val oldShapes = shapes.map(t => t._1 -> Drawing(t._1))
+    val newShapes = shapes.map(t => Drawing(t._1).delete(t._2)).flatten
     
     // Does the deletion result in new shapes?
     if (newShapes.isEmpty) { // No - that's easy!
-      Model execute DeleteShapes(oldShapes)
+      Drawing execute DeleteShapes(oldShapes)
     } else { // Yes - now we need the magic
-      Model.executeWithIds(newShapes, DeleteShapeParts(oldShapes, _))
+      Drawing.executeWithIds(newShapes, DeleteShapeParts(oldShapes, _))
     }
   }
   
   def apply(ids : Traversable[Int]) {
-    Model execute DeleteShapes(ids.map(i => i -> Model(i)).toMap)
+    Drawing execute DeleteShapes(ids.map(i => i -> Drawing(i)).toMap)
   }
   
   def apply(selection : Selection) {
-    Model deselect()
+    Drawing deselect()
     apply(selection.parts)
   }
   
