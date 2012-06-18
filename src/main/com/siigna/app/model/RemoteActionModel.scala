@@ -17,8 +17,7 @@ import com.siigna.app.Siigna
 import shape.Shape
 import com.siigna.util.logging.Log
 import com.siigna.app.view.View
-import java.io.Externalizable
-import com.siigna.util.collection.Attributes
+import java.io._
 
 /**
  * <p>A RemoteActionModel with the responsibilities to keep track of actions (and information regarding
@@ -26,6 +25,7 @@ import com.siigna.util.collection.Attributes
  * <p>An example is the unique shape id necessary for each shape, which can not be served locally before the
  * server has approved the id. To solve this the action is only applied locally, but not sent remotely.</p>
  */
+@SerialVersionUID(-1921442500)
 class RemoteActionModel extends ActionModel with Externalizable {
 
   /**
@@ -129,7 +129,7 @@ class RemoteActionModel extends ActionModel with Externalizable {
     // but not if it is volatile or remote (no need to store non-remote)
     if (action.isInstanceOf[LocalAction] || (!action.isInstanceOf[VolatileAction] && remote)) {
       executed +:= action
-      undone = Seq()
+      undone = Vector()
     }
 
     // Render the view
@@ -236,6 +236,30 @@ class RemoteActionModel extends ActionModel with Externalizable {
     } else {
       Log.warning("Model: No more actions to undo.")
     }
+  }
+
+  def writeExternal(out : ObjectOutput) {
+    out.writeObject(model.shapes)
+    out.writeObject(executed)
+  }
+
+  def readExternal(in : ObjectInput) {
+    var fail = false
+    try {
+      val shapes = in.readObject()
+      model = new Model(shapes.asInstanceOf[Map[Int, Shape]])
+    } catch {
+      case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
+    }
+
+    try {
+      val actions = in.readObject()
+      executed = actions.asInstanceOf[Seq[Action]]
+    } catch {
+      case e => Log.error("Model: Failed to read actions from data.", e); fail = true
+    }
+
+    if (!fail) Log.success("Model: Sucessfully read data.")
   }
   
 }
