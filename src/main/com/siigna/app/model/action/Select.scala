@@ -11,9 +11,9 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.app.model.{Selection, Model}
 import com.siigna.util.geom.{Rectangle2D, Vector2D}
 import com.siigna.app.model.shape.{ShapeSelector, EmptySelector, Shape}
+import com.siigna.app.model.{Drawing, Selection, Model}
 
 /**
  * An object that provides shortcuts to select objects in the model. Selections are crucial
@@ -44,27 +44,27 @@ object Select {
    * @param id  The ID of the shape to getPart.
    */
   def apply(id : Int) {
-    Model select id
+    Drawing select id
   }
   
   def apply(id : Int, point : Vector2D) {
-    Model.select(id, Model(id).getPart(point))
+    Drawing.select(id, Drawing(id).getPart(point))
   }
   
   def apply(id : Int, r : Rectangle2D) {
-    Model.select(id, Model(id).getPart(r))
+    Drawing.select(id, Drawing(id).getPart(r))
   }
   
   def apply(r : Rectangle2D, enclosed : Boolean = true) {
     val filtered = if (enclosed) {
-      Model(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
+      Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
     } else {
       var parts = Map[Int, ShapeSelector]()
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-      Model(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
+      Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
       parts
     }
-    Model.select(Selection(filtered))
+    Drawing.select(Selection(filtered))
   }
 
   /**
@@ -72,7 +72,7 @@ object Select {
    * @param ids  The id's of the shapes to select.
    */
   def apply(ids : Int*) {
-    Model select ids
+    Drawing select ids
   }
 
   /**
@@ -80,7 +80,7 @@ object Select {
    * @param ids The shapes to select.
    */
   def apply(ids : Traversable[Int]) {
-    Model select ids
+    Drawing select ids
   }
 
 }

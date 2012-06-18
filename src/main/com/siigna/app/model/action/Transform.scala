@@ -10,9 +10,9 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -25,7 +25,7 @@ object Transform {
    * @param transformation  The transformation to apply
    */
   def apply(id : Int, transformation : TransformationMatrix) {
-    Model execute TransformShape(id, transformation)
+    Drawing execute TransformShape(id, transformation)
   }
 
   /**
@@ -35,7 +35,7 @@ object Transform {
    * @param f  The function that returns the new shape, given a transformation matrix. 
    */
   def apply(id : Int, transformation : TransformationMatrix, f : TransformationMatrix => Shape) {
-    Model execute TransformShape(id, transformation, Some(f))
+    Drawing execute TransformShape(id, transformation, Some(f))
   }
 
   /**
@@ -44,8 +44,8 @@ object Transform {
    * @param transformation The transformation to apply
    */
   def apply(ids : Traversable[Int], transformation : TransformationMatrix) {
-    val m = ids.map(id => (id -> Model(id))).toMap
-    Model execute TransformShapes(m, transformation)
+    val m = ids.map(id => (id -> Drawing(id))).toMap
+    Drawing execute TransformShapes(m, transformation)
   }
 
   /**
@@ -55,9 +55,9 @@ object Transform {
    */
   def apply[T](shapes : Map[Int, T], transformation : TransformationMatrix)(implicit m : Manifest[T]) {
     if (m <:< manifest[ShapeSelector]) { // Match shape selectors
-      Model execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapeSelector]], transformation)
+      Drawing execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapeSelector]], transformation)
     } else if (m <:< manifest[Shape]) { // Match shapes
-      Model execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]], transformation)
+      Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]], transformation)
     } // If no match, do nothing
   }
 }
@@ -93,14 +93,14 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
+    model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
   // TODO: Implement and optimize
   //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    model add shapes.map(e => (e._1 -> Model(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
+    model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
   }
   
 }

@@ -10,9 +10,9 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
+import com.siigna.app.model.{Drawing, Model}
 
 /**
 * An object that allows you to create one or more shapes.
@@ -24,7 +24,7 @@ object Create {
    * @param shape  The shape to create.
    */
   def apply(shape : Shape) {
-    Model.executeWithIds(Seq(shape), CreateShapes(_))
+    Drawing.executeWithIds(Seq(shape), CreateShapes(_))
   }
 
   /**
@@ -33,7 +33,7 @@ object Create {
    * @tparam T  The type of the entries in the shape.
    */
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    Model.executeWithIds(Seq(collection), CreateShapes(_))
+    Drawing.executeWithIds(Seq(collection), CreateShapes(_))
   }
 
   /**
@@ -52,7 +52,7 @@ object Create {
    */
   def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
-      Model.executeWithIds(shapes.toIterable, CreateShapes(_))
+      Drawing.executeWithIds(shapes.toIterable, CreateShapes(_))
     } else if (shapes.size == 1) {
       apply(shapes.head)
     } else {

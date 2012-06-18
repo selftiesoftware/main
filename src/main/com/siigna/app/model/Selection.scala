@@ -34,7 +34,7 @@ import collection.mutable.BitSet
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
-case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with MapProxy[Int, ShapeSelector] {
+case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes with MapProxy[Int, ShapeSelector] {
 
   type T = Selection
 
@@ -55,7 +55,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
    * @param t  The transformation matrix to be applied.
    */
   def apply(t : TransformationMatrix) = {
-    parts.map(p => Model(p._1).apply(p._2)).collect{case Some(p : PartialShape) => p.apply(t) }
+    parts.map(p => Drawing(p._1).apply(p._2)).collect{case Some(p : PartialShape) => p.apply(t) }
   }
 
   /**
@@ -67,7 +67,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
    * The boundary of the underlying ImmutableShapes.
    * @return A Rectangle2D.
    */
-  def boundary = parts.map(s => Model(s._1)).foldLeft(Model(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
+  def boundary = parts.map(s => Drawing(s._1)).foldLeft(Drawing(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
 
   /**
    * Calculates the distance from the vector and to the underlying Shape.
@@ -75,7 +75,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
    * @param scale  The scale in which we are calculating.
    * @return  The length from the closest point of this shape to the point.
    */
-  def distanceTo(point: Vector2D, scale: Double) = parts.map(s => Model(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
+  def distanceTo(point: Vector2D, scale: Double) = parts.map(s => Drawing(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
 
   /**
    * Returns the current transformation applied to the shape.
@@ -89,7 +89,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends ShapeLike with 
    */
   def shapes : Map[Int, Shape] = {
     parts.map((t : (Int, ShapeSelector)) => {
-      (t._1 -> Model(t._1).setAttributes(attributes))
+      (t._1 -> Drawing(t._1).setAttributes(attributes))
     })
   }
   

@@ -11,8 +11,8 @@
 package com.siigna.app
 
 import controller.{Controller, RemoteController, Client}
-import model.Model
-import model.server.{User, Drawing}
+import model.server.User
+import model._
 import view._
 import com.siigna.util.geom._
 import event.Track
@@ -28,13 +28,6 @@ import java.awt.{Dimension, Cursor}
  * <p>See {http://github.com/siigna/main/wiki} for more information</p>
  */
 object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes {
-
-  /**
-   * The active drawing for this client. The drawing does not necessarily contain all
-   * the relevant information and can thus be an [[com.siigna.app.model.server.InvalidDrawing]].
-   * Otherwise the drawing is an instance of [[com.siigna.app.model.server.ValidDrawing]].
-   */
-  var drawing : Drawing = Drawing()
 
   /**
    * The active display, if any.
@@ -142,7 +135,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * Returns the paper scale of the current model.
    */
-  def paperScale : Int = Model.boundaryScale
+  def paperScale : Int = Drawing.boundaryScale
 
   /**
    * The selection-distance.

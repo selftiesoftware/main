@@ -36,7 +36,7 @@ import com.siigna.util.geom._
  * The shape hierarchy looks like this:
  * <pre>
  *
- *             ShapeLike
+ *             HasAttributes
  *                 |
  *                 +--------+ Selection
  *                 |

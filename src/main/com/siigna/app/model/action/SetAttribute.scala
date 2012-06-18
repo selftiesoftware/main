@@ -11,8 +11,8 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
 import com.siigna.util.collection.Attributes
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * Sets a single attribute on a number of shapes to the given value.
@@ -23,17 +23,17 @@ import com.siigna.util.collection.Attributes
 @SerialVersionUID(-955468992)
 case class SetAttribute(ids : Traversable[Int], name : String, value : Any) extends Action {
   
-  val oldValues : Map[Int, Option[Any]] = ids.map(i => i -> Model(i).attributes.get(name)).toMap
+  val oldValues : Map[Int, Option[Any]] = ids.map(i => i -> Drawing(i).attributes.get(name)).toMap
   
-  def execute(model: Model) = model.add(ids.map(i => i -> Model(i).setAttribute(name, value)).toMap)
+  def execute(model : Model) = model.add(ids.map(i => i -> Drawing(i).setAttribute(name, value)).toMap)
 
   //def merge(that: Action) = throw new UnsupportedOperationException("Not yet implemented.")
 
   def undo(model: Model) = model.add(oldValues.map(i => {
     i._1 -> (if (i._2.isDefined) {
-      Model(i._1).setAttribute(name, i._2)
+      Drawing(i._1).setAttribute(name, i._2)
     } else {
-      Model(i._1).removeAttribute(name)
+      Drawing(i._1).removeAttribute(name)
     })
   }))
   
@@ -47,14 +47,14 @@ case class SetAttribute(ids : Traversable[Int], name : String, value : Any) exte
 @SerialVersionUID(-1003577121)
 case class SetAttributes(ids : Traversable[Int], attributes : Attributes) extends Action {
 
-  val oldValues : Map[Int, Attributes] = ids.map(i => i -> Model(i).attributes).toMap
+  val oldValues : Map[Int, Attributes] = ids.map(i => i -> Drawing(i).attributes).toMap
 
-  def execute(model: Model) = model.add(ids.map(i => i -> Model(i).setAttributes(attributes)).toMap)
+  def execute(model: Model) = model.add(ids.map(i => i -> Drawing(i).setAttributes(attributes)).toMap)
 
   //def merge(that: Action) = throw new UnsupportedOperationException("Not yet implemented.")
 
   def undo(model: Model) = model.add(oldValues.map(i => {
-    i._1 -> Model(i._1).setAttributes(i._2)
+    i._1 -> Drawing(i._1).setAttributes(i._2)
   }))
 
 }
