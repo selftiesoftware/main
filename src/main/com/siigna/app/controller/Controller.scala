@@ -17,14 +17,11 @@ import com.siigna.app.view.event.{Event, ModuleEvent}
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
-import com.siigna.app.model.action.Action
 import actors.Actor
-import com.siigna.app.model.Model
 import remote._
 import actors.remote.RemoteActor._
-import actors.remote.Node._
 import actors.remote.{RemoteActor, Node}
-import com.siigna.app.model.server.{Drawing, User}
+import com.siigna.app.model.Drawing
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -83,12 +80,9 @@ object Controller extends Actor {
     
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
-    if (Siigna.user.isDefined && Siigna.drawing.id.isDefined) {
-      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Siigna.drawing.id.get)
-      Register(Siigna.user.get, Client(0, Drawing(Siigna.drawing.id.get)))
-    } else if (Siigna.user.isDefined) {
-      Log.debug("Controller: Registering with user " + Siigna.user)
-      Register(Siigna.user.get, Client())
+    if (Siigna.user.isDefined) {
+      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Drawing.attributes.int("id"))
+      Register(Siigna.user.get, Drawing.attributes.int("id"), Client(0))
     }
 
     // TEST!!!!

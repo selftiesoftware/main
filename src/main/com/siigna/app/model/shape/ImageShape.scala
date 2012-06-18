@@ -102,7 +102,7 @@ object ImageShape {
    * class and saving the result.
    * TODO: Refactorize!
    */
-  def fromShape(rawShape : ShapeLike) = {
+  def fromShape(rawShape : HasAttributes) = {
     // Force the shape to draw from (0, 0) on the canvas.
     // Uses bottomLeft, since the shape is being flipped when drawn.
     val distanceToZero = - rawShape.boundary.bottomLeft

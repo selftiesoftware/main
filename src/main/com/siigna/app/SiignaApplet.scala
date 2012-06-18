@@ -21,7 +21,8 @@ import com.siigna.util.logging.Log
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
 import java.awt.{BorderLayout}
-import model.server.{Drawing, User}
+import model.Drawing
+import model.server.User
 import view.View
 
 /**
@@ -77,7 +78,7 @@ class SiignaApplet extends Applet {
       if (drawingId != null) try {
         val id = drawingId.toInt
         Log.debug("Applet: Found drawing: " + id)
-        Siigna.drawing = Drawing(id)
+        Drawing.setAttribute("id", id)
       }
     } catch { case _ => }
 

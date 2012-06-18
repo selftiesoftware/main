@@ -11,15 +11,13 @@
 
 package com.siigna.app.model
 
-import shape.ShapeLike
-
 /**
  * An immutable model containing shapes
  * @tparam Key  The keys in the Model.
  * @tparam Value  The shapes in the model.
  */
-trait ImmutableModel[Key, Value <: ShapeLike] extends ModelBuilder[Key, Value]
-                                             with GroupableModel[Key, Value] {
+trait ImmutableModel[Key, Value <: HasAttributes] extends ModelBuilder[Key, Value]
+                                                 with GroupableModel[Key, Value] {
 
   /**
    * Add a shape to the model.
