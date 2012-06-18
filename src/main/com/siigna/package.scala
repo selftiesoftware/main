@@ -32,7 +32,7 @@ package object siigna extends com.siigna.util.Implicits {
   lazy val Controller = com.siigna.app.controller.Controller
 
   // Model
-  val Model = com.siigna.app.model.Model
+  val Drawing = com.siigna.app.model.Drawing
 
   type Selection = com.siigna.app.model.Selection
   val Selection = com.siigna.app.model.Selection

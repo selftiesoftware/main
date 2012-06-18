@@ -14,11 +14,11 @@ package com.siigna.app.view
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._
 import java.awt.geom.{Arc2D => JavaArc}
-import com.siigna.app.model.Model
 import com.siigna.app.model.shape._
 import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -122,7 +122,7 @@ class Graphics(val g : Graphics2D)
         case s : TextShape        => {
           val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
           val shape : TextShape = if (adjustToScale) {
-            s.copy(scale = s.scale * Model.boundaryScale)
+            s.copy(scale = s.scale * Drawing.boundaryScale)
           } else s
           // Draw!
           drawText(shape.layout, shape.position - shape.boundaryPosition - shape.alignmentPosition)

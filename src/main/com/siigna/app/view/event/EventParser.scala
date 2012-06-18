@@ -13,12 +13,12 @@ package com.siigna.app.view.event
 
 import java.awt.event.{KeyEvent => AWTKeyEvent}
 
-import com.siigna.app.model.Model
 import com.siigna.app.Siigna
 import com.siigna.app.model.shape.{Shape}
 import com.siigna.app.view.Graphics
 import collection.parallel.immutable.{ParMap, ParIterable}
 import com.siigna.util.geom.{Vector2D, TransformationMatrix}
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * An <code>EventParser</code> that analyses a given list of events, and returns an
@@ -158,7 +158,7 @@ class EventParser {
 
     if (enabled) {
       // Perform 2D query
-      val model = Model(Siigna.mousePosition, margin)
+      val model = Drawing(Siigna.mousePosition, margin)
 
       // Parse the track
       var newEvent = track.parse(events, model)

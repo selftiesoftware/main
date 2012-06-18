@@ -11,29 +11,22 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.app.Siigna
-import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{TransformationMatrix, Rectangle2D, Vector2D}
-import com.siigna.app.view.View
+import com.siigna.app.model.HasAttributes
+import com.siigna.util.geom.{TransformationMatrix, Vector2D, Rectangle2D}
 
 /**
  * <p>The highest trait for objects that are shape-like in Siigna.
- * Shape-like objects have attributes, a Minimum-Bounding Rectangle, information
- * about its distance to other objects and an ability to be transformed with
- * a [[com.siigna.util.geom.TransformationMatrix]].</p>
- *
- * <p>ShapeLike has been made to describe items that contains spatial information
- * like Shapes, but should not be stored or otherwise treated like a regular Shape.
- * As an example a [[com.siigna.app.model.Selection]] extends ShapeLike.</p>
+  * Shape-like objects have attributes, a Minimum-Bounding Rectangle, information
+  * about its distance to other objects and an ability to be transformed with
+  * a [[com.siigna.util.geom.TransformationMatrix]].</p>
+  *
+  * <p>HasAttributes has been made to describe items that contains spatial information
+  * like Shapes, but should not be stored or otherwise treated like a regular Shape.
+  * As an example a [[com.siigna.app.model.Selection]] extends HasAttributes.</p>
  */
-trait ShapeLike {
+trait ShapeLike extends HasAttributes {
 
   type T <: ShapeLike
-
-  /**
-   * The attributes of the shape.
-   */
-  def attributes : Attributes
 
   /**
    * Returns a rectangle that includes the entire shape.
@@ -46,50 +39,7 @@ trait ShapeLike {
   def distanceTo(point : Vector2D, scale : Double) : Double
 
   /**
-   * Removes one attribute from the set of current attributes, if it exists.
-   *
-   * @param attribute  The attribute to remove.
-   * @return  A ShapeLike with the attribute removed.
-   */
-  def removeAttribute(attribute : String) = setAttributes(attributes - attribute)
-
-  /**
-   * Remotes a set of attributes from the current attributes, if they exist.
-   * @param attributes  The attributes to remove
-   * @return  A ShapeLike with the attributes removed.
-   */
-  def removeAttributes(attributes : Traversable[String]) = setAttributes(this.attributes.--(attributes))
-
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attribute  the new attribute to merge in.
-   * @return  a shape with the updated attributes.
-   */
-  def setAttribute(attribute : (String, Any)) = setAttributes(attributes + attribute)
-
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attributes  the new attributes to merge in.
-   * @return  a shape with the updated attributes.
-   */
-  def setAttributes(attributes : Attributes) : T
-  
-  /**
-   * Merge the new attributes in with the existing ones, eventually overwriting
-   * attributes with new values.
-   *
-   * @param  attributes  the new attributes to merge in.
-   * @return  a shape with the updated attributes.
-   */
-  def setAttributes(attributes : (String, Any)*) : T = setAttributes(this.attributes ++ attributes)
-
-  /**
    * Applies a transformation to the shape.
    */
-  def transform(transformation : TransformationMatrix) : T
-  
+  def transform(transformation: TransformationMatrix): T
 }
