@@ -15,11 +15,21 @@ import com.siigna.app.model.action.Action
 import shape.Shape
 import java.io.{ObjectInput, ObjectOutput, Externalizable}
 import com.siigna.util.logging.Log
+import com.siigna.util.collection.Attributes._
+import com.siigna.util.collection.Attributes
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends Externalizable {
+trait ActionModel extends HasAttributes {
+
+  type T = ActionModel
+
+  /**
+   * The attributes of the model containing name, title, owner and other attributes
+   * fetched from the server, necessary for Siigna.
+   */
+  var attributes = Attributes()
 
   /**
    * The underlying immutable model of Siigna.
@@ -48,6 +58,11 @@ trait ActionModel extends Externalizable {
    * <p>Redo an action, by executing the last function that's been undone.</p>
    */
   def redo()
+
+  def setAttributes(attributes : Attributes) = {
+    this.attributes = attributes
+    this
+  }
 
   /**
    * <p>Undo an action and put it in the list of undone actions.</p>

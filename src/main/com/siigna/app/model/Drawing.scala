@@ -26,14 +26,6 @@ object Drawing extends RemoteActionModel
                 with MapProxy[Int, Shape]
                 with HasAttributes {
 
-  type T = this.type
-
-  /**
-   * The attributes of the model containing name, title, owner and other attributes
-   * fetched from the server, necessary for Siigna.
-   */
-  var attributes = Attributes()
-
   /**
    * The boundary from the current content of the Model.
    * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
@@ -128,11 +120,6 @@ object Drawing extends RemoteActionModel
    * @return  Some(Selection) if a selection is active or None if nothing has been selected
    */
   @transient def selection : Option[Selection] = model.selection
-
-  def setAttributes(attributes : Attributes) = {
-    this.attributes = attributes
-    this
-  }
 
   /**
    * The shapes currently in the model.
