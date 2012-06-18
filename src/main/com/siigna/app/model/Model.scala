@@ -37,9 +37,9 @@ import com.siigna.app.controller.remote.{Get, RemoteAction}
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
 sealed class Model(val shapes : Map[Int, Shape]) extends ImmutableModel[Int, Shape]
-                                                            with MutableModel
-                                                            with SpatialModel[Int, Shape]
-                                                            with ModelBuilder[Int, Shape] {
+                                                    with MutableModel
+                                                    with SpatialModel[Int, Shape]
+                                                    with ModelBuilder[Int, Shape] {
 
   def build(coll : Map[Int, Shape]) = new Model(coll)
 
