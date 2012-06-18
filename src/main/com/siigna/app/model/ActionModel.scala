@@ -13,10 +13,9 @@ package com.siigna.app.model
 
 import com.siigna.app.model.action.Action
 import shape.Shape
-import java.io.{ObjectInput, ObjectOutput, Externalizable}
 import com.siigna.util.logging.Log
-import com.siigna.util.collection.Attributes._
 import com.siigna.util.collection.Attributes
+import java.io.{Externalizable, ObjectInput, ObjectOutput}
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -68,29 +67,5 @@ trait ActionModel extends HasAttributes {
    * <p>Undo an action and put it in the list of undone actions.</p>
    */
   def undo()
-
-  def writeExternal(out : ObjectOutput) {
-    out.writeObject(model.shapes)
-    out.writeObject(executed)
-  }
-
-  def readExternal(in : ObjectInput) {
-    var fail = false
-    try {
-      val shapes = in.readObject()
-      model = new Model(shapes.asInstanceOf[Map[Int, Shape]])
-    } catch {
-      case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
-    }
-
-    try {
-      val actions = in.readObject()
-      executed = actions.asInstanceOf[Seq[Action]]
-    } catch {
-      case e => Log.error("Model: Failed to read actions from data.", e); fail = true
-    }
-
-    if (!fail) Log.success("Model: Sucessfully read data.")
-  }
 
 }

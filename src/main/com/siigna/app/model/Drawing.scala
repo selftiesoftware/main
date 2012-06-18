@@ -123,9 +123,9 @@ object Drawing extends RemoteActionModel
 
   /**
    * The shapes currently in the model.
-   * @return A ParMap containing shapes.
+   * @return A Map containing shapes.
    */
-  @transient def shapes = model.shapes
+  @transient override def shapes = model.shapes
 
   //------------- Required by the MapProxy trait -------------//
   @transient def self = model.shapes
