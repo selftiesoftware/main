@@ -11,12 +11,14 @@
 
 package com.siigna.app.model
 
-import action.{VolatileAction, Action, CreateShape, DeleteShape}
+import action.{VolatileAction, Action}
 import com.siigna.app.controller.remote._
 import com.siigna.app.Siigna
 import shape.Shape
 import com.siigna.util.logging.Log
 import com.siigna.app.view.View
+import java.io.Externalizable
+import com.siigna.util.collection.Attributes
 
 /**
  * <p>A RemoteActionModel with the responsibilities to keep track of actions (and information regarding
@@ -24,7 +26,7 @@ import com.siigna.app.view.View
  * <p>An example is the unique shape id necessary for each shape, which can not be served locally before the
  * server has approved the id. To solve this the action is only applied locally, but not sent remotely.</p>
  */
-trait RemoteActionModel extends ActionModel {
+class RemoteActionModel extends ActionModel with Externalizable {
 
   /**
    * An action that is only executed locally.
