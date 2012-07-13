@@ -14,9 +14,9 @@ package com.siigna.app.model.action
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.Spec
 import com.siigna.util.geom.Vector2D
-import com.siigna.app.model.Model
 import com.siigna.app.model.shape.{Shape, LineShape}
 import collection.parallel.immutable.{ParMap, ParHashMap}
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * A test for the Create object and associated classes
@@ -86,7 +86,7 @@ class CreateTest extends Spec with ShouldMatchers {
 
     it("can create a single shape") {
       Create(line)
-      Model.shapes should equal(ParMap(0 -> line))
+      Drawing.shapes should equal(Map(0 -> line))
     }
 
   }

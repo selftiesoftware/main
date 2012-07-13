@@ -40,15 +40,10 @@ class SiignaApplet extends Applet {
   private var mouseButtonMiddle = false
   private var mouseButtonRight  = false
 
-  private val paintThread = new Thread(View, "Siigna view")
-
   /**
    * Closes down relevant actors and destroys the applet.
    */
   override def destroy() {
-    // Put down the paint loop
-    paintThread.interrupt()
-
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
 
@@ -121,9 +116,6 @@ class SiignaApplet extends Applet {
 
     // Start the controller - ends up with calling act() method in Controller.
     Controller.start()
-
-    // Start the paint-loop
-    paintThread.start()
 
     // Preload modules
     Preload('Default)
@@ -233,6 +225,8 @@ class SiignaApplet extends Applet {
       case MouseMove  (point, _, _) => Some(MouseMove(toVirtual(point), button, keys))
       case _ => Log.error("Did not expect event: " + event); None
     }
+    
+    View.repaint();
 
     // Dispatch the event if it wasn't caught above
     if (option.isDefined) dispatchEvent(option.get)
