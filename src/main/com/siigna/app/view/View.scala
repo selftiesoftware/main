@@ -25,7 +25,7 @@ import com.siigna.app.model.{Drawing, Model}
  * content, and transforming the zoom scale and the pan vector.
  * TODO: Cache(?)
  */
-object View extends Canvas with Runnable {
+object View extends Canvas {
 
   /**
    * A background image that can be re-used to draw as background on the canvas.
@@ -129,7 +129,7 @@ object View extends Canvas with Runnable {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
-  def draw(graphicsPanel : AWTGraphics) { if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
+  override def paint(graphicsPanel : AWTGraphics) { if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = virtual
 
@@ -307,61 +307,6 @@ object View extends Canvas with Runnable {
       cachedBackgroundImage = Some(image)
     }
   }
-
- /**
-   * The active rendering-loop. Avoids paint-events from native Java.
-   * See: <a href="http://download.oracle.com/javase/tutorial/fullscreen/rendering.html">download.oracle.com/javase/tutorial/fullscreen/rendering.html</a>.
-   */
-  override def run() { try {
-    // State that we're initiating
-    Log.success("View: Initiating paint-loop.")
-
-    // Create peer or die trying!
-    try {
-      View.addNotify()
-    } catch {
-      case _ => {
-        try {
-          Thread.sleep(100)
-          View.addNotify()
-        } catch {
-          case _ => {
-            try {
-              Thread.sleep(1000)
-              View.addNotify()
-            } catch {
-              case _ => System.exit(-1) // Die!
-            }
-          }
-        }
-      }
-    }
-
-    // Create a buffer strategy of 2
-    View.createBufferStrategy(2)
-
-    // Start the loop
-    while(true) {
-      try {
-        if (isShowing) {
-          // Retrieve the graphics object from the buffer strategy
-          val graphics = getBufferStrategy.getDrawGraphics
-          draw(graphics)
-          graphics.dispose()
-          getBufferStrategy.show()
-        }
-      } catch {
-        case e => Log.warning("View: Could not create graphics-object.")
-      }
-      
-      // Terminate the thread if it's been interrupted
-      if (Thread.currentThread().isInterrupted)
-        throw new InterruptedException()
-    }
-  } catch {
-    case e : InterruptedException => Log.info("View has been terminated.")
-    case e => Log.error("View has been terminated with unexpected error.", e)
-  } }
 
   /**
    * The screen as a rectangle, given in physical coordinates.
