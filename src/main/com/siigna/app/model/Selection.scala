@@ -42,26 +42,21 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    * Stores a private transformation matrix that indicates the translation applied to the
    * Selection since creation.
    */
-  private var transformation : TransformationMatrix = TransformationMatrix()
+  var transformation : TransformationMatrix = TransformationMatrix()
 
   /**
-   * Stores a private attribute variable with values that have been applied to the Selection since
+   * Stores the attributes variable with values that have been applied to the Selection since
    * creation.
    */
-  private var attribute : Attributes = Attributes()
+  var attributes : Attributes = Attributes()
 
   /**
    * Applies a transformation matrix to the selected part of the contained shapes and returns the resulting shapes.
    * @param t  The transformation matrix to be applied.
    */
   def apply(t : TransformationMatrix) = {
-    parts.map(p => Drawing(p._1).apply(p._2)).collect{case Some(p : PartialShape) => p.apply(t) }
+    parts.map(p => Drawing(p._1).apply(p._2)).collect{ case Some(p : PartialShape) => p.apply(t) }
   }
-
-  /**
-   * The attributes of the underlying ImmutableShapes.
-   */
-  def attributes = attribute
 
   /**
    * The boundary of the underlying ImmutableShapes.
@@ -78,12 +73,6 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
   def distanceTo(point: Vector2D, scale: Double) = parts.map(s => Drawing(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
 
   /**
-   * Returns the current transformation applied to the shape.
-   * @return  The transformation as a [[com.siigna.util.geom.TransformationMatrix]].
-   */
-  def getTransformation = transformation
-
-  /**
    * Retrieves the current shapes of the selection.
    * @return A map containing the ids and the shapes used in the current selection.
    */
@@ -96,7 +85,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
   def self = parts
 
   def setAttributes(attributes: Attributes) = {
-    this.attribute = attributes
+    this.attributes = attributes
     this
   }
 

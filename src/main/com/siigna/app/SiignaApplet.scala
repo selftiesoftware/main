@@ -225,11 +225,12 @@ class SiignaApplet extends Applet {
       case MouseMove  (point, _, _) => Some(MouseMove(toVirtual(point), button, keys))
       case _ => Log.error("Did not expect event: " + event); None
     }
-    
-    View.repaint();
 
     // Dispatch the event if it wasn't caught above
     if (option.isDefined) dispatchEvent(option.get)
+
+    // After the event has been dispatched, draw
+    View.repaint();
   }
 
   /**
