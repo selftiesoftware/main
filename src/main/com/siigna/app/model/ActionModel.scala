@@ -20,7 +20,7 @@ import java.io.{Externalizable, ObjectInput, ObjectOutput}
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends HasAttributes {
+trait ActionModel extends SelectableModel with HasAttributes {
 
   type T = ActionModel
 

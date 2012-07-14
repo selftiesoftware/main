@@ -122,6 +122,9 @@ class RemoteActionModel extends ActionModel with Externalizable {
   def execute(action : Action, remote : Boolean) {
     Log.debug("Model: Executing action: " + action)
 
+    // Deselect any selections made
+    deselect()
+
     // Execute in the model
     model = action.execute(model)
 
@@ -183,6 +186,9 @@ class RemoteActionModel extends ActionModel with Externalizable {
       
       Log.debug("Model: Redoing action: " + action)
 
+      // Deselect any selections made
+      deselect()
+
       // Execute the event and add it to the executed list
       model = action.execute(model)
       executed +:= action
@@ -218,6 +224,9 @@ class RemoteActionModel extends ActionModel with Externalizable {
       }
 
       Log.debug("Model: Undoing " + (if (remote.isDefined) "remote" else "local") + " action " + action)
+
+      // Deselect any selections made
+      deselect()
 
       // Undo it
       model = action.undo(model)
