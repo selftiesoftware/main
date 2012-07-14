@@ -51,7 +51,7 @@ trait MutableModel extends SelectableModel {
   override def deselect() {
     if (selection.isDefined) {
       val a = selection.get.attributes
-      val t = selection.get.getTransformation
+      val t = selection.get.transformation
       val s = selection.get
 
       // Find the transformation
@@ -63,6 +63,9 @@ trait MutableModel extends SelectableModel {
         Some(SetAttributes(s.keys, a))
       } else None
 
+      // Remove the selection before executing actions to avoid recursion
+      selection = None
+
       // Execute action
       if (transformAction.isDefined && attributeAction.isDefined) {
         Drawing execute transformAction.get.merge(attributeAction.get)
@@ -71,8 +74,6 @@ trait MutableModel extends SelectableModel {
       } else if (attributeAction.isDefined) {
         Drawing execute attributeAction.get
       }
-      
-      selection = None
     }
   }
 
