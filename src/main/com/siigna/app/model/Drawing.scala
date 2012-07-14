@@ -21,10 +21,9 @@ import com.siigna.util.geom.{Vector2D, Rectangle2D}
  * The model of Siigna.
  */
 object Drawing extends RemoteActionModel
-                with SelectableModel
-                with SpatialModel[Int, Shape]
-                with MapProxy[Int, Shape]
-                with HasAttributes {
+                  with SpatialModel[Int, Shape]
+                  with MapProxy[Int, Shape]
+                  with HasAttributes {
 
   /**
    * The boundary from the current content of the Model.
@@ -34,7 +33,7 @@ object Drawing extends RemoteActionModel
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  @transient def boundary = {
+  def boundary = {
     val newBoundary  = model.mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
@@ -69,7 +68,7 @@ object Drawing extends RemoteActionModel
   }
 
   //the boundary without print margin
-  @transient def boundaryWithoutMargin = {
+  def boundaryWithoutMargin = {
     val newBoundary  = model.mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
@@ -107,7 +106,7 @@ object Drawing extends RemoteActionModel
    *
    * Uses toInt since it always rounds down to an integer.
    */
-  @transient def boundaryScale : Int =
+  def boundaryScale : Int =
     math.ceil((scala.math.max(boundaryWithoutMargin.width, boundaryWithoutMargin.height) / (Siigna.double("printFormatMax").getOrElse(297.0)).toInt)).toInt
 
   /**
@@ -119,15 +118,15 @@ object Drawing extends RemoteActionModel
    * The current selection represented by a an Option of [[com.siigna.app.model.Selection]].
    * @return  Some(Selection) if a selection is active or None if nothing has been selected
    */
-  @transient def selection : Option[Selection] = model.selection
+  def selection : Option[Selection] = model.selection
 
   /**
    * The shapes currently in the model.
    * @return A Map containing shapes.
    */
-  @transient override def shapes = model.shapes
+  override def shapes = model.shapes
 
   //------------- Required by the MapProxy trait -------------//
-  @transient def self = model.shapes
+  def self = model.shapes
 
 }
