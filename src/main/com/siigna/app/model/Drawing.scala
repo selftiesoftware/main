@@ -120,12 +120,6 @@ object Drawing extends RemoteActionModel
    */
   def selection : Option[Selection] = model.selection
 
-  /**
-   * The shapes currently in the model.
-   * @return A Map containing shapes.
-   */
-  override def shapes = model.shapes
-
   //------------- Required by the MapProxy trait -------------//
   def self = model.shapes
 
