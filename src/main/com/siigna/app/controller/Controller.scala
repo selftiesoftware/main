@@ -91,8 +91,8 @@ object Controller extends Actor {
     }
 
     // TEST!!!!
-    isConnected = true
-    Register(User("Jens"), None, Client(0))
+    //isConnected = true
+    //Register(User("Jens"), None, Client(0))
     
     // Loop and react on incoming messages
     loop {
