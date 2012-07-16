@@ -3,7 +3,6 @@ package com.siigna.app.model
 import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
-import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 
 /*
@@ -20,10 +19,9 @@ import com.siigna.util.geom.{Vector2D, Rectangle2D}
 /**
  * The model of Siigna.
  */
-object Drawing extends RemoteActionModel
+object Drawing extends RemoteModel
                   with SpatialModel[Int, Shape]
-                  with MapProxy[Int, Shape]
-                  with HasAttributes {
+                  with MapProxy[Int, Shape] {
 
   /**
    * The boundary from the current content of the Model.
