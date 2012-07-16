@@ -22,11 +22,7 @@ import remote._
 import actors.remote.RemoteActor._
 import actors.remote.{RemoteActor, Node}
 import java.io.{FileInputStream, ObjectInputStream, FileOutputStream, ObjectOutputStream}
-import com.siigna.app.model.{RemoteActionModel, Drawing}
-import com.siigna.util.geom.Vector2D
-import com.siigna.app.model.shape.LineShape
-import com.siigna.app.model.action.CreateShape
-import com.siigna.app.model.server.User
+import com.siigna.app.model.Drawing
 
 /**
  * The Controller controls the core of the software. Basically that includes
