@@ -58,6 +58,12 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def redo()
 
+  /**
+   * The shapes currently in the model.
+   * @return A Map containing shapes.
+   */
+  def shapes = model.shapes
+
   def setAttributes(attributes : Attributes) = {
     this.attributes = attributes
     this
