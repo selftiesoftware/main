@@ -26,6 +26,7 @@ import com.siigna.app.model.{RemoteActionModel, Drawing}
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.model.shape.LineShape
 import com.siigna.app.model.action.CreateShape
+import com.siigna.app.model.server.User
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -90,9 +91,9 @@ object Controller extends Actor {
     }
 
     // TEST!!!!
-    //isConnected = true
-    //Register(User("Jens"), Client(0, Drawing(211)))
-
+    isConnected = true
+    Register(User("Jens"), None, Client(0))
+    
     // Loop and react on incoming messages
     loop {
       react {
