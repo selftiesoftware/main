@@ -80,7 +80,7 @@ trait CommandController extends EventController {
 
             // Forward everything else to the server. If it is not a Success type we can be
             // sure the remote command are meant to be forwarded to the server
-            case _ =>
+            case msg => RemoteController ! msg
           }
         }
 
