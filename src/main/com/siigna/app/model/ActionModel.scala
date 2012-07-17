@@ -193,7 +193,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
       // Send a request for more ID's
       if (Siigna.client.isDefined) {
-        Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
+        Get(ShapeIdentifier, Some(math.max(shapes.size, 10)), Siigna.client.get)
       }
     }
   }
