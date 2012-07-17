@@ -14,8 +14,7 @@ package com.siigna.app.controller.remote
 import com.siigna.app.controller.Client
 
 /**
- * A RemoteCommand capable of retrieving a given attribute, related to the current server,
- * from the remote sink.
+ * A RemoteCommand capable of retrieving a given attribute from the remote server.
  */
 @SerialVersionUID(-348100723)
 case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand

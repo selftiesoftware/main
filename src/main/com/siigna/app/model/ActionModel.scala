@@ -46,7 +46,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  @volatile protected var model = new Model(Map[Int, Shape]())
+  protected var model = new Model(Map[Int, Shape]())
 
   /**
    * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
@@ -72,7 +72,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
    * Adds a number of remote ids to the id-pool.
    * @param xs  The remote ids to add.
    */
-  def addRemoteIds(xs : Seq[Int]) {
+  def addRemoteIds(xs : Range) {
     // Store the ids
     var ids = remoteIds ++ xs
 
