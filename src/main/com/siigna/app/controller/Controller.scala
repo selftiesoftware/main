@@ -17,6 +17,7 @@ import com.siigna.app.view.event.Event
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import remote._
+import com.siigna.app.model.server.User
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -47,11 +48,9 @@ object Controller extends CommandController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
+    // Initialize the remote controller
+    RemoteController
 
-    // TEST!!!!
-    //isConnected = true
-    //Register(User("Jens"), None, Client(0))
-    
     // Loop and react on incoming messages
     loop {
       react {
@@ -72,7 +71,7 @@ object Controller extends CommandController {
         case 'exit => {
           Log.info("Controller is shutting down")
           // Close connection to the server
-          remote ! Unregister
+          remote ! ((c : Client) => Unregister(c))
 
           // Quit the thread
           exit()
