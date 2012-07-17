@@ -10,7 +10,7 @@
  */
 package com.siigna.app
 
-import controller.{Controller, RemoteController, Client}
+import controller.{Controller, CommandController, Client}
 import model.server.User
 import model._
 import view._
@@ -73,7 +73,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
    * The signature for this client, if any. This is set as soon as connection with the
    * server is established.
    */
-  def client : Option[Client] = RemoteController.client
+  def client : Option[Client] = CommandController.client
 
   /**
    * Saves a given display.
