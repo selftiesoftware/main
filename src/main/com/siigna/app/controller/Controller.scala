@@ -13,15 +13,10 @@ package com.siigna.app.controller
 import collection.mutable.Stack
 
 import com.siigna.app.controller.command._
-import com.siigna.app.view.event.{Event, ModuleEvent}
+import com.siigna.app.view.event.Event
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
-import com.siigna.app.Siigna
-import actors.Actor
 import remote._
-import actors.remote.RemoteActor._
-import actors.remote.{RemoteActor, Node}
-import com.siigna.app.model.{Drawing}
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -52,15 +47,6 @@ object Controller extends CommandController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
-    // Define the remote
-    val sink = select(Node("siigna.com", 20004), 'siigna)
-    
-    // Register the client IF the user is logged on
-    // Remember: When remote commands are created, they are sent to the controller immediately
-    if (Siigna.user.isDefined) {
-      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Drawing.attributes.int("id"))
-      Register(Siigna.user.get, Drawing.attributes.int("id"), Client(0))
-    }
 
     // TEST!!!!
     //isConnected = true
@@ -69,7 +55,6 @@ object Controller extends CommandController {
     // Loop and react on incoming messages
     loop {
       react {
-
         // Handle commands
         case command : Command => {
           Log.debug("Controller: Received command: " + command)
@@ -87,9 +72,7 @@ object Controller extends CommandController {
         case 'exit => {
           Log.info("Controller is shutting down")
           // Close connection to the server
-          if (Siigna.client.isDefined) {
-            sink ! Unregister(Siigna.client.get)
-          }
+          remote ! Unregister(_)
 
           // Quit the thread
           exit()

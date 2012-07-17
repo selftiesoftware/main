@@ -11,22 +11,90 @@
 
 package com.siigna.app.controller.remote
 
-import actors.Actor
-import actors.remote.RemoteActor
+import actors.Actor._
+import actors.remote.RemoteActor._
+import actors.remote.{Node, RemoteActor}
+import com.siigna.app.controller.{Client, Controller}
+import com.siigna.app.Siigna
+import com.siigna.util.logging.Log
 
 /**
  * Controls any remote connection(s).
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  */
-protected[controller] object RemoteController extends Actor {
+protected[controller] object RemoteController {
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
 
+  /**
+   * A boolean flag to indicate if this controller has been successfully registered with the server.
+   */
+  protected var isConnected = false
 
-  def act {
+  /**
+   * Defines whether the client is connected to a remote server or not.
+   * @return true if connected, false if not.
+   */
+  def isOnline = isConnected
 
+  /**
+   * A queue of commands waiting to be sent to the server.
+   */
+  private var queue = Seq[Client => RemoteCommand]()
+
+  // The remote server
+  private val remote = actor {
+
+    // Register the client IF the user is logged on
+    // Remember: When remote commands are created, they are sent to the controller immediately
+    if (Siigna.user.isDefined) {
+      val Drawing = com.siigna.app.model.Drawing // Use the right namespace
+      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Drawing.attributes.int("id"))
+      Register(Siigna.user.get, Drawing.attributes.int("id"), Client(0))
+    }
+
+    loop {
+      react {
+        case msg => Controller ! msg
+      }
+    }
+  }
+
+  // Define the remote
+  // TODO: What to do if we're not online??
+  private val sink = select(Node("siigna.com", 20004), 'siigna)
+
+  // TEST!!!!
+  //isConnected = true
+  //Register(User("Jens"), None, Client(0))
+
+  /**
+   * Enqueues a message to the remote server. If the client is not connected the messages is sent as soon
+   * as a connection is established. Messages are sent in the order they are received.
+   * @param message The message to forward to the remote server.
+   */
+  def ! (message : RemoteCommand) {
+    // TODO: Check for connection
+    if (isOnline)
+      sink.send(message, sink)
+    else {
+
+    }
+
+  }
+
+  /**
+   * Enqueues a message to the remote server while providing a client to the function. If no client can be found
+   * (failure to registrate) or no connection can be made, then the message is enqueued and sent as soon
+   * a connection is established. Messages are sent in the order they are received.
+   */
+  def ! (f : Client => RemoteCommand) {
+    Siigna.client match {
+      case Some(c) => this ! f(c)
+      case None => queue = queue :+ f
+    }
   }
 
 }
