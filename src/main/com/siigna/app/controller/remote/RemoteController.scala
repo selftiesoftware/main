@@ -17,6 +17,7 @@ import actors.remote.{Node, RemoteActor}
 import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
+import com.siigna.app.model.server.User
 
 /**
  * Controls any remote connection(s).
@@ -69,8 +70,23 @@ protected[controller] object RemoteController {
   private var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  private val remote = select(Node("siigna.com", 20004), 'siigna)
+  //private val remote = select(Node("siigna.com", 20004), 'siigna)
+  private val remote = select(Node("localhost", 20004), 'siigna)
 
+  // TODO: Fix this.
+  def ! (command : RemoteCommand) {
+    command match {
+      case c : Register if (isOnline) => remote.send(command, local)
+      case c : Unregister if (isOnline) => remote.send(command, local)
+      case _ => {
+        Controller.client match {
+          case Some(c) if (isOnline) => remote.send(command, local)
+          case _ =>
+        }
+      }
+    }
+  }
+  
   /**
    * Enqueues a message to the remote server while providing a client to the function. If no client can be found
    * (failure to registrate) or no connection can be made, then the message is enqueued and sent as soon
