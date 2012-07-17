@@ -49,6 +49,10 @@ protected[controller] object RemoteController {
       Register(Siigna.user.get, Drawing.attributes.int("id"), Client())
     }
 
+    // TEST!!!!
+    //isConnected = true
+    //Register(User("Jens"), None, Client(0))
+
     loop {
       react {
         case msg => {
@@ -66,10 +70,6 @@ protected[controller] object RemoteController {
 
   // The remote server
   private val remote = select(Node("siigna.com", 20004), 'siigna)
-
-  // TEST!!!!
-  //isConnected = true
-  //Register(User("Jens"), None, Client(0))
 
   /**
    * Enqueues a message to the remote server while providing a client to the function. If no client can be found
