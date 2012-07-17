@@ -198,7 +198,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
     }
   }
 
-  def redo {
+  def redo() {
     if (undone.size > 0) {
       // Retrieve the event
       val action = undone.head
@@ -237,7 +237,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
     this
   }
 
-  def undo { undo(None) }
+  def undo() { undo(None) }
 
   /**
    * <p>Undo an action and put it in the list of undone actions.</p>
