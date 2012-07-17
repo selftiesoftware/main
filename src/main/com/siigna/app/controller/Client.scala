@@ -16,4 +16,4 @@ package com.siigna.app.controller
  * @param id  The unique identifier of the client, given by the server. Zero if no id has been given.
  */
 @SerialVersionUID(-1673622368)
-case class Client(id : Long = 0L)
+case class Client(id : Long = 0L, token: String = "")
