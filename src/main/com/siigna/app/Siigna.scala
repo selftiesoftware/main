@@ -73,7 +73,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
    * The signature for this client, if any. This is set as soon as connection with the
    * server is established.
    */
-  def client : Option[Client] = CommandController.client
+  def client : Option[Client] = Controller.client
 
   /**
    * Saves a given display.

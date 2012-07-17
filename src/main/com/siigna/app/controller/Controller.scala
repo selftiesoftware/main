@@ -72,7 +72,7 @@ object Controller extends CommandController {
         case 'exit => {
           Log.info("Controller is shutting down")
           // Close connection to the server
-          remote ! Unregister(_)
+          remote ! Unregister
 
           // Quit the thread
           exit()
@@ -83,5 +83,11 @@ object Controller extends CommandController {
       }
     }
   }
+
+  /**
+   * Examines whether this client is connected with the server.
+   * @return True if the connection has been established correctly, false otherwise.
+   */
+  def isOnline = RemoteController.isOnline
 
 }

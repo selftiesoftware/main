@@ -39,51 +39,37 @@ protected[controller] object RemoteController {
    */
   def isOnline = isConnected
 
-  /**
-   * A queue of commands waiting to be sent to the server.
-   */
-  private var queue = Seq[Client => RemoteCommand]()
-
-  // The remote server
-  private val remote = actor {
-
+  // The local sink, receiving actions from the remote sink
+  private val local = actor {
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined) {
       val Drawing = com.siigna.app.model.Drawing // Use the right namespace
       Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Drawing.attributes.int("id"))
-      Register(Siigna.user.get, Drawing.attributes.int("id"), Client(0))
+      Register(Siigna.user.get, Drawing.attributes.int("id"), Client())
     }
 
     loop {
       react {
-        case msg => Controller ! msg
+        case msg => {
+          Controller ! msg
+          isConnected = true
+        }
       }
     }
   }
 
-  // Define the remote
-  // TODO: What to do if we're not online??
-  private val sink = select(Node("siigna.com", 20004), 'siigna)
+  /**
+   * A queue of commands waiting to be sent to the server.
+   */
+  private var queue : Seq[Client => RemoteCommand] = Seq()
+
+  // The remote server
+  private val remote = select(Node("siigna.com", 20004), 'siigna)
 
   // TEST!!!!
   //isConnected = true
   //Register(User("Jens"), None, Client(0))
-
-  /**
-   * Enqueues a message to the remote server. If the client is not connected the messages is sent as soon
-   * as a connection is established. Messages are sent in the order they are received.
-   * @param message The message to forward to the remote server.
-   */
-  def ! (message : RemoteCommand) {
-    // TODO: Check for connection
-    if (isOnline)
-      sink.send(message, sink)
-    else {
-
-    }
-
-  }
 
   /**
    * Enqueues a message to the remote server while providing a client to the function. If no client can be found
@@ -91,9 +77,11 @@ protected[controller] object RemoteController {
    * a connection is established. Messages are sent in the order they are received.
    */
   def ! (f : Client => RemoteCommand) {
-    Siigna.client match {
-      case Some(c) => this ! f(c)
-      case None => queue = queue :+ f
+    Controller.client match {
+      // Send the message to the client and provide a return channel
+      case Some(c) if (isOnline) => remote.send(f(c), local)
+      // Enqueue it and wait for a connection
+      case _ => queue = queue :+ f
     }
   }
 

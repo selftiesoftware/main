@@ -12,6 +12,7 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.Client
+import com.siigna.app.Siigna
 
 /**
  * A RemoteCommand capable of retrieving a given attribute from the remote server.
