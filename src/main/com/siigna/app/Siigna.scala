@@ -10,8 +10,8 @@
  */
 package com.siigna.app
 
-import controller.{Controller, CommandController, Client}
-import model.server.User
+import com.siigna.app.controller.{Controller, CommandController, Client}
+import com.siigna.app.model.server.User
 import model._
 import view._
 import com.siigna.util.geom._
