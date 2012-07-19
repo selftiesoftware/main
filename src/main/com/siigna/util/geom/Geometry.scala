@@ -91,96 +91,16 @@ trait Geometry2D extends Geometry {
   /**
    * Determines the distance from the geometry to an arc.
    */
-  def distanceTo(arc : Arc2D) : Double
+  def distanceTo(geometry : Geometry2D) : Double
 
   /**
-   * Determines the distance from the geometry to a circle.
+   * Determine whether the geometry is overlapping (intersecting) the given geometry.
    */
-  def distanceTo(circle : Circle2D) : Double
+  def intersects(geometry : Geometry2D) : Boolean
 
   /**
-   * Determines the distance from the geometry to an ellipse.
+   * Returns the intersections between this and the given geometry, if any.
    */
-  def distanceTo(ellipse : Ellipse2D) : Double
-
-  /**
-   * Determines the distance from the geometry to a line.
-   */
-  def distanceTo(line : Line2D) : Double
-
-  /**
-   * Determines the distance from the geometry to a rectangle.
-   */
-  def distanceTo(rectangle : Rectangle2D) : Double
-
-  /**
-   * Determines the distance from the geometry to a segment.
-   */
-  def distanceTo(segment : Segment2D) : Double
-
-  /**
-   * Determines the distance from the geometry to a vector.
-   */
-  def distanceTo(vector : Vector2D) : Double
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given arc.
-   */
-  def intersects(arc : Arc2D) : Boolean
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given circle.
-   */
-  def intersects(circle : Circle2D) : Boolean
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given ellipse.
-   */
-  def intersects(ellipse : Ellipse2D) : Boolean
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given line.
-   */
-  def intersects(line : Line2D) : Boolean
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given rectangle.
-   */
-  def intersects(rectangle : Rectangle2D) : Boolean
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given segment.
-   */
-  def intersects(segment : Segment2D) : Boolean
-
-  /**
-   * Returns the intersections between this and the given arc, if any.
-   */
-  def intersections(arc : Arc2D) : Set[Vector2D]
-
-  /**
-   * Returns the intersections between this and the given circle, if any.
-   */
-  def intersections(circle : Circle2D) : Set[Vector2D]
-
-  /**
-   * Returns the intersections between this and the given ellipse, if any.
-   */
-  def intersections(ellipse : Ellipse2D) : Set[Vector2D]
-
-  /**
-   * Returns the intersections between this and the given line, if any.
-   */
-  def intersections(line : Line2D) : Set[Vector2D]
-
-  /**
-   * Returns the intersections between this and the given rectangle, if any.
-   */
-  def intersections(rectangle : Rectangle2D) : Set[Vector2D]
-
-  /**
-   * Returns the intersections between this and the given segment, if any.
-   */
-  def intersections(segment : Segment2D) : Set[Vector2D]
+  def intersections(geometry : Geometry2D) : Set[Vector2D]
 
 }
