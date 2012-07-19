@@ -25,27 +25,11 @@ case class CollectionGeometry(geometries : Seq[Geometry2D]) extends Geometry2D {
 
   def closestPoint(p : Vector2D) = geometries.map(_.closestPoint(p)).reduceLeft((a, b) => if ((p - a).length <= (p - b).length) a else b)
 
-  def distanceTo(s : Arc2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Circle2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Ellipse2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Line2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Rectangle2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Segment2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
-  def distanceTo(s : Vector2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
+  def distanceTo(s : Geometry2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
 
-  def intersects(s : Arc2D) = geometries.exists(_.intersects(s))
-  def intersects(s : Circle2D) = geometries.exists(_.intersects(s))
-  def intersects(s : Ellipse2D) = geometries.exists(_.intersects(s))
-  def intersects(s : Line2D) = geometries.exists(_.intersects(s))
-  def intersects(s : Rectangle2D) = geometries.exists(_.intersects(s))
-  def intersects(s : Segment2D) = geometries.exists(_.intersects(s))
+  def intersects(s : Geometry2D) = geometries.exists(_.intersects(s))
 
-  def intersections(s : Arc2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
-  def intersections(s : Circle2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
-  def intersections(s : Ellipse2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
-  def intersections(s : Line2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
-  def intersections(s : Rectangle2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
-  def intersections(s : Segment2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
+  def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
 
   def transform(t : TransformationMatrix) = CollectionGeometry(geometries.map(_ transform t))
 
