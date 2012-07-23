@@ -10,6 +10,8 @@
  */
 package com.siigna.app.controller.command
 
+import com.siigna.app.controller.Controller
+
 /**
  * Asks the controller to preload a given module.
  *
@@ -17,4 +19,8 @@ package com.siigna.app.controller.command
  * @param classPath  The name of the path to load the class from, including the name of the class itself.
  * @param filePath  The name and the place of the given file to load.
  */
-case class Preload(name : Symbol, classPath : String = "com.siigna.module.base", filePath : String = "") extends Command
+case class Preload(name : Symbol, classPath : String = "com.siigna.module.base", filePath : String = "") extends Command {
+
+  // Dispatches the command
+  Controller ! this
+}
