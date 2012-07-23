@@ -52,7 +52,7 @@ trait Geometry {
   def transform(transformation : TransformationMatrix) : T
 
   /**
-   * A set of vertices defined by the geometry.
+   * A sequence of vertices defined by the geometry.
    */
   def vertices : Seq[V]
 
