@@ -11,11 +11,7 @@
 
 package com.siigna.util
 
-import com.siigna.util.geom.{Rectangle, Vector}
 import java.awt.Color
-import com.siigna.app.model.Model
-
-//import com.siigna.app.model.Selection
 
 /**
  * Contains several implicit definitions which are collected in a single object
