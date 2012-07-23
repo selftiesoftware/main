@@ -18,7 +18,7 @@ import com.siigna.app.model.shape._
 import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
-import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.{Selection, Drawing, Model}
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -36,7 +36,15 @@ class Graphics(val g : Graphics2D)
   def colorBackground  = Siigna.color("colorBackground").getOrElse("#F9F9F9".color)
   def colorDraw        = Siigna.color("colorDraw").getOrElse("#000000".color)
   def colorSelected    = Siigna.color("colorSelected").getOrElse("#7777FF".color)
-  
+
+  /**
+   * Draws a given selection.
+   */
+  def draw(selection : Selection) {
+    // Draw all the partial shapes that are defined (have meaningful graphical semantic)
+    selection.map(t => Drawing(t._1)(t._2)).foreach{ _ match { case Some(s) => draw(s.part); case None => } }
+  }
+
   /**
    * Draws a given shape.
    */
@@ -95,6 +103,7 @@ class Graphics(val g : Graphics2D)
           //draw(s.p1)
           //draw(s.p2)
         }
+
         /** COLLECTION SHAPES **/
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {
