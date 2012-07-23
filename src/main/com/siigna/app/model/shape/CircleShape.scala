@@ -39,7 +39,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       //  else p2,
       //  attributes)))
     //}
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
