@@ -12,17 +12,17 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.Spec
 import collection.parallel.immutable.ParHashMap
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.LineShape
+import org.scalatest.{FunSpec, Spec}
 
 /**
  * Test an arc.
  */
-class ModelSpec extends Spec with ShouldMatchers {
+class ModelSpec extends FunSpec with ShouldMatchers {
 
-  val model = new Model(Map())
+  val model = new Model(Map(), Seq(), Seq())
 
   describe("An immutable model") {
     val v1 = Vector(0, 0)
