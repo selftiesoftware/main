@@ -25,7 +25,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Geo
   def boundary = Rectangle(Vector(center.x - radius, center.y - radius), Vector(center.x + radius, center.y + radius))
 
   def contains(arc : Arc2D) = false
-  def contains(geometry : Geometry) = geometry match {
+  def contains(geometry : Geometry2D) = geometry match {
     case circle : Circle2D => (radius >= circle.radius && (center - circle.center).length < (radius - circle.radius).abs)
     case point : Vector2D => (point - center).length < radius
     case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
