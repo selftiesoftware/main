@@ -13,8 +13,9 @@ package com.siigna.util.geom
 
 /**
  * A vector class utility.
+ * TODO: Should it extend geometry?
  */
-trait Vector {
+trait Vector extends Geometry {
 
   type T <: Vector
   type R <: Rectangle

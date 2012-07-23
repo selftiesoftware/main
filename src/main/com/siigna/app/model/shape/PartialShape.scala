@@ -23,8 +23,11 @@ import com.siigna.util.geom.{TransformationMatrix}
  * @see MutableModel
  * @see Select
  * @see Selection
+ *
+ * @param part  The part representing the sub-part of a shape.
+ * @param f  The function that can transform the sub-part of the shape and leave the rest unchanged.
  */
-class PartialShape(f : (TransformationMatrix => Shape)) extends (TransformationMatrix => Shape) {
+class PartialShape(val part : Shape, f : (TransformationMatrix => Shape)) extends (TransformationMatrix => Shape) {
 
   /**
    * Transforms the PartialShape with a given matrix.
