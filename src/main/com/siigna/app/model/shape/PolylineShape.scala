@@ -48,21 +48,29 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   type T = PolylineShape
   
   def apply(part : ShapeSelector) = part match {
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     case CollectionSelector(xs) => {
+      // The selected parts, needed for drawing
+      var selected = Seq[BasicShape]()
+
       // Create a function that transforms the selected parts of the polyline
       val transformInner = (t : TransformationMatrix) => {
-        val arr = new Array[PolylineShape.InnerPolylineShape](innerShapes.size)
+        val arr      = new Array[PolylineShape.InnerPolylineShape](innerShapes.size)
         for (i <- 0 until innerShapes.size) {
           arr(i) = if (xs contains (i + 1)) {
+            selected = selected :+ shapes(i)
             innerShapes(i).transform(t)
           } else innerShapes(i)
         }
+
         // Make sure there are no duplicate points
         arr.distinct
       }
 
-      Some(new PartialShape((t : TransformationMatrix) =>
+      // Create a shape used for drawing
+      val drawShape = GroupShape(selected)
+
+      Some(new PartialShape(drawShape, (t : TransformationMatrix) =>
         PolylineShape(
           // Test if the start point is included (binary position 1)
           if (xs(0)) { startPoint.transform(t) } else { startPoint },
