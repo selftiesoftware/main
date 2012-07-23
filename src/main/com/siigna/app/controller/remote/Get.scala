@@ -18,8 +18,20 @@ import com.siigna.app.controller.{Controller, Client}
  * A RemoteCommand capable of retrieving a given attribute from the remote server.
  */
 @SerialVersionUID(-348100723)
-case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand {
+sealed case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand
 
-  // Dispatches the command
-  Controller ! this
+/**
+ * Companion object for the Get class.
+ */
+object Get {
+
+  /**
+   * Constructs a Get command and forwards it to the Controller
+   * @param name  The type of the request.
+   * @param value  The value, if any.
+   */
+  def apply(name : RemoteConstant, value : Option[Any]) {
+    Controller ! ((c : Client) => Get(name, value, c))
+  }
+
 }

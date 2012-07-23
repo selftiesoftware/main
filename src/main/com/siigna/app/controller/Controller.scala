@@ -56,14 +56,13 @@ object Controller extends CommandController {
     loop {
       react {
         // Handle actions (execute, not undo)
-        case action : Action => {
-          remote ! (action, false)
-        }
+        case action : Action                   => remote ! (action, false)
           
         // Handle actions with an undo flag
-        case (action : Action, undo : Boolean) => {
-          remote ! (action, undo)
-        }
+        case (action : Action, undo : Boolean) => remote ! (action, undo)
+          
+        // Handle remote commands
+        case f : (Client => RemoteCommand)     => remote ! f
         
         // Handle commands
         case command : Command => {
