@@ -43,12 +43,12 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def apply(part : ShapeSelector) = part match {
     case Selector(xs) => {
-      Some(new PartialShape((t : TransformationMatrix) => LineShape(
+      Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(
         if(xs)  p1.transform(t) else p1,
         if(!xs) p2.transform(t) else p2,
         attributes)))
     }
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
