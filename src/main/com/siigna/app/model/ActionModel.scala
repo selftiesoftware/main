@@ -90,19 +90,15 @@ trait ActionModel extends SelectableModel with HasAttributes {
           }).toMap)
 
           // Send to server
-          if (Siigna.client.isDefined) {
-            Controller ! action
-            Log.debug("Model: Sending action to server.")
-          }
+          Controller ! action
+          Log.debug("Model: Sending action to server.")
 
           // Return
           remoteAction
         }
         case LocalAction(shapes, _) => {
           // Request more ids!
-          if (Siigna.client.isDefined) {
-            Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
-          }
+          Get(ShapeIdentifier, Some(math.max(shapes.size, 5)))
           action
         }
         case a => a
@@ -197,9 +193,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       execute(new LocalAction(ids.zip(shapes).toMap, f), false)
 
       // Send a request for more ID's
-      if (Siigna.client.isDefined) {
-        Get(ShapeIdentifier, Some(math.max(shapes.size, 10)), Siigna.client.get)
-      }
+      Controller ! Get(ShapeIdentifier, Some(math.max(shapes.size, 10)))
     }
   }
 
@@ -219,7 +213,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       executed +:= action
 
       // Send to server
-      if (Siigna.client.isDefined && !action.isInstanceOf[LocalAction]) {
+      if (!action.isInstanceOf[LocalAction]) {
         Controller ! action
         Log.debug("Model: Sending action to server.")
       }
@@ -271,7 +265,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       if (remote.isEmpty) undone +:= action
 
       // Send to server if the client is defined and the action isn't set
-      if (Siigna.client.isDefined && remote.isEmpty && !action.isInstanceOf[LocalAction]) {
+      if (remote.isEmpty && !action.isInstanceOf[LocalAction]) {
         Controller ! (action, true)
         Log.debug("Forwarding undoing action to server: " + action)
       }
