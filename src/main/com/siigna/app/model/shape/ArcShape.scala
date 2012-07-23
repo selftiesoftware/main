@@ -41,7 +41,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   // TODO: What about selection "arc-points"??
   def apply(part : ShapeSelector) = part match {
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     //case PartialSelector(1) => Some(new PartialShape((t : TransformationMatrix) => ArcShape(t.transform(center), radius * t.scaleFactor, startAngle, angle, attributes)))
     case _ => None
   }

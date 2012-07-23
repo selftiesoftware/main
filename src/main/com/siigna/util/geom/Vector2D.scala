@@ -15,7 +15,7 @@ package com.siigna.util.geom
  * A vector class utility.
  */
 @SerialVersionUID(1206628808)
-case class Vector2D(x : Double, y : Double) extends Vector {
+case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   type T = Vector2D
   type R = Rectangle2D
@@ -93,11 +93,6 @@ case class Vector2D(x : Double, y : Double) extends Vector {
   def distanceTo(point : Vector2D) = (point - this).length
 
   /**
-   * Examines whether a given rectangle intersects with the point.
-   */
-  def intersect(rectangle : Rectangle2D) = rectangle.distanceTo(this) == 0
-
-  /**
    * Calculates the length of the vector.
    */
   def length = java.lang.Math.hypot(x, y)
@@ -121,6 +116,16 @@ case class Vector2D(x : Double, y : Double) extends Vector {
    * Calculates the unit-vector of this.
    */
   def unit = Vector2D(this.x / this.length, this.y / this.length)
+
+  def distanceTo(geometry : Geometry2D) = geometry.distanceTo(this)
+
+  def intersects(geometry: Geometry2D) = geometry.intersects(this)
+
+  def intersections(geometry: Geometry2D) = geometry.intersections(this)
+
+  def closestPoint(vector: Vector2D) = this
+
+  def vertices : Set[Vector2D] = Set(this)
 
 }
 
