@@ -18,7 +18,8 @@ import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna.app.controller.remote._
 import com.siigna.app.view.View
-import com.siigna.app.controller.remote.{Get, RemoteAction}
+import com.siigna.app.controller.remote.Get
+import com.siigna.app.controller.Controller
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -90,7 +91,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
           // Send to server
           if (Siigna.client.isDefined) {
-            RemoteAction(Siigna.client.get, remoteAction, undo)
+            Controller ! action
             Log.debug("Model: Sending action to server.")
           }
 
@@ -150,7 +151,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
     // Create the remote command and dispatch it
     if (remote && Siigna.isOnline) {
-      RemoteAction(Siigna.client.get, action)
+      Controller ! action
       Log.debug("Forwarding action to server: " + action)
     }
   }
@@ -219,7 +220,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
       // Send to server
       if (Siigna.client.isDefined && !action.isInstanceOf[LocalAction]) {
-        RemoteAction(Siigna.client.get, action)
+        Controller ! action
         Log.debug("Model: Sending action to server.")
       }
 
@@ -271,7 +272,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
       // Send to server if the client is defined and the action isn't set
       if (Siigna.client.isDefined && remote.isEmpty && !action.isInstanceOf[LocalAction]) {
-        RemoteAction(Siigna.client.get, action, true)
+        Controller ! (action, true)
         Log.debug("Forwarding undoing action to server: " + action)
       }
 
