@@ -99,20 +99,6 @@ protected[controller] object RemoteController {
   def ! (action : Action, undo : Boolean) {
     queue :+= ((c : Client) => RemoteAction(c, action, undo))
   }
-
-  // TODO: Fix this.
-  def ! (command : RemoteCommand) {
-    command match {
-      case c : Register if (isOnline) => remote.send(command, local)
-      case c : Unregister if (isOnline) => remote.send(command, local)
-      case _ => {
-        client match {
-          case Some(c) if (isOnline) => remote.send(command, local)
-          case _ =>
-        }
-      }
-    }
-  }
   
   /**
    * Enqueues a message to the remote server while providing a client to the function. If no client can be found
@@ -124,7 +110,7 @@ protected[controller] object RemoteController {
       // Send the message to the client and provide a return channel
       case Some(c) if (isOnline) => remote.send(f(c), local)
       // Enqueue it and wait for a connection
-      case _ => queue = queue :+ f
+      case _ => queue :+= f
     }
   }
 
