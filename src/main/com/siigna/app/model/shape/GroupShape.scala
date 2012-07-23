@@ -28,8 +28,6 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  */
 case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends CollectionShape[Shape] {
 
-  throw new UnsupportedOperationException("Not implemented yet")
-
   type T = GroupShape
 
   def apply(part : ShapeSelector) = None

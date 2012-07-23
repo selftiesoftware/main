@@ -44,7 +44,7 @@ class RemoteModel extends ActionModel
     var fail = false
     try {
       val shapes = in.readObject()
-      model = new Model(shapes.asInstanceOf[Map[Int, Shape]])
+      model = new Model(shapes.asInstanceOf[Map[Int, Shape]], Seq(), Seq())
     } catch {
       case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
     }
