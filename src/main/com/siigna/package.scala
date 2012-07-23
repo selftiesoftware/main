@@ -18,18 +18,18 @@ package object siigna extends com.siigna.util.Implicits {
   // Actions
   type Action = com.siigna.app.model.action.Action
 
-  lazy val Create = com.siigna.app.model.action.Create
-  lazy val Delete = com.siigna.app.model.action.Delete
-  lazy val Select = com.siigna.app.model.action.Select
-  lazy val Transform = com.siigna.app.model.action.Transform
+  val Create = com.siigna.app.model.action.Create
+  val Delete = com.siigna.app.model.action.Delete
+  val Select = com.siigna.app.model.action.Select
+  val Transform = com.siigna.app.model.action.Transform
 
   // Commands
-  lazy val ForwardTo = com.siigna.app.controller.command.ForwardTo
-  lazy val Goto = com.siigna.app.controller.command.Goto
-  lazy val Preload = com.siigna.app.controller.command.Preload
+  val ForwardTo = com.siigna.app.controller.command.ForwardTo
+  val Goto = com.siigna.app.controller.command.Goto
+  val Preload = com.siigna.app.controller.command.Preload
 
   // Controller
-  lazy val Controller = com.siigna.app.controller.Controller
+  val Controller = com.siigna.app.controller.Controller
 
   // Model
   val Drawing = com.siigna.app.model.Drawing
@@ -59,13 +59,13 @@ package object siigna extends com.siigna.util.Implicits {
   type PartialShape = com.siigna.app.model.shape.PartialShape
 
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
-  lazy val PolylineShape = com.siigna.app.model.shape.PolylineShape
+  val PolylineShape = com.siigna.app.model.shape.PolylineShape
 
   type TextShape = com.siigna.app.model.shape.TextShape
-  lazy val TextShape = com.siigna.app.model.shape.TextShape
+  val TextShape = com.siigna.app.model.shape.TextShape
 
   // Siigna object
-  lazy val Siigna = com.siigna.app.Siigna
+  val Siigna = com.siigna.app.Siigna
 
   // View
   lazy val Cursors = com.siigna.app.view.Interface.Cursors 
@@ -78,18 +78,18 @@ package object siigna extends com.siigna.util.Implicits {
   // ------------------ UTIL -------------------- //
   // Collection
   type Attributes = com.siigna.util.collection.Attributes
-  lazy val Attributes = com.siigna.util.collection.Attributes
+  val Attributes = com.siigna.util.collection.Attributes
 
   type DirectedGraph[V, A] = com.siigna.util.collection.DirectedGraph[V, A]
-  lazy val DirectedGraph = com.siigna.util.collection.DirectedGraph
+  val DirectedGraph = com.siigna.util.collection.DirectedGraph
 
   // Events
   type Event = com.siigna.app.view.event.Event
 
   type EventHandler = com.siigna.app.view.event.EventHandler
-  lazy val EventHandler = com.siigna.app.view.event.EventHandler
+  val EventHandler = com.siigna.app.view.event.EventHandler
 
-  lazy val Key = com.siigna.app.view.event.Key
+  val Key = com.siigna.app.view.event.Key
   type KeyDown = com.siigna.app.view.event.KeyDown
   val KeyDown = com.siigna.app.view.event.KeyDown
   type KeyUp = com.siigna.app.view.event.KeyUp
@@ -103,10 +103,10 @@ package object siigna extends com.siigna.util.Implicits {
 
   type ModuleEvent = com.siigna.app.view.event.ModuleEvent
 
-  lazy val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
-  lazy val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle
-  lazy val MouseButtonNone = com.siigna.app.view.event.MouseButtonNone
-  lazy val MouseButtonRight = com.siigna.app.view.event.MouseButtonRight
+  val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
+  val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle
+  val MouseButtonNone = com.siigna.app.view.event.MouseButtonNone
+  val MouseButtonRight = com.siigna.app.view.event.MouseButtonRight
 
   type MouseDown = com.siigna.app.view.event.MouseDown
   val MouseDown = com.siigna.app.view.event.MouseDown
@@ -124,37 +124,30 @@ package object siigna extends com.siigna.util.Implicits {
   val MouseWheel = com.siigna.app.view.event.MouseWheel
 
   // Geometry
-  type Arc = com.siigna.util.geom.Arc
   type Arc2D = com.siigna.util.geom.Arc2D
-  lazy val Arc2D = com.siigna.util.geom.Arc2D
+  val Arc2D = com.siigna.util.geom.Arc2D
 
-  type Circle = com.siigna.util.geom.Circle
   type Circle2D = com.siigna.util.geom.Circle2D
-  lazy val Circle2D = com.siigna.util.geom.Circle2D
+  val Circle2D = com.siigna.util.geom.Circle2D
 
   //type Ellipse = com.siigna.util.geom.Ellipse
   //lazy val Ellipse = com.siigna.util.geom.Ellipse
 
-  type Line = com.siigna.util.geom.Line
   type Line2D = com.siigna.util.geom.Line2D
-  lazy val Line2D = com.siigna.util.geom.Line2D
+  val Line2D = com.siigna.util.geom.Line2D
 
-  type Rectangle = com.siigna.util.geom.Rectangle
   type Rectangle2D = com.siigna.util.geom.Rectangle2D
-  lazy val Rectangle2D = com.siigna.util.geom.Rectangle2D
+  val Rectangle2D = com.siigna.util.geom.Rectangle2D
 
-  type Segment = com.siigna.util.geom.Segment
   type Segment2D = com.siigna.util.geom.Segment2D
-  lazy val Segment2D = com.siigna.util.geom.Segment2D
+  val Segment2D = com.siigna.util.geom.Segment2D
 
   type TransformationMatrix = com.siigna.util.geom.TransformationMatrix
-  lazy val TransformationMatrix = com.siigna.util.geom.TransformationMatrix
-
-  type Vector = com.siigna.util.geom.Vector
+  val TransformationMatrix = com.siigna.util.geom.TransformationMatrix
   type Vector2D = com.siigna.util.geom.Vector2D
-  lazy val Vector2D = com.siigna.util.geom.Vector2D
+  val Vector2D = com.siigna.util.geom.Vector2D
 
   // Log
-  lazy val Log = com.siigna.util.logging.Log
+  val Log = com.siigna.util.logging.Log
 
 }
