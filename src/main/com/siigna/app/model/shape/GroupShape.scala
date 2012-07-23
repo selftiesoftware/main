@@ -37,7 +37,10 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
   def delete(part : ShapeSelector) = {
     part match {
       case GroupShape.Selector(parts) => {
-        Seq(copy(shapes = parts.foldLeft(shapes)((shapes, part) => shapes.updated(part._1))
+        Seq(copy(shapes = parts.foldLeft(shapes)((shapes, part) => {
+          val (head, tail) = shapes.splitAt(part._1)
+          head ++ shapes(part._1).delete(part._2) ++ tail.tail
+        })))
       }
       case _ => Nil
     }

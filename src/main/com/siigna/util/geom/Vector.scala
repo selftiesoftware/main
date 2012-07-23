@@ -21,11 +21,6 @@ trait Vector extends Geometry {
   type R <: Rectangle
 
   /**
-   * The center of the geometry.
-   */
-  val center = this
-
-  /**
    * Returns the sum of this vector with another vector.
    */
   def +(other : T) : T

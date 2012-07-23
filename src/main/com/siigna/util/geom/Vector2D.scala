@@ -21,11 +21,6 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   type R = Rectangle2D
 
   /**
-   * The dimension of the vector.
-   */
-  val dimension = 2
-
-  /**
    * Returns the sum of this vector with another vector.
    */
   def +(other : Vector2D) = Vector2D(x + other.x, y + other.y)
@@ -125,7 +120,7 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   def closestPoint(vector: Vector2D) = this
 
-  def vertices : Set[Vector2D] = Set(this)
+  def vertices = Seq(this)
 
 }
 

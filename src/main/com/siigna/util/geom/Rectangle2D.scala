@@ -159,6 +159,8 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
       Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
         _ distanceTo(point)
       ).reduceLeft( (a, b) => if (a < b) a else b)
+
+    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
   }
 
   def expand(geom : Geometry2D) : Rectangle2D = geom match {

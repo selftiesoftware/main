@@ -30,11 +30,6 @@ trait Rectangle {
   def circumference : Double
 
   /**
-   * Returns a rectangle that encapsulates both this rectangle and the given rectangle.
-   */
-  def expand(that : T) : T
-
-  /**
    * The height of the rectangle
    */
   def height : Double
