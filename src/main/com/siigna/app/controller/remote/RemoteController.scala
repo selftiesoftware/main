@@ -30,6 +30,11 @@ protected[controller] object RemoteController {
   RemoteActor.classLoader = getClass.getClassLoader
 
   /**
+   * The unique identifier for this client.
+   */
+  var client : Option[Client] = None
+
+  /**
    * A boolean flag to indicate if this controller has been successfully registered with the server.
    */
   protected var isConnected = false
@@ -51,11 +56,25 @@ protected[controller] object RemoteController {
     }
 
     // TEST!!!!
+    //import com.siigna.app.controller.remote._
     //isConnected = true
-    //Register(User("Jens"), None, Client(0))
+    //remote.send(Register(User("Jens"), None, Client(0)), local)
 
     loop {
       react {
+        // Successful registration of the client
+        case r : Register => {
+          // Log the received client
+          Log.info("CommandController: Registered client: " + r.client)
+
+          // Store the client
+          client = Some(r.client)
+
+          // Get shape-ids for the id-bank
+          Get(ShapeIdentifier, Some(4), r.client)
+
+          Log.debug("CommandController: Sucessfully registered client: " + client)
+        }
         case msg => {
           Controller ! msg
           isConnected = true
@@ -87,7 +106,7 @@ protected[controller] object RemoteController {
       case c : Register if (isOnline) => remote.send(command, local)
       case c : Unregister if (isOnline) => remote.send(command, local)
       case _ => {
-        Controller.client match {
+        client match {
           case Some(c) if (isOnline) => remote.send(command, local)
           case _ =>
         }
@@ -101,7 +120,7 @@ protected[controller] object RemoteController {
    * a connection is established. Messages are sent in the order they are received.
    */
   def ! (f : Client => RemoteCommand) {
-    Controller.client match {
+    client match {
       // Send the message to the client and provide a return channel
       case Some(c) if (isOnline) => remote.send(f(c), local)
       // Enqueue it and wait for a connection

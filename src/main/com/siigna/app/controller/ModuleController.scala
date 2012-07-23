@@ -38,11 +38,6 @@ import actors.Actor
 trait ModuleController extends Actor {
 
   /**
-   * The unique identifier for this client.
-   */
-  var client : Option[Client] = None  
-
-  /**
    * The last 10 events
    */
   protected var events : List[Event] = List()
