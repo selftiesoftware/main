@@ -18,8 +18,4 @@ import com.siigna.app.controller.{Controller, Client}
  * A class that un-registers a client.
  */
 @SerialVersionUID(-767381287)
-case class Unregister(client : Client) extends RemoteCommand {
-
-  // Dispatches the command
-  Controller ! this
-}
+case class Unregister(client : Client) extends RemoteCommand

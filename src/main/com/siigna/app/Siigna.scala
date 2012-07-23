@@ -70,12 +70,6 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   def clearDisplay() { display = None }
 
   /**
-   * The signature for this client, if any. This is set as soon as connection with the
-   * server is established.
-   */
-  def client : Option[Client] = Controller.client
-
-  /**
    * Saves a given display.
    */
   def display(display : Display) { this.display = Some(display) }
