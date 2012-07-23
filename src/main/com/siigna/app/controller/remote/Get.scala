@@ -11,11 +11,15 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.controller.Client
 import com.siigna.app.Siigna
+import com.siigna.app.controller.{Controller, Client}
 
 /**
  * A RemoteCommand capable of retrieving a given attribute from the remote server.
  */
 @SerialVersionUID(-348100723)
-case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand
+case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand {
+
+  // Dispatches the command
+  Controller ! this
+}
