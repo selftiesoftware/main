@@ -11,10 +11,15 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.controller.Client
+import com.siigna.app.controller.{Controller, Client}
+
 
 /**
  * A RemoteCommand capable of setting a given attribute to a given value.
  */
 @SerialVersionUID(-1041843852)
-case class Set(name : String, value : Any, client : Client) extends RemoteCommand
+case class Set(name : String, value : Any, client : Client) extends RemoteCommand {
+
+  // Dispatches the command
+  Controller ! this
+}
