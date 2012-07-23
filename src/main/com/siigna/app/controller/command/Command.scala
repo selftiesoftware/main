@@ -15,8 +15,4 @@ import com.siigna.app.controller.Controller
 /**
  * Commands that can be used to instruct the controller.
  */
-trait Command {
-
-  // Dispatches the command
-  Controller ! this
-}
+trait Command
