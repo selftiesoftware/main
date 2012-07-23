@@ -17,7 +17,6 @@ import com.siigna.app.view.event.Event
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import remote._
-import com.siigna.app.model.server.User
 import com.siigna.app.model.action.Action
 
 /**
