@@ -135,6 +135,6 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   /**
    * Examines whether the ellipse intersects with rectangle
    */
-  def intersects(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
+  def intersections(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
   
 }
