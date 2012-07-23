@@ -193,7 +193,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       execute(new LocalAction(ids.zip(shapes).toMap, f), false)
 
       // Send a request for more ID's
-      Controller ! Get(ShapeIdentifier, Some(math.max(shapes.size, 10)))
+      Get(ShapeIdentifier, Some(math.max(shapes.size, 10)))
     }
   }
 
