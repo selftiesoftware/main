@@ -46,18 +46,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  protected var model = new Model(Map[Int, Shape]())
-
-  /**
-   * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
-   */
-  protected var executed = Seq[Action]()
-
-  /**
-   * The [[com.siigna.app.model.action.Action]]s that have been undone on this model.
-   */
-  protected var undone = Seq[Action]()
-
+  protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
+  
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -163,6 +153,20 @@ trait ActionModel extends SelectableModel with HasAttributes {
       RemoteAction(Siigna.client.get, action)
       Log.debug("Forwarding action to server: " + action)
     }
+  }
+
+  /**
+   * Retrieves the sequence of executed actions.
+   * @return The actions executed on the Model
+   */
+  protected def executed = model.executed
+
+  /**
+   * Sets the executed actions of the model.
+   * @param executed  The sequence of actions to replace the executed actions with.
+   */
+  protected def executed_=(executed : Seq[Action]) {
+    model = new Model(model.shapes, executed, model.undone)
   }
 
   /**
@@ -276,6 +280,20 @@ trait ActionModel extends SelectableModel with HasAttributes {
     } else {
       Log.warning("Model: No more actions to undo.")
     }
+  }
+
+  /**
+   * The actions that have been undone on the model.
+   * @return  A sequence of undone actions.
+   */
+  def undone = model.undone
+
+  /**
+   * Sets the undone actions of the model.
+   * @param undone  The sequence of actions to replace the currently undone actions.
+   */
+  def undone_=(undone : Seq[Action]) {
+    model = new Model(model.shapes, model.executed, undone)
   }
 
 }
