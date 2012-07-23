@@ -48,20 +48,6 @@ trait CommandController extends EventController {
               }
             }
 
-            // Successful registration of the client
-            case r : Register => {
-              // Log the received client
-              Log.info("CommandController: Registered client: " + r.client)
-
-              // Store the client
-              client = Some(r.client)
-
-              // Get shape-ids for the id-bank
-              Get(ShapeIdentifier, Some(4), r.client)
-
-              Log.debug("CommandController: Sucessfully registered client: " + client)
-            }
-
             // Remote actions
             case RemoteAction(_, action, undo) => {
               if (undo) {
