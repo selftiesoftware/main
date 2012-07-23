@@ -69,39 +69,34 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
   def closestPoint(vector : Vector2D) = (vector - center).unit * radius
 
-  def distanceTo(arc : Arc2D) = throw new UnsupportedOperationException("Not implemented")
-  def distanceTo(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
-  def distanceTo(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
-  def distanceTo(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
-  def distanceTo(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
-  def distanceTo(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
+  def distanceTo(geometry : Geometry2D) = geometry match {
+    case p : Vector2D => {
+      // The angle from 0 degrees (3 o'clock) to the point
+      val angleToPoint = (p - center).angle
 
-  def distanceTo(p : Vector2D) =
-  {
-    // The angle from 0 degrees (3 o'clock) to the point
-    val angleToPoint = (p - center).angle
+      // If the angle is lesser than the start and greater than the end angle
+      // it must be 'inside' the arc, and the shortest distance must then be
+      // the distance to the circle-section.
+      if (angleToPoint >= startAngle && angleToPoint <= endAngle)
+        scala.math.abs(radius - (center - p).length)
 
-    // If the angle is lesser than the start and greater than the end angle
-    // it must be 'inside' the arc, and the shortest distance must then be
-    // the distance to the circle-section.
-    if (angleToPoint >= startAngle && angleToPoint <= endAngle)
-      scala.math.abs(radius - (center - p).length)
+      // If the arc goes through 0 degrees (i. e. 360 degrees so the angle of
+      // the start-point is lesser then the start-point), then we must test for
+      // a case where the point can be 'inside' the circle-section when the
+      // angle from the point to the X-axis is greater than the endAngle
+      // or lesser than the startAngle.
+      else if (endAngle < startAngle && (angleToPoint > startAngle || angleToPoint < endAngle))
+        scala.math.abs(radius - (center - p).length)
 
-    // If the arc goes through 0 degrees (i. e. 360 degrees so the angle of
-    // the start-point is lesser then the start-point), then we must test for
-    // a case where the point can be 'inside' the circle-section when the
-    // angle from the point to the X-axis is greater than the endAngle
-    // or lesser than the startAngle.
-    else if (endAngle < startAngle && (angleToPoint > startAngle || angleToPoint < endAngle))
-      scala.math.abs(radius - (center - p).length)
+      // If the anglePoint is closest to endAngle
+      else if (angleToPoint - endAngle <= angleToPoint - startAngle)
+        (p - endPoint).length
 
-    // If the anglePoint is closest to endAngle
-    else if (angleToPoint - endAngle <= angleToPoint - startAngle)
-      (p - endPoint).length
-
-    // Else the point must be closest to startAngle
-    else
-      (p - startPoint).length
+      // Else the point must be closest to startAngle
+      else
+        (p - startPoint).length
+    }
+    case _ => throw new UnsupportedOperationException("Not implemented")
   }
 
   /**
@@ -114,43 +109,34 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     bindTo360(angle - startAngle) <= this.angle
   }
 
-  def intersects(arc : Arc2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersects(vector : Vector2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(geometry : Geometry2D) = throw new UnsupportedOperationException("Not implemented")
 
   /**
    * Returns a list of points, defined as the intersection(s) between the
    * arc and another arc.
    */
-  def intersections(arc : Arc2D) : Set[Vector2D] = {
-    val circleIntersections = Circle(center, radius).intersections(Circle(arc.center, arc.radius))
-    if (circleIntersections.isEmpty) {
-      Set() // No intersections
-    } else { // Check whether both points are inside the respective arcs
-      circleIntersections.filter(p => {
-        val angle1 = (p - center).angle
-        val angle2 = (p - arc.center).angle
-        (insideArcDegrees(angle1) && arc.insideArcDegrees(angle2))
-      })
+  def intersections(geometry : Geometry2D) : Set[Vector2D] = geometry match {
+    case arc : Arc2D => {
+      val circleIntersections = Circle(center, radius).intersections(Circle(arc.center, arc.radius))
+      if (circleIntersections.isEmpty) {
+        Set() // No intersections
+      } else { // Check whether both points are inside the respective arcs
+        circleIntersections.filter(p => {
+          val angle1 = (p - center).angle
+          val angle2 = (p - arc.center).angle
+          (insideArcDegrees(angle1) && arc.insideArcDegrees(angle2))
+        })
+      }
     }
+    case _ => throw new UnsupportedOperationException("Not implemented")
   }
-
-  def intersections(circle : Circle2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersections(ellipse : Ellipse2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersections(line : Line2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersections(rectangle : Rectangle2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersections(segment : Segment2D) = throw new UnsupportedOperationException("Not implemented")
-  def intersections(vector : Vector2D) = throw new UnsupportedOperationException("Not implemented")
 
   def transform(t : TransformationMatrix) =
     new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)
 
   // TODO: Add middlepoint
   lazy val vertices = Seq(startPoint, endPoint)
+
 }
 
 /**
