@@ -12,17 +12,17 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.Spec
 import com.siigna.app.model.Model
 import collection.parallel.immutable.{ParHashMap}
 import com.siigna.app.model.shape.{LineShape}
+import org.scalatest.{FunSpec, Spec}
 
 /**
  * Test the immutable model to manipulate and contain a map of ints and shapes.
  */
-class ImmutableModelSpec extends Spec with ShouldMatchers {
+class ImmutableModelSpec extends FunSpec with ShouldMatchers {
 
-  val model = new Model(Map())
+  val model = new Model(Map(), Seq(), Seq())
 
   describe("An immutable model") {
     val v1 = Vector(0, 0)
