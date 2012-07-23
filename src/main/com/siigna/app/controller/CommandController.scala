@@ -38,49 +38,40 @@ trait CommandController extends EventController {
             case failure : Failure => {
               Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
             }
-            // Catch successes - we know these are from the server
-            case success : Success => {
-              // Examine what was successful
-              success.command match {
 
-                // Successful get shape identifiers command
-                case Get(ShapeIdentifier, value, _) => {
-                  try {
-                    Drawing.addRemoteIds(value.get.asInstanceOf[Range])
-                  } catch {
-                    case e => Log.warning("Unknown input for shape identifiers: " + value)
-                  }
-                }
-
-                // Successful registration of the client
-                case r : Register => {
-                  // Log the received client
-                  Log.info("CommandController: Registered client: " + r.client)
-
-                  // Store the client
-                  client = Some(r.client)
-
-                  // Get shape-ids for the id-bank
-                  Get(ShapeIdentifier, Some(4), r.client)
-
-                  Log.debug("CommandController: Sucessfully registered client: " + client)
-                }
-
-                // Remote actions
-                case RemoteAction(_, action, undo) => {
-                  if (undo) {
-                    Drawing undo Some(action)
-                  } else {
-                    Drawing execute(action, false)
-                  }
-                }
-                case _ => Log.warning("CommandController: Received unknown success: " + success)
+            // Successful get shape identifiers command
+            case Get(ShapeIdentifier, value, _) => {
+              try {
+                Drawing.addRemoteIds(value.get.asInstanceOf[Range])
+              } catch {
+                case e => Log.warning("Unknown input for shape identifiers: " + value)
               }
             }
 
-            // Forward everything else to the server. If it is not a Success type we can be
-            // sure the remote command are meant to be forwarded to the server
-            case msg => RemoteController ! msg
+            // Successful registration of the client
+            case r : Register => {
+              // Log the received client
+              Log.info("CommandController: Registered client: " + r.client)
+
+              // Store the client
+              client = Some(r.client)
+
+              // Get shape-ids for the id-bank
+              Get(ShapeIdentifier, Some(4), r.client)
+
+              Log.debug("CommandController: Sucessfully registered client: " + client)
+            }
+
+            // Remote actions
+            case RemoteAction(_, action, undo) => {
+              if (undo) {
+                Drawing undo Some(action)
+              } else {
+                Drawing execute(action, false)
+              }
+            }
+
+            case msg => Log.warning("Controller received unknown remote command: " + msg)
           }
         }
 

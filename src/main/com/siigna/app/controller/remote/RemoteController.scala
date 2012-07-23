@@ -17,6 +17,7 @@ import actors.remote.{Node, RemoteActor}
 import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
+import com.siigna.app.model.action.Action
 
 /**
  * Controls any remote connection(s).
@@ -70,6 +71,15 @@ protected[controller] object RemoteController {
 
   // The remote server
   private val remote = select(Node("siigna.com", 20004), 'siigna)
+
+  /**
+   * Sends an action remotely.
+   * @param action The action to dispatch.
+   * @param undo Should the action be undone?
+   */
+  def ! (action : Action, undo : Boolean) {
+    queue :+= ((c : Client) => RemoteAction(c, action, undo))
+  }
 
   // TODO: Fix this.
   def ! (command : RemoteCommand) {
