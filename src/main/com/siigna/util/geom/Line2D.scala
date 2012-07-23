@@ -40,93 +40,73 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     Vector2D(x, y)
   }
 
-  def distanceTo(arc : Arc2D) = POSITIVE_INFINITY
-  def distanceTo(circle : Circle2D) = POSITIVE_INFINITY
-  def distanceTo(ellipse : Ellipse2D) = POSITIVE_INFINITY
-  def distanceTo(line : Line2D) = POSITIVE_INFINITY
-  def distanceTo(rectangle : Rectangle2D) = POSITIVE_INFINITY
-
-  /**
-   * Calculates the distance between a vector and a line.
-   */
-  def distanceTo(point : Vector2D) : Double = {
-    if (p1 != p2) {
+  def distanceTo(geom : Geometry2D) = geom match {
+    case point : Vector2D => if (p1 != p2) {
       // Calculate the distance from the projection on the line to the point.
       (closestPoint(point) - point).length
     } else {
       (p1 - point).length
     }
+    case g => throw new UnsupportedOperationException("Line: DistanceTo not yet implemented with " + g)
   }
 
-  def distanceTo(segment : Segment2D) = POSITIVE_INFINITY
+  def intersects(geom : Geometry2D) = throw new UnsupportedOperationException("Line: Intersects not yet implemented with " + geom)
 
-  def intersects(arc : Arc2D) = false
-  def intersects(circle : Circle2D) = false
-  def intersects(ellipse : Ellipse2D) = false
-  def intersects(line : Line2D) = false
-  def intersects(rectangle : Rectangle2D) = false
-  def intersects(segment : Segment2D) = false
+  def intersections(geom : Geometry2D) = geom match {
+    /**
+     * Returns a list of points, defined as the intersection(s) between the
+     * line and the circle.
+     */
+    case circle : Circle2D => {
+      val f           = p2 - p1
+      val g           = p1 - circle.center
+      val determinant = (f * g) * (f * g) - (f * f) * (g * g - circle.radius * circle.radius)
 
-  def intersections(arc : Arc2D) = Set()
+      val t =
+        if (determinant < 0)
+          Set()
+        else if (determinant > 0)
+          Set((-(f * g) - scala.math.sqrt(determinant)) / (f * f),
+               (-(f * g) + scala.math.sqrt(determinant)) / (f * f))
+        else
+          Set(-(f * g) / (f * f))
 
-  /**
-   * Returns a list of points, defined as the intersection(s) between the
-   * line and the circle.
-   */
-  def intersections(circle : Circle2D) = {
-    val f           = p2 - p1
-    val g           = p1 - circle.center
-    val determinant = (f * g) * (f * g) - (f * f) * (g * g - circle.radius * circle.radius)
+      t map(f * _ + p1)
+    }
+    /**
+     * Returns a set of points, defined as the intersection(s) between the
+     * two endless lines.
+     */
+    case line : Line2D => {
+      // The lines are defined by the equations:
+      //   L1 = A*u + C
+      //   L2 = B*v + D
+      val A = p2 - p1
+      val B = line.p2 - line.p1
+      val C = p1
+      val D = line.p1
 
-    val t =
-      if (determinant < 0)
+      // To findRecursive the intersection, set the two above equations equal:
+      //   L1 = L2  <=>  A*u + C = B*v + D
+      // The intersection is defined by solving (u,v) in the linear system:
+      //   A*u - B*v = D - C
+      // Calculate the determinant:
+      //   det = | A  -B | = | B  A |
+      // If det = 0 there are no solutions (the lines are parallel). Now we findRecursive
+      // the solution for the first line, L1:
+      //   u = | (D - C)  -B | / det = | B  (D - C) | / det
+      val det = Vector2D.determinant(B, A)
+      val u   = Vector2D.determinant(B, D - C) / det
+
+      // To calculate the point of intersection we insert u in the line equation.
+      // If the determinant = 0, the lines are parallel
+      if (det == 0)
         Set()
-      else if (determinant > 0)
-        Set((-(f * g) - scala.math.sqrt(determinant)) / (f * f),
-             (-(f * g) + scala.math.sqrt(determinant)) / (f * f))
       else
-        Set(-(f * g) / (f * f))
-
-    t map(f * _ + p1)
+        Set[Vector2D](A * u + C)
+    }
+    case g => throw new UnsupportedOperationException("Line: Intersections not yet implemented with " + g)
   }
-
-  def intersections(ellipse : Ellipse2D) = Set()
-
-  /**
-   * Returns a set of points, defined as the intersection(s) between the
-   * two endless lines.
-   */
-  def intersections(line : Line2D) = {
-    // The lines are defined by the equations:
-    //   L1 = A*u + C
-    //   L2 = B*v + D
-    val A = p2 - p1
-    val B = line.p2 - line.p1
-    val C = p1
-    val D = line.p1
-
-    // To findRecursive the intersection, set the two above equations equal:
-    //   L1 = L2  <=>  A*u + C = B*v + D
-    // The intersection is defined by solving (u,v) in the linear system:
-    //   A*u - B*v = D - C
-    // Calculate the determinant:
-    //   det = | A  -B | = | B  A |
-    // If det = 0 there are no solutions (the lines are parallel). Now we findRecursive
-    // the solution for the first line, L1:
-    //   u = | (D - C)  -B | / det = | B  (D - C) | / det
-    val det = Vector2D.determinant(B, A)
-    val u   = Vector2D.determinant(B, D - C) / det
-
-    // To calculate the point of intersection we insert u in the line equation.
-    // If the determinant = 0, the lines are parallel
-    if (det == 0)
-      Set()
-    else
-      Set[Vector2D](A * u + C)
-  }
-
-  def intersections(rectangle : Rectangle2D) = Set()
-  def intersections(segment : Segment2D) = Set()
 
   def transform(t : TransformationMatrix) = {
     Line2D(p1.transform(t), p2.transform(t))

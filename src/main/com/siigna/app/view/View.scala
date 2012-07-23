@@ -161,6 +161,11 @@ object View extends Canvas {
       // TODO: Cache this
       try {
         val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
+
+        // Draw selection
+        Drawing.selection.foreach(graphics draw)
+
+        // Draw vertices
         Drawing.selection.foreach(_.foreach(i => {
           Drawing(i._1).getVertices(i._2).foreach(p => {
             graphics.draw(transformation.transform(p), color)
