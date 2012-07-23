@@ -1,7 +1,7 @@
 package com.siigna.app.controller.remote
 
-import com.siigna.app.controller.Client
 import com.siigna.app.model.server.User
+import com.siigna.app.controller.{Controller, Client}
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free

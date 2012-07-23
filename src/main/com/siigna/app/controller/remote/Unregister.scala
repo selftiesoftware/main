@@ -11,7 +11,8 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.controller.Client
+import com.siigna.app.controller.{Controller, Client}
+
 
 /**
  * A class that un-registers a client.
