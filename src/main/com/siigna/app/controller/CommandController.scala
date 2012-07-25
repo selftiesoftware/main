@@ -100,6 +100,8 @@ trait CommandController extends EventController {
             case Goto(state, continue) => {
               if (modules.isEmpty) {
                 Log.warning("[Controller]: Could not change state - no module in the stack.")
+              } else if (state == 'end && modules.size == 1) {
+                Log.warning("[Controller]: Cannot goto 'end on the last remaining module. Command ignored.")
               } else {
                 // Set the new state
                 modules.top.state = state
