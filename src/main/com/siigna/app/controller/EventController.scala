@@ -43,7 +43,10 @@ trait EventController extends ModuleController {
            case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
          }
        } catch {
-         case e => Log.error("Controller: Unexpected error in processing state map: ", e)
+         case e => {
+           Log.error("Controller: Unexpected error when processing state map in module " + module + ". Shutting down. ", e)
+           stopModule(module, false)
+         }
        }
 
        // React on the event parsed and execute the function associated with the state;
@@ -56,7 +59,10 @@ trait EventController extends ModuleController {
            case None =>
          }
        } catch {
-         case e => Log.error("Error in retrieving state machine from module " + module + ".", e)
+         case e => {
+           Log.error("Error in retrieving state machine from module " + module + ". Shutting down!", e)
+           stopModule(module, false)
+         }
        }
 
        // If the module is ending then stop the module and match on the resulting event
