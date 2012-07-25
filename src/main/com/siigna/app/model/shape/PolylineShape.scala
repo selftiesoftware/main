@@ -188,7 +188,8 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
       else {
         var firstPoint = false
         var parts = Seq[InnerPolylineShape]()
-        var isConsistent = true
+        var lastIndex = xs.head // Last known index
+        var isConsistent = true // Is the
         xs foreach ( i => {
           // See if two adjacent elements are selected
           if ((xs(i) && xs(i + 1)) || (xs(i) && xs(i - 1))) {
@@ -200,16 +201,21 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
             // Include the start point if i is the head element
             if (i == 0) { firstPoint = true }
             else        { includeElement(i) }
-          } else if (parts.size > 2) {
-            // If two indexes are not next to one another, the polyline is not consistent
+          }
+
+          // If two indices are not next to one another, the polyline is not consistent
+          if (lastIndex < (i - 1)) {
             isConsistent = false
           }
+
+          // Set the isFirstSet variable depending on whether the previous part is included
+          lastIndex = i
         })
         // Examine whether the first point should be included and whether the result is coherent
         (firstPoint, isConsistent) match {
           case (true, true)   => Some(copy(innerShapes = parts))
-          case (false, true)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
-          case (true, false) if (parts.size > 1)  => Some(GroupShape(shapes(startPoint, parts), attributes))
+          case (true, false)  => Some(GroupShape(shapes(startPoint, parts), attributes))
+          case (false, true) if (parts.size > 1)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
           case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
           case _ => None
         }
