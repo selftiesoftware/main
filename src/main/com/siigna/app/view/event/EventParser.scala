@@ -14,11 +14,11 @@ package com.siigna.app.view.event
 import java.awt.event.{KeyEvent => AWTKeyEvent}
 
 import com.siigna.app.Siigna
-import com.siigna.app.model.shape.{Shape}
 import com.siigna.app.view.Graphics
 import collection.parallel.immutable.{ParMap, ParIterable}
 import com.siigna.util.geom.{Vector2D, TransformationMatrix}
 import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.shape.{CircleShape, Shape}
 
 /**
  * An <code>EventParser</code> that analyses a given list of events, and returns an
