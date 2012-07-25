@@ -18,7 +18,8 @@ import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna.app.controller.remote._
 import com.siigna.app.view.View
-import com.siigna.app.controller.remote.{Get, RemoteAction}
+import com.siigna.app.controller.remote.Get
+import com.siigna.app.controller.Controller
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -46,18 +47,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  protected var model = new Model(Map[Int, Shape]())
-
-  /**
-   * The [[com.siigna.app.model.action.Action]]s that have been executed on this model.
-   */
-  protected var executed = Seq[Action]()
-
-  /**
-   * The [[com.siigna.app.model.action.Action]]s that have been undone on this model.
-   */
-  protected var undone = Seq[Action]()
-
+  protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
+  
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -99,19 +90,15 @@ trait ActionModel extends SelectableModel with HasAttributes {
           }).toMap)
 
           // Send to server
-          if (Siigna.client.isDefined) {
-            RemoteAction(Siigna.client.get, remoteAction, undo)
-            Log.debug("Model: Sending action to server.")
-          }
+          Controller ! action
+          Log.debug("Model: Sending action to server.")
 
           // Return
           remoteAction
         }
         case LocalAction(shapes, _) => {
           // Request more ids!
-          if (Siigna.client.isDefined) {
-            Get(ShapeIdentifier, Some(math.max(shapes.size, 5)), Siigna.client.get)
-          }
+          Get(ShapeIdentifier, Some(math.max(shapes.size, 5)))
           action
         }
         case a => a
@@ -160,9 +147,23 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
     // Create the remote command and dispatch it
     if (remote && Siigna.isOnline) {
-      RemoteAction(Siigna.client.get, action)
+      Controller ! action
       Log.debug("Forwarding action to server: " + action)
     }
+  }
+
+  /**
+   * Retrieves the sequence of executed actions.
+   * @return The actions executed on the Model
+   */
+  protected def executed = model.executed
+
+  /**
+   * Sets the executed actions of the model.
+   * @param executed  The sequence of actions to replace the executed actions with.
+   */
+  protected def executed_=(executed : Seq[Action]) {
+    model = new Model(model.shapes, executed, model.undone)
   }
 
   /**
@@ -192,9 +193,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       execute(new LocalAction(ids.zip(shapes).toMap, f), false)
 
       // Send a request for more ID's
-      if (Siigna.client.isDefined) {
-        Get(ShapeIdentifier, Some(math.max(shapes.size, 10)), Siigna.client.get)
-      }
+      Get(ShapeIdentifier, Some(math.max(shapes.size, 10)))
     }
   }
 
@@ -214,8 +213,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
       executed +:= action
 
       // Send to server
-      if (Siigna.client.isDefined && !action.isInstanceOf[LocalAction]) {
-        RemoteAction(Siigna.client.get, action)
+      if (!action.isInstanceOf[LocalAction]) {
+        Controller ! action
         Log.debug("Model: Sending action to server.")
       }
 
@@ -266,8 +265,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
       if (remote.isEmpty) undone +:= action
 
       // Send to server if the client is defined and the action isn't set
-      if (Siigna.client.isDefined && remote.isEmpty && !action.isInstanceOf[LocalAction]) {
-        RemoteAction(Siigna.client.get, action, true)
+      if (remote.isEmpty && !action.isInstanceOf[LocalAction]) {
+        Controller ! (action, true)
         Log.debug("Forwarding undoing action to server: " + action)
       }
 
@@ -276,6 +275,20 @@ trait ActionModel extends SelectableModel with HasAttributes {
     } else {
       Log.warning("Model: No more actions to undo.")
     }
+  }
+
+  /**
+   * The actions that have been undone on the model.
+   * @return  A sequence of undone actions.
+   */
+  def undone = model.undone
+
+  /**
+   * Sets the undone actions of the model.
+   * @param undone  The sequence of actions to replace the currently undone actions.
+   */
+  def undone_=(undone : Seq[Action]) {
+    model = new Model(model.shapes, model.executed, undone)
   }
 
 }

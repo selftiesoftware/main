@@ -9,30 +9,27 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.remote
+package com.siigna.app.model.action
 
-import com.siigna.app.controller.{Controller, Client}
+import com.siigna.app.model.shape.Shape
+import com.siigna.app.model.{Drawing, Model}
+import com.siigna.util.collection.Attributes
 
-
-/**
- * A RemoteCommand capable of setting a given attribute to a given value.
- */
-@SerialVersionUID(-1041843852)
-sealed case class Set(name : RemoteConstant, value : Any, client : Client) extends RemoteCommand
 
 /**
- * A companion object to the Set command.
+ * Loads a drawing from a given input.
+ *
+ * @param shapes  The shapes in the drawing.
+ * @param actions  The actions that have been executed on the model.
  */
-object Set {
+case class LoadDrawing(shapes : Map[Int, Shape], actions : Seq[Action], attributes : Attributes) extends VolatileAction {
 
-  /**
-   * Creates and dispatches a Set command to the Controller.
-   * @param name  The type of the value to set.
-   * @param value  The value of the value (uuuh, inception!!).
-   */
-  def apply(name : RemoteConstant, value : Any) {
-    // Dispatches the command
-    Controller ! ((c : Client) => Set(name, value, c))
+  def execute(model : Model) = {
+    // Store the attributes
+    Drawing.setAttributes(attributes)
+
+    // Store the shapes and the executed actions.
+    new Model(shapes, actions, Seq())
   }
   
 }

@@ -187,7 +187,7 @@ object DXFSection {
         }
         case p: PolylineShape => {
           val vertices = p.geometry.vertices
-          val numberOfVertices = vertices.length
+          val numberOfVertices = vertices.size
 
           DXFSection(
 
