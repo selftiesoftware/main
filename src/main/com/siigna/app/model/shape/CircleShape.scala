@@ -39,7 +39,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       //  else p2,
       //  attributes)))
     //}
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
@@ -67,6 +67,11 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
     else {
       FullSelector
     }
+  
+  def getShape(s : ShapeSelector) = s match {
+    case FullSelector => Some(this)
+    case _ => None
+  }
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices

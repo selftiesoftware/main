@@ -40,7 +40,7 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   def contains[Geometry2D](g : Geometry2D) = false
 
   // TODO: Find a Math wiz.
-  def distanceTo(point : Vector) = java.lang.Double.POSITIVE_INFINITY
+  def distanceTo(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
 
   /**
    * Calculates the distance from a ellipse to a point.
@@ -130,11 +130,11 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   /**
    * Examines whether the ellipse intersects with a segment
    */
-  def intersects(line: Segment) = false
+  def intersects(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
 
   /**
    * Examines whether the ellipse intersects with rectangle
    */
-  def intersects(rect: Rectangle) = false
+  def intersections(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
   
 }

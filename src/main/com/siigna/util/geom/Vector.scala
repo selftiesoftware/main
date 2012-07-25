@@ -13,16 +13,12 @@ package com.siigna.util.geom
 
 /**
  * A vector class utility.
+ * TODO: Should it extend geometry?
  */
-trait Vector {
+trait Vector extends Geometry {
 
   type T <: Vector
   type R <: Rectangle
-
-  /**
-   * The center of the geometry.
-   */
-  val center = this
 
   /**
    * Returns the sum of this vector with another vector.

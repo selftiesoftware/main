@@ -34,33 +34,9 @@ trait GeometryEnclosed2D extends GeometryEnclosed with Geometry2D {
   // TODO: Introduce expand
 
   /**
-   * Examines whether a circle is within the four boundaries
-   * of a rectangle.
+   * Examines whether a the given geometry is completely enclosed by this geometry.
+   * @return true if the given geometry is inside, false otherwise
    */
-  def contains(circle : Circle2D) : Boolean
-
-  /**
-   * Examines whether an ellipse is within the four boundaries
-   * of a rectangle.
-   */
-  def contains(ellipse : Ellipse2D) : Boolean
-
-  /**
-   * Examines whether an ellipse is within the four boundaries
-   * of a rectangle.
-   */
-  def contains(rectangle : Rectangle2D) : Boolean
-
-  /**
-   * Examines whether a line is within (or on top of) the four boundaries
-   * of a rectangle.
-   */
-  def contains(line : Segment2D) : Boolean
-
-  /**
-   * Examines whether a point is within (or on top of) the four boundaries
-   * of a rectangle.
-   */
-  def contains(point : Vector2D) : Boolean
+  def contains(geometry : Geometry2D) : Boolean
   
 }

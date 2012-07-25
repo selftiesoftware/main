@@ -17,7 +17,8 @@ import com.siigna.app.view.event.Event
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import remote._
-import com.siigna.app.model.server.User
+import com.siigna.app.model.action.Action
+import com.siigna.app.view.View
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -54,6 +55,15 @@ object Controller extends CommandController {
     // Loop and react on incoming messages
     loop {
       react {
+        // Handle actions (execute, not undo)
+        case action : Action                   => remote ! (action, false)
+          
+        // Handle actions with an undo flag
+        case (action : Action, undo : Boolean) => remote ! (action, undo)
+          
+        // Handle remote commands
+        case f : (Client => RemoteCommand)     => remote ! f
+        
         // Handle commands
         case command : Command => {
           Log.debug("Controller: Received command: " + command)
@@ -80,6 +90,9 @@ object Controller extends CommandController {
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
       }
+
+      // Draw the view
+      View.repaint()
     }
   }
 

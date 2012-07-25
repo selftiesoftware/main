@@ -12,7 +12,7 @@
 package com.siigna.app.model
 
 
-import action.CreateShape
+import action.{Action, CreateShape}
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.{Shape}
@@ -33,14 +33,19 @@ import com.siigna.app.controller.remote.{Get, RemoteAction}
  * layer, and the actions which have been applied on the dynamic layer is applied on the static layer.
  *
  * @param shapes  The shapes and their identifiers (keys) stored in the model.
+ * @param executed  The actions that have been executed on this model.
+ * @param undone  The actions that have been undone on this model.
  *
  * TODO: Examine possibility to implement an actor. Thread-less please.
  */
-sealed class Model(val shapes : Map[Int, Shape]) extends ImmutableModel[Int, Shape]
+sealed class Model(val shapes : Map[Int, Shape], val executed : Seq[Action], val undone : Seq[Action])
+                                                 extends ImmutableModel[Int, Shape]
                                                     with MutableModel
                                                     with SpatialModel[Int, Shape]
                                                     with ModelBuilder[Int, Shape] {
+  
+  def build(coll : Map[Int, Shape]) = new Model(coll, executed, undone)
 
-  def build(coll : Map[Int, Shape]) = new Model(coll)
+  def build(coll : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action]) = new Model(coll, executed, undone)
 
 }

@@ -18,7 +18,7 @@ import com.siigna.app.model.shape._
 import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
-import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.{Selection, Drawing, Model}
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -36,9 +36,11 @@ class Graphics(val g : Graphics2D)
   def colorBackground  = Siigna.color("colorBackground").getOrElse("#F9F9F9".color)
   def colorDraw        = Siigna.color("colorDraw").getOrElse("#000000".color)
   def colorSelected    = Siigna.color("colorSelected").getOrElse("#7777FF".color)
-  
+
   /**
    * Draws a given shape.
+   *
+   * TODO: Make this thread-safe.
    */
   def draw(shape : Shape) {
 
@@ -51,7 +53,7 @@ class Graphics(val g : Graphics2D)
 
     // Set the server-color
     setColor(color)
-    
+
     if (attributes.boolean("Visible") != Some(false)) {
       transformedShape match {
         case s : ArcShape         => {
@@ -95,6 +97,7 @@ class Graphics(val g : Graphics2D)
           //draw(s.p1)
           //draw(s.p2)
         }
+
         /** COLLECTION SHAPES **/
         // TODO: What about the attributes from the collection-shapes?!
         case s : PolylineShape    => {

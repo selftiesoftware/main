@@ -17,7 +17,8 @@ import actors.remote.{Node, RemoteActor}
 import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import com.siigna.app.model.server.User
+import com.siigna.app.model.action.Action
+import actors.Actor
 
 /**
  * Controls any remote connection(s).
@@ -28,6 +29,11 @@ protected[controller] object RemoteController {
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
+
+  /**
+   * The unique identifier for this client.
+   */
+  var client : Option[Client] = None
 
   /**
    * A boolean flag to indicate if this controller has been successfully registered with the server.
@@ -41,7 +47,7 @@ protected[controller] object RemoteController {
   def isOnline = isConnected
 
   // The local sink, receiving actions from the remote sink
-  private val local = actor {
+  private val local : Actor = actor {
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined) {
@@ -51,12 +57,29 @@ protected[controller] object RemoteController {
     }
 
     // TEST!!!!
+    //import com.siigna.app.model.server._
     //isConnected = true
-    //Register(User("Jens"), None, Client(0))
+    //remote.send(Register(User("Jens"), Some(31), Client(31)), local)
 
     loop {
       react {
+        // Successful registration of the client
+        case client : Client => {
+          // Log the received client
+          Log.info("CommandController: Registered client: " + client)
+
+          // Store the client
+          this.client = Some(client)
+          
+          //remote.send(Get(Drawing, Some(31), client), local)
+
+          // Get shape-ids for the id-bank
+          remote.send(Get(ShapeIdentifier, Some(4), client), local)
+
+          Log.debug("CommandController: Sucessfully registered client: " + client)
+        }
         case msg => {
+          println("Received: " + msg)
           Controller ! msg
           isConnected = true
         }
@@ -70,21 +93,15 @@ protected[controller] object RemoteController {
   private var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  //private val remote = select(Node("siigna.com", 20004), 'siigna)
   private val remote = select(Node("localhost", 20004), 'siigna)
 
-  // TODO: Fix this.
-  def ! (command : RemoteCommand) {
-    command match {
-      case c : Register if (isOnline) => remote.send(command, local)
-      case c : Unregister if (isOnline) => remote.send(command, local)
-      case _ => {
-        Controller.client match {
-          case Some(c) if (isOnline) => remote.send(command, local)
-          case _ =>
-        }
-      }
-    }
+  /**
+   * Sends an action remotely.
+   * @param action The action to dispatch.
+   * @param undo Should the action be undone?
+   */
+  def ! (action : Action, undo : Boolean) {
+    queue :+= ((c : Client) => RemoteAction(c, action, undo))
   }
   
   /**
@@ -93,11 +110,11 @@ protected[controller] object RemoteController {
    * a connection is established. Messages are sent in the order they are received.
    */
   def ! (f : Client => RemoteCommand) {
-    Controller.client match {
+    client match {
       // Send the message to the client and provide a return channel
       case Some(c) if (isOnline) => remote.send(f(c), local)
       // Enqueue it and wait for a connection
-      case _ => queue = queue :+ f
+      case _ => queue :+= f
     }
   }
 
