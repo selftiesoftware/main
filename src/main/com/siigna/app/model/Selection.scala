@@ -51,11 +51,15 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
   var attributes : Attributes = Attributes()
 
   /**
-   * Applies a transformation matrix to the selected part of the contained shapes and returns the resulting shapes.
+   * Applies a transformation matrix to the selected parts of the contained shapes only, and not
+   * touching the rest of the shape.
    * @param t  The transformation matrix to be applied.
+   * @return The shapes with the partial transform applied.
    */
-  def apply(t : TransformationMatrix) = {
-    parts.map(p => Drawing(p._1).apply(p._2)).collect{ case Some(p : PartialShape) => p.apply(t) }
+  def apply(t : TransformationMatrix) : Iterable[Shape] = {
+    parts.map(p => {
+      Drawing(p._1)(p._2)
+    }).collect{ case Some(p : PartialShape) => p.apply(t) }
   }
 
   /**
@@ -71,6 +75,16 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    * @return  The length from the closest point of this shape to the point.
    */
   def distanceTo(point: Vector2D, scale: Double) = parts.map(s => Drawing(s._1).distanceTo(point)).reduceLeft((a, b) => if (a < b) a else b) * scale
+
+  /**
+   * Retrieves the selected parts of the shapes in the current selection.
+   * @return A number of selected sub-shapes.
+   */
+  def selectedShapes : Iterable[Shape] = {
+    parts.map((t : (Int, ShapeSelector)) => {
+      Drawing(t._1).getShape(t._2)
+    }).collect { case Some(s : Shape) => s.setAttributes(attributes) }
+  }
 
   /**
    * Retrieves the current shapes of the selection.
@@ -97,7 +111,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
   def toggle(id : Int, selector : ShapeSelector) {
     if (parts contains id) {
       parts(id) match {
-        case CollectionSelector(xs) => parts = parts + (id -> CollectionSelector({
+        case PolylineShape.Selector(xs) => parts = parts + (id -> PolylineShape.Selector({
           val set = BitSet()
           for (i <- 0 to xs.max) {
             if (!xs(i)) set + i

@@ -134,7 +134,7 @@ class SiignaApplet extends Applet {
 
     // Set the event-values
     val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
-    val code = e.getKeyCode
+    val code = e.getKeyChar
     val isModifier = (code == 16 || code == 17 || code == 18)
 
     // If they key-code equals a modifier key, nothing bad can happen..

@@ -10,6 +10,8 @@
  */
 package com.siigna.app.controller.command
 
+import com.siigna.app.controller.Controller
+
 /**
  * A message that signals the Controller to go to another state.
  *
@@ -17,5 +19,9 @@ package com.siigna.app.controller.command
  * @param continue  A flag that signals whether the module should continue it's execution in the new state or wait
  * for a new event.
  */
-case class Goto(state : Symbol, continue : Boolean = true) extends Command
+case class Goto(state : Symbol, continue : Boolean = true) extends Command {
+
+  // Dispatches the command
+  Controller ! this
+}
 

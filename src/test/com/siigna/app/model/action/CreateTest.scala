@@ -12,20 +12,20 @@
 package com.siigna.app.model.action
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.Spec
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.model.shape.{Shape, LineShape}
 import collection.parallel.immutable.{ParMap, ParHashMap}
 import com.siigna.app.model.{Drawing, Model}
+import org.scalatest.{FunSpec, Spec}
 
 /**
  * A test for the Create object and associated classes
  */
-class CreateTest extends Spec with ShouldMatchers {
+class CreateTest extends FunSpec with ShouldMatchers {
 
   val id = 123142
   val line = LineShape(Vector2D(0, 0), Vector2D(13, 14))
-  val model = new Model(Map())
+  val model = new Model(Map(), Seq(), Seq())
 
   describe("CreateShape") {
     val action = CreateShape(id, line)
