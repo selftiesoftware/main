@@ -78,7 +78,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    */
   def shapes : Map[Int, Shape] = {
     parts.map((t : (Int, ShapeSelector)) => {
-      (t._1 -> Drawing(t._1).setAttributes(attributes))
+      (t._1 -> Drawing(t._1).addAttributes(attributes))
     })
   }
   
