@@ -163,7 +163,9 @@ object View extends Canvas {
         val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
         // Draw selection
-        Drawing.selection.foreach(graphics draw)
+        Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
+          graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
+        }))
 
         // Draw vertices
         Drawing.selection.foreach(_.foreach(i => {
@@ -172,7 +174,7 @@ object View extends Canvas {
           })
         }))
       } catch {
-        case e => Log.error("View: Unable to draw the dynamic Model: "+e)
+        case e => Log.error("View: Unable to draw the dynamic Model: ", e)
       }
 
       /***** MODULES *****/
@@ -257,7 +259,7 @@ object View extends Canvas {
         // Draw model
         if (Drawing.size > 0) try {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-          Drawing(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
+          Drawing(mbr).map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
         } catch {
           case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
           case e => Log.error("View: Unable to draw Drawing: "+e)
