@@ -22,6 +22,22 @@ trait HasAttributes {
   type T <: HasAttributes
 
   /**
+   * Adds an attribute to the current attributes
+   * @param attribute  The attributes to add
+   * @return A shape with the new attributes
+   */
+
+  def addAttribute(attribute : (String, Any)) = setAttributes(this.attributes + attribute)
+
+  /**
+   * Adds attributes to the current attributes
+   * @param attributes  The attributes to add
+   * @return A shape with the new attributes
+   */
+  
+  def addAttributes(attributes : Attributes) = setAttributes(this.attributes ++ attributes)
+   
+  /**
    * The attributes of the shape.
    */
   def attributes: Attributes
