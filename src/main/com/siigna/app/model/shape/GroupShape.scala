@@ -60,12 +60,22 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
   def getPart(point: Vector2D) = {
     shapes.reduceLeft((a : Shape, b : Shape) => if (a.distanceTo(point) <= b.distanceTo(point)) a else b).getPart(point)
   }
+  
+  def getShape(s : ShapeSelector) = s match {
+    case FullSelector => Some(this)
+    case GroupShape.Selector(xs) => {
+      Some(copy(shapes = xs.map(t => shapes(t._1).getShape(t._2)).collect {
+        case Some(s : Shape) => s
+      }.toSeq))
+    }
+    case _ => None
+  }
 
   def getVertices(selector: ShapeSelector) = shapes.flatMap(_.getVertices(selector))
 
-  def join(shape: Shape) = throw new UnsupportedOperationException("Not yet implemented")
+  def join(shape : Shape) = copy(shapes = shapes :+ shape)
 
-  def join(shapes: Traversable[Shape]) = throw new UnsupportedOperationException("Not yet implemented")
+  def join(shapes: Traversable[Shape]) = copy(shapes = this.shapes ++ shapes)
 
   /**
    * Returns a new collection with a new set of attributes. In other words return a collection with a new id,
@@ -84,6 +94,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
  */
 object GroupShape {
 
+  // TODO: There must be a smarter way to do this instead of spending one class-reference per selected object.
   sealed case class Selector(selectors : Map[Int, ShapeSelector]) extends ShapeSelector
 
   def apply(shapes : Traversable[Shape]) = new GroupShape(shapes.toSeq, Attributes())
