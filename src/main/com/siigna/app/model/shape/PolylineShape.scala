@@ -218,7 +218,7 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   // TODO: export polylines.
   //def toDXF = DXFSection(List())
 
-  override def toString = "PolylineShape[" + startPoint + "," + innerShapes + "]"
+  override def toString = "PolylineShape[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
   def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)).distinct, attributes)
 }
