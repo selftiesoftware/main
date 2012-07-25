@@ -31,6 +31,9 @@ class PartialShape(val part : Shape, f : (TransformationMatrix => Shape)) extend
 
   /**
    * Transforms the PartialShape with a given matrix.
+   *
+   * @param t  A [[com.siigna.util.geom.TransformationMatrix]] to apply to the sub-selection of the containing shape.
+   * @return  A partially transformed shape.
    */
   def apply(t : TransformationMatrix) = f(t)
   
