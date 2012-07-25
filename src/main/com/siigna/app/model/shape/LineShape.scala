@@ -43,12 +43,12 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def apply(part : ShapeSelector) = part match {
     case Selector(xs) => {
-      Some(new PartialShape((t : TransformationMatrix) => LineShape(
+      Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(
         if(xs)  p1.transform(t) else p1,
         if(!xs) p2.transform(t) else p2,
         attributes)))
     }
-    case FullSelector => Some(new PartialShape(transform))
+    case FullSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
@@ -85,6 +85,11 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       }
     }
   }
+  
+  def getShape(s : ShapeSelector) = s match {
+    case FullSelector => Some(this)
+    case _ => None
+  }
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices
@@ -104,7 +109,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
               DXFSection.fromVector(p2)
   */
 
-  override def toString() = "LineShape[" + p1 + ", " + p2 + "]"
+  override def toString = "LineShape[" + p1 + ", " + p2 + " (" + attributes + ")]"
 
   def transform(transformation : TransformationMatrix) : LineShape = {
     LineShape(p1 transform(transformation),

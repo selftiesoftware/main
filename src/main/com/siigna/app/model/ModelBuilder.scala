@@ -11,6 +11,8 @@
 
 package com.siigna.app.model
 
+import action.Action
+
 /**
  * Trait that provides necessary information to build a model with a
  * [[scala.collection.parallel.immutable.ParHashMap]] containing the given types.
@@ -23,6 +25,15 @@ trait ModelBuilder[Key, Value] {
    * @return A new (immutable) Model.
    */
   protected def build(coll : Map[Key, Value]) : Model
+  
+  /**
+   * Builds a new Model from the given Map of shapes along with the actions this model has executed and undone.
+   * @param coll  The map of keys and shapes.
+   * @param executed  The actions that has been executed on this model
+   * @param undone  The actions that has been undone on this model.
+   * @return A new (immutable) Model.
+   */
+  protected def build(coll : Map[Key, Value], executed : Seq[Action], undone : Seq[Action]) : Model
 
   /**
    * The shapes used to perform actions upon.
