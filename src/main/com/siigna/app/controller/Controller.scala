@@ -18,6 +18,7 @@ import com.siigna.module.Module
 import com.siigna.util.logging.Log
 import remote._
 import com.siigna.app.model.action.Action
+import com.siigna.app.view.View
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -89,6 +90,9 @@ object Controller extends CommandController {
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
       }
+
+      // Draw the view
+      View.repaint()
     }
   }
 
