@@ -18,6 +18,7 @@ import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
+import actors.Actor
 
 /**
  * Controls any remote connection(s).
@@ -46,7 +47,7 @@ protected[controller] object RemoteController {
   def isOnline = isConnected
 
   // The local sink, receiving actions from the remote sink
-  private val local = actor {
+  private val local : Actor = actor {
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined) {
@@ -56,26 +57,29 @@ protected[controller] object RemoteController {
     }
 
     // TEST!!!!
-    //import com.siigna.app.controller.remote._
+    //import com.siigna.app.model.server._
     //isConnected = true
-    //remote.send(Register(User("Jens"), None, Client(0)), local)
+    //remote.send(Register(User("Jens"), Some(31), Client(31)), local)
 
     loop {
       react {
         // Successful registration of the client
-        case r : Register => {
+        case client : Client => {
           // Log the received client
-          Log.info("CommandController: Registered client: " + r.client)
+          Log.info("CommandController: Registered client: " + client)
 
           // Store the client
-          client = Some(r.client)
+          this.client = Some(client)
+          
+          //remote.send(Get(Drawing, Some(31), client), local)
 
           // Get shape-ids for the id-bank
-          Get(ShapeIdentifier, Some(4), r.client)
+          remote.send(Get(ShapeIdentifier, Some(4), client), local)
 
           Log.debug("CommandController: Sucessfully registered client: " + client)
         }
         case msg => {
+          println("Received: " + msg)
           Controller ! msg
           isConnected = true
         }
@@ -89,7 +93,7 @@ protected[controller] object RemoteController {
   private var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  private val remote = select(Node("siigna.com", 20004), 'siigna)
+  private val remote = select(Node("localhost", 20004), 'siigna)
 
   /**
    * Sends an action remotely.
