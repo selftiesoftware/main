@@ -189,30 +189,29 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
         var firstPoint = false
         var parts = Seq[InnerPolylineShape]()
         var isConsistent = true
-        for (i <- xs.head until xs.last) {
-          if (xs(i) && xs(i + 1)) {
+        xs foreach ( i => {
+          // See if two adjacent elements are selected
+          if ((xs(i) && xs(i + 1)) || (xs(i) && xs(i - 1))) {
             // Includes shapes if they are not already there
             def includeElement(s : Int) {
               val shape = innerShapes(s - 1) // Minus 1 since start point is included in xs (at position 0)
-              if (!parts.contains(shape)) parts :+= shape
+              parts :+= shape
             }
             // Include the start point if i is the head element
             if (i == 0) { firstPoint = true }
             else        { includeElement(i) }
-
-            // Include the i + 1 element 
-            includeElement(i + 1)
-          } else {
+          } else if (parts.size > 2) {
             // If two indexes are not next to one another, the polyline is not consistent
             isConsistent = false
           }
-        }
+        })
         // Examine whether the first point should be included and whether the result is coherent
         (firstPoint, isConsistent) match {
           case (true, true)   => Some(copy(innerShapes = parts))
-          case (false, true)  => Some(copy(startPoint = innerShapes.head.point, innerShapes = innerShapes.tail))
-          case (true, false)  => Some(GroupShape(shapes(startPoint, innerShapes), attributes))
-          case (false, false) => Some(GroupShape(shapes(innerShapes.head.point, innerShapes.tail), attributes))
+          case (false, true)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
+          case (true, false) if (parts.size > 1)  => Some(GroupShape(shapes(startPoint, parts), attributes))
+          case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
+          case _ => None
         }
       }
     }
