@@ -41,7 +41,7 @@ object View extends Canvas {
    * A volatile image, used to utilize hardware acceleration and cancel out the double-buffering issue
    * that can cause flickering when repainting (see below).
    */
-  private var cachedVolatileImage : Option[VolatileImage] = None
+  var cachedVolatileImage : Option[VolatileImage] = None
 
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
@@ -83,7 +83,7 @@ object View extends Canvas {
   /**
    * Creates a Volatile Image with the width and height of the current screen.
    */
-  private def backBuffer : VolatileImage = {
+  def backBuffer : VolatileImage = {
     getGraphicsConfiguration.createCompatibleVolatileImage(getSize width, getSize height)
   }
 
@@ -176,6 +176,9 @@ object View extends Canvas {
       } catch {
         case e => Log.error("View: Unable to draw the dynamic Model: ", e)
       }
+
+      /***** MODULES LOADER *****/
+      modulesLoader.paint(graphics,transformation)
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
