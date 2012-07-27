@@ -11,11 +11,13 @@
 
 package com.siigna.app.view
 
+import java.awt.Color
+
 import com.siigna.app.model.shape._
+import com.siigna.app.Siigna
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.geom.Vector2D
 import com.siigna.util.geom.Vector2D._
-import java.awt.Color
 
 object modulesLoader {
 
@@ -24,7 +26,7 @@ object modulesLoader {
                                 LineShape(Vector2D(105,15.56),Vector2D(105,5.345)),
                                 LineShape(Vector2D(8.34,18.91),Vector2D(101.7,18.91)),
 
-                                LineShape(Vector2D(105,13.59),Vector2D(5,13.59)),
+                                LineShape(Vector2D(105,12),Vector2D(5,12)),
 
                                 ArcShape(Vector2D(8.34,5.34),3.34,180,-90),
                                 ArcShape(Vector2D(101.65,5.34),3.34,0,90),
@@ -35,28 +37,50 @@ object modulesLoader {
                                 LineShape(Vector2D(53.21,14.70),Vector2D(57,14.70)),
                                 LineShape(Vector2D(57,14.70),Vector2D(55,17.84)))
 
-  val frameFill = Array        (Vector2D(5,5.345),Vector2D(5,15.56),
-                                Vector2D(5,15.56),Vector2D(8.34,18.91),
-                                Vector2D(8.34,18.91),Vector2D(101.7,18.91),
-                                Vector2D(101.7,18.91),Vector2D(105,15.56),
-                                Vector2D(105,15.56),Vector2D(105,5.345),
+  val frameFillTop = Array      (Vector2D(5,5.345),Vector2D(5,12),
+                                Vector2D(5,12),Vector2D(105,12),
+                                Vector2D(105,12),Vector2D(105,5.345),
                                 Vector2D(105,5.345),Vector2D(101.7,2),
                                 Vector2D(101.7,2),Vector2D(8.34,2),
                                 Vector2D(8.34,2),Vector2D(5,5.345))
 
-
+val frameFillFlyout = Array     (
+                                Vector2D(5,12),Vector2D(5,15.56),
+                                Vector2D(5,15.56),Vector2D(8.34,18.91),
+                                Vector2D(8.34,18.91),Vector2D(101.7,18.91),
+                                Vector2D(101.7,18.91),Vector2D(105,15.56),
+                                Vector2D(105,15.56),Vector2D(105,12),
+                                Vector2D(105,12),Vector2D(5,12))
 
   def paint (g : Graphics, t : TransformationMatrix)= {
 
-    val menuColor       = new Color(0.95f, 0.95f, 0.95f, 1.00f)
-    val fillScreenX = frameFill.map(_.x.toInt).toArray
-    val fillScreenY = frameFill.map(_.y.toInt).toArray
+    var m = Siigna.mousePosition.transform(t)
+
+    def highlight : Boolean = {
+      if(m.x < 100 & m.y < 20 && m.y > 10 ) true
+      else false
+    }
+
+    val menuColor = new Color(0.95f, 0.95f, 0.95f, 0.80f)
+
+    val flyoutColor       = {
+      if(highlight == true) new Color(0.75f, 0.75f, 0.75f, 0.80f)
+      else new Color(0.95f, 0.95f, 0.95f, 0.20f)
+    }
+
+    val fillTopX = frameFillTop.map(_.x.toInt).toArray
+    val fillTopY = frameFillTop.map(_.y.toInt).toArray
+
+    val fillFlyoutX = frameFillFlyout.map(_.x.toInt).toArray
+    val fillFlyoutY = frameFillFlyout.map(_.y.toInt).toArray
 
     g setColor menuColor
-    g.g.fillPolygon(fillScreenX, fillScreenY, frameFill.size)
+    g.g.fillPolygon(fillTopX, fillTopY, frameFillTop.size)
+    g setColor flyoutColor
+    g.g.fillPolygon(fillFlyoutX, fillFlyoutY, frameFillFlyout.size)
 
-    frame.foreach(g draw)
-    g draw TextShape("BASE MODULES",Vector2D(19,4.5),8)
+    frame.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
+    g draw TextShape("BASE MODULES",Vector2D(19,4),8)
 
   }
 }
