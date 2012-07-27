@@ -178,7 +178,7 @@ object View extends Canvas {
       }
 
       /***** MODULES LOADER *****/
-      modulesLoader.paint(graphics,transformation)
+      //modulesLoader.paint(graphics,transformation)
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
