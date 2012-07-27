@@ -17,7 +17,6 @@ import com.siigna.app.model.shape._
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.geom.Vector2D
-import com.siigna.util.geom.Vector2D._
 
 object modulesLoader {
 
