@@ -134,9 +134,12 @@ class SiignaApplet extends Applet {
 
     // Set the event-values
     val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
-    val code = e.getKeyChar
+    
+    // If the key is numeric then retrieve the Char value, otherwise get the int code.
+    // Numeric keys aren't interpreted as digits if the int code is used (silly!)
+    val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getKeyCode
     val isModifier = (code == 16 || code == 17 || code == 18)
-
+    
     // If they key-code equals a modifier key, nothing bad can happen..
     if (isModifier) {
       Controller ! constructor(getCorrectCase(code), keys)
