@@ -34,13 +34,3 @@ case object EmptySelector extends ShapeSelector
  * A FullSelector signals that the ShapeSelector contains the entire shape. No sub-selection magic is needed.
  */
 case object FullSelector extends ShapeSelector
-
-/**
- * A CollectionSelector is a selector for [[com.siigna.app.model.shape.CollectionShape]]s.
- * It is basically a BitSet where each boolean represents one part of the collection.
- *
- * @param xs The BitSet indicating which parts of a CollectionShape has been selected.
- * @see BitSet
- * @see CollectionShape
- */
-case class CollectionSelector(xs : BitSet) extends ShapeSelector
