@@ -54,6 +54,11 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
   def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
 
   def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").getOrElse(5.0)) FullSelector else EmptySelector
+  
+  def getShape(s : ShapeSelector) = s match {
+    case FullSelector => Some(this)
+    case _ => None
+  }
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices

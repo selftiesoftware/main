@@ -77,9 +77,11 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-  def getPart(rect: Rectangle2D) = throw new UnsupportedOperationException("Not yet implemented")
+  def getPart(rect: Rectangle2D) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
 
-  def getPart(point: Vector2D) = throw new UnsupportedOperationException("Not yet implemented")
+  def getPart(point: Vector2D) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+
+  def getShape(s : ShapeSelector) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
 
   def getVertices(selector: ShapeSelector) = throw new UnsupportedOperationException("Not yet implemented")
 

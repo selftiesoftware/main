@@ -35,7 +35,7 @@ trait SelectableModel {
    * Selects an entire shape based on its id.
    * @param id  The id of the shape.
    */
-  def select(id : Int) { model select id }
+  def select(id : Int) { model select id } //TODO: Make this abstract!
 
   /**
    * Selects several shapes based on their ids.

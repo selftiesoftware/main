@@ -38,15 +38,9 @@ class Graphics(val g : Graphics2D)
   def colorSelected    = Siigna.color("colorSelected").getOrElse("#7777FF".color)
 
   /**
-   * Draws a given selection.
-   */
-  def draw(selection : Selection) {
-    // Draw all the partial shapes that are defined (have meaningful graphical semantic)
-    selection.map(t => Drawing(t._1)(t._2)).foreach{ _ match { case Some(s) => draw(s.part); case None => } }
-  }
-
-  /**
    * Draws a given shape.
+   *
+   * TODO: Make this thread-safe.
    */
   def draw(shape : Shape) {
 
@@ -59,7 +53,7 @@ class Graphics(val g : Graphics2D)
 
     // Set the server-color
     setColor(color)
-    
+
     if (attributes.boolean("Visible") != Some(false)) {
       transformedShape match {
         case s : ArcShape         => {
