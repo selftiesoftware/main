@@ -61,7 +61,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * The version of Siigna.
    */
-  val version = "v. 1.0 beta"
+  val version = "v1.0 beta"
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
