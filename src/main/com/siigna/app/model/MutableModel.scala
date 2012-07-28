@@ -85,6 +85,10 @@ trait MutableModel extends SelectableModel {
     select(Selection(id, Drawing(id).getPart))
   }
   
+  override def select(ids : Traversable[Int]) {
+    select(Selection(ids.map(id => id -> Drawing(id).getPart).toMap))
+  }
+  
   /**
    * Select a single shape with the given Selection information.
    * @param selection  The Selection representing the selection.

@@ -41,7 +41,7 @@ object View extends Canvas {
    * A volatile image, used to utilize hardware acceleration and cancel out the double-buffering issue
    * that can cause flickering when repainting (see below).
    */
-  private var cachedVolatileImage : Option[VolatileImage] = None
+  var cachedVolatileImage : Option[VolatileImage] = None
 
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
@@ -83,7 +83,7 @@ object View extends Canvas {
   /**
    * Creates a Volatile Image with the width and height of the current screen.
    */
-  private def backBuffer : VolatileImage = {
+  def backBuffer : VolatileImage = {
     getGraphicsConfiguration.createCompatibleVolatileImage(getSize width, getSize height)
   }
 
@@ -163,7 +163,9 @@ object View extends Canvas {
         val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
         // Draw selection
-        Drawing.selection.foreach(graphics draw)
+        Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
+          graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
+        }))
 
         // Draw vertices
         Drawing.selection.foreach(_.foreach(i => {
@@ -172,8 +174,11 @@ object View extends Canvas {
           })
         }))
       } catch {
-        case e => Log.error("View: Unable to draw the dynamic Model: "+e)
+        case e => Log.error("View: Unable to draw the dynamic Model: ", e)
       }
+
+      /***** MODULES LOADER *****/
+      modulesLoader.paint(graphics,transformation)
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
@@ -257,7 +262,7 @@ object View extends Canvas {
         // Draw model
         if (Drawing.size > 0) try {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-          Drawing(mbr).par.map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
+          Drawing(mbr).map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
         } catch {
           case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
           case e => Log.error("View: Unable to draw Drawing: "+e)
@@ -266,9 +271,9 @@ object View extends Canvas {
         // Draw the boundary shape
         g draw boundaryShape(boundary)
 
-        // Draw a version number
-        val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
-        g.draw(v)
+        // Draw a version number NOTE: display of version number moved to modulesLoader
+        //val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
+        //g.draw(v)
 
       } while (image.contentsLost) // Continue looping until the content isn't lost.
 
