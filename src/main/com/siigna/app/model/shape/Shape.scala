@@ -67,10 +67,19 @@ import com.siigna.util.geom._
  *                 +--- TextShape
  * </pre>
  */
-trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
+trait Shape extends ShapeLike {
 
   type T <: Shape
-  
+
+  /**
+   * Retrieves a part of the shape from the given selector, if a meaningful part can be extracted.
+   * A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
+   * operations on specific parts of a shape.
+   * @param selector  The selector with which to retrieve part of the current shape.
+   * @return  Some[PartialShape] if a part can be extracted, None otherwise.
+   */
+  def apply(selector : ShapeSelector) : Option[PartialShape]
+
   /**
    * Calculates the closest distance to the shape using the views current zoom
    * scale.
@@ -92,7 +101,7 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
    * empty list. If, however, removing the part means splitting the shape up in several shapes, the method returns
    * several shapes that should be created when the part is removed.
    */
-  def delete(part : ShapeSelector) : Seq[Shape]
+  def delete(part : ShapeSelector) : Seq[T]
 
   /**
    * The basic geometric object for the shape.
@@ -119,7 +128,16 @@ trait Shape extends ShapeLike with (ShapeSelector => Option[PartialShape]) {
    * @param point  The point to base the selection on.
    * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapeSelector]].
    */
-  def getPart(point : Vector2D) : ShapeSelector // getPart shape close to the point
+  def getPart(point : Vector2D) : ShapeSelector
+
+  /**
+   * Retrieves a sub-selection as a shape.
+   * <b>Note:</b> The type of the shape can change from the current shape. Since all shapes cannot split into
+   * several shapes, some are transformed to group-shapes and so forth.
+   * @param selector  The selector to base the selection on.
+   * @return  Some if a shape could be extracted by the operation, None otherwise.
+   */
+  def getShape(selector : ShapeSelector) : Option[Shape]
 
   /**
    * Retrives the affected points from the given ShapeSelector
@@ -173,7 +191,7 @@ trait BasicShape extends Shape {
  */
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
   
-  // TODO: Fix this - how?
+  // TODO: Rewrite this to something more clever - or what?
   def geometry : CollectionGeometry = CollectionGeometry(shapes.map(_.geometry))
 
   /**

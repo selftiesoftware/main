@@ -14,7 +14,7 @@ import com.siigna.util.geom._
 import collection.mutable.BitSet
 import com.siigna.util.collection.{Attributes}
 import collection.Seq
-import com.siigna.app.model.shape.PolylineShape.InnerPolylineShape
+import com.siigna.app.model.shape.PolylineShape.{Selector, InnerPolylineShape}
 
 /**
  * <p>A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -49,7 +49,7 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   
   def apply(part : ShapeSelector) = part match {
     case FullSelector => Some(new PartialShape(this, transform))
-    case CollectionSelector(xs) => {
+    case Selector(xs) => {
       // The selected parts, needed for drawing
       var selected = Seq[BasicShape]()
 
@@ -86,7 +86,7 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
   
   def delete(part : ShapeSelector) = part match {
     case FullSelector => Nil
-    case CollectionSelector(xs) => {
+    case Selector(xs) => {
 
       if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
         Nil
@@ -139,7 +139,7 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
           set add (i + 1) // Add one since we already included the startPoint (at index 0)
         }
       }
-      CollectionSelector(set)
+      Selector(set)
     } else EmptySelector
 
   def getPart(point: Vector2D) = { // TODO: Test this
@@ -177,13 +177,56 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
     if (set.size == shapes.size + 1) {
       FullSelector
     } else if (set.size > 0) {
-      CollectionSelector(set)
+      Selector(set)
     } else EmptySelector
+  }
+
+  def getShape(s : ShapeSelector) = s match {
+    case FullSelector => Some(this)
+    case Selector(xs) => {
+      if (xs.size < 2) None
+      else {
+        var firstPoint = false
+        var parts = Seq[InnerPolylineShape]()
+        var lastIndex = xs.head // Last known index
+        var isConsistent = true // Is the
+        xs foreach ( i => {
+          // See if two adjacent elements are selected
+          if ((xs(i) && xs(i + 1)) || (xs(i) && xs(i - 1))) {
+            // Includes shapes if they are not already there
+            def includeElement(s : Int) {
+              val shape = innerShapes(s - 1) // Minus 1 since start point is included in xs (at position 0)
+              parts :+= shape
+            }
+            // Include the start point if i is the head element
+            if (i == 0) { firstPoint = true }
+            else        { includeElement(i) }
+          }
+
+          // If two indices are not next to one another, the polyline is not consistent
+          if (lastIndex < (i - 1)) {
+            isConsistent = false
+          }
+
+          // Set the isFirstSet variable depending on whether the previous part is included
+          lastIndex = i
+        })
+        // Examine whether the first point should be included and whether the result is coherent
+        (firstPoint, isConsistent) match {
+          case (true, true)   => Some(copy(innerShapes = parts))
+          case (true, false)  => Some(GroupShape(shapes(startPoint, parts), attributes))
+          case (false, true) if (parts.size > 1)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
+          case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
+          case _ => None
+        }
+      }
+    }
+    case _ => None
   }
 
   def getVertices(selector: ShapeSelector) = selector match {
     case FullSelector => geometry.vertices
-    case CollectionSelector(xs) => {
+    case Selector(xs) => {
       var inner = Seq[Vector2D]()
       
       // Add startPoint
@@ -212,21 +255,31 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
    * The inner shapes the PolylineShape consists of in terms of regular
    * [[com.siigna.app.model.shape.Shape]]s.
    */
-  def shapes : Seq[BasicShape] = if (!innerShapes.isEmpty) {
-    val tmp = new Array[BasicShape](innerShapes.size)
-    tmp(0) = innerShapes.head.apply(startPoint)
-    for (i <- 1 until innerShapes.size) {
-      tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
-    }
-    tmp
-  } else Seq[BasicShape]()
+  def shapes : Seq[BasicShape] = shapes(startPoint, innerShapes)
+
+  /**
+   * Retrieves actual BasicShape-types from a given point along with a sequence of InnerPolylineShapes.
+   * @param point  The starting point, to base the collection on.
+   * @param inner  A sequence of InnerPolylineShapes
+   * @return A collection of BasicShapes.
+   */
+  protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
+    if (!innerShapes.isEmpty) {
+      val tmp = new Array[BasicShape](innerShapes.size)
+      tmp(0) = innerShapes.head.apply(startPoint)
+      for (i <- 1 until innerShapes.size) {
+        tmp(i) = innerShapes(i).apply(innerShapes(i - 1).point)
+      }
+      tmp
+    } else Seq[BasicShape]()
+  }
 
   def setAttributes(attr : Attributes) = copy(attributes = attr)
 
   // TODO: export polylines.
   //def toDXF = DXFSection(List())
 
-  override def toString = "PolylineShape[" + startPoint + "," + innerShapes + "]"
+  override def toString = "PolylineShape[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
   def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)).distinct, attributes)
 }
@@ -235,6 +288,15 @@ sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes :
  * A companion object to PolylineShape. Provides shortcuts to creations of PolylineShapes.
  */
 object PolylineShape {
+
+  /**
+   * A PolylineSelector is a BitSet where each boolean represents one part of the Polyline.
+   *
+   * @param xs The BitSet indicating which parts of a PolylineShape has been selected.
+   * @see BitSet
+   * @see CollectionShape
+   */
+  sealed case class Selector(xs : BitSet) extends ShapeSelector
 
   /**
    * A shape type used in the PolylineShape. This shape is instantiated by a given point,
