@@ -178,7 +178,7 @@ object View extends Canvas {
       }
 
       /***** MODULES LOADER *****/
-      //modulesLoader.paint(graphics,transformation)
+      modulesLoader.paint(graphics,transformation)
 
       /***** MODULES *****/
       // Paint the modules, displays and filters accessible by the interfaces.
@@ -271,9 +271,9 @@ object View extends Canvas {
         // Draw the boundary shape
         g draw boundaryShape(boundary)
 
-        // Draw a version number
-        val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
-        g.draw(v)
+        // Draw a version number NOTE: display of version number moved to modulesLoader
+        //val v = TextShape(Siigna.version, Vector2D(screen.width - 60, 10), 10)
+        //g.draw(v)
 
       } while (image.contentsLost) // Continue looping until the content isn't lost.
 
