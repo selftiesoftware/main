@@ -1,4 +1,4 @@
-package com.siigna.module.IO.dxf
+package com.siigna.module.io.dxf
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
@@ -35,7 +35,7 @@ case class DXFSection(values: Seq[DXFValue]) extends Subtractable[DXFValue, DXFS
 
   def repr = this
 
-  def toShape: Option[ShapeLike] = {
+  def toShape: Option[Shape] = {
     try {
       values.head match {
         // Arc
