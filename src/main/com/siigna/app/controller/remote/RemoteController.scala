@@ -18,8 +18,7 @@ import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
-import actors.{Scheduler, Future, Actor}
-import java.util.concurrent.Executors
+import actors.Actor
 
 /**
  * Controls any remote connection(s).
@@ -31,14 +30,10 @@ protected[controller] object RemoteController {
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
 
-  /**
-   * The unique identifier for this client.
-   */
-  var client : Option[Client] = None
+  // The unique identifier for this client.
+  protected var client : Option[Client] = None
 
-  /**
-   * A boolean flag to indicate if this controller has been successfully registered with the server.
-   */
+  // A boolean flag to indicate if this controller has been successfully registered with the server.
   protected var isConnected = false
 
   // A timestamp for last ping attempt
@@ -47,14 +42,16 @@ protected[controller] object RemoteController {
   // A queue of commands waiting to be sent to the server.
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
+  // The remote server
+  protected val remote = select(Node("localhost", 20004), 'siigna)
+
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
     // Register the client IF the user is logged on
-    // Remember: When remote commands are created, they are sent to the controller immediately
-    if (Siigna.user.isDefined) {
-      val Drawing = com.siigna.app.model.Drawing // Use the right namespace
-      Log.debug("Controller: Registering with user " + Siigna.user + " and drawing " + Drawing.attributes.int("id"))
-      Register(Siigna.user.get, Drawing.attributes.int("id"), Client())
+    val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
+    if (Siigna.user.isDefined && SiignaDrawing.attributes.int("id").isDefined) {
+      remote.send(Register(Siigna.user.get, SiignaDrawing.attributes.int("id"), Client()), local)
+      Log.info("Remote: Registering with user " + Siigna.user + " and drawing " + SiignaDrawing.attributes.int("id"))
     }
 
     // TEST!!!!
@@ -66,22 +63,23 @@ protected[controller] object RemoteController {
     loop {
       react {
         // Successful registration of the client
-        case client : Client => {
+        case Register(_, id : Some[Int], c) => {
           // Log the received client
           Log.info("Remote: Registered client: " + client)
 
           // Store the client
-          this.client = Some(client)
-
-          // Empty the queue
-          dequeue(client)
-
-          //remote.send(Get(Drawing, Some(31), client), local)
+          this.client = Some(c)
 
           // Get shape-ids for the id-bank
-          remote.send(Get(ShapeIdentifier, Some(4), client), local)
+          remote.send(Get(ShapeIdentifier, Some(4), c), local)
+
+          // Empty the queue
+          dequeue(c)
 
           Log.debug("Remote: Sucessfully registered client: " + client)
+        }
+        case Register(_, None, c) => {
+          Log.error("Remote: Did not receive drawing-id from server. Fail!")
         }
         case msg => {
           Log.info("Remote: Received: " + msg)
@@ -90,9 +88,6 @@ protected[controller] object RemoteController {
       }
     }
   }
-
-  // The remote server
-  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   /**
    * Sends an action remotely.
@@ -121,7 +116,7 @@ protected[controller] object RemoteController {
    * Dequeues the enqueued commands in the queue.
    * @param client  The client to authorize the commands.
    */
-  protected def dequeue(client : Client) { if (!queue.isEmpty) {
+  protected def dequeue(client : Client) { if (!queue.isEmpty ) {
     Log.info("Remote: Sending queue of size: " + queue.size)
 
     // Send and dequeue the enqueued messages
@@ -135,7 +130,7 @@ protected[controller] object RemoteController {
    * Defines whether the client is connected to a remote server or not.
    * @return true if connected, false if not.
    */
-  def isOnline = isConnected   
+  def isOnline = isConnected
 
   // Pings the server
   // TODO: Can we incoorporate this in a nicer way?
@@ -144,7 +139,7 @@ protected[controller] object RemoteController {
       try {
         while (true) {
           // Ping the server
-          if (System.currentTimeMillis() - lastPingAttempt > 10000L && client.isDefined) {
+          if (client.isDefined) {
             // Request an answer
             remote !? (5000, client.get) match {
               case Some(b : Boolean) => isConnected = b
@@ -160,7 +155,13 @@ protected[controller] object RemoteController {
             if (isConnected) {
               dequeue(client.get)
             }
+            
+            // Register if the client is empty, but the title AND user has been set
+          } else if (com.siigna.app.model.Drawing.attributes.string("title").isDefined && Siigna.user.isDefined) {
+            remote.send(Register(Siigna.user.get, None, Client()), local)
           }
+
+          // Ping every 10 seconds
           Thread.sleep(10000)
         }
       } catch {
