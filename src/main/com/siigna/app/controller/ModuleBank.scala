@@ -27,11 +27,12 @@ class ModuleBank {
    */
   private val modules = scala.collection.mutable.Map[Symbol, Module]()
 
+
   /**
    * The class loader used to load classes.
    */
-  //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/main/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
   private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/app/base.jar!/")), this.getClass.getClassLoader)
+  //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/main/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
   //private val classLoader = new ModuleLoader(Array(new URL("jar:http://localhost/siigna-modules_2.9.1-0.1.jar!/")), this.getClass.getClassLoader)
   //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/siigna/siigna/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
 
