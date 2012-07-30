@@ -146,7 +146,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
     View.render()
 
     // Create the remote command and dispatch it
-    if (remote && Siigna.isOnline) {
+    if (remote) {
       Controller ! action
       Log.debug("Forwarding action to server: " + action)
     }

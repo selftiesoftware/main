@@ -1,4 +1,4 @@
-package com.siigna.module.IO.dxf
+package com.siigna.module.io.dxf
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
