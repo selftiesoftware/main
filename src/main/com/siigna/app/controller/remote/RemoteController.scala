@@ -121,15 +121,15 @@ protected[controller] object RemoteController {
    * Dequeues the enqueued commands in the queue.
    * @param client  The client to authorize the commands.
    */
-  protected def dequeue(client : Client) {
+  protected def dequeue(client : Client) { if (!queue.isEmpty) {
+    Log.info("Remote: Sending queue of size: " + queue.size)
+
     // Send and dequeue the enqueued messages
     queue = queue.foldLeft(queue)((q : Seq[Client => RemoteCommand], f : (Client => RemoteCommand)) => {
       remote.send(q.head(client), local)
       q.tail
     })
-
-    Log.success("Remote: Queue sent: " + q.head(client))
-  }
+  } }
 
   /**
    * Defines whether the client is connected to a remote server or not.
@@ -138,6 +138,7 @@ protected[controller] object RemoteController {
   def isOnline = isConnected   
 
   // Pings the server
+  // TODO: Can we incoorporate this in a nicer way?
   protected val pingThread = new Thread("Remote ping loop") {
     override def run() {
       try {
@@ -156,7 +157,7 @@ protected[controller] object RemoteController {
             lastPingAttempt = System.currentTimeMillis()
     
             // Empty the queue
-            if (isConnected && !queue.isEmpty) {
+            if (isConnected) {
               dequeue(client.get)
             }
           }
