@@ -43,12 +43,12 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("localhost", 20004), 'siigna)
+  protected val remote = select(Node("siigna.com", 20004), 'siigna)
 
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
-    com.siigna.app.model.Drawing.setAttribute("title", "operahuset")
-    com.siigna.app.model.Drawing.setAttribute("id", 82)
+//    com.siigna.app.model.Drawing.setAttribute("title", "operahuset")
+//    com.siigna.app.model.Drawing.setAttribute("id", 82)
     // Register the client IF the user is logged on
     val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
     if (Siigna.user.isDefined && SiignaDrawing.attributes.int("id").isDefined) {
