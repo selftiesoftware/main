@@ -18,7 +18,8 @@ import com.siigna.app.controller.{Client, Controller}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
-import actors.Actor
+import actors.{Scheduler, Future, Actor}
+import java.util.concurrent.Executors
 
 /**
  * Controls any remote connection(s).
@@ -40,14 +41,14 @@ protected[controller] object RemoteController {
    */
   protected var isConnected = false
 
-  /**
-   * Defines whether the client is connected to a remote server or not.
-   * @return true if connected, false if not.
-   */
-  def isOnline = isConnected
+  // A timestamp for last ping attempt
+  protected var lastPingAttempt : Long = 0L
+
+  // A queue of commands waiting to be sent to the server.
+  protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The local sink, receiving actions from the remote sink
-  private val local : Actor = actor {
+  protected val local : Actor = actor {
     // Register the client IF the user is logged on
     // Remember: When remote commands are created, they are sent to the controller immediately
     if (Siigna.user.isDefined) {
@@ -57,8 +58,9 @@ protected[controller] object RemoteController {
     }
 
     // TEST!!!!
-    //import com.siigna.app.model.server._
+    import com.siigna.app.model.server._
     //isConnected = true
+    //println("Sending Register")
     //remote.send(Register(User("Jens"), Some(31), Client(31)), local)
 
     loop {
@@ -66,34 +68,31 @@ protected[controller] object RemoteController {
         // Successful registration of the client
         case client : Client => {
           // Log the received client
-          Log.info("CommandController: Registered client: " + client)
+          Log.info("Remote: Registered client: " + client)
 
           // Store the client
           this.client = Some(client)
-          
+
+          // Empty the queue
+          dequeue(client)
+
           //remote.send(Get(Drawing, Some(31), client), local)
 
           // Get shape-ids for the id-bank
           remote.send(Get(ShapeIdentifier, Some(4), client), local)
 
-          Log.debug("CommandController: Sucessfully registered client: " + client)
+          Log.debug("Remote: Sucessfully registered client: " + client)
         }
         case msg => {
-          println("Received: " + msg)
+          Log.info("Remote: Received: " + msg)
           Controller ! msg
-          isConnected = true
         }
       }
     }
   }
 
-  /**
-   * A queue of commands waiting to be sent to the server.
-   */
-  private var queue : Seq[Client => RemoteCommand] = Seq()
-
   // The remote server
-  private val remote = select(Node("localhost", 20004), 'siigna)
+  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   /**
    * Sends an action remotely.
@@ -112,10 +111,61 @@ protected[controller] object RemoteController {
   def ! (f : Client => RemoteCommand) {
     client match {
       // Send the message to the client and provide a return channel
-      case Some(c) if (isOnline) => remote.send(f(c), local)
+      case Some(c) if (isOnline) => { remote.send(f(c), local) }
       // Enqueue it and wait for a connection
       case _ => queue :+= f
     }
   }
+
+  /**
+   * Dequeues the enqueued commands in the queue.
+   * @param client  The client to authorize the commands.
+   */
+  protected def dequeue(client : Client) {
+    // Send and dequeue the enqueued messages
+    queue = queue.foldLeft(queue)((q : Seq[Client => RemoteCommand], f : (Client => RemoteCommand)) => {
+      remote.send(q.head(client), local)
+      q.tail
+    })
+
+    Log.success("Remote: Queue sent: " + q.head(client))
+  }
+
+  /**
+   * Defines whether the client is connected to a remote server or not.
+   * @return true if connected, false if not.
+   */
+  def isOnline = isConnected   
+
+  // Pings the server
+  protected val pingThread = new Thread("Remote ping loop") {
+    override def run() {
+      try {
+        while (true) {
+          // Ping the server
+          if (System.currentTimeMillis() - lastPingAttempt > 10000L && client.isDefined) {
+            // Request an answer
+            remote !? (5000, client.get) match {
+              case Some(b : Boolean) => isConnected = b
+              case None => {
+                isConnected = false
+                Log.warning("Remote: Server timeout")
+              }
+            }
+            // Set the last ping attempt
+            lastPingAttempt = System.currentTimeMillis()
+    
+            // Empty the queue
+            if (isConnected && !queue.isEmpty) {
+              dequeue(client.get)
+            }
+          }
+          Thread.sleep(10000)
+        }
+      } catch {
+        case _ => 
+      }
+    }
+  }.start()
 
 }
