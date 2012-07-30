@@ -144,7 +144,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
     // Render the view
     View.render()
-
+    
     // Create the remote command and dispatch it
     if (remote) {
       Controller ! action
