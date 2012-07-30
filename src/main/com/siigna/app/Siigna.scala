@@ -56,7 +56,9 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * The current user logged in to Siigna, if any.
    */
-  var user : Option[User] = Some(new User("csp"))
+   var user : Option[User] = None
+
+  // var user : Option[User] = Some(new User("csp"))
 
   /**
    * The version of Siigna.
