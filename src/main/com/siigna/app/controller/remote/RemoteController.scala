@@ -43,7 +43,7 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("localhost", 20004), 'siigna)
+  protected val remote = select(Node("siigna.com", 20004), 'siigna)
 
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
