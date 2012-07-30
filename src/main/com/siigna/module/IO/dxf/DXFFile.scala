@@ -1,8 +1,8 @@
-package com.siigna.module.IO.dxf
+package com.siigna.module.io.dxf
 
 //import com.siigna.module.base.file.fileformats.dxf.DXFSection.apply
 //import com.siigna.module.base.file.fileformats.dxf.DXFSection.apply
-//import com.siigna.module.IO.dxf.{DXFSection, DXFValue}
+//import com.siigna.module.io.dxf.{DXFSection, DXFValue}
 
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
