@@ -231,10 +231,17 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
+    case line : Line2D => {
+      val top = Line2D(topLeft, topRight)
+      val right = Line2D(topRight, bottomRight)
+      val bottom = Line2D(bottomRight, bottomLeft)
+      val left = Line2D(bottomLeft, topLeft)
+      
+      Set(top, right, bottom, left).flatMap(_.intersections(line))
+    }
     case segment : Segment2D => segment.intersections(this)
     case g => throw new UnsupportedOperationException("Rectangle: Intersections not yet implemented with " + g)
   }
-
 
   def onPeriphery(point : Vector2D) =
     (point.x == xMin || point.x == xMax) && (point.y == yMax || point.y == yMin)

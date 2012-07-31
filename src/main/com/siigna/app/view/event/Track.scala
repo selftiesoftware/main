@@ -46,19 +46,6 @@ object Track extends EventTrack {
   protected var pointOne : Option[Vector2D] = None
   protected var pointTwo : Option[Vector2D] = None
 
-  //functions to determine if a vertical or horizontal guide should be drawn:
-  protected def horizontalActive(p : Vector2D, m : Vector2D) : Boolean = {
-    val guide = Line2D(p, Vector2D(p.x - 1, p.y))
-    if (guide.distanceTo(m) < 5) true
-    else false
-  } 
-  
-  protected def verticalActive(p : Vector2D, m : Vector2D) : Boolean = {
-    val guide = Line2D(p, Vector2D(p.x, p.y-1))
-    if (guide.distanceTo(m) < 5) true
-    else false
-  }
-
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
     // Set isTracking to false
@@ -127,16 +114,14 @@ object Track extends EventTrack {
     def paintPoint(p : Vector2D) {
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
-      
+
       //draw the vertical tracking guide
       if (vertical.distanceTo(mousePosition) < trackDistance) {
-        //g draw verticalGuide1.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
       }
 
       //draw the horizontal tracking guide
       if (horizontal.distanceTo(mousePosition) < trackDistance) {
-        //g draw verticalGuide1.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
       }
     }
