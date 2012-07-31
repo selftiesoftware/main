@@ -49,7 +49,11 @@ import com.siigna.util.Implicits._
  *  <dt>printFormatMax</dt>
  *    <dd>The maximum format when printing, given in mm. Defaults to the height of a standard A4-size: 297.</dd>
  *  <dt>selectionDistance</dt>
- *    <dd>The distance of which single-point selection happens, given in units. Defaults to 5.</dd>
+ *    <dd>The distance of which single-point selection happens, given in units. Defaults to 5.</dd> ,
+ *  <dt>trackDistance</dt>
+  *   <dd>Sensitivity of track.</dd>
+ *  <dt>trackGuideColor</dt>
+  *   <dd>The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting" a point.</dd>
  *  <dt>zoomSpeed</dt>
  *    <dd>The speed with which the client zooms, given in percentages. Defaults to 0.5.</dd>
  * </dl>
@@ -76,6 +80,7 @@ trait SiignaAttributes extends Map[String, Any] with AttributesLike {
   this("printFormatMin")        = 210.0
   this("printFormatMax")        = 297.0
   this("selectionDistance")     = 5.0
+  this("trackDistance")         = 3.0
   this("trackGuideColor")       = "#00FFFF".color
   this("zoomSpeed")             = 0.5
   
