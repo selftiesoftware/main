@@ -70,12 +70,13 @@ class SiignaApplet extends Applet {
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
       val drawingId = getParameter("drawingId")
+
       if (drawingId != null) try {
         val id = drawingId.toInt
         Log.debug("Applet: Found drawing: " + id)
         Drawing.setAttribute("id", id)
       }
-    } catch { case _ => }
+    } catch { case e => Log.info("No user or drawing found. Siigna will be running in local mode.")}
 
     // Set the layout
     setLayout(new BorderLayout())
@@ -138,6 +139,8 @@ class SiignaApplet extends Applet {
     // If the key is numeric then retrieve the Char value, otherwise get the int code.
     // Numeric keys aren't interpreted as digits if the int code is used (silly!)
     val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getKeyCode
+
+    // Tests true if shift-, control- or alt key is pressed
     val isModifier = (code == 16 || code == 17 || code == 18)
     
     // If they key-code equals a modifier key, nothing bad can happen..
@@ -233,7 +236,7 @@ class SiignaApplet extends Applet {
     if (option.isDefined) dispatchEvent(option.get)
 
     // After the event has been dispatched, draw
-    View.repaint();
+    View.repaint()
   }
 
   /**
