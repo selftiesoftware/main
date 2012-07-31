@@ -120,14 +120,6 @@ class EventParser {
   }
 
   /**
-   * Parse a single event. See below for more documentation.
-   *
-   * @param event  The event to parse.
-   * @return  An event. If the right conditions have been met, the event has now been snapped to a coordinate.
-   */
-  def parse(event : Event) : Event = parse(event :: Nil).head
-
-  /**
    * Parse a given list of Events.
    * The events are analysed in the following order:
    * <ol>
