@@ -192,7 +192,7 @@ object Segment2D {
    * <pre>
    * *    *        *----*
    *           ==> |    |
-   * *             *----*
+   * *    *        *----*
    * </pre>
    * @param points  A list of vectors
    * @return List[Segment]  A list of lineSegments
