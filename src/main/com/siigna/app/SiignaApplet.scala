@@ -59,6 +59,9 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
+    // Init parent
+    super.init()
+
     // Start by reading the applet parameters
     try {
       // Get the active user, if a log in was performed at www.siigna.com
@@ -70,12 +73,13 @@ class SiignaApplet extends Applet {
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
       val drawingId = getParameter("drawingId")
+
       if (drawingId != null) try {
         val id = drawingId.toInt
         Log.debug("Applet: Found drawing: " + id)
         Drawing.setAttribute("id", id)
       }
-    } catch { case _ => }
+    } catch { case e => println("Error: ", e)}
 
     // Set the layout
     setLayout(new BorderLayout())
