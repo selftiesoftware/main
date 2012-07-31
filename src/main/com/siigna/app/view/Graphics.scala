@@ -179,12 +179,8 @@ class Graphics(val g : Graphics2D)
    */
   def drawLine(p1 : Vector2D, p2 : Vector2D) {
     val boundary = View.screen
-    val line = Line(p1, p2)
-    val line1 = Line(boundary.topLeft, boundary.bottomLeft)
-    val line2 = Line(boundary.topRight, boundary.bottomRight)
-    val intersection1 = line.intersections(line1)
-    val intersection2 = line.intersections(line2)
-    if (!intersection1.isEmpty && !intersection2.isEmpty) drawSegment(intersection1.head, intersection2.head)
+    val intersections = boundary.intersections(Line(p1, p2))
+    if (intersections.size >= 2) drawSegment(intersections.head, intersections.tail.head)
   }
 
   /**
