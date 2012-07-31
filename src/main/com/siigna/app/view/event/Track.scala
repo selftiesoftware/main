@@ -27,11 +27,8 @@ object Track extends EventTrack {
   // Define the attributes of the track lines
   protected val attributes = Attributes("Infinite" -> true, color)
 
-  // Are we tracking?
-  protected var isEnabled = false                 
-
   // Get method
-  def isTracking = isEnabled
+  var isTracking = false
   
   // The up-to-date mouse position
   protected var mousePosition = Siigna.mousePosition   
@@ -64,6 +61,9 @@ object Track extends EventTrack {
 
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
+    // Set isTracking to false
+    isTracking = false
+
     // Get mouse event
     val (m : Vector2D, eventFunction : (Vector2D => Event)) = events match {
       case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
@@ -106,10 +106,14 @@ object Track extends EventTrack {
           val distHori = horizontal.distanceTo(p)
           val distVert = vertical.distanceTo(p)
           if (distHori <= distVert && distHori < trackDistance) {
+            isTracking = true
             horizontal.closestPoint(p)
           } else if (distVert < distHori && distVert < trackDistance) {
+            isTracking = true
             vertical.closestPoint(p)
-          } else p
+          } else {
+            p
+          }
         }
         case None => p
       }
