@@ -228,7 +228,7 @@ abstract class EventTrack {
   /**
    * Whether or not the EventTrack is tracking.
    */
-  var isTracking : Boolean
+  def isTracking : Boolean
 
   /**
    * Paint stuff.
