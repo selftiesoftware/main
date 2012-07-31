@@ -31,6 +31,10 @@ class RemoteModel extends ActionModel
                      with HasAttributes 
                      with Externalizable {
 
+  override def toString: String = {
+    return "shapes: "+model.shapes+"\n attributes:"+attributes
+  }
+
   def writeExternal(out : ObjectOutput) {
     out.writeObject(model.shapes)
     out.writeObject(attributes)
