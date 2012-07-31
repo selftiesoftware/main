@@ -147,8 +147,8 @@ class SiignaApplet extends Applet {
     val isModifier = (code == 16 || code == 17 || code == 18)
     
     // If they key-code equals a modifier key, nothing bad can happen..
-    if (isModifier) {
-      Controller ! constructor(getCorrectCase(code), keys)
+    dispatchEvent( if (isModifier) {
+      constructor(getCorrectCase(code), keys)
 
     // If it doesn't check if a key is being hid by
     // a modifier key and return the key it that's the case
@@ -158,11 +158,14 @@ class SiignaApplet extends Applet {
         else if (e.isAltDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
         else Array[Char]()
       if (!array.isEmpty) { // If there are elements in the character-array pass them on
-        Controller ! constructor(getCorrectCase(array(0)), keys)
+        constructor(getCorrectCase(array(0)), keys)
       } else { // Otherwise we accept the original char for the event
-        Controller ! constructor(getCorrectCase(code), keys)
+        constructor(getCorrectCase(code), keys)
       }
-    }
+    })
+
+    // After the event has been dispatched, draw
+    View.repaint()
   }
 
   /**
