@@ -76,6 +76,7 @@ trait SiignaAttributes extends Map[String, Any] with AttributesLike {
   this("printFormatMin")        = 210.0
   this("printFormatMax")        = 297.0
   this("selectionDistance")     = 5.0
+  this("trackGuideColor")       = "#00FFFF".color
   this("zoomSpeed")             = 0.5
   
   /**
