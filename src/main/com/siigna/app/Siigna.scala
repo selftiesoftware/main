@@ -10,8 +10,8 @@
  */
 package com.siigna.app
 
-import controller.{Controller, CommandController, Client}
-import model.server.User
+import com.siigna.app.controller.{Controller, CommandController, Client}
+import com.siigna.app.model.server.User
 import model._
 import view._
 import com.siigna.util.geom._
@@ -56,7 +56,9 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * The current user logged in to Siigna, if any.
    */
-  var user : Option[User] = None
+   var user : Option[User] = None
+
+  // var user : Option[User] = Some(new User("csp"))
 
   /**
    * The version of Siigna.
