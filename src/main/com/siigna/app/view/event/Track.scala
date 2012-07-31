@@ -13,8 +13,7 @@ package com.siigna.app.view.event
 
 import com.siigna.app.model.shape._
 import com.siigna.app.view.Graphics
-import collection.parallel.immutable.{ParMap, ParIterable}
-import com.siigna.util.geom.{Line2D, Vector2D, Line, TransformationMatrix}
+import com.siigna.util.geom.{Line2D, Vector2D, TransformationMatrix}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.Drawing
 import com.siigna.app.Siigna
@@ -22,112 +21,127 @@ import com.siigna.util.Implicits._
 
 object Track extends EventTrack {
 
-  // Horizontal guides
-  protected var horizontalGuide1 : Option[LineShape] = None
-  protected var horizontalGuide2 : Option[LineShape] = None
+  // Get the track color
+  protected val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
+
+  // Define the attributes of the track lines
+  protected val attributes = Attributes("Infinite" -> true, color)
+
+  // Are we tracking?
+  protected var isEnabled = false                 
+
+  // Get method
+  def isTracking = isEnabled
+  
+  // The up-to-date mouse position
+  protected var mousePosition = Siigna.mousePosition   
+    
+  // Get the track distance
+  val trackDistance = Siigna.double("trackDistance").getOrElse(3.0)
+
+  // Code to get the horizontal guide from a point
+  def horizontalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x + 1, p.y))
+
+  // Code to get the vertical guide from a point
+  def verticalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x, p.y + 1))
 
   // Points to track from
   protected var pointOne : Option[Vector2D] = None
   protected var pointTwo : Option[Vector2D] = None
 
-  // Vertical guides
-  protected var verticalGuide1 : Option[LineShape] = None
-  protected var verticalGuide2 : Option[LineShape] = None
-
-  // Are we tracking?
-  protected var isEnabled = false
-
-  def isTracking = isEnabled
-
-
   //functions to determine if a vertical or horizontal guide should be drawn:
   protected def horizontalActive(p : Vector2D, m : Vector2D) : Boolean = {
-    var guide = Line2D(p, Vector2D(p.x - 1, p.y))
+    val guide = Line2D(p, Vector2D(p.x - 1, p.y))
     if (guide.distanceTo(m) < 5) true
     else false
   } 
   
   protected def verticalActive(p : Vector2D, m : Vector2D) : Boolean = {
-    var guide = Line2D(p, Vector2D(p.x, p.y-1))
+    val guide = Line2D(p, Vector2D(p.x, p.y-1))
     if (guide.distanceTo(m) < 5) true
     else false
   }
 
-  def parse(events : List[Event], model : Map[Int, Shape]) : Event = { 
+  // Track on the basis of a maximum of two tracking points.
+  def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
     // Get mouse event
-    val (m, eventFun) = events match {
-      case MouseMove(p, a, b) => (p, MouseMove(_, a, b))
-      case MouseDrag(p, a, b) => (p, MouseDrag(_, a, b))
-      case e => (Siigna.mousePosition, e)
-    }        
-    
-    //get the nearest shape if it is defined
-    if (Drawing(m).size > 0) {
-      //println("pt one: "+pointOne)
-      //println("pt two: "+pointTwo)
+    val (m : Vector2D, eventFunction : (Vector2D => Event)) = events match {
+      case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
+      case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
+      case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))
+      case MouseDrag (p, a, b) :: tail => (p, (v : Vector2D) => MouseDrag(v, a, b))
+      case MouseDown (p, a, b) :: tail => (p, (v : Vector2D) => MouseDown(v, a, b))
+      case MouseUp   (p, a, b) :: tail => (p, (v : Vector2D) => MouseUp  (v, a, b))
+      case e :: tail => (this.mousePosition, (v : Vector2D) => e)
+    }
 
+    // Update mousePosition
+    this.mousePosition = m
+    
+    // Get the nearest shape if it is defined
+    if (Drawing(m).size > 0) {
       //if a tracking point is defined, and the mouse is placed on top of a second point
-      if (pointOne.isDefined){
+      if (pointOne.isDefined) {
         val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
         val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-        if (nearestPoint.distanceTo(m) < 2 ){
+        if (nearestPoint.distanceTo(m) < trackDistance) {
           if  (!(pointOne.get.distanceTo(m) < 10)) pointTwo = pointOne
           pointOne = Some(nearestPoint)
-        }
-        horizontalGuide1 = Some(LineShape(Vector2D(pointOne.get.x-10000,pointOne.get.y),Vector2D(pointOne.get.x+10000,pointOne.get.y)))
-        verticalGuide1 = Some(LineShape(Vector2D(pointOne.get.x,pointOne.get.y-10000),Vector2D(pointOne.get.x,pointOne.get.y+10000)))
-        if(pointTwo.isDefined){
-          horizontalGuide2 = Some(LineShape(Vector2D(pointTwo.get.x-10000,pointTwo.get.y),Vector2D(pointTwo.get.x+10000,pointTwo.get.y)))
-          verticalGuide2 = Some(LineShape(Vector2D(pointTwo.get.x,pointTwo.get.y-10000),Vector2D(pointTwo.get.x,pointTwo.get.y+10000)))
         }
       }
       //if no tracking point is defined, set the first point.
       else {
         val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
         val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-        pointOne = if (nearestPoint.distanceTo(m) < 2) Some(nearestPoint) else None
-
-        if (pointOne.isDefined && verticalActive(pointOne.get,m) == true) {
-          horizontalGuide1 = Some(LineShape(Vector2D(pointOne.get.x-10000,pointOne.get.y),Vector2D(pointOne.get.x+10000,pointOne.get.y)))
-          verticalGuide1 = Some(LineShape(Vector2D(pointOne.get.x,pointOne.get.y-10000),Vector2D(pointOne.get.x,pointOne.get.y+10000)))
-        }
+        pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
       }
     }
+
+    // Snap the event
+    val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
+      opt match {
+        case Some(snapPoint : Vector2D) => {
+          val horizontal = horizontalGuide(snapPoint)
+          val vertical = verticalGuide(snapPoint)
+          val distHori = horizontal.distanceTo(p)
+          val distVert = vertical.distanceTo(p)
+          if (distHori <= distVert && distHori < trackDistance) {
+            horizontal.closestPoint(p)
+          } else if (distVert < distHori && distVert < trackDistance) {
+            vertical.closestPoint(p)
+          } else p
+        }
+        case None => p
+      }
+    })
+    
+    // Return snapped coordinate
+    eventFunction(mousePosition)
   }
 
-  override def paint(graphics : Graphics, transformation : TransformationMatrix) {   
-    //track on the basis of a maximum of two tracking points.
-    val color = Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
+  override def paint(g : Graphics, t : TransformationMatrix) {
+    def paintPoint(p : Vector2D) {
+      val horizontal = horizontalGuide(p)
+      val vertical   = verticalGuide(p)
+      
+      //draw the vertical tracking guide
+      if (vertical.distanceTo(mousePosition) < trackDistance) {
+        //g draw verticalGuide1.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
+        g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
+      }
+
+      //draw the horizontal tracking guide
+      if (horizontal.distanceTo(mousePosition) < trackDistance) {
+        //g draw verticalGuide1.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
+        g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
+      }
+    }
     
     //PAINT TRACKING POINT ONE
-    if(pointOne.isDefined){
-      //draw the vertical tracking guide
-      if(verticalGuide1.isDefined && verticalActive (pointOne.get, m) == true) {
-        //g draw verticalGuide1.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
-        g draw verticalGuide1.get.setAttributes(trackGuide).transform(t)
-      }
-
-      //draw the horizontal tracking guide
-      if(horizontalGuide1.isDefined && horizontalActive (pointOne.get, m) == true) {
-        //g draw verticalGuide.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
-        g draw horizontalGuide1.get.setAttributes(trackGuide).transform(t)
-      }
-    }
+    if (pointOne.isDefined) paintPoint(pointOne.get)
 
     //PAINT TRACKING POINT TWO
-    if (pointTwo.isDefined) {
-      //draw the vertical tracking guide
-      if(verticalGuide2.isDefined && verticalActive (pointTwo.get, m) == true) {
-        //g draw verticalGuide2.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
-        g draw verticalGuide2.get.setAttributes(trackGuide).transform(t)
-      }
-  
-      //draw the horizontal tracking guide
-      if(horizontalGuide2.isDefined && horizontalActive (pointTwo.get, m) == true) {
-        //g draw verticalGuide.get.setAttributes("Infinite" -> true, trackGuide).transform(t)
-        g draw horizontalGuide2.get.setAttributes(trackGuide).transform(t)
-      }
-    }
+    if (pointTwo.isDefined) paintPoint(pointTwo.get)
   }
 
 }
