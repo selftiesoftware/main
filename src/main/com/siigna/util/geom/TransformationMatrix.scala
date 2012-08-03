@@ -23,7 +23,7 @@ import java.awt.geom.{AffineTransform, Point2D}
  * TODO: Create a 3D representation as well.
  */
 @SerialVersionUID(414468046)
-case class TransformationMatrix(t : AffineTransform) extends Serializable {
+case class TransformationMatrix(t : AffineTransform) {
 
   def this() = this(new AffineTransform)
 
