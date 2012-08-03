@@ -326,6 +326,7 @@ object PolylineShape {
    * A LineShape representation used inside a PolylineShape.
    * @param point  The point given to create a LineShape.
    */
+  @SerialVersionUID(-1210960374)
   case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = LineShape(v, point)
     override def toString = "PolylineLineShape(" + point + ")"
@@ -337,6 +338,7 @@ object PolylineShape {
    * @param middle  The center point of the arc
    * @param point The point given to create a LineShape.
    */
+  @SerialVersionUID(882064197)
   case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = ArcShape(v, middle, point)
     override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
