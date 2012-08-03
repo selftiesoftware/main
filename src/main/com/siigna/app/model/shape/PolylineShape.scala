@@ -40,7 +40,7 @@ import com.siigna.app.model.shape.PolylineShape.{Selector, InnerPolylineShape}
  * TODO: Implement additions and subtractions
  * TODO: Implement more robust geometry for PolylineShapes
  */
-sealed case class PolylineShape(startPoint : Vector2D, private val innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
+sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   require(startPoint != null, "Cannot create a polyline without a starting point")
   require(!innerShapes.isEmpty, "Cannot create a polyline without shapes")
