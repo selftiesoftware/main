@@ -128,6 +128,7 @@ object LineShape {
    * The selector specific for LineShapes.
    * @param part  A boolean flag indicating if the first point is a part of the selection (true) or the second point (false).
    */
+  @SerialVersionUID(219744478)
   sealed case class Selector(part : Boolean) extends ShapeSelector
 
   def apply(p1 : Vector2D, p2 : Vector2D) : LineShape =

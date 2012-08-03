@@ -92,6 +92,7 @@ object CircleShape
   /**
    * The selector for CircleShapes.
    */
+  @SerialVersionUID(1738298316)
   sealed case class Selector(part : Boolean) extends ShapeSelector
 
   def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())

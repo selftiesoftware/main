@@ -14,7 +14,7 @@ import com.siigna.util.geom._
 import collection.mutable.BitSet
 import com.siigna.util.collection.{Attributes}
 import collection.Seq
-import com.siigna.app.model.shape.PolylineShape.{Selector, InnerPolylineShape}
+import com.siigna.app.model.shape.PolylineShape.Selector
 
 /**
  * <p>A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -40,7 +40,7 @@ import com.siigna.app.model.shape.PolylineShape.{Selector, InnerPolylineShape}
  * TODO: Implement additions and subtractions
  * TODO: Implement more robust geometry for PolylineShapes
  */
-sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[PolylineShape.InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
+sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   require(startPoint != null, "Cannot create a polyline without a starting point")
   require(!innerShapes.isEmpty, "Cannot create a polyline without shapes")
@@ -55,7 +55,7 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[Polylin
 
       // Create a function that transforms the selected parts of the polyline
       val transformInner = (t : TransformationMatrix) => {
-        val arr      = new Array[PolylineShape.InnerPolylineShape](innerShapes.size)
+        val arr      = new Array[InnerPolylineShape](innerShapes.size)
         for (i <- 0 until innerShapes.size) {
           arr(i) = if (xs contains (i + 1)) {
             selected = selected :+ shapes(i)
@@ -245,8 +245,8 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[Polylin
   }   
 
   def join(shape: BasicShape) = PolylineShape(startPoint, innerShapes :+ (shape match {
-    case ArcShape(p, _, _, _, _) => new PolylineShape.PolylineLineShape(p) // TODO: Use PolylineArcShape!
-    case LineShape(p1, p2, _) => new PolylineShape.PolylineLineShape(p2)
+    case ArcShape(p, _, _, _, _) => new PolylineLineShape(p) // TODO: Use PolylineArcShape!
+    case LineShape(p1, p2, _) => new PolylineLineShape(p2)
   }), attributes)
 
   def join(shapes: Traversable[BasicShape]) = null
@@ -296,54 +296,8 @@ object PolylineShape {
    * @see BitSet
    * @see CollectionShape
    */
+  @SerialVersionUID(515068925)
   case class Selector(xs : BitSet) extends ShapeSelector
-
-  /**
-   * A shape type used in the PolylineShape. This shape is instantiated by a given point,
-   * so we (1) ensure that the shapes are connected and (2) avoids any duplicated points.
-   */
-  trait InnerPolylineShape extends Serializable with (Vector2D => BasicShape) {
-
-    /**
-     * Creates a BasicShape to use inside the PolylineShape.
-     * @param v  The vector with which the BasicShape is instantiated.
-     */
-    def apply(v : Vector2D) : BasicShape
-
-    /**
-     * The only point the InnerPolylineShape knows for certain.
-     */
-    def point : Vector2D
-
-    /**
-     * Transforms the InnerPolylineShape with the given [[com.siigna.util.geom.TransformationMatrix]].
-     */
-    def transform(t : TransformationMatrix) : InnerPolylineShape
-
-  }
-
-  /**
-   * A LineShape representation used inside a PolylineShape.
-   * @param point  The point given to create a LineShape.
-   */
-  @SerialVersionUID(-1210960374)
-  case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
-    def apply(v : Vector2D) = LineShape(v, point)
-    override def toString = "PolylineLineShape(" + point + ")"
-    def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
-  }
-
-  /**
-   * An ArcShape representation used inside a PolylineShape.
-   * @param middle  The center point of the arc
-   * @param point The point given to create a LineShape.
-   */
-  @SerialVersionUID(882064197)
-  case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
-    def apply(v : Vector2D) = ArcShape(v, middle, point)
-    override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
-    def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
-  }
 
   /**
    * Creates an empty PolylineShape.
@@ -378,4 +332,51 @@ object PolylineShape {
    */
   def apply(rect : Rectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
 
+}
+
+/**
+ * A shape type used in the PolylineShape. This shape is instantiated by a given point,
+ * so we (1) ensure that the shapes are connected and (2) avoids any duplicated points.
+ */
+sealed trait InnerPolylineShape extends Serializable with (Vector2D => BasicShape) {
+
+  /**
+   * Creates a BasicShape to use inside the PolylineShape.
+   * @param v  The vector with which the BasicShape is instantiated.
+   */
+  def apply(v : Vector2D) : BasicShape
+
+  /**
+   * The only point the InnerPolylineShape knows for certain.
+   */
+  def point : Vector2D
+
+  /**
+   * Transforms the InnerPolylineShape with the given [[com.siigna.util.geom.TransformationMatrix]].
+   */
+  def transform(t : TransformationMatrix) : InnerPolylineShape
+
+}
+
+/**
+ * A LineShape representation used inside a PolylineShape.
+ * @param point  The point given to create a LineShape.
+ */
+@SerialVersionUID(-1210960374)
+sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
+  def apply(v : Vector2D) = LineShape(v, point)
+  override def toString = "PolylineLineShape(" + point + ")"
+  def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
+}
+
+/**
+ * An ArcShape representation used inside a PolylineShape.
+ * @param middle  The center point of the arc
+ * @param point The point given to create a LineShape.
+ */
+@SerialVersionUID(882064197)
+sealed case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
+  def apply(v : Vector2D) = ArcShape(v, middle, point)
+  override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
+  def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
 }

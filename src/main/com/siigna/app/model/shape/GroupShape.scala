@@ -95,6 +95,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 object GroupShape {
 
   // TODO: There must be a smarter way to do this instead of spending one class-reference per selected object.
+  @SerialVersionUID(-468271378)
   sealed case class Selector(selectors : Map[Int, ShapeSelector]) extends ShapeSelector
 
   def apply(shapes : Traversable[Shape]) = new GroupShape(shapes.toSeq, Attributes())
