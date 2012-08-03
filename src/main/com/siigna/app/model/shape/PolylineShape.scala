@@ -40,6 +40,7 @@ import com.siigna.app.model.shape.PolylineShape.Selector
  * TODO: Implement additions and subtractions
  * TODO: Implement more robust geometry for PolylineShapes
  */
+@SerialVersionUID(1147278759)
 sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
 
   require(startPoint != null, "Cannot create a polyline without a starting point")

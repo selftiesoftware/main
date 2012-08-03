@@ -26,6 +26,7 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  *
  * TODO: Implement this.
  */
+@SerialVersionUID(111678680)
 case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends CollectionShape[Shape] {
 
   type T = GroupShape

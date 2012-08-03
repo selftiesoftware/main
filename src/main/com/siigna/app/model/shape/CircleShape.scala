@@ -25,6 +25,7 @@ import com.siigna.app.Siigna
  *  - StrokeWidth  Double  The width of the line-stroke used to draw.
  * </pre>
  */
+@SerialVersionUID(-746797736)
 case class CircleShape(center : Vector2D, radius : Double, attributes : Attributes) extends EnclosedShape {
 
   type T = CircleShape
@@ -86,8 +87,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   
 }
 
-object CircleShape
-{                     
+object CircleShape {
 
   /**
    * The selector for CircleShapes.

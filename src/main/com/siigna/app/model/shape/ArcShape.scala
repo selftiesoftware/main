@@ -33,6 +33,7 @@ import com.siigna.app.Siigna
  * TODO: Middle point should be middle of arc, not random point on circumference.
  * TODO: Refactor so shape-parts include handles
  */
+@SerialVersionUID(1561246469)
 case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape {
 
   type T = ArcShape
