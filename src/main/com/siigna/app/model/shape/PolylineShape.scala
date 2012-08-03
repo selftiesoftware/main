@@ -296,13 +296,13 @@ object PolylineShape {
    * @see BitSet
    * @see CollectionShape
    */
-  sealed case class Selector(xs : BitSet) extends ShapeSelector
+  case class Selector(xs : BitSet) extends ShapeSelector
 
   /**
    * A shape type used in the PolylineShape. This shape is instantiated by a given point,
    * so we (1) ensure that the shapes are connected and (2) avoids any duplicated points.
    */
-  sealed trait InnerPolylineShape extends Serializable with (Vector2D => BasicShape) {
+  trait InnerPolylineShape extends Serializable with (Vector2D => BasicShape) {
 
     /**
      * Creates a BasicShape to use inside the PolylineShape.
@@ -326,7 +326,7 @@ object PolylineShape {
    * A LineShape representation used inside a PolylineShape.
    * @param point  The point given to create a LineShape.
    */
-  sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
+  case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = LineShape(v, point)
     override def toString = "PolylineLineShape(" + point + ")"
     def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
@@ -337,7 +337,7 @@ object PolylineShape {
    * @param middle  The center point of the arc
    * @param point The point given to create a LineShape.
    */
-  sealed case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
+  case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
     def apply(v : Vector2D) = ArcShape(v, middle, point)
     override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
     def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
