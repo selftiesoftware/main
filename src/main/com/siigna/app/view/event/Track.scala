@@ -58,25 +58,23 @@ object Track extends EventTrack {
     def getTrackPoint(p : Vector2D) : Vector2D = {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
-      
+
       // Horizontal!
-      if (horiz.distanceTo(p) < vert.distanceTo(p)) {
-        val closestPoint = horiz.closestPoint(p)
+      if (horiz.distanceTo(mousePosition) < vert.distanceTo(mousePosition)) {
+        val closestPoint = horiz.closestPoint(mousePosition)
         if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
         else                      Vector2D(p.x + dist, p.y)
       // Vertical!
-      } else {        
-        val closestPoint = vert.closestPoint(p)
+      } else {
+        val closestPoint = vert.closestPoint(mousePosition)
         if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
-        else                      Vector2D(p.x, p.y + dist)  
+        else                      Vector2D(p.x, p.y + dist)
       } 
     }
     
-    if (pointTwo.isDefined)
-      Some(getTrackPoint(pointTwo.get))
-    else if (pointOne.isDefined)
+    if (pointOne.isDefined) {
       Some(getTrackPoint(pointOne.get))
-    else None
+    } else None
   }
 
   // Track on the basis of a maximum of two tracking points.
@@ -138,7 +136,7 @@ object Track extends EventTrack {
         case None => p
       }
     })
-    
+
     // Return snapped coordinate
     eventFunction(mousePosition)
   }

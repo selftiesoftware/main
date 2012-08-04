@@ -127,6 +127,8 @@ package object siigna extends com.siigna.util.Implicits {
   type MouseWheel = com.siigna.app.view.event.MouseWheel
   val MouseWheel = com.siigna.app.view.event.MouseWheel
 
+  val Track = com.siigna.app.view.event.Track
+
   // Geometry
   type Arc2D = com.siigna.util.geom.Arc2D
   val Arc2D = com.siigna.util.geom.Arc2D
