@@ -46,6 +46,39 @@ object Track extends EventTrack {
   protected var pointOne : Option[Vector2D] = None
   protected var pointTwo : Option[Vector2D] = None
 
+  /**
+   * Find a point from a distance, assuming there's a track active.  
+   * @param dist The distance to go in the line of the track.
+   * @return  Some[Vector2D] if track is active, otherwise None.
+   */
+  def getPointFromDistance(dist : Double) : Option[Vector2D] = {
+    /** Get the best fitting line (horizontal or vertical)
+     * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
+     */ 
+    def getTrackPoint(p : Vector2D) : Vector2D = {
+      val horiz = horizontalGuide(p)
+      val vert  = verticalGuide(p)
+      
+      // Horizontal!
+      if (horiz.distanceTo(p) < vert.distanceTo(p)) {
+        val closestPoint = horiz.closestPoint(p)
+        if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
+        else                      Vector2D(p.x + dist, p.y)
+      // Vertical!
+      } else {        
+        val closestPoint = vert.closestPoint(p)
+        if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
+        else                      Vector2D(p.x, p.y + dist)  
+      } 
+    }
+    
+    if (pointTwo.isDefined)
+      Some(getTrackPoint(pointTwo.get))
+    else if (pointOne.isDefined)
+      Some(getTrackPoint(pointOne.get))
+    else None
+  }
+
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
     // Set isTracking to false
