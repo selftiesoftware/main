@@ -21,6 +21,11 @@ import com.siigna.util.Implicits._
 
 object Track extends EventTrack {
 
+  /**
+   * A flag to toggle track on or off.
+   */  
+  var trackEnabled : Boolean = true 
+  
   // Get the track color
   protected val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
 
@@ -79,67 +84,71 @@ object Track extends EventTrack {
 
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
-    // Set isTracking to false
-    isTracking = false
-
-    // Get mouse event
-    val (m : Vector2D, eventFunction : (Vector2D => Event)) = events match {
-      case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
-      case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
-      case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))
-      case MouseDrag (p, a, b) :: tail => (p, (v : Vector2D) => MouseDrag(v, a, b))
-      case MouseDown (p, a, b) :: tail => (p, (v : Vector2D) => MouseDown(v, a, b))
-      case MouseUp   (p, a, b) :: tail => (p, (v : Vector2D) => MouseUp  (v, a, b))
-      case e :: tail => (this.mousePosition, (v : Vector2D) => e)
-    }
-
-    // Update mousePosition
-    this.mousePosition = m
+    if(trackEnabled) {
     
-    // Get the nearest shape if it is defined
-    if (Drawing(m).size > 0) {
-      //if a tracking point is defined, and the mouse is placed on top of a second point
-      if (pointOne.isDefined) {
-        val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
-        val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-        if (nearestPoint.distanceTo(m) < trackDistance) {
-          if  (!(pointOne.get.distanceTo(m) < 10)) pointTwo = pointOne
-          pointOne = Some(nearestPoint)
-        }
-      }
-      //if no tracking point is defined, set the first point.
-      else {
-        val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
-        val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-        pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
-      }
-    }
+      // Set isTracking to false
+      isTracking = false
 
-    // Snap the event
-    val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
-      opt match {
-        case Some(snapPoint : Vector2D) => {
-          val horizontal = horizontalGuide(snapPoint)
-          val vertical = verticalGuide(snapPoint)
-          val distHori = horizontal.distanceTo(p)
-          val distVert = vertical.distanceTo(p)
-          if (distHori <= distVert && distHori < trackDistance) {
-            isTracking = true
-            horizontal.closestPoint(p)
-          } else if (distVert < distHori && distVert < trackDistance) {
-            isTracking = true
-            vertical.closestPoint(p)
-          } else {
-            p
+      // Get mouse event
+      val (m : Vector2D, eventFunction : (Vector2D => Event)) = events match {
+        case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
+        case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
+        case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))
+        case MouseDrag (p, a, b) :: tail => (p, (v : Vector2D) => MouseDrag(v, a, b))
+        case MouseDown (p, a, b) :: tail => (p, (v : Vector2D) => MouseDown(v, a, b))
+        case MouseUp   (p, a, b) :: tail => (p, (v : Vector2D) => MouseUp  (v, a, b))
+        case e :: tail => (this.mousePosition, (v : Vector2D) => e)
+      }
+
+      // Update mousePosition
+      this.mousePosition = m
+
+      // Get the nearest shape if it is defined
+      if (Drawing(m).size > 0) {
+        //if a tracking point is defined, and the mouse is placed on top of a second point
+        if (pointOne.isDefined) {
+          val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
+          val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          if (nearestPoint.distanceTo(m) < trackDistance) {
+            if  (!(pointOne.get.distanceTo(m) < 10)) pointTwo = pointOne
+            pointOne = Some(nearestPoint)
           }
         }
-        case None => p
+        //if no tracking point is defined, set the first point.
+        else {
+          val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
+          val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
+        }
       }
-    })
 
-    // Return snapped coordinate
-    eventFunction(mousePosition)
+      // Snap the event
+      val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
+        opt match {
+          case Some(snapPoint : Vector2D) => {
+            val horizontal = horizontalGuide(snapPoint)
+            val vertical = verticalGuide(snapPoint)
+            val distHori = horizontal.distanceTo(p)
+            val distVert = vertical.distanceTo(p)
+            if (distHori <= distVert && distHori < trackDistance) {
+              isTracking = true
+              horizontal.closestPoint(p)
+            } else if (distVert < distHori && distVert < trackDistance) {
+              isTracking = true
+              vertical.closestPoint(p)
+            } else {
+              p
+            }
+          }
+          case None => p
+        }
+      })
+
+      // Return snapped coordinate
+      eventFunction(mousePosition)
+    } else events.head
   }
+
 
   override def paint(g : Graphics, t : TransformationMatrix) {
     def paintPoint(p : Vector2D) {
