@@ -116,7 +116,7 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    snap.foreach(_.paint(graphics, transformation))
+    if(Snap.snapEnabled == true) snap.foreach(_.paint(graphics, transformation))
   }
 
   /**
@@ -164,7 +164,9 @@ class EventParser {
       var newEvent = track.parse(events, model)
 
       // Parse the snap
-      snap foreach {a => newEvent = a.parse(newEvent, model)}
+      if(Snap.snapEnabled == true) {
+        snap foreach {a => newEvent = a.parse(newEvent, model)}
+      }
 
       // Return the edited list and slice the list to the size defined in <code>listSize</code>.
       newEvent :: events.tail.slice(0, listSize - 1)
