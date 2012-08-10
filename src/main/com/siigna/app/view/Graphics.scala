@@ -11,6 +11,7 @@
 
 package com.siigna.app.view
 
+
 import event.Snap
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._

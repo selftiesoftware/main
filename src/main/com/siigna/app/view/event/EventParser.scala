@@ -35,7 +35,7 @@ class EventParser {
    * The default snap-modules.
    */
   protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
-  
+
   /**
    * A boolean value of whether the EventParser is enable or not. Defaults to true.
    */
@@ -116,7 +116,7 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    if(Snap.snapEnabled == true) snap.foreach(_.paint(graphics, transformation))
+    snap.foreach(_.paint(graphics, transformation))
   }
 
   /**
@@ -164,9 +164,7 @@ class EventParser {
       var newEvent = track.parse(events, model)
 
       // Parse the snap
-      if(Snap.snapEnabled == true) {
-        snap foreach {a => newEvent = a.parse(newEvent, model)}
-      }
+      snap foreach {a => newEvent = a.parse(newEvent, model)}
 
       // Return the edited list and slice the list to the size defined in <code>listSize</code>.
       newEvent :: events.tail.slice(0, listSize - 1)
@@ -226,7 +224,7 @@ abstract class EventSnap {
  * <code>isTracking</code> to true and returns a new event that fits the track.
  */
 abstract class EventTrack {
-  
+
   /**
    * Whether or not the EventTrack is tracking.
    */
@@ -241,5 +239,5 @@ abstract class EventTrack {
    * Parses a list into a single event.
    */
   def parse(events : List[Event], model : Map[Int, Shape]) : Event
-  
+
 }
