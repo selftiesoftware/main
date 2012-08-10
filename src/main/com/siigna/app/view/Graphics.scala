@@ -11,6 +11,7 @@
 
 package com.siigna.app.view
 
+import event.Snap
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._
 import java.awt.geom.{Arc2D => JavaArc}
@@ -142,7 +143,7 @@ class Graphics(val g : Graphics2D)
    */
   def draw(point : Vector2D, color : Color = new Color(50, 50, 50, 100)) {
     setColor(color)
-    drawCircle(point, 4, true)
+    if(Snap.snapEnabled == true) drawCircle(point, 4, true)
   }
 
   /**
