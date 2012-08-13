@@ -35,7 +35,7 @@ class EventParser {
    * The default snap-modules.
    */
   protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
-  
+
   /**
    * A boolean value of whether the EventParser is enable or not. Defaults to true.
    */
@@ -226,7 +226,7 @@ abstract class EventSnap {
  * <code>isTracking</code> to true and returns a new event that fits the track.
  */
 abstract class EventTrack {
-  
+
   /**
    * Whether or not the EventTrack is tracking.
    */
@@ -241,5 +241,5 @@ abstract class EventTrack {
    * Parses a list into a single event.
    */
   def parse(events : List[Event], model : Map[Int, Shape]) : Event
-  
+
 }

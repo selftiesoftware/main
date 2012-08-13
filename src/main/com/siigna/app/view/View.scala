@@ -27,6 +27,7 @@ import com.siigna.app.model.{Drawing, Model}
  */
 object View extends Canvas {
 
+
   /**
    * A background image that can be re-used to draw as background on the canvas.
    */
@@ -74,6 +75,11 @@ object View extends Canvas {
    * the current panning has moved relative to the old.
    */
   var panPointOld   = Vector2D(0, 0)
+
+  /**
+   * The color of the paper (defaults to white)
+   */
+  var paperColor = 1.00f
 
   /**
    * The zoom scale. Starts out in 1:1.
@@ -250,8 +256,15 @@ object View extends Canvas {
         // Draw the background
         g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
 
+        //draw a semi-transparent margin to illustrate the size of the paper if printed.
+        val mT = 10 * zoom.toInt
+        val mS = 11 * zoom.toInt
+        val mB = 12 * zoom.toInt
+        g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
+        g.g.clearRect(boundary.xMin.toInt - mS, boundary.yMin.toInt - mB, boundary.width.toInt + 2 * mS, boundary.height.toInt + 2 *mT)
+
         // Draw a white rectangle inside the boundary of the current model.
-        g.g.setBackground(Color white)
+        g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
         g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
 
         // Set anti-aliasing

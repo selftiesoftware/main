@@ -59,7 +59,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)
 
-  def font                = new Font("Helvetica", Font.PLAIN, (fontSize * scale * GlobalFontScale) toInt)
+  def font                = new Font("Lucida Sans Typewriter", Font.PLAIN, (fontSize * scale * GlobalFontScale) toInt)
 
 
   /**
