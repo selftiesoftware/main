@@ -256,7 +256,7 @@ object View extends Canvas {
         // Draw the background
         g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
 
-        //draw a semi-transparent margin to illustrate the size of the paper if printed.
+        //draw the pape as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
         val mT = 10 * zoom.toInt
         val mS = 11 * zoom.toInt
         val mB = 12 * zoom.toInt
@@ -264,8 +264,8 @@ object View extends Canvas {
         g.g.clearRect(boundary.xMin.toInt - mS, boundary.yMin.toInt - mB, boundary.width.toInt + 2 * mS, boundary.height.toInt + 2 *mT)
 
         // Draw a white rectangle inside the boundary of the current model.
-        g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
-        g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+        //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
+        //g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
 
         // Set anti-aliasing
         val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
