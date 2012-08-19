@@ -48,7 +48,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
    * The underlying immutable model of Siigna.
    */
   protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
-  
+
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -118,7 +118,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   def execute(action : Action) { execute(action, true) }
 
   /**
-   <p>Executes an action, lists it as executed and clears the undone stack to make way for new actions
+  <p>Executes an action, lists it as executed and clears the undone stack to make way for new actions
    * (if they are not instances of [[com.siigna.app.model.action.VolatileAction]]) and sends it to .</p>
    * es
    * <p>If the local flag is set the action is not distributed to the server. If the flag is false the
@@ -144,7 +144,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
     // Render the view
     View.render()
-    
+
     // Create the remote command and dispatch it
     if (remote) {
       Controller ! action
@@ -179,15 +179,15 @@ trait ActionModel extends SelectableModel with HasAttributes {
   def executeWithIds(shapes : Iterable[Shape], f : Map[Int, Shape] => Action) {
     // Do we have enough ids?
     if (remoteIds.size >= shapes.size) { // Yes!
-      // Retrieve the ids
-      val (ids, bank) = remoteIds.splitAt(shapes.size)
+    // Retrieve the ids
+    val (ids, bank) = remoteIds.splitAt(shapes.size)
       remoteIds = bank
 
       // Execute the action with the remote ids
       execute(f(ids.zip(shapes).toMap))
     } else { // ... No ...
-      // Decrement the counter by the number of shapes (avoid collision with server ids)
-      val ids = localIdStream.take(shapes.size).toSeq
+    // Decrement the counter by the number of shapes (avoid collision with server ids)
+    val ids = localIdStream.take(shapes.size).toSeq
 
       // Execute the action wrapped in a local action
       execute(new LocalAction(ids.zip(shapes).toMap, f), false)

@@ -17,8 +17,8 @@ import com.siigna.app.controller.{Controller, Client}
 /**
  * A RemoteCommand capable of setting a given attribute to a given value.
  */
-@SerialVersionUID(-1041843852)
-sealed case class Set(name : RemoteConstant, value : Any, client : Client) extends RemoteCommand
+@SerialVersionUID(-1044323852)
+sealed case class Set(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand
 
 /**
  * A companion object to the Set command.
@@ -30,7 +30,7 @@ object Set {
    * @param name  The type of the value to set.
    * @param value  The value of the value (uuuh, inception!!).
    */
-  def apply(name : RemoteConstant, value : Any) {
+  def apply(name : RemoteConstant, value : Option[Any]) {
     // Dispatches the command
     Controller ! ((c : Client) => Set(name, value, c))
   }

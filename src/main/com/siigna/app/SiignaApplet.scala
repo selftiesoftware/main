@@ -68,7 +68,7 @@ class SiignaApplet extends Applet {
       val userName = getParameter("contributorName")
       if (userName != null) {
         Log.debug("Applet: Found user: " + userName)
-        Siigna.user = Some(User(userName))
+        Siigna.user = Some(User(userName, None, None))
       }
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received

@@ -21,5 +21,5 @@ publishTo := Some(Resolver.file("file",  new File( "../rls/base" )) )
 resolvers += "Siigna" at "http://siigna.com/rls/base"
 
 libraryDependencies ++= Seq(
-  "com.siigna" %% "siigna-module" % "0.1"
+  "com.siigna" %% "siigna-module" % "preAlpha"
 )

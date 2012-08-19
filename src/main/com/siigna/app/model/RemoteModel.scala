@@ -26,7 +26,7 @@ import com.siigna.util.collection.Attributes
  * <p>An example is the unique shape id necessary for each shape, which can not be served locally before the
  * server has approved the id. To solve this the action is only applied locally, but not sent remotely.</p>
  */
-@SerialVersionUID(2113944332)
+@SerialVersionUID(2113124332)
 class RemoteModel extends ActionModel
                      with HasAttributes 
                      with Externalizable {

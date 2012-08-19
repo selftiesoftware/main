@@ -24,4 +24,11 @@ package object remote extends Enumeration {
 
   val DrawingName = Value
 
+  val DrawingId = Value
+
+  val Action = Value
+
+  val ActionId = Value
+
+  val Client = Value
 }

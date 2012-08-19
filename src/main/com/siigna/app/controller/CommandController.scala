@@ -33,6 +33,8 @@ trait CommandController extends EventController {
       command match {
         // Handle remote commands from the remote
         case command : RemoteCommand => {
+          println("Command controller has "+command)
+
           command match {
             // Failure
             case failure : Failure => {
@@ -41,6 +43,7 @@ trait CommandController extends EventController {
 
             // Successful get shape identifiers command
             case Get(ShapeIdentifier, value, _) => {
+              println("Commandcontroller got some shapeidentifers")
               try {
                 Drawing.addRemoteIds(value.get.asInstanceOf[Range])
               } catch {
@@ -50,10 +53,11 @@ trait CommandController extends EventController {
 
             // Remote actions
             case RemoteAction(_, action, undo) => {
+              println("CommandController got "+action)
               if (undo) {
                 Drawing undo Some(action)
               } else {
-                Drawing execute(action, false)
+                Drawing execute(action, true)
               }
             }
 
