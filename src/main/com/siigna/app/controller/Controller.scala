@@ -56,7 +56,7 @@ object Controller extends CommandController {
     // Loop and react on incoming messages
     loop {
       react {
-        case ra : RemoteAction                 => if (ra.undo) Drawing undo Some(ra.action) else Drawing execute(ra.action, false)
+        case ra : RemoteAction                 => if (ra.undo) Drawing undo ra.action else Drawing execute(ra.action, false)
 
         // Handle actions (execute, not undo)
         case action : Action                   => remote ! (action, false)

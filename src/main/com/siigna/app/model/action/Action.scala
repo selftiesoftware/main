@@ -44,6 +44,19 @@ trait Action extends Serializable {
   def execute(model : Model) : Model
 
   /**
+   * The identifiers (ids) used by the action.
+   * @return  Any number of id's used in the action.
+   */
+  def ids : Traversable[Int]
+
+  /**
+   * Defines if the action contains local (negative) ids and thus should not be sent to the server.
+   * <br>
+   * This definition is used to avoid clashes with remote and local ids.
+   */
+  def isLocal : Boolean = ids.exists(_ < 0)
+
+  /**
    * The method merges this action in with another action, so this action is performed first.
    */
   def merge(that : Action) = that match {
@@ -56,6 +69,14 @@ trait Action extends Serializable {
    */
   def undo(model : Model) : Model
 
+  /**
+   * Updates the identifiers (ids) in the action with the given map.
+   * If the id exists in the collection it is replaced with the mapped value.
+   * @param map  A map containing links from the old keys (keys) to the new keys (values).
+   * @return  A copy of the existing action with the new ids replaced (if any matches exist).
+   */
+  def update(map : Map[Int, Int]) : Action
+
 }
 
 /**
@@ -65,10 +86,22 @@ trait Action extends Serializable {
 trait VolatileAction extends Action {
 
   /**
+   * It makes no sense for a volatile action to store its ids - it won't be evaluated later on!
+   * @return  An empty Traversable.
+   */
+  def ids = Traversable.empty[Int]
+  
+  /**
    * A Volatile Action cannot undo.
    */
   override final def undo(model : Model) : Model = {
     throw new UnsupportedOperationException("A VolatileAction can not be undone.")
   }
-  
+
+  /**
+   * A VolatileAction is not stored, hence it makes no sense to update it!
+   * @return  The exact same action as you had before.
+   */
+  def update(map : Map[Int, Int]) = this
+
 }

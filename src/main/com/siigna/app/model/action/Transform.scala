@@ -77,6 +77,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
     model add(id, model.shapes(id).transform(transformation))
   }
 
+  def ids = Traversable(id)
 
   // TODO: Implement and optimize
   // def merge(that : Action)
@@ -86,6 +87,8 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
   } else {
     model add (id, model.shapes(id).transform(transformation))
   }
+  
+  def update(map : Map[Int, Int]) = copy(map.getOrElse(id, id))
 
 }
 
@@ -96,12 +99,16 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
     model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
+  def ids = shapes.keys
+  
   // TODO: Implement and optimize
   //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
     model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
   }
+  
+  def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
   
 }
 
@@ -116,6 +123,8 @@ case class TransformShapes(shapes : Map[Int, Shape], transformation : Transforma
     model add map
   }
 
+  def ids = shapes.keys
+
   // TODO: Implement and optimize
   //def merge(that : Action) = SequenceAction(this, that)
 
@@ -123,5 +132,8 @@ case class TransformShapes(shapes : Map[Int, Shape], transformation : Transforma
     val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation.inverse))).toMap
     model add map
   }
+
+  def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
+
 }
 

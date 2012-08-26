@@ -36,7 +36,8 @@ case class SetAttribute(ids : Traversable[Int], name : String, value : Any) exte
       Drawing(i._1).removeAttribute(name)
     })
   }))
-  
+
+  def update(map: Map[Int, Int]) = copy(ids.map(i => map.getOrElse(i, i)))
 }
 
 /**
@@ -56,5 +57,7 @@ case class SetAttributes(ids : Traversable[Int], attributes : Attributes) extend
   def undo(model: Model) = model.add(oldValues.map(i => {
     i._1 -> Drawing(i._1).setAttributes(i._2)
   }))
+
+  def update(map: Map[Int, Int]) = copy(ids.map(i => map.getOrElse(i, i)))
 
 }

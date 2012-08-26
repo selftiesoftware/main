@@ -41,23 +41,13 @@ trait CommandController extends EventController {
               Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
             }
 
-            // Successful get shape identifiers command
-            case Get(ShapeIdentifier, value, _) => {
-              println("Commandcontroller got some shapeidentifers")
-              try {
-                Drawing.addRemoteIds(value.get.asInstanceOf[Range])
-              } catch {
-                case e => Log.warning("Unknown input for shape identifiers: " + value)
-              }
-            }
-
             // Remote actions
             case RemoteAction(_, action, undo) => {
               println("CommandController got "+action)
               if (undo) {
-                Drawing undo Some(action)
+                Drawing undo (action, false)
               } else {
-                Drawing execute(action, true)
+                Drawing execute (action, false)
               }
             }
 

@@ -18,6 +18,8 @@ import com.siigna.app.model.Model
 case class SequenceAction(actions : Seq[Action]) extends Action {
 
   def execute(model : Model) : Model = actions.foldLeft(model)((m, action) => action.execute(m))
+  
+  def ids = actions.flatMap(_.ids)
 
   override def merge(that : Action) = that match {
     case SequenceAction(acts : Seq[Action]) => SequenceAction(actions ++ acts)
@@ -25,6 +27,8 @@ case class SequenceAction(actions : Seq[Action]) extends Action {
   }
 
   def undo(model : Model) : Model = actions.foldLeft(model)((m, action) => action.undo(m))
+  
+  def update(map : Map[Int, Int]) = copy(actions.map(_.update(map)))
 
 }
 

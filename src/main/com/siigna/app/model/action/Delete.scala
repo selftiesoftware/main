@@ -13,6 +13,9 @@ package com.siigna.app.model.action
 import com.siigna.app.model.shape.{ShapeSelector, Shape}
 import com.siigna.app.model.{Drawing, Model, Selection}
 
+/**
+ * Deletes shapes from the [[com.siigna.app.model.Drawing]]
+ */
 object Delete {
   
   def apply(id : Int) {
@@ -30,8 +33,8 @@ object Delete {
     // Does the deletion result in new shapes?
     if (newShapes.isEmpty) { // No - that's easy!
       Drawing execute DeleteShapes(oldShapes)
-    } else { // Yes - now we need the magic
-      Drawing.executeWithIds(newShapes, DeleteShapeParts(oldShapes, _))
+    } else { // Yes - now we need ids
+      Drawing.execute(DeleteShapeParts(oldShapes, Drawing.getIds(newShapes)))
     }
   }
   
@@ -53,8 +56,12 @@ object Delete {
 sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
+  
+  def ids = Traversable(id)
 
   def undo(model : Model) = model.add(id, shape)
+  
+  def update(map : Map[Int, Int]) = copy(map.getOrElse(id, id))
 
 }
 
@@ -84,6 +91,8 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
     }
   }
   
+  def ids = Traversable(id)
+  
   def undo(model : Model) = {
     if (parts.size <= 1) {
       model.add(id, shape)
@@ -92,6 +101,7 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
     }
   }
   
+  def update(map : Map[Int, Int]) = copy(map.getOrElse(id, id))
 }
 
 /**
@@ -103,8 +113,14 @@ case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Sh
   def execute(model : Model) = 
     model.remove(oldShapes.keys).add(newShapes)
   
+  def ids = oldShapes.keys ++ newShapes.keys
+  
   def undo(model : Model) = 
     model.remove(newShapes.keys).add(oldShapes)
+  
+  def update(map : Map[Int, Int]) = copy(
+    oldShapes.map(t => map.getOrElse(t._1, t._1) -> t._2),
+    newShapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
   
 }
 
@@ -116,5 +132,9 @@ case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys
 
+  def ids = shapes.keys
+
   def undo(model : Model) = model add shapes
+
+  def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
 }

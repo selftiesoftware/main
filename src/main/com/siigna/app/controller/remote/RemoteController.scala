@@ -45,8 +45,8 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  //protected val remote = select(Node("siigna.com", 20004), 'siigna)
-  protected val remote = select(Node("localhost", 20004), 'siigna)
+  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  //protected val remote = select(Node("localhost", 20004), 'siigna)
 
   com.siigna.app.model.Drawing.setAttribute("title", "operahuset")
   com.siigna.app.model.Drawing.setAttribute("id", 1)
@@ -92,7 +92,7 @@ protected[controller] object RemoteController {
 
             case Drawing => {
               //SiignaDrawing.shapes = value.getAsInstanceOf[RemoteModel].shapes
-              value.get match{
+              value.get match {
                 case rem: RemoteModel => {
 
                   val baos = new ByteArrayOutputStream()
@@ -111,7 +111,7 @@ protected[controller] object RemoteController {
 
             case ShapeIdentifier => {
               println("Got range "+value+" for "+client)
-              SiignaDrawing.addRemoteIds(value.get.asInstanceOf[Range])
+              SiignaDrawing.execute(UpdateLocalActions(value.get.asInstanceOf[Range]))
             }
           }
         }
@@ -130,13 +130,19 @@ protected[controller] object RemoteController {
   }
 
   /**
-   * Sends an action remotely.
+   * Sends an action remotely. If the action is local (see [[com.siigna.app.model.action.Action.isLocal]])
+   * we query the server for ids so we can be certain everything is synchronized with the server.
    * @param action The action to dispatch.
    * @param undo Should the action be undone?
    */
   def ! (action : Action, undo : Boolean) {
-    println("Handling "+action)
+    // Query for remote ids
+    if (action.isLocal) {
+      // Do something!
+    }
+      
     queue :+= ((c : Client) => RemoteAction(c, action, undo))
+    Log.success("RemoteController: Successfully handled action: " + action)
   }
   
   /**

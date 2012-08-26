@@ -24,7 +24,7 @@ object Create {
    * @param shape  The shape to create.
    */
   def apply(shape : Shape) {
-    Drawing.executeWithIds(Seq(shape), CreateShapes(_))
+    Drawing.execute(CreateShape(Drawing getId, shape))
   }
 
   /**
@@ -33,7 +33,7 @@ object Create {
    * @tparam T  The type of the entries in the shape.
    */
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    Drawing.executeWithIds(Seq(collection), CreateShapes(_))
+    Drawing.execute(CreateShape(Drawing getId, collection))
   }
 
   /**
@@ -52,7 +52,7 @@ object Create {
    */
   def apply(shapes : Traversable[Shape]) {
     if (shapes.size > 1) {
-      Drawing.executeWithIds(shapes.toIterable, CreateShapes(_))
+      Drawing.execute(CreateShapes(Drawing.getIds(shapes)))
     } else if (shapes.size == 1) {
       apply(shapes.head)
     } else {
@@ -73,7 +73,11 @@ case class CreateShape(id : Int, shape : Shape) extends Action {
   
   def execute(model : Model) = model add (id, shape)
 
+  def ids = Traversable(id)
+
   def undo(model : Model) = model remove id
+
+  def update(map : Map[Int, Int]) = CreateShape(map.getOrElse(id, id), shape)
 
 }
 
@@ -88,6 +92,11 @@ case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
   
   def execute(model : Model) = model add shapes
+  
+  def ids = shapes.keys
 
   def undo(model : Model) = model remove shapes.keys
+  
+  def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
+  
 }

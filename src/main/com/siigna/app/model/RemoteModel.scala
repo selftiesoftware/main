@@ -11,13 +11,10 @@
 
 package com.siigna.app.model
 
-import action.{VolatileAction, Action}
-import com.siigna.app.controller.remote._
-import com.siigna.app.Siigna
+import java.io._
+
 import shape.Shape
 import com.siigna.util.logging.Log
-import com.siigna.app.view.View
-import java.io._
 import com.siigna.util.collection.Attributes
 
 /**
@@ -30,15 +27,6 @@ import com.siigna.util.collection.Attributes
 class RemoteModel extends ActionModel
                      with HasAttributes 
                      with Externalizable {
-
-  override def toString: String = {
-    return "shapes: "+model.shapes+"\n attributes:"+attributes
-  }
-
-  def writeExternal(out : ObjectOutput) {
-    out.writeObject(model.shapes)
-    out.writeObject(attributes)
-  }
 
   def readExternal(in : ObjectInput) {
     var fail = false
@@ -57,6 +45,15 @@ class RemoteModel extends ActionModel
     }
 
     if (!fail) Log.success("Model: Sucessfully read data.")
+  }
+
+  override def toString: String = {
+    "shapes: "+model.shapes+"\n attributes:"+attributes
+  }
+
+  def writeExternal(out : ObjectOutput) {
+    out.writeObject(model.shapes)
+    out.writeObject(attributes)
   }
   
 }
