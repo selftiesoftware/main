@@ -67,7 +67,7 @@ class SiignaApplet extends Applet {
       // Get the active user, if a log in was performed at www.siigna.com
       val userName = getParameter("contributorName")
       if (userName != null) {
-        //Siigna.user = Some(User(userName, None, None))
+        Siigna.user = Some(User(userName, None, Some(util.Random.nextString(20))))
         Log.success("Applet: Found user: " + userName)
       }
 
@@ -75,7 +75,7 @@ class SiignaApplet extends Applet {
       val drawingId = getParameter("drawingId")
 
       if (drawingId != null) try {
-        val id = drawingId.toInt
+        val id = drawingId.toLong
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }

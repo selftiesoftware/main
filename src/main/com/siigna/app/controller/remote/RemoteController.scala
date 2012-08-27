@@ -54,6 +54,7 @@ protected[controller] object RemoteController {
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
   //SiignaDrawing.addAttribute("id",20)
+
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
 
@@ -68,11 +69,10 @@ protected[controller] object RemoteController {
           this.client = Some(cl)
 
           // Ask for the drawing
-          if (!SiignaDrawing.attributes.int("id").isDefined) {
-            println("No id")
+         /* if (!SiignaDrawing.attributes.int("id").isDefined) {
             remote.send(Get(DrawingId, None, cl), local)
-          } else
-            remote.send(Get(Drawing, SiignaDrawing.attributes.int("id"), cl), local)
+          } else*/
+            remote.send(Get(Drawing, SiignaDrawing.attributes.long("id"), cl), local)
 
           // Empty the queue
           dequeue(cl)
@@ -82,9 +82,9 @@ protected[controller] object RemoteController {
         case Set(typ, value, _) => {
           typ match {
             case DrawingId => {
-              println("Got id "+value)
               SiignaDrawing.addAttribute("id", value.get)
-            } case Drawing => {
+            }
+            case Drawing => {
               //SiignaDrawing.shapes = value.getAsInstanceOf[RemoteModel].shapes
               value.get match {
                 case rem: RemoteModel => {
@@ -238,11 +238,12 @@ protected[controller] object RemoteController {
             }
             
             // Register if the client is empty, but the title AND user has been set
-          } else if (SiignaDrawing.attributes.int("id").isDefined) {
-            remote.send(Register(Siigna.user, SiignaDrawing.attributes.int("id"), com.siigna.app.controller.Client()), local)
+          } else if (SiignaDrawing.attributes.long("id").isDefined) {
+            remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()), local)
           } else {
             remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
           }
+
           // Ping every 5 seconds (dev)
           Thread.sleep(5000)
         }
