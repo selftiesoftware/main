@@ -378,7 +378,7 @@ object PolylineShape {
  * A shape type used in the PolylineShape. This shape is instantiated by a given point,
  * so we (1) ensure that the shapes are connected and (2) avoids any duplicated points.
  */
-sealed trait InnerPolylineShape extends Serializable with (Vector2D => BasicShape) {
+sealed trait InnerPolylineShape {
 
   /**
    * Creates a BasicShape to use inside the PolylineShape.
