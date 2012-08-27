@@ -15,6 +15,7 @@ import collection.mutable.BitSet
 import com.siigna.util.collection.{Attributes}
 import collection.Seq
 import com.siigna.app.model.shape.PolylineShape.Selector
+import java.io.{ObjectOutput, ObjectInput, Externalizable}
 
 /**
  * <p>A PolylineShape is a shape that can consist of segments or arcs. <b>Use the companion object
@@ -41,7 +42,9 @@ import com.siigna.app.model.shape.PolylineShape.Selector
  * TODO: Implement more robust geometry for PolylineShapes
  */
 @SerialVersionUID(1147278759)
-sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) extends CollectionShape[BasicShape] {
+sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) 
+          extends CollectionShape[BasicShape] 
+             with Externalizable {
 
   require(startPoint != null, "Cannot create a polyline without a starting point")
   require(!innerShapes.isEmpty, "Cannot create a polyline without shapes")
@@ -283,6 +286,42 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
   override def toString = "PolylineShape[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
   def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)).distinct, attributes)
+
+  def writeExternal(out: ObjectOutput) {
+    // startPoint
+    out.writeObject(startPoint)
+    // innerShapes
+    out.writeInt(innerShapes.size)
+    innerShapes.foreach(_ match {
+      case PolylineLineShape(v) => {
+        out.writeBoolean(true)
+        out.writeObject(v)
+      }
+      case PolylineArcShape(m, e) => {
+        out.writeBoolean(false)
+        out.writeObject(m)
+        out.writeObject(e)
+      }
+    })
+    // attributes
+    out.writeObject(attributes)
+  }
+
+  def readExternal(in: ObjectInput) {
+    // startPoints
+    PolylineShape(
+      in.readObject().asInstanceOf[Vector2D],
+      for (n <- 0 until in.readInt())
+        yield in.readBoolean() match {
+          case true => { // Line
+            PolylineLineShape(in.readObject().asInstanceOf[Vector2D])
+          }
+          case false => { // Arc
+            PolylineArcShape(in.readObject().asInstanceOf[Vector2D], in.readObject().asInstanceOf[Vector2D])
+          }
+        },
+      in.readObject().asInstanceOf[Attributes])
+  }
 }
 
 /**
