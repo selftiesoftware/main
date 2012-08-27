@@ -49,11 +49,11 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  //protected val remote = select(Node("localhost", 20004), 'siigna)
+  //protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-
+  //SiignaDrawing.addAttribute("id",20)
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
 
@@ -69,8 +69,10 @@ protected[controller] object RemoteController {
 
           // Ask for the drawing
           if (!SiignaDrawing.attributes.int("id").isDefined) {
+            println("No id")
             remote.send(Get(DrawingId, None, cl), local)
-          }
+          } else
+            remote.send(Get(Drawing, SiignaDrawing.attributes.int("id"), cl), local)
 
           // Empty the queue
           dequeue(cl)
@@ -79,8 +81,10 @@ protected[controller] object RemoteController {
 
         case Set(typ, value, _) => {
           typ match {
-
-            case Drawing => {
+            case DrawingId => {
+              println("Got id "+value)
+              SiignaDrawing.addAttribute("id", value.get)
+            } case Drawing => {
               //SiignaDrawing.shapes = value.getAsInstanceOf[RemoteModel].shapes
               value.get match {
                 case rem: RemoteModel => {
@@ -236,8 +240,9 @@ protected[controller] object RemoteController {
             // Register if the client is empty, but the title AND user has been set
           } else if (SiignaDrawing.attributes.int("id").isDefined) {
             remote.send(Register(Siigna.user, SiignaDrawing.attributes.int("id"), com.siigna.app.controller.Client()), local)
+          } else {
+            remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
           }
-
           // Ping every 5 seconds (dev)
           Thread.sleep(5000)
         }
