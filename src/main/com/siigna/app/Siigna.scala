@@ -55,9 +55,8 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
 
   /**
    * The current user logged in to Siigna, if any.
-   * TODO: Insert the right user!
    */
-   val user : Option[User] = Some(new User(util.Random.nextString(10), Some(1), Some("johnnyhash")))
+   var user : Option[User] = None
 
   /**
    * The version of Siigna.
