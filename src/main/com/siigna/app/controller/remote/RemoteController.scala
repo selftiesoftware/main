@@ -49,11 +49,11 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
- // protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  protected val remote = select(Node("localhost", 20004), 'siigna)
+  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  //protected val remote = select(Node("localhost", 20004), 'siigna)
 
   com.siigna.app.model.Drawing.setAttribute("title", "operahuset")
-  com.siigna.app.model.Drawing.setAttribute("id", 52)
+  com.siigna.app.model.Drawing.setAttribute("id", 20)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -173,8 +173,8 @@ protected[controller] object RemoteController {
 
           // Query for remote ids if the action is local
           if (action.isLocal) {
-            val localIds = action.ids.filter(_ < 0).toIterator
-            
+            val localIds = action.ids.filter(_ < 0).toSeq
+
             // Map the ids with existing key-pairs
             val ids = localIds.map(i => localIdMap.getOrElse(i, i))
             
@@ -188,7 +188,7 @@ protected[controller] object RemoteController {
                 case Set(ShapeIdentifier, Some(i : Range), _) => {
                   
                   // Find out how the ids map to the action
-                  val map = for (n <- 0 until localIds.size) yield localIds.next() -> i(n)
+                  val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
                   
                   // Update the map in the remote controller
                   localIdMap ++= map
@@ -196,6 +196,8 @@ protected[controller] object RemoteController {
                   // Update the model
                   SiignaDrawing.execute(UpdateLocalActions(localIdMap))
 
+                  println("Action ids: " + action.ids, "Updated action ids: " + action.update(localIdMap).ids)
+                  
                   // Return the updated action
                   action.update(localIdMap)
                 }
