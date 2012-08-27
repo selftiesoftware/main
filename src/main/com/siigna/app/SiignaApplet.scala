@@ -67,8 +67,8 @@ class SiignaApplet extends Applet {
       // Get the active user, if a log in was performed at www.siigna.com
       val userName = getParameter("contributorName")
       if (userName != null) {
-        Log.debug("Applet: Found user: " + userName)
-        Siigna.user = Some(User(userName, None, None))
+        //Siigna.user = Some(User(userName, None, None))
+        Log.success("Applet: Found user: " + userName)
       }
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
@@ -76,8 +76,8 @@ class SiignaApplet extends Applet {
 
       if (drawingId != null) try {
         val id = drawingId.toInt
-        Log.debug("Applet: Found drawing: " + id)
         Drawing.setAttribute("id", id)
+        Log.success("Applet: Found drawing: " + id)
       }
     } catch { case e => Log.info("No user or drawing found. Siigna will be running in local mode.")}
 

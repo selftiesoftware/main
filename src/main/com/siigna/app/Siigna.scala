@@ -55,15 +55,14 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
 
   /**
    * The current user logged in to Siigna, if any.
+   * TODO: Insert the right user!
    */
-   //var user : Option[User] = None
-
-   var user : Option[User] = Some(new User("csp", Some(1), Some("johnnyhash")))
+   val user : Option[User] = Some(new User(util.Random.nextString(10), Some(1), Some("johnnyhash")))
 
   /**
    * The version of Siigna.
    */
-  val version = "v1.0 beta"
+  val version = "v1.0 alpha"
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
