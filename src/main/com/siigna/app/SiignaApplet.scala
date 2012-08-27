@@ -59,6 +59,7 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
+    Siigna display("loading modules..please wait..for us to get better upload from the server. ")
     // Init parent
     super.init()
 

@@ -25,6 +25,7 @@ package com.siigna.app.controller
 import java.lang.ClassLoader
 import java.net.{URL, URLClassLoader}
 import com.siigna.util.logging.Log
+import com.siigna._
 
 /**
  * An object that loads scala class files from remote locations.
