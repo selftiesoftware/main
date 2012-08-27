@@ -67,7 +67,7 @@ import com.siigna.util.geom._
  *                 +--- TextShape
  * </pre>
  */
-trait Shape extends ShapeLike {
+trait Shape extends ShapeLike with Serializable {
 
   type T <: Shape
 
