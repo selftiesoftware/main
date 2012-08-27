@@ -26,11 +26,11 @@ package object siigna extends com.siigna.util.Implicits {
   // Commands
   val ForwardTo = com.siigna.app.controller.command.ForwardTo
   val Goto = com.siigna.app.controller.command.Goto
-  val Preload = com.siigna.app.controller.command.Preload  
-  
+  val Preload = com.siigna.app.controller.command.Preload
+
   // Remote commands
-  val ShapeIdentifier = com.siigna.app.controller.remote.ShapeIdentifier
-  val DrawingName = com.siigna.app.controller.remote.DrawingName
+  val ShapeIdentifier = com.siigna.app.controller.remote.RemoteConstants.ShapeIdentifier
+  val DrawingName = com.siigna.app.controller.remote.RemoteConstants.DrawingName
 
   // Controller
   val Controller = com.siigna.app.controller.Controller

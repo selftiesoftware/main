@@ -90,7 +90,8 @@ object Track extends EventTrack {
       isTracking = false
 
       // Get mouse event
-      val (m : Vector2D, eventFunction : (Vector2D => Event)) = events match {
+      // The events has been unchecked since this match cannot occur if the event-list is empty
+      val (m : Vector2D, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
         case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
         case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
         case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))

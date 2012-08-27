@@ -12,14 +12,9 @@
 package com.siigna.app.model
 
 
-import action.{Action, CreateShape}
-import com.siigna.app.Siigna
-import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import shape.{Shape}
-import collection.immutable.MapProxy
-import com.siigna.app.controller.{Controller}
-import com.siigna.util.collection.Attributes
-import com.siigna.app.controller.remote.{Get, RemoteAction}
+import action.Action
+import shape.Shape
+import collection.GenMap
 
 /**
  * An immutable model with two layers: an static and dynamic.

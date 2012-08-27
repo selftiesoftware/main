@@ -9,26 +9,47 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller
+package com.siigna.app.controller.remote
 
 /**
  * The remote package contains remote information relevant for the client and server.
  */
-package object remote extends Enumeration {
+object RemoteConstants extends Enumeration {
 
   type RemoteConstant = Value
 
+  /**
+   * Used to recognize requests for getting or setting ShapeIdentifiers (ids).
+   */
   val ShapeIdentifier = Value
 
+  /**
+   * Used to recognize requests for getting or setting [[com.siigna.app.model.Drawing]]s.
+   */
   val Drawing = Value
 
+  /**
+   * Used to recognize requests for setting or getting drawing names.
+   */
   val DrawingName = Value
 
+  /**
+   * Used to recognize requests for setting or getting drawing ids.
+   */
   val DrawingId = Value
 
+  /**
+   * Used to recognize requests for setting or getting [[com.siigna.app.model.action.Action]]s.
+   */
   val Action = Value
 
+  /**
+   * Used to recognize requests for setting or getting [[com.siigna.app.model.action.Action]] ids.
+   */
   val ActionId = Value
 
+  /**
+   * Used to recognize requests for setting or getting [[com.siigna.app.controller.Client]]s.
+   */
   val Client = Value
 }

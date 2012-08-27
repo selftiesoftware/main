@@ -12,6 +12,7 @@
 package com.siigna.app.model
 
 import action.Action
+import collection.GenMap
 
 /**
  * Trait that provides necessary information to build a model with a

@@ -15,7 +15,7 @@ import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.model.Model
 import collection.parallel.immutable.{ParHashMap}
 import com.siigna.app.model.shape.{LineShape}
-import org.scalatest.{FunSpec, Spec}
+import org.scalatest.FunSpec
 
 /**
  * Test the immutable model to manipulate and contain a map of ints and shapes.

@@ -12,13 +12,31 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.model.Model
-import com.siigna.app.model.action.VolatileAction
+import com.siigna.app.model.action.{Action, VolatileAction}
 
 /**
  * An action that updates all the local actions and replaces local ids with remote ids.
+ * @param map  A mapping of local ids to remote ids.
  */
-protected[remote] sealed case class UpdateLocalActions(range : Range) extends VolatileAction {
+protected[remote] sealed case class UpdateLocalActions(map : Map[Int, Int]) extends VolatileAction {
 
-  def execute(model: Model) = null
+  def execute(model: Model) = {
+    def replaceActionSeq(s : Seq[Action]) = if (s.exists(_.isLocal)) {
+      s.map(a => if (a.isLocal) a.update(map) else a) } else s
+
+    // Replace the shapes
+    val shapes = if (model.shapes.exists(_._1 < 0)) {
+      model.shapes.par.map(t => map.getOrElse(t._1, t._1) -> t._2)
+    } else model.shapes
+
+    // Find and replace all local executed actions
+    val executed = replaceActionSeq(model.executed)
+
+    // Find and replace all local undone action
+    val undone = replaceActionSeq(model.undone)
+
+    // Return the new model
+    new Model(shapes.seq, executed, undone)
+  }
 
 }

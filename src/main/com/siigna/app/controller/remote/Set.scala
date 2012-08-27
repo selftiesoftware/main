@@ -11,6 +11,7 @@
 
 package com.siigna.app.controller.remote
 
+import com.siigna.app.controller.remote.RemoteConstants.RemoteConstant
 import com.siigna.app.controller.{Controller, Client}
 
 

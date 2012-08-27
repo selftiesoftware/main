@@ -12,8 +12,8 @@
 package com.siigna.app.model
 
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
-import shape.{Shape}
-import collection.parallel.immutable.{ParMap, ParIterable}
+import shape.Shape
+import collection.GenMap
 
 /**
  * An interface that supplies

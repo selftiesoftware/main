@@ -54,6 +54,6 @@ abstract class Implicits {
 }
 
 /**
- * An object used for direct import. Import should happen through com.siigna.package.scala.
+ * An object used for direct import. Import should happen through com.siigna.RemoteConstants.scala.
  */
 object Implicits extends Implicits
