@@ -14,11 +14,11 @@ mainClass in (Compile, run) := Some("com.siigna.app.SiignaApplication")
 
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
-javaOptions += "-Xss1m -server"
-
 publishTo := Some(Resolver.file("file",  new File( "../rls/base" )) )
 
 resolvers += "Siigna" at "http://siigna.com/rls/base"
+
+fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
   "com.siigna" %% "siigna-module" % "preAlpha"

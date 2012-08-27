@@ -49,11 +49,11 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  //protected val remote = select(Node("localhost", 20004), 'siigna)
+ // protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   com.siigna.app.model.Drawing.setAttribute("title", "operahuset")
-  com.siigna.app.model.Drawing.setAttribute("id", 1)
+  com.siigna.app.model.Drawing.setAttribute("id", 52)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
