@@ -34,6 +34,7 @@ import collection.mutable.BitSet
  * @param parts  The ids of the wrapped shape(s).
  * @see [[com.siigna.app.model.MutableModel]]
  */
+@SerialVersionUID(2104259901)
 case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes with MapProxy[Int, ShapeSelector] {
 
   type T = Selection
