@@ -164,6 +164,30 @@ trait AttributesLike {
   def int(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Int])
 
   /**
+   * Gets an attribute value as an optional long. This means no exceptions
+   * are thrown. You can either use pattern matching or the getOrElse feature
+   * to provide a default value.
+   *
+   * <p>
+   * Examples:
+   * <pre>
+   *   // Using pattern matching.
+   *   attributes.long("BigNumber") match {
+   *     case Some(n) => println("We found a big number: " + n)
+   *     case None    => println("Unknown number.")
+   *   }
+   *
+   *   // Using default value.
+   *   println( attributes int "BigNumber" getOrElse 0 )
+   * </pre>
+   * </p>
+   *
+   * @param  attributeName  the name of attribute to look up.
+   * @return  an optional attribute long value.
+   */
+  def long(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Long])
+
+  /**
    * Gets an attribute value as an optional string. This means no exceptions
    * are thrown. You can either use pattern matching or the getOrElse feature
    * to provide a default value.

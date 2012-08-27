@@ -75,7 +75,7 @@ class SiignaApplet extends Applet {
       val drawingId = getParameter("drawingId")
 
       if (drawingId != null) try {
-        val id = drawingId.toInt
+        val id = drawingId.toLong
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }

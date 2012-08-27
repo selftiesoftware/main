@@ -235,7 +235,7 @@ protected[controller] object RemoteController {
             
             // Register if the client is empty, but the title AND user has been set
           } else if (SiignaDrawing.attributes.int("id").isDefined) {
-            remote.send(Register(Siigna.user, SiignaDrawing.attributes.int("id"), com.siigna.app.controller.Client()), local)
+            remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()), local)
           }
 
           // Ping every 5 seconds (dev)

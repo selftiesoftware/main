@@ -12,7 +12,6 @@ package com.siigna.app.model
  */
 
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{TransformationMatrix}
 
 /**
  * A trait for object with attributes.
