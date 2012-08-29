@@ -53,7 +53,7 @@ protected[controller] object RemoteController {
   //protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-  SiignaDrawing.setAttribute("id", 20L) // Remember to set it as a long :-)
+  //SiignaDrawing.setAttribute("id", 20L) // Remember to set it as a long :-)
 
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
