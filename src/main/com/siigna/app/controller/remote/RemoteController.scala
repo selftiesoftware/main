@@ -49,11 +49,11 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  //protected val remote = select(Node("localhost", 20004), 'siigna)
+  //protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-  //SiignaDrawing.addAttribute("id",20)
+  SiignaDrawing.setAttribute("id", 20L) // Remember to set it as a long :-)
 
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
@@ -127,7 +127,6 @@ protected[controller] object RemoteController {
    */
   def ! (action : Action, undo : Boolean) {
     queue :+= ((c : Client) => RemoteAction(c, action, undo))
-    Log.success("Remote: Successfully handled action: " + action)
   }
   
   /**
@@ -153,61 +152,74 @@ protected[controller] object RemoteController {
   protected def dequeue(client : Client) { if (!queue.isEmpty ) {
     Log.debug("Remote: Sending queue of size: " + queue.size)
 
-    // Send and dequeue the enqueued messages
-    queue = queue.foldLeft(queue)((q : Seq[Client => RemoteCommand], f : (Client => RemoteCommand)) => {
+    try {                         
+      // Send and dequeue the enqueued messages
+      queue = queue.foldLeft(queue)((q : Seq[Client => RemoteCommand], f : (Client => RemoteCommand)) => {
 
-      // Retrieve the command
-      val command : RemoteCommand = f(client) match {
-        case remoteAction : RemoteAction => {
-          val action = remoteAction.action
+        // Retrieve the command
+        val command : RemoteCommand = f(client) match {
+          case remoteAction : RemoteAction => {
+            val action = remoteAction.action
 
-          // Query for remote ids if the action is local
-          if (action.isLocal) {
-            val localIds = action.ids.filter(_ < 0).toSeq
+            // Query for remote ids if the action is local
+            if (action.isLocal) {
+              Log.debug("Remote: Local action detected - resolving ...")
 
-            // Map the ids with existing key-pairs
-            val ids = localIds.map(i => localIdMap.getOrElse(i, i))
-            
-            // Do we still have local ids? 
-            val updatedAction = if (ids.exists(_ < 0)) {
-              // Find the local ids
-              val localIds = ids.filter(_ < 0)
+              val localIds = action.ids.filter(_ < 0).toSeq
 
-              // .. Then we need to query the server for ids
-              remote !? Get(ShapeIdentifier, Some(localIds.size), client) match {
-                case Set(ShapeIdentifier, Some(i : Range), _) => {
-                  
-                  // Find out how the ids map to the action
-                  val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
-                  
-                  // Update the map in the remote controller
-                  localIdMap ++= map
+              // Map the ids with existing key-pairs
+              val ids = localIds.map(i => localIdMap.getOrElse(i, i))
 
-                  // Update the model
-                  SiignaDrawing.execute(UpdateLocalActions(localIdMap))
-                  
-                  // Return the updated action
-                  action.update(localIdMap)
+              // Do we still have local ids? 
+              val updatedAction : Action = if (ids.exists(_ < 0)) {
+                // Find the local ids
+                val localIds = ids.filter(_ < 0)
+
+                // .. Then we need to query the server for ids
+                remote !? Get(ShapeIdentifier, Some(localIds.size), client) match {
+                  case Set(ShapeIdentifier, Some(i : Range), _) => {
+
+                    // Find out how the ids map to the action
+                    val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
+
+                    // Update the map in the remote controller
+                    localIdMap ++= map
+
+                    // Update the model
+                    SiignaDrawing.execute(UpdateLocalActions(localIdMap))
+
+                    // Update the action
+                    val a = action.update(localIdMap)
+                    Log.success("Remote: Local action resolved with server.")
+
+                    // Return
+                    a
+                  }
+                  case e => throw new UnknownError("Remote: Expected Set(ShapeIdentifier, _, _), got " + e)
                 }
-                case e => throw new UnknownError("Remote: Expected Set(ShapeIdentifier, _, _), got " + e)
+              } else { // Else give the action the new ids
+                val a = action.update(localIds.zip(ids).toMap)
+                Log.success("Remote: Local action resolved locally.")
+                // Return
+                a
               }
-            } else { // Else give the action the new ids
-              action.update(localIds.zip(ids).toMap)
-            }
 
-            // Dispatch the remote command
-            RemoteAction(client, updatedAction, remoteAction.undo)
-          } else { // Else simply just dispatch
-            remoteAction
+              // Dispatch the remote command
+              RemoteAction(client, updatedAction, remoteAction.undo)
+            } else { // Else simply just dispatch
+              remoteAction
+            }
           }
+          case cmd => cmd // Just return
         }
-        case cmd => cmd // Just return
-      }
-      
-      // Send it to the server
-      remote.send(command, local)
-      q.tail
-    })
+
+        // Send it to the server
+        remote.send(command, local)
+        q.tail
+      })
+    } catch {
+      case e => Log.error("Remote: Failed to send action-queue", e)
+    }
   } }
 
   /**
@@ -225,7 +237,10 @@ protected[controller] object RemoteController {
           if (client.isDefined) {
             // Request an answer com.siigna.app.model.Drawing.attributes.string("title")
             remote !? (5000, client.get) match {
-              case Some(b : Boolean) => { isConnected = b }
+              case Some(b : Boolean) => { 
+                isConnected = b
+                Log.success("Remote: Server responded: " + b)
+              }
               case None => {
                 isConnected = false
                 Log.warning("Remote: Server timeout")
@@ -233,15 +248,14 @@ protected[controller] object RemoteController {
             }
 
             // Empty the queue
-            if (isConnected) {
-              dequeue(client.get)
-            }
+            if (isConnected) dequeue(client.get)
             
             // Register if the client is empty, but the title AND user has been set
           } else if (SiignaDrawing.attributes.long("id").isDefined) {
             remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()), local)
           } else {
-            remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
+            // Should we do anything here? No one is logged on...
+            //remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
           }
 
           // Ping every 5 seconds (dev)
