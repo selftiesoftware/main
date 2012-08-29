@@ -21,6 +21,7 @@ object Log extends scala.util.logging.ConsoleLogger {
   val INFO    = 4
   val DEBUG   = 8
   val SUCCESS = 16
+  val ALL     = ERROR + WARNING + INFO + DEBUG + SUCCESS
   
   /**
    * The debug-level. Levels are following:
@@ -42,6 +43,7 @@ object Log extends scala.util.logging.ConsoleLogger {
   private var lineNumber = 0
 
   private def format(message : Any, messageLevel : Int, refs : Seq[Any], error : Option[Throwable] = None) {
+    println("Log: " + ALL)
     if ((level & messageLevel) == messageLevel) {
       // Add to the line-number
       lineNumber += 1
