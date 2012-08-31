@@ -56,7 +56,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * The current user logged in to Siigna, if any.
    */
-   var user : Option[User] = None
+   var user : Option[User] = Some(User(util.Random.nextString(10), Some(util.Random.nextLong()), Some(util.Random.nextString(12))))
 
   /**
    * The version of Siigna.

@@ -14,5 +14,5 @@ package com.siigna.app.model.server
 /**
  * A User is identified by a single name.
  */
-@SerialVersionUID(-1857738901)
-case class User(name : String, id: Option[Int], hash: Option[String])
+@SerialVersionUID(-1855638901)
+case class User(name : String, id: Option[Long], hash: Option[String])

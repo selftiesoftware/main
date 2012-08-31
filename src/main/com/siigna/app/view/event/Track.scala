@@ -103,12 +103,15 @@ object Track extends EventTrack {
 
       // Update mousePosition
       this.mousePosition = m
-
+      var shape : Option[Int] = None
+      
       // Get the nearest shape if it is defined
       if (Drawing(m).size > 0) {
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
+          
           val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
+          shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           if (nearestPoint.distanceTo(m) < trackDistance) {
             if  (!(pointOne.get.distanceTo(m) < 10)) pointTwo = pointOne
@@ -118,9 +121,13 @@ object Track extends EventTrack {
         //if no tracking point is defined, set the first point.
         else {
           val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
+          shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
+      } else if(!shape.isDefined) {
+        pointOne = None
+        pointTwo = None
       }
 
       // Snap the event

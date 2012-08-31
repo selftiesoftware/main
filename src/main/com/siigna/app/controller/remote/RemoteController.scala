@@ -53,7 +53,7 @@ protected[controller] object RemoteController {
   protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-
+  SiignaDrawing.addAttribute("id",20L)
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
 
@@ -82,6 +82,7 @@ protected[controller] object RemoteController {
         case Set(typ, value, _) => {
           typ match {
             case DrawingId => {
+              println("received "+value)
               SiignaDrawing.addAttribute("id", value.get)
             }
             case Drawing => {
