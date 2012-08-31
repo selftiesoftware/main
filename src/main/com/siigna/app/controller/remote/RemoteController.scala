@@ -49,11 +49,10 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  //protected val remote = select(Node("localhost", 20004), 'siigna)
+  //protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-  //SiignaDrawing.addAttribute("id",20)
 
   // The local sink, receiving actions from the remote sink
   protected val local : Actor = actor {
@@ -72,7 +71,8 @@ protected[controller] object RemoteController {
          /* if (!SiignaDrawing.attributes.int("id").isDefined) {
             remote.send(Get(DrawingId, None, cl), local)
           } else*/
-            remote.send(Get(Drawing, SiignaDrawing.attributes.long("id"), cl), local)
+
+          remote.send(Get(Drawing, SiignaDrawing.attributes.long("id"), cl), local)
 
           // Empty the queue
           dequeue(cl)
@@ -223,6 +223,7 @@ protected[controller] object RemoteController {
         while (true) {
           // Ping the server
           if (client.isDefined) {
+            println("With client")
             // Request an answer com.siigna.app.model.Drawing.attributes.string("title")
             remote !? (5000, client.get) match {
               case Some(b : Boolean) => { isConnected = b }
@@ -237,12 +238,14 @@ protected[controller] object RemoteController {
               dequeue(client.get)
             }
             
-            // Register if the client is empty, but the title AND user has been set
-          } else if (SiignaDrawing.attributes.long("id").isDefined) {
+            // Register if the client is empty
+          } else {//if (SiignaDrawing.attributes.long("id").isDefined) {
+            println("No client. Drawing id: "+SiignaDrawing.attributes.long("id"))
             remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()), local)
-          } else {
+          } /*else {
+            println("With no idea")
             remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
-          }
+          }   */
 
           // Ping every 5 seconds (dev)
           Thread.sleep(5000)

@@ -6,7 +6,7 @@ organization := "com.siigna"
 
 scalaVersion := "2.9.2"
 
-crossScalaVersions := Seq("2.9.1", "2.9.2")
+crossScalaVersions := Seq("2.9.2")
 
 scalaSource in Compile <<= (baseDirectory in Compile)(_ / "src" / "main")
 
@@ -21,5 +21,6 @@ resolvers += "Siigna" at "http://siigna.com/rls/base"
 fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
-  "com.siigna" %% "siigna-module" % "preAlpha"
+  "com.siigna" %% "siigna-module" % "preAlpha",
+  "org.scala-lang" % "scala-library" % "2.9.2"
 )
