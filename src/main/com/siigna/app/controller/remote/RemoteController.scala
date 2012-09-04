@@ -49,19 +49,22 @@ protected[controller] object RemoteController {
   protected var queue : Seq[Client => RemoteCommand] = Seq()
 
   // The remote server
-  //protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  protected val remote = select(Node("localhost", 20004), 'siigna)
+  //protected val remote = select(Node("siigna", 20004), 'siigna)
+
+  protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  // protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
   // The local sink, receiving actions from the remote sink
+  //SiignaDrawing.setAttribute("id",108L)
   protected val local : Actor = actor {
 
-    loop {
+      loop {
       react {
         // Successful user registration
         case cl: Client => {
           // Log the received client
-          Log.success("Remote: Registered client: " +cl)
+          println("Remote: Registered client: " +cl)
           
           // Store the client
           this.client = Some(cl)
@@ -70,8 +73,9 @@ protected[controller] object RemoteController {
          /* if (!SiignaDrawing.attributes.int("id").isDefined) {
             remote.send(Get(DrawingId, None, cl), local)
           } else*/
-
-          remote.send(Get(Drawing, SiignaDrawing.attributes.long("id"), cl), local)
+          val get = Get(Drawing, SiignaDrawing.attributes.long("id"), cl)
+          println("Sending "+get)
+          remote.send(get, local)
 
           // Empty the queue
           dequeue(cl)
@@ -81,39 +85,51 @@ protected[controller] object RemoteController {
         case Set(typ, value, _) => {
           typ match {
             case DrawingId => {
-              println("received "+value)
-              SiignaDrawing.addAttribute("id", value.get)
+              value match {
+                case id: Some[Long] => {println("Got drawing id, YAY!"); SiignaDrawing.addAttribute("id", value.get) }
+                case e => println("remote asked for drawing id, but got: "+e)
+              }
             }
             case Drawing => {
+              println("Got drawing: "+value)
               //SiignaDrawing.shapes = value.getAsInstanceOf[RemoteModel].shapes
               value.get match {
                 case rem: RemoteModel => {
-
+                  val model = rem
                   val baos = new ByteArrayOutputStream()
                   val oos = new ObjectOutputStream(baos)
 
-                  rem.writeExternal(oos)
+                  model.writeExternal(oos)
                   val modelData = baos.toByteArray
 
                   val drawData = new ObjectInputStream(new ByteArrayInputStream(modelData))
 
                   SiignaDrawing.readExternal(drawData)
+                  println("Drawing id: "+SiignaDrawing.attributes.long("id"))
                 }
-                case e => Log.error("Remote: Got a weird drawing "+e)
+                case e => println("Remote: Got a weird drawing "+e)
               }
             }
-
-            case _ =>
+            case Action => {
+              value match {
+                /*case Some(ra: RemoteAction) =>{
+                  println("Remote got some remote action "+ra)
+                  SiignaDrawing.execute(ra.action, ra.undo)
+                } */
+                case e => println("Remote was asked to set an action. This is the value: "+e)
+              }
+            }
+            case e => println("Remote was asked to set "+e)
           }
         }
 
         case false => {
           isConnected = false;
-          Log.error("Remote: Authentication has failed you. Please log in again")
+          println("Remote: Authentication has failed you. Please log in again")
         }
 
         case msg => {
-          Log.debug("Remote: Received: " + msg)
+          println("Remote: Received: " + msg)
           Controller ! msg
         }
       }
@@ -127,7 +143,7 @@ protected[controller] object RemoteController {
    */
   def ! (action : Action, undo : Boolean) {
     queue :+= ((c : Client) => RemoteAction(c, action, undo))
-    Log.success("Remote: Successfully handled action: " + action)
+    println("Remote: Successfully handled action: " + action)
   }
   
   /**
@@ -151,7 +167,7 @@ protected[controller] object RemoteController {
    * @param client  The client to authorize the commands.
    */
   protected def dequeue(client : Client) { if (!queue.isEmpty ) {
-    Log.debug("Remote: Sending queue of size: " + queue.size)
+    println("Remote: Sending queue of size: " + queue.size)
 
     // Send and dequeue the enqueued messages
     queue = queue.foldLeft(queue)((q : Seq[Client => RemoteCommand], f : (Client => RemoteCommand)) => {
@@ -223,13 +239,13 @@ protected[controller] object RemoteController {
         while (true) {
           // Ping the server
           if (client.isDefined) {
-            println("With client")
+            //println("With client: "+SiignaDrawing.attributes.long("id"))
             // Request an answer com.siigna.app.model.Drawing.attributes.string("title")
             remote !? (5000, client.get) match {
               case Some(b : Boolean) => { isConnected = b }
               case None => {
                 isConnected = false
-                Log.warning("Remote: Server timeout")
+                println("Remote: Server timeout")
               }
             }
 
@@ -241,7 +257,19 @@ protected[controller] object RemoteController {
             // Register if the client is empty
           } else {//if (SiignaDrawing.attributes.long("id").isDefined) {
             println("No client. Drawing id: "+SiignaDrawing.attributes.long("id"))
-            remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()), local)
+            remote !? Register(Siigna.user, SiignaDrawing.attributes.long("id"), com.siigna.app.controller.Client()) match {
+              case cl : Client => {
+                // Resend registration with the obtained client. The outputchannel is temporary with the !? operator, so consider this a hack for now
+                remote.send(Register(Siigna.user, SiignaDrawing.attributes.long("id"),cl),local)
+              }
+              case false => {
+                println("Got false in response to register, going for the id")
+                remote.send(Get(DrawingId, None, Client()), local)
+              }
+              case msg => {
+                println("Register failed, we're still pinging: " + msg)
+              }
+            }
           } /*else {
             println("With no idea")
             remote.send(Get(DrawingId, None, com.siigna.app.controller.Client()), local)
