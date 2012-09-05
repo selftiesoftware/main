@@ -50,11 +50,12 @@ protected[controller] object RemoteController {
 
   // The remote server
   protected val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  //protected val remote = select(Node("localhost", 20004), 'siigna)
+  // protected val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-
   // The local sink, receiving actions from the remote sink
+  //SiignaDrawing.setAttribute("id",108L)
+
   protected val local : Actor = actor {
 
     loop {

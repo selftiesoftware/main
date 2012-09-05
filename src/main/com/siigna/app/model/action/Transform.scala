@@ -13,6 +13,8 @@ package com.siigna.app.model.action
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
 import com.siigna.app.model.{Drawing, Model}
+import serialization.TransformShapePartsProxy
+import java.io.{InvalidObjectException, ObjectInputStream}
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -44,8 +46,7 @@ object Transform {
    * @param transformation The transformation to apply
    */
   def apply(ids : Traversable[Int], transformation : TransformationMatrix) {
-    val m = ids.map(id => (id -> Drawing(id))).toMap
-    Drawing execute TransformShapes(m, transformation)
+    Drawing execute TransformShapes(ids, transformation)
   }
 
   /**
@@ -57,7 +58,7 @@ object Transform {
     if (m <:< manifest[ShapeSelector]) { // Match shape selectors
       Drawing execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapeSelector]], transformation)
     } else if (m <:< manifest[Shape]) { // Match shapes
-      Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]], transformation)
+      Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]].keys, transformation)
     } // If no match, do nothing
   }
 }
@@ -92,6 +93,13 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 
 }
 
+/**
+ * Transforms parts of several shapes with the same [[com.siigna.util.geom.TransformationMatrix]]
+ * by mapping their id to a [[com.siigna.app.model.shape.ShapeSelector]].
+ *
+ * @param shapes  The id paired with a selector that selects the desired shape part.
+ * @param transformation  The transformation with which all shape-parts should be applied.
+ */
 @SerialVersionUID(-1080215160)
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
 
@@ -109,31 +117,48 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
   }
   
   def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
-  
+
+  /**
+   * Writes the TransformShapeParts out as a TransformShapePartsProxy. This is called a
+   * <i>serialization proxy pattern</i>.
+   * @see Effective Java 2nd Edition, item 78.
+   * @return  A TransformShapePartsProxy that can be used for serialization
+   */
+  def writeReplace() : Object = new TransformShapePartsProxy(shapes, transformation)
+
+  /**
+   * Avoids the possibility to fake a TransformShapeParts deserialization (like that's ever gonna happen).
+   * @see Effective Java 2nd Edition, item 74 and 78.
+   * @param in  The ObjectInputStream to not read the object from.
+   */
+  def readObject(in: ObjectInputStream) {
+    throw new InvalidObjectException("TransformShapeParts: Proxy required to read object.")
+  }
 }
 
 /**
- * Transforms a number of shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
+ * Transforms entire shapes with the given [[com.siigna.util.geom.TransformationMatrix]].
+ *
+ * @param ids  The ids of the shapes to transform.
+ * @param transformation  The transformation matrix to apply.
  */
-@SerialVersionUID(-91684555)
-case class TransformShapes(shapes : Map[Int, Shape], transformation : TransformationMatrix) extends Action {
+@SerialVersionUID(478072287)
+case class TransformShapes(ids : Traversable[Int], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation))).toMap
+    val map : Map[Int, Shape] = ids.map(i => i -> model.shapes(i).transform(transformation)).toMap
     model add map
   }
-
-  def ids = shapes.keys
 
   // TODO: Implement and optimize
   //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    val map : Map[Int, Shape] = shapes.map(s => (s._1 -> s._2.transform(transformation.inverse))).toMap
+    val map : Map[Int, Shape] = ids.map(i => (i -> model.shapes(i).transform(transformation.inverse))).toMap
     model add map
   }
 
-  def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
+  def update(map : Map[Int, Int]) = copy(ids.map(t => map.getOrElse(t, t)))
 
 }
 
