@@ -104,7 +104,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
+    model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
   def ids = shapes.keys
@@ -113,7 +113,7 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
   //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    model add shapes.map(e => (e._1 -> Drawing(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
+    model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
   }
   
   def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
