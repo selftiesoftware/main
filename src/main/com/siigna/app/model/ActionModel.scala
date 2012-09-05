@@ -147,7 +147,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def undo() { 
     model.executed.headOption match {
-      case Some(action) => undo(action)
+      case Some(action) => undo(action, true)
       case None => Log.debug("ActionModel: No more actions to undo.")
     } 
   }
