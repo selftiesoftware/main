@@ -26,7 +26,9 @@ import com.siigna.app.model.action.TransformShapeParts
  * @param transformation  The transformation to apply.
  */
 @SerialVersionUID(-540105375)
-sealed protected[action] class TransformShapePartsProxy(private var shapes : Map[Int, ShapeSelector], private var transformation : TransformationMatrix) extends Externalizable {
+sealed protected[action] class TransformShapePartsProxy(private var shapes : Map[Int, ShapeSelector], 
+                                                        private var transformation : TransformationMatrix) 
+  extends SerializationProxy(() => new TransformShapeParts(shapes, transformation)) {
 
   /**
    * A public, empty constructor required by the Externalizable trait.
@@ -34,10 +36,6 @@ sealed protected[action] class TransformShapePartsProxy(private var shapes : Map
    */
   def this() = this(Map(), TransformationMatrix())
 
-  /**
-   * Writes the TransformShapePartsProxy to the given ObjectOutput.
-   * @param out  The ObjectOutput to write the content of the class to.
-   */
   def writeExternal(out: ObjectOutput) {
     out.writeInt(shapes.size)
     shapes.foreach{ case (i : Int, s : ShapeSelector) => {
@@ -47,13 +45,6 @@ sealed protected[action] class TransformShapePartsProxy(private var shapes : Map
     out.writeObject(transformation)
   }
 
-  /**
-   * Reads the content of the ObjectInput and attempts to parse it as a TransformShapePartsProxy.
-   * After the object has been read the <code>readResolve</code> method is called and an instance
-   * of a TransformShapeParts is returned instead.
-   * @see The description for [[com.siigna.app.model.action.serialization.TransformShapePartsProxy]]
-   * @param in
-   */
   def readExternal(in: ObjectInput) {
     val size = in.readInt()
     shapes = new Array[(Int, ShapeSelector)](size).map(_ => {
@@ -61,10 +52,4 @@ sealed protected[action] class TransformShapePartsProxy(private var shapes : Map
     }).toMap
     transformation = in.readObject().asInstanceOf[TransformationMatrix]
   }
-
-  /**
-   * When de-serializing we read the proxy as if it was a TransformShapeParts.
-   * @return  A new instance of TransformShapeParts.
-   */
-  def readResolve() : Object = new TransformShapeParts(shapes, transformation)
 }

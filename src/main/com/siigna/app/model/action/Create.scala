@@ -13,6 +13,7 @@ package com.siigna.app.model.action
 import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
 import com.siigna.app.model.{Drawing, Model}
+import serialization.CreateShapesProxy
 
 /**
 * An object that allows you to create one or more shapes.
@@ -87,7 +88,8 @@ case class CreateShape(id : Int, shape : Shape) extends Action {
  * $actionDescription
  */
 @SerialVersionUID(-1426451986)
-case class CreateShapes(shapes : Map[Int, Shape]) extends Action {
+case class CreateShapes(shapes : Map[Int, Shape])
+  extends SerializableProxyAction(() => new CreateShapesProxy(shapes)) {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
   

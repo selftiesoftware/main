@@ -12,6 +12,8 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.Shape
+import serialization.TransformShapePartsProxy
+import java.io.{InvalidObjectException, ObjectInputStream}
 
 /**
  * <p>An action is an immutable representation of a state-change in the model and <b>the only way</b>
@@ -104,4 +106,34 @@ trait VolatileAction extends Action {
    */
   def update(map : Map[Int, Int]) = this
 
+}
+
+/**
+ * A Serializable action implemented by proxy. The point is to avoid actual serialization of Actions
+ * since they, for the most part, are immutable. Instead we implement an Action that serializes into
+ * another object and deserialized into the original object. It is also called a
+ * <i>serialization proxy pattern</i>.
+ *
+ * @see Effective Java 2nd Edition, item 78.
+ * @param f  A function that returns the proxy object.
+ */
+protected[action] abstract class SerializableProxyAction(f : () => Object) extends Action {
+  
+  /**
+     * Writes the TransformShapeParts out as a TransformShapePartsProxy. This is called a
+     * <i>serialization proxy pattern</i>.
+     * @see Effective Java 2nd Edition, item 78.
+     * @return  A TransformShapePartsProxy that can be used for serialization
+     */
+    def writeReplace() : Object = f()
+  
+    /**
+     * Avoids the possibility to fake a SerializableAction deserialization (like that's ever gonna happen).
+     * @see Effective Java 2nd Edition, item 74 and 78.
+     * @param in  The ObjectInputStream to not read the object from.
+     */
+    def readObject(in: ObjectInputStream) {
+      throw new InvalidObjectException("Serializable Action: Proxy required to read object.")
+    }
+  
 }

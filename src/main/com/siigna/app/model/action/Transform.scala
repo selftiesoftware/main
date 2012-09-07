@@ -14,7 +14,6 @@ import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
 import com.siigna.app.model.{Drawing, Model}
 import serialization.TransformShapePartsProxy
-import java.io.{InvalidObjectException, ObjectInputStream}
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -101,7 +100,8 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
  * @param transformation  The transformation with which all shape-parts should be applied.
  */
 @SerialVersionUID(-1080215160)
-case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
+case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix)
+  extends SerializableProxyAction(() => new TransformShapePartsProxy(shapes, transformation)) {
 
   def execute(model : Model) = {
     model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
@@ -118,22 +118,6 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
   
   def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
 
-  /**
-   * Writes the TransformShapeParts out as a TransformShapePartsProxy. This is called a
-   * <i>serialization proxy pattern</i>.
-   * @see Effective Java 2nd Edition, item 78.
-   * @return  A TransformShapePartsProxy that can be used for serialization
-   */
-  def writeReplace() : Object = new TransformShapePartsProxy(shapes, transformation)
-
-  /**
-   * Avoids the possibility to fake a TransformShapeParts deserialization (like that's ever gonna happen).
-   * @see Effective Java 2nd Edition, item 74 and 78.
-   * @param in  The ObjectInputStream to not read the object from.
-   */
-  def readObject(in: ObjectInputStream) {
-    throw new InvalidObjectException("TransformShapeParts: Proxy required to read object.")
-  }
 }
 
 /**
