@@ -12,6 +12,7 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.{ShapeSelector, Shape}
 import com.siigna.app.model.{Drawing, Model, Selection}
+import serialization.{DeleteShapesProxy, DeleteShapePartsProxy}
 
 /**
  * Deletes shapes from the [[com.siigna.app.model.Drawing]]
@@ -108,7 +109,8 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
  * Deletes a part of a shape represented as a shape selector.
  */
 @SerialVersionUID(1143887988)
-case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) extends Action {
+case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) 
+  extends SerializableProxyAction(() => new DeleteShapePartsProxy(oldShapes, newShapes)) {
   
   def execute(model : Model) = 
     model.remove(oldShapes.keys).add(newShapes)
@@ -128,7 +130,8 @@ case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Sh
  * Deletes a number of shapes.
  */
 @SerialVersionUID(-113196732)
-case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
+case class DeleteShapes(shapes : Map[Int, Shape]) 
+  extends SerializableProxyAction(() => new DeleteShapesProxy(shapes)) {
 
   def execute(model : Model) = model remove shapes.keys
 

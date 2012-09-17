@@ -8,12 +8,10 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-
 package com.siigna.app.model.action.serialization
 
 import java.io.{ObjectInput, ObjectOutput, Externalizable}
 import com.siigna.app.model.action.Action
-
 
 /**
  * A proxy class used to serialize and de-serialize instances of Actions that contains
@@ -24,7 +22,7 @@ import com.siigna.app.model.action.Action
  * @see Effective Java 2nd Edition, item 78.
  * @param f  A function that creates a new Action
  */
-abstract class SerializationProxy(f : () => Action) extends Externalizable {
+protected[action] abstract class SerializationProxy(f : () => Action) extends Externalizable {
 
   /**
    * Writes the TransformShapePartsProxy to the given ObjectOutput.
