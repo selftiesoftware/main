@@ -12,7 +12,11 @@
 package com.siigna.app.model.server
 
 /**
- * A User is identified by a single name.
+ * A User is identified by a name, id and hash.
+ *
+ * @param id  The unique identifier of the user.
+ * @param name  The name of the user.
+ * @param token  A password token to authenticate the user.
  */
-@SerialVersionUID(-1855638901)
-case class User(name : String, id: Option[Long], hash: Option[String])
+@SerialVersionUID(-505180571)
+case class User(id: Long, name : String, token: String)

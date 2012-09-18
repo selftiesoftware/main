@@ -9,14 +9,16 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.controller.remote
+package com.siigna.app.controller
+
+import com.siigna.app.model.server.User
 
 /**
- * A class indicating failure. Used by the server to inform the client when something went wrong.
+ * A client session represented by an id of the drawing the current instance of Siigna is associated with
+ * and a token given by the server to authenticate the client.
+ *
+ * @param drawing The unique identifier of the drawing the client is drawing on.
+ * @param user  The user associated with the session.
  */
-@SerialVersionUID(1381198437)
-case class Failure(command : RemoteCommand, message : String = "") extends RemoteCommand {
-
-  def client = command.client
-
-}
+@SerialVersionUID(-160078897)
+case class Session(drawing : Long, user : User)

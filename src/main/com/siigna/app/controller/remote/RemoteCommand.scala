@@ -12,22 +12,19 @@ package com.siigna.app.controller.remote
  */
 
 import com.siigna.app.controller.command.Command
-import com.siigna.app.controller.Client
+import com.siigna.app.controller.Session
 
 /**
  * A [[com.siigna.app.controller.command.Command]] that can be sent over the network to the Siigna Universe,
- * and thus provides semantics for instructing the Server and informing the Client.
- *
- * Every remote command going <b>from</b> the client <b>to</b> the server are simply the native type. So for
- * instance a registration of the client will be performed via the Register command.
+ * containing a Session which tells the server which user that sends the command and on what drawing.
  */
 trait RemoteCommand extends Command with Serializable {
 
   /**
-   * The client who are sending this command.
+   * The session who are sending this command.
    * @return The client associated with the command.
    */
-  def client : Client
+  def session : Session
   
 }
 

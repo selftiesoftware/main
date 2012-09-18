@@ -12,13 +12,13 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.remote.RemoteConstants.RemoteConstant
-import com.siigna.app.controller.{Controller, Client}
+import com.siigna.app.controller.{Controller, Session}
 
 /**
  * A RemoteCommand capable of retrieving a given attribute from the remote server.
  */
 @SerialVersionUID(-348100723)
-sealed case class Get(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand
+sealed case class Get(name : RemoteConstant, value : Option[Any], client : Session) extends RemoteCommand
 
 /**
  * Companion object for the Get class.
@@ -31,7 +31,7 @@ object Get {
    * @param value  The value, if any.
    */
   def apply(name : RemoteConstant, value : Option[Any]) {
-    Controller ! ((c : Client) => Get(name, value, c))
+    Controller ! ((c : Session) => Get(name, value, c))
   }
 
 }

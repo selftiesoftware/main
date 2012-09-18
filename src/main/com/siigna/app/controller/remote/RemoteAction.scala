@@ -12,14 +12,12 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.model.action.Action
-import com.siigna.app.controller.Client
 
 /**
  * An action meant to be sent over the network.
  *
- * @param client  The client sending the action.
  * @param action  The action to send.
  * @param undo  A boolean flag indicating if this action was done (false) or undone (true).
  */
-@SerialVersionUID(413435921)
-case class RemoteAction(client : Client, action : Action, undo : Boolean = false) extends RemoteCommand
+@SerialVersionUID(2103194976)
+case class RemoteAction(action : Action, undo : Boolean = false)

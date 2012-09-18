@@ -65,7 +65,7 @@ object Controller extends CommandController {
         case (action : Action, undo : Boolean) => remote ! (action, undo)
 
         // Handle remote commands
-        case f : (Client => RemoteCommand)     => remote ! f
+        case f : (Session => RemoteCommand)     => remote ! f
 
         // Handle commands
         case command : Command => {
@@ -84,7 +84,7 @@ object Controller extends CommandController {
         case 'exit => {
           Log.info("Controller is shutting down")
           // Close connection to the server
-          remote ! ((c : Client) => Unregister(c))
+          remote ! ((c : Session) => Unregister(c))
 
           // Quit the thread
           exit()

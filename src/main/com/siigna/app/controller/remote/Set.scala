@@ -12,14 +12,14 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.remote.RemoteConstants.RemoteConstant
-import com.siigna.app.controller.{Controller, Client}
+import com.siigna.app.controller.{Controller, Session}
 
 
 /**
  * A RemoteCommand capable of setting a given attribute to a given value.
  */
 @SerialVersionUID(-1044323852)
-sealed case class Set(name : RemoteConstant, value : Option[Any], client : Client) extends RemoteCommand
+sealed case class Set(name : RemoteConstant, value : Option[Any], client : Session) extends RemoteCommand
 
 /**
  * A companion object to the Set command.
@@ -33,7 +33,7 @@ object Set {
    */
   def apply(name : RemoteConstant, value : Option[Any]) {
     // Dispatches the command
-    Controller ! ((c : Client) => Set(name, value, c))
+    Controller ! ((c : Session) => Set(name, value, c))
   }
   
 }
