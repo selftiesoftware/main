@@ -13,6 +13,7 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.controller.command.Command
 import com.siigna.app.controller.Session
+import com.siigna.app.controller.remote.RemoteConstants._
 
 /**
  * A [[com.siigna.app.controller.command.Command]] that can be sent over the network to the Siigna Universe,
@@ -27,4 +28,31 @@ trait RemoteCommand extends Command with Serializable {
   def session : Session
   
 }
+
+/**
+ * A RemoteCommand capable of retrieving a given attribute from the remote server.
+ * @param name  The name of the value to get
+ * @param value  A parameter to send with the request
+ * @param session  A session to authenticate the request
+ */
+@SerialVersionUID(-348100723)
+sealed case class Get(name : RemoteConstant, value : Option[Any], session : Session) extends RemoteCommand
+
+/**
+ * A RemoteCommand signalling that some error occurred on the server side.
+ * @param code  The HTTP code of the error
+ * @param message  The message from the server
+ * @param session  A session to authenticate the request
+ */
+@SerialVersionUID(-1573685469)
+sealed case class Error(code : Int, message : String, session : Session) extends RemoteCommand
+
+/**
+ * A RemoteCommand capable of setting a given attribute to a given value.
+ * @param name  The name of the value to set
+ * @param value  A parameter value to send with the request
+ * @param session  A session to authenticate the request
+ */
+@SerialVersionUID(-1044323852)
+sealed case class Set(name : RemoteConstant, value : Option[Any], session : Session) extends RemoteCommand
 
