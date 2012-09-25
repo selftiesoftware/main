@@ -36,7 +36,7 @@ trait RemoteCommand extends Command with Serializable {
  * @param session  A session to authenticate the request
  */
 @SerialVersionUID(-348100723)
-sealed case class Get(name : RemoteConstant, value : Option[Any], session : Session) extends RemoteCommand
+sealed case class Get(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
 
 /**
  * A RemoteCommand signalling that some error occurred on the server side.
@@ -54,5 +54,5 @@ sealed case class Error(code : Int, message : String, session : Session) extends
  * @param session  A session to authenticate the request
  */
 @SerialVersionUID(-1044323852)
-sealed case class Set(name : RemoteConstant, value : Option[Any], session : Session) extends RemoteCommand
+sealed case class Set(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
 

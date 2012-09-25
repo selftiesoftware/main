@@ -12,7 +12,6 @@
 package com.siigna.app.controller
 
 import com.siigna.util.logging.Log
-import com.siigna.app.model.Drawing
 import command.{Preload, Goto, ForwardTo, Command}
 import remote._
 
@@ -31,29 +30,6 @@ trait CommandController extends EventController {
   protected def apply(command : Command) {
     try {
       command match {
-        // Handle remote commands from the remote
-        case command : RemoteCommand => {
-          println("Command controller has "+command)
-
-          command match {
-            // Failure
-            case failure : Failure => {
-              Log.warning("Remote command " + failure.command + " failed with message: " + failure.message)
-            }
-
-            // Remote actions
-            case RemoteAction(_, action, undo) => {
-              println("CommandController got "+action)
-              if (undo) {
-                Drawing undo (action, false)
-              } else {
-                Drawing execute (action, false)
-              }
-            }
-
-            case msg => Log.warning("Controller received unknown remote command: " + msg)
-          }
-        }
 
         // Handle ordinary commands (from the modules):
         case command : Command => {

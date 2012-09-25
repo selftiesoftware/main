@@ -56,16 +56,12 @@ object Controller extends CommandController {
     // Loop and react on incoming messages
     loop {
       react {
-        case ra : RemoteAction                 => if (ra.undo) Drawing undo ra.action else Drawing execute(ra.action, false)
 
         // Handle actions (execute, not undo)
-        case action : Action                   => remote ! (action, false)
+        case action : Action                   => remote ! RemoteAction(action, false)
           
         // Handle actions with an undo flag
-        case (action : Action, undo : Boolean) => remote ! (action, undo)
-
-        // Handle remote commands
-        case f : (Session => RemoteCommand)     => remote ! f
+        case (action : Action, undo : Boolean) => remote ! RemoteAction(action, undo)
 
         // Handle commands
         case command : Command => {
@@ -83,8 +79,6 @@ object Controller extends CommandController {
         // Exit
         case 'exit => {
           Log.info("Controller is shutting down")
-          // Close connection to the server
-          remote ! ((c : Session) => Unregister(c))
 
           // Quit the thread
           exit()

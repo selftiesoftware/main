@@ -11,18 +11,14 @@
 
 package com.siigna.app.controller.remote
 
-import actors.Actor._
 import actors.remote.RemoteActor._
 import actors.remote.{Node, RemoteActor}
-import com.siigna.app.controller.{Session, Controller}
+import com.siigna.app.controller.{Session}
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import com.siigna.app.model.action.Action
 import actors.Actor
-import com.siigna.app.model.RemoteModel
-import java.io.{ByteArrayInputStream, ObjectOutputStream, ByteArrayOutputStream, ObjectInputStream}
+import collection.mutable.BitSet
 import RemoteConstants._
-import collection.immutable.BitSet
 
 /**
  * Controls any remote connection(s).
@@ -48,10 +44,13 @@ protected[controller] object RemoteController extends Actor {
   protected var isConnected = false
 
   // All the ids of the actions that have been executed on the client
-  protected var localActions = BitSet()
+  protected val localActions = BitSet()
 
   // A map of local ids mapped to their remote counterparts
   protected var localIdMap : Map[Int, Int] = Map()
+
+  // Ping-time in ms
+  var pingTime = 2000
 
   // The remote server
   protected var remote = select(Node("62.243.118.234", 20004), 'siigna)
@@ -68,16 +67,44 @@ protected[controller] object RemoteController extends Actor {
    * The acting part of the RemoteController.
    */
   def act() {
-
+    // The time of the most recent ping
+    var lastPing = System.currentTimeMillis()
+    
     loop {
+      
+      if (System.currentTimeMillis() > lastPing + pingTime) {
+        // Any outstanding actions?
+        localActions.
+
+        synchronous(Get(ActionId, None, session), _ match {
+          case Set(ActionId, id : Int, _) => {
+  
+          }
+        })
+        lastPing = System.currentTimeMillis()
+      }
+      
       react {
+        // Set an action to the server
+        case local : RemoteAction => {
+          synchronous(Set(Action, local, session), _ match {
+            case Error(code, message, _) => {
+              Log.error("Remote: Error when sending action - retrying: " + message)
+              // TODO: Correctly handle errors
+            }
+            case Set(ActionId, id : Int, _) => {
+              localActions + id;
+              Log.success("Remote: Received and updated action id")
+            }
+          })
+        }
+
+        // Execute other commands (or not?)
         case command : RemoteCommand => {
           synchronous(command, _ match {
             case Error(code, message, _) => {
               Log.error("Remote error Code " + code + ": " + message)
             }
-            case get : Get => // TODO: Handle Get
-            case set : Set => // TODO: Handle Set
             case any => Log.error("Remote: Received unknown value from server: " + any)
           })
         }
@@ -199,9 +226,13 @@ protected[controller] object RemoteController extends Actor {
    * @param message  The message to send
    * @param f  The callback function to execute when data is successfully retrieved
    */
-  protected def synchronous(message : RemoteCommand, f : Any => ()) {
+  protected def synchronous(message : RemoteCommand, f : Any => Unit) {
     remote.!?(timeout, message) match {
-      case Some(any) => f(any)         // Call the callback function
+      case Some(data) => { // Call the callback function
+        try { f(data) } catch {
+          case e => Log.error("Remote: Error when treating remote data: " + e )
+        }
+      }
       case None      => synchronous(message, f) // Retry
     }
   }

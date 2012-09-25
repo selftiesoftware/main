@@ -93,12 +93,6 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   def getInterface = interface
 
   /**
-   * Examines whether the user has been logged in from the Siigna website.
-   * @return True if the user is logged in, false otherwise.
-   */
-  def isLoggedIn = user.isDefined
-
-  /**
    * Examines whether this client is connected with the server.
    * @return True if the connection has been established correctly, false otherwise.
    */
