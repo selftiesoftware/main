@@ -99,30 +99,7 @@ trait AttributesLike {
    * @param  attributeName  the name of attribute to look up.
    * @return  an optional attribute double value.
    */
-  def double(attributeName : String) = {
-    // Try double
-    val double = getAsType(attributeName, _.asInstanceOf[Double])
-    if (double.isDefined) double
-      
-    // Try int
-    else {
-      val int : Option[Int] = getAsType(attributeName, _.asInstanceOf[Int])
-      if (int.isDefined) Some(int.get.toDouble)
-        
-      // Try float 
-      else {
-        val float : Option[Float] = getAsType(attributeName, _.asInstanceOf[Float])
-        if (float.isDefined) Some(float.get.toDouble)
-          
-        // Try long
-        else {
-          val long : Option[Long] = getAsType(attributeName, _.asInstanceOf[Long])
-          if (long.isDefined) Some(long.get.toDouble)
-          else None // No luck...
-        }
-      }
-    }
-  }
+  def double(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Number].doubleValue())
   
   /**
    * Get the value of an attribute if it exists and can be converted to a
@@ -161,7 +138,7 @@ trait AttributesLike {
    * @param  attributeName  the name of attribute to look up.
    * @return  an optional attribute integer value.
    */
-  def int(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Int])
+  def int(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Number].intValue())
 
   /**
    * Gets an attribute value as an optional long. This means no exceptions
@@ -185,7 +162,7 @@ trait AttributesLike {
    * @param  attributeName  the name of attribute to look up.
    * @return  an optional attribute long value.
    */
-  def long(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Long])
+  def long(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Number].longValue())
 
   /**
    * Gets an attribute value as an optional string. This means no exceptions
