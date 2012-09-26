@@ -74,7 +74,9 @@ protected[controller] object RemoteController extends Actor {
       
       if (System.currentTimeMillis() > lastPing + pingTime) {
         // Any outstanding actions?
-        localActions.
+        if (isOutstandingAction) {
+          // TODO
+        }
 
         synchronous(Get(ActionId, None, session), _ match {
           case Set(ActionId, id : Int, _) => {
@@ -213,6 +215,37 @@ protected[controller] object RemoteController extends Actor {
       q.tail
     })
   } }*/
+
+  /**
+   * Retrieves actions that are missing in the continuum between the index of the first received action
+   * to the given index - i. e. if we are missing any actions between the first action the client has
+   * received and the last action. If that is the case we need to fetch these actions to make sure the
+   * client has a coherent model.
+   * @param last  The index of the last action, can be defined if an index is received from the server. Defaults to localActions.last
+   * @return A BitSet containing the outstanding/missing actions.
+   */
+  protected def getOutstandingActions(last : Int = localActions.last) = {
+    val xs = BitSet()
+    for (i <- localActions.head until last) {
+      // Add it to the set if it is not found
+      if (!localActions(i)) xs + i
+    }
+    xs // Return
+  }
+
+  /**
+   * Examines if there are any outstanding actions to be handled. False is good.
+   * @return False is none could be found, true otherwise
+   */
+  protected def isOutstandingAction : Boolean = {
+    if (!localActions.isEmpty) {
+      for (i <- localActions.head until localActions.last) {
+        // Return true (and break the loop) if it is not the last action and the number is not found
+        if (!localActions(i)) return true
+      }
+    }
+    false
+  }
 
   /**
    * Defines whether the client is connected to a remote server or not.
