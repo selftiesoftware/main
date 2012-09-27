@@ -11,11 +11,14 @@
 
 package com.siigna.app.model
 
+import action.Action
 import java.io._
 
-import shape.Shape
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.Attributes
+import reflect.Type
+import scala.reflect
+import shape.Shape
 
 /**
  * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
@@ -45,7 +48,7 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
     if (!fail) Log.success("Model: Sucessfully read data.")
   }
 
-  def setAttributes(attr : Attributes) {
+  def setAttributes(attr : Attributes) = {
     attributes = attr
     this
   }
@@ -59,4 +62,8 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
     out.writeObject(attributes)
   }
   
+}
+
+object RemoteModel {
+  def apply() = new RemoteModel(new Model(Map[Int,shape.Shape](), Seq[Action](),Seq[Action]()), Attributes())
 }
