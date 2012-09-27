@@ -58,10 +58,10 @@ object Controller extends CommandController {
       react {
 
         // Handle actions (execute, not undo)
-        case action : Action                   => remote ! RemoteAction(action, false)
+        case action : Action                   => remote ! (action, false)
           
         // Handle actions with an undo flag
-        case (action : Action, undo : Boolean) => remote ! RemoteAction(action, undo)
+        case (action : Action, undo : Boolean) => remote ! (action, undo)
 
         // Handle commands
         case command : Command => {

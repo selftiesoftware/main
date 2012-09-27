@@ -21,7 +21,7 @@ object RemoteConstants extends Enumeration {
   /**
    * Used to recognize requests for getting or setting ShapeIdentifiers (ids).
    */
-  val ShapeIdentifier = Value
+  val ShapeId = Value
 
   /**
    * Used to recognize requests for getting or setting [[com.siigna.app.model.Drawing]]s.

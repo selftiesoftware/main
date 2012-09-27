@@ -29,7 +29,7 @@ package object siigna extends com.siigna.util.Implicits {
   val Preload = com.siigna.app.controller.command.Preload
 
   // Remote commands
-  val ShapeIdentifier = com.siigna.app.controller.remote.RemoteConstants.ShapeIdentifier
+  val ShapeIdentifier = com.siigna.app.controller.remote.RemoteConstants.ShapeId
   val DrawingName = com.siigna.app.controller.remote.RemoteConstants.DrawingName
 
   // Controller

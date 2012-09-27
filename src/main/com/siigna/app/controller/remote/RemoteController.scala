@@ -13,12 +13,15 @@ package com.siigna.app.controller.remote
 
 import actors.remote.RemoteActor._
 import actors.remote.{Node, RemoteActor}
-import com.siigna.app.controller.{Session}
+import com.siigna.app.controller.Session
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
 import actors.Actor
 import collection.mutable.BitSet
 import RemoteConstants._
+import com.siigna.app.model.action.{LoadDrawing, Action}
+import com.siigna.app.controller.remote.RemoteConstants.Action
+import com.siigna.app.model.RemoteModel
 
 /**
  * Controls any remote connection(s).
@@ -37,14 +40,18 @@ protected[controller] object RemoteController extends Actor {
   protected var session : Session = try {
     Session(SiignaDrawing.attributes.long("id").get, Siigna.user)
   } catch {
-    case _ => throw new ExceptionInInitializerError("No id found for the drawing.")
+    case _ => {
+      exit("Remote: Cannot connect to server without a drawing id.")
+      throw new ExceptionInInitializerError("Remote: No id found for the drawing. " +
+        "Cannot connect to server without knowing which drawing to connect to.")
+    }
   }
 
   // A boolean flag to indicate if this controller has been successfully registered with the server.
   protected var isConnected = false
 
   // All the ids of the actions that have been executed on the client
-  protected val localActions = BitSet()
+  protected val actionIndices = BitSet()
 
   // A map of local ids mapped to their remote counterparts
   protected var localIdMap : Map[Int, Int] = Map()
@@ -60,191 +67,44 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 1000
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-  // The local sink, receiving actions from the remote sink
-  //SiignaDrawing.setAttribute("id",11L)
 
   /**
    * The acting part of the RemoteController.
    */
   def act() {
+
     // The time of the most recent ping
     var lastPing = System.currentTimeMillis()
-    
-    loop {
+
+    // First of all fetch the current drawing
+    synchronous(Get(Drawing, null, session), handleGetDrawing)
+
+      loop {
       
       if (System.currentTimeMillis() > lastPing + pingTime) {
-        // Any outstanding actions?
-        if (isOutstandingAction) {
-          // TODO
-        }
+        // Query for new actions
+        synchronous(Get(ActionId, null, session), handleGetActionId)
 
-        synchronous(Get(ActionId, None, session), _ match {
-          case Set(ActionId, id : Int, _) => {
-  
-          }
-        })
+        // Update lastPing to ensure this only happens when pingTime has passed
         lastPing = System.currentTimeMillis()
       }
       
       react {
         // Set an action to the server
-        case local : RemoteAction => {
-          synchronous(Set(Action, local, session), _ match {
-            case Error(code, message, _) => {
-              Log.error("Remote: Error when sending action - retrying: " + message)
-              // TODO: Correctly handle errors
-            }
-            case Set(ActionId, id : Int, _) => {
-              localActions + id;
-              Log.success("Remote: Received and updated action id")
-            }
-          })
+        case (action : Action, undo : Boolean) => {
+          // Parse the local action to ensure all the ids are up to date
+          val updatedAction = parseLocalAction(action, undo)
+
+          // Dispatch the updated action
+          synchronous(Set(Action, updatedAction, session), handleSetAction)
         }
 
         // Execute other commands (or not?)
-        case command : RemoteCommand => {
-          synchronous(command, _ match {
-            case Error(code, message, _) => {
-              Log.error("Remote error Code " + code + ": " + message)
-            }
-            case any => Log.error("Remote: Received unknown value from server: " + any)
-          })
-        }
-        
-        /*case Set(typ, value, _) => {
-          Log.info("Remote: Received Set[" + typ + " -> " + value + "]")
-          typ match {
-            case ActionId => {
-              localActions += value.get.asInstanceOf[Int]
-            }
-            case DrawingId => {
-              SiignaDrawing.addAttribute("id", value.get)
-            }
-            case Drawing => {
-              //SiignaDrawing.shapes = value.getAsInstanceOf[RemoteModel].shapes
-              value.get match {
-                case rem: RemoteModel => {
-
-                  val baos = new ByteArrayOutputStream()
-                  val oos = new ObjectOutputStream(baos)
-
-                  rem.writeExternal(oos)
-                  val modelData = baos.toByteArray
-
-                  val drawData = new ObjectInputStream(new ByteArrayInputStream(modelData))
-
-                  SiignaDrawing.readExternal(drawData)
-                }
-                case e => Log.error("Remote: Got a weird drawing "+e)
-              }
-            }
-
-            case _ =>
-          }
-        }*/
-
         case message => {
-          Log.debug("Remote: Unable to handle local input: " + message)
+          Log.warning("Remote: Unknown input(" + message + "), expected a remote action.")
         }
       }
     }
-  }
-
-  /**
-   * Dequeues the enqueued commands in the queue.
-   * If the action is local (see [[com.siigna.app.model.action.Action.isLocal]])
-   * we query the server for ids so we can be certain everything is synchronized with the server.
-   * param client  The client to authorize the commands.
-   */
-  /*protected def dequeue(client : Session) { if (!queue.isEmpty ) {
-    Log.debug("Remote: Sending queue of size: " + queue.size)
-
-    // Send and dequeue the enqueued messages
-    queue = queue.foldLeft(queue)((q : Seq[Session => RemoteCommand], f : (Session => RemoteCommand)) => {
-
-      // Retrieve the command
-      val command : RemoteCommand = f(client) match {
-        case remoteAction : RemoteAction => {
-          val action = remoteAction.action
-
-          // Query for remote ids if the action is local
-          if (action.isLocal) {
-            val localIds = action.ids.filter(_ < 0).toSeq
-
-            // Map the ids with existing key-pairs
-            val ids = localIds.map(i => localIdMap.getOrElse(i, i))
-
-            // Do we still have local ids?
-            val updatedAction = if (ids.exists(_ < 0)) {
-              // Find the local ids
-              val localIds = ids.filter(_ < 0)
-
-              // .. Then we need to query the server for ids
-              remote !? Get(ShapeIdentifier, Some(localIds.size), client) match {
-                case Set(ShapeIdentifier, Some(i : Range), _) => {
-
-                  // Find out how the ids map to the action
-                  val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
-
-                  // Update the map in the remote controller
-                  localIdMap ++= map
-
-                  // Update the model
-                  SiignaDrawing.execute(UpdateLocalActions(localIdMap))
-
-                  // Return the updated action
-                  action.update(localIdMap)
-                }
-                case e => throw new UnknownError("Remote: Expected Set(ShapeIdentifier, _, _), got " + e)
-              }
-            } else { // Else give the action the new ids
-              action.update(localIds.zip(ids).toMap)
-            }
-
-            // Dispatch the remote command
-            RemoteAction(client, updatedAction, remoteAction.undo)
-          } else { // Else simply just dispatch
-            remoteAction
-          }
-        }
-        case cmd => cmd // Just return
-      }
-
-      // Send it to the server
-      remote.send(command, local)
-      q.tail
-    })
-  } }*/
-
-  /**
-   * Retrieves actions that are missing in the continuum between the index of the first received action
-   * to the given index - i. e. if we are missing any actions between the first action the client has
-   * received and the last action. If that is the case we need to fetch these actions to make sure the
-   * client has a coherent model.
-   * @param last  The index of the last action, can be defined if an index is received from the server. Defaults to localActions.last
-   * @return A BitSet containing the outstanding/missing actions.
-   */
-  protected def getOutstandingActions(last : Int = localActions.last) = {
-    val xs = BitSet()
-    for (i <- localActions.head until last) {
-      // Add it to the set if it is not found
-      if (!localActions(i)) xs + i
-    }
-    xs // Return
-  }
-
-  /**
-   * Examines if there are any outstanding actions to be handled. False is good.
-   * @return False is none could be found, true otherwise
-   */
-  protected def isOutstandingAction : Boolean = {
-    if (!localActions.isEmpty) {
-      for (i <- localActions.head until localActions.last) {
-        // Return true (and break the loop) if it is not the last action and the number is not found
-        if (!localActions(i)) return true
-      }
-    }
-    false
   }
 
   /**
@@ -254,19 +114,133 @@ protected[controller] object RemoteController extends Actor {
   def isOnline = isConnected
 
   /**
+   * Handles requests for action ids. These requests are performed once in a while to make sure the client
+   * has received the latest actions from the server.
+   * @param any  The result of the request.
+   */
+  protected def handleGetActionId(any : Any) {
+    any match {
+      case Set(ActionId, id : Int, _) => {
+        // If the id is above the action indices + 1 then we have a gap to fill!
+        if (!actionIndices.isEmpty && id > actionIndices.last + 1) {
+          for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
+            synchronous(Get(Action, i, session), _ match {
+              case Set(Action, action : Action, _) => {
+                SiignaDrawing.execute(action)
+                actionIndices + i
+              }
+            })
+          }
+        }
+
+        // After the check it should be fine to add the index to the set of action indices
+        actionIndices + id
+      }
+    }
+  }
+
+  /**
+   * Handles requests to set an action, initiated by the client. These requests store the actions made by the
+   * clients on the server.
+   * @param any  The data received from the server
+   */
+  protected def handleSetAction(any : Any) {
+    any match {
+      case Error(code, message, _) => {
+        Log.error("Remote: Error when sending action - retrying: " + message)
+        // TODO: Correctly handle errors
+      }
+      case Set(ActionId, id : Int, _) => {
+        actionIndices + id
+        Log.success("Remote: Received and updated action id")
+      }
+    }
+  }
+
+  /**
+   * Handles the request for a drawing whose id is specified in the <code>session</code> of this client.
+   */
+  protected def handleGetDrawing(any : Any) {
+    any match {
+      case Set(Drawing, model : RemoteModel, _) => {
+        SiignaDrawing.execute(LoadDrawing(model))
+      }
+    }
+  }
+
+  /**
+   * Parses a given local action to a remote action by checking if there are any local ids that we need
+   * to update. If so the necessary requests are made to the server and the local model is updated
+   * with the new ids. In case of irreversible errors we throw an UnknownException. You are warned.
+   *
+   * @throws UnknownError  If the server returned something illegible
+   * @return A RemoteAction with updated ids, if any.
+   */
+  def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
+    // Parse the action to an updated version
+    val updated : Action = if (action.isLocal) {
+      val localIds = action.ids.filter(_ < 0).toSeq
+
+      // Map the ids with existing key-pairs
+      val ids = localIds.map(i => localIdMap.getOrElse(i, i))
+
+      // Do we still have local ids?
+      if (ids.exists(_ < 0)) {
+        // Find the local ids
+        val localIds = ids.filter(_ < 0)
+
+        // .. Then we need to query the server for ids
+        val result = synchronous[Action](Get(ShapeId, localIds.size, session), _ match {
+          case Set(ShapeId, i : Range, _) => {
+
+            // Find out how the ids map to the action
+            val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
+
+            // Update the map in the remote controller
+            localIdMap ++= map
+
+            // Update the model
+            SiignaDrawing.execute(UpdateLocalActions(localIdMap))
+
+            // Return the updated action
+            action.update(localIdMap)
+          }
+          case e => {
+            throw new UnknownError("Remote: Expected Set(ShapeIdentifier, Range, _), got: " + e)
+          }
+        })
+
+        if (result.isRight) result.right.get
+        else throw new UnknownError("Remote: Error when retrieving action ids: " + result.left.get)
+      } else { // Else give the action the new ids
+        action.update(localIds.zip(ids).toMap)
+      }
+    } else { // No local ids
+      action
+    }
+
+    // Return the updated action as a remote action
+    RemoteAction(updated, undo)
+  }
+
+  /**
    * A method that sends a remote command synchronously with an associated callback function
    * with side effects. The method repeats the procedure until something is received.
    * @param message  The message to send
    * @param f  The callback function to execute when data is successfully retrieved
+   * @tparam R  The return type of the callback function
+   * @return  Right[R] if things go well, Left[Error] if not
+   * @throws UnknownException  If the data returned did not match expected type(s)
    */
-  protected def synchronous(message : RemoteCommand, f : Any => Unit) {
+  def synchronous[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
     remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
-        try { f(data) } catch {
-          case e => Log.error("Remote: Error when treating remote data: " + e )
+        try { Right(f(data)) } catch {
+          case e : Error => Left(e)
+          case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
         }
       }
-      case None      => synchronous(message, f) // Retry
+      case None      => synchronous(message, f) // Timeout, retry
     }
   }
 
