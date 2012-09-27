@@ -18,12 +18,9 @@ import com.siigna.app.view.ModuleInterface
 
 /**
  * Defines the parent class for all modules.
- * Modules are basically immutable descriptions of what to do in case of certain events. Based on a state map and a
- * state machine.
- * <br />
- * The <b>state map</b> describes where to go when a certain event pops in in a certain state. Format: State -> Event -> State.
- * <br />
- * The <b>state machine</b> describes what actions to take in each state.
+ * Modules are basically immutable descriptions of what to do in case of certain events based on the state map.
+ * The <b>state map</b> describes where to go when a certain event pops in in a certain state.
+ * Format: State -> List[Event] -> State.
  * 
  * <br />
  * Modules are serialized so they can be sent, received and correctly read.
@@ -76,7 +73,7 @@ trait Module extends Serializable {
   def stateMap : Map[Symbol, PartialFunction[List[Event], Symbol]]
 
   /**
-   * A function available for all Modules to paint on.
+   * A function available for all Modules to paint their content.
    *
    * @param graphics  The graphics object available to paint on.
    * @param transformation  The transformationMatrix on which the current screen-transformations are saved.
