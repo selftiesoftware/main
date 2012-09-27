@@ -12,13 +12,13 @@
 package com.siigna.util.rtree
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{Spec}
+import org.scalatest.{FunSpec, Spec}
 import com.siigna.util.geom.Rectangle2D
 
 /**
  * A test for the Leaf clas.
  */
-class LeafSpec extends Spec with ShouldMatchers {
+class LeafSpec extends FunSpec with ShouldMatchers {
 
   val elem1 = (10020, Rectangle2D(15.23, 17.30, 89.3502, 123.273))
   val elem2 = (0, Rectangle2D.empty)

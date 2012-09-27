@@ -16,7 +16,7 @@ import actors.remote.{Node, RemoteActor}
 import com.siigna.app.controller.Session
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.Actor
+import actors.{AbstractActor, Actor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{LoadDrawing, Action}
@@ -59,10 +59,6 @@ protected[controller] object RemoteController extends Actor {
   // Ping-time in ms
   var pingTime = 2000
 
-  // The remote server
-  protected var remote = select(Node("62.243.118.234", 20004), 'siigna)
-  // protected val remote = select(Node("localhost", 20004), 'siigna)
-
   // Timeout to the server
   var timeout = 1000
 
@@ -72,6 +68,9 @@ protected[controller] object RemoteController extends Actor {
    * The acting part of the RemoteController.
    */
   def act() {
+    // The remote server
+    implicit val remote = select(Node("62.243.118.234", 20004), 'siigna)
+    // implicit val remote = select(Node("localhost", 20004), 'siigna)
 
     // The time of the most recent ping
     var lastPing = System.currentTimeMillis()
@@ -79,7 +78,7 @@ protected[controller] object RemoteController extends Actor {
     // First of all fetch the current drawing
     synchronous(Get(Drawing, null, session), handleGetDrawing)
 
-      loop {
+    loop {
       
       if (System.currentTimeMillis() > lastPing + pingTime) {
         // Query for new actions
@@ -99,7 +98,7 @@ protected[controller] object RemoteController extends Actor {
           synchronous(Set(Action, updatedAction, session), handleSetAction)
         }
 
-        // Execute other commands (or not?)
+        // We can't handle any other commands actively...
         case message => {
           Log.warning("Remote: Unknown input(" + message + "), expected a remote action.")
         }
@@ -228,11 +227,12 @@ protected[controller] object RemoteController extends Actor {
    * with side effects. The method repeats the procedure until something is received.
    * @param message  The message to send
    * @param f  The callback function to execute when data is successfully retrieved
+   * @param remote  The remote actor to send the message to, given implicitly
    * @tparam R  The return type of the callback function
    * @return  Right[R] if things go well, Left[Error] if not
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
-  def synchronous[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
+  def synchronous[R](message : RemoteCommand, f : Any => R)(implicit remote : AbstractActor) : Either[Error, R] = {
     remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
         try { Right(f(data)) } catch {
@@ -240,7 +240,10 @@ protected[controller] object RemoteController extends Actor {
           case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
         }
       }
-      case None      => synchronous(message, f) // Timeout, retry
+      case None      => { // Timeout
+        isConnected = false // We're no longer connected
+        synchronous(message, f) // Retry
+      }
     }
   }
 
