@@ -62,16 +62,16 @@ protected[controller] object RemoteController extends Actor {
   // Timeout to the server
   var timeout = 1000
 
+  // The remote server
+  implicit val remote = select(Node("62.243.118.234", 20004), 'siigna)
+  // implicit val remote = select(Node("localhost", 20004), 'siigna)
+
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
   /**
    * The acting part of the RemoteController.
    */
   def act() {
-    // The remote server
-    implicit val remote = select(Node("62.243.118.234", 20004), 'siigna)
-    // implicit val remote = select(Node("localhost", 20004), 'siigna)
-
     // The time of the most recent ping
     var lastPing = System.currentTimeMillis()
 
@@ -227,12 +227,11 @@ protected[controller] object RemoteController extends Actor {
    * with side effects. The method repeats the procedure until something is received.
    * @param message  The message to send
    * @param f  The callback function to execute when data is successfully retrieved
-   * @param remote  The remote actor to send the message to, given implicitly
    * @tparam R  The return type of the callback function
    * @return  Right[R] if things go well, Left[Error] if not
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
-  def synchronous[R](message : RemoteCommand, f : Any => R)(implicit remote : AbstractActor) : Either[Error, R] = {
+  def synchronous[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
     remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
         try { Right(f(data)) } catch {
