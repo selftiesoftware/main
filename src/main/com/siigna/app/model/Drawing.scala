@@ -19,7 +19,7 @@ import com.siigna.util.geom.{Vector2D, Rectangle2D}
 /**
  * The model of Siigna.
  */
-object Drawing extends RemoteModel
+object Drawing extends ActionModel
                   with SpatialModel[Int, Shape]
                   with MapProxy[Int, Shape] {
 

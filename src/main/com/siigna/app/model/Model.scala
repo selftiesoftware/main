@@ -38,7 +38,7 @@ sealed class Model(val shapes : Map[Int, Shape], val executed : Seq[Action], val
                                                     with MutableModel
                                                     with SpatialModel[Int, Shape]
                                                     with ModelBuilder[Int, Shape] {
-  
+
   def build(coll : Map[Int, Shape]) = new Model(coll, executed, undone)
 
   def build(coll : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action]) = new Model(coll, executed, undone)

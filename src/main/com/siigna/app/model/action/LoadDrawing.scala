@@ -44,6 +44,6 @@ object LoadDrawing {
    * @param model  The model to load.
    * @return  An instance of LoadDrawing.
    */
-  def apply(model : RemoteModel) = new LoadDrawing(model.shapes, Seq(), model.attributes)
+  def apply(model : RemoteModel) = new LoadDrawing(model.model.shapes, Seq(), model.attributes)
 
 }

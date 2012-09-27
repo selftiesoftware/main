@@ -18,15 +18,13 @@ import com.siigna.util.logging.Log
 import com.siigna.util.collection.Attributes
 
 /**
- * <p>A RemoteActionModel with the responsibilities to keep track of actions (and information regarding
- * the actions) relevant in the communications between the client and the server.</p>
- * <p>An example is the unique shape id necessary for each shape, which can not be served locally before the
- * server has approved the id. To solve this the action is only applied locally, but not sent remotely.</p>
+ * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
  */
 @SerialVersionUID(2113124332)
-class RemoteModel extends ActionModel
-                     with HasAttributes 
+class RemoteModel(var model : Model, var attributes : Attributes) extends HasAttributes
                      with Externalizable {
+
+  type T = RemoteModel
 
   def readExternal(in : ObjectInput) {
     var fail = false
@@ -45,6 +43,11 @@ class RemoteModel extends ActionModel
     }
 
     if (!fail) Log.success("Model: Sucessfully read data.")
+  }
+
+  def setAttributes(attr : Attributes) {
+    attributes = attr
+    this
   }
 
   override def toString: String = {
