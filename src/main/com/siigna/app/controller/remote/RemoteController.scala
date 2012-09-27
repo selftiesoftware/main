@@ -11,12 +11,11 @@
 
 package com.siigna.app.controller.remote
 
-import actors.remote.RemoteActor._
-import actors.remote.{Node, RemoteActor}
+import actors.remote.RemoteActor
 import com.siigna.app.controller.Session
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{AbstractActor, Actor}
+import actors.Actor
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{LoadDrawing, Action}
@@ -36,20 +35,6 @@ protected[controller] object RemoteController extends Actor {
   // Start the actor
   start()
 
-  // The session for this client.
-  protected var session : Session = try {
-    Session(SiignaDrawing.attributes.long("id").get, Siigna.user)
-  } catch {
-    case _ => {
-      exit("Remote: Cannot connect to server without a drawing id.")
-      throw new ExceptionInInitializerError("Remote: No id found for the drawing. " +
-        "Cannot connect to server without knowing which drawing to connect to.")
-    }
-  }
-
-  // A boolean flag to indicate if this controller has been successfully registered with the server.
-  protected var isConnected = false
-
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()
 
@@ -60,11 +45,11 @@ protected[controller] object RemoteController extends Actor {
   var pingTime = 2000
 
   // Timeout to the server
-  var timeout = 1000
+  var timeout = 4000
 
   // The remote server
-  implicit val remote = select(Node("62.243.118.234", 20004), 'siigna)
-  // implicit val remote = select(Node("localhost", 20004), 'siigna)
+  val remote = new Server("62.243.118.234", Mode.Production)
+  // val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -76,13 +61,13 @@ protected[controller] object RemoteController extends Actor {
     var lastPing = System.currentTimeMillis()
 
     // First of all fetch the current drawing
-    synchronous(Get(Drawing, null, session), handleGetDrawing)
+    remote(Get(Drawing, null, session), handleGetDrawing)
 
     loop {
       
       if (System.currentTimeMillis() > lastPing + pingTime) {
         // Query for new actions
-        synchronous(Get(ActionId, null, session), handleGetActionId)
+        remote(Get(ActionId, null, session), handleGetActionId)
 
         // Update lastPing to ensure this only happens when pingTime has passed
         lastPing = System.currentTimeMillis()
@@ -95,7 +80,7 @@ protected[controller] object RemoteController extends Actor {
           val updatedAction = parseLocalAction(action, undo)
 
           // Dispatch the updated action
-          synchronous(Set(Action, updatedAction, session), handleSetAction)
+          remote(Set(Action, updatedAction, session), handleSetAction)
         }
 
         // We can't handle any other commands actively...
@@ -110,7 +95,7 @@ protected[controller] object RemoteController extends Actor {
    * Defines whether the client is connected to a remote server or not.
    * @return true if connected, false if not.
    */
-  def isOnline = isConnected
+  def isOnline = remote.isConnected
 
   /**
    * Handles requests for action ids. These requests are performed once in a while to make sure the client
@@ -123,7 +108,7 @@ protected[controller] object RemoteController extends Actor {
         // If the id is above the action indices + 1 then we have a gap to fill!
         if (!actionIndices.isEmpty && id > actionIndices.last + 1) {
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
-            synchronous(Get(Action, i, session), _ match {
+            remote(Get(Action, i, session), _ match {
               case Set(Action, action : Action, _) => {
                 SiignaDrawing.execute(action)
                 actionIndices + i
@@ -189,7 +174,7 @@ protected[controller] object RemoteController extends Actor {
         val localIds = ids.filter(_ < 0)
 
         // .. Then we need to query the server for ids
-        val result = synchronous[Action](Get(ShapeId, localIds.size, session), _ match {
+        val result = remote[Action](Get(ShapeId, localIds.size, session), _ match {
           case Set(ShapeId, i : Range, _) => {
 
             // Find out how the ids map to the action
@@ -223,26 +208,16 @@ protected[controller] object RemoteController extends Actor {
   }
 
   /**
-   * A method that sends a remote command synchronously with an associated callback function
-   * with side effects. The method repeats the procedure until something is received.
-   * @param message  The message to send
-   * @param f  The callback function to execute when data is successfully retrieved
-   * @tparam R  The return type of the callback function
-   * @return  Right[R] if things go well, Left[Error] if not
-   * @throws UnknownException  If the data returned did not match expected type(s)
+   * Attempts to fetch the session for the current client.
+   * @return A session if possible.
    */
-  def synchronous[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    remote.!?(timeout, message) match {
-      case Some(data) => { // Call the callback function
-        try { Right(f(data)) } catch {
-          case e : Error => Left(e)
-          case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
-        }
-      }
-      case None      => { // Timeout
-        isConnected = false // We're no longer connected
-        synchronous(message, f) // Retry
-      }
+  protected def session : Session = try {
+    Session(SiignaDrawing.attributes.long("id").get, Siigna.user)
+  } catch {
+    case _ => {
+      Log.error("Remote: Cannot find a drawing id which is necessary to make a connection; shutting down.")
+      exit("Remote: Cannot connect to server without a drawing id.")
+      throw new ExceptionInInitializerError("Remote: No id found for the current drawing.")
     }
   }
 

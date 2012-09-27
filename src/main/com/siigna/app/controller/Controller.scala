@@ -50,9 +50,6 @@ object Controller extends CommandController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
-    // Initialize the remote controller
-    RemoteController
-
     // Loop and react on incoming messages
     loop {
       react {
@@ -97,6 +94,6 @@ object Controller extends CommandController {
    * Examines whether this client is connected with the server.
    * @return True if the connection has been established correctly, false otherwise.
    */
-  def isOnline = RemoteController.isOnline
+  def isOnline = remote.isOnline
 
 }
