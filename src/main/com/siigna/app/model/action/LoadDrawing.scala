@@ -12,7 +12,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.Shape
-import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.{RemoteModel, Drawing, Model}
 import com.siigna.util.collection.Attributes
 
 
@@ -32,4 +32,18 @@ case class LoadDrawing(shapes : Map[Int, Shape], actions : Seq[Action], attribut
     new Model(shapes, actions, Seq())
   }
   
+}
+
+/**
+ * A companion object to LoadDrawing.
+ */
+object LoadDrawing {
+
+  /**
+   * Creates a LoadDrawing action from the given RemoteModel.
+   * @param model  The model to load.
+   * @return  An instance of LoadDrawing.
+   */
+  def apply(model : RemoteModel) = new LoadDrawing(model.shapes, Seq(), model.attributes)
+
 }
