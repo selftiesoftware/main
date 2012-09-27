@@ -45,8 +45,8 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
     if (!fail) Log.success("Model: Sucessfully read data.")
   }
 
-  def setAttributes(attr : Attributes) {
-    attributes = attr
+  def setAttributes(attributes : Attributes) = {
+    this.attributes = attributes
     this
   }
 

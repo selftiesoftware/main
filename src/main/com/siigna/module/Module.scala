@@ -12,10 +12,9 @@
 package com.siigna.module
 
 import com.siigna.app.view.Graphics
-import com.siigna.app.view.event.EventHandler
-import com.siigna.app.view.event.EventParser
+import com.siigna.app.view.event.{Event, EventParser}
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.view.{Display, ModuleInterface}
+import com.siigna.app.view.ModuleInterface
 
 /**
  * Defines the parent class for all modules.
@@ -61,11 +60,20 @@ trait Module extends Serializable {
   final var state : Symbol = 'Start
 
   /**
-   * The method defines the event handler the module want to use. It is sent
-   * to the controller that "walks" the state diagram and executes actions
-   * associated with each state.
+   * <p>The state map and "heart" of the module. This state map describes all the states that exists in the module
+   * and all the ways the user can leave these states and enter new ones via [[com.siigna.app.view.event.Event]]s.
+   * A StateMap is defined as various states, describes as symbols, that are mapped to a PartialFunction. This
+   * function various code-blocks that are executed only if the input are right (think case matches).</p>
+   *
+   * <p>The old implementation didn't allow functions to execute (no conditionality) which proved to be
+   * insufficient - we simply did not have enough control. That lead us to implement a Goto statement. That did not
+   * end well. This implementation provides a much better control for the event-flow and thus much richer
+   * interactions between the states.</p>
+   *
+   * <p>The method thus defines the way it wishes to handle the events given. The stateMap is used in the
+   * controller where we "walk" the state map and executes the functions associated with each state.</p>
    */
-  def eventHandler : EventHandler
+  def stateMap : Map[Symbol, PartialFunction[List[Event], Symbol]]
 
   /**
    * A function available for all Modules to paint on.
@@ -78,6 +86,6 @@ trait Module extends Serializable {
   /**
    * Returns the simple name of the module.
    */
-  override def toString = this.getClass.getSimpleName
+  override def toString = this.getClass.getSimpleName.replace("$", "")
 
 }

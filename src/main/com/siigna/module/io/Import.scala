@@ -41,65 +41,63 @@ object Import extends Module {
 
   private var startTime: Option[Long] = None
 
-  lazy val eventHandler = EventHandler(stateMap, stateMachine)
+  def stateMap : StateMap = Map(
+    'Start -> {
+      case _ => {
+        if (frameIsLoaded == false) {
+          try {
+            //opens a file dialog
+            val dialog = new FileDialog(frame)
+            dialog.setVisible(true)
 
-  lazy val stateMap = DirectedGraph('Start -> 'KeyEscape -> 'End)
+            val fileName = dialog.getFile
+            val fileDir = dialog.getDirectory
+            val file = new File(fileDir + fileName)
 
-  lazy val stateMachine = Map(
-    'Start -> ((events: List[Event]) => {
-      if (frameIsLoaded == false) {
-        try {
-          //opens a file dialog
-          val dialog = new FileDialog(frame)
-          dialog.setVisible(true)
+            // Can we import the file-type?
+            val extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase
 
-          val fileName = dialog.getFile
-          val fileDir = dialog.getDirectory
-          val file = new File(fileDir + fileName)
+            if (importers.contains(extension)) {
+              startTime = Some(System.currentTimeMillis().toLong)
 
-          // Can we import the file-type?
-          val extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase
+              //TODO: find the correct scaling factor to make loading bar fit large DXF files.
+              fileLength = file.length().toInt * 4
 
-          if (importers.contains(extension)) {
-            startTime = Some(System.currentTimeMillis().toLong)
+              Siigna display "Loading file... Please wait."
 
-            //TODO: find the correct scaling factor to make loading bar fit large DXF files.
-            fileLength = file.length().toInt * 4
+              // Retrieve the streams for the file
+              val fileStream = new FileInputStream(file)
 
-            Siigna display "Loading file... Please wait."
+              // Import!
+              importers(extension)(fileStream)
 
-            // Retrieve the streams for the file
-            val fileStream = new FileInputStream(file)
+              // Close the stream
+              fileStream.close()
 
-            // Import!
-            importers(extension)(fileStream)
-
-            // Close the stream
-            fileStream.close()
-
-            Siigna display "Loading completed."
-            frameIsLoaded = true
-            Goto('End)
-          } else {
-            Log.error("Import: Unable to import file of the specified type: " + extension)
-          }
-
-
-        } catch {
-          case e => {
-            Siigna display "Import cancelled."
-            Goto('End)
+              Siigna display "Loading completed."
+              frameIsLoaded = true
+            } else {
+              Log.error("Import: Unable to import file of the specified type: " + extension)
+            }
+          } catch {
+            case e => {
+              Siigna display "Import cancelled."
+            }
           }
         }
+        'End
       }
-    }),
+    },
     // Dispose of the frame so the thread can close down.
-    'End -> ((events: List[Event]) => {
-      fileLength = 0
-      frameIsLoaded = false
-      frame.dispose()
-      startTime = None
-    })
+    'End -> {
+      case _ => {
+        fileLength = 0
+        frameIsLoaded = false
+        frame.dispose()
+        startTime = None
+        'End
+      }
+    }
   )
 
   /**

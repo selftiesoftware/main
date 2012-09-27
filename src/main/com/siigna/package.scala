@@ -25,7 +25,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Commands
   val ForwardTo = com.siigna.app.controller.command.ForwardTo
-  val Goto = com.siigna.app.controller.command.Goto
   val Preload = com.siigna.app.controller.command.Preload
 
   // Remote commands
@@ -43,6 +42,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Module
   type Module = com.siigna.module.Module
+  type StateMap = Map[Symbol, PartialFunction[List[Event], Symbol]]
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
@@ -89,9 +89,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Events
   type Event = com.siigna.app.view.event.Event
-
-  type EventHandler = com.siigna.app.view.event.EventHandler
-  val EventHandler = com.siigna.app.view.event.EventHandler
 
   val Key = com.siigna.app.view.event.Key
   type KeyDown = com.siigna.app.view.event.KeyDown

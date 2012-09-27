@@ -12,7 +12,7 @@
 package com.siigna.app.controller
 
 import com.siigna.util.logging.Log
-import command.{Preload, Goto, ForwardTo, Command}
+import command.{Preload, ForwardTo, Command}
 import remote._
 
 /**
@@ -64,28 +64,6 @@ trait CommandController extends EventController {
                 }
               } else {
                 Log.warning("Controller: Failed to forward to module "+symbol+". Could not find it")
-              }
-            }
-            // Goto another state
-            case Goto(state, continue) => {
-              if (modules.isEmpty) {
-                Log.warning("[Controller]: Could not change state - no module in the stack.")
-              } else if (state == 'end && modules.size == 1) {
-                Log.warning("[Controller]: Cannot goto 'end on the last remaining module. Command ignored.")
-              } else {
-                // Set the new state
-                modules.top.state = state
-
-                // If continue is set, prepend the newest event to the event-queue
-                // and remove the newest event form the event-list
-                if (continue && !events.isEmpty) {
-                  this ! events.head
-                  events = events.tail
-
-                  Log.info("Controller successfully changed state of " + modules.top + " to "+state+" and continued execution.")
-                } else {
-                  Log.info("Controller successfully changed state of " + modules.top + " to "+state+".")
-                }
               }
             }
 
