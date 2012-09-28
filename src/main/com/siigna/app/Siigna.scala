@@ -10,14 +10,14 @@
  */
 package com.siigna.app
 
-import com.siigna.app.controller.{Controller, CommandController, Session}
+import com.siigna.app.controller.Controller
 import com.siigna.app.model.server.User
 import model._
 import view._
 import com.siigna.util.geom._
 import event.Track
 import collection.mutable.HashMap
-import java.awt.{Dimension, Cursor}
+import java.awt.Cursor
 
 /**
  * <p>The Siigna object provides access to various core elements of the software.</p>
@@ -142,8 +142,6 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
    * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
    * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
    * get painted.
-   * <br />
-   * In other words don't meddle with this if you don't know what you're doing.
    */
   def setInterface(interface : ModuleInterface) {
     this.interface = Some(interface)

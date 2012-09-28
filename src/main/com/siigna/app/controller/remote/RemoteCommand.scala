@@ -12,7 +12,6 @@ package com.siigna.app.controller.remote
  */
 
 import com.siigna.app.controller.command.Command
-import com.siigna.app.controller.Session
 import com.siigna.app.controller.remote.RemoteConstants._
 
 /**

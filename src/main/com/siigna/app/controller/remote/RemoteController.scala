@@ -12,7 +12,6 @@
 package com.siigna.app.controller.remote
 
 import actors.remote.RemoteActor
-import com.siigna.app.controller.Session
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
 import actors.Actor
