@@ -16,10 +16,9 @@ import com.siigna.app.controller.command._
 import com.siigna.app.view.event.Event
 import com.siigna.module.Module
 import com.siigna.util.logging.Log
-import remote._
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
-import com.siigna.app.model.Drawing
+import modules.ModuleLoader
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -29,7 +28,7 @@ import com.siigna.app.model.Drawing
  */
 object Controller extends CommandController {
 
-  protected val moduleBank = new ModuleBank()
+  protected val moduleBank = ModuleLoader
 
   protected val modules = new Stack[Module]()
 
