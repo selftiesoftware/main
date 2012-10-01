@@ -70,7 +70,7 @@ trait Module extends Serializable {
    * <p>The method thus defines the way it wishes to handle the events given. The stateMap is used in the
    * controller where we "walk" the state map and executes the functions associated with each state.</p>
    */
-  def stateMap : Map[Symbol, PartialFunction[List[Event], Symbol]]
+  def stateMap : Map[Symbol, PartialFunction[List[Event], Any]]
 
   /**
    * A function available for all Modules to paint their content.

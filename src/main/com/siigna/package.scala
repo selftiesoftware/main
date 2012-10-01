@@ -42,7 +42,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Module
   type Module = com.siigna.module.Module
-  type StateMap = Map[Symbol, PartialFunction[List[Event], Symbol]]
+  type StateMap = Map[Symbol, PartialFunction[List[Event], Any]]
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
