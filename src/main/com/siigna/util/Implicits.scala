@@ -12,6 +12,7 @@
 package com.siigna.util
 
 import java.awt.Color
+import com.siigna.app.view.event.Event
 
 /**
  * Contains several implicit definitions which are collected in a single object
@@ -23,7 +24,7 @@ abstract class Implicits {
 
   /**
    * Implicitly adds a toHtmlString method on AWT Color objects. To use this
-   * <code>import RichColor.awtColor2RichColor</code> in your code.
+   * <code>import Implicits.awtColor2RichColor</code> in your code.
    *
    * <p>
    * Example:
@@ -38,7 +39,7 @@ abstract class Implicits {
 
   /**
    * Implicitly adds a color method on String objects. To use this
-   * <code>import RichColor.stringToColor</code> in your code.
+   * <code>import Implicits.stringToColor</code> in your code.
    *
    * <p>
    * Example:

@@ -160,7 +160,7 @@ protected[controller] object RemoteController extends Actor {
    * @throws UnknownError  If the server returned something illegible
    * @return A RemoteAction with updated ids, if any.
    */
-  def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
+  protected def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
     // Parse the action to an updated version
     val updated : Action = if (action.isLocal) {
       val localIds = action.ids.filter(_ < 0).toSeq

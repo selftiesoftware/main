@@ -49,6 +49,9 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
   }
 }
 
+/**
+ * The server mode in which the server operates. There are two modes: Production and Testing.
+ */
 object Mode extends Enumeration {
   type Mode = Value
   val Production = Value(20004)
