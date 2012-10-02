@@ -38,6 +38,34 @@ abstract class Implicits {
   implicit def awtColorToRichColor(color : Color) = new RichColor(color)
 
   /**
+   * Implicitly convert a Function0[Any] to a PartialFunction[List[Event], Any], used in the
+   * [[com.siigna.module.Module]]s stateMap. This conversion is useful if you would like to write states like:
+   * {{{
+   *   State('Start -> () => ( ... ))
+   * }}}
+   * @param f  The function to convert to a partial function
+   * @return A PartialFunction
+   */
+  implicit def funToPartialFun(f : () => Any) = new PartialFunction[List[Event], Any] {
+    def isDefinedAt(x : List[Event]) = true
+    def apply(x : List[Event]) = f()
+  }
+
+  /**
+   * Implicitly convert a Function1[List[Event, Any]] to a PartialFunction[List[Event], Any], used in the
+   * [[com.siigna.module.Module]]s stateMap. This conversion is useful if you would like to write states like:
+   * {{{
+   *   State('Start -> (events : List[Event]) => ( ... ))
+   * }}}
+   * @param f  The function to convert to a partial function
+   * @return A PartialFunction
+   */
+  implicit def funToPartialFun(f : (List[Event]) => Any) = new PartialFunction[List[Event], Any] {
+    def isDefinedAt(x : List[Event]) = true
+    def apply(x : List[Event]) = f(x)
+  }
+
+  /**
    * Implicitly adds a color method on String objects. To use this
    * <code>import Implicits.stringToColor</code> in your code.
    *

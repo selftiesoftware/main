@@ -9,31 +9,14 @@ import com.siigna.app.view.event.Event
 object State {
 
   /**
-   * Creates a state by converting a function to a partial function for use when
-   * creating [[com.siigna.util.State]]s.
+   * Creates a state by explicitly stating that we wish to create a State to help the type-checking mechanisms in
+   * Scala. States contain [[scala.PartialFunction]] which - if the implicit definitions do not catch the syntax -
+   * contains some pretty heavy semantics. This can be avoided by explicitly stating which types the PartialFunction
+   * has.
    *
-   * <p>Example:
-   * '''
-   * State('Start, () => {
-   *   ...
-   * })
-   * '''
-   * Which is slightly shorter than for instance
-   * '''
-   * State('Start, {
-   *   case _ => {
-   *     ...
-   *   }
-   * }
-   * '''
-   * </p>
-   *
-   * @param f  The function to convert.
+   * @param f  The PartialFunction to apply.
    * @return  A PartialFunction accepting types of List[Event] and returning Any.
    */
-  def apply(s : Symbol, f : () => Any) : com.siigna.State = (s, new PartialFunction[List[Event], Any] {
-    def apply(x : List[Event]) = f()
-    def isDefinedAt(x : List[Event]) = true
-  })
+  def apply(s : Symbol, f : PartialFunction[List[Event], Any]) = (s, f)
 
 }

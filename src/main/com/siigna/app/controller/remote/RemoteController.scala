@@ -147,6 +147,7 @@ protected[controller] object RemoteController extends Actor {
     any match {
       case Set(Drawing, model : RemoteModel, _) => {
         SiignaDrawing.execute(LoadDrawing(model))
+        actionIndices + model.attributes.int("lastAction").getOrElse(0)
       }
     }
   }
