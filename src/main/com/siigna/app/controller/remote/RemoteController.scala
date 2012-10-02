@@ -19,7 +19,9 @@ import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
-import com.siigna.app.model.RemoteModel
+import com.siigna.app.model.{Model, RemoteModel}
+import java.io.{ObjectInputStream, ByteArrayInputStream}
+import com.siigna.util.collection.Attributes
 
 /**
  * Controls any remote connection(s).
@@ -30,9 +32,6 @@ protected[controller] object RemoteController extends Actor {
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader
-
-  // Start the actor
-  start()
 
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()
@@ -47,7 +46,7 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("62.243.118.234", Mode.Production)
+  val remote = new Server("localhost", Mode.Production)
   // val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
@@ -145,9 +144,17 @@ protected[controller] object RemoteController extends Actor {
    */
   protected def handleGetDrawing(any : Any) {
     any match {
-      case Set(Drawing, model : RemoteModel, _) => {
+      case Set(Drawing, bytes : Array[Byte], _) => {
+        // Read the bytes
+        val byteIn = new ByteArrayInputStream(bytes)
+        val in = new ObjectInputStream(byteIn)
+        val model = new RemoteModel(new Model(Map(), Seq(), Seq()), Attributes())
+        model.readExternal(in)
+
+        // Implement the model
         SiignaDrawing.execute(LoadDrawing(model))
         actionIndices + model.attributes.int("lastAction").getOrElse(0)
+        Log.success("Remote: Successfully received drawing from server")
       }
     }
   }

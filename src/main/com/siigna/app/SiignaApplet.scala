@@ -66,7 +66,8 @@ class SiignaApplet extends Applet {
     // Start by reading the applet parameters
     try {
       // Get the active user, if a log in was performed at www.siigna.com
-      val userName = getParameter("contributorName")
+      //val userName = getParameter("contributorName")
+      val userName = "jens"
       if (userName != null) {
         // TODO: Refine this
         Siigna.user = User(util.Random.nextLong(), userName, util.Random.nextString(20))
@@ -74,7 +75,8 @@ class SiignaApplet extends Applet {
       }
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-      val drawingId = getParameter("drawingId")
+      //val drawingId = getParameter("drawingId")
+      val drawingId = 1
 
       if (drawingId != null) try {
         val id = drawingId.toLong

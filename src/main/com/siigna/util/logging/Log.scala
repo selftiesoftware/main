@@ -21,7 +21,7 @@ object Log extends scala.util.logging.ConsoleLogger {
   val INFO    = 4
   val DEBUG   = 8
   val SUCCESS = 16
-  val ALL     = ERROR + WARNING + INFO + DEBUG + SUCCESS
+  val ALL     = ERROR + WARNING + INFO + SUCCESS
   
   /**
    * The debug-level. Levels are following:

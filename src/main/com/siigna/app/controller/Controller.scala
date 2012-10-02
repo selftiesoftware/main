@@ -50,6 +50,9 @@ object Controller extends CommandController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
+    // Start RemoteController
+    RemoteController.start
+
     // Loop and react on incoming messages
     loop {
       react {

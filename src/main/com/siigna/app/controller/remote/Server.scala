@@ -34,7 +34,8 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
   def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    remote.!?(timeout, message) match {
+    println("Remote: Sending: " + message)
+    val res = remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
         try { Right(f(data)) } catch {
           case e : Error => Left(e)
@@ -46,6 +47,8 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
         apply(message, f) // Retry
       }
     }
+    println("Remote: Done sending")
+    res
   }
 }
 
