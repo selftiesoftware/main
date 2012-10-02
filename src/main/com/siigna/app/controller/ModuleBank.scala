@@ -30,8 +30,8 @@ class ModuleBank {
   /**
    * The class loader used to load classes.
    */
-  //private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/applet/base.jar!/")), this.getClass.getClassLoader)
-  private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/main/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
+  private val classLoader = new ModuleLoader(Array(new URL("jar:http://siigna.com/applet/base.jar!/")), this.getClass.getClassLoader)
+  //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/workspace/siigna/main/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
   //private val classLoader = new ModuleLoader(Array(new URL("jar:http://localhost/siigna-modules_2.9.1-0.1.jar!/")), this.getClass.getClassLoader)
   //private val classLoader = new ModuleLoader(Array(new URL("jar:file:c:/siigna/siigna-modules/out/artifacts/base.jar!/")), this.getClass.getClassLoader)
 
