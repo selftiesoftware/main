@@ -17,11 +17,11 @@ import com.siigna.util.logging.Log
 import actors.Actor
 import collection.mutable.BitSet
 import RemoteConstants._
-import com.siigna.app.model.action.{LoadDrawing, Action}
+import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
-import com.siigna.app.model.{Model, RemoteModel}
 import java.io.{ObjectInputStream, ByteArrayInputStream}
 import com.siigna.util.collection.Attributes
+import com.siigna.util.Serializer
 
 /**
  * Controls any remote connection(s).
@@ -107,9 +107,14 @@ protected[controller] object RemoteController extends Actor {
         if (!actionIndices.isEmpty && id > actionIndices.last + 1) {
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
             remote(Get(Action, i, session), _ match {
-              case Set(Action, action : Action, _) => {
-                SiignaDrawing.execute(action)
-                actionIndices + i
+              case Set(Action, array : Array[Byte], _) => {
+                try {
+                  val action = Serializer.readAction(array)
+                  SiignaDrawing.execute(action.action, action.undo)
+                  actionIndices + i
+                } catch {
+                  case e => Log.error("Remote: Error when reading data from server", e)
+                }
               }
             })
           }
@@ -146,15 +151,16 @@ protected[controller] object RemoteController extends Actor {
     any match {
       case Set(Drawing, bytes : Array[Byte], _) => {
         // Read the bytes
-        val byteIn = new ByteArrayInputStream(bytes)
-        val in = new ObjectInputStream(byteIn)
-        val model = new RemoteModel(new Model(Map(), Seq(), Seq()), Attributes())
-        model.readExternal(in)
+        try {
+          val model = Serializer.readDrawing(bytes)
 
-        // Implement the model
-        SiignaDrawing.execute(LoadDrawing(model))
-        actionIndices + model.attributes.int("lastAction").getOrElse(0)
-        Log.success("Remote: Successfully received drawing from server")
+          // Implement the model
+          SiignaDrawing.execute(LoadDrawing(model))
+          actionIndices + model.attributes.int("lastAction").getOrElse(0)
+          Log.success("Remote: Successfully received drawing from server")
+        } catch {
+          case e => Log.error("Remote: Error when reading data from server", e)
+        }
       }
     }
   }
