@@ -11,8 +11,6 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.app.model.action.Action
-
 /**
  * An action meant to be sent over the network.
  *

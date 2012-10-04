@@ -37,7 +37,11 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
     println("Remote: Sending: " + message)
     val res = remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
-        try { Right(f(data)) } catch {
+        try {
+          val r = f(data)     // Parse the data
+          _isConnected = true // We're not connected for sure
+          Right(r)            // Return
+        } catch {
           case e : Error => Left(e)
           case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
         }
