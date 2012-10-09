@@ -13,12 +13,13 @@ package com.siigna.app.controller
 import collection.mutable.Stack
 
 import com.siigna.app.controller.command._
-import com.siigna.app.view.event.Event
-import com.siigna.module.Module
+import com.siigna.app.view.event.{ModuleEvent, Key, KeyDown, Event}
+import com.siigna.module.{ModuleInstance, Module}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
 import modules.ModuleLoader
+import remote.RemoteController
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -27,10 +28,6 @@ import modules.ModuleLoader
  * $controlHierarchy
  */
 object Controller extends CommandController {
-
-  protected val moduleBank = ModuleLoader
-
-  protected val modules = new Stack[Module]()
 
   /**
    * <p>The running part of the controller.</p>
@@ -50,7 +47,10 @@ object Controller extends CommandController {
    */
   def act() {
     // Start RemoteController
-    RemoteController.start
+    RemoteController.start()
+
+    var defaultModule = ModuleLoader.load(ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default))
+    var events : List[Event] = Nil
 
     // Loop and react on incoming messages
     loop {
@@ -71,8 +71,13 @@ object Controller extends CommandController {
 
         // Handle events
         case event : Event => {
-          Log.debug("Controller: Received event: " + event)
-          this(event)
+          if (defaultModule.isDefined) {
+            events = event :: events
+            defaultModule(events)
+          } else {
+            Log.warning("Controller: No modules in the controller. Trying to forward to Default.")
+            ForwardTo('Default)
+          }
         }
 
         // Exit

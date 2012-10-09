@@ -11,9 +11,7 @@
 
 package com
 
-import siigna.app.model.Selection
-
-package object siigna extends com.siigna.util.Implicits {
+package object siigna extends com.siigna.util.Modules with com.siigna.util.Implicits {
 
   // Actions
   type Action = com.siigna.app.model.action.Action
@@ -35,12 +33,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   type Selection = com.siigna.app.model.Selection
   val Selection = com.siigna.app.model.Selection
-
-  // Module
-  type Module = com.siigna.module.Module
-  type StateMap = Map[Symbol, PartialFunction[List[Event], Any]]
-  type State = (Symbol, PartialFunction[List[Event], Any])
-  val State = com.siigna.util.State
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape

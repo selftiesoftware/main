@@ -20,7 +20,7 @@ import com.siigna.app.view.event.Event
  * See <a href="http://scala.sygneca.com/patterns/pimp-my-library" title="Pimp my library">Pimp my library</a>
  * on <a href="http://scala.sygneca.com/" title="Scala wiki">Scala Wiki</a>.
  */
-abstract class Implicits {
+trait Implicits {
 
   /**
    * Implicitly adds a toHtmlString method on AWT Color objects. To use this
@@ -83,6 +83,7 @@ abstract class Implicits {
 }
 
 /**
- * An object used for direct import. Import should happen through com.siigna.RemoteConstants.scala.
+ * An object used for direct import. Import should happen through the package object in com.siigna.package.scala
+  * @see http://www.scala-lang.org/docu/files/packageobjects/packageobjects.html
  */
 object Implicits extends Implicits

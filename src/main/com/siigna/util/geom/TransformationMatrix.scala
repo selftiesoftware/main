@@ -191,7 +191,7 @@ case class TransformationMatrix(t : AffineTransform) {
 }
 
 /**
- * A shortcut to instantiate a TransformationMatrix.
+ * A companion object to the TransformationMatrix.
  */
 object TransformationMatrix
 {

@@ -22,6 +22,12 @@ import com.siigna.util.logging.Log
  */
 object ModuleLoader extends ClassLoader {
 
+
+  /**
+   * The base module package.
+   */
+  var base : ModulePackage = ModulePackage('base, "siigna.com", "applet/base.jar")
+
   /**
    * The stored modules.
    */

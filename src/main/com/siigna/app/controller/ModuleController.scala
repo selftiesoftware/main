@@ -14,6 +14,7 @@ package com.siigna.app.controller
 import com.siigna.app.view.event.Event
 import collection.mutable.Stack
 import com.siigna.module.Module
+import modules.ModuleLoader
 import remote.RemoteController
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
@@ -57,6 +58,29 @@ trait ModuleController extends Actor {
    * Return the last 10 parsed events currently stored in the controller.
    */
   def getEvents = events
+
+  protected def forwardTo(module : Module) {
+    // Tell the old module it's no longer active
+    if (modules.size > 0)
+      modules.head.isActive = false
+
+    // Put the new module into the stack.
+    modules.push(module)
+
+    // Put the latest event back in the event-queue if it's specified in the ForwardTo command.
+    if (continue && !events.isEmpty) {
+      this ! events.head
+      events = events.tail
+    }
+
+    // Initialize module
+    val success = startModule(modules.top)
+
+    // Log the success
+    if (success) {
+      Log.success("Controller: Succesfully forwarded to " + module + ".")
+    }
+  }
 
   /**
    * Initializes a module by setting the starting state to 'Start and chaining the modules

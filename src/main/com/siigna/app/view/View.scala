@@ -135,76 +135,79 @@ object View extends Canvas {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
-  override def paint(graphicsPanel : AWTGraphics) { if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
-    // Create a new transformation-matrix
-    val transformation : TransformationMatrix = virtual
+  override def paint(graphicsPanel : AWTGraphics) {
+   synchronized {
+     if (getSize.getHeight > 0 && getSize.getWidth > 0) try {
+      // Create a new transformation-matrix
+      val transformation : TransformationMatrix = virtual
 
-    // Get the volatile image
-    var background = cachedVolatileImage.getOrElse(backBuffer)
+      // Get the volatile image
+      var background = cachedVolatileImage.getOrElse(backBuffer)
 
-    // Loop the rendering.
-    do {
-      // Validate the backgroundImage
-      if (background.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
-        background = backBuffer
+      // Loop the rendering.
+      do {
+        // Validate the backgroundImage
+        if (background.validate(getGraphicsConfiguration) == VolatileImage.IMAGE_INCOMPATIBLE)
+          background = backBuffer
 
-      // Define the buffer graphics as an instance of <code>Graphics2D</code>
-      // (which is much nicer than just <code>Graphics</code>).
-      val graphics2D = background.getGraphics.asInstanceOf[Graphics2D]
+        // Define the buffer graphics as an instance of <code>Graphics2D</code>
+        // (which is much nicer than just <code>Graphics</code>).
+        val graphics2D = background.getGraphics.asInstanceOf[Graphics2D]
 
-      // Wraps the graphics-object in our own Graphics-wrapper (simpler API).
-      val graphics = new Graphics(graphics2D)
+        // Wraps the graphics-object in our own Graphics-wrapper (simpler API).
+        val graphics = new Graphics(graphics2D)
 
-      // Draw the model
-      if (cachedForegroundImage.isDefined) {
-        graphics2D drawImage(cachedForegroundImage.get, 0, 0, this)
-      }
+        // Draw the model
+        if (cachedForegroundImage.isDefined) {
+          graphics2D drawImage(cachedForegroundImage.get, 0, 0, this)
+        }
 
-      // Enable anti-aliasing
-      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        // Enable anti-aliasing
+        graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
-      // Fetch and draw the dynamic layer.
-      // TODO: Cache this
-      try {
-        val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
+        // Fetch and draw the dynamic layer.
+        // TODO: Cache this
+        try {
+          val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
-        // Draw selection
-        Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
-          graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
-        }))
+          // Draw selection
+          Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
+            graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
+          }))
 
-        // Draw vertices
-        Drawing.selection.foreach(_.foreach(i => {
-          Drawing(i._1).getVertices(i._2).foreach(p => {
-            graphics.draw(transformation.transform(p), color)
-          })
-        }))
-      } catch {
-        case e => Log.error("View: Unable to draw the dynamic Model: ", e)
-      }
+          // Draw vertices
+          Drawing.selection.foreach(_.foreach(i => {
+            Drawing(i._1).getVertices(i._2).foreach(p => {
+              graphics.draw(transformation.transform(p), color)
+            })
+          }))
+        } catch {
+          case e => Log.error("View: Unable to draw the dynamic Model: ", e)
+        }
 
-      /***** MODULES LOADER *****/
-      modulesLoader.paint(graphics,transformation)
+        /***** MODULES LOADER *****/
+        modulesLoader.paint(graphics,transformation)
 
-      /***** MODULES *****/
-      // Paint the modules, displays and filters accessible by the interfaces.
-      try {
-        Siigna.paint(graphics, transformation)
-      } catch {
-        case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
-        case e => Log.error("View: Unknown error while painting the modules.", e)
-      }
+        /***** MODULES *****/
+        // Paint the modules, displays and filters accessible by the interfaces.
+        try {
+          Siigna.paint(graphics, transformation)
+        } catch {
+          case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
+          case e => Log.error("View: Unknown error while painting the modules.", e)
+        }
 
-      // Draw the image we get from the maneuvers above.
-      // Parameters are (Image img, int x, int y, ImageObserver observer)
-      graphicsPanel drawImage(background, 0, 0, this)
-    } while (background.contentsLost) // Continue looping until the content isn't lost.
+        // Draw the image we get from the maneuvers above.
+        // Parameters are (Image img, int x, int y, ImageObserver observer)
+        graphicsPanel drawImage(background, 0, 0, this)
+      } while (background.contentsLost) // Continue looping until the content isn't lost.
 
-  // Catch unexpected errors
-  } catch {
-    case e => Log.error("View: Unknown critical error encountered while painting.", e)
+    // Catch unexpected errors
+    } catch {
+      case e => Log.error("View: Unknown critical error encountered while painting.", e)
 
-  } }
+    } }
+  }
 
   /**
    * Pans the view.

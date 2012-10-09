@@ -37,34 +37,7 @@ trait CommandController extends EventController {
           command match {
             // Forward to another module
             case ForwardTo(symbol, continue) => {
-              // Try to find the module
-              val loadedModule = moduleBank.load(symbol)
 
-              // Save the modules if defined
-              if (loadedModule.isDefined) {
-                // Tell the old module it's no longer active
-                if (modules.size > 0)
-                  modules.head.isActive = false
-
-                // Put the new module into the stack.
-                modules.push(loadedModule.get)
-
-                // Put the latest event back in the event-queue if it's specified in the ForwardTo command.
-                if (continue && !events.isEmpty) {
-                  this ! events.head
-                  events = events.tail
-                }
-
-                // Initialize module
-                val success = startModule(modules.top)
-
-                // Log the success
-                if (success) {
-                  Log.success("Controller: Succesfully forwarded to "+symbol+".")
-                }
-              } else {
-                Log.warning("Controller: Failed to forward to module "+symbol+". Could not find it")
-              }
             }
 
             // Preload a module

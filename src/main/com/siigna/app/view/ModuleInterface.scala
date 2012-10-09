@@ -24,6 +24,9 @@ import com.siigna.module.Module
  * A ModuleInterface can be chained to another interface. If the interface is chained every
  * paint-call is forwarded to the chained instance as well. In this way every active module
  * gets painted, starting from the first one initialized to the latest.
+ *
+ * @todo  Rethink the module interface
+ * @param module  The module this interface is tied to.
  */
 class ModuleInterface(module : Module) extends Interface {
 
