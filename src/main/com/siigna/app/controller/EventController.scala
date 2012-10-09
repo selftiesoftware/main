@@ -13,7 +13,7 @@ package com.siigna.app.controller
 
 import command.ForwardTo
 import com.siigna.util.logging.Log
-import com.siigna.app.view.event.{ModuleEvent, Event}
+import com.siigna.app.view.event.{Key, KeyDown, ModuleEvent, Event}
 import com.siigna.module.Module
 
 /**
@@ -24,72 +24,66 @@ import com.siigna.module.Module
 trait EventController extends ModuleController {
 
   def apply(event : Event) {
-      if (modules.size > 0) {
+    if (modules.size > 0) {
 
-       // Retrieve module
-       val module : Module = modules.top
+      // Retrieve module
+      val module : Module = modules.top
 
-       // Examine if the module has not yet been imported
-       // Parse the events
-       events = module.eventParser.parse(event :: events)
+      // Catch any Escape-key downs to change the state to 'end (quits the module)
+      event match {
+        case KeyDown(Key.Escape, _) => module.state = 'End
+        case _ => // Do nothing
+      }
 
-       // Give the module a chance to change state
-       try {
-         module.eventHandler.stateMap(module.state -> events.head.symbol) match {
-           case Some(s : Symbol) => if (module.state != s) {
-             module.state = s
-             Log.debug("Controller: Succesfully changed the state of the " + module + " to "+s)
-           }
-           case None => Log.debug("Controller: Tried to change state with event "+events.head+", but no route was found.")
-         }
-       } catch {
-         case e => {
-           Log.error("Controller: Unexpected error when processing state map in module " + module + ". Shutting down. ", e)
-           stopModule(module, false)
-         }
-       }
+      // Examine if the module has not yet been imported
+      // Parse the events
+      events = module.eventParser.parse(event :: events)
 
-       // React on the event parsed and execute the function associated with the state;
-       // These lines are in a try-catch loop in case anything goes wrong in a module.
-       // Since modules are prone to error we need to make sure they don't break the entire program.
-       val result : Any = try {
-         // Retrieve the function from the map and apply them if they exist
-         module.eventHandler.stateMachine.get(module.state) match {
-           case Some(f) => f(events)
-           case None =>
-         }
-       } catch {
-         case e => {
-           Log.error("Error in retrieving state machine from module " + module + ". Shutting down!", e)
-           stopModule(module, false)
-         }
-       }
+      // React on the event parsed and execute the function associated with the state;
+      // These lines are in a try-catch loop in case anything goes wrong in a module.
+      // Since modules are prone to error we need to make sure they don't break the entire program.
+      val result : Any = try {
+        // Retrieve the function from the map and apply them if they exist
+        module.stateMap.get(module.state) match {
+          case Some(f) if (f.isDefinedAt(events)) => {
+            f(events) match {
+              case s : Symbol => module.state = s
+              case _ => // Do nothing
+            }
+          }
+          case None => // Do nothing
+        }
+      } catch {
+        case e => {
+          Log.error("Error in retrieving state map from module " + module + ". Shutting down!", e)
+          stopModule(module, false)
+        }
+      }
 
-       // If the module is ending then stop the module and match on the resulting event
-       // If it was a ModuleEvent then send it back into the event-queue for other modules
-       // to respond on.
-       if (module.state == 'End) {
+      // If the module is ending then stop the module and match on the resulting event
+      // If it was a ModuleEvent then send it back into the event-queue for other modules
+      // to respond on.
+      if (module.state == 'End) {
+          val continue = result match {
+          // Put a module event back in the event queue
+          case moduleEvent : ModuleEvent => {
+            this ! moduleEvent
+            false
+          }
+          case unknown => {
+            Log.debug("Controller: Received object " + unknown + " from the ending module " + module +
+              ", but not reacting since it is not a Module Event.")
+            true
+          }
+        }
 
-         val continue = result match {
-           // Put a module event back in the event queue
-           case moduleEvent : ModuleEvent => {
-             this ! moduleEvent
-             false
-           }
-           case unknown => {
-             Log.debug("Controller: Received object " + unknown + " from the ending module " + module +
-               ", but not reacting since it is not a Module Event.")
-             true
-           }
-         }
-
-         // Stop the module
-         stopModule(module, continue)
-       }
-     } else {
-       Log.warning("Controller: No modules in the controller. Trying to forward to Default.")
-       ForwardTo('Default)
-     }
+        // Stop the module
+        stopModule(module, continue)
+      }
+    } else {
+      Log.warning("Controller: No modules in the controller. Trying to forward to Default.")
+      ForwardTo('Default)
+    }
   }
 
 }

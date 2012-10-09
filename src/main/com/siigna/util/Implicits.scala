@@ -12,6 +12,7 @@
 package com.siigna.util
 
 import java.awt.Color
+import com.siigna.app.view.event.Event
 
 /**
  * Contains several implicit definitions which are collected in a single object
@@ -23,7 +24,7 @@ abstract class Implicits {
 
   /**
    * Implicitly adds a toHtmlString method on AWT Color objects. To use this
-   * <code>import RichColor.awtColor2RichColor</code> in your code.
+   * <code>import Implicits.awtColor2RichColor</code> in your code.
    *
    * <p>
    * Example:
@@ -37,8 +38,36 @@ abstract class Implicits {
   implicit def awtColorToRichColor(color : Color) = new RichColor(color)
 
   /**
+   * Implicitly convert a Function0[Any] to a PartialFunction[List[Event], Any], used in the
+   * [[com.siigna.module.Module]]s stateMap. This conversion is useful if you would like to write states like:
+   * {{{
+   *   State('Start -> () => ( ... ))
+   * }}}
+   * @param f  The function to convert to a partial function
+   * @return A PartialFunction
+   */
+  implicit def funToPartialFun(f : () => Any) = new PartialFunction[List[Event], Any] {
+    def isDefinedAt(x : List[Event]) = true
+    def apply(x : List[Event]) = f()
+  }
+
+  /**
+   * Implicitly convert a Function1[List[Event, Any]] to a PartialFunction[List[Event], Any], used in the
+   * [[com.siigna.module.Module]]s stateMap. This conversion is useful if you would like to write states like:
+   * {{{
+   *   State('Start -> (events : List[Event]) => ( ... ))
+   * }}}
+   * @param f  The function to convert to a partial function
+   * @return A PartialFunction
+   */
+  implicit def funToPartialFun(f : (List[Event]) => Any) = new PartialFunction[List[Event], Any] {
+    def isDefinedAt(x : List[Event]) = true
+    def apply(x : List[Event]) = f(x)
+  }
+
+  /**
    * Implicitly adds a color method on String objects. To use this
-   * <code>import RichColor.stringToColor</code> in your code.
+   * <code>import Implicits.stringToColor</code> in your code.
    *
    * <p>
    * Example:

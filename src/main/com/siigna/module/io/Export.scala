@@ -21,52 +21,54 @@ object Export extends Module {
 
   // The exporters that can export a given extension (string)
   protected var exporters : Map[String, Exporter] = Map()
-  
-  lazy val eventHandler = EventHandler(stateMap, stateMachine)
+
   private var frameIsLoaded: Boolean = false
-  lazy val stateMap = DirectedGraph('Start -> 'KeyEscape -> 'End)
 
-  lazy val stateMachine = Map(
-    'Start -> ((events: List[Event]) => {
-      //a hack to prevent the dialog from opening twice
-      if (frameIsLoaded == false) {
-        try {
-          frameIsLoaded = true
-          val frame = new Frame()
-          val dialog = new FileDialog(frame, "Export to file", FileDialog.SAVE)
-          dialog.setVisible(true)
+  val stateMap : StateMap = Map(
+    'Start -> {
+      case _ => {
+        //a hack to prevent the dialog from opening twice
+        if (frameIsLoaded == false) {
+          try {
+            frameIsLoaded = true
+            val frame = new Frame()
+            val dialog = new FileDialog(frame, "Export to file", FileDialog.SAVE)
+            dialog.setVisible(true)
 
-          val directory = dialog.getDirectory
-          val filename = dialog.getFile
+            val directory = dialog.getDirectory
+            val filename = dialog.getFile
 
-          val extension = filename.substring(filename.lastIndexOf('.') + 1);
+            val extension = filename.substring(filename.lastIndexOf('.') + 1);
 
-          if (exporters.contains(extension)) {
-            // Fetch the output stream
-            val output = new FileOutputStream(directory + filename)
+            if (exporters.contains(extension)) {
+              // Fetch the output stream
+              val output = new FileOutputStream(directory + filename)
 
-            // Write!
-            exporters(extension)(output)
+              // Write!
+              exporters(extension)(output)
 
-            // Flush and close
-            output.flush(); output.close();
+              // Flush and close
+              output.flush(); output.close();
+            }
+
+            dialog.dispose()
+            frame.dispose()
+
+            Siigna display "Export successful."
+
+          } catch {
+            case e => Siigna display "Export cancelled."
           }
-
-          dialog.dispose()
-          frame.dispose()
-
-          Siigna display "Export successful."
-
-        } catch {
-          case e => Siigna display "Export cancelled."
         }
+        'End
       }
-      Goto('End)
-      None
-    }),
-    'End -> ((events: List[Event]) => {
-      frameIsLoaded = false
-    })
+    },
+    'End -> {
+      case _ => {
+        frameIsLoaded = false
+        'End
+      }
+    }
   )
 
   /**

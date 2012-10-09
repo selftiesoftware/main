@@ -9,17 +9,13 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
-
-import com.siigna.util.collection.DirectedGraph
+package com.siigna.app.model.action
 
 /**
- * Handles events using two state diagrams: one that maps events that leads to
- * states (the stateMap) and one that maps states with actions (the stateMachine).
- * Both the states and events are described using the build-in scala symbols
- * (example: <code>'MouseDown</code>).
+ * An action meant to be sent over the network.
  *
- * @param stateMap  the state map.
- * @param stateMachine  a list of the states and their associated actions.
+ * @param action  The action to send.
+ * @param undo  A boolean flag indicating if this action was done (false) or undone (true).
  */
-case class EventHandler(stateMap : DirectedGraph[Symbol, Symbol], stateMachine : Map[Symbol, List[Event] => Any])
+@SerialVersionUID(2103194976)
+case class RemoteAction(action : Action, undo : Boolean = false)

@@ -34,9 +34,14 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
   def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    remote.!?(timeout, message) match {
+    println("Remote: Sending: " + message)
+    val res = remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
-        try { Right(f(data)) } catch {
+        try {
+          val r = f(data)     // Parse the data
+          _isConnected = true // We're not connected for sure
+          Right(r)            // Return
+        } catch {
           case e : Error => Left(e)
           case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
         }
@@ -46,9 +51,14 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
         apply(message, f) // Retry
       }
     }
+    println("Remote: Done sending")
+    res
   }
 }
 
+/**
+ * The server mode in which the server operates. There are two modes: Production and Testing.
+ */
 object Mode extends Enumeration {
   type Mode = Value
   val Production = Value(20004)
