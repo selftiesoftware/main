@@ -14,21 +14,26 @@ package com.siigna.app.controller.modules
 import com.siigna.app.controller.Controller
 import com.siigna.util.logging.Log
 import java.util.jar.{JarFile, JarEntry}
+import java.net.JarURLConnection
 
 /**
- * A ClassLoader for modules
+ * A ClassLoader for [[com.siigna.app.controller.modules.ModulePackage]]s and
+ * [[com.siigna.app.controller.modules.ModuleInstance]]s. This class loader is meant to
  */
-class ModuleClassLoader(classLoader : ClassLoader = Controller.getClass.getClassLoader) extends ClassLoader(classLoader) {
+object ModuleClassLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
   /**
-   * Attempts to define a class from a given ModuleEntry
-   * @param module  The ModuleEntry
+   * Attempts to define a class from a given ModuleInstance
+   * @param module  The ModuleInstance
    * @return  Some(Class[_]) if it could be found, None otherwise
    */
-  protected def defineClass(module : ModuleEntry) : Option[Class[_]] = {
-    executeOnEntries(module.pack.jarFile, entry => {
-      if (entry.getName.equals(module.getFullClassName)) {
-        return Some(defineClass(module.pack.jarFile, entry))
+  protected def defineClass(module : ModuleInstance) : Option[Class[_]] = {
+    // Force-load the jar if it hasn't already been loaded
+    val jar = module.pack.jar()
+
+    opOnJarEntries(jar, entry => {
+      if (entry.getName.equals(module.toString)) {
+        return Some(defineClass(jar, entry))
       }
     })
     None
@@ -39,7 +44,7 @@ class ModuleClassLoader(classLoader : ClassLoader = Controller.getClass.getClass
    * @param file  The jar file to read the entries from
    * @param f  The function to apply on the entries
    */
-  protected def executeOnEntries(file : JarFile, f : JarEntry => Unit) {
+  protected def opOnJarEntries(file : JarFile, f : JarEntry => Unit) {
     val entries = file.entries
     while (entries.hasMoreElements) { f(entries.nextElement) }
   }
@@ -58,42 +63,53 @@ class ModuleClassLoader(classLoader : ClassLoader = Controller.getClass.getClass
   }
 
   /**
-   * Initialize the given package by attempting to load all the classes into the system.
-   * These operations are done asynchronously.
-   * @param pack  The package to add.
+   * <p>Loads all the resources in the given package by loading all the module-classes in the [[java.util.jar.JarFile]]
+   * of the package into the system.</p>
+   * <p><b>These operations are done asynchronously.</b></p>
+   *
+   * @param pack  The package to load
+   * @throws IOException  If an error occurred while downloading the .jar
    */
-  def initPackage(pack : ModulePackage) {
+  def loadAll(pack : ModulePackage) {
     try {
       // Attempt to load the resources from the .jar in the background
       new Thread {
         override def run() {
-          executeOnEntries(pack.jarFile, entry => {
+          // Force-load the jar file if it hasn't already been downloaded
+          val jar = pack.jar()
+
+          opOnJarEntries(jar, entry => {
             if (!entry.isDirectory) {
-              defineClass(pack.jarFile, entry)
+              defineClass(jar, entry)
             }
           })
         }
       }.start()
+      Log.success("ModuleClassLoader: Sucessfully loaded entire module package " + pack)
     } catch {
       case e => Log.error("ModuleClassLoader: Failed to load module pack " + e)
     }
   }
 
   /**
-   * Attempts to load a module from the information in the given [[com.siigna.app.controller.modules.ModuleEntry]].
+   * Attempts to load a module from the information in the given [[com.siigna.app.controller.modules.ModuleInstance]].
    * @see http://stackoverflow.com/questions/3039822/how-do-i-call-a-scala-object-method-using-reflection
    */
-  def loadModuleEntry(entry : ModuleEntry) : Option[Class[_]] = {
+  def loadModuleEntry(entry : ModuleInstance) : Option[Class[_]] = {
     // Try to load the module from memory
     try {
-      Some(loadClass(entry.classPath + "." + entry.className))
+      Some(loadClass(entry.toString))
     } catch {
       case _ => {
         // Failure means that we have to try to fetch it from the jar
         try {
           defineClass(entry)
         } catch {
-          case _ => None
+          // Failure means that the module did not exist
+          case _ => {
+            Log.error("ModuleClassLoader: Module " + entry + " could not be found")
+            None
+          }
         }
       }
     }

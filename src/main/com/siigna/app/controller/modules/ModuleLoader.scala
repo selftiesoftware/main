@@ -27,12 +27,15 @@ object ModuleLoader extends ClassLoader {
    */
   protected val modules = scala.collection.mutable.Map[Symbol, Module]()
 
-  protected var baseURL = new URL("jar:http://siigna.com/applet/base.jar!/")
+  /**
+   * The base url
+   */
+  var baseURL = new URL("jar:http://siigna.com/applet/base.jar!/")
 
   /**
    * The class loader used to load classes.
    */
-  protected val classLoader = new ModuleClassLoader(this.getClass.getClassLoader)
+  protected val classLoader = ModuleClassLoader
 
   /**
    * Examines whether the bank contains a given module.

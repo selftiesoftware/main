@@ -43,11 +43,6 @@ trait ModuleController extends Actor {
   protected var events : List[Event] = List()
 
   /**
-   * The Module Bank used to fetch modules from external sources.
-   */
-  protected def moduleBank : ModuleBank
-
-  /**
    * The stack of active Modules, ranging from the "oldest" in the bottom of the stack to the newest and active module
    * in the top. LIFO.
    */

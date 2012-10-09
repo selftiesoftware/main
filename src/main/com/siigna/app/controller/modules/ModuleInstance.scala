@@ -12,8 +12,8 @@
 package com.siigna.app.controller.modules
 
 /**
- * <p>A ModuleEntry is an entry in a [[com.siigna.app.controller.modules.ModulePackage]].
- * This class is made to make sure that we can identify different Modules with same name from each other. A ModuleEntry
+ * <p>A ModuleInstance is an entry in a [[com.siigna.app.controller.modules.ModulePackage]].
+ * This class is made to make sure that we can identify different Modules with same name from each other. A ModuleInstance
  * allows us to plug several modules from different packages into the same running instance of Siigna.</p>
  *
  * <p>To provide the right information make sure the class path is given as the exact folder-location in the .jar file,
@@ -25,12 +25,12 @@ package com.siigna.app.controller.modules
  * @param classPath  The class path to the module (e. g. ''com.siigna.module.base'')
  * @param className  The name of the class (e. g. ''Default'' - without .class)
  */
-case class ModuleEntry(pack : ModulePackage, classPath : String, className : String) {
+case class ModuleInstance(pack : ModulePackage, classPath : String, className : String) {
 
   /**
-   * Gets the full class name and path for the module.
+   * Gets the full class path for the module.
    * @return  The class path concatenated with the class name with a "."
    */
-  def getFullClassName = classPath + "." + className
+  override def toString = classPath + "." + className
 
 }

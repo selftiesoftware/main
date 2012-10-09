@@ -12,12 +12,16 @@
 package com.siigna.app.controller.modules
 
 import java.net.{JarURLConnection, URL}
+import java.util.jar.JarFile
+
+import actors.Futures._
+import actors.Future
 
 /**
  * <p>A ModulePackage is a number of modules grouped in a ''.jar'' file. This class represents the package and
  * its version number, title and location of that file and thus a means to retrieve it. A ModulePackage can be
- * downloaded
- * transformed to a URL so the resource can be extracted by the [[com.siigna.app.controller.modules.ModuleLoader]].</p>
+ * downloaded through the [[com.siigna.app.controller.modules.ModuleClassLoader]] via its
+ * <code>load</code> method. A ModulePackage can also be transformed to a URL via the <code>toURL</code> method.</p>
 
  * <p>The last two parameter ''domain'' and ''path'' are meant to be understood like a Uniform Resource Locator (URL)
  * where the domain comes first (fx ''www.example.org'') followed by the path (fx ''files/example.jar'').
@@ -28,23 +32,21 @@ import java.net.{JarURLConnection, URL}
  * }}}
  * </p>
  *
- * <p><b>Note:</b> On startup the class attempts to load the module from the given domain and path, so
- * watch out for errors when creating the class.</p>
- *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
+ * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.
  * @param path  The path to the resource inside the domain, e. g. ''modules/example.jar''.
  * @throws IOException  If the jarFile could not be downloaded
  */
-case class ModulePackage(name : String, domain : String, path : String) {
+case class ModulePackage(name : Symbol, domain : String, path : String) {
 
   /**
-   * The jar file containing the module classes. This file is loaded on class initialization which can result
-   * in Exceptions.
-   * @throws ClassCastException  If the connection could not find a .jar resource
-   * @throws IOException  If an error occurred while downloading the .jar
+   * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
+   * since it might block the calling thread.
    */
-  val jarFile = toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile
+  val jar : Future[JarFile] = future { toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile }
+
+  override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 
   /**
    * Converts this ModulePackage to a URL while appending "''jar:http://''" to the domain, inserting a "''/''"
