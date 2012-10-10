@@ -19,26 +19,26 @@ import remote.RemoteController
 import actors.Actor
 
 /**
- * The Controller controls the core of the software. Basically that includes
- * dealing with the event-flow to the modules.
- *
- * $controlHierarchy
+ * <p>
+ *   The Controller contains the core application logic in Siigna. Fortunately the only logic in Siigna is to forward
+ *   events on to the [[com.siigna.module.Module]]s and forward [[com.siigna.app.model.action.Action]]s from the
+ *   [[com.siigna.app.model.Drawing]] and onto the main server and to other clients. Simply, right?
+ * </p>
  */
 object Controller extends Actor {
 
   /**
-   * <p>The running part of the controller.</p>
+   * <p>
+   *   The running part of the controller handling [[com.siigna.app.model.action.Action]]s and
+   *   [[com.siigna.app.view.event.Event]]s. If an action is sent to the controller it is forwarded to the
+   *   RemoteController to be passed on to the remote system and other clients. Actions can be sent as a
+   *   <code>(Action, Boolean)</code> [[scala.Tuple2]]. The second boolean parameter indicates whether the action
+   *   should be undone (true) or simply executed(false).
+   * </p>
    *
-   * <p>It consists of a loop that exists until 'exit is given, or the system is exiting (naturally).</p>
-   *
-   * <p>In the loop we first examine whether there is pending events. If so we:
-   * <ol>
-   *   <li>Set the state of the active module.</li>
-   *   <li>React on the given event by executing the state given by the state machine.</li>
-   *   <li>Close a possibly ending module and ask the loop to repeat so the "parent" can answer.</li>
-   *   <li>If the ending module returns a <code>ModuleEvent</code> then we put it back into the event queue, so other
-   *       modules can react on it.</li>
-   * </ol>
+   * <p>
+   *   The Controller does not quit until 'exit is sent to it, or the system is exiting (thread death).
+   * </p>
    *
    * The actor also handles commands and the 'exit symbol.</p>
    */

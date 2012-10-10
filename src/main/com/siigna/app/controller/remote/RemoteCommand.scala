@@ -18,7 +18,7 @@ import com.siigna.app.controller.remote.RemoteConstants._
  * A [[com.siigna.app.controller.command.Command]] that can be sent over the network to the Siigna Universe,
  * containing a Session which tells the server which user that sends the command and on what drawing.
  */
-trait RemoteCommand extends Command with Serializable {
+trait RemoteCommand extends Serializable {
 
   /**
    * The session who are sending this command.
