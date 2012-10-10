@@ -118,7 +118,7 @@ class SiignaApplet extends Applet {
       }
     })
 
-    // Allows specific KeyEvents to be detected.
+    // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
 
     // Start the controller - ends up with calling act() method in Controller.

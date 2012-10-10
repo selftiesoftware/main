@@ -11,7 +11,7 @@
 package com.siigna.app.controller
 
 import com.siigna.app.view.event.Event
-import com.siigna.module.ModuleInstance
+import com.siigna.module.{ModulePackage, ModuleInstance}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
@@ -45,6 +45,12 @@ object Controller extends Actor {
   def act() {
     // Start RemoteController
     RemoteController.start()
+
+    // Set the base modules to local (TEST)
+    ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
+
+    // Start loading in the base modules
+    ModuleLoader.load(ModuleLoader.base)
 
     def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
 
