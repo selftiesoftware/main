@@ -13,7 +13,7 @@ package com.siigna.util
 
 import com.siigna.module.{ModulePackage, ModuleInstance}
 import com.siigna.app.view.event.Event
-import com.siigna.app.controller.modules.ModuleLoader
+import com.siigna.app.controller.ModuleLoader
 
 /**
  * A utility object that includes utility methods and types for [[com.siigna.module.Module]]s.
@@ -37,7 +37,7 @@ abstract class Modules {
    * @param name  The name of the module.
    * @return  A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def Module(name : Symbol) = ModuleInstance(ModuleLoader.base, "com.siigna.module" + ModuleLoader.base.name.name, name.name)
+  def Module(name : Symbol) = ModuleInstance(ModuleLoader.base, "com.siigna.module" + ModuleLoader.base.name.name, name)
 
   /**
    * @define moduleToModuleParameters  name and class-path
@@ -47,7 +47,7 @@ abstract class Modules {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def Module(name : Symbol, classPath : String) = ModuleInstance(ModuleLoader.base, classPath, name.name)
+  def Module(name : Symbol, classPath : String) = ModuleInstance(ModuleLoader.base, classPath, name)
 
   /**
    * @define moduleToModuleParameters  name, class-path and [[com.siigna.module.ModulePackage]]
@@ -58,7 +58,7 @@ abstract class Modules {
    * @param pack  The package in which the module is defined
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def Module(name : Symbol, classPath : String, pack : ModulePackage) = ModuleInstance(pack, classPath, name.name)
+  def Module(name : Symbol, classPath : String, pack : ModulePackage) = ModuleInstance(pack, classPath, name)
 
   /**
    * An object that provides shortcuts to instantiate states that have a somewhat ugly syntax (especially if

@@ -10,16 +10,13 @@
  */
 package com.siigna.app.controller
 
-import collection.mutable.Stack
-
-import com.siigna.app.controller.command._
-import com.siigna.app.view.event.{ModuleEvent, Key, KeyDown, Event}
-import com.siigna.module.{ModuleInstance, Module}
+import com.siigna.app.view.event.Event
+import com.siigna.module.ModuleInstance
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
-import modules.ModuleLoader
 import remote.RemoteController
+import actors.Actor
 
 /**
  * The Controller controls the core of the software. Basically that includes
@@ -27,7 +24,7 @@ import remote.RemoteController
  *
  * $controlHierarchy
  */
-object Controller extends CommandController {
+object Controller extends Actor {
 
   /**
    * <p>The running part of the controller.</p>
@@ -49,7 +46,8 @@ object Controller extends CommandController {
     // Start RemoteController
     RemoteController.start()
 
-    var defaultModule = ModuleLoader.load(ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default))
+    def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
+
     var events : List[Event] = Nil
 
     // Loop and react on incoming messages
@@ -57,26 +55,22 @@ object Controller extends CommandController {
       react {
 
         // Handle actions (execute, not undo)
-        case action : Action                   => remote ! (action, false)
+        case action : Action                   => RemoteController ! (action, false)
           
         // Handle actions with an undo flag
-        case (action : Action, undo : Boolean) => remote ! (action, undo)
-
-        // Handle commands
-        case command : Command => {
-          Log.debug("Controller: Received command: " + command)
-          // Handle it through the CommandController
-          this(command)
-        }
+        case (action : Action, undo : Boolean) => RemoteController ! (action, undo)
 
         // Handle events
         case event : Event => {
-          if (defaultModule.isDefined) {
-            events = event :: events
-            defaultModule(events)
-          } else {
-            Log.warning("Controller: No modules in the controller. Trying to forward to Default.")
-            ForwardTo('Default)
+          // Concatenate the event (to a max of 10)
+          events = (event :: events).take(10)
+
+          // Send the events on to the modules!
+          defaultModule(events)
+
+          // Never allow it to step into the 'End state
+          if (defaultModule.state == 'End) {
+            defaultModule.state = 'Start
           }
         }
 
@@ -101,6 +95,6 @@ object Controller extends CommandController {
    * Examines whether this client is connected with the server.
    * @return True if the connection has been established correctly, false otherwise.
    */
-  def isOnline = remote.isOnline
+  def isOnline = RemoteController.isOnline
 
 }

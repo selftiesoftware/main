@@ -12,10 +12,10 @@
 package com.siigna.module
 
 import com.siigna.app.view.event.{KeyUp, Key, KeyDown, Event}
-import com.siigna.app.controller.modules.ModuleClassLoader
 import actors.Future
 import actors.Futures._
 import com.siigna.util.logging.Log
+import com.siigna.app.controller.ModuleLoader
 
 /**
  * <p>
@@ -23,6 +23,13 @@ import com.siigna.util.logging.Log
  *   This class is made to make sure that we can identify different Modules with same name from each other. A
  *   ModuleInstance allows us to plug several modules from different packages into the same running instance
  *   of Siigna.
+ * </p>
+ *
+ * <p>
+ *   In effect the ModuleInstance works as a wrapper to [[com.siigna.module.Module]]s, so we can stow all runtime
+ *   information away from the modules. The ModuleInstance is responsible for making sure the module will run and
+ *   is loaded from the right resources. The [[com.siigna.app.view.event.Event]]s that the modules process are also
+ *   given to the ModuleInstance before handed over to the module since the ModuleInstance might forward
  * </p>
  *
  * <p>
@@ -42,7 +49,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
    * since it might block the calling thread.
    */
-  val module : Future[Module] = future { ModuleClassLoader.load(this) }
+  val module : Future[Module] = future { ModuleLoader.load(this) }
 
   /**
    * The forwarding module, if any
@@ -68,9 +75,12 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
         child = None
         module().interface.unchain()
       }
+    }
 
     // Otherwise we handle the events inside this module
-    } else {
+    // This is separate from the previous if-statement because the child could have exited,
+    // on which the parent (might) need to act
+    if (child.isEmpty) {
       // Force-load the module
       val module : Module = this.module()
 
