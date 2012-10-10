@@ -11,7 +11,6 @@ package com.siigna.app
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-import controller.command.{ForwardTo, Preload}
 import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
 
 import java.applet.Applet
@@ -124,12 +123,6 @@ class SiignaApplet extends Applet {
 
     // Start the controller - ends up with calling act() method in Controller.
     Controller.start()
-
-    // Preload modules
-    Preload('Default)
-    Preload('Menu)
-    Preload('Selection)
-    ForwardTo('Default)
   }
 
   /**

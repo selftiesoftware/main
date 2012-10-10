@@ -11,7 +11,6 @@ package com.siigna.app.controller.remote
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-import com.siigna.app.controller.command.Command
 import com.siigna.app.controller.remote.RemoteConstants._
 
 /**

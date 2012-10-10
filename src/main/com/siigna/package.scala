@@ -21,10 +21,6 @@ package object siigna extends com.siigna.util.Modules with com.siigna.util.Impli
   val Select = com.siigna.app.model.action.Select
   val Transform = com.siigna.app.model.action.Transform
 
-  // Commands
-  val ForwardTo = com.siigna.app.controller.command.ForwardTo
-  val Preload = com.siigna.app.controller.command.Preload
-
   // Controller
   val Controller = com.siigna.app.controller.Controller
 
