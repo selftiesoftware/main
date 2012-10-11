@@ -38,7 +38,7 @@ import actors.Future
  * @param path  The path to the resource inside the domain, e. g. ''modules/example.jar''.
  * @throws IOException  If the jarFile could not be downloaded
  */
-final case class ModulePackage(name : Symbol, domain : String, path : String) {
+final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
 
   /**
    * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
@@ -54,6 +54,6 @@ final case class ModulePackage(name : Symbol, domain : String, path : String) {
    * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
    * @return  A URL specifying the location of the resource.
    */
-  def toURL = new URL("jar:http://" + domain + "/" + path + "!/")
+  def toURL = new URL((if (local) "jar:file:" else "jar:http://") + domain + "/" + path + "!/")
 
 }

@@ -127,6 +127,6 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Gets the full class path for the module.
    * @return  The class path concatenated with the class name with a "."
    */
-  override def toString = classPath + "." + className
+  override def toString = classPath + "." + className.name
 
 }
