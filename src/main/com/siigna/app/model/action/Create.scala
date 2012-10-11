@@ -70,7 +70,7 @@ object Create {
  * $actionDescription
  */
 @SerialVersionUID(71837821)
-case class CreateShape(id : Int, shape : Shape) extends Action {
+case class CreateShape(id : Int, shape : Shape) extends Action with CreateAction {
   
   def execute(model : Model) = model add (id, shape)
 
@@ -89,7 +89,7 @@ case class CreateShape(id : Int, shape : Shape) extends Action {
  */
 @SerialVersionUID(-1426451986)
 case class CreateShapes(shapes : Map[Int, Shape])
-  extends SerializableProxyAction(() => new CreateShapesProxy(shapes)) {
+  extends SerializableProxyAction(() => new CreateShapesProxy(shapes)) with CreateAction {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
   
