@@ -66,10 +66,10 @@ class SiignaApplet extends Applet {
     try {
       // Get the active user, if a log in was performed at www.siigna.com
       //val userName = getParameter("contributorName")
-      val userName = "jens"
+      val userName = "anonymous"
       if (userName != null) {
         // TODO: Refine this
-        Siigna.user = User(util.Random.nextLong(), userName, util.Random.nextString(20))
+        Siigna.user = User(0, userName, util.Random.nextString(20))
         Log.success("Applet: Found user: " + userName)
       }
 
