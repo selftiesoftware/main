@@ -11,12 +11,13 @@
 package com.siigna.app.controller
 
 import com.siigna.app.view.event.Event
-import com.siigna.module.ModuleInstance
+import com.siigna.module.{ModulePackage, ModuleInstance}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
 import remote.RemoteController
 import actors.Actor
+import com.siigna.app.Siigna
 
 /**
  * <p>
@@ -46,7 +47,11 @@ object Controller extends Actor {
     // Start RemoteController
     RemoteController.start()
 
+    ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
+
     def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
+
+    Siigna.setInterface(defaultModule.module().interface)
 
     var events : List[Event] = Nil
 

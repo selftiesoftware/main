@@ -50,7 +50,17 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected def defineClass(file : JarFile, entry : JarEntry) : Class[_] = {
     val input = file.getInputStream(entry)
     val bytes = Stream.continually(input.read).takeWhile(-1 !=).map(_.toByte).toArray
-    defineClass(entry.getName, bytes, 0, bytes.size)
+    val name  = entry.getName
+    val clazz = name.substring(0, name.indexOf('.')).replace('/', '.') // Replace package delimiters and remove .class
+    try {
+      defineClass(clazz, bytes, 0, bytes.size)
+    } catch {
+      case e : LinkageError => // This is caused by an attempt to duplicate classes
+                               // caused by the additional "$" above. Unfortunately scala object are postfixed
+                               // with a "$" so there's not really anything we can do about it...
+                               // So we just return the same class.. tihiii
+      loadClass(clazz)
+    }
   }
 
   /**
@@ -100,7 +110,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
       var module : Option[Module] = None
 
       opOnJarEntries(jar, zip => {
-        if (!zip.isDirectory && zip.getName.startsWith(entry.toString)) {
+        if (!zip.isDirectory && zip.getName.contains(entry.className.name + "$.class")) {
           module = loadModuleFromJar(jar, zip)
         }
       })
@@ -123,12 +133,33 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected def loadModuleFromJar[ModuleType : Manifest](jar : JarFile, entry : JarEntry) : Option[Module] = {
     try {
       val clazz : Class[_] = defineClass(jar, entry)
-      val module : Module  = clazz.getField("MODULE$").get(manifest.erasure).asInstanceOf[Module]
-      modules + (Symbol(module.toString) -> module)
-      Some(module)
+      val module : Option[Module] = try {
+        val field = clazz.getField("MODULE$")
+        val instance = field.get(manifest.erasure).asInstanceOf[Module]
+        // Return!
+        Some(instance)
+      } catch {
+        case e : ExceptionInInitializerError => {
+          // If constructing via the MODULE$ field fails, try using the constructor instead.
+          try {
+            val constructors = clazz.getDeclaredConstructors
+            constructors(0).setAccessible(true)
+            Some(constructors(0).newInstance())
+            None
+          } catch {
+            case e : Exception => Log.error("ModuleLoader: Module " + entry.toString + " was found but could not be initialized through MODULE$ field or constructor.", e)
+            None
+          }
+        }
+        case e => Log.error("ModuleLoader: Class found, but failed to cast to Module.", e); None
+      }
+
+      if (module.isDefined) modules + (Symbol(module.get.toString) -> module)
+
+      module
     } catch {
       case e : Exception => {
-        Log.error("ModuleLoader: Error when loading module entry " + entry + " from file " + jar)
+        Log.error("ModuleLoader: Unknown error when loading module entry " + entry + " from file " + jar)
         None
       }
     }
