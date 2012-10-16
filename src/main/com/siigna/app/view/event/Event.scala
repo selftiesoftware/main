@@ -26,7 +26,29 @@ trait Event
 
 /**
  * ModifierKeys used to match further information in a given event.
- * Arguments are listed as follows: Shift - Controller - Alt
+ * Arguments are listed as follows: Shift - Control - Alt
  */
 case class ModifierKeys(shift : Boolean, ctrl : Boolean, alt : Boolean)
+
+/**
+ * Companion object for [[com.siigna.app.view.event.ModifierKeys]].
+ */
+object ModifierKeys {
+
+  /**
+   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Shift is pressed.
+   */
+  val Shift = ModifierKeys(true, false, false)
+
+  /**
+   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Control is pressed.
+   */
+  val Control = ModifierKeys(false, true, false)
+
+  /**
+   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Alt is pressed.
+   */
+  val Alt = ModifierKeys(false, false, true)
+
+}
 

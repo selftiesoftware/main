@@ -86,7 +86,10 @@ package object siigna extends com.siigna.util.Modules with com.siigna.util.Impli
   lazy val Message = com.siigna.app.view.event.Message
 
   type ModifierKeys = com.siigna.app.view.event.ModifierKeys
-  val ModifierKeys = com.siigna.app.view.event.ModifierKeys
+  val ModifierKeys  = com.siigna.app.view.event.ModifierKeys
+  val Alt           = ModifierKeys.Alt
+  val Control, Ctrl = ModifierKeys.Control
+  val Shift         = ModifierKeys.Shift
 
   type ModuleEvent = com.siigna.app.view.event.ModuleEvent
 

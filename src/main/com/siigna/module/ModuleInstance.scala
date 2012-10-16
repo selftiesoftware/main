@@ -113,7 +113,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
               case _ => // Function return value does not match: Do nothing
             }
           }
-          case None => // No state defined: Do nothing
+          case _ => // No state defined: Do nothing
         }
       } catch {
         case e : Exception => {
