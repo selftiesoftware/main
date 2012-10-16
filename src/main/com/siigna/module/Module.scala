@@ -82,10 +82,6 @@ import com.siigna.util.geom.TransformationMatrix
  */
 trait Module {
 
-  // Require that 'Start end 'End state is defined.
-  require(stateMap.contains('Start), "Module must contain a 'Start state!")
-  require(stateMap.contains('End), "Module must contain an 'End state!")
-
   /**
    * The EventParser that parses the event-stream from the given snap- and
    * track-settings.

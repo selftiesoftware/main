@@ -68,7 +68,7 @@ protected[controller] object RemoteController extends Actor {
         // Update lastPing to ensure this only happens when pingTime has passed
         lastPing = System.currentTimeMillis()
       }
-      
+
       react {
         // Set an action to the server
         case (action : Action, undo : Boolean) => {

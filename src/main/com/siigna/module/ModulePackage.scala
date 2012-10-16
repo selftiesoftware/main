@@ -65,6 +65,6 @@ final case class ModulePackage(name : Symbol, domain : String, path : String, lo
    * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
    * @return  A URL specifying the location of the resource.
    */
-  def toURL = new URL( (if (local) "jar:file:" else "jar:http://") + domain + "/" + path + "!/")
+  def toURL = new URL((if (local) "jar:file:" else "jar:http://") + domain + "/" + path + "!/")
 
 }

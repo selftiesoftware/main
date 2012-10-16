@@ -2,6 +2,7 @@ package com.siigna.app.controller.remote
 
 import actors.remote.RemoteActor._
 import actors.remote.Node
+import com.siigna.util.logging.Log
 
 /**
  * An instance of a specific server located at the given host and the given port that can
@@ -34,7 +35,7 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
   def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    println("Remote: Sending: " + message)
+    Log.info("Remote: Sending: " + message)
     val res = remote.!?(timeout, message) match {
       case Some(data) => { // Call the callback function
         try {
@@ -51,7 +52,6 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
         apply(message, f) // Retry
       }
     }
-    println("Remote: Done sending")
     res
   }
 }

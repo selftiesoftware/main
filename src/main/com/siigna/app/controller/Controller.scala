@@ -17,6 +17,7 @@ import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
 import remote.RemoteController
 import actors.Actor
+import com.siigna.app.Siigna
 
 /**
  * <p>
@@ -49,10 +50,9 @@ object Controller extends Actor {
     // Set the base modules to local (TEST)
     ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
 
-    // Start loading in the base modules
-    ModuleLoader.load(ModuleLoader.base)
-
     def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
+
+    Siigna.setInterface(defaultModule.module().interface)
 
     var events : List[Event] = Nil
 

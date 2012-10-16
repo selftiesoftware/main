@@ -1,5 +1,3 @@
-package com.siigna.app.controller
-
 /*
 * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
 * to Share — to copy, distribute and transmit the work,
@@ -10,6 +8,8 @@ package com.siigna.app.controller
 * Noncommercial — You may not use this work for commercial purposes.
 * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
 */
+
+package com.siigna.app.controller
 
 import actors.Futures._
 import com.siigna.module.{ModuleInstance, ModulePackage, Module}
@@ -28,7 +28,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    */
   var base : ModulePackage = ModulePackage('base, "siigna.com", "applet/base.jar")
 
-  protected val modules = collection.mutable.Map[Symbol, Module]()
+  protected val modules = collection.mutable.HashMap[Symbol, Module]()
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
@@ -45,11 +45,19 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @return  The class that was defined
    */
   protected def defineClass(file : JarFile, entry : JarEntry) : Class[_] = {
-    val input     = file.getInputStream(entry)
-    val bytes     = Stream.continually(input.read).takeWhile(-1 !=).map(_.toByte).toArray
-    val name      = entry.getName
-    val className = name.substring(0, name.indexOf('.')).replace("/", ".") // Remove '.class' and '/'
-    defineClass(className, bytes, 0, bytes.size)
+    val input = file.getInputStream(entry)
+    val bytes = Stream.continually(input.read).takeWhile(-1 !=).map(_.toByte).toArray
+    val name  = entry.getName
+    val clazz = name.substring(0, name.indexOf('.')).replace('/', '.') // Replace package delimiters and remove .class
+    try {
+      defineClass(clazz, bytes, 0, bytes.size)
+    } catch {
+      case e : LinkageError => // This is caused by an attempt to duplicate classes
+                               // caused by the additional "$" above. Unfortunately scala object are postfixed
+                               // with a "$" so there's not really anything we can do about it...
+                               // So we just return the same class.. tihiii
+      loadClass(clazz)
+    }
   }
 
   /**
@@ -104,7 +112,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
           var module : Option[Module] = None
 
           opOnJarEntries(jar, zip => {
-            if (!zip.isDirectory && zip.getName.startsWith(entry.toString)) {
+            if (!zip.isDirectory && zip.getName.contains(entry.className.name + "$.class")) {
               module = loadModuleFromJar(jar, zip)
             }
           })
@@ -129,12 +137,34 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected def loadModuleFromJar[ModuleType : Manifest](jar : JarFile, entry : JarEntry) : Option[Module] = {
     try {
       val clazz : Class[_] = defineClass(jar, entry)
-      val module : Module  = classToModule(clazz)
-      modules + (Symbol(module.toString) -> module)
-      Some(module)
+
+      val module : Option[Module] = try {
+        val field = clazz.getField("MODULE$")
+        val instance = field.get(manifest.erasure).asInstanceOf[Module]
+        // Return!
+        Some(instance)
+      } catch {
+        case e : ExceptionInInitializerError => {
+          // If constructing via the MODULE$ field fails, try using the constructor instead.
+          try {
+            val constructors = clazz.getDeclaredConstructors
+            constructors(0).setAccessible(true)
+            Some(constructors(0).newInstance().asInstanceOf[Module])
+          } catch {
+            case e : Exception => Log.error("ModuleLoader: Module " + entry.toString + " was found but could not be initialized through MODULE$ field or constructor.", e)
+            None
+          }
+        }
+        case e => Log.error("ModuleLoader: Class found, but failed to cast to Module.", e); None
+      }
+
+      // Add the module to the cache
+      if (module.isDefined) modules + (Symbol(module.get.toString) -> module)
+
+      module
     } catch {
       case e : Exception => {
-        Log.error("ModuleLoader: Error when loading module entry " + entry + " from file " + jar)
+        Log.error("ModuleLoader: Unknown error when loading module entry " + entry + " from file " + jar)
         None
       }
     }
