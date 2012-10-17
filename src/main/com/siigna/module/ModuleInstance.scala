@@ -49,7 +49,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
    * since it might block the calling thread.
    */
-  val module : Future[Module] = future { ModuleLoader.load(this) }
+  lazy val module : Future[Module] = future { ModuleLoader.load(this) }
 
   /**
    * The forwarding module, if any
@@ -123,6 +123,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
           f(parsedEvents) match {
             // Forward to a module
             case m : ModuleInstance => {
+              // Try to load the module
               child = Some(m)
               module.interface.chain(m.module().interface)
             }

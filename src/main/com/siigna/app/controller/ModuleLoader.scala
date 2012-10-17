@@ -103,7 +103,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     } else {
       // Try to fetch it from the class loader with the right name
       try {
-        classToModule(loadClass(entry.className.name))
+        classToModule(loadClass(entry.toString + "$"))
       } catch {
         case _ : Exception => {
           // Failure means that we have to try to fetch it from the jar
@@ -157,7 +157,9 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
       }
 
       // Add the module to the cache
-      if (module.isDefined) modules + (Symbol(module.get.toString) -> module)
+      if (module.isDefined) {
+        modules += Symbol(module.get.toString) -> module.get
+      }
 
       module
     } catch {

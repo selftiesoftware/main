@@ -49,9 +49,11 @@ object Controller extends Actor {
 
     // Set the base modules to local (TEST)
     ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
+    ModuleLoader.load(ModuleLoader.base)
 
-    def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
+    val defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
 
+    Thread.sleep(1000)
     Siigna.setInterface(defaultModule.module().interface)
 
     var events : List[Event] = Nil
