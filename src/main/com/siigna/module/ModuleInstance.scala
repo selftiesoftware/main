@@ -66,59 +66,78 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * @param events  The events from the user
    */
   def apply(events : List[Event]) {
+    val module : Module = this.module()
+
     // Forward events if a child-module is available
-    if (child.isDefined) {
+    val childEvents = if (child.isDefined) {
+      // Pass the events on to the child
       child.get.apply(events)
 
-      // End the module if it's in state 'End
+      // End the child module if it's in state 'End
       if (child.get.state == 'End) {
         child = None
-        module().interface.unchain()
+        module.interface.unchain()
       }
-    }
+
+      // Update events if the child exited due to a KeyDown
+      events match {
+        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+          state = 'End
+          tail // Filter away the escape
+        }
+        case rest => rest // Do nothing
+      }
+    } else events
 
     // Otherwise we handle the events inside this module
     // This is separate from the previous if-statement because the child could have exited,
     // on which the parent (might) need to act
-    if (child.isEmpty) {
-      // Force-load the module
-      val module : Module = this.module()
+    if (child.isEmpty) parse(childEvents)
+  }
 
-      // Catch any Escape-keys to change the state to 'End (quits the module)
-      events match {
-        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => state = 'End
-        case _ => // Do nothing
-      }
+  /**
+   * Parses the given events inside the current module
+   * @param events The list of events to use
+   */
+  protected def parse(events : List[Event]) {
+    // Force-load the module
+    val module : Module = this.module()
 
-      // Examine if the module has not yet been imported
-      // Parse the events
-      val parsedEvents = module.eventParser.parse(events)
+    // Catch any Escape-keys to change the state to 'End (quits the module)
+    events match {
+      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => state = 'End
+      case _ => // Do nothing
+    }
 
-      // React on the event parsed and execute the function associated with the state;
-      // These lines are in a try-catch loop in case anything goes wrong in a module.
-      // Since modules are prone to error we need to make sure they don't break the entire program.
-      try {
-        // Retrieve the function from the map and apply them if they exist
-        module.stateMap.get(state) match {
-          case Some(f) if (f.isDefinedAt(parsedEvents)) => {
-            f(parsedEvents) match {
-              // Forward to a module
-              case m : ModuleInstance => {
-                child = Some(m)
-                module.interface.chain(m.module().interface)
-              }
-              // Set the state
-              case s : Symbol if (module.stateMap.contains(s))
-                              => state = s
-              case _ => // Function return value does not match: Do nothing
+    // Examine if the module has not yet been imported
+    // Parse the events
+    val parsedEvents = module.eventParser.parse(events)
+
+    // React on the event parsed and execute the function associated with the state;
+    // These lines are in a try-catch loop in case anything goes wrong in a module.
+    // Since modules are prone to error we need to make sure they don't break the entire program.
+    try {
+      // Retrieve the function from the map and apply them if they exist
+      module.stateMap.get(state) match {
+        case Some(f) if (f.isDefinedAt(parsedEvents)) => {
+          f(parsedEvents) match {
+            // Forward to a module
+            case m : ModuleInstance => {
+              child = Some(m)
+              module.interface.chain(m.module().interface)
             }
+            // Set the state
+            case s : Symbol if (module.stateMap.contains(s)) => {
+              state = s
+            }
+            case _ => // Function return value does not match: Do nothing
           }
-          case _ => // No state defined: Do nothing
         }
-      } catch {
-        case e : Exception => {
-          Log.error(toString() + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
-        }
+        case _ => // No state defined: Do nothing
+      }
+    } catch {
+      case e : Exception => {
+        Log.error(toString() + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
       }
     }
   }

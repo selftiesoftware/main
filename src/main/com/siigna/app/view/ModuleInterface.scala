@@ -76,7 +76,7 @@ class ModuleInterface(module : Module) extends Interface {
     // Paint the current paint-function, if defined
     module.paint(graphics, transformation)
 
-    // Paint the chain
+    // Paint the next interface in the chain
     if (chain.isDefined) chain.get.paint(graphics, transformation)
   }
 
