@@ -40,7 +40,7 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
       case Some(data) => { // Call the callback function
         try {
           val r = f(data)     // Parse the data
-          _isConnected = true // We're not connected for sure
+          _isConnected = true // We're now connected for sure
           Right(r)            // Return
         } catch {
           case e : Error => Left(e)

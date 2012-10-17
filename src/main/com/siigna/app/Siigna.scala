@@ -22,10 +22,8 @@ import java.awt.Cursor
 /**
  * <p>The Siigna object provides access to various core elements of the software.</p>
  *
- * <p>It also functions as the first <code>Interface</code> connected
+ * <p>It also functions as the first [[com.siigna.app.view.Interface]] connected
  * to the [[com.siigna.app.view.View]].</p>
- *
- * <p>See {http://github.com/siigna/main/wiki} for more information</p>
  */
 object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes {
 
@@ -48,7 +46,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
 
   /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
-   * <code>Model</code> remains where it is while the modules still receives the events and
+   * [[com.siigna.app.model.Drawing]] remains where it is while the modules still receives the events and
    * are still able to react.
    */
   var navigation = true
@@ -61,7 +59,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   /**
    * The version of Siigna.
    */
-  val version = "v1.0 alpha"
+  val version = "beta - Xenophanes"
 
   /**
    * Clears the display. NOT the interface. The interface can only be cleared by
@@ -138,7 +136,7 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
   }
 
   /**
-   * Sets the currently active ModuleInterface.
+   * Sets the currently active [[com.siigna.app.view.ModuleInterface]].
    * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
    * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
    * get painted.

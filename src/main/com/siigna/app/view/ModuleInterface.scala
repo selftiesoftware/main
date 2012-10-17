@@ -18,14 +18,24 @@ import com.siigna.util.geom.TransformationMatrix
 import com.siigna.module.Module
 
 /**
- * Every Module is given an unique instance of ModuleInterface to access graphical stuff. The
- * graphical settings are inherited in a direct line from the Siigna object.
- * <br />
- * A ModuleInterface can be chained to another interface. If the interface is chained every
- * paint-call is forwarded to the chained instance as well. In this way every active module
- * gets painted, starting from the first one initialized to the latest.
+ * <p>
+ *   Every Module is given an unique instance of ModuleInterface to access graphical stuff. The
+ *   graphical settings are inherited in a direct line from the [[com.siigna.app.Siigna]] object.
+ * </p>
  *
- * @todo  Rethink the module interface
+ * <p>
+ *   A ModuleInterface can be chained to another interface. If the interface is chained every
+ *   paint-call is forwarded to the chained instance as well. These chains are especially handy
+ *   in the module system where the Default module can chain to another module and so on.
+ *   This way, every active module gets painted.
+ * </p>
+ *
+ * <p>
+ *   Another handy feature is that ModuleInterfaces are bound to the module it is created for.
+ *   That means that all graphical settings such as cursors, are set back to normal when a module
+ *   closes, without the module having to remember to revert every graphical changes made.
+ * </p>
+ *
  * @param module  The module this interface is tied to.
  */
 class ModuleInterface(module : Module) extends Interface {

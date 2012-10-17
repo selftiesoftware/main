@@ -18,19 +18,28 @@ import java.awt.image.MemoryImageSource
 import com.siigna.util.geom.TransformationMatrix
 
 /**
- * An Interface provides functionality to interact with the graphical part of Siigna. There are two
- * types interfaces in the Siigna core: ModuleInterfaces and the <code>Siigna</code> object. The
- * hierarchy Each module is thus as follows:
+ *
+ * <p>
+ *   An Interface provides functionality to interact with the graphical part of Siigna. There are two
+ *   types interfaces in the Siigna core: [[com.siigna.app.view.ModuleInterface]]s and the
+ *   [[com.siigna.app.Siigna]] object. The inheritance hierarchy is defined as follows:
  * <pre>
  *       Interface
- *     ____/   \____
- *    /             \
+ *          |
+ *    +-----+-------|
+ *    |             |
  * Siigna      ModuleInterface
  * </pre>
- * Each module is connected to their unique instance of a ModuleInterface where they can set stuff
- * like cursors, displays, paint-functions etc. <br />
- * The Siigna object is the main entry-point to the graphical parts of Siigna. It communicates
- * directly to the view. See the <code>Siigna</code> object for more info.
+ * </p>
+ *
+ * <p>
+ *   Each module is connected to their unique instance of a [[com.siigna.app.view.ModuleInterface]] where they
+ *   can set stuff like cursors, paint-functions etc. See [[com.siigna.app.view.ModuleInterface]] for more info.
+ * </p>
+ * <p>
+ *   The [[com.siigna.app.Siigna]]object is the main entry-point to the graphical parts of Siigna. It communicates
+ *   directly to the view. See the [[com.siigna.app.Siigna]] object for more info.
+ * </p>
  */
 trait Interface {
 

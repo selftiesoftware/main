@@ -140,9 +140,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
       val module : Option[Module] = try {
         val field = clazz.getField("MODULE$")
-        val instance = field.get(manifest.erasure).asInstanceOf[Module]
-        // Return!
-        Some(instance)
+        Some(field.get(manifest.erasure).asInstanceOf[Module])
       } catch {
         case e : ExceptionInInitializerError => {
           // If constructing via the MODULE$ field fails, try using the constructor instead.
