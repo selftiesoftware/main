@@ -16,16 +16,28 @@ import model._
 import view._
 import com.siigna.util.geom._
 import event.Track
-import collection.mutable.HashMap
 import java.awt.Cursor
 
 /**
- * <p>The Siigna object provides access to various core elements of the software.</p>
+ * <p>
+ *   The Siigna object provides access to various core elements of the software.
+ *   It is designed to be the easy access-point for graphics and system information such as mouse-position,
+ *   paper scale, user-information etc.
+ * </p>
  *
- * <p>It also functions as the first [[com.siigna.app.view.Interface]] connected
- * to the [[com.siigna.app.view.View]].</p>
+ * <p>
+ *  Siigna inherits from [[com.siigna.app.SiignaAttributes]] which defines a number of attributes that can change
+ *  the behaviour of the running program.
+ * </p>
+ *
+ * $siignaAttributes
+ *
+ * <p>It also functions as the first [[com.siigna.app.view.Interface]] connected to the
+ * [[com.siigna.app.view.View]]. Which basically means that Siigna is painting whatever the Siigna object tells
+ * it to paint. And that is [[com.siigna.app.view.event.Track]], the [[com.siigna.app.view.Display]](s) and
+ * the [[com.siigna.module.Module]]s.</p>
  */
-object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes {
+object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
    * The active display, if any.
@@ -103,13 +115,18 @@ object Siigna extends HashMap[String, Any] with Interface with SiignaAttributes 
    * <br />
    * The painting eludes the normal event-based thread communication, since the <code>Controller<code>
    * mechanism runs on it's own thread and we'd like to make sure that the painting happens instantly.
+   *
+   * The drawing of the [[com.siigna.module.Module]]s is synchronized to avoid any unfortunate collisions with
+   * modules ending, module-information being garbage collected and what not.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
     // Paint the tracking - if needed
     Track.paint(graphics, transformation)
 
     // Paint the interface
-    if (interface.isDefined) interface.get.paint(graphics, transformation)
+    synchronized {
+      if (interface.isDefined) interface.get.paint(graphics, transformation)
+    }
 
     // Paint the display or remove it if needed
     if (display.isDefined && display.get.isEnabled)

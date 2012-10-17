@@ -21,12 +21,33 @@ import java.awt.image.{BufferedImage, VolatileImage}
 import com.siigna.app.model.{Drawing, Model}
 
 /**
- * The View. The view is responsible for painting the appropriate
- * content, and transforming the zoom scale and the pan vector.
- * TODO: Cache(?)
+ * <p>
+ *   This is the view part of the
+  *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
+ *   The view is responsible for painting the appropriate content (in this case the [[com.siigna.app.model.Drawing]])
+ *   and transforming the content to the correct zoom scale and pan vector.
+ * </p>
+ *
+ * <h3>Zoom and pan</h3>
+ * <p>
+ *   The zoom is basically how much the user has zoomed in or out of the drawing. And the pan is how much the user
+ *   has moved his perspective in a 2-dimensional space, perpendicular to the [[com.siigna.app.model.Drawing]]
+ *   surface. It goes without saying that moving every single shape in the drawing every time the user moves his
+ *   or her mouse is an incredibly bad idea. Instead we maintain one single pan-vector and a single zoom-scale
+ *   that we can apply on each shape as we draw them.
+ * </p>
+ *
+ * <h3>Transformations</h3>
+ * <p>
+ *   This might seem like an easy thing to do, but the core of the matter is how to do it efficiently. It is pretty
+ *   cumbersome to apply two operations on each shape everytime we need to draw the shapes. This is where
+ *   [[com.siigna.util.geom.TransformationMatrix]] comes in. This matrix is capable of containing
+ *   <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformation<a>. In other words
+ *   we can express every possible N-dimensional transformation in such a matrix. So instead of applying two
+ *   operations we get one... And some other stuff.
+ * </p>
  */
 object View extends Canvas {
-
 
   /**
    * A background image that can be re-used to draw as background on the canvas.
@@ -51,11 +72,13 @@ object View extends Canvas {
   
   /**
    * The frames in the current second.
+   * @todo Use these!
    */
   var fpsCurrent : Double = 0
 
   /**
    * The second the fps is counting in.
+   * @todo Use these!
    */
   var fpsSecond : Double = 0
 
@@ -130,8 +153,6 @@ object View extends Canvas {
   * potentially clearing paint-methods that are in the making. This can
   * create 'black-outs' (also known as double-buffering) which makes us
   * saaaad pandas.
-  *
-  * TODO: Implement fork/join: http://docs.oracle.com/javase/tutorial/essential/concurrency/forkjoin.html
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
@@ -422,6 +443,8 @@ object View extends Canvas {
    *   <li>The zoom level are below 0.00001 or above 50</li>
    * </ol>
    * Also, if the delta is cropped at (+/-)10, to avoid touch-pad bugs with huge deltas etc.
+   *
+   * The zoom is, by the way logarithmic (base 2), since linear zooming gives some very brutal zoom-steps.
    *
    * @param point  The center for the zoom-operation
    * @param delta  The amount of zoomSpeed-units to zoom

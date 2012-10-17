@@ -17,13 +17,20 @@ import java.awt.Dimension
 import com.siigna.util.Implicits._
 
 /**
- * <p>Attributes such as selection distance, anti-aliasing etc. for the Siigna application
- * accessible via the [[com.siigna.app.Siigna]] object.
+ * <p>
+ *   Attributes that can change the behaviour of Siigna such as selection distance, anti-aliasing etc.
+ *   They are accessible via the [[com.siigna.app.Siigna]] object.
  * </p>
- * <p>The class stores a number of pre-set values into a mutable map which can be changed actively
- * while Siigna is running.
+ *
+ * <p>
+ *   The class stores a number of pre-set values into a mutable map which can be changed actively
+ *   while Siigna is running. Remember that tampering with some of the constants might not bring
+ *   the desired effects. So read the documentation. But do not worry about breaking things.
+ *   Siigna is a very sturdy piece of software. Of course :-)
  * </p>
- * <p>Currently the following values are set:
+ *
+ * @define siignaAttributes
+ * <p>Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
  * <dl>
  *  <dt>antiAliasing</dt>
  *    <dd>A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
@@ -49,11 +56,13 @@ import com.siigna.util.Implicits._
  *  <dt>printFormatMax</dt>
  *    <dd>The maximum format when printing, given in mm. Defaults to the height of a standard A4-size: 297.</dd>
  *  <dt>selectionDistance</dt>
- *    <dd>The distance of which single-point selection happens, given in units. Defaults to 5.</dd> ,
+ *    <dd>The distance of which single-point selection happens, given in units. The actual distance changes based on
+ *    the zoom-level and this value of course. Defaults to 5.</dd> ,
  *  <dt>trackDistance</dt>
   *   <dd>Sensitivity of track.</dd>
  *  <dt>trackGuideColor</dt>
-  *   <dd>The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting" a point.</dd>
+  *   <dd>The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting"
+ *        a point. Defaults to #00FFFF in hex.</dd>
  *  <dt>zoomSpeed</dt>
  *    <dd>The speed with which the client zooms, given in percentages. Defaults to 0.5.</dd>
  * </dl>

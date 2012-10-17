@@ -19,7 +19,7 @@ import scala.Some
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
- * This class loader stores all the modules loaded in by this instance of Siigna and caches them.
+ * This class loader loads and caches modules in Siigna.
  */
 object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
@@ -33,7 +33,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
    * @param clazz  The class to cast
-   * @return  A Module (hopefully)
+   * @return  A Module (hopefully), otherwise probably a nasty exception
    */
   protected def classToModule(clazz : Class[_]) = clazz.getField("MODULE$").get(manifest.erasure).asInstanceOf[Module]
 
@@ -130,17 +130,15 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * Loads a module from a jar file
    * @param jar  The jar file to load the entry from
    * @param entry  The entry in the .jar file representing the module
-   * @tparam ModuleType  The Module-type to load - needed for its manifest
    * @return  Some[Module] if the module was found, None otherwise
    * @see http://stackoverflow.com/questions/3039822/how-do-i-call-a-scala-object-method-using-reflection
    */
-  protected def loadModuleFromJar[ModuleType : Manifest](jar : JarFile, entry : JarEntry) : Option[Module] = {
+  protected def loadModuleFromJar(jar : JarFile, entry : JarEntry) : Option[Module] = {
     try {
       val clazz : Class[_] = defineClass(jar, entry)
 
       val module : Option[Module] = try {
-        val field = clazz.getField("MODULE$")
-        Some(field.get(manifest.erasure).asInstanceOf[Module])
+        Some(classToModule(clazz))
       } catch {
         case e : ExceptionInInitializerError => {
           // If constructing via the MODULE$ field fails, try using the constructor instead.

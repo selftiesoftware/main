@@ -21,9 +21,18 @@ import com.siigna.app.Siigna
 
 /**
  * <p>
+ *   This is the controller part of the
+ *   <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
  *   The Controller contains the core application logic in Siigna. Fortunately the only logic in Siigna is to forward
- *   events on to the [[com.siigna.module.Module]]s and forward [[com.siigna.app.model.action.Action]]s from the
- *   [[com.siigna.app.model.Drawing]] and onto the main server and to other clients. Simply, right?
+ *   incoming events on to the [[com.siigna.module.Module]]s and forward [[com.siigna.app.model.action.Action]]s from
+ *   the [[com.siigna.app.model.Drawing]] onto the main server and from there to other clients. Simple, right?
+ * </p>
+ *
+ * <p>
+ *  The Controller is implemented as its own actor, since to separate the view and control-threads. Since
+ *  [[com.siigna.module.Module]]s are designed to be made by third-parties, we can not ensure their quality, so
+ *  we might encounter some unexpected thread blocking. If that happens the modules are screwed but the rest of the
+ *  application carries on. Hurray!
  * </p>
  */
 object Controller extends Actor {
