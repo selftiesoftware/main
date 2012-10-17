@@ -32,10 +32,17 @@ import actors.Future
  * }}}
  * </p>
  *
+ * <p>
+ *   Lastly the ModulePackage can be set to local which means that the protocol for getting the resource changes.
+ *   In other words the <code>toURL</code> method returns a location on the disk instead of a global resource
+ *   available on the www.
+ * </p>
+ *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
  * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.
  * @param path  The path to the resource inside the domain, e. g. ''modules/example.jar''.
+ * @param local  If set to true we treat this resource as local on the current machine, see <code>toURL</code>
  * @throws IOException  If the jarFile could not be downloaded
  */
 final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
@@ -49,8 +56,12 @@ final case class ModulePackage(name : Symbol, domain : String, path : String, lo
   override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 
   /**
-   * Converts this ModulePackage to a URL while appending "''jar:http://''" to the domain, inserting a "''/''"
-   * between the domain and the path and lastly appending "''!/''" to indicate that it is a .jar resource.
+   * <p>
+   *   Converts this ModulePackage to a URL while appending "''jar:http://''" to the domain, inserting a "''/''"
+   *   between the domain and the path and lastly appending "''!/''" to indicate that it is a .jar resource.
+   *   If the <code>local</code> parameter has been set the protocol is set to "''jar:file:''" instead.
+   * </p>
+   *
    * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
    * @return  A URL specifying the location of the resource.
    */

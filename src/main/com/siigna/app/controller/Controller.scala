@@ -47,6 +47,7 @@ object Controller extends Actor {
     // Start RemoteController
     RemoteController.start()
 
+    // Set the base modules to local (TEST)
     ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
 
     def defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)

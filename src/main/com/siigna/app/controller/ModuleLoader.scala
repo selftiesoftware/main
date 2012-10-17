@@ -1,5 +1,3 @@
-package com.siigna.app.controller
-
 /*
 * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
 * to Share — to copy, distribute and transmit the work,
@@ -10,6 +8,8 @@ package com.siigna.app.controller
 * Noncommercial — You may not use this work for commercial purposes.
 * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
 */
+
+package com.siigna.app.controller
 
 import actors.Futures._
 import com.siigna.module.{ModuleInstance, ModulePackage, Module}
@@ -28,17 +28,14 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    */
   var base : ModulePackage = ModulePackage('base, "siigna.com", "applet/base.jar")
 
-  protected val modules = collection.mutable.Map[Symbol, Module]()
+  protected val modules = collection.mutable.HashMap[Symbol, Module]()
 
   /**
-   * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
-   * @param file  The jar file to read the entries from
-   * @param f  The function to apply on the entries
+   * Attempt to cast a class to a [[com.siigna.module.Module]].
+   * @param clazz  The class to cast
+   * @return  A Module (hopefully)
    */
-  protected def opOnJarEntries(file : JarFile, f : JarEntry => Unit) {
-    val entries = file.entries
-    while (entries.hasMoreElements) { f(entries.nextElement) }
-  }
+  protected def classToModule(clazz : Class[_]) = clazz.getField("MODULE$").get(manifest.erasure).asInstanceOf[Module]
 
   /**
    * Fetches the bytes associated with a [[java.util.jar.JarEntry]] in a [[java.util.jar.JarFile]] and
@@ -81,11 +78,11 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
         opOnJarEntries(jar, entry => {
           if (!entry.isDirectory) {
-            loadModuleFromJar(jar, entry)
+            defineClass(jar, entry)
           }
         })
+        Log.success("ModuleLoader: Sucessfully loaded entire module package " + pack)
       }
-      Log.success("ModuleLoader: Sucessfully loaded entire module package " + pack)
     } catch {
       case e : Exception => Log.error("ModuleLoader: Failed to load module pack " + e)
     }
@@ -104,20 +101,27 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     if (modules.contains(entry.className)) {
       modules.apply(entry.className)
     } else {
-      // Failure means that we have to try to fetch it from the jar
-      // Force-load the jar file if it hasn't already been downloaded
-      val jar = entry.pack.jar()
-      var module : Option[Module] = None
+      // Try to fetch it from the class loader with the right name
+      try {
+        classToModule(loadClass(entry.className.name))
+      } catch {
+        case _ : Exception => {
+          // Failure means that we have to try to fetch it from the jar
+          // Force-load the jar file if it hasn't already been downloaded
+          val jar = entry.pack.jar()
+          var module : Option[Module] = None
 
-      opOnJarEntries(jar, zip => {
-        if (!zip.isDirectory && zip.getName.contains(entry.className.name + "$.class")) {
-          module = loadModuleFromJar(jar, zip)
+          opOnJarEntries(jar, zip => {
+            if (!zip.isDirectory && zip.getName.contains(entry.className.name + "$.class")) {
+              module = loadModuleFromJar(jar, zip)
+            }
+          })
+
+          module match {
+            case Some(m) => m
+            case None    => throw new NoSuchElementException("ModuleLoader: Could not find module " + entry + " in package " + entry.pack)
+          }
         }
-      })
-
-      module match {
-        case Some(m) => m
-        case None    => throw new NoSuchElementException("ModuleLoader: Could not find module " + entry + " in package " + entry.pack)
       }
     }
   }
@@ -133,6 +137,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected def loadModuleFromJar[ModuleType : Manifest](jar : JarFile, entry : JarEntry) : Option[Module] = {
     try {
       val clazz : Class[_] = defineClass(jar, entry)
+
       val module : Option[Module] = try {
         val field = clazz.getField("MODULE$")
         val instance = field.get(manifest.erasure).asInstanceOf[Module]
@@ -144,8 +149,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
           try {
             val constructors = clazz.getDeclaredConstructors
             constructors(0).setAccessible(true)
-            Some(constructors(0).newInstance())
-            None
+            Some(constructors(0).newInstance().asInstanceOf[Module])
           } catch {
             case e : Exception => Log.error("ModuleLoader: Module " + entry.toString + " was found but could not be initialized through MODULE$ field or constructor.", e)
             None
@@ -154,6 +158,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
         case e => Log.error("ModuleLoader: Class found, but failed to cast to Module.", e); None
       }
 
+      // Add the module to the cache
       if (module.isDefined) modules + (Symbol(module.get.toString) -> module)
 
       module
@@ -163,6 +168,16 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
         None
       }
     }
+  }
+
+  /**
+   * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
+   * @param file  The jar file to read the entries from
+   * @param f  The function to apply on the entries
+   */
+  protected def opOnJarEntries(file : JarFile, f : JarEntry => Unit) {
+    val entries = file.entries
+    while (entries.hasMoreElements) { f(entries.nextElement) }
   }
 
 }
