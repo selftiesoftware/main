@@ -35,7 +35,7 @@ import com.siigna.app.Siigna
  *  application carries on. Hurray!
  * </p>
  */
-object Controller extends Actor {
+object Controller extends Actor with EventController {
 
   /**
    * <p>

@@ -48,13 +48,18 @@ case class KeyUp  (code : Int, keys : ModifierKeys) extends KeyEvent { val symbo
 case object Key {
   val Alt, alt                        = AWTKey.VK_ALT
   val AltGR, AltGr, altgr             = AWTKey.VK_ALT_GRAPH
-  val ArrowLeft, arrowLeft, arrowleft = AWTKey.VK_LEFT
+  val ArrowDown, arrowDown            = AWTKey.VK_DOWN
+  val ArrowLeft, arrowLeft            = AWTKey.VK_LEFT
+  val ArrowRight, arrowRight          = AWTKey.VK_RIGHT
+  val ArrowUp, arrowUp                = AWTKey.VK_UP
   val BackSpace, Backspace, backspace = AWTKey.VK_BACK_SPACE
   val Control, control                = AWTKey.VK_CONTROL
   val Delete, delete                  = AWTKey.VK_DELETE
   val Enter, enter                    = AWTKey.VK_ENTER
   val Escape, Esc, escape, esc        = AWTKey.VK_ESCAPE
-  val Tabulator, Tab, tab, tabulator  = AWTKey.VK_TAB
+  val Minus, minus, min               = AWTKey.VK_MINUS
+  val Plus, plus                      = AWTKey.VK_PLUS
   val Shift, shift                    = AWTKey.VK_SHIFT
   val Space, space                    = AWTKey.VK_SPACE
+  val Tabulator, Tab, tab, tabulator  = AWTKey.VK_TAB
 }

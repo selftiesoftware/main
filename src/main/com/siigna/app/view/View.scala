@@ -83,31 +83,15 @@ object View extends Canvas {
   var fpsSecond : Double = 0
 
   /**
-   * Describes how far the view has been panned. This vector is given in
-   * physical coordinates, relative from the top left point of the screen.
-   */
-  var pan           = Vector2D(0, 0)
-
-  /**
-   * Describes the current mouse-location when panning.
-   */
-  var panPointMouse =  Vector2D(0, 0)
-
-  /**
-   * Describes the old panning-point, so the software can tell how much
-   * the current panning has moved relative to the old.
-   */
-  var panPointOld   = Vector2D(0, 0)
-
-  /**
    * The color of the paper (defaults to white)
    */
   var paperColor = 1.00f
 
   /**
-   * The zoom scale. Starts out in 1:1.
+   * The transformation of the user (panning and zooming), Starts out as a identity matrix since no
+   * transformations has been done.
    */
-  var zoom : Double = 1
+  private var transformation = TransformationMatrix()
 
   /**
    * Creates a Volatile Image with the width and height of the current screen.
@@ -232,10 +216,10 @@ object View extends Canvas {
 
   /**
    * Pans the view.
+   * @param delta  How much the view should pan.
    */
-  def pan(endPoint : Vector2D) {
-    if (Siigna.navigation) pan = panPointOld + endPoint - panPointMouse
-    render()
+  def pan(delta : Vector2D) {
+    if (Siigna.navigation) transformation.translate(delta)
   }
 
   /**
@@ -280,12 +264,10 @@ object View extends Canvas {
         // Draw the background
         g.g.drawImage(cachedBackgroundImage.get, 0, 0, null)
 
-        //draw the pape as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-        val mT = 8 * zoom.toInt
-        val mS = 7 * zoom.toInt
-        val mB = 6 * zoom.toInt
+        // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
         g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-        g.g.clearRect(boundary.xMin.toInt - mS, boundary.yMin.toInt - mB, boundary.width.toInt + 2 * mS, boundary.height.toInt + 2 *mT)
+        g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt,
+                      boundary.width.toInt, boundary.height.toInt)
 
         // Draw a white rectangle inside the boundary of the current model.
         //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
@@ -299,7 +281,7 @@ object View extends Canvas {
         // Draw model
         if (Drawing.size > 0) try {
           val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(virtual.inverse)
-          Drawing(mbr).map(_._2 transform virtual) foreach(g draw) // Draw the entire Drawing
+          Drawing(mbr).map(_._2 transform transformation) foreach(g draw) // Draw the entire Drawing
         } catch {
           case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
           case e => Log.error("View: Unable to draw Drawing: "+e)
@@ -361,20 +343,10 @@ object View extends Canvas {
   def screen = Rectangle2D(0, 0, getSize.width, getSize.height)
 
   /**
-   * Initializes a pan in order to save the start-vector of the current pan
-   * and the vector for the <code>pan</code> value.
-   */
-  def startPan(point : Vector2D) {
-    panPointOld   = pan
-    panPointMouse = point
-  }
-
-  /**
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view, translated to a given point.
    */
-  def transformationTo(point : Vector2D) : TransformationMatrix =
-    TransformationMatrix(View.pan + point, View.zoom).flipY
+  def transformationTo(point : Vector2D) : TransformationMatrix = transformation.translate(point)
 
   /**
    * Short explanation: Redirects the update-method to <code>paint</code>.
@@ -415,26 +387,6 @@ object View extends Canvas {
   override def update(g : AWTGraphics) { paint(g) }
 
   /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view.
-   */
-  def virtual : TransformationMatrix = TransformationMatrix(View.pan, View.zoom).flipY
-
-  /**
-   * Returns a TransformationMatrix with a translation and scale that fits the
-   * given rectangle.
-   */
-  def virtualTransformationTo(rectangle : Rectangle2D) = {
-    // Calculates the difference between the size of the screen and the size of the
-    // boundary. This is then multiplied on the zoom level to give the exact
-    // scale for the TransformationMatrix.
-    val screenFactor = View.screen.width / Drawing.boundary.transform(virtual).width
-    val scaleFactor  = screenFactor * View.zoom
-
-    TransformationMatrix(View.center, scaleFactor).flipY
-  }
-
-  /**
    * Carries out a zoom action by zooming with the given delta and then panning
    * the view relative to the current zoom-factor.
    * The zoom-function are disabled if:
@@ -452,15 +404,12 @@ object View extends Canvas {
    */
   def zoom(point : Vector2D, delta : Double) {
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
-    if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
+    val zoomLevel = transformation.scaleFactor
+    if (Siigna.navigation && (zoomLevel < 50 || zoomDelta > 0)) {
       val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
-      if ((zoom > 0.000001 || zoomDelta < 0)) {
-          zoom *= zoomFactor
+      if ((zoomLevel > 0.000001 || zoomDelta < 0)) {
+          transformation = transformation.scale(zoomFactor, point)
         }
-      pan = (pan - point) * zoomFactor + point
-
-      // Render a new model.
-      render()
     }
   }
 
