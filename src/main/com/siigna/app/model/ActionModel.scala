@@ -64,9 +64,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
         }
       }
 
-      // Render the view
-      View.render()
-
       // Send it to the server
       if (remote) Controller ! action
 
@@ -112,9 +109,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
         // Execute the event and add it to the executed list
         model = action.execute(model)
         model = new Model(model.shapes, model.executed.+:(action), undone)
-
-        // Render the view
-        View.render()
 
         // Send to server
         Controller ! action
@@ -165,9 +159,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
       // Send the action to server with the undone flag set to true!
       if (remote) Controller ! (action, true)
-
-      // Render the view
-      View.render()
 
       Log.success("ActionModel: Action successfully undone: " + action)
     } catch {

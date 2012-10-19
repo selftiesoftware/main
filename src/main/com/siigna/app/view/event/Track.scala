@@ -36,7 +36,7 @@ object Track extends EventTrack {
   var isTracking = false
   
   // The up-to-date mouse position
-  protected var mousePosition = Siigna.mousePosition   
+  protected var mousePosition = Siigna.mousePosition
     
   // Get the track distance
   val trackDistance = Siigna.double("trackDistance").getOrElse(3.0)

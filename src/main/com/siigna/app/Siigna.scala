@@ -50,13 +50,6 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   private var interface : Option[ModuleInterface] = None
 
   /**
-   * The current position of the mouse. This does not take snap and track into account. Use
-   * [[com.siigna.module.Module.mousePosition]] if you are searching for the mouse coordinate
-   * used by the given Module.
-   */
-  var mousePosition = Vector2D(0, 0)
-
-  /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
    * [[com.siigna.app.model.Drawing]] remains where it is while the modules still receives the events and
    * are still able to react.
@@ -107,6 +100,15 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * @return True if the connection has been established correctly, false otherwise.
    */
   def isOnline = Controller.isOnline
+
+  /**
+   * The current position of the mouse. This does not take snap and track into account. Use
+   * [[com.siigna.module.Module.mousePosition]] if you are searching for the mouse coordinate
+   * used by the given Module.
+   */
+  def mousePosition = if (View.getMousePosition != null) {
+    Vector2D(View.getMousePosition).transform(View.drawingTransformation.inverse)
+  } else Vector2D(Double.NaN, Double.NaN)
 
   /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the

@@ -19,34 +19,32 @@ import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
-import java.awt.{BorderLayout}
+import java.awt.{Canvas, Graphics, BorderLayout}
 import model.Drawing
 import model.server.User
 import view.View
 
 /**
- * The main class of Siigna.
- * The applet is first and foremost responsible for setting up event listeners
- * and painting. The painting part is being handled by the <code>View</code> trait.
- * The events are forwarded to the <code>Controller</code> and the painting is primarily
- * done by painting the <code>DOM (Document Object Model)</code> and then allowing
- * the modules to paint additional graphics. The modules do not have direct access to
- * the view, but the <code>Interface</code> is designed to utilize access to it.
+ * The entry-point of Siigna.
+ *
+ * The applet is first and foremost responsible for setting up the environment for Siigna.
+ * That means placing the view in the context of the applet so it's actually run, telling the
+ * controller to setup event listeners and get the view to start painting. The events are
+ * forwarded to the [[com.siigna.app.controller.Controller]]. The actual painting part is being
+ * handled by the [[com.siigna.app.view.View]] object by painting the [[com.siigna.app.model.Drawing]]
+ * and then allowing the modules to paint additional graphics.
  */
 class SiignaApplet extends Applet {
 
-  /**
-   * Closes down relevant actors and destroys the applet.
-   */
+  // A boolean value indicating whether to exit the paint-loop
+  private var shouldExit = false
+
   override def destroy() {
+    // Exit the paint-loop
+    shouldExit = true
+
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
-
-    // Stop the applet
-    super.destroy()
-
-    // Stop the system
-    System.exit(0)
   }
 
   /**
@@ -54,8 +52,7 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
-    Siigna display("loading modules..please wait..for us to get better upload from the server. ")
-    // Init parent
+    // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
     // Start by reading the applet parameters
@@ -86,19 +83,29 @@ class SiignaApplet extends Applet {
     // Add the view to the applet
     add(View, BorderLayout.CENTER)
 
+    // Position the applet
+    View.setLocation(0, 0)
+
     // Misc initialization
-    setVisible(true); setFocusable(true); requestFocus(); validate()
-
-
+    setVisible(true); setFocusable(true); requestFocus()
 
     // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
 
-    // Start the controller - ends up with calling act() method in Controller.
+    Controller.setupEventListenersOn(View)
+
+    // Start the controller
     Controller.start()
+
+    View.setIgnoreRepaint(true)
+
+    View.requestFocus()
+
+    // Paint the view
+    new Thread() {
+      override def run() { paintLoop() }
+    }.start()
   }
-
-
 
   /**
    * Overrides resize to force the underlying View to resize.
@@ -108,7 +115,45 @@ class SiignaApplet extends Applet {
   override def resize(width : Int, height : Int) {
     super.resize(width, height)
     View.resize(width, height)
-    View.render()
+  }
+
+  /**
+   * This is the actual paint-loop for the applet. The loop stops when <code>shouldExit</code> is set to true.
+   *
+   * The code is stolen from Java's api-entry on
+   * <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/image/BufferStrategy.html">BufferStrategy</a>.
+   */
+  private def paintLoop() {
+    // Create a double buffer strategy
+    View.createBufferStrategy(2)
+
+    // Get the strategy
+    val strategy = View.getBufferStrategy
+
+    println(strategy)
+
+    // Run, run, run
+    while(!shouldExit) {
+      // Render a single frame
+      if (strategy != null) do {
+
+        // The following loop ensures that the contents of the drawing buffer
+        // are consistent in case the underlying surface was recreated
+        do {
+          // Fetch the buffer graphics
+          val graphics = strategy.getDrawGraphics
+
+          // Paint the view
+          View.paint(graphics)
+
+          // Dispose of the graphics
+          graphics.dispose()
+        } while (strategy.contentsRestored())
+
+        // Make the next buffer available
+        strategy.show()
+      } while (strategy.contentsLost())
+    }
   }
 
 }
