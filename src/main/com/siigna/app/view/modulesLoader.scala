@@ -41,7 +41,7 @@ object ModulesLoader {
 
   def paint (g : Graphics, t : TransformationMatrix)= {
 
-    var m = Siigna.mousePosition.transform(t)
+    var m = View.mousePosition.transform(t)
 
     def highlight : Boolean = {
       if(m.x < 30 & m.y < 30) true

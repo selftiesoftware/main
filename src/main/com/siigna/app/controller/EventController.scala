@@ -160,23 +160,23 @@ trait EventController {
     def dispatch(e : Option[Event]) { e foreach Controller.! }
 
     // Add event listeners
-    View.addKeyListener(new KeyListener {
+    canvas.addKeyListener(new KeyListener {
       override def keyPressed (e : AWTKeyEvent) { dispatch(parseKeyEvent(e, KeyDown)) }
       override def keyReleased(e : AWTKeyEvent) { dispatch(parseKeyEvent(e, KeyUp))   }
       override def keyTyped   (e : AWTKeyEvent) { }
     })
-    View.addMouseListener(new MouseListener {
+    canvas.addMouseListener(new MouseListener {
       override def mouseClicked (e : AWTMouseEvent) { }
       override def mouseEntered (e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseEnter)) }
       override def mouseExited  (e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseExit)) }
       override def mousePressed (e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseDown)) }
       override def mouseReleased(e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseUp)) }
     })
-    View.addMouseMotionListener(new MouseMotionListener {
+    canvas.addMouseMotionListener(new MouseMotionListener {
       override def mouseDragged(e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseDrag)) }
       override def mouseMoved  (e : AWTMouseEvent) { dispatch(parseMouseEvent(e, MouseMove)) }
     })
-    View.addMouseWheelListener(new MouseWheelListener {
+    canvas.addMouseWheelListener(new MouseWheelListener {
       override def mouseWheelMoved(e : MouseWheelEvent) {
         // getPreciseWheelRotation is only available in 1.7
         val scroll = try {e.getPreciseWheelRotation} catch { case _ => e.getUnitsToScroll}

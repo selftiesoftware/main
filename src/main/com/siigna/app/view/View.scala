@@ -15,10 +15,11 @@ import com.siigna.util.Implicits._
 import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
-import java.awt.{Image, Canvas, Color, Graphics2D, Graphics => AWTGraphics, RenderingHints}
+import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.shape.{Shape, TextShape, PolylineShape}
 import java.awt.image.{BufferedImage, VolatileImage}
 import com.siigna.app.model.{Drawing, Model}
+import scala.Some
 
 /**
  * <p>
@@ -63,12 +64,17 @@ import com.siigna.app.model.{Drawing, Model}
  *  latter can be used for keeping something on a fixed position, regardless of the zoom.
  * </p>
  */
-object View extends Canvas {
+object View {
 
   /**
    * A background image that can be re-used to draw as background on the canvas.
    */
   private var cachedBackground : BufferedImage = null
+
+  /**
+   * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
+   */
+  private var canvas : Option[Canvas] = None
 
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
@@ -108,10 +114,10 @@ object View extends Canvas {
 
     //
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
-    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, screen.width),
-                                   confine(offScreenBoundary.topLeft.y, 0, getSize.height))
-    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, screen.width),
-                                   confine(offScreenBoundary.bottomRight.y, 0, getSize.height))
+    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, width),
+                                   confine(offScreenBoundary.topLeft.y, 0, height))
+    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, width),
+                                   confine(offScreenBoundary.bottomRight.y, 0, height))
     Rectangle2D(topLeft, bottomRight)
   }
 
@@ -136,6 +142,27 @@ object View extends Canvas {
    */
   def drawingTransformation = transformation
 
+  /**
+   * Finds the mouse position for the mouse.
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the canvas.
+   */
+  def mousePosition =
+    if (canvas.isDefined && canvas.get.getMousePosition != null)
+      Vector2D(canvas.get.getMousePosition).transform(deviceTransformation)
+    else Vector2D(0, 0)
+
+  def height = if (canvas.isDefined) canvas.get.getHeight else 0
+
+  /**
+   * Returns the canvas of the view.
+   * @return  A positive integer
+   */
+  def width = if (canvas.isDefined) canvas.get.getWidth else 0
+
+  protected[app] def setCanvas(canvas : Canvas) {
+    this.canvas = Some(canvas)
+  }
+
  /**
   * Draws the [[com.siigna.app.model.Model]] and the [[com.siigna.module.Module]]s.<br />
   *
@@ -153,74 +180,72 @@ object View extends Canvas {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
-  override def paint(screenGraphics : AWTGraphics) {
-    if (getSize.getHeight > 0 && getSize.getWidth > 0) {
-      // Create a new transformation-matrix
-      val transformation : TransformationMatrix = drawingTransformation
+  def paint(screenGraphics : AWTGraphics) {
+    // Create a new transformation-matrix
+    val transformation : TransformationMatrix = drawingTransformation
 
-      // Retrieve graphics objects
-      val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
-      val graphics = new Graphics(graphics2D)
+    // Retrieve graphics objects
+    val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
+    val graphics = new Graphics(graphics2D)
 
-      // Setup anti-aliasing
-      val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
-      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
-      graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
+    // Setup anti-aliasing
+    val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
+    val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+    graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
-      // Render and draw the background
-      graphics2D drawImage(renderBackground, 0, 0, null)
+    // Render and draw the background
+    graphics2D drawImage(renderBackground, 0, 0, null)
 
-      // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-      graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt,
-                    boundary.width.toInt, boundary.height.toInt)
+    // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
+    graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
+    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt,
+                  boundary.width.toInt, boundary.height.toInt)
 
-      // Draw a white rectangle inside the boundary of the current model.
-      //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
-      //g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+    // Draw a white rectangle inside the boundary of the current model.
+    //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
+    //g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
 
-      // Draw model
-      if (Drawing.size > 0) try {
-        val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-        Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-      } catch {
-        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-        case e => Log.error("View: Unable to draw Drawing: "+e)
-      }
+    // Draw model
+    if (Drawing.size > 0) try {
+      val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+      Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+    } catch {
+      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      case e => Log.error("View: Unable to draw Drawing: "+e)
+    }
 
-      // Draw the boundary shape
-      graphics draw boundaryShape(boundary)
+    // Draw the boundary shape
+    graphics draw boundaryShape(boundary)
 
-      // Fetch and draw the dynamic layer.
-      // TODO: Cache this
-      try {
-        val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
+    // Fetch and draw the dynamic layer.
+    // TODO: Cache this
+    try {
+      val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
-        // Draw selection
-        Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
-          graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
-        }))
+      // Draw selection
+      Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
+        graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
+      }))
 
-        // Draw vertices
-        Drawing.selection.foreach(_.foreach(i => {
-          Drawing(i._1).getVertices(i._2).foreach(p => {
-            graphics.draw(transformation.transform(p), color)
-          })
-        }))
-      } catch {
-        case e => Log.error("View: Unable to draw the dynamic Model: ", e)
-      }
+      // Draw vertices
+      Drawing.selection.foreach(_.foreach(i => {
+        Drawing(i._1).getVertices(i._2).foreach(p => {
+          graphics.draw(transformation.transform(p), color)
+        })
+      }))
+    } catch {
+      case e => Log.error("View: Unable to draw the dynamic Model: ", e)
+    }
 
-      // Paint the module-loading icon in the top left corner
-      ModulesLoader.paint(graphics,transformation)
+    // Paint the module-loading icon in the top left corner
+    ModulesLoader.paint(graphics,transformation)
 
-      // Paint the modules, displays and filters accessible by the interfaces.
-      try {
-        Siigna.paint(graphics, transformation)
-      } catch {
-        case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
-        case e => Log.error("View: Unknown error while painting the modules.", e)
-      }
+    // Paint the modules, displays and filters accessible by the interfaces.
+    try {
+      Siigna.paint(graphics, transformation)
+    } catch {
+      case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
+      case e => Log.error("View: Unknown error while painting the modules.", e)
     }
   }
 
@@ -255,25 +280,15 @@ object View extends Canvas {
   }
 
   /**
-   * Resizes the view to the given boundary.
-   */
-  override def resize(width : Int, height : Int) {
-    // Pan the view if the pan isn't set
-    if (transformation.getTranslate == Vector2D(0, 0)) {
-      pan(screen.center)
-    }
-  }
-
-  /**
    * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
    * local variable. If the renderBackground method is called again, we simply return the cached copy
    * unless the dimensions of the view has changed, in which case we need to re-render it.
    */
   def renderBackground : BufferedImage = {
-    if (cachedBackground == null || cachedBackground.getHeight != getHeight
-                                 || cachedBackground.getWidth  != getWidth) {
+    if (cachedBackground == null || cachedBackground.getHeight != height
+                                 || cachedBackground.getWidth  != width) {
       // Create image
-      val image = new BufferedImage(getSize.width, getSize.height, BufferedImage.TYPE_4BYTE_ABGR)
+      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics
       val size = Siigna.int("backgroundTileSize").getOrElse(12)
       var x = 0
@@ -281,13 +296,13 @@ object View extends Canvas {
 
       // Clear background
       g setColor Siigna.color("colorBackgroundDark").getOrElse("#DADADA".color)
-      g fillRect (0, 0, getSize.width, getSize.height)
+      g fillRect (0, 0, width, height)
       g setColor Siigna.color("colorBackgroundLight").getOrElse("E9E9E9".color)
 
       // Draw a chess-board pattern
       var evenRow = false
-      while (x < getSize.width) {
-        while (y < getSize.height) {
+      while (x < width) {
+        while (y < height) {
           g.fillRect(x, y, size, size)
           y += size << 1
         }
@@ -300,10 +315,14 @@ object View extends Canvas {
     cachedBackground
   }
 
+  def setCursor(cursor : Cursor) {
+    if (canvas.isDefined) canvas.get.setCursor(cursor)
+  }
+
   /**
-   * The screen as a rectangle, given in physical coordinates.
+   * The screen as a rectangle, given in device coordinates.
    */
-  def screen = Rectangle2D(0, 0, getSize.width, getSize.height)
+  def screen = Rectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom
@@ -346,7 +365,7 @@ object View extends Canvas {
    * to avoid double-buffering.
    * </p>
    */
-  override def update(g : AWTGraphics) { paint(g) }
+  def update(g : AWTGraphics) { paint(g) }
 
   /**
    * Returns the current zoom-level of the View.

@@ -36,6 +36,9 @@ import view.View
  */
 class SiignaApplet extends Applet {
 
+  // The canvas on which we can paint
+  private var canvas : Canvas = null
+
   // A boolean value indicating whether to exit the paint-loop
   private var shouldExit = false
 
@@ -80,11 +83,13 @@ class SiignaApplet extends Applet {
     // Set the layout
     setLayout(new BorderLayout())
 
+    canvas = new Canvas()
+
     // Add the view to the applet
-    add(View, BorderLayout.CENTER)
+    add(canvas, BorderLayout.CENTER)
 
     // Position the applet
-    View.setLocation(0, 0)
+    canvas.setLocation(0, 0)
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
@@ -92,14 +97,18 @@ class SiignaApplet extends Applet {
     // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
 
-    Controller.setupEventListenersOn(View)
+    Controller.setupEventListenersOn(canvas)
 
     // Start the controller
     Controller.start()
 
-    View.setIgnoreRepaint(true)
+    canvas.setIgnoreRepaint(true)
 
-    View.requestFocus()
+    canvas.requestFocus()
+
+    // Set the canvas in the view
+    View.setCanvas(canvas)
+    canvas.setSize(getSize)
 
     // Paint the view
     new Thread() {
@@ -114,7 +123,8 @@ class SiignaApplet extends Applet {
    */
   override def resize(width : Int, height : Int) {
     super.resize(width, height)
-    View.resize(width, height)
+    if (canvas != null)
+      canvas.setSize(width, height)
   }
 
   /**
@@ -125,12 +135,10 @@ class SiignaApplet extends Applet {
    */
   private def paintLoop() {
     // Create a double buffer strategy
-    View.createBufferStrategy(2)
+    canvas.createBufferStrategy(2)
 
     // Get the strategy
-    val strategy = View.getBufferStrategy
-
-    println(strategy)
+    val strategy = canvas.getBufferStrategy
 
     // Run, run, run
     while(!shouldExit) {

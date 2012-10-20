@@ -12,7 +12,7 @@
 package com.siigna.app.view.event
 
 import com.siigna.app.model.shape._
-import com.siigna.app.view.Graphics
+import com.siigna.app.view.{View, Graphics}
 import com.siigna.util.geom.{Line2D, Vector2D, TransformationMatrix}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.Drawing
@@ -36,7 +36,7 @@ object Track extends EventTrack {
   var isTracking = false
   
   // The up-to-date mouse position
-  protected var mousePosition = Siigna.mousePosition
+  protected var mousePosition = View.mousePosition
     
   // Get the track distance
   val trackDistance = Siigna.double("trackDistance").getOrElse(3.0)

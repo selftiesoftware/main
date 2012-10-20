@@ -102,9 +102,6 @@ object Controller extends Actor with EventController {
         // Unknown
         case e => Log.warning("Controller: Received unknown input: " + e)
       }
-
-      // Draw the view
-      View.repaint()
     }
   }
 

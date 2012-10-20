@@ -102,15 +102,6 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def isOnline = Controller.isOnline
 
   /**
-   * The current position of the mouse. This does not take snap and track into account. Use
-   * [[com.siigna.module.Module.mousePosition]] if you are searching for the mouse coordinate
-   * used by the given Module.
-   */
-  def mousePosition = if (View.getMousePosition != null) {
-    Vector2D(View.getMousePosition).transform(View.drawingTransformation.inverse)
-  } else Vector2D(Double.NaN, Double.NaN)
-
-  /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
    * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
    * needs to use/reverse some of the transformations that already have been applied to the view.
