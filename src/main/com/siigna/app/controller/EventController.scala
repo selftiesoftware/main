@@ -34,11 +34,6 @@ import com.siigna.util.logging.Log
 trait EventController {
 
   /**
-   * Describes the current mouse-location when panning.
-   */
-  private var previousMousePosition = Vector2D(0, 0)
-
-  /**
    * Parses key events by filtering modifier keys (shift, alt, control etc.) and converting them to a
    * format Siigna can understand.
    * @param e  The AWT event to parse
@@ -55,7 +50,9 @@ trait EventController {
 
     // If the key is numeric then retrieve the Char value, otherwise get the int code.
     // Numeric keys aren't interpreted as digits if the int code is used (silly!)
-    val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getKeyCode
+    val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getExtendedKeyCode
+
+    println(e.getKeyCode, e.getExtendedKeyCode)
 
     // Tests true if shift-, control- or alt key is pressed
     val isModifier = (code == 16 || code == 17 || code == 18)
@@ -64,19 +61,18 @@ trait EventController {
     val event = if (isModifier) {
       constructor(getCorrectCase(code), keys)
 
-      // If it doesn't check if a key is being hid by
+      // If it doesn't, check if a key is being hid away by
       // a modifier key and return the key it that's the case
     } else  {
-      val array  =
-        if      (e.isControlDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
-        else if (e.isAltDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
-        else Array[Char]()
-      if (!array.isEmpty) { // If there are elements in the character-array pass them on
-        constructor(getCorrectCase(array(0)), keys)
-      } else { // Otherwise we accept the original char for the event
-        constructor(getCorrectCase(code), keys)
-      }
+      val result : Option[Int] =
+        if      (e.isControlDown && !isModifier) Some(AWTKeyEvent.getKeyText(code).charAt(0))
+        else if (e.isAltDown && !isModifier) Some(AWTKeyEvent.getKeyText(code).charAt(0))
+        else None
+
+      constructor(getCorrectCase(result.getOrElse(code)), keys)
     }
+
+    println(event, code)
 
     event match {
       case KeyDown(Key.Plus, ModifierKeys.Control) => View.zoom(View.center, -5); None // Zoom in
@@ -102,8 +98,8 @@ trait EventController {
     val point = Vector2D(e getX, e getY).transform(View.drawingTransformation)
 
     // Retrieves and updates the previous point
-    val delta = point - previousMousePosition
-    previousMousePosition = point
+    val delta = point - View.mousePosition
+    View.setMousePosition(point)
 
     // Finds out which buttons are pressed
     val mod = e.getModifiersEx
@@ -133,13 +129,14 @@ trait EventController {
 
     // Pan (using middle button) and zoom (using wheel) or otherwise return the optional event
     event match {
-      case MouseWheel (_, _, _, delta)          => {
-        if (Siigna.navigation) { View.zoom(point, delta); None }
-        else Some(MouseWheel(point, button, keys, delta))
+      case MouseWheel (_, _, _, d)          => {
+        if (Siigna.navigation) { View.zoom(point, d); None }
+        else Some(MouseWheel(point, button, keys, d))
       }
-      case MouseDown  (_, MouseButtonMiddle, _) => None
-      case MouseDrag  (_, MouseButtonMiddle, _) => View.pan(delta); None
-      case MouseUp    (_, MouseButtonMiddle, _) => View.pan(delta); None
+      case MouseDown  (_, MouseButtonMiddle, _)    => None
+      case MouseDrag  (_, MouseButtonMiddle, _)    => View.pan(delta); None
+      case MouseMove  (_, _, ModifierKeys.Control) => View.pan(delta); None
+      case MouseUp    (_, MouseButtonMiddle, _)    => View.pan(delta); None
       case MouseEnter (_, _, _) => Some(MouseEnter(point, button, keys))
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
       case MouseDown  (_, _, _) => Some(MouseDown(point, button, keys))

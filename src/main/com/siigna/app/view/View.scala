@@ -16,9 +16,9 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
-import com.siigna.app.model.shape.{Shape, TextShape, PolylineShape}
-import java.awt.image.{BufferedImage, VolatileImage}
-import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.shape.{Shape, PolylineShape}
+import java.awt.image.BufferedImage
+import com.siigna.app.model.Drawing
 import scala.Some
 
 /**
@@ -40,12 +40,12 @@ import scala.Some
  *
  * <h3>Transformations</h3>
  * <p>
- *   This might seem like an easy thing to do, but the core of the matter is how to do it efficiently. It is pretty
- *   cumbersome to apply two operations on each [[com.siigna.app.model.shape.Shape]] everytime we need to draw the
- *   shapes. This is where [[com.siigna.util.geom.TransformationMatrix]] comes in. This matrix is capable of containing
- *   <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformation<a>. In other words
- *   we can express every possible N-dimensional transformation in such a matrix. So instead of applying two
- *   operations we get one... And some other stuff.
+ *   This might seem like an easy thing to do, but the core of the matter is to do it efficiently. It is pretty
+ *   cumbersome to apply two operations (zoom and pan) on each [[com.siigna.app.model.shape.Shape]] every time we
+ *   need to draw the shapes. This is where [[com.siigna.util.geom.TransformationMatrix]] comes in. This matrix is
+ *   capable of containing <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformations<a>.
+ *   In other words we can express every possible N-dimensional transformation in such a matrix. So instead of
+ *   applying two operations we get one... And some other stuff.
  * </p>
  *
  * <h3>Device and Drawing coordinates</h3>
@@ -65,6 +65,9 @@ import scala.Some
  * </p>
  */
 object View {
+
+  // The most recent mouse position
+  private var _mousePosition = Vector2D(0, 0)
 
   /**
    * A background image that can be re-used to draw as background on the canvas.
@@ -99,10 +102,14 @@ object View {
   var paperColor = 1.00f
 
   /**
-   * The transformation of the user (panning and zooming), Starts out as a identity matrix since no
-   * transformations has been done.
+   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane.
    */
-  private var transformation = TransformationMatrix(center, 1).flipY
+  var pan : Vector2D = Vector2D(0, 0)
+
+  /**
+   * The zoom-level of the View.
+   */
+  var zoom : Double = 1
 
   /**
    * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
@@ -133,35 +140,26 @@ object View {
    * drawing-coordinates <i>to</i> device-coordinates.
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
-  def deviceTransformation = transformation.inverse
+  def deviceTransformation = drawingTransformation.inverse
 
   /**
    * The drawing [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
    * device-coordinates <i>to</i> drawing-coordinates.
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
-  def drawingTransformation = transformation
+  def drawingTransformation = TransformationMatrix(pan, zoom).flipY
 
   /**
    * Finds the mouse position for the mouse.
    * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the canvas.
    */
-  def mousePosition =
-    if (canvas.isDefined && canvas.get.getMousePosition != null)
-      Vector2D(canvas.get.getMousePosition).transform(deviceTransformation)
-    else Vector2D(0, 0)
-
-  def height = if (canvas.isDefined) canvas.get.getHeight else 0
+  def mousePosition = _mousePosition
 
   /**
-   * Returns the canvas of the view.
+   * Returns the height of the view.
    * @return  A positive integer
    */
-  def width = if (canvas.isDefined) canvas.get.getWidth else 0
-
-  protected[app] def setCanvas(canvas : Canvas) {
-    this.canvas = Some(canvas)
-  }
+  def height = if (canvas.isDefined) canvas.get.getHeight else 0
 
  /**
   * Draws the [[com.siigna.app.model.Model]] and the [[com.siigna.module.Module]]s.<br />
@@ -250,17 +248,11 @@ object View {
   }
 
   /**
-   * Returns the pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane.
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing the pan of the view
-   */
-  def pan = transformation.getTranslate
-
-  /**
    * Pans the view by the given delta.
    * @param delta  How much the view should pan.
    */
   def pan(delta : Vector2D) {
-    if (Siigna.navigation) transformation = transformation.translate(delta)
+    if (Siigna.navigation) pan = pan + delta
   }
 
   /**
@@ -268,7 +260,7 @@ object View {
    * @param delta  How much the x-axis of the view should pan.
    */
   def panX(delta : Double) {
-    if (Siigna.navigation) transformation = transformation.translateX(delta)
+    if (Siigna.navigation) pan = pan.copy(x = pan.x + delta)
   }
 
   /**
@@ -276,7 +268,7 @@ object View {
    * @param delta  How much the y-axis of the view should pan.
    */
   def panY(delta : Double) {
-    if (Siigna.navigation) transformation = transformation.translateX(delta)
+    if (Siigna.navigation) pan = pan.copy(y = pan.y + delta)
   }
 
   /**
@@ -315,8 +307,44 @@ object View {
     cachedBackground
   }
 
+  /**
+   * Resizes the view to the given boundary.
+   */
+  def resize(width : Int, height : Int) {
+    if (canvas.isDefined) {
+      // Resize the canvas
+      canvas.get.setSize(width, height)
+
+      // Pan the view if the pan isn't set
+      if (View.pan == Vector2D(0, 0)) {
+        View.pan(View.screen.center)
+      }
+    }
+  }
+
+  /**
+   * Sets the underlying canvas for setting cursors, size etc.
+   * @param canvas  The underlying canvas of the View object.
+   */
+  protected[app] def setCanvas(canvas : Canvas) {
+    this.canvas = Some(canvas)
+    pan = Vector2D(canvas.getWidth / 2, canvas.getHeight / 2)
+  }
+
+  /**
+   * Sets the cursor for the view.
+   * @param cursor  The new cursor
+   */
   def setCursor(cursor : Cursor) {
     if (canvas.isDefined) canvas.get.setCursor(cursor)
+  }
+
+  /**
+   * Sets the mouse position of the view. Only accessible by the controller package.
+   * @param v  The position of the mouse.
+   */
+  protected[app] def setMousePosition(v : Vector2D) {
+    _mousePosition = v
   }
 
   /**
@@ -328,50 +356,13 @@ object View {
    * Returns the TransformationMatrix for the current pan distance and zoom
    * level of the view, translated to a given point.
    */
-  def transformationTo(point : Vector2D) : TransformationMatrix = transformation.translate(point)
+  def transformationTo(point : Vector2D) : TransformationMatrix = drawingTransformation.translate(point)
 
   /**
-   * Short explanation: Redirects the update-method to <code>paint</code>.
-   *
-   * <p><b>Longer explanation</b>:
-   * AWT draws in a way that is logical for larger software but rather
-   * illogical for smaller ones. When the software needs to draw on a
-   * panel it calls the <code>repaint</code>-function, which then dispatches
-   * the request on to <code>update</code>. This function waits until the
-   * program has the capacity for server and then calls <code>paint</code> to
-   * do the dirty-work.
-   * </p>
-   *
-   * <p><b>Further explanation:</b>
-   * The reason it's great for large application is that they can end up in
-   * steal resources, or situations where you need to draw on layers
-   * (which probably is the case in most of the software working with AWT - or
-   * Swing), where it's handy to wait until all changes on a
-   * layer has been performed before server the whole thing all over. But
-   * for a program such as Siigna where the main task is to actually draw a
-   * drawing and modules, we don't need to put the task in line more than we need
-   * to just get it done. Furthermore this jumping back and forth from
-   * repaint-update-paint can be yet another source of double-buffering, since
-   * <code>update</code> can cause irregular calls to <code>paint</code>
-   * which then can end up in a situation where the former paint-job is overridden
-   * and thus a black screen occur (see above). And that makes us saaad pandas.
-   * However: Keep in mind that the <code>update</code> function is there for
-   * a reason. Don't just call paint and expect the whole thing to sort
-   * itself out...
-   * </p>
-   *
-   * <p><b>Short explanation:</b>
-   * We override the update functionality and dispatches it directly to <code>paint</code>, in order
-   * to avoid double-buffering.
-   * </p>
+   * Returns the width of the view.
+   * @return  A positive integer
    */
-  def update(g : AWTGraphics) { paint(g) }
-
-  /**
-   * Returns the current zoom-level of the View.
-   * @return  A Double describing the zoom-level - high means very close, low means far away
-   */
-  def zoom = transformation.scaleFactor
+  def width = if (canvas.isDefined) canvas.get.getWidth else 0
 
   /**
    * Carries out a zoom action by zooming with the given delta and then panning
@@ -391,12 +382,12 @@ object View {
    */
   def zoom(point : Vector2D, delta : Double) {
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
-    val zoomLevel = transformation.scaleFactor
-    if (Siigna.navigation && (zoomLevel < 50 || zoomDelta > 0)) {
+    if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
       val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
-      if ((zoomLevel > 0.000001 || zoomDelta < 0)) {
-          transformation = transformation.scale(zoomFactor, point)
-        }
+      if ((zoom > 0.000001 || zoomDelta < 0)) {
+        zoom *= zoomFactor
+      }
+      pan = (pan - point) * zoomFactor + point
     }
   }
 

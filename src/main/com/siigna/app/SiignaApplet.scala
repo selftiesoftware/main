@@ -83,13 +83,13 @@ class SiignaApplet extends Applet {
     // Set the layout
     setLayout(new BorderLayout())
 
-    canvas = new Canvas()
-
     // Add the view to the applet
+    canvas = new Canvas()
     add(canvas, BorderLayout.CENTER)
-
-    // Position the applet
-    canvas.setLocation(0, 0)
+    canvas.setIgnoreRepaint(true)
+    canvas.requestFocus()
+    canvas.setSize(getSize)
+    View.setCanvas(canvas)
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
@@ -101,14 +101,6 @@ class SiignaApplet extends Applet {
 
     // Start the controller
     Controller.start()
-
-    canvas.setIgnoreRepaint(true)
-
-    canvas.requestFocus()
-
-    // Set the canvas in the view
-    View.setCanvas(canvas)
-    canvas.setSize(getSize)
 
     // Paint the view
     new Thread() {
@@ -124,7 +116,7 @@ class SiignaApplet extends Applet {
   override def resize(width : Int, height : Int) {
     super.resize(width, height)
     if (canvas != null)
-      canvas.setSize(width, height)
+      View.resize(width, height)
   }
 
   /**

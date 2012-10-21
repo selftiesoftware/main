@@ -61,8 +61,7 @@ case class TransformationMatrix(t : AffineTransform) {
    * Creates a TransformationMatrix that performs the inverse operation of
    * this transformation.
    */
-  def inverse =
-    TransformationMatrix(t createInverse)
+  def inverse = if (t.getDeterminant != 0) TransformationMatrix(t createInverse) else this
 
   /**
    * Examines if this TransformationMatrix is "empty" that is an identity-transformation.
