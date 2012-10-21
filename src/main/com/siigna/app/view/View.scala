@@ -58,8 +58,8 @@ import scala.Some
  *  <code>width * height</code> pixels, equal to the resolution of the device. The drawing coordinates does not fit
  *  into this coordinate-space on their own, so we have to transform them. For that purpose we have two
  *  [[com.siigna.util.geom.TransformationMatrix]]es that can transform [[com.siigna.app.model.shape.Shape]]s
- *  <i>from</i> the drawing space and <i>to</i> the device-space (<code>deviceTransformation()</code>) and one that can
- *  transform shapes <i>from</i> the device-space and <i>to</i> drawing-space (<code>drawingTransformation()</code>).
+ *  <i>from</i> the drawing space and <i>to</i> the device-space (<code>drawingTransformation()</code>) and one that can
+ *  transform shapes <i>from</i> the device-space and <i>to</i> drawing-space (<code>deviceTransformation()</code>).
  *  The former is handy whenever we need to put the shapes onto the screen (and we need to do that a lot) while the
  *  latter can be used for keeping something on a fixed position, regardless of the zoom.
  * </p>
@@ -137,23 +137,41 @@ object View {
 
   /**
    * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
-   * drawing-coordinates <i>to</i> device-coordinates.
+   * device-coordinates <i>to</i> drawing-coordinates.
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
   def deviceTransformation = drawingTransformation.inverse
 
   /**
    * The drawing [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
-   * device-coordinates <i>to</i> drawing-coordinates.
+   * drawing-coordinates <i>to</i> device-coordinates.
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
   def drawingTransformation = TransformationMatrix(pan, zoom).flipY
 
   /**
-   * Finds the mouse position for the mouse.
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the canvas.
+   * Finds the mouse position for the mouse in device coordinates, that is the coordinate system where the upper
+   * left corner of the entire Siigna drawing surface (on your computer screen) is (0, 0) and the bottom right
+   * corner of the drawing surface is (width, height). If you would like to know where the mouse is positioned on
+   * the drawing use <code>mousePositionDrawing</code> or simple transform it yourself:
+   * {{{
+   *   // Find the mouse position
+   *   val position = View.mousePosition
+   *
+   *   // Transform it FROM the the screen device coordinates and TO the drawing coordinates
+   *   position.transform(View.deviceTransformation)
+   * }}}
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the screen.
    */
   def mousePosition = _mousePosition
+
+  /**
+   * Finds the coordinates of the mouse on the drawing. That means that we translate the mouse coordinates from the
+   * device coordinates into drawing coordinated (see the <code>mousePosition</code> method and description
+   * for the [[com.siigna.app.view.View]].
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current posiiton on the mouse on the drawing.
+   */
+  def mousePositionDrawing = _mousePosition.transform(deviceTransformation)
 
   /**
    * Returns the height of the view.
@@ -245,6 +263,11 @@ object View {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
       case e => Log.error("View: Unknown error while painting the modules.", e)
     }
+
+   {
+     import com.siigna._
+     graphics.draw(CircleShape(mousePositionDrawing, 10))
+   }
   }
 
   /**

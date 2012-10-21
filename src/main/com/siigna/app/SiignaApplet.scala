@@ -15,11 +15,9 @@ import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, K
 
 import java.applet.Applet
 import com.siigna.app.controller.Controller
-import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
-import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
-import java.awt.{Canvas, Graphics, BorderLayout}
+import java.awt.{Canvas, BorderLayout}
 import model.Drawing
 import model.server.User
 import view.View
@@ -39,6 +37,9 @@ class SiignaApplet extends Applet {
   // The canvas on which we can paint
   private var canvas : Canvas = null
 
+  // The paint thread
+  private val paintThread = new Thread() { override def run() { paintLoop() } }
+
   // A boolean value indicating whether to exit the paint-loop
   private var shouldExit = false
 
@@ -48,6 +49,9 @@ class SiignaApplet extends Applet {
 
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
+
+    // Wait for the paint thread (max 500ms)
+    paintThread.join(500)
   }
 
   /**
@@ -78,7 +82,7 @@ class SiignaApplet extends Applet {
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }
-    } catch { case e => Log.info("No user or drawing found. Siigna will be running in local mode.")}
+    } catch { case e : Exception => Log.info("No user or drawing found. Siigna will be running in local mode.")}
 
     // Set the layout
     setLayout(new BorderLayout())
@@ -103,9 +107,7 @@ class SiignaApplet extends Applet {
     Controller.start()
 
     // Paint the view
-    new Thread() {
-      override def run() { paintLoop() }
-    }.start()
+    paintThread.start()
   }
 
   /**
@@ -142,6 +144,9 @@ class SiignaApplet extends Applet {
         do {
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
+
+          // Set the clip bounds, so we only draw within the canvas
+          graphics.setClip(0, 0, canvas.getWidth, canvas.getHeight)
 
           // Paint the view
           View.paint(graphics)

@@ -40,6 +40,8 @@ trait EventController {
    * @param constructor  The constructor for the Siigna key event, to distinguish between KeyDown and KeyUp
    * @return A [[com.siigna.app.view.event.KeyEvent]] with information about the modifier keys, unless it has been
    *         consumed while panning and zooming
+   *
+   * @todo Arrow-keys are not handled properly
    */
   private def parseKeyEvent(e : AWTKeyEvent, constructor : (Int, ModifierKeys) => KeyEvent) : Option[KeyEvent] = {
     // Sets the correct casing of the character - i.e. make it uppercase if shift is pressed and vice versa
@@ -51,8 +53,6 @@ trait EventController {
     // If the key is numeric then retrieve the Char value, otherwise get the int code.
     // Numeric keys aren't interpreted as digits if the int code is used (silly!)
     val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getExtendedKeyCode
-
-    println(e.getKeyCode, e.getExtendedKeyCode)
 
     // Tests true if shift-, control- or alt key is pressed
     val isModifier = (code == 16 || code == 17 || code == 18)
@@ -71,8 +71,6 @@ trait EventController {
 
       constructor(getCorrectCase(result.getOrElse(code)), keys)
     }
-
-    println(event, code)
 
     event match {
       case KeyDown(Key.Plus, ModifierKeys.Control) => View.zoom(View.center, -5); None // Zoom in
@@ -95,7 +93,7 @@ trait EventController {
    */
   private def parseMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event) : Option[MouseEvent] = {
     // Saves the position of the mouse
-    val point = Vector2D(e getX, e getY).transform(View.drawingTransformation)
+    val point = Vector2D(e getX, e getY)
 
     // Retrieves and updates the previous point
     val delta = point - View.mousePosition

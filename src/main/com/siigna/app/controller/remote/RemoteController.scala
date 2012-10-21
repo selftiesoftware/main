@@ -14,7 +14,7 @@ package com.siigna.app.controller.remote
 import actors.remote.RemoteActor
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.Actor
+import actors.{DaemonActor, Actor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -26,7 +26,7 @@ import com.siigna.util.Serializer
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  */
-protected[controller] object RemoteController extends Actor {
+protected[controller] object RemoteController extends DaemonActor {
 
   // Set remote class loader
   RemoteActor.classLoader = getClass.getClassLoader

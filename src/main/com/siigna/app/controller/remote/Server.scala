@@ -19,6 +19,9 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
   // A boolean flag to indicate if we have a connection with this server
   protected var _isConnected = false
 
+  // A boolean flag to indicate that the we should cut the connection
+  protected var shouldExit = false
+
   /**
    * A boolean value to indicate whether a connection has been successfully made to this server.
    * @return  True if a connection is available, false otherwise
@@ -35,25 +38,35 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
   def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    Log.info("Remote: Sending: " + message)
-    val res = remote.!?(timeout, message) match {
-      case Some(data) => { // Call the callback function
-        try {
-          val r = f(data)     // Parse the data
-          _isConnected = true // We're now connected for sure
-          Right(r)            // Return
-        } catch {
-          case e : Error => Left(e)
-          case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
+    if (shouldExit) {
+      Left(Error(-1, "Connection shutting down", message.session))
+    } else {
+      Log.info("Remote: Sending: " + message)
+      val res = remote.!?(timeout, message) match {
+        case Some(data) => { // Call the callback function
+          try {
+            val r = f(data)     // Parse the data
+            _isConnected = true // We're now connected for sure
+            Right(r)            // Return
+          } catch {
+            case e : Error => Left(e)
+            case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
+          }
+        }
+        case None      => { // Timeout
+          _isConnected = false // We're no longer connected
+          apply(message, f) // Retry
         }
       }
-      case None      => { // Timeout
-        _isConnected = false // We're no longer connected
-        apply(message, f) // Retry
-      }
+      res
     }
-    res
   }
+
+  /**
+   * Disconnects from the server and stops any future attempts to send messages so the thread can quit.
+   */
+  def disconnect() { shouldExit = true }
+
 }
 
 /**
