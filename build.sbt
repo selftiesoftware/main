@@ -21,6 +21,6 @@ resolvers += "Siigna" at "http://siigna.com/rls/base"
 fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
-  "com.siigna" %% "siigna-module" % "preAlpha",
+//  "com.siigna" %% "siigna-module" % "preAlpha",
   "org.scala-lang" % "scala-library" % "2.9.2"
 )

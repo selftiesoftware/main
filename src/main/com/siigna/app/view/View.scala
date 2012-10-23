@@ -43,7 +43,7 @@ import scala.Some
  *   This might seem like an easy thing to do, but the core of the matter is to do it efficiently. It is pretty
  *   cumbersome to apply two operations (zoom and pan) on each [[com.siigna.app.model.shape.Shape]] every time we
  *   need to draw the shapes. This is where [[com.siigna.util.geom.TransformationMatrix]] comes in. This matrix is
- *   capable of containing <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformations<a>.
+ *   capable of containing <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformations</a>.
  *   In other words we can express every possible N-dimensional transformation in such a matrix. So instead of
  *   applying two operations we get one... And some other stuff.
  * </p>

@@ -16,7 +16,8 @@ import com.siigna.app.view.event.EventParser
 import com.siigna.util.geom.TransformationMatrix
 
 /**
- * <h2>Defines the parent class for all modules</h2>
+ * Defines the parent class for all modules
+ * <h2>Modules</h2>
  * <p>
  *   Modules are basically immutable descriptions of what to do in case of certain events based on the state map
  *   (finite state machine/automaton). In other words a Module tells Siigna exactly what to do in which situations,
@@ -40,14 +41,14 @@ import com.siigna.util.geom.TransformationMatrix
  * <p>
  *   The <b>state map</b> is a map of states and functions that describes where to go when a certain event is received
  *   by the module. So, depending on what state the module is currently in, different functionality is executed.
- *   <br>
+ *   <br />
  *   To be correctly defined, a state map should contain at least a <code>'Start</code> and <code>'End</code> state,
  *   so the [[com.siigna.app.controller.Controller]] can start and stop the module, if everything else fails.
  * </p>
  * <p>
  *   The format of the state map is: <code>State -> List[Event] -> State</code>.
- *   See [[com.siigna.module.State]] for more information.
- * <p>
+ *   See [[com.siigna.State]] for more information.
+ * </p>
  *
  * <h3 id="painting">Painting</h3>
  * <p>
