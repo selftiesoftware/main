@@ -48,6 +48,9 @@ class SiignaApplet extends Applet {
 
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
+
+    // Quit the system
+    System.exit(0)
   }
 
   /**

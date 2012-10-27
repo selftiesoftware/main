@@ -17,6 +17,8 @@ import java.awt.event.{KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, _}
 import com.siigna.app.view.event._
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
+import scala.Some
+import com.siigna.util.logging.Log
 import com.siigna.app.view.event.MouseDown
 import com.siigna.app.view.event.KeyDown
 import com.siigna.app.view.event.MouseExit
@@ -26,7 +28,6 @@ import com.siigna.app.view.event.KeyUp
 import com.siigna.app.view.event.MouseMove
 import com.siigna.app.view.event.MouseUp
 import com.siigna.app.view.event.MouseDrag
-import com.siigna.util.logging.Log
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
@@ -52,8 +53,6 @@ trait EventController {
     // Numeric keys aren't interpreted as digits if the int code is used (silly!)
     val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getExtendedKeyCode
 
-    println(e.getKeyCode, e.getExtendedKeyCode)
-
     // Tests true if shift-, control- or alt key is pressed
     val isModifier = (code == 16 || code == 17 || code == 18)
 
@@ -71,8 +70,6 @@ trait EventController {
 
       constructor(getCorrectCase(result.getOrElse(code)), keys)
     }
-
-    println(event, code)
 
     event match {
       case KeyDown(Key.Plus, ModifierKeys.Control) => View.zoom(View.center, -5); None // Zoom in
@@ -95,7 +92,8 @@ trait EventController {
    */
   private def parseMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event) : Option[MouseEvent] = {
     // Saves the position of the mouse
-    val point = Vector2D(e getX, e getY).transform(View.drawingTransformation)
+    val mouse = Vector2D(e getX, e getY)
+    val point = mouse.transform(View.drawingTransformation)
 
     // Retrieves and updates the previous point
     val delta = point - View.mousePosition
@@ -129,8 +127,8 @@ trait EventController {
 
     // Pan (using middle button) and zoom (using wheel) or otherwise return the optional event
     event match {
-      case MouseWheel (_, _, _, d)          => {
-        if (Siigna.navigation) { View.zoom(point, d); None }
+      case MouseWheel(_, _, _, d)          => {
+        if (Siigna.navigation) { View.zoom(mouse, d); None }
         else Some(MouseWheel(point, button, keys, d))
       }
       case MouseDown  (_, MouseButtonMiddle, _)    => None

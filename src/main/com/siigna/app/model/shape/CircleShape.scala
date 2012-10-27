@@ -87,6 +87,9 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   
 }
 
+/**
+ * A companion object for [[com.siigna.app.model.shape.CircleShape]].
+ */
 object CircleShape {
 
   /**
@@ -97,6 +100,4 @@ object CircleShape {
 
   def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
   def apply(center : Vector2D, radius : Double) = new CircleShape(center, radius, Attributes())
-
-  def apply(center: Vector2D, r: Double) = new CircleShape(center, r, Attributes())
 }
