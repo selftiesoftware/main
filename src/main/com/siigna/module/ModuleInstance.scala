@@ -17,6 +17,7 @@ import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.app.controller.ModuleLoader
 
+
 /**
  * <p>
  *   A ModuleInstance is an entry in a [[com.siigna.module.ModulePackage]].
@@ -66,17 +67,21 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * @param events  The events from the user
    */
   def apply(events : List[Event]) {
-    val module : Module = this.module()
+    var shouldKill  = false
 
     // Forward events if a child-module is available
     val childEvents = if (child.isDefined) {
+      val module = child.get.module()
+
       // Pass the events on to the child
       child.get.apply(events)
 
-      // End the child module if it's in state 'End
-      if (child.get.state == 'End) {
+      shouldKill = child.get.state == 'Kill
+
+      // End the child module if it's in state 'End or 'Kill
+      if (child.get.state == 'End || child.get.state == 'Kill) {
         child = None
-        module.interface.unchain()
+        this.module().interface.unchain()
       }
 
       // Update events if the child exited due to a KeyDown
@@ -87,12 +92,13 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
         }
         case rest => rest // Do nothing
       }
+
     } else events
 
     // Otherwise we handle the events inside this module
     // This is separate from the previous if-statement because the child could have exited,
     // on which the parent (might) need to act
-    if (child.isEmpty) parse(childEvents)
+    if (child.isEmpty && !shouldKill) parse(childEvents)
   }
 
   /**
