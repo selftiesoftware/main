@@ -29,7 +29,7 @@ import com.siigna.util.Serializer
 protected[controller] object RemoteController extends Actor {
 
   // Set remote class loader
-  RemoteActor.classLoader = getClass.getClassLoader
+  //RemoteActor.classLoader = getClass.getClassLoader
 
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()

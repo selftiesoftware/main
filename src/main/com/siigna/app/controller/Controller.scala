@@ -57,7 +57,7 @@ object Controller extends Actor {
     RemoteController.start()
 
     // Set the base modules to local (TEST)
-    ModuleLoader.base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true)
+    ModuleLoader.base = ModulePackage('base, "/home/csp/projects/siigna/out/artifacts/base", "base.jar", true)
     ModuleLoader.load(ModuleLoader.base)
 
     val defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
