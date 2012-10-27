@@ -11,6 +11,8 @@
 
 package com.siigna.util.geom
 
+import java.awt.Point
+
 /**
  * A vector class utility.
  */
@@ -130,6 +132,13 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 object Vector2D {
   
   import java.lang.Double.NaN
+
+  /**
+   * Creates a Vector2D from a given [[java.awt.Point]].
+   * @param p  The [[java.awt.Point]] to convert to a Vector2D
+   * @return  A Vector2D with the same x and y-coordinates as the given point
+   */
+  def apply(p : Point) = new Vector2D(p.getX, p.getY)
 
   /**
    * Calculates the determinant of the 2x2 matrix described by two vectors.

@@ -16,6 +16,7 @@ import com.siigna.module.{ModuleInstance, ModulePackage, Module}
 import com.siigna.util.logging.Log
 import java.util.jar.{JarEntry, JarFile}
 import scala.Some
+import java.io.FileNotFoundException
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
@@ -26,7 +27,18 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   /**
    * The base module package.
    */
-  var base : ModulePackage = ModulePackage('base, "siigna.com", "applet/base.jar")
+  var base : Option[ModulePackage] = try {
+    Some(ModulePackage('base, "rls.siigna.com", "base/com/siigna/siigna-module_2.9.2/preAlpha/siigna-module_2.9.2-preAlpha.jar"))
+  } catch {
+    case e : FileNotFoundException => {
+      Log.error("ModuleLoader: Base module pack could not be found: " + e.getMessage)
+      None
+    }
+    case e => {
+      Log.error("ModuleLoader: Base module failed to load: " + e.getMessage)
+      None
+    }
+  }
 
   protected val modules = collection.mutable.HashMap[Symbol, Module]()
 

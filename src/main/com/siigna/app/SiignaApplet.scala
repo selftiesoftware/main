@@ -19,37 +19,37 @@ import com.siigna.app.view.event._
 import com.siigna.util.logging.Log
 import com.siigna.util.geom.{Vector2D}
 import java.lang.Thread
-import java.awt.{BorderLayout}
+import java.awt.{Canvas, Graphics, BorderLayout}
 import model.Drawing
 import model.server.User
 import view.View
 
 /**
- * The main class of Siigna.
- * The applet is first and foremost responsible for setting up event listeners
- * and painting. The painting part is being handled by the <code>View</code> trait.
- * The events are forwarded to the <code>Controller</code> and the painting is primarily
- * done by painting the <code>DOM (Document Object Model)</code> and then allowing
- * the modules to paint additional graphics. The modules do not have direct access to
- * the view, but the <code>Interface</code> is designed to utilize access to it.
+ * The entry-point of Siigna.
+ *
+ * The applet is first and foremost responsible for setting up the environment for Siigna.
+ * That means placing the view in the context of the applet so it's actually run, telling the
+ * controller to setup event listeners and get the view to start painting. The events are
+ * forwarded to the [[com.siigna.app.controller.Controller]]. The actual painting part is being
+ * handled by the [[com.siigna.app.view.View]] object by painting the [[com.siigna.app.model.Drawing]]
+ * and then allowing the modules to paint additional graphics.
  */
 class SiignaApplet extends Applet {
 
-  private var mouseButtonLeft   = false
-  private var mouseButtonMiddle = false
-  private var mouseButtonRight  = false
+  // The canvas on which we can paint
+  private var canvas : Canvas = null
 
-  /**
-   * Closes down relevant actors and destroys the applet.
-   */
+  // A boolean value indicating whether to exit the paint-loop
+  private var shouldExit = false
+
   override def destroy() {
+    // Exit the paint-loop
+    shouldExit = true
+
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
 
-    // Stop the applet
-    super.destroy()
-
-    // Stop the system
+    // Quit the system
     System.exit(0)
   }
 
@@ -58,8 +58,7 @@ class SiignaApplet extends Applet {
    * adds EventListeners.
    */
   override def init() {
-    Siigna display("loading modules..please wait..for us to get better upload from the server. ")
-    // Init parent
+    // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
     // Start by reading the applet parameters
@@ -88,165 +87,28 @@ class SiignaApplet extends Applet {
     setLayout(new BorderLayout())
 
     // Add the view to the applet
-    add(View, BorderLayout.CENTER)
+    canvas = new Canvas()
+    add(canvas, BorderLayout.CENTER)
+    canvas.setIgnoreRepaint(true)
+    canvas.requestFocus()
+    canvas.setSize(getSize)
+    View.setCanvas(canvas)
 
     // Misc initialization
-    setVisible(true); setFocusable(true); requestFocus(); validate()
-
-    // Add event listeners
-    View.addKeyListener(new KeyListener {
-      override def keyPressed (e : AWTKeyEvent) { handleKeyEvent(e, KeyDown) }
-      override def keyReleased(e : AWTKeyEvent) { handleKeyEvent(e, KeyUp)   }
-      override def keyTyped   (e : AWTKeyEvent) { false }
-    })
-    View.addMouseListener(new MouseListener {
-      override def mouseClicked (e : AWTMouseEvent) { false }
-      override def mouseEntered (e : AWTMouseEvent) { handleMouseEvent(e, MouseEnter) }
-      override def mouseExited  (e : AWTMouseEvent) { handleMouseEvent(e, MouseExit) }
-      override def mousePressed (e : AWTMouseEvent) { handleMouseEvent(e, MouseDown) }
-      override def mouseReleased(e : AWTMouseEvent) { handleMouseEvent(e, MouseUp) }
-    })
-    View.addMouseMotionListener(new MouseMotionListener {
-      override def mouseDragged(e : AWTMouseEvent) { handleMouseEvent(e, MouseDrag) }
-      override def mouseMoved  (e : AWTMouseEvent) { handleMouseEvent(e, MouseMove) }
-    })
-    View.addMouseWheelListener(new MouseWheelListener {
-      override def mouseWheelMoved(e : MouseWheelEvent) {
-        // getPreciseWheelRotation is only available in 1.7
-        val scroll = try {e.getPreciseWheelRotation} catch { case _ => e.getUnitsToScroll}
-        handleMouseEvent(e, MouseWheel(scroll))
-      }
-    })
+    setVisible(true); setFocusable(true); requestFocus()
 
     // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
 
-    // Start the controller - ends up with calling act() method in Controller.
+    Controller.setupEventListenersOn(canvas)
+
+    // Start the controller
     Controller.start()
-  }
 
-  /**
-   * Handles and dispatches KeyEvents.
-   */
-  private def handleKeyEvent(e : AWTKeyEvent, constructor : (Int, ModifierKeys) => Event)
-  {
-    // Sets the correct casing of the character - i.e. make it uppercase if shift is pressed and vice versa
-    def getCorrectCase(c : Int) = if (e.isShiftDown) c.toChar.toUpper.toInt else c.toChar.toLower.toInt
-
-    // Set the event-values
-    val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
-    
-    // If the key is numeric then retrieve the Char value, otherwise get the int code.
-    // Numeric keys aren't interpreted as digits if the int code is used (silly!)
-    val code = if (e.getKeyChar.isDigit) e.getKeyChar else e.getKeyCode
-
-    // Tests true if shift-, control- or alt key is pressed
-    val isModifier = (code == 16 || code == 17 || code == 18)
-    
-    // If they key-code equals a modifier key, nothing bad can happen..
-    dispatchEvent( if (isModifier) {
-      constructor(getCorrectCase(code), keys)
-
-    // If it doesn't check if a key is being hid by
-    // a modifier key and return the key it that's the case
-    } else  {
-      val array  =
-        if      (e.isControlDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
-        else if (e.isAltDown && !isModifier) AWTKeyEvent.getKeyText(code).toCharArray
-        else Array[Char]()
-      if (!array.isEmpty) { // If there are elements in the character-array pass them on
-        constructor(getCorrectCase(array(0)), keys)
-      } else { // Otherwise we accept the original char for the event
-        constructor(getCorrectCase(code), keys)
-      }
-    })
-
-    // After the event has been dispatched, draw
-    View.repaint()
-  }
-
-  /**
-   * Takes care of mouse-events by making sure the correct mouse button is
-   * dispatched even in MouseMove and MouseDrag, and dispatches them to
-   * EventHandler by filling in the correct constructor-parameters.
-   */
-  private def handleMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event) {
-    // Converts a physical point to a virtual one.
-    def toVirtual(physical : Vector2D) = {
-      val r = physical.transform(View.virtual.inverse)
-      Siigna.mousePosition = r
-      r
-    }
-
-    // Saves the position of the mouse
-    val position = Vector2D(e getX, e getY)
-
-    // Saves the last mouse-button as a boolean in the case of a MouseDown event,
-    // to be used later on.
-    if (constructor == MouseDown) {
-      if (e.getButton == AWTMouseEvent.BUTTON1) mouseButtonLeft   = true
-      if (e.getButton == AWTMouseEvent.BUTTON2) mouseButtonMiddle = true
-      if (e.getButton == AWTMouseEvent.BUTTON3) mouseButtonRight  = true
-    }
-
-    // Sets up the correct mouse-button and tests if MouseButtonMiddle is used,
-    // even on computers that have none, by checking if left and right button
-    // is down at the same time.
-    val button = (mouseButtonLeft, mouseButtonMiddle, mouseButtonRight) match {
-      case (false, false, false) => MouseButtonNone
-      case (false, false,  true) => MouseButtonRight
-      case (false,  true, false) => MouseButtonMiddle
-      case (false,  true,  true) => MouseButtonMiddle
-      case ( true, false, false) => MouseButtonLeft
-      case ( true, false,  true) => MouseButtonMiddle
-      case ( true,  true, false) => MouseButtonMiddle
-      case ( true,  true,  true) => MouseButtonMiddle
-    }
-
-    // Resets the last mouse-button in the case of a MouseUp event, to start
-    // from scratch when the next event is fired.
-    if (constructor == MouseUp) {
-      if (e.getButton == AWTMouseEvent.BUTTON1) mouseButtonLeft   = false
-      if (e.getButton == AWTMouseEvent.BUTTON2) mouseButtonMiddle = false
-      if (e.getButton == AWTMouseEvent.BUTTON3) mouseButtonRight  = false
-    }
-
-    // Setup the modifier-keys
-    val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
-
-    // Create mouse event with physical coordinates.
-    val event = constructor(position, button, keys)
-
-    // Pan (using middle button) and zoom (using wheel) or otherwise dispatch
-    // to dispatchEvent.
-    val option : Option[Event] = event match {
-
-      case MouseWheel (point, _, _, delta)         => if (Siigna.navigation) { View.zoom(point, delta); None }
-                                                       else Some(MouseWheel(toVirtual(point), button, keys, delta))
-      case MouseDown  (point, MouseButtonMiddle, _) => View.startPan(point); None
-      case MouseDrag  (point, MouseButtonMiddle, _) => View.pan(point); None
-      case MouseUp    (point, MouseButtonMiddle, _) => View.pan(point); None
-      case MouseEnter (point, _, _) => Some(MouseEnter(toVirtual(point), button, keys))
-      case MouseExit  (point, _, _) => Some(MouseExit(toVirtual(point), button, keys))
-      case MouseDown  (point, _, _) => Some(MouseDown(toVirtual(point), button, keys))
-      case MouseUp    (point, _, _) => Some(MouseUp(toVirtual(point), button, keys))
-      case MouseDrag  (point, _, _) => Some(MouseDrag(toVirtual(point), button, keys))
-      case MouseMove  (point, _, _) => Some(MouseMove(toVirtual(point), button, keys))
-      case _ => Log.error("Did not expect event: " + event); None
-    }
-
-    // Dispatch the event if it wasn't caught above
-    if (option.isDefined) dispatchEvent(option.get)
-
-    // After the event has been dispatched, draw
-    View.repaint()
-  }
-
-  /**
-   * The overall event-handler. Dispatches event on to the controller.
-   */
-  private def dispatchEvent(event : Event) {
-    Controller ! event
+    // Paint the view
+    new Thread() {
+      override def run() { paintLoop() }
+    }.start()
   }
 
   /**
@@ -256,8 +118,45 @@ class SiignaApplet extends Applet {
    */
   override def resize(width : Int, height : Int) {
     super.resize(width, height)
-    View.resize(width, height)
-    View.render()
+    if (canvas != null)
+      View.resize(width, height)
+  }
+
+  /**
+   * This is the actual paint-loop for the applet. The loop stops when <code>shouldExit</code> is set to true.
+   *
+   * The code is stolen from Java's api-entry on
+   * <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/image/BufferStrategy.html">BufferStrategy</a>.
+   */
+  private def paintLoop() {
+    // Create a double buffer strategy
+    canvas.createBufferStrategy(2)
+
+    // Get the strategy
+    val strategy = canvas.getBufferStrategy
+
+    // Run, run, run
+    while(!shouldExit) {
+      // Render a single frame
+      if (strategy != null) do {
+
+        // The following loop ensures that the contents of the drawing buffer
+        // are consistent in case the underlying surface was recreated
+        do {
+          // Fetch the buffer graphics
+          val graphics = strategy.getDrawGraphics
+
+          // Paint the view
+          View.paint(graphics)
+
+          // Dispose of the graphics
+          graphics.dispose()
+        } while (strategy.contentsRestored())
+
+        // Make the next buffer available
+        strategy.show()
+      } while (strategy.contentsLost())
+    }
   }
 
 }

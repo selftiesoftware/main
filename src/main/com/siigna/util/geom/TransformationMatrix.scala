@@ -61,8 +61,7 @@ case class TransformationMatrix(t : AffineTransform) {
    * Creates a TransformationMatrix that performs the inverse operation of
    * this transformation.
    */
-  def inverse =
-    TransformationMatrix(t createInverse)
+  def inverse = if (t.getDeterminant != 0) TransformationMatrix(t createInverse) else this
 
   /**
    * Examines if this TransformationMatrix is "empty" that is an identity-transformation.
@@ -160,8 +159,26 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Creates a translation (panning) and concatenates it with this
    * transformation.
+   *
+   * @param delta  The translation to do describes as a [[com.siigna.util.geom.Vector2D]]
    */
   def translate(delta : Vector2D) = TransformationMatrix(operation(_ translate(delta.x, delta.y)))
+
+  /**
+   * Creates a translation (panning) on the x-axis and concatenates it with this
+   * transformation.
+   *
+   * @param delta  The translation of the x-axis
+   */
+  def translateX(delta : Double) = TransformationMatrix(operation(_ translate(delta, 0)))
+
+  /**
+   * Creates a translation (panning) on the y-axis and concatenates it with this
+   * transformation.
+   *
+   * @param delta  The translation of the y-axis
+   */
+  def translateY(delta : Double) = TransformationMatrix(operation(_ translate(0, delta)))
   
   /**
    * Performs an operation on the affine transformation which is wrapped by this

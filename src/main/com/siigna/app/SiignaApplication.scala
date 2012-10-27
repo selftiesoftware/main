@@ -99,9 +99,6 @@ class ApplicationWindow extends Frame
     }
   )
 
-  // Start the applet
-  applet.init()
-
   // Show the window. The program is running.
   setVisible(true)
 
@@ -111,6 +108,8 @@ class ApplicationWindow extends Frame
   // Pack the elements of this window. The panel requests a certain size.
   pack()
 
+  // Start the applet
+  applet.init()
 
 }
 
