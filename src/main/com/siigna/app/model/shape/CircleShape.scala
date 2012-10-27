@@ -98,4 +98,5 @@ object CircleShape {
   def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
   def apply(center : Vector2D, radius : Double) = new CircleShape(center, radius, Attributes())
 
+  def apply(center: Vector2D, r: Double) = new CircleShape(center, r, Attributes())
 }
