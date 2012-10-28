@@ -11,11 +11,16 @@
 
 package com.siigna.module
 
-import com.siigna.app.view.event.{KeyUp, Key, KeyDown, Event}
+import com.siigna.app.view.event._
 import actors.Future
 import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.app.controller.ModuleLoader
+import com.siigna.module.ModuleInstance
+import com.siigna.app.view.event.KeyUp
+import com.siigna.app.view.event.KeyDown
+import com.siigna.module.ModulePackage
+import scala.Some
 
 
 /**
@@ -66,7 +71,8 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
    * @param events  The events from the user
    */
-  def apply(events : List[Event]) {
+  def apply(events : List[Event]): List[Event] = {
+
     var shouldKill  = false
     var shouldEnd = false
 
@@ -78,16 +84,17 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
       shouldEnd = child.get.state == 'End
 
       // Pass the events on to the child
-      child.get.apply(events)
+      val allEvents = child.get.apply(events)
 
       // End the child module if it's in state 'End or 'Kill
       if (shouldEnd || shouldKill) {
+        child.get.state='Start
         child = None
         this.module().interface.unchain()
       }
 
       // Update events if the child exited due to a KeyDown
-      events match {
+      allEvents match {
         case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
           state = 'End
           tail // Filter away the escape
@@ -100,14 +107,17 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
     // Otherwise we handle the events inside this module
     // This is separate from the previous if-statement because the child could have exited,
     // on which the parent (might) need to act
-    if (child.isEmpty && !shouldKill) parse(childEvents)
+    if (child.isEmpty && !shouldKill)
+      parse(childEvents)
+    else
+      childEvents
   }
 
   /**
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
-  protected def parse(events : List[Event]) {
+  protected def parse(events : List[Event]): List[Event] = {
     // Force-load the module
     val module : Module = this.module()
 
@@ -133,24 +143,25 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
             case m : ModuleInstance => {
               // Try to load the module
               child = Some(m)
-              println("Running "+child)
               module.interface.chain(m.module().interface)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => {
-              println("Going to "+state)
               state = s
             }
-            case _ => // Function return value does not match: Do nothing
+            // If module returns an event, we append the given event. All will be returned
+            case e: ModuleEvent => return e::parsedEvents
+            case e => // Function return value does not match: Do nothing
           }
         }
-        case _ => // No state defined: Do nothing
+        case e => // No state defined: Do nothing
       }
     } catch {
       case e : Exception => {
         Log.error(toString() + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
       }
     }
+    parsedEvents
   }
 
   /**
