@@ -68,18 +68,20 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    */
   def apply(events : List[Event]) {
     var shouldKill  = false
+    var shouldEnd = false
 
     // Forward events if a child-module is available
     val childEvents = if (child.isDefined) {
       val module = child.get.module()
 
+      shouldKill = child.get.state == 'Kill
+      shouldEnd = child.get.state == 'End
+
       // Pass the events on to the child
       child.get.apply(events)
 
-      shouldKill = child.get.state == 'Kill
-
       // End the child module if it's in state 'End or 'Kill
-      if (child.get.state == 'End || child.get.state == 'Kill) {
+      if (shouldEnd || shouldKill) {
         child = None
         this.module().interface.unchain()
       }
@@ -131,10 +133,12 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
             case m : ModuleInstance => {
               // Try to load the module
               child = Some(m)
+              println("Running "+child)
               module.interface.chain(m.module().interface)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => {
+              println("Going to "+state)
               state = s
             }
             case _ => // Function return value does not match: Do nothing
