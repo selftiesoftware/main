@@ -150,7 +150,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
         module match {
           case Some(m) => m // Success
           case None    => { // Failed! Log the error and return a simple dummy module
-            Log.error("Failed to load module " + entry)
+            Log.error("ModuleLoader: Failed to load module " + entry)
             dummyModule
           }
         }

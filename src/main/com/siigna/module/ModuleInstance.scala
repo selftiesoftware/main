@@ -53,7 +53,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
    * since it might block the calling thread.
    */
-  lazy val module : Future[Module] = future { ModuleLoader.load(this) }
+  val module : Future[Module] = future { ModuleLoader.load(this) }
 
   /**
    * The forwarding module, if any
@@ -69,31 +69,35 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
    * @param events  The events from the user
    */
-  def apply(events : List[Event]): List[Event] = {
+  def apply(events : List[Event]) : List[Event] = {
+    def endChild() {
+      val name = child.get.toString
+      // Reset the state
+      child.get.state = 'Start
+
+      // Remove the child
+      child = None
+
+      // Stop painting the child
+      this.module().interface.unchain()
+
+      Log.info("Module '" + this.module() + "': Ended module " + name)
+    }
 
     // Forward events if a child-module is available
-    val childEvents = if (child.isDefined) {
-      // Pass the events on to the child
-      val allEvents = child.get.apply(events)
-
-      // Update events if the child exited due to a KeyDown
-      val shouldExit = allEvents match {
-        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
-          true
+    val childEvents : List[Event] = if (child.isDefined) {
+      // Give the events to the child and match on the output
+      child.get.apply(events) match {
+        case (m : ModuleEnd[_]) :: tail => {
+          endChild()
+          tail
         }
-        case rest => false // Do nothing
+        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+          endChild()
+          tail
+        }
+        case rest => rest // Do nothing
       }
-
-      // End the child module if it's in state 'End
-      if (shouldExit || allEvents.head.symbol == 'ModuleEnd) {
-        child.get.state='Start
-        child = None
-        this.module().interface.unchain()
-      }
-
-
-      allEvents
-
     } else events
 
     // Otherwise we handle the events inside this module
@@ -101,8 +105,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
     // on which the parent (might) need to act
     if (child.isEmpty)
       parse(childEvents)
-    else
-      childEvents
+    else Nil
   }
 
   /**
@@ -136,6 +139,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
               // Try to load the module
               child = Some(m)
               module.interface.chain(m.module().interface)
+              Log.info("Module '" + this.module() + "': Forwarded to " +m)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => {
