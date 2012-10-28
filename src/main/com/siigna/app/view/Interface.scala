@@ -84,6 +84,11 @@ object Interface {
 	  }
 
     /**
+     * The classical point-and-click hand
+     */
+    lazy val hand = new Cursor(Cursor.HAND_CURSOR)
+
+    /**
      * An invisible block.
      */
     lazy val invisible : Cursor = {

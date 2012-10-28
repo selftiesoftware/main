@@ -119,10 +119,11 @@ trait Module {
   def stateMap : StateMap
 
   /**
-   * A function available for all Modules to paint their content. Override this method if you wish to paint
+   * A function available for all Modules to paint their content. Override this method if you wish to paint.
    *
-   * @param graphics  The graphics object available to paint on.
-   * @param transformation  The transformationMatrix on which the current screen-transformations are saved.
+   * @param graphics  The [[com.siigna.app.view.Graphics]] object available to paint on.
+   * @param transformation  The [[com.siigna.util.geom.TransformationMatrix]] on which the current
+   *                        screen-transformations are saved.
    */
   def paint(graphics: Graphics, transformation : TransformationMatrix) { }
 

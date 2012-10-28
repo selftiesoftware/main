@@ -20,6 +20,7 @@ import com.siigna.app.model.shape.{Shape, PolylineShape}
 import java.awt.image.BufferedImage
 import com.siigna.app.model.Drawing
 import scala.Some
+import com.siigna.module.io.ModuleMenu
 
 /**
  * <p>
@@ -236,7 +237,7 @@ object View {
     }
 
     // Paint the module-loading icon in the top left corner
-    ModulesLoader.paint(graphics,transformation)
+    ModuleMenu.paint(graphics,transformation)
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {

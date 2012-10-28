@@ -28,6 +28,7 @@ import com.siigna.app.view.event.KeyUp
 import com.siigna.app.view.event.MouseMove
 import com.siigna.app.view.event.MouseUp
 import com.siigna.app.view.event.MouseDrag
+import com.siigna.module.io.ModuleMenu
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
@@ -92,8 +93,7 @@ trait EventController {
    */
   private def parseMouseEvent(e : AWTMouseEvent, constructor : (Vector2D, MouseButton, ModifierKeys) => Event) : Option[MouseEvent] = {
     // Saves the position of the mouse
-    val mouse = Vector2D(e getX, e getY)
-    val point = mouse.transform(View.drawingTransformation)
+    val point = Vector2D(e getX, e getY)
 
     // Retrieves and updates the previous point
     val delta = point - View.mousePosition
@@ -128,7 +128,7 @@ trait EventController {
     // Pan (using middle button) and zoom (using wheel) or otherwise return the optional event
     event match {
       case MouseWheel(_, _, _, d)          => {
-        if (Siigna.navigation) { View.zoom(mouse, d); None }
+        if (Siigna.navigation) { View.zoom(point, d); None }
         else Some(MouseWheel(point, button, keys, d))
       }
       case MouseDown  (_, MouseButtonMiddle, _)    => None
@@ -141,7 +141,7 @@ trait EventController {
       case MouseUp    (_, _, _) => Some(MouseUp(point, button, keys))
       case MouseDrag  (_, _, _) => Some(MouseDrag(point, button, keys))
       case MouseMove  (_, _, _) => Some(MouseMove(point, button, keys))
-      case _ => Log.error("Did not expect event: " + event); None
+      case _ => Log.error("EventController: Did not expect event: " + event); None
     }
   }
 
