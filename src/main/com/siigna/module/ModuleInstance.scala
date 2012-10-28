@@ -16,10 +16,8 @@ import actors.Future
 import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.app.controller.ModuleLoader
-import com.siigna.module.ModuleInstance
 import com.siigna.app.view.event.KeyUp
 import com.siigna.app.view.event.KeyDown
-import com.siigna.module.ModulePackage
 import scala.Some
 
 
@@ -150,7 +148,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
               state = s
             }
             // If module returns an event, we append the given event. All will be returned
-            case e: ModuleEvent => return e::parsedEvents
+            case e: ModuleEvent => return e :: parsedEvents
             case e => // Function return value does not match: Do nothing
           }
         }
