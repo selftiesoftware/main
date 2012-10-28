@@ -17,6 +17,7 @@ import com.siigna.util.logging.Log
 import java.util.jar.{JarEntry, JarFile}
 import scala.Some
 import java.io.FileNotFoundException
+import com.siigna.app.view.event.ModuleEnd
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
@@ -40,6 +41,16 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     }
   }
 
+  /**
+   * A dummy module to use if the loading fails.
+   */
+  protected val dummyModule : Module = new Module {
+    val stateMap : com.siigna.StateMap = Map('Start -> { case _ => ModuleEnd })
+  }
+
+  /**
+   * The cached modules
+   */
   protected val modules = collection.mutable.HashMap[Symbol, Class[_ <: Module]]()
 
   /**
@@ -90,7 +101,18 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
         opOnJarEntries(jar, entry => {
           if (!entry.isDirectory) {
-            defineClass(jar, entry)
+            // First define a stable identifier
+            // see http://stackoverflow.com/questions/7157143/how-can-i-match-classes-in-a-scala-match-statement
+            val Module = classOf[Module]
+            // First load the class into the class loader, then match to see if it's a module
+            val clazz = defineClass(jar, entry)
+
+            clazz match {
+              // Attempt to load a module if it matches the module signature
+              case Module => loadModuleFrom(clazz)
+              case _ => // Do nothing, if it is a simple class
+            }
+
           }
         })
         Log.success("ModuleLoader: Sucessfully loaded entire module package " + pack)
@@ -113,71 +135,65 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     if (modules.contains(entry.className)) {
       modules.apply(entry.className).newInstance().asInstanceOf[Module]
     } else {
-      // Try to fetch it from the class loader with the right name
+      // Failure means that we have to try to fetch it from the jar
       try {
-        classToModule(loadClass(entry.toString))
-      } catch {
-        case _ : Exception => {
-          // Failure means that we have to try to fetch it from the jar
-          // Force-load the jar file if it hasn't already been downloaded
-          val jar = entry.pack.jar()
-          var module : Option[Module] = None
+        // Force-load the jar file if it hasn't already been downloaded
+        val jar = entry.pack.jar()
+        var module : Option[Module] = None
 
-          opOnJarEntries(jar, zip => {
-            if (!zip.isDirectory && zip.getName.contains(entry.className.name + ".class")) {
-              module = loadModuleFromJar(jar, zip)
-            }
-          })
-
-          module match {
-            case Some(m) => m
-            case None    => throw new NoSuchElementException("ModuleLoader: Could not find module " + entry + " in package " + entry.pack)
+        opOnJarEntries(jar, zip => {
+          if (!zip.isDirectory && zip.getName.contains(entry.className.name + ".class")) {
+            module = loadModuleFrom(defineClass(jar, zip))
           }
+        })
+
+        module match {
+          case Some(m) => m // Success
+          case None    => { // Failed! Log the error and return a simple dummy module
+            Log.error("Failed to load module " + entry)
+            dummyModule
+          }
+        }
+      } catch {
+        case e : Exception => {
+          Log.error("ModuleLoader: Error when loading module " + entry + ": " + e)
+          dummyModule
         }
       }
     }
   }
 
   /**
-   * Loads a module from a jar file
-   * @param jar  The jar file to load the entry from
-   * @param entry  The entry in the .jar file representing the module
-   * @return  Some[Module] if the module was found, None otherwise
-   * @see http://stackoverflow.com/questions/3039822/how-do-i-call-a-scala-object-method-using-reflection
+   * Attempt to load and instantiate a new module from a given archetype class.
+   * @return  Some[Module] if the module could be instantiated and cast, None otherwise
    */
-  protected def loadModuleFromJar(jar : JarFile, entry : JarEntry) : Option[Module] = {
-    try {
-      val clazz : Class[_] = defineClass(jar, entry)
-
-      val module : Option[Module] = try {
-        Some(classToModule(clazz))
-      } catch {
-        case e : ExceptionInInitializerError => {
-          // If constructing via the MODULE$ field fails, try using the constructor instead.
-          try {
-            val constructors = clazz.getDeclaredConstructors
-            constructors(0).setAccessible(true)
-            Some(constructors(0).newInstance().asInstanceOf[Module])
-          } catch {
-            case e : Exception => Log.error("ModuleLoader: Module " + entry.toString + " was found but could not be initialized through MODULE$ field or constructor.", e)
-            None
-          }
-        }
-        case e => Log.error("ModuleLoader: Class found, but failed to cast to Module.", e); None
-      }
-
-      // Add the module to the cache
-      if (module.isDefined) {
-        modules += Symbol(module.get.toString) -> module.get.getClass
-      }
-
-      module
+  protected def loadModuleFrom(clazz : Class[_]) : Option[Module] = {
+    val module : Option[Module] = try {
+      Some(classToModule(clazz))
     } catch {
-      case e : Exception => {
-        Log.error("ModuleLoader: Unknown error when loading module entry " + entry + " from file " + jar)
+      case e : InstantiationException => {
+        // If constructing via the class, try to force the constructor public.
+        try {
+          val constructors = clazz.getDeclaredConstructors
+          constructors(0).setAccessible(true)
+          Some(constructors(0).newInstance().asInstanceOf[Module])
+        } catch {
+          case e : Exception => Log.warning("ModuleLoader: Class " + clazz.getName + " found but failed to instantiate.", e)
+          None
+        }
+      }
+      case e => {
+        Log.warning("ModuleLoader: Class " + clazz.getName + "found, but failed to cast to Module.", e)
         None
       }
     }
+
+    // Add the module to the cache
+    if (module.isDefined) {
+      modules += Symbol(module.get.toString) -> module.get.getClass
+    }
+
+    module
   }
 
   /**
