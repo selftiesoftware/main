@@ -21,3 +21,7 @@ trait ModuleEvent extends Event
  * @param message  any object that the module wishes to forward.
  */
 case class Message[T](message : T) extends ModuleEvent { val symbol = 'Message }
+
+case class ModuleEnd[T](message: T) extends ModuleEvent { val symbol = 'ModuleEnd }
+
+case object ModuleEnd extends ModuleEvent { val symbol = 'ModuleEnd}

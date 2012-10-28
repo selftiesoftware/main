@@ -92,6 +92,8 @@ package object siigna extends com.siigna.util.Modules with com.siigna.util.Impli
   val Shift         = ModifierKeys.Shift
 
   type ModuleEvent = com.siigna.app.view.event.ModuleEvent
+  type ModuleEnd[T] = com.siigna.app.view.event.ModuleEnd[T]
+  val ModuleEnd = com.siigna.app.view.event.ModuleEnd
 
   val MouseButtonLeft = com.siigna.app.view.event.MouseButtonLeft
   val MouseButtonMiddle = com.siigna.app.view.event.MouseButtonMiddle

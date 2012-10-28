@@ -16,7 +16,7 @@ import com.siigna.app.view.event.EventParser
 import com.siigna.util.geom.TransformationMatrix
 
 /**
- * <h2>Defines the parent class for all modules</h2>
+ * <h1>Defines the parent class for all modules</h1>
  * <p>
  *   Modules are basically immutable descriptions of what to do in case of certain events based on the state map
  *   (finite state machine/automaton). In other words a Module tells Siigna exactly what to do in which situations,
@@ -36,20 +36,51 @@ import com.siigna.util.geom.TransformationMatrix
  *   <a href="#eventParser">Read more below</a>.
  * </p>
  *
- * <h3 id="stateMap">The state map</h3>
+ * <h2 id="stateMap">The state map</h2>
  * <p>
  *   The <b>state map</b> is a map of states and functions that describes where to go when a certain event is received
  *   by the module. So, depending on what state the module is currently in, different functionality is executed.
  *   <br>
- *   To be correctly defined, a state map should contain at least a <code>'Start</code> and <code>'End</code> state,
- *   so the [[com.siigna.app.controller.Controller]] can start and stop the module, if everything else fails.
+ *   To be correctly defined, a state map should contain at least a <code>'Start</code> and a <code>'End</code>
+ *   <i>or</i> <code>'Kill</code> state, so the [[com.siigna.app.controller.Controller]] knows when to
+ *   start and stop the module. Every module always starts in the <code>'Start</code> state. However, there is two
+ *   ways to end a module: Via <code>'End</code> or <code>'Kill</code>.
+ * </p>
+ *
+ * <h3><code>'End</code> versus <code>'Kill</code></h3>
+ * <p>
+ *   Just like <code>'Start</code> both
+ *   states have their code executed, but the <code>'End</code> state differs from the <code>'Kill</code> state
+ *   in that when a module has ended, the forwarding module is allowed to react on the ending. So if, for instance,
+ *   the <code>Default</code> is forwarding to the <code>Menu</code> module and <code>Menu</code> is ending via
+ *   the <code>'End</code> state, <code>Default</code> is immediately able to react. Contrary if the <code>Menu</code>
+ *   module were to quit via the <code>'Kill</code> state, <code>Default</code> is not allowed to react. This is
+ *   implemented to allow the module to control whether to return a value to the 'parent' module. Some ASCII art
+ *   to illustrate the example:
+ *   <pre>
+ *     'End state:
+ *
+ *     +-------------+          +-----------+
+ *     |  Default    |   --->   |    Menu   |
+ *     |             |          |           |
+ *     |  Reacting!  |   <---   |  in 'End  |
+ *     +-------------+          +-----------+
+ *
+ *     'Kill state:
+ *
+ *     +-------------+          +------------+
+ *     |  Default    |   --->   |    Menu    |
+ *     |             |          |            |
+ *     |  Nothing    |          |  in 'Kill  |
+ *     +-------------+          +------------+
+ *   </pre>
  * </p>
  * <p>
  *   The format of the state map is: <code>State -> List[Event] -> State</code>.
  *   See [[com.siigna.module.State]] for more information.
  * <p>
  *
- * <h3 id="painting">Painting</h3>
+ * <h2 id="painting">Painting</h2>
  * <p>
  *  Painting in Siigna is controlled from the [[com.siigna.app.view.View]] and outwards due to various reasons.
  *  This means that the module does not have any control over when the paint method is being called, so the module
@@ -62,7 +93,7 @@ import com.siigna.util.geom.TransformationMatrix
  *   transform the shapes, so they fit on the screen.
  * </p>
  *
- * <h3 id="eventParser">The [[com.siigna.app.view.event.EventParser]]</h3>
+ * <h2 id="eventParser">The [[com.siigna.app.view.event.EventParser]]</h2>
  * <p>
  *  There are two different kinds of parsing: [[com.siigna.app.view.event.Track]]ing and snapping
  *  ([[com.siigna.app.view.event.EventSnap]]). Snap is a way to "glue" the cursor to object already on the
@@ -72,7 +103,7 @@ import com.siigna.util.geom.TransformationMatrix
  * </p>
  * <p>
  *   Both types of parsing happens before the event is given to the module. Both snap and track can be disabled in
- *   the module if you wish.
+ *   the module if you wish.            i
  * </p>
  *
  * @todo Elaborate documentation

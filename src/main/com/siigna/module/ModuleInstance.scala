@@ -71,41 +71,35 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    */
   def apply(events : List[Event]): List[Event] = {
 
-    var shouldKill  = false
-    var shouldEnd = false
-
     // Forward events if a child-module is available
     val childEvents = if (child.isDefined) {
-      val module = child.get.module()
-
-      shouldKill = child.get.state == 'Kill
-      shouldEnd = child.get.state == 'End
-
       // Pass the events on to the child
       val allEvents = child.get.apply(events)
 
-      // End the child module if it's in state 'End or 'Kill
-      if (shouldEnd || shouldKill) {
+      // Update events if the child exited due to a KeyDown
+      val shouldExit = allEvents match {
+        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+          true
+        }
+        case rest => false // Do nothing
+      }
+
+      // End the child module if it's in state 'End
+      if (shouldExit || allEvents.head.symbol == 'ModuleEnd) {
         child.get.state='Start
         child = None
         this.module().interface.unchain()
       }
 
-      // Update events if the child exited due to a KeyDown
-      allEvents match {
-        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
-          state = 'End
-          tail // Filter away the escape
-        }
-        case rest => rest // Do nothing
-      }
+
+      allEvents
 
     } else events
 
     // Otherwise we handle the events inside this module
     // This is separate from the previous if-statement because the child could have exited,
     // on which the parent (might) need to act
-    if (child.isEmpty && !shouldKill)
+    if (child.isEmpty)
       parse(childEvents)
     else
       childEvents

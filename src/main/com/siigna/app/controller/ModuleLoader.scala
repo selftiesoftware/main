@@ -40,14 +40,14 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     }
   }
 
-  protected val modules = collection.mutable.HashMap[Symbol, Module]()
+  protected val modules = collection.mutable.HashMap[Symbol, Class[_ <: Module]]()
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
    * @param clazz  The class to cast
    * @return  A Module (hopefully), otherwise probably a nasty exception
    */
-  protected def classToModule(clazz : Class[_]) = clazz.getField("MODULE$").get(manifest.erasure).asInstanceOf[Module]
+  protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
 
   /**
    * Fetches the bytes associated with a [[java.util.jar.JarEntry]] in a [[java.util.jar.JarFile]] and
@@ -111,11 +111,11 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   def load(entry : ModuleInstance) : Module = {
     // Try to load the module from cache
     if (modules.contains(entry.className)) {
-      modules.apply(entry.className)
+      modules.apply(entry.className).newInstance().asInstanceOf[Module]
     } else {
       // Try to fetch it from the class loader with the right name
       try {
-        classToModule(loadClass(entry.toString + "$"))
+        classToModule(loadClass(entry.toString))
       } catch {
         case _ : Exception => {
           // Failure means that we have to try to fetch it from the jar
@@ -124,7 +124,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
           var module : Option[Module] = None
 
           opOnJarEntries(jar, zip => {
-            if (!zip.isDirectory && zip.getName.contains(entry.className.name + "$.class")) {
+            if (!zip.isDirectory && zip.getName.contains(entry.className.name + ".class")) {
               module = loadModuleFromJar(jar, zip)
             }
           })
@@ -168,7 +168,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
       // Add the module to the cache
       if (module.isDefined) {
-        modules += Symbol(module.get.toString) -> module.get
+        modules += Symbol(module.get.toString) -> module.get.getClass
       }
 
       module
