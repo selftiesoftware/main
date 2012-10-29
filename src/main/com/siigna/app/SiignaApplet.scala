@@ -49,9 +49,12 @@ class SiignaApplet extends Applet {
 
     // Stop the controller by interruption so we're sure the controller shuts it
     Controller ! 'exit
-
+              
     // Wait for the paint thread (max 500ms)
     paintThread.join(500)
+    
+    // Quit the system
+    System.exit(0)
   }
 
   /**
@@ -82,7 +85,7 @@ class SiignaApplet extends Applet {
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }
-    } catch { case e : Exception => Log.info("No user or drawing found. Siigna will be running in local mode.")}
+    } catch { case e => Log.info("No user or drawing found. Siigna will be running in local mode.")}
 
     // Set the layout
     setLayout(new BorderLayout())
@@ -107,7 +110,9 @@ class SiignaApplet extends Applet {
     Controller.start()
 
     // Paint the view
-    paintThread.start()
+    new Thread() {
+      override def run() { paintLoop() }
+    }.start()
   }
 
   /**
@@ -144,9 +149,6 @@ class SiignaApplet extends Applet {
         do {
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
-
-          // Set the clip bounds, so we only draw within the canvas
-          graphics.setClip(0, 0, canvas.getWidth, canvas.getHeight)
 
           // Paint the view
           View.paint(graphics)

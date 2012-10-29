@@ -9,16 +9,23 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view
+package com.siigna.module.io
 
-import java.awt.Color
+import java.awt._
 
 import com.siigna.app.model.shape._
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.geom.Vector2D
+import com.siigna.app.view.{Interface, View, Graphics}
+import com.siigna.app.controller.ModuleLoader
 
-object ModulesLoader {
+object ModuleMenu {
+
+  /**
+   * A boolean flag to indicate whether the menu is active or not.
+   */
+  protected var highlighted = false
 
   //LOGO
   val frameLogo = Iterable(LineShape(Vector2D(8.345,2),Vector2D(25.56,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(30,25.56),Vector2D(30,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(26.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(26.65,5.34),3.34,0,90),ArcShape(Vector2D(26.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
@@ -38,36 +45,46 @@ object ModulesLoader {
   //val frameFillTop = Array(Vector2D(5,5.345),Vector2D(5,12),Vector2D(5,12),Vector2D(105,12),Vector2D(105,12),Vector2D(105,5.345),Vector2D(105,5.345),Vector2D(101.7,2),Vector2D(101.7,2),Vector2D(8.34,2),Vector2D(8.34,2),Vector2D(5,5.345))
   //val frameFillFlyout = Array(Vector2D(5,12),Vector2D(5,25.56),Vector2D(5,25.56),Vector2D(8.34,28.91),Vector2D(8.34,28.91),Vector2D(101.7,28.91),Vector2D(101.7,28.91),Vector2D(105,25.56),Vector2D(105,25.56),Vector2D(105,22),Vector2D(105,22),Vector2D(5,22))
 
+  val expandedColor = new Color(0.75f, 0.75f, 0.75f, 0.80f)
+  val menuColor = new Color(0.95f, 0.95f, 0.95f, 0.90f)
+
+  val expandedX = expandedFill.map(_.x.toInt).toArray
+  val expandedY = expandedFill.map(_.y.toInt).toArray
+
+  val logoFillX = logoFill.map(_.x.toInt).toArray
+  val logoFillY = logoFill.map(_.y.toInt).toArray
+
+  val frame = {
+    val f = new Frame("Siigna Module Menu")
+    f.setLayout(new BorderLayout())
+  }
+
+  def isHighlighted(m : Vector2D) : Boolean = {
+    if(m.x < 30 & m.y < 30) {
+      if (!highlighted) View.setCursor(Interface.Cursors.hand)
+      highlighted = true
+      true
+    }
+    else {
+      if (highlighted) View.setCursor(Interface.Cursors.crosshair)
+      highlighted = false
+      false
+    }
+  }
 
   def paint (g : Graphics, t : TransformationMatrix)= {
+    val highlight = isHighlighted(View.mousePosition)
 
-    var m = View.mousePosition.transform(t)
-
-    def highlight : Boolean = {
-      if(m.x < 30 & m.y < 30) true
-      else false
-    }
-
-    val expandedColor = new Color(0.75f, 0.75f, 0.75f, 0.80f)
-    val menuColor = new Color(0.95f, 0.95f, 0.95f, 0.90f)
-
-    val expandedX = expandedFill.map(_.x.toInt).toArray
-    val expandedY = expandedFill.map(_.y.toInt).toArray
-
-    val logoFillX = logoFill.map(_.x.toInt).toArray
-    val logoFillY = logoFill.map(_.y.toInt).toArray
-
-    if(highlight == true) {
+    if(highlight == true && ModuleLoader.base.isDefined) {
       g setColor expandedColor
       g.g.fillPolygon(expandedX, expandedY, expandedFill.size)
 
       frameExpanded.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
       //g draw TextShape("BASE MODULES",Vector2D(16,8),9)
-      g draw TextShape("SIIGNA "+Siigna.version,Vector2D(11,6),7)
-      g draw TextShape("BASE MODULES",Vector2D(11,18),9.2)
+      g draw TextShape("SIIGNA "+Siigna.version, Vector2D(11,6),7)
+      g draw TextShape(ModuleLoader.base.get.name.name.toUpperCase + " PACKAGE", Vector2D(11,18),9.2)
 
-    }
-    else {
+    } else {
       g setColor menuColor
       g.g.fillPolygon(logoFillX, logoFillY, logoFill.size)
       logo.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.50f))))

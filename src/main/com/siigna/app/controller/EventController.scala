@@ -17,6 +17,8 @@ import java.awt.event.{KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, _}
 import com.siigna.app.view.event._
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
+import scala.Some
+import com.siigna.util.logging.Log
 import com.siigna.app.view.event.MouseDown
 import com.siigna.app.view.event.KeyDown
 import com.siigna.app.view.event.MouseExit
@@ -26,12 +28,16 @@ import com.siigna.app.view.event.KeyUp
 import com.siigna.app.view.event.MouseMove
 import com.siigna.app.view.event.MouseUp
 import com.siigna.app.view.event.MouseDrag
-import com.siigna.util.logging.Log
+import com.siigna.module.io.ModuleMenu
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
  */
 trait EventController {
+
+  private var mouseButtonLeft   = false
+  private var mouseButtonMiddle = false
+  private var mouseButtonRight  = false
 
   /**
    * Parses key events by filtering modifier keys (shift, alt, control etc.) and converting them to a
@@ -99,16 +105,18 @@ trait EventController {
     val delta = point - View.mousePosition
     View.setMousePosition(point)
 
-    // Finds out which buttons are pressed
-    val mod = e.getModifiersEx
-    val leftButton   = (mod & InputEvent.BUTTON1_DOWN_MASK) == InputEvent.BUTTON1_DOWN_MASK
-    val middleButton = (mod & InputEvent.BUTTON2_DOWN_MASK) == InputEvent.BUTTON2_DOWN_MASK
-    val rightButton  = (mod & InputEvent.BUTTON3_DOWN_MASK) == InputEvent.BUTTON3_DOWN_MASK
+    // Saves the last mouse-button as a boolean in the case of a MouseDown event,
+    // to be used to recognize MouseUp events (which normally aren't associated with buttons).
+    if (constructor == MouseDown) {
+      if (e.getButton == AWTMouseEvent.BUTTON1) mouseButtonLeft   = true
+      if (e.getButton == AWTMouseEvent.BUTTON2) mouseButtonMiddle = true
+      if (e.getButton == AWTMouseEvent.BUTTON3) mouseButtonRight  = true
+    }
 
     // Sets up the correct mouse-button and tests if MouseButtonMiddle is used,
     // even on computers that have none, by checking if left and right button
     // is down at the same time.
-    val button = (leftButton, middleButton, rightButton) match {
+    val button = (mouseButtonLeft, mouseButtonMiddle, mouseButtonRight) match {
       case (false, false, false) => MouseButtonNone
       case (false, false,  true) => MouseButtonRight
       case (false,  true, false) => MouseButtonMiddle
@@ -119,6 +127,14 @@ trait EventController {
       case ( true,  true,  true) => MouseButtonMiddle
     }
 
+    // Resets the last mouse-button in the case of a MouseUp event, to start
+    // from scratch when the next event is fired.
+    if (constructor == MouseUp) {
+      if (e.getButton == AWTMouseEvent.BUTTON1) mouseButtonLeft   = false
+      if (e.getButton == AWTMouseEvent.BUTTON2) mouseButtonMiddle = false
+      if (e.getButton == AWTMouseEvent.BUTTON3) mouseButtonRight  = false
+    }
+
     // Setup the modifier-keys
     val keys = ModifierKeys(e isShiftDown, e isControlDown, e isAltDown)
 
@@ -127,7 +143,7 @@ trait EventController {
 
     // Pan (using middle button) and zoom (using wheel) or otherwise return the optional event
     event match {
-      case MouseWheel (_, _, _, d)          => {
+      case MouseWheel(_, _, _, d)          => {
         if (Siigna.navigation) { View.zoom(point, d); None }
         else Some(MouseWheel(point, button, keys, d))
       }
@@ -141,7 +157,7 @@ trait EventController {
       case MouseUp    (_, _, _) => Some(MouseUp(point, button, keys))
       case MouseDrag  (_, _, _) => Some(MouseDrag(point, button, keys))
       case MouseMove  (_, _, _) => Some(MouseMove(point, button, keys))
-      case _ => Log.error("Did not expect event: " + event); None
+      case _ => Log.error("EventController: Did not expect event: " + event); None
     }
   }
 

@@ -11,11 +11,15 @@
 
 package com.siigna.module
 
-import com.siigna.app.view.event.{KeyUp, Key, KeyDown, Event}
+import com.siigna.app.view.event._
 import actors.Future
 import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.app.controller.ModuleLoader
+import com.siigna.app.view.event.KeyUp
+import com.siigna.app.view.event.KeyDown
+import scala.Some
+
 
 /**
  * <p>
@@ -49,7 +53,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
    * since it might block the calling thread.
    */
-  lazy val module : Future[Module] = future { ModuleLoader.load(this) }
+  val module : Future[Module] = future { ModuleLoader.load(this) }
 
   /**
    * The forwarding module, if any
@@ -65,25 +69,32 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
    * @param events  The events from the user
    */
-  def apply(events : List[Event]) {
-    val module : Module = this.module()
+  def apply(events : List[Event]) : List[Event] = {
+    def endChild() {
+      val name = child.get.toString
+      // Reset the state
+      child.get.state = 'Start
+
+      // Remove the child
+      child = None
+
+      // Stop painting the child
+      this.module().interface.unchain()
+
+      Log.info("Module '" + this.module() + "': Ended module " + name)
+    }
 
     // Forward events if a child-module is available
-    val childEvents = if (child.isDefined) {
-      // Pass the events on to the child
-      child.get.apply(events)
-
-      // End the child module if it's in state 'End
-      if (child.get.state == 'End) {
-        child = None
-        module.interface.unchain()
-      }
-
-      // Update events if the child exited due to a KeyDown
-      events match {
+    val childEvents : List[Event] = if (child.isDefined) {
+      // Give the events to the child and match on the output
+      child.get.apply(events) match {
+        case (m : ModuleEnd[_]) :: tail => {
+          endChild()
+          tail
+        }
         case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
-          state = 'End
-          tail // Filter away the escape
+          endChild()
+          tail
         }
         case rest => rest // Do nothing
       }
@@ -92,14 +103,16 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
     // Otherwise we handle the events inside this module
     // This is separate from the previous if-statement because the child could have exited,
     // on which the parent (might) need to act
-    if (child.isEmpty) parse(childEvents)
+    if (child.isEmpty)
+      parse(childEvents)
+    else Nil
   }
 
   /**
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
-  protected def parse(events : List[Event]) {
+  protected def parse(events : List[Event]): List[Event] = {
     // Force-load the module
     val module : Module = this.module()
 
@@ -126,21 +139,25 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
               // Try to load the module
               child = Some(m)
               module.interface.chain(m.module().interface)
+              Log.info("Module '" + this.module() + "': Forwarded to " +m)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => {
               state = s
             }
-            case _ => // Function return value does not match: Do nothing
+            // If module returns an event, we append the given event. All will be returned
+            case e: ModuleEvent => return e :: parsedEvents
+            case e => // Function return value does not match: Do nothing
           }
         }
-        case _ => // No state defined: Do nothing
+        case e => // No state defined: Do nothing
       }
     } catch {
       case e : Exception => {
         Log.error(toString() + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
       }
     }
+    parsedEvents
   }
 
   /**

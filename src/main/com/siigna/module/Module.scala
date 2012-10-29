@@ -41,14 +41,14 @@ import com.siigna.util.geom.TransformationMatrix
  * <p>
  *   The <b>state map</b> is a map of states and functions that describes where to go when a certain event is received
  *   by the module. So, depending on what state the module is currently in, different functionality is executed.
- *   <br />
+ *   <br>
  *   To be correctly defined, a state map should contain at least a <code>'Start</code> and <code>'End</code> state,
  *   so the [[com.siigna.app.controller.Controller]] can start and stop the module, if everything else fails.
  * </p>
  * <p>
  *   The format of the state map is: <code>State -> List[Event] -> State</code>.
- *   See [[com.siigna.State]] for more information.
- * </p>
+ *   See [[com.siigna.module.State]] for more information.
+ * <p>
  *
  * <h3 id="painting">Painting</h3>
  * <p>
