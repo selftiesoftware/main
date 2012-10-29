@@ -18,7 +18,7 @@ import com.siigna.app.Siigna
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.{Interface, View, Graphics}
-import com.siigna.app.controller.ModuleLoader
+import com.siigna.module.ModuleLoader
 
 object ModuleMenu {
 

@@ -9,7 +9,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
+package com.siigna.util.event
 
 /**
  * The basic interface for all events in the system
@@ -31,22 +31,22 @@ trait Event
 case class ModifierKeys(shift : Boolean, ctrl : Boolean, alt : Boolean)
 
 /**
- * Companion object for [[com.siigna.app.view.event.ModifierKeys]].
+ * Companion object for [[com.siigna.util.event.ModifierKeys]].
  */
 object ModifierKeys {
 
   /**
-   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Shift is pressed.
+   * An instance of [[com.siigna.util.event.ModifierKeys]] where Shift is pressed.
    */
   val Shift = ModifierKeys(true, false, false)
 
   /**
-   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Control is pressed.
+   * An instance of [[com.siigna.util.event.ModifierKeys]] where Control is pressed.
    */
   val Control = ModifierKeys(false, true, false)
 
   /**
-   * An instance of [[com.siigna.app.view.event.ModifierKeys]] where Alt is pressed.
+   * An instance of [[com.siigna.util.event.ModifierKeys]] where Alt is pressed.
    */
   val Alt = ModifierKeys(false, false, true)
 

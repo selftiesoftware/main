@@ -12,7 +12,7 @@
 package com.siigna.module
 
 import com.siigna.app.view.{ModuleInterface, Graphics}
-import com.siigna.app.view.event.EventParser
+import com.siigna.util.event.{Start, Event, EventParser}
 import com.siigna.util.geom.TransformationMatrix
 
 /**
@@ -23,7 +23,7 @@ import com.siigna.util.geom.TransformationMatrix
  *   (finite state machine/automaton). In other words a Module tells Siigna exactly what to do in which situations,
  *   depending on the events the Module is (and has been) given. This is very handy because modules needs to be able
  *   to react differently depending on what the user does. So, for instance, a <code>Distance</code>  module needs
- *   to measure distances in different places based on the given [[com.siigna.app.view.event.MouseEvent]]s.
+ *   to measure distances in different places based on the given [[com.siigna.util.event.MouseEvent]]s.
  *   <a href="#stateMap">Read more below</a>.
  * </p>
  * <p>
@@ -33,7 +33,7 @@ import com.siigna.util.geom.TransformationMatrix
  * </p>
  * <p>
  *   Last but not least modules needs to be able to parse events before they enter the module since
- *   [[com.siigna.app.view.event.Snap]] or [[com.siigna.app.view.event.Track]] might be enabled.
+ *   [[com.siigna.util.event.Snap]] or [[com.siigna.util.event.Track]] might be enabled.
  *   <a href="#eventParser">Read more below</a>.
  * </p>
  *
@@ -63,10 +63,10 @@ import com.siigna.util.geom.TransformationMatrix
  *   transform the shapes, so they fit on the screen.
  * </p>
  *
- * <h3 id="eventParser">The [[com.siigna.app.view.event.EventParser]]</h3>
+ * <h3 id="eventParser">The [[com.siigna.util.event.EventParser]]</h3>
  * <p>
- *  There are two different kinds of parsing: [[com.siigna.app.view.event.Track]]ing and snapping
- *  ([[com.siigna.app.view.event.EventSnap]]). Snap is a way to "glue" the cursor to object already on the
+ *  There are two different kinds of parsing: [[com.siigna.util.event.Track]]ing and snapping
+ *  ([[com.siigna.util.event.EventSnap]]). Snap is a way to "glue" the cursor to object already on the
  *  screen if the cursor is close. This is used to make it easier for the user to make coherent drawings.
  *  Track is a way to remember which points the user has snapped to, so we can snap to lines expanding from these
  *  points.
@@ -105,7 +105,7 @@ trait Module {
 
   /**
    * <p>The state map and "heart" of the module. This state map describes all the states that exists in the module
-   * and all the ways the user can leave these states and enter new ones via [[com.siigna.app.view.event.Event]]s.
+   * and all the ways the user can leave these states and enter new ones via [[com.siigna.util.event.Event]]s.
    * A StateMap is defined as various states, describes as symbols, that are mapped to a PartialFunction. This
    * function various code-blocks that are executed only if the input are right (think case matches).</p>
    *
@@ -131,5 +131,48 @@ trait Module {
    * Returns the simple name of the module.
    */
   override def toString = this.getClass.getSimpleName.replace("$", "")
+
+}
+
+/**
+ * A companion object to Module, capable of creating [[com.siigna.module.ModuleInstance]]s which is needed to
+ * instantiate [[com.siigna.module.Module]]s.
+ */
+object Module {
+
+  /**
+   * @define moduleToModuleParameters  name
+   * @define moduleToModuleInstance
+   *         Creates a [[com.siigna.module.ModuleInstance]] of a module with the given $moduleToModuleParameters and
+   *         returns it, so the controller can load and the new module. This is useful when modules needs to
+   *         wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
+   *         [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   *
+   * @param name  The name of the module.
+   * @return  A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol) : ModuleInstance = ModuleInstance(ModuleLoader.base.get, "com.siigna.module" + ModuleLoader.base.get.name.name, name)
+
+  /**
+   * @define moduleToModuleParameters  name and class-path
+   * $moduleToModuleInstance
+   *
+   * @param name  The name of the module
+   * @param classPath  The class path of the module
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol, classPath : String) : ModuleInstance = ModuleInstance(ModuleLoader.base.get, classPath, name)
+
+  /**
+   * @define moduleToModuleParameters  name, class-path and [[com.siigna.module.ModulePackage]]
+   * $moduleToModuleInstance
+   *
+   * @param name  The name of the module
+   * @param classPath  The class path of the module
+   * @param pack  The package in which the module is defined
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol, classPath : String, pack : ModulePackage) : ModuleInstance = ModuleInstance(pack, classPath, name)
+
 
 }

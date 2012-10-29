@@ -15,8 +15,8 @@ import com.siigna.app.model.server.User
 import model._
 import view._
 import com.siigna.util.geom._
-import event.Track
 import java.awt.Cursor
+import com.siigna.util.event.Track
 
 /**
  * <p>
@@ -34,7 +34,7 @@ import java.awt.Cursor
  *
  * <p>It also functions as the first [[com.siigna.app.view.Interface]] connected to the
  * [[com.siigna.app.view.View]]. Which basically means that Siigna is painting whatever the Siigna object tells
- * it to paint. And that is [[com.siigna.app.view.event.Track]], the [[com.siigna.app.view.Display]](s) and
+ * it to paint. And that is [[com.siigna.util.event.Track]], the [[com.siigna.app.view.Display]](s) and
  * the [[com.siigna.module.Module]]s.</p>
  */
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {

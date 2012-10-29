@@ -12,7 +12,7 @@
 package com.siigna.util
 
 import java.awt.Color
-import com.siigna.app.view.event.Event
+import com.siigna.util.event.Event
 
 /**
  * Contains several implicit definitions which are collected in a single object

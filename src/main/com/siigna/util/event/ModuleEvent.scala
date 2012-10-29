@@ -8,9 +8,9 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-package com.siigna.app.view.event
+package com.siigna.util.event
 
-import com.siigna.module.ModuleInstance
+import com.siigna.module.{ModuleLoader, ModulePackage, ModuleInstance}
 
 /**
  * Events the modules can use to signal to each other.
@@ -18,7 +18,7 @@ import com.siigna.module.ModuleInstance
 trait ModuleEvent extends Event
 
 /**
- * Messages that can be sent to and from modules containing any object.
+ * Messages that can be sent to and from modules and states, containing a message of a given type.
  *
  * @param message  any object that the module wishes to forward.
  */
@@ -42,3 +42,44 @@ case object End extends ModuleEvent { val symbol = 'ModuleEnd}
  * @param module  The module to initialize and forward to.
  */
 case class Start(module : ModuleInstance) extends ModuleEvent { val symbol = 'ModuleStart }
+
+/**
+ * Companion object for case class [[com.siigna.util.event.Start]]
+ */
+object Start {
+
+  /**
+   * @define moduleToModuleParameters  name
+   * @define moduleToModuleInstance
+   *         Creates a [[com.siigna.module.ModuleInstance]] of a module with the given $moduleToModuleParameters and
+   *         returns it, so the controller can load and the new module. This is useful when modules needs to
+   *         wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
+   *         [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   *
+   * @param name  The name of the module.
+   * @return  A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol) : Start = Start(ModuleInstance(ModuleLoader.base.get, "com.siigna.module" + ModuleLoader.base.get.name.name, name))
+
+  /**
+   * @define moduleToModuleParameters  name and class-path
+   * $moduleToModuleInstance
+   *
+   * @param name  The name of the module
+   * @param classPath  The class path of the module
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol, classPath : String) : Start = Start(ModuleInstance(ModuleLoader.base.get, classPath, name))
+
+  /**
+   * @define moduleToModuleParameters  name, class-path and [[com.siigna.module.ModulePackage]]
+   * $moduleToModuleInstance
+   *
+   * @param name  The name of the module
+   * @param classPath  The class path of the module
+   * @param pack  The package in which the module is defined
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(name : Symbol, classPath : String, pack : ModulePackage) : Start = Start(ModuleInstance(pack, classPath, name))
+
+}

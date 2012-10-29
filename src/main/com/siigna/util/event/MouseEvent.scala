@@ -9,21 +9,24 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
+package com.siigna.util.event
 
 import com.siigna.util.geom.Vector2D
 
-//TODO: implement touch gestures (for track/touch pads)
-//TODO: why does MousebuttonNone not work in modules even though it is defined here?
-
+/**
+ * An overall trait for mouse buttons.
+ */
 trait MouseButton
-final case object MouseButtonNone   extends MouseButton
-final case object MouseButtonLeft   extends MouseButton
-final case object MouseButtonRight  extends MouseButton
-final case object MouseButtonMiddle extends MouseButton
 
-trait MouseEvent extends Event
-{
+case object MouseButtonNone   extends MouseButton
+case object MouseButtonLeft   extends MouseButton
+case object MouseButtonRight  extends MouseButton
+case object MouseButtonMiddle extends MouseButton
+
+/**
+ * An overall trait for mouse events containing a position, a button and a key.
+ */
+trait MouseEvent extends Event {
 
   def position : Vector2D
 
@@ -41,8 +44,10 @@ case class MouseDrag (position : Vector2D, button : MouseButton, keys : Modifier
 case class MouseMove (position : Vector2D, button : MouseButton, keys : ModifierKeys) extends MouseEvent { val symbol = 'MouseMove }
 case class MouseWheel(position : Vector2D, button : MouseButton, keys : ModifierKeys, wheel : Double) extends MouseEvent { val symbol = 'MouseWheel }
 
-object MouseWheel
-{
+/**
+ * Companion object to the [[com.siigna.util.event.MouseWheel]] event.
+ */
+object MouseWheel {
   def apply(wheel : Double)(position : Vector2D, button : MouseButton, keys : ModifierKeys) =
     new MouseWheel(position, button, keys, wheel)
 }

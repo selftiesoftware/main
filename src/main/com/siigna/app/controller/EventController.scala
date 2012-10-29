@@ -14,20 +14,20 @@ package com.siigna.app.controller
 import java.awt.Canvas
 import com.siigna.app.view.View
 import java.awt.event.{KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, _}
-import com.siigna.app.view.event._
+import com.siigna.util.event._
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
 import scala.Some
 import com.siigna.util.logging.Log
-import com.siigna.app.view.event.MouseDown
-import com.siigna.app.view.event.KeyDown
-import com.siigna.app.view.event.MouseExit
+import com.siigna.util.event.MouseDown
+import com.siigna.util.event.KeyDown
+import com.siigna.util.event.MouseExit
 import scala.Some
-import com.siigna.app.view.event.MouseEnter
-import com.siigna.app.view.event.KeyUp
-import com.siigna.app.view.event.MouseMove
-import com.siigna.app.view.event.MouseUp
-import com.siigna.app.view.event.MouseDrag
+import com.siigna.util.event.MouseEnter
+import com.siigna.util.event.KeyUp
+import com.siigna.util.event.MouseMove
+import com.siigna.util.event.MouseUp
+import com.siigna.util.event.MouseDrag
 import com.siigna.module.io.ModuleMenu
 
 /**
@@ -44,7 +44,7 @@ trait EventController {
    * format Siigna can understand.
    * @param e  The AWT event to parse
    * @param constructor  The constructor for the Siigna key event, to distinguish between KeyDown and KeyUp
-   * @return A [[com.siigna.app.view.event.KeyEvent]] with information about the modifier keys, unless it has been
+   * @return A [[com.siigna.util.event.KeyEvent]] with information about the modifier keys, unless it has been
    *         consumed while panning and zooming
    *
    * @todo Arrow-keys are not handled properly

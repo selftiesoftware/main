@@ -10,8 +10,8 @@
  */
 package com.siigna.app.controller
 
-import com.siigna.app.view.event.Event
-import com.siigna.module.{ModulePackage, ModuleInstance}
+import com.siigna.util.event.Event
+import com.siigna.module.{ModuleLoader, ModulePackage, ModuleInstance}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import com.siigna.app.view.View
@@ -40,7 +40,7 @@ object Controller extends Actor with EventController {
   /**
    * <p>
    *   The running part of the controller handling [[com.siigna.app.model.action.Action]]s and
-   *   [[com.siigna.app.view.event.Event]]s. If an action is sent to the controller it is forwarded to the
+   *   [[com.siigna.util.event.Event]]s. If an action is sent to the controller it is forwarded to the
    *   RemoteController to be passed on to the remote system and other clients. Actions can be sent as a
    *   <code>(Action, Boolean)</code> [[scala.Tuple2]]. The second boolean parameter indicates whether the action
    *   should be undone (true) or simply executed(false).
@@ -57,7 +57,7 @@ object Controller extends Actor with EventController {
     RemoteController.start()
 
     // Set the base modules to local (TEST)
-    ModuleLoader.base = Some(ModulePackage('base, "/home/csp/projects/siigna/out/artifacts/base", "base.jar", true))
+    ModuleLoader.base = Some(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts/", "base.jar", true))
     ModuleLoader.load(ModuleLoader.base.get)
 
     val defaultModule = ModuleInstance(ModuleLoader.base.get, "com.siigna.module.base", 'Default)

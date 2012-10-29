@@ -11,13 +11,12 @@
 
 package com.siigna.module
 
-import com.siigna.app.view.event._
+import com.siigna.util.event._
 import actors.Future
 import actors.Futures._
 import com.siigna.util.logging.Log
-import com.siigna.app.controller.ModuleLoader
-import com.siigna.app.view.event.KeyUp
-import com.siigna.app.view.event.KeyDown
+import com.siigna.util.event.KeyUp
+import com.siigna.util.event.KeyDown
 import scala.Some
 
 
@@ -32,7 +31,7 @@ import scala.Some
  * <p>
  *   In effect the ModuleInstance works as a wrapper to [[com.siigna.module.Module]]s, so we can stow all runtime
  *   information away from the modules. The ModuleInstance is responsible for making sure the module will run and
- *   is loaded from the right resources. The [[com.siigna.app.view.event.Event]]s that the modules process are also
+ *   is loaded from the right resources. The [[com.siigna.util.event.Event]]s that the modules process are also
  *   given to the ModuleInstance before handed over to the module since the ModuleInstance might forward
  * </p>
  *
@@ -70,6 +69,8 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * @param events  The events from the user
    */
   def apply(events : List[Event]) : List[Event] = {
+    var endedChild = false
+
     def endChild() {
       val name = child.get.toString
       // Reset the state
@@ -81,6 +82,10 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
       // Stop painting the child
       this.module().interface.unchain()
 
+      // Set flag
+      // TODO: Do this in a smarter way
+      endedChild = true
+
       Log.info("Module '" + this.module() + "': Ended module " + name)
     }
 
@@ -88,7 +93,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
     val childEvents : List[Event] = if (child.isDefined) {
       // Give the events to the child and match on the output
       child.get.apply(events) match {
-        case (m : ModuleEnd[_]) :: tail => {
+        case (m : End[_]) :: tail => {
           endChild()
           tail
         }
@@ -105,6 +110,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
     // on which the parent (might) need to act
     if (child.isEmpty)
       parse(childEvents)
+    else if (!endedChild) childEvents
     else Nil
   }
 
@@ -135,7 +141,7 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
         case Some(f) if (f.isDefinedAt(parsedEvents)) => {
           f(parsedEvents) match {
             // Forward to a module
-            case m : ModuleInstance => {
+            case Start(m) => {
               // Try to load the module
               child = Some(m)
               module.interface.chain(m.module().interface)

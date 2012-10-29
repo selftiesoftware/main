@@ -11,7 +11,6 @@
 
 package com.siigna.app.view
 
-import event.Snap
 import java.awt.{Graphics2D, BasicStroke, Color}
 import java.awt.font._
 import java.awt.geom.{Arc2D => JavaArc}
@@ -20,6 +19,7 @@ import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
 import com.siigna.app.model.{Selection, Drawing, Model}
+import com.siigna.util.event.Snap
 
 /**
  * A wrapper class for the Graphics class from AWT.

@@ -9,7 +9,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.view.event
+package com.siigna.util.event
 
 import com.siigna.app.model.shape._
 import com.siigna.app.view.{View, Graphics}
