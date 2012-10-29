@@ -23,6 +23,29 @@ import com.siigna.util.event.Snap
 
 /**
  * A wrapper class for the Graphics class from AWT.
+ *
+ * <h2>Drawing</h2>
+ * <p>
+ *   The Graphics is made primarily to draw [[com.siigna.app.model.shape.Shape]]s on the given underlying
+ *   Java [[java.awt.Graphics]] object. The behavior of the drawing method changes according to the
+ *   [[com.siigna.util.collection.Attributes]] in the shape. The exact behaviour is described in each
+ *   [[com.siigna.app.model.shape.Shape]], but for instance "<code>Color</code>" is used in a number of shapes.
+ * </p>
+ *
+ * <h2>Transforming</h2>
+ * <p>
+ *   An important step in drawing is the act of transforming shapes to fit the right view. As described in
+ *   [[com.siigna.app.view.View]] the screen you are currently looking on have a coordinate space of (0, 0) to
+ *   (width, height). A drawing has one that originates in the center and can resize dynamically. This causes some
+ *   issues when we try to translate one to the other. So is you need to translate a screen-coordinate into a
+ *   drawing coordinate use the <code>[[com.siigna.app.view.View]].deviceTransformation</code> (for instance a
+ *   mouse position into a drawing-coordinate), but if you need to take a shape from the drawing and draw it upon
+ *   the screen, use the <code>[[com.siigna.app.view.View]].drawingTransformation</code>.
+ *   <br />
+ *   See [[com.siigna.util.geom.TransformationMatrix]] for a more detailed description.
+ * </p>
+ * @see [[com.siigna.util.geom.TransformationMatrix]].
+ * @see [[com.siigna.app.view.View]].
  */
 class Graphics(val g : Graphics2D)
 {
@@ -234,12 +257,4 @@ class Graphics(val g : Graphics2D)
   def setStrokeWidth(width : Double) {
     g setStroke(new BasicStroke(width.asInstanceOf[Float]))
   }
-
-  /**
-   * Transforms the graphics-object by a given TransformationMatrix.
-   */
-  def transform(t : TransformationMatrix) {
-    t transform(g)
-  }
-
 }

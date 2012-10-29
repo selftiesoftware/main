@@ -30,43 +30,42 @@ import com.siigna.util.Implicits._
  * </p>
  *
  * @define siignaAttributes
- * <p>Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
- * <dl>
- *  <dt>antiAliasing</dt>
- *    <dd>A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
- *        The modules are always drawn with anti-aliasing. Defaults to true.</dd>
- *  <dt>backgroundTileSize</dt>
- *    <dd>The size of the square tiles drawn behind the actual drawable canvas, given in pixels. Defaults to 12.</dd>
- *  <dt>colorBackground</dt>
- *    <dd>The background color for the drawable canvas. Defaults to #F9F9F9 in hex.</dd>
- *  <dt>colorBackgroundLight</dt>
- *    <dd>The background color for the light squares in the background checkers-pattern. Defaults to #E9E9E9 in hex.</dd>
- *  <dt>colorBackgroundDark</dt>
- *    <dd>The background color for the dark squares in the background checkers-pattern. Defaults to #DADADA in hex.</dd>
- *  <dt>colorDraw</dt>
- *    <dd>The color every shapes are drawn with by default. Defaults to #000000 (black) in hex.</dd>
- *  <dt>colorSelected</dt>
- *    <dd>The color given to selected elements. Defaults to #7777FF in hex.</dd>
- *  <dt>defaultScreenSize</dt>
- *    <dd>The default size of the screen given as a [[java.awt.Dimension]]. Defaults to (600 x 400).</dd>
- *  <dt>printMargin</dt>
- *    <dd>The margin on pages when printing the content in Siigna, given in mm. Defaults to 13. </dd>
- *  <dt>printFormatMin</dt>
- *    <dd>The minimum format when printing, given in mm. Defaults to the width of a standard A4-size: 210.</dd>
- *  <dt>printFormatMax</dt>
- *    <dd>The maximum format when printing, given in mm. Defaults to the height of a standard A4-size: 297.</dd>
- *  <dt>selectionDistance</dt>
- *    <dd>The distance of which single-point selection happens, given in units. The actual distance changes based on
- *    the zoom-level and this value of course. Defaults to 5.</dd> ,
- *  <dt>trackDistance</dt>
-  *   <dd>Sensitivity of track.</dd>
- *  <dt>trackGuideColor</dt>
-  *   <dd>The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting"
- *        a point. Defaults to #00FFFF in hex.</dd>
- *  <dt>zoomSpeed</dt>
- *    <dd>The speed with which the client zooms, given in percentages. Defaults to 0.5.</dd>
- * </dl>
- * </p>
+ * Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
+ * {{{
+ *  antiAliasing
+ *    A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
+ *    The modules are always drawn with anti-aliasing. Defaults to true.
+ *  backgroundTileSize
+ *    The size of the square tiles drawn behind the actual drawable canvas, given in pixels. Defaults to 12.
+ *  colorBackground
+ *    The background color for the drawable canvas. Defaults to #F9F9F9 in hex.
+ *  colorBackgroundLight
+ *    The background color for the light squares in the background checkers-pattern. Defaults to #E9E9E9 in hex.
+ *  colorBackgroundDark
+ *    The background color for the dark squares in the background checkers-pattern. Defaults to #DADADA in hex.
+ *  colorDraw
+ *    The color every shapes are drawn with by default. Defaults to #000000 (black) in hex.
+ *  colorSelected
+ *    The color given to selected elements. Defaults to #7777FF in hex.
+ *  defaultScreenSize
+ *    The default size of the screen given as a [[java.awt.Dimension]]. Defaults to (600 x 400).
+ *  printMargin
+ *    The margin on pages when printing the content in Siigna, given in mm. Defaults to 13. 
+ *  printFormatMin
+ *    The minimum format when printing, given in mm. Defaults to the width of a standard A4-size: 210.
+ *  printFormatMax
+ *    The maximum format when printing, given in mm. Defaults to the height of a standard A4-size: 297.
+ *  selectionDistance
+ *    The distance of which single-point selection happens, given in units. The actual distance changes based on
+ *    the zoom-level and this value of course. Defaults to 5.
+ *  trackDistance
+ *    Sensitivity of track.
+ *  trackGuideColor
+ *    The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting"
+ *    a point. Defaults to #00FFFF in hex.
+ *  zoomSpeed
+ *    The speed with which the client zooms, given in percentages. Defaults to 0.5.
+ * }}}
  */
 trait SiignaAttributes extends Map[String, Any] with AttributesLike {
 

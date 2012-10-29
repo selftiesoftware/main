@@ -42,8 +42,11 @@ import com.siigna.util.geom.TransformationMatrix
  *   The <b>state map</b> is a map of states and functions that describes where to go when a certain event is received
  *   by the module. So, depending on what state the module is currently in, different functionality is executed.
  *   <br>
- *   To be correctly defined, a state map should contain at least a <code>'Start</code> and <code>'End</code> state,
- *   so the [[com.siigna.app.controller.Controller]] can start and stop the module, if everything else fails.
+ *   To be correctly defined, a state map should contain at least a <code>'Start</code> state,
+ *   so the [[com.siigna.app.controller.Controller]] can start the module. Modules can be ended by using the
+ *   [[com.siigna.util.event.End]] class to signal that it would like to stop. A value can be passed on to
+ *   [[com.siigna.util.event.End]] so the module can end with or without a return value. If the user presses the
+ *   escape key the module is ended, no matter which state it is in.
  * </p>
  * <p>
  *   The format of the state map is: <code>State -> List[Event] -> State</code>.
@@ -60,7 +63,8 @@ import com.siigna.util.geom.TransformationMatrix
  *   To avoid the ugly Java API we have constructed our own [[com.siigna.app.view.Graphics]] object which has a
  *   number of methods to paint different graphical objects. Along with the Graphics object, a
  *   [[com.siigna.util.geom.TransformationMatrix]] is sent to the method as a parameter which can be used to
- *   transform the shapes, so they fit on the screen.
+ *   transform the shapes, so they fit on the screen. More on this in the documentation of the
+ *   [[com.siigna.app.view.View]] and [[com.siigna.app.view.Graphics]].
  * </p>
  *
  * <h3 id="eventParser">The [[com.siigna.util.event.EventParser]]</h3>

@@ -15,12 +15,27 @@ import java.awt.Graphics2D
 import java.awt.geom.{AffineTransform, Point2D}
 
 /**
- * A wrapper class for the AffineTransform-class from AWT.
- * Used for geometrical manipulation of any kind.
+ * A wrapper class for the AffineTransform-class from AWT. Used for geometrical manipulation of any kind.
+ * <h2>Geometric transformation</h2>
+ * <p>
+ *   First and foremost the TransformationMatrix is used to transform geometries: translation (moving),
+ *   scaling (zooming) and rotation. The mathematics behind can be found at
+ *   <a href="http://en.wikipedia.org/wiki/Transformation_matrix">Wikipedia</a>. What that means for us is that
+ *   we can keep track of all the geometric manipulations one place. And that's handy!
+ * </p>
+ *
+ * <h2>Using the TransformationMatrix for drawing</h2>
+ * <p>
+ *   The TransformationMatrix is also handy when it comes to translating between coordinate-systems. As described in
+ *   the [[com.siigna.app.view.View]] the screen you are currently looking on have a coordinate space of (0, 0) to
+ *   (width, height). A drawing has one that originates in the (0, 0) (the center) and resizes dynamically. This causes
+ *   some issues when we try to translate one to the other. So if you need to translate a screen-coordinate into a
+ *   drawing coordinate use the <code>deviceTransformation</code> method in the [[com.siigna.app.view.View]] (for
+ *   instance a mouse position into a drawing-coordinate), but if you need to take a shape from the drawing and draw
+ *   it upon the screen, use the <code>drawingTransformation</code> method in the [[com.siigna.app.view.View]].
+ * </p>
  *
  * @param t  The transformation matrix derived from AWT.
- *
- * TODO: Create a 3D representation as well.
  */
 @SerialVersionUID(414468046)
 case class TransformationMatrix(t : AffineTransform) {
