@@ -68,67 +68,59 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
    * @param events  The events from the user
    */
-  def apply(events : List[Event]) : List[Event] = {
-    var endedChild = false
-
-    def endChild() {
-      val name = child.get.toString
-      // Reset the state
-      child.get.state = 'Start
-
-      // Remove the child
-      child = None
-
-      // Stop painting the child
-      this.module().interface.unchain()
-
-      // Set flag
-      // TODO: Do this in a smarter way
-      endedChild = true
-
-      Log.info("Module '" + this.module() + "': Ended module " + name)
-    }
-
-    // Forward events if a child-module is available
-    val childEvents : List[Event] = if (child.isDefined) {
-      // Give the events to the child and match on the output
+  def apply(events : List[Event]) : Option[ModuleEvent] = {
+    // Proceed if the child is defined
+    if (child.isDefined) {
+      // Give the events to the child
       child.get.apply(events) match {
-        case (m : End[_]) :: tail => {
-          endChild()
-          tail
-        }
-        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
-          endChild()
-          tail
-        }
-        case rest => rest // Do nothing
-      }
-    } else events
+        // A message was received for us to pass on
+        case Some(m : Message[_]) => {
+          // Give the message to this module to act upon
+          parse(m :: events)
 
+          // Return None so the parent doesn't react on the message too
+          None
+        }
+        // The child ended with a message
+        case Some(m : End[_]) => {
+          val name = child.get.toString
+
+          // Remove the child
+          child = None
+
+          // Stop painting the child
+          this.module().interface.unchain()
+
+          // Log it
+          Log.debug("Module '" + this.module() + "': Ended module " + name + " with message " + m.message)
+
+          // Continue to run the current module so it can react
+          parse(m :: events)
+
+          // Return None so the parent doesn't react on the message too
+          None
+        }
+        // The return value was not recognized, run it as we normally would
+        case _ => parse(events)
+      }
     // Otherwise we handle the events inside this module
-    // This is separate from the previous if-statement because the child could have exited,
-    // on which the parent (might) need to act
-    if (child.isEmpty)
-      parse(childEvents)
-    else if (!endedChild) childEvents
-    else Nil
+    } else parse(events)
   }
 
   /**
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
-  protected def parse(events : List[Event]): List[Event] = {
+  protected def parse(events : List[Event]) : Option[ModuleEvent] = {
     // Force-load the module
     val module : Module = this.module()
 
-    // Catch any Escape-keys to change the state to 'End (quits the module)
+    // Quit if the user presses escape
     events match {
-      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => state = 'End
-      case _ => // Do nothing
+      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => return Some(End)
+      case _ =>
     }
 
-    // Examine if the module has not yet been imported
     // Parse the events
     val parsedEvents = module.eventParser.parse(events)
 
@@ -144,15 +136,15 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
             case Start(m) => {
               // Try to load the module
               child = Some(m)
+
+              // Start painting the module and log
               module.interface.chain(m.module().interface)
-              Log.info("Module '" + this.module() + "': Forwarded to " +m)
+              Log.debug("Module '" + this.module() + "': Forwarded to " +m)
             }
             // Set the state
-            case s : Symbol if (module.stateMap.contains(s)) => {
-              state = s
-            }
-            // If module returns an event, we append the given event. All will be returned
-            case e: ModuleEvent => return e :: parsedEvents
+            case s : Symbol if (module.stateMap.contains(s)) => state = s
+            // If module returns a ModuleEvent (e. g. End), return it immediately
+            case e : ModuleEvent => return Some(e)
             case e => // Function return value does not match: Do nothing
           }
         }
@@ -160,16 +152,18 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
       }
     } catch {
       case e : Exception => {
-        Log.error(toString() + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
+        Log.error(toString + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
       }
     }
-    parsedEvents
+
+    // No ModuleEvent encountered, so return None
+    None
   }
 
   /**
    * Gets the full class path for the module.
    * @return  The class path concatenated with the class name with a "."
    */
-  override def toString = classPath + "." + className.name
+  override def toString = module().toString
 
 }

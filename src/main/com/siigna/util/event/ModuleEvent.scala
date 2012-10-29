@@ -34,7 +34,7 @@ case class End[T](message: T) extends ModuleEvent { val symbol = 'ModuleEnd }
 /**
  * An event that signals a [[com.siigna.module.Module]] to end.
  */
-case object End extends ModuleEvent { val symbol = 'ModuleEnd}
+case object End extends End[Unit]()
 
 /**
  * An event that signals that a [[com.siigna.module.Module]] wishes to initialize and forward to the given module.
