@@ -56,14 +56,10 @@ object Controller extends Actor with EventController {
     // Start RemoteController
     RemoteController.start()
 
-    // Set the base modules to local (TEST)
-    ModuleLoader.base = Some(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts/", "base.jar", true))
-    ModuleLoader.load(ModuleLoader.base.get)
-
-    val defaultModule = ModuleInstance(ModuleLoader.base.get, "com.siigna.module.base", 'Default)
+    val defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
 
     Thread.sleep(1000)
-    Siigna.setInterface(defaultModule.module().interface)
+    Siigna.setInterface(defaultModule.module.interface)
 
     var events : List[Event] = Nil
 

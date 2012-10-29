@@ -49,10 +49,9 @@ import scala.Some
 final case class ModuleInstance(pack : ModulePackage, classPath : String, className : Symbol) {
 
   /**
-   * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
-   * since it might block the calling thread.
+   * The [[com.siigna.module.Module]] loaded via the given [[com.siigna.module.ModulePackage]].
    */
-  val module : Future[Module] = future { ModuleLoader.load(this) }
+  lazy val module : Module = pack.load(this)
 
   /**
    * The forwarding module, if any
@@ -89,10 +88,10 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
           child = None
 
           // Stop painting the child
-          this.module().interface.unchain()
+          module.interface.unchain()
 
           // Log it
-          Log.debug("Module '" + this.module() + "': Ended module " + name + " with message " + m.message)
+          Log.debug("Module '" + module + "': Ended module " + name + " with message " + m.message)
 
           // Continue to run the current module so it can react
           parse(m :: events)
@@ -112,9 +111,6 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * @param events The list of events to use
    */
   protected def parse(events : List[Event]) : Option[ModuleEvent] = {
-    // Force-load the module
-    val module : Module = this.module()
-
     // Quit if the user presses escape
     events match {
       case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => return Some(End)
@@ -138,8 +134,8 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
               child = Some(m)
 
               // Start painting the module and log
-              module.interface.chain(m.module().interface)
-              Log.debug("Module '" + this.module() + "': Forwarded to " +m)
+              module.interface.chain(m.module.interface)
+              Log.debug("Module '" + module + "': Forwarded to " +m)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => state = s
@@ -164,6 +160,6 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
    * Gets the full class path for the module.
    * @return  The class path concatenated with the class name with a "."
    */
-  override def toString = module().toString
+  override def toString = module.toString
 
 }

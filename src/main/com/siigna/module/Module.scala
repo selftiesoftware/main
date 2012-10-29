@@ -155,7 +155,7 @@ object Module {
    * @param name  The name of the module.
    * @return  A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply(name : Symbol) : ModuleInstance = ModuleInstance(ModuleLoader.base.get, "com.siigna.module" + ModuleLoader.base.get.name.name, name)
+  def apply(name : Symbol) : ModuleInstance = ModuleInstance(ModuleLoader.base, "com.siigna.module" + ModuleLoader.base.name.name, name)
 
   /**
    * @define moduleToModuleParameters  name and class-path
@@ -165,7 +165,7 @@ object Module {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply(name : Symbol, classPath : String) : ModuleInstance = ModuleInstance(ModuleLoader.base.get, classPath, name)
+  def apply(name : Symbol, classPath : String) : ModuleInstance = ModuleInstance(ModuleLoader.base, classPath, name)
 
   /**
    * @define moduleToModuleParameters  name, class-path and [[com.siigna.module.ModulePackage]]

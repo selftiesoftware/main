@@ -153,7 +153,12 @@ trait EventController {
       case MouseUp    (_, MouseButtonMiddle, _)    => View.pan(delta); None
       case MouseEnter (_, _, _) => Some(MouseEnter(point, button, keys))
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
-      case MouseDown  (_, _, _) => Some(MouseDown(point, button, keys))
+      case MouseDown  (_, _, _) => {
+        if (ModuleMenu.isHighlighted(point)) {
+          ModuleMenu.init()
+          None
+        } else Some(MouseDown(point, button, keys))
+      }
       case MouseUp    (_, _, _) => Some(MouseUp(point, button, keys))
       case MouseDrag  (_, _, _) => Some(MouseDrag(point, button, keys))
       case MouseMove  (_, _, _) => Some(MouseMove(point, button, keys))

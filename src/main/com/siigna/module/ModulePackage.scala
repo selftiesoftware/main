@@ -16,11 +16,12 @@ import java.util.jar.JarFile
 
 import actors.Futures._
 import actors.Future
+import com.siigna.util.logging.Log
 
 /**
  * <p>A ModulePackage is a number of modules grouped in a ''.jar'' file. This class represents the package and
  * its version number, title and location of that file and thus a means to retrieve it. A ModulePackage can be
- * downloaded through the [[com.siigna.app.controller.ModuleLoader]] via its
+ * downloaded through the [[com.siigna.module.ModuleLoader]] via its
  * <code>load</code> method. A ModulePackage can also be transformed to a URL via the <code>toURL</code> method.</p>
 
  * <p>The last two parameter ''domain'' and ''path'' are meant to be understood like a Uniform Resource Locator (URL)
@@ -48,10 +49,28 @@ import actors.Future
 final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
 
   /**
-   * The [[java.util.jar.JarFile]] represented as a [[scala.actors.Future]]. Be careful to force-load the value
-   * since it might block the calling thread.
+   * The cached modules in the package.
    */
-  lazy val jar : Future[JarFile] = future { toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile }
+  protected val _modules = collection.mutable.HashMap[Symbol, Class[_ <: Module]]()
+
+  def load(instance : ModuleInstance) = {
+    // Try to load the module from cache
+    if (modules.contains(instance.className)) {
+      modules(instance.className).newInstance().asInstanceOf[Module]
+    } else {
+      val module = ModuleLoader.load(instance.className.name, this)
+
+      _modules += instance.className -> module.getClass
+
+      module
+    }
+  }
+
+  /**
+   * A map of the modules loaded by this package.
+   * @return A map of the symbols of the modules and their corresponding java class.
+   */
+  def modules = _modules.toMap
 
   override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 

@@ -15,10 +15,11 @@ import java.awt._
 
 import com.siigna.app.model.shape._
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{TransformationMatrix, Vector2D}
+import com.siigna.util.geom.TransformationMatrix
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.{Interface, View, Graphics}
 import com.siigna.module.ModuleLoader
+import event.{WindowAdapter, WindowEvent, WindowListener}
 
 object ModuleMenu {
 
@@ -54,9 +55,27 @@ object ModuleMenu {
   val logoFillX = logoFill.map(_.x.toInt).toArray
   val logoFillY = logoFill.map(_.y.toInt).toArray
 
-  val frame = {
+  def init() {
     val f = new Frame("Siigna Module Menu")
-    f.setLayout(new BorderLayout())
+    f.setLayout(new GridLayout())
+    f.setLocation(View.center.toPoint)
+    f.setPreferredSize(new Dimension(300, 240))
+    f.setVisible(true)
+    f.requestFocus()
+    f.revalidate()
+    f.setAlwaysOnTop(true)
+    f.pack()
+
+    f.addWindowListener(new WindowAdapter {
+      override def windowClosing(e: WindowEvent) {
+        f.dispose()
+      }
+    })
+
+    val list = new List()
+    ModuleLoader.packages.foreach(s => list.add(s._1.name.name))
+    f.add(new Label("Loaded packages"))
+    f.add(list)
   }
 
   def isHighlighted(m : Vector2D) : Boolean = {
@@ -75,15 +94,13 @@ object ModuleMenu {
   def paint (g : Graphics, t : TransformationMatrix)= {
     val highlight = isHighlighted(View.mousePosition)
 
-    if(highlight == true && ModuleLoader.base.isDefined) {
+    if(highlight == true) {
       g setColor expandedColor
       g.g.fillPolygon(expandedX, expandedY, expandedFill.size)
 
       frameExpanded.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
       //g draw TextShape("BASE MODULES",Vector2D(16,8),9)
       g draw TextShape("SIIGNA "+Siigna.version, Vector2D(11,6),7)
-      g draw TextShape(ModuleLoader.base.get.name.name.toUpperCase + " PACKAGE", Vector2D(11,18),9.2)
-
     } else {
       g setColor menuColor
       g.g.fillPolygon(logoFillX, logoFillY, logoFill.size)

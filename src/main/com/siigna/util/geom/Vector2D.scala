@@ -105,6 +105,11 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   def round = Vector2D(scala.math.round(x), scala.math.round(y))
 
   /**
+   * Returns the [[java.awt.Point]]-representation of the Vector.
+   */
+  def toPoint = new Point(x.toInt, y.toInt)
+
+  /**
    * Transforms a vector with a given transformation matrix.
    */
   def transform(transformation : TransformationMatrix) = transformation.transform(this)

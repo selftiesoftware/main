@@ -15,9 +15,10 @@ import actors.Futures._
 import com.siigna.util.logging.Log
 import java.util.jar.{JarEntry, JarFile}
 import scala.Some
-import java.io.FileNotFoundException
 import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
+import actors.Future
+import java.net.JarURLConnection
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
@@ -25,21 +26,13 @@ import com.siigna.app.controller.Controller
  */
 object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
+  // Load the default modules
+  val base = ModulePackage('base, "c:/workspace/siigna/main/out/artifacts/", "base.jar", true)
+
   /**
-   * The base module package.
+   * Cached packages and their jar files
    */
-  var base : Option[ModulePackage] = try {
-    Some(ModulePackage('base, "rls.siigna.com", "base/com/siigna/siigna-module_2.9.2/preAlpha/siigna-module_2.9.2-preAlpha.jar"))
-  } catch {
-    case e : FileNotFoundException => {
-      Log.error("ModuleLoader: Base module pack could not be found: " + e.getMessage)
-      None
-    }
-    case e => {
-      Log.error("ModuleLoader: Base module failed to load: " + e.getMessage)
-      None
-    }
-  }
+  val _packages = collection.mutable.Map[ModulePackage, JarFile]()
 
   /**
    * A dummy module to use if the loading fails.
@@ -47,11 +40,6 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected val dummyModule : Module = new Module {
     val stateMap : StateMap = Map('Start -> { case _ => End })
   }
-
-  /**
-   * The cached modules
-   */
-  protected val modules = collection.mutable.HashMap[Symbol, Class[_ <: Module]]()
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
@@ -84,91 +72,85 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   }
 
   /**
-   * <p>Loads all the resources in the given package by loading all the module-classes in the [[java.util.jar.JarFile]]
-   * of the package into the system.</p>
+   * Attempts to load a module from the information in the given [[com.siigna.module.ModuleInstance]].
+   * <p><b>This method runs synchronously.</b></p>
    *
-   * <p><b>This method runs asynchronously.</b></p>
-   *
-   * @param pack  The package to load
-   * @throws IOException  If an error occurred while downloading the .jar
+   * @param entry  The name of the class to load
+   * @return  The module to load
+   * @throws NoSuchElementException  If no module could be loaded from the given resource
    */
-  def load(pack : ModulePackage) {
+  def load(entry : String, pack : ModulePackage) : Module = {
+    // Failure means that we have to try to fetch it from the jar
     try {
-      // Attempt to load the resources from the .jar in the background
-      future {
-        // Force-load the jar file if it hasn't already been downloaded
-        val jar = pack.jar()
+      // If the package has not been loaded, we need to do so
+      val jar = if (!_packages.contains(pack)) {
+        load(pack)
+      } else _packages(pack)
 
-        opOnJarEntries(jar, entry => {
-          if (!entry.isDirectory) {
-            // First define a stable identifier
-            // see http://stackoverflow.com/questions/7157143/how-can-i-match-classes-in-a-scala-match-statement
-            val Module = classOf[Module]
-            // First load the class into the class loader, then match to see if it's a module
-            val clazz = defineClass(jar, entry)
+      var module : Option[Module] = None
 
-            clazz match {
-              // Attempt to load a module if it matches the module signature
-              case Module => loadModuleFrom(clazz)
-              case _ => // Do nothing, if it is a simple class
-            }
+      opOnJarEntries(jar, zip => {
+        if (!zip.isDirectory && zip.getName.contains(entry + ".class")) {
+          module = loadModuleFrom(defineClass(jar, zip))
+        }
+      })
 
-          }
-        })
-        Log.success("ModuleLoader: Sucessfully loaded entire module package " + pack)
+      module match {
+        case Some(m) => m // Success
+        case None    => { // Failed! Log the error and return a simple dummy module
+          Log.error("ModuleLoader: Could not find module and load " + entry + " in package " + pack)
+          dummyModule
+        }
       }
     } catch {
-      case e : Exception => Log.error("ModuleLoader: Failed to load module pack " + e)
+      case e : Exception => {
+        Log.error("ModuleLoader: Error when loading module " + entry, e)
+        dummyModule
+      }
     }
   }
 
   /**
-   * Attempts to load a module from the information in the given [[com.siigna.module.ModuleInstance]].
-   * <p><b>This method runs synchronously.</b></p>
+   * <p>Loads all the resources in the given package by loading all the module-classes in the [[java.util.jar.JarFile]]
+   * of the package into the system.</p>
    *
-   * @param entry  The [[com.siigna.module.ModuleInstance]] to load
-   * @return  The module to load
-   * @throws NoSuchElementException  If no module could be loaded from the given resource
+   * <p><b>Parts of this method runs synchronously.</b></p>
+   *
+   * @param pack  The package to load
+   * @throws IOException  If an error occurred while downloading the .jar
    */
-  def load(entry : ModuleInstance) : Module = {
-    // Try to load the module from cache
-    if (modules.contains(entry.className)) {
-      modules.apply(entry.className).newInstance().asInstanceOf[Module]
+  def load(pack : ModulePackage) = {
+    if (!_packages.contains(pack)) {
+      // Force-load the jar file if it hasn't already been downloaded
+      val jar = pack.toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile
+
+      // Save the package
+      _packages += pack -> jar
+
+      // Load the classes inside
+      opOnJarEntries(jar, entry => {
+        if (!entry.isDirectory) {
+          // Load the class into the class loader
+          defineClass(jar, entry)
+        }
+      })
+
+      Log.success("ModuleLoader: Sucessfully stored the module package " + pack)
+
+      // Return the jar
+      jar
     } else {
-      // Failure means that we have to try to fetch it from the jar
-      try {
-        // Force-load the jar file if it hasn't already been downloaded
-        val jar = entry.pack.jar()
-        var module : Option[Module] = None
-
-        opOnJarEntries(jar, zip => {
-          if (!zip.isDirectory && zip.getName.contains(entry.className.name + ".class")) {
-            module = loadModuleFrom(defineClass(jar, zip))
-          }
-        })
-
-        module match {
-          case Some(m) => m // Success
-          case None    => { // Failed! Log the error and return a simple dummy module
-            Log.error("ModuleLoader: Failed to load module " + entry)
-            dummyModule
-          }
-        }
-      } catch {
-        case e : Exception => {
-          Log.error("ModuleLoader: Error when loading module " + entry + ": " + e)
-          dummyModule
-        }
-      }
+      _packages(pack)
     }
   }
 
   /**
    * Attempt to load and instantiate a new module from a given archetype class.
+   * @param clazz  The class-information to create a module from
    * @return  Some[Module] if the module could be instantiated and cast, None otherwise
    */
   protected def loadModuleFrom(clazz : Class[_]) : Option[Module] = {
-    val module : Option[Module] = try {
+    try {
       Some(classToModule(clazz))
     } catch {
       case e : InstantiationException => {
@@ -187,14 +169,13 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
         None
       }
     }
-
-    // Add the module to the cache
-    if (module.isDefined) {
-      modules += Symbol(module.get.toString) -> module.get.getClass
-    }
-
-    module
   }
+
+  /**
+   * A list of the loaded packages.
+   * @return  An Iterable[ModulePackage] containing their respective modules.
+   */
+  def packages = _packages
 
   /**
    * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
@@ -204,6 +185,15 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   protected def opOnJarEntries(file : JarFile, f : JarEntry => Unit) {
     val entries = file.entries
     while (entries.hasMoreElements) { f(entries.nextElement) }
+  }
+
+  /**
+   * Unloads a [[com.siigna.module.ModulePackage]] so all modules created in the future cannot derive from this
+   * package.
+   * @param pack  The package to unload.
+   */
+  def unload(pack : ModulePackage) {
+    _packages.-=(pack)
   }
 
 }
