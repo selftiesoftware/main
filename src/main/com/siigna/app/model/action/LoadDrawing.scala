@@ -26,7 +26,7 @@ case class LoadDrawing(shapes : Map[Int, Shape], actions : Seq[Action], attribut
 
   def execute(model : Model) = {
     // Store the attributes
-    Drawing.setAttributes(attributes)
+    Drawing.addAttributes(attributes)
 
     // Store the shapes and the executed actions.
     new Model(shapes, actions, Seq())
