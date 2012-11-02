@@ -60,16 +60,11 @@ protected[controller] object RemoteController extends DaemonActor {
     remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
 
     loop {
-      
-      if (System.currentTimeMillis() > lastPing + pingTime) {
-        // Query for new actions
-        remote(Get(ActionId, null, session), handleGetActionId)
 
-        // Update lastPing to ensure this only happens when pingTime has passed
-        lastPing = System.currentTimeMillis()
-      }
+      // Query for new actions
+      remote(Get(ActionId, null, session), handleGetActionId)
 
-      react {
+      reactWithin(pingTime) {
         // Set an action to the server
         case (action : Action, undo : Boolean) => {
           // Parse the local action to ensure all the ids are up to date
@@ -101,10 +96,13 @@ protected[controller] object RemoteController extends DaemonActor {
   protected def handleGetActionId(any : Any) {
     any match {
       case Set(ActionId, id : Int, _) => {
-        // If the id is above the action indices + 1 then we have a gap to fill!
-        if (!actionIndices.isEmpty && id > actionIndices.last + 1) {
+        // Store the id if it's the first we get
+        if (actionIndices.isEmpty) {
+          actionIndices += id
+        // If the id is above the action indices then we have a gap to fill!
+        } else if(id > actionIndices.last) {
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
-            remote(Get(Action, i, session), _ match {
+            remote(Get(Action, Some(i), session), _ match {
               case Set(Action, array : Array[Byte], _) => {
                 try {
                   val action = Serializer.readAction(array)
@@ -117,6 +115,7 @@ protected[controller] object RemoteController extends DaemonActor {
                   case e => Log.error("Remote: Error when reading data from server", e)
                 }
               }
+              case e : Error => Log.error("Remote: Unexpected format: " + e)
             })
           }
         }
@@ -191,7 +190,6 @@ protected[controller] object RemoteController extends DaemonActor {
         val localIds = ids.filter(_ < 0)
 
         def handleGetShapeId(any : Any) = {
-          println(any)
           any match {
             case Set(ShapeId, i : Range, _) => {
 

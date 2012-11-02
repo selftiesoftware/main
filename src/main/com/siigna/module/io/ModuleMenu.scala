@@ -34,18 +34,10 @@ object ModuleMenu {
   val logo = Iterable(PolylineShape(Vector2D(10.24,6.938),Vector2D(12.10,12.49),Vector2D(12.67,25),Vector2D(13.52,25),Vector2D(13.65,12.49),Vector2D(15.96,6.938),Vector2D(10.24,6.938)),(PolylineShape(Vector2D(18.24,6.938),Vector2D(20.10,12.49),Vector2D(20.67,25),Vector2D(21.52,25),Vector2D(21.65,12.49),Vector2D(23.96,6.938),Vector2D(18.24,6.938))))
   val logoFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(25.56,2),Vector2D(30,5.345),Vector2D(30,25.56),Vector2D(26.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
 
-  //expanded menu - in v1.0 the current version and name of the current modules are displayed.
-  //TODO: create a dynamic fly-down menu where different sets of modules can be selected
-  //val frameExpanded = Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),LineShape(Vector2D(105,22),Vector2D(5,22)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90),LineShape(Vector2D(55,27.84),Vector2D(53.21,24.70)),LineShape(Vector2D(53.21,24.70),Vector2D(57,24.70)),LineShape(Vector2D(57,24.70),Vector2D(55,27.84)))
-
   //the frame without horizontal divider for flyout menu (only needed when modules changing is implemented)
   val frameExpanded = Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
 
   val expandedFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(101.7,2),Vector2D(105,5.345),Vector2D(105,25.56),Vector2D(101.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
-
-
-  //val frameFillTop = Array(Vector2D(5,5.345),Vector2D(5,12),Vector2D(5,12),Vector2D(105,12),Vector2D(105,12),Vector2D(105,5.345),Vector2D(105,5.345),Vector2D(101.7,2),Vector2D(101.7,2),Vector2D(8.34,2),Vector2D(8.34,2),Vector2D(5,5.345))
-  //val frameFillFlyout = Array(Vector2D(5,12),Vector2D(5,25.56),Vector2D(5,25.56),Vector2D(8.34,28.91),Vector2D(8.34,28.91),Vector2D(101.7,28.91),Vector2D(101.7,28.91),Vector2D(105,25.56),Vector2D(105,25.56),Vector2D(105,22),Vector2D(105,22),Vector2D(5,22))
 
   val expandedColor = new Color(0.75f, 0.75f, 0.75f, 0.80f)
   val menuColor = new Color(0.95f, 0.95f, 0.95f, 0.90f)
@@ -112,15 +104,17 @@ object ModuleMenu {
               list.remove(item)
               Log.success("Module: Successfully removed package " + item)
             }
-            case _ => Log.error("Module: Failed to remove package " + item)
+            case _ => Log.error("Module: Could not find package to remove: " + item)
           }
         }
       }
     })
 
     // Add module packages
-    val buttonAddLocal  = new Button("Add Local Package")
-    val buttonAddRemote = new Button("Add Remote Package")
+    val labelAdd        = new Label("Add package")
+    val buttonAddLocal  = new Button("Local")
+    val buttonAddRemote = new Button("Remote")
+    f.add(labelAdd)
     f.add(buttonAddLocal)
     f.add(buttonAddRemote)
     buttonAddRemote.setEnabled(false)
@@ -136,12 +130,15 @@ object ModuleMenu {
         try {
           val name = file.replace(".jar", "")
 
-          ModulePackage(Symbol(name), dir, file, true)
-          list.remove(name)
-          list.add(name)
+          // Load the package
+          ModuleLoader load ModulePackage(Symbol(name), dir, file, true)
+
+          // Add the package to the list
+          if (!list.getItems.contains(name)) list.add(name)
           Log.success("Module: Successfully imported module package " + file)
         } catch {
-          case _ => Log.error("Module: Import of module package " + file + "failed")
+          case e : NullPointerException => // Aborted
+          case e : Exception => Log.error("Module: Import of module package " + file + " failed", e)
         }
 
         // Close dialog
@@ -155,15 +152,14 @@ object ModuleMenu {
       if (!highlighted) View.setCursor(Interface.Cursors.hand)
       highlighted = true
       true
-    }
-    else {
+    } else {
       if (highlighted) View.setCursor(Interface.Cursors.crosshair)
       highlighted = false
       false
     }
   }
 
-  def paint (g : Graphics, t : TransformationMatrix)= {
+  def paint (g : Graphics, t : TransformationMatrix) {
     val highlight = isHighlighted(View.mousePosition)
 
     if(highlight == true) {

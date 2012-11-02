@@ -38,6 +38,12 @@ import com.siigna.app.Siigna
 object Controller extends Actor with EventController {
 
   /**
+   * The default [[com.siigna.module.Module]] that we're sending events to.
+   * Override this if you want to change the behavior.
+   */
+  var defaultModule = ModuleInstance('Default, "com.siigna.module.base")
+
+  /**
    * <p>
    *   The running part of the controller handling [[com.siigna.app.model.action.Action]]s and
    *   [[com.siigna.util.event.Event]]s. If an action is sent to the controller it is forwarded to the
@@ -55,8 +61,6 @@ object Controller extends Actor with EventController {
   def act() {
     // Start RemoteController
     RemoteController.start()
-
-    val defaultModule = ModuleInstance('Default, "com.siigna.module.base")
 
     Siigna.setInterface(defaultModule.module.interface)
 

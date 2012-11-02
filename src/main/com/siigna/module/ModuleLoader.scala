@@ -15,6 +15,7 @@ import com.siigna.util.logging.Log
 import java.util.jar.{JarEntry, JarFile}
 import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
+import java.io.IOException
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
@@ -23,7 +24,7 @@ import com.siigna.app.controller.Controller
 object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
   // Create a default package
-  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts/", "base.jar", true))
+  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
 
   /**
    * The loaded classes.
@@ -46,7 +47,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     try {
       Some(clazz.newInstance().asInstanceOf[Module])
     } catch {
-      case _ => None
+      case _ : Exception => None
     }
 
   /**
@@ -93,7 +94,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
               break()
             }
           } catch {
-            case e => Log.warning("ModuleLoader: Module " + instance + " not found. Did you include the right package?", e)
+            case _ : Exception => // Module couldn't be found, ignore it
           }
         })
       }
@@ -118,6 +119,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * <p><b>Parts of this method runs synchronously.</b></p>
    *
    * @param pack  The package to load
+   * @throws IOException  If something went wrong while trying to download the .jar file
    */
   def load(pack : ModulePackage) {
     if (!classes.contains(pack)) {
