@@ -56,9 +56,8 @@ object Controller extends Actor with EventController {
     // Start RemoteController
     RemoteController.start()
 
-    val defaultModule = ModuleInstance(ModuleLoader.base, "com.siigna.module.base", 'Default)
+    val defaultModule = ModuleInstance('Default, "com.siigna.module.base")
 
-    Thread.sleep(1000)
     Siigna.setInterface(defaultModule.module.interface)
 
     var events : List[Event] = Nil

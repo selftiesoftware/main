@@ -145,38 +145,17 @@ trait Module {
 object Module {
 
   /**
-   * @define moduleToModuleParameters  name
-   * @define moduleToModuleInstance
-   *         Creates a [[com.siigna.module.ModuleInstance]] of a module with the given $moduleToModuleParameters and
-   *         returns it, so the controller can load and the new module. This is useful when modules needs to
-   *         wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
-   *         [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
    *
-   * @param name  The name of the module.
-   * @return  A [[com.siigna.module.ModuleInstance]] to be read by the controller.
-   */
-  def apply(name : Symbol) : ModuleInstance = ModuleInstance(ModuleLoader.base, "com.siigna.module" + ModuleLoader.base.name.name, name)
-
-  /**
-   * @define moduleToModuleParameters  name and class-path
-   * $moduleToModuleInstance
+   * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
+   * returns it, so the controller can load and the new module. This is useful when modules needs to
+   * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
+   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
    *
    * @param name  The name of the module
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply(name : Symbol, classPath : String) : ModuleInstance = ModuleInstance(ModuleLoader.base, classPath, name)
-
-  /**
-   * @define moduleToModuleParameters  name, class-path and [[com.siigna.module.ModulePackage]]
-   * $moduleToModuleInstance
-   *
-   * @param name  The name of the module
-   * @param classPath  The class path of the module
-   * @param pack  The package in which the module is defined
-   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
-   */
-  def apply(name : Symbol, classPath : String, pack : ModulePackage) : ModuleInstance = ModuleInstance(pack, classPath, name)
+  def apply(name : Symbol, classPath : String) : ModuleInstance = ModuleInstance(name, classPath)
 
 
 }

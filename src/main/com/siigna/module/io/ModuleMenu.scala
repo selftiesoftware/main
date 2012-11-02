@@ -18,8 +18,9 @@ import com.siigna.app.Siigna
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.{Interface, View, Graphics}
-import com.siigna.module.ModuleLoader
-import event.{WindowAdapter, WindowEvent, WindowListener}
+import com.siigna.module.{ModulePackage, ModuleLoader}
+import event._
+import com.siigna.util.logging.Log
 
 object ModuleMenu {
 
@@ -57,7 +58,13 @@ object ModuleMenu {
 
   def init() {
     val f = new Frame("Siigna Module Menu")
-    f.setLayout(new GridLayout())
+    val l = new GridLayout()
+    l.setHgap(2)
+    l.setVgap(2)
+    l.setColumns(3)
+    l.setRows(2)
+    f.setLayout(l)
+
     f.setLocation(View.center.toPoint)
     f.setPreferredSize(new Dimension(300, 240))
     f.setVisible(true)
@@ -72,10 +79,75 @@ object ModuleMenu {
       }
     })
 
+    // List of module packages
     val list = new List()
-    ModuleLoader.packages.foreach(s => list.add(s._1.name.name))
+    ModuleLoader.packages.foreach(p => list.add(p.name.name))
     f.add(new Label("Loaded packages"))
     f.add(list)
+
+    // Remove module package
+    val buttonRemove = new Button("Remove")
+    buttonRemove.setEnabled(false)
+    f.add(buttonRemove)
+
+    list.addFocusListener(new FocusListener {
+      def focusGained(e: FocusEvent) {
+        val item = list.getSelectedItem
+        if (item != null) {
+          buttonRemove.setEnabled(true)
+        }
+      }
+
+      def focusLost(e: FocusEvent) {
+        buttonRemove.setEnabled(false)
+      }
+    })
+    buttonRemove.addActionListener(new ActionListener {
+      def actionPerformed(e: ActionEvent) {
+        val item = list.getSelectedItem
+        if (item != null) {
+          ModuleLoader.packages.find(_.name.name == item) match {
+            case Some(pack) => {
+              ModuleLoader.unload(pack)
+              list.remove(item)
+              Log.success("Module: Successfully removed package " + item)
+            }
+            case _ => Log.error("Module: Failed to remove package " + item)
+          }
+        }
+      }
+    })
+
+    // Add module packages
+    val buttonAddLocal  = new Button("Add Local Package")
+    val buttonAddRemote = new Button("Add Remote Package")
+    f.add(buttonAddLocal)
+    f.add(buttonAddRemote)
+    buttonAddRemote.setEnabled(false)
+
+    // Add module package local
+    buttonAddLocal.addActionListener(new ActionListener {
+      def actionPerformed(e: ActionEvent) {
+        val dialog = new FileDialog(f, "Add package")
+        dialog.setVisible(true)
+
+        val dir  = dialog.getDirectory
+        val file = dialog.getFile
+        try {
+          val name = file.replace(".jar", "")
+
+          ModulePackage(Symbol(name), dir, file, true)
+          list.remove(name)
+          list.add(name)
+          Log.success("Module: Successfully imported module package " + file)
+        } catch {
+          case _ => Log.error("Module: Import of module package " + file + "failed")
+        }
+
+        // Close dialog
+        dialog.dispose()
+      }
+    })
   }
 
   def isHighlighted(m : Vector2D) : Boolean = {

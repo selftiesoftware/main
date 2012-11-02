@@ -39,38 +39,34 @@ import com.siigna.util.logging.Log
  *   available on the www.
  * </p>
  *
+ * <p>
+ *   <b>Remember to load it into the [[com.siigna.module.ModuleLoader]]</b>!
+ * </p>
+ *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
  * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.
  * @param path  The path to the resource inside the domain, e. g. ''modules/example.jar''.
  * @param local  If set to true we treat this resource as local on the current machine, see <code>toURL</code>
- * @throws IOException  If the jarFile could not be downloaded
  */
 final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
 
+  // The private jar file
+  private var _jar : Option[JarFile] = None
+
   /**
-   * The cached modules in the package.
+   * The JarFile containing the modules lying in the domain with the path given by the constructor. If the file
+   * has not been fetched before this method will attempt to retrieve it. This is normally not a concern, since the
+   * [[com.siigna.module.ModuleLoader]] should handle all this. But if you do decide to call this method, be careful.
+   * @return  A JarFile containing exciting Java classes!
    */
-  protected val _modules = collection.mutable.HashMap[Symbol, Class[_ <: Module]]()
-
-  def load(instance : ModuleInstance) = {
-    // Try to load the module from cache
-    if (modules.contains(instance.className)) {
-      modules(instance.className).newInstance().asInstanceOf[Module]
-    } else {
-      val module = ModuleLoader.load(instance.className.name, this)
-
-      _modules += instance.className -> module.getClass
-
-      module
+  def jar = {
+    if (_jar.isDefined) _jar.get
+    else {
+      _jar = Some(toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile)
+      _jar.get
     }
   }
-
-  /**
-   * A map of the modules loaded by this package.
-   * @return A map of the symbols of the modules and their corresponding java class.
-   */
-  def modules = _modules.toMap
 
   override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 

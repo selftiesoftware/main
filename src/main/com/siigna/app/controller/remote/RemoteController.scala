@@ -44,7 +44,7 @@ protected[controller] object RemoteController extends DaemonActor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("localhost", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Production)
   // val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
@@ -57,7 +57,7 @@ protected[controller] object RemoteController extends DaemonActor {
     var lastPing = System.currentTimeMillis()
 
     // First of all fetch the current drawing
-    remote(Get(Drawing, null, session), handleGetDrawing)
+    remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
 
     loop {
       

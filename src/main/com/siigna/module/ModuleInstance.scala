@@ -42,16 +42,28 @@ import scala.Some
  *   class name would be ''Default''.
  * </p>
  *
- * @param pack  The [[com.siigna.module.ModulePackage]] in which the module lies
+ * @param name  The name of the class (e. g. ''Default'' - without .class)
  * @param classPath  The class path to the module (e. g. ''com.siigna.module.base'')
- * @param className  The name of the class (e. g. ''Default'' - without .class)
  */
-final case class ModuleInstance(pack : ModulePackage, classPath : String, className : Symbol) {
+final case class ModuleInstance(name : Symbol, classPath : String) {
+
+  // The module class itself
+  private var _module : Option[Module] = None
 
   /**
-   * The [[com.siigna.module.Module]] loaded via the given [[com.siigna.module.ModulePackage]].
+   * The [[com.siigna.module.Module]] loaded via the given [[com.siigna.module.ModulePackage]]. If the module has
+   * not been loaded before, we attempt to do so. This can result in a small load-time, but it can't really be avoided.
+   * If something goes wrong we return a dummy-module to prevent everything from breaking.
+   * @return  A [[com.siigna.module.Module]] that can either contain the information we wanted or a simple
+   *          dummy-module that does... nothing.
    */
-  lazy val module : Module = pack.load(this)
+  def module : Module = {
+    if (_module.isDefined) _module.get
+    else {
+      _module = Some(ModuleLoader.load(this))
+      _module.get
+    }
+  }
 
   /**
    * The forwarding module, if any
@@ -157,9 +169,9 @@ final case class ModuleInstance(pack : ModulePackage, classPath : String, classN
   }
 
   /**
-   * Gets the full class path for the module.
-   * @return  The class path concatenated with the class name with a "."
+   * Returns the <code>name</code> parameter of the ModuleInstance as a String.
+   * @return  A String. Neat, right? :-)
    */
-  override def toString = module.toString
+  override def toString = classPath + "." + name.name
 
 }
