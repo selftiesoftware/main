@@ -26,11 +26,6 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts/", "base.jar", true))
 
   /**
-   * Cached packages and their jar files
-   */
-  protected lazy val _packages = collection.mutable.Map[ModulePackage, collection.mutable.Map[Symbol, Class[_ <: Module]]]()
-
-  /**
    * The loaded classes.
    */
   protected lazy val classes = collection.mutable.Map[ModulePackage, collection.mutable.Map[String, Class[_]]]()
@@ -45,9 +40,14 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
    * @param clazz  The class to cast
-   * @return  A Module (hopefully), otherwise probably a nasty exception
+   * @return  A Some[Module] (hopefully), otherwise None
    */
-  protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
+  protected def classToModule(clazz : Class[_]) =
+    try {
+      Some(clazz.newInstance().asInstanceOf[Module])
+    } catch {
+      case _ => None
+    }
 
   /**
    * Fetches the bytes associated with a [[java.util.jar.JarEntry]] in a [[java.util.jar.JarFile]] and
@@ -79,37 +79,36 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @return  The module if it could be found, or a dummy module if no suitable entry existed.
    */
   def load(instance : ModuleInstance) : Module = {
+    var module : Option[Module] = None
+
+    // Try to load the class from the loaded class definitions
     try {
-      // Look in the cache for the instance
-      _packages.values.foreach ( map => {
-        if (map.contains(instance.name))
-          return map(instance.name).newInstance().asInstanceOf[Module]
-      })
-
-      // Otherwise try to load the class from the loaded class definitions
-      classes.foreach(t => {
-        try {
-          if (t._2.contains(instance.toString)) {
-            // Fetch the class
-            val c = classToModule(t._2(instance.toString))
-
-            // Cache the module class
-            _packages(t._1) += Symbol(instance.toString) -> c.getClass
-
-            // Break out and return
-            return c
+      import scala.util.control.Breaks._
+      breakable {
+        classes.foreach(t => {
+          try {
+            if (t._2.contains(instance.toString)) {
+              // Fetch the class
+              module = classToModule(t._2(instance.toString))
+              break()
+            }
+          } catch {
+            case e => Log.warning("ModuleLoader: Module " + instance + " not found. Did you include the right package?", e)
           }
-        } catch {
-          case _ =>Log.warning("ModuleLoader: Module " + instance + " not found. Did you include the right package?")
-        }
-      })
-
+        })
+      }
     } catch {
       case e : Exception => println("ModuleLoader: Error when loading module.", e)
     }
 
-    // No module was found
-    dummyModule
+    module match {
+      case Some(m) => m  // Gotcha!
+      case _ => {        // No module was found
+        Log.warning("ModuleLoader: Could not find module " + instance + ", inserting dummy module instead.")
+        dummyModule
+      }
+    }
+
   }
 
   /**
@@ -121,12 +120,11 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @param pack  The package to load
    */
   def load(pack : ModulePackage) {
-    if (!_packages.contains(pack)) {
+    if (!classes.contains(pack)) {
       // Force-load the jar file if it hasn't already been downloaded
       val jar = pack.jar
 
       // Save the package
-      _packages += pack -> collection.mutable.Map()
       classes  += pack -> collection.mutable.Map()
 
       // Load the classes inside
@@ -149,10 +147,9 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @return  Some[Module] if the module could be instantiated and cast, None otherwise
    */
   protected def loadModuleFrom(clazz : Class[_]) : Option[Module] = {
-    try {
-      Some(classToModule(clazz))
-    } catch {
-      case e : InstantiationException => {
+    classToModule(clazz) match {
+      case s : Some[Module] => s
+      case _ => {
         // If constructing via the class, try to force the constructor public.
         try {
           val constructors = clazz.getDeclaredConstructors
@@ -163,10 +160,6 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
           None
         }
       }
-      case e => {
-        Log.warning("ModuleLoader: Class " + clazz.getName + "found, but failed to cast to Module.", e)
-        None
-      }
     }
   }
 
@@ -174,7 +167,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * A list of the loaded packages.
    * @return  An Iterable[ModulePackage].
    */
-  def packages = _packages.keys
+  def packages = classes.keys
 
   /**
    * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
@@ -192,7 +185,6 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @param pack  The package to unload.
    */
   def unload(pack : ModulePackage) {
-    _packages -= pack
     classes -= pack
   }
 
