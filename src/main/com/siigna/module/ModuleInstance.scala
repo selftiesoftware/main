@@ -111,8 +111,8 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
           // Return None so the parent doesn't react on the message too
           None
         }
-        // The return value was not recognized, run it as we normally would
-        case _ => parse(events)
+        // The return value was not recognized, nothing should happen
+        case _ => None
       }
     // Otherwise we handle the events inside this module
     } else parse(events)
@@ -123,6 +123,9 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
    * @param events The list of events to use
    */
   protected def parse(events : List[Event]) : Option[ModuleEvent] = {
+    // The event to return
+    var event : Option[ModuleEvent] = None
+
     // Quit if the user presses escape
     events match {
       case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => return Some(End)
@@ -141,18 +144,24 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
         case Some(f) if (f.isDefinedAt(parsedEvents)) => {
           f(parsedEvents) match {
             // Forward to a module
-            case Start(m) => {
+            case s : Start[_] => {
               // Try to load the module
-              child = Some(m)
+              child = Some(s.module)
 
-              // Start painting the module and log
-              module.interface.chain(m.module.interface)
-              Log.debug("Module '" + module + "': Forwarded to " +m)
+              // Start painting the module
+              module.interface.chain(s.module.module.interface)
+
+              // Send the start message on to the child
+              child.get.apply(s :: events)
+
+              // Log success
+              Log.debug("Module '" + module + "': Forwarded to " + s.module +
+                (if (s.message.isDefined) " with message " + s.message else ""))
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => state = s
             // If module returns a ModuleEvent (e. g. End), return it immediately
-            case e : ModuleEvent => return Some(e)
+            case e : ModuleEvent => event = Some(e)
             case e => // Function return value does not match: Do nothing
           }
         }
@@ -164,8 +173,8 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
       }
     }
 
-    // No ModuleEvent encountered, so return None
-    None
+    // Return the event
+    event
   }
 
   /**

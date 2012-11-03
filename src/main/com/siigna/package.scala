@@ -106,7 +106,7 @@ package object siigna extends com.siigna.util.Implicits {
   type ModuleEvent = com.siigna.util.event.ModuleEvent
   type End[T]      = com.siigna.util.event.End[T]
   val End          = com.siigna.util.event.End
-  type Start       = com.siigna.util.event.Start
+  type Start[T]    = com.siigna.util.event.Start[T]
   val Start        = com.siigna.util.event.Start
 
   val MouseButtonLeft   = com.siigna.util.event.MouseButtonLeft
