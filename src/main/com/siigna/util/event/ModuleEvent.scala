@@ -59,7 +59,7 @@ object Start {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply(name : Symbol, classPath : String) : Start[_] = Start(Module(name, classPath), Unit)
+  def apply(name : Symbol, classPath : String) : Start[_] = new Start(Module(name, classPath), Unit)
 
   /**
    * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
@@ -71,6 +71,6 @@ object Start {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply[T](name : Symbol, classPath : String, message : T) = Start[T](Module(name, classPath), message)
+  def apply[T](name : Symbol, classPath : String, message : T) : Start[T] = new Start[T](Module(name, classPath), message)
 
 }

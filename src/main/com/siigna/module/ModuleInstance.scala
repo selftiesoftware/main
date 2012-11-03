@@ -155,8 +155,7 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
               child.get.apply(s :: events)
 
               // Log success
-              Log.debug("Module '" + module + "': Forwarded to " + s.module +
-                (if (s.message.isDefined) " with message " + s.message else ""))
+              Log.debug("Module '" + module + "': Forwarded to " + s.module)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => state = s
