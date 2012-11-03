@@ -16,12 +16,13 @@ import java.util.jar.{JarEntry, JarFile}
 import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
 import java.io.IOException
+import java.net.{URL, URLClassLoader}
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
  * This class loader loads and caches modules in Siigna.
  */
-object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
+object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClassLoader) {
 
   // Create a default package
   load(ModulePackage('base, "rls.siigna.com/base/com/siigna/siigna-module_2.9.2/preAlpha", "siigna-module_2.9.2-preAlpha.jar", false))
@@ -29,7 +30,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   /**
    * The loaded classes.
    */
-  protected lazy val classes = collection.mutable.Map[ModulePackage, collection.mutable.Map[String, Class[_]]]()
+  protected lazy val modules = collection.mutable.Map[ModulePackage, collection.mutable.Map[String, Class[_ <: Module]]]()
 
   /**
    * A dummy module to use if the loading fails.
@@ -43,12 +44,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @param clazz  The class to cast
    * @return  A Some[Module] (hopefully), otherwise None
    */
-  protected def classToModule(clazz : Class[_]) =
-    try {
-      Some(clazz.newInstance().asInstanceOf[Module])
-    } catch {
-      case _ : Exception => None
-    }
+  protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
 
   /**
    * Fetches the bytes associated with a [[java.util.jar.JarEntry]] in a [[java.util.jar.JarFile]] and
@@ -62,15 +58,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
     val bytes = Stream.continually(input.read).takeWhile(-1 !=).map(_.toByte).toArray
     val name  = entry.getName
     val clazz = name.substring(0, name.indexOf('.')).replace('/', '.') // Replace package delimiters and remove .class
-    try {
-      clazz -> defineClass(clazz, bytes, 0, bytes.size)
-    } catch {
-      case e : LinkageError => // This is caused by an attempt to duplicate classes
-                               // caused by the additional "$" above. Unfortunately scala object are postfixed
-                               // with a "$" so there's not really anything we can do about it...
-                               // So we just return the same class.. tihiii
-      clazz -> loadClass(clazz)
-    }
+    clazz -> defineClass(clazz, bytes, 0, bytes.size)
   }
 
   /**
@@ -82,24 +70,16 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
   def load(instance : ModuleInstance) : Module = {
     var module : Option[Module] = None
 
-    // Try to load the class from the loaded class definitions
-    try {
-      import scala.util.control.Breaks._
-      breakable {
-        classes.foreach(t => {
-          try {
-            if (t._2.contains(instance.toString)) {
-              // Fetch the class
-              module = classToModule(t._2(instance.toString))
-              break()
-            }
-          } catch {
-            case _ : Exception => // Module couldn't be found, ignore it
-          }
-        })
+    modules.values.find(_.contains(instance.toString)) match {
+      case Some(map) => module = Some(classToModule(map(instance.toString)))
+      case _ => {
+        // Try to load the class from the loaded class definitions
+        try {
+          module = Some(classToModule(loadClass(instance.toString)))
+        } catch {
+          case e : Exception => Log.error("ModuleLoader: Error when loading module", e)
+        }
       }
-    } catch {
-      case e : Exception => println("ModuleLoader: Error when loading module.", e)
     }
 
     module match {
@@ -122,20 +102,12 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @throws IOException  If something went wrong while trying to download the .jar file
    */
   def load(pack : ModulePackage) {
-    if (!classes.contains(pack)) {
-      // Force-load the jar file if it hasn't already been downloaded
-      val jar = pack.jar
+    if (!modules.contains(pack)) {
+      // Add package to URL base
+      addURL(pack.toURL)
 
-      // Save the package
-      classes  += pack -> collection.mutable.Map()
-
-      // Load the classes inside
-      opOnJarEntries(jar, entry => {
-        if (!entry.isDirectory) {
-          // Load the classes into the class loader
-          classes(pack) += defineClass(jar, entry)
-        }
-      })
+      // Add to cache
+      modules += pack -> collection.mutable.Map()
 
       Log.success("ModuleLoader: Sucessfully stored the module package " + pack)
     } else {
@@ -149,9 +121,10 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @return  Some[Module] if the module could be instantiated and cast, None otherwise
    */
   protected def loadModuleFrom(clazz : Class[_]) : Option[Module] = {
-    classToModule(clazz) match {
-      case s : Some[Module] => s
-      case _ => {
+    try {
+      Some(classToModule(clazz))
+    } catch {
+      case _ : Exception => {
         // If constructing via the class, try to force the constructor public.
         try {
           val constructors = clazz.getDeclaredConstructors
@@ -169,7 +142,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * A list of the loaded packages.
    * @return  An Iterable[ModulePackage].
    */
-  def packages = classes.keys
+  def packages = modules.keys
 
   /**
    * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
@@ -187,7 +160,7 @@ object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
    * @param pack  The package to unload.
    */
   def unload(pack : ModulePackage) {
-    classes -= pack
+    modules -= pack
   }
 
 }

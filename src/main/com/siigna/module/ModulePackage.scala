@@ -39,10 +39,6 @@ import com.siigna.util.logging.Log
  *   available on the www.
  * </p>
  *
- * <p>
- *   <b>Remember to load it into the [[com.siigna.module.ModuleLoader]]</b>!
- * </p>
- *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
  * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.
@@ -51,22 +47,13 @@ import com.siigna.util.logging.Log
  */
 final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
 
-  // The private jar file
-  private var _jar : Option[JarFile] = None
-
   /**
    * The JarFile containing the modules lying in the domain with the path given by the constructor. If the file
    * has not been fetched before this method will attempt to retrieve it. This is normally not a concern, since the
    * [[com.siigna.module.ModuleLoader]] should handle all this. But if you do decide to call this method, be careful.
    * @return  A JarFile containing exciting Java classes!
    */
-  def jar = {
-    if (_jar.isDefined) _jar.get
-    else {
-      _jar = Some(toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile)
-      _jar.get
-    }
-  }
+  def jar = toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile
 
   override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 
