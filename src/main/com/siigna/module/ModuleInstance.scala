@@ -84,14 +84,23 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
     if (child.isDefined) {
       // Give the events to the child
       child.get.apply(events) match {
-        // A message was received for us to pass on
-        case Some(m : Message[_]) => {
-          // Give the message to this module to act upon
-          parse(m :: events)
+        // The child ended without a message
+        case Some(End) => {
+          val name = child.get.toString
 
-          // Return None so the parent doesn't react on the message too
-          None
+          // Remove the child
+          child = None
+
+          // Stop painting the child
+          module.interface.unchain()
+
+          // Log it
+          Log.debug("Module '" + module + "': Ended module " + name)
+
+          // Continue to run the current module and return the result
+          parse(End :: events)
         }
+
         // The child ended with a message
         case Some(m : End[_]) => {
           val name = child.get.toString
@@ -105,14 +114,11 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
           // Log it
           Log.debug("Module '" + module + "': Ended module " + name + " with message " + m.message)
 
-          // Continue to run the current module so it can react
+          // Continue to run the current module and return the result
           parse(m :: events)
-
-          // Return None so the parent doesn't react on the message too
-          None
         }
         // The return value was not recognized, nothing should happen
-        case _ => None
+        case x => None
       }
     // Otherwise we handle the events inside this module
     } else parse(events)
@@ -151,8 +157,8 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
               // Start painting the module
               module.interface.chain(s.module.module.interface)
 
-              // Send the start message on to the child
-              child.get.apply(s :: events)
+              // Send the start message through this class again
+              apply(s :: events)
 
               // Log success
               Log.debug("Module '" + module + "': Forwarded to " + s.module)

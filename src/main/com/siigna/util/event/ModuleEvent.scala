@@ -18,9 +18,11 @@ import com.siigna.module.{Module, ModuleInstance}
 sealed trait ModuleEvent extends Event
 
 /**
- * Messages that can be sent to and from modules and states, containing a message of a given type.
+ * Messages that can be sent to and from states, containing a message of a given type.
+ * <b>Note:</b> Messages are treated like normal events and are <i>not</i> given to children and/or
+ * parent modules like [[com.siigna.util.event.Start]] and [[com.siigna.util.event.End]].
  *
- * @param message  any object that the module wishes to forward.
+ * @param message  any object that the module wishes to pass on to other states.
  */
 final case class Message[T](message : T) extends ModuleEvent { val symbol = 'Message }
 
@@ -50,37 +52,31 @@ final case class Start[T](module : ModuleInstance, message : T) extends ModuleEv
 object Start {
 
   /**
-   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
-   * returns it, so the controller can load and the new module. This is useful when modules needs to
-   * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
-   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   * Starts a [[com.siigna.module.ModuleInstance]] with the given module path and
+   * returns it, so the controller can load and the new module.
    *
    * @param module The [[com.siigna.module.ModuleInstance]] to create
-   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   * @return A [[com.siigna.module.ModuleInstance]]
    */
   def apply(module : ModuleInstance) : Start[Unit] = new Start[Unit](module, Unit)
 
   /**
    * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
-   * returns it, so the controller can load and the new module. This is useful when modules needs to
-   * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
-   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   * returns it, so the controller can load and the new module.
    *
    * @param name  The name of the module
    * @param classPath  The class path of the module
-   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   * @return A [[com.siigna.module.ModuleInstance]]
    */
   def apply(name : Symbol, classPath : String) : Start[_] = new Start(Module(name, classPath), Unit)
 
   /**
    * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
-   * returns it, so the controller can load and the new module with the given message. This is useful when modules
-   * needs to wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
-   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   * returns it, so the controller can load and the new module with the given message.
    *
    * @param name  The name of the module
    * @param classPath  The class path of the module
-   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   * @return A [[com.siigna.module.ModuleInstance]]
    */
   def apply[T](name : Symbol, classPath : String, message : T) : Start[T] = new Start[T](Module(name, classPath), message)
 
