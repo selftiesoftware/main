@@ -71,6 +71,6 @@ object Start {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply[T](name : Symbol, classPath : String, message : T) = Start(Module(name, classPath), message)
+  def apply[T](name : Symbol, classPath : String, message : T) = Start[T](Module(name, classPath), message)
 
 }
