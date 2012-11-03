@@ -37,11 +37,27 @@ import com.siigna.app.Siigna
  */
 object Controller extends Actor with EventController {
 
+  // The private init module.. ssshhh
+  private var _initModule : Option[ModuleInstance] = None
+
   /**
-   * The default [[com.siigna.module.Module]] that we're sending events to.
-   * Override this if you want to change the behavior.
+   * The init [[com.siigna.module.Module]] that we're sending events to.
+   * Call <code>initModule_=()</code> if you want to change the behavior.
+   * @see [[com.siigna.module.Module]]
    */
-  var defaultModule = ModuleInstance('Default, "com.siigna.module.base")
+  def initModule : ModuleInstance = _initModule.getOrElse(new ModuleInstance('Init, ModuleLoader.DummyModule))
+
+  /**
+   * Sets the init module so every events from the Controller will be forwarded to the init module instead.
+   * This also means the the previous init module does not get any events.
+   * @param instance  The [[com.siigna.module.ModuleInstance]] to use as the default module.
+   * @see [[com.siigna.module.Module]]
+   * @see [[com.siigna.module.ModuleInstance]]
+   */
+  def initModule_=(instance : ModuleInstance) {
+    Siigna.setInterface(instance.module.interface)
+    _initModule = Some(instance)
+  }
 
   /**
    * <p>
@@ -62,7 +78,8 @@ object Controller extends Actor with EventController {
     // Start RemoteController
     RemoteController.start()
 
-    Siigna.setInterface(defaultModule.module.interface)
+    // Init ModuleLoader
+    ModuleLoader
 
     var events : List[Event] = Nil
 
@@ -82,12 +99,7 @@ object Controller extends Actor with EventController {
           events = (event :: events).take(10)
 
           // Send the events on to the modules!
-          defaultModule(events)
-
-          // Never allow it to step into the 'End state
-          if (defaultModule.state == 'End) {
-            defaultModule.state = 'Start
-          }
+          initModule(events)
         }
 
         // Exit

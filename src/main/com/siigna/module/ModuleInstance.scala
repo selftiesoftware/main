@@ -43,27 +43,9 @@ import scala.Some
  * </p>
  *
  * @param name  The name of the class (e. g. ''Default'' - without .class)
- * @param classPath  The class path to the module (e. g. ''com.siigna.module.base'')
+ * @param module  The module that the instance communicates with
  */
-final case class ModuleInstance(name : Symbol, classPath : String) {
-
-  // The module class itself
-  private var _module : Option[Module] = None
-
-  /**
-   * The [[com.siigna.module.Module]] loaded via the given [[com.siigna.module.ModulePackage]]. If the module has
-   * not been loaded before, we attempt to do so. This can result in a small load-time, but it can't really be avoided.
-   * If something goes wrong we return a dummy-module to prevent everything from breaking.
-   * @return  A [[com.siigna.module.Module]] that can either contain the information we wanted or a simple
-   *          dummy-module that does... nothing.
-   */
-  def module : Module = {
-    if (_module.isDefined) _module.get
-    else {
-      _module = Some(ModuleLoader.load(this))
-      _module.get
-    }
-  }
+final case class ModuleInstance(name : Symbol, module : Module) {
 
   /**
    * The forwarding module, if any
@@ -186,6 +168,23 @@ final case class ModuleInstance(name : Symbol, classPath : String) {
    * Returns the <code>name</code> parameter of the ModuleInstance as a String.
    * @return  A String. Neat, right? :-)
    */
-  override def toString = classPath + "." + name.name
+  override def toString = name.name
+
+}
+
+/**
+ * Companion object for easy loading of [[com.siigna.module.Module]]s.
+ */
+object ModuleInstance {
+
+  /**
+   * Creates a ModuleInstance with the given name and class-path. If the module could not be found, a dummy-module
+   * is inserted instead...
+   * @param name  The name of the module, e. g. 'Menu
+   * @param classPath  The path of the module, e. g. "com.siigna.module.base"
+   * @return  A ModuleInstance
+   */
+  def apply(name : Symbol, classPath : String) : ModuleInstance =
+    new ModuleInstance(name, ModuleLoader.load(name, classPath))
 
 }

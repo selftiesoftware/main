@@ -38,6 +38,19 @@ import com.siigna.util.logging.Log
  *   available on the www.
  * </p>
  *
+ * <h2>Overriding or replacing default behaviour</h2>
+ * <p>
+ *   It is possible to override the default behaviour for modules and [[com.siigna.module.ModulePackage]]s. Every
+ *   time a ModulePackage is loaded we check for a class called <code>ModuleInit</code> in the
+ *   <code>com.siigna.module</code> package. If this class exist we assume that it can work as the base of the package
+ *   and will override every other init-modules previously implemented.
+ * </p>
+ * <p>
+ *   So: If a [[com.siigna.module.ModulePackage]] wishes to define or override the
+ *   initializing module, <b>a module needs to be placed in the <code>com.siigna.module</code>
+ *   package under the name <code>ModuleInit</code>!</b>. If it is not, the init module will not work as intended.
+ * </p>
+ *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
  * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.

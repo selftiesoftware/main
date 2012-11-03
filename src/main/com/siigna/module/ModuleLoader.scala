@@ -21,63 +21,56 @@ import java.net.{URL, URLClassLoader}
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
  * This class loader loads and caches modules in Siigna.
+ * @todo implement caching on a per package basis
  */
-object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClassLoader) {
+object ModuleLoader {
 
-  // Create a default packages
-  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  // The underlying class loader
+  protected var loader = new URLClassLoader(Array(), Controller.getClass.getClassLoader)
 
   /**
    * The loaded classes.
    */
-  protected lazy val modules = collection.mutable.Map[ModulePackage, collection.mutable.Map[String, Class[_ <: Module]]]()
+  protected lazy val modules = collection.mutable.Map[ModulePackage, collection.mutable.Map[Symbol, Class[_ <: Module]]]()
 
   /**
    * A dummy module to use if the loading fails.
    */
-  lazy val dummyModule : Module = new Module {
+  lazy val DummyModule : Module = new Module {
     val stateMap : StateMap = Map('Start -> { case _ => End })
   }
+
+  // Create a default packages
+  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
    * @param clazz  The class to cast
-   * @return  A Some[Module] (hopefully), otherwise None
+   * @return  A Module (hopefully), otherwise probably a nasty error
    */
   protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
 
   /**
-   * Fetches the bytes associated with a [[java.util.jar.JarEntry]] in a [[java.util.jar.JarFile]] and
-   * attempts to define it as a class in the class loader.
-   * @param file  The JarFile that contains the entry
-   * @param entry  The JarEntry to read
-   * @return  The class that was defined
-   */
-  protected def defineClass(file : JarFile, entry : JarEntry) : (String, Class[_]) = {
-    val input = file.getInputStream(entry)
-    val bytes = Stream.continually(input.read).takeWhile(-1 !=).map(_.toByte).toArray
-    val name  = entry.getName
-    val clazz = name.substring(0, name.indexOf('.')).replace('/', '.') // Replace package delimiters and remove .class
-    clazz -> defineClass(clazz, bytes, 0, bytes.size)
-  }
-
-  /**
    * Attempts to load a [[com.siigna.module.Module]] by looking through all the available packages,
-   * starting with the ones loaded first.
-   * @param instance  The module instance to load.
+   * starting with the ones loaded first. If that
+   * @param name  The symbolic name of the module
+   * @param classPath  The class path, e. g. "com.siigna.module.base"
    * @return  The module if it could be found, or a dummy module if no suitable entry existed.
    */
-  def load(instance : ModuleInstance) : Module = {
+  def load(name : Symbol, classPath : String) : Module = {
     var module : Option[Module] = None
+    val path = classPath + "." + name.name
 
-    modules.values.find(_.contains(instance.toString)) match {
-      case Some(map) => module = Some(classToModule(map(instance.toString)))
+    modules.values.find(_.contains(name)) match {
+      case Some(map) => module = Some(classToModule(map(name)))
       case _ => {
         // Try to load the class from the loaded class definitions
         try {
-          module = Some(classToModule(loadClass(instance.toString)))
+          module = Some(classToModule(loader.loadClass(path)))
         } catch {
-          case e : Exception => Log.error("ModuleLoader: Error when loading module", e)
+          case e : Exception => Log.debug("ModuleLoader: Error when loading module", e)
         }
       }
     }
@@ -85,8 +78,8 @@ object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClass
     module match {
       case Some(m) => m  // Gotcha!
       case _ => {        // No module was found
-        Log.warning("ModuleLoader: Could not find module " + instance + ", inserting dummy module instead.")
-        dummyModule
+        Log.warning("ModuleLoader: Could not find module " + path + ", inserting dummy module instead.")
+        DummyModule
       }
     }
 
@@ -104,7 +97,18 @@ object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClass
   def load(pack : ModulePackage) {
     if (!modules.contains(pack)) {
       // Add package to URL base
-      addURL(pack.toURL)
+      val url = pack.toURL
+      loader = new URLClassLoader(loader.getURLs.:+(url), Controller.getClass.getClassLoader)
+
+      // Check for ModuleInit in that package
+      try {
+        val c = loader.loadClass("com.siigna.module.ModuleInit")
+        val m = classToModule(c)
+        Controller.initModule = new ModuleInstance('ModuleInit, m)
+        Log.success("ModuleLoader: Reloaded init module.")
+      } catch {
+        case e => e.printStackTrace() // No module found
+      }
 
       // Add to cache
       modules += pack -> collection.mutable.Map()
@@ -116,43 +120,10 @@ object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClass
   }
 
   /**
-   * Attempt to load and instantiate a new module from a given archetype class.
-   * @param clazz  The class-information to create a module from
-   * @return  Some[Module] if the module could be instantiated and cast, None otherwise
-   */
-  protected def loadModuleFrom(clazz : Class[_]) : Option[Module] = {
-    try {
-      Some(classToModule(clazz))
-    } catch {
-      case _ : Exception => {
-        // If constructing via the class, try to force the constructor public.
-        try {
-          val constructors = clazz.getDeclaredConstructors
-          constructors(0).setAccessible(true)
-          Some(constructors(0).newInstance().asInstanceOf[Module])
-        } catch {
-          case e : Exception => Log.warning("ModuleLoader: Class " + clazz.getName + " found but failed to instantiate.", e)
-          None
-        }
-      }
-    }
-  }
-
-  /**
    * A list of the loaded packages.
    * @return  An Iterable[ModulePackage].
    */
   def packages = modules.keys
-
-  /**
-   * Execute a function on each [[java.util.jar.JarEntry]] elements in the jar file
-   * @param file  The jar file to read the entries from
-   * @param f  The function to apply on the entries
-   */
-  protected def opOnJarEntries(file : JarFile, f : JarEntry => Unit) {
-    val entries = file.entries
-    while (entries.hasMoreElements) { f(entries.nextElement) }
-  }
 
   /**
    * Unloads a [[com.siigna.module.ModulePackage]] so all modules created in the future cannot derive from this
@@ -161,6 +132,7 @@ object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClass
    */
   def unload(pack : ModulePackage) {
     modules -= pack
+    loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), Controller.getClass.getClassLoader)
   }
 
 }

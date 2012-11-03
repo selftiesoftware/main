@@ -56,32 +56,36 @@ protected[controller] object RemoteController extends DaemonActor {
     // The time of the most recent ping
     var lastPing = System.currentTimeMillis()
 
-    // First of all fetch the current drawing
-    remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
+    try {
+      // First of all fetch the current drawing
+      remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
 
-    loop {
+      loop {
 
-      // Query for new actions
-      remote(Get(ActionId, null, session), handleGetActionId)
+        // Query for new actions
+        remote(Get(ActionId, null, session), handleGetActionId)
 
-      reactWithin(pingTime) {
-        // Set an action to the server
-        case (action : Action, undo : Boolean) => {
-          // Parse the local action to ensure all the ids are up to date
-          val updatedAction = parseLocalAction(action, undo)
+        reactWithin(pingTime) {
+          // Set an action to the server
+          case (action : Action, undo : Boolean) => {
+            // Parse the local action to ensure all the ids are up to date
+            val updatedAction = parseLocalAction(action, undo)
 
-          // Dispatch the updated action
-          remote(Set(Action, updatedAction, session), handleSetAction)
-        }
+            // Dispatch the updated action
+            remote(Set(Action, updatedAction, session), handleSetAction)
+          }
 
-        // Timeout
-        case TIMEOUT =>
+          // Timeout
+          case TIMEOUT =>
 
-        // We can't handle any other commands actively...
-        case message => {
-          Log.warning("Remote: Unknown input '" + message + "', expected a remote action.")
+          // We can't handle any other commands actively...
+          case message => {
+            Log.warning("Remote: Unknown input '" + message + "', expected a remote action.")
+          }
         }
       }
+    } catch {
+      case e : Error => Log.error("Remote: Error, shutting down.", e)
     }
   }
 
