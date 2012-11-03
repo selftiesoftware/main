@@ -14,7 +14,7 @@ package com.siigna.app.controller.remote
 import actors.remote.RemoteActor
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{DaemonActor, Actor}
+import actors.{TIMEOUT, DaemonActor, Actor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -74,9 +74,12 @@ protected[controller] object RemoteController extends DaemonActor {
           remote(Set(Action, updatedAction, session), handleSetAction)
         }
 
+        // Timeout
+        case TIMEOUT =>
+
         // We can't handle any other commands actively...
         case message => {
-          Log.warning("Remote: Unknown input(" + message + "), expected a remote action.")
+          Log.warning("Remote: Unknown input '" + message + "', expected a remote action.")
         }
       }
     }
