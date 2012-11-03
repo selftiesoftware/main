@@ -42,7 +42,7 @@ case object End extends ModuleEvent { val symbol = 'ModuleEnd }
  * @param module  The module to initialize and forward to.
  * @param message  An optional message to the new module.
  */
-final case class Start[T](module : ModuleInstance, message : Option[T] = None) extends ModuleEvent { val symbol = 'ModuleStart }
+final case class Start[T](module : ModuleInstance, message : T) extends ModuleEvent { val symbol = 'ModuleStart }
 
 /**
  * Companion object for case class [[com.siigna.util.event.Start]]
@@ -50,7 +50,6 @@ final case class Start[T](module : ModuleInstance, message : Option[T] = None) e
 object Start {
 
   /**
-   * @define moduleToModuleParameters  name and class-path
    * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
    * returns it, so the controller can load and the new module. This is useful when modules needs to
    * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
@@ -60,6 +59,18 @@ object Start {
    * @param classPath  The class path of the module
    * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
    */
-  def apply(name : Symbol, classPath : String) : Start[_] = Start(Module(name, classPath))
+  def apply(name : Symbol, classPath : String) : Start[_] = Start(Module(name, classPath), Unit)
+
+  /**
+   * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
+   * returns it, so the controller can load and the new module with the given message. This is useful when modules
+   * needs to wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
+   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   *
+   * @param name  The name of the module
+   * @param classPath  The class path of the module
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply[T](name : Symbol, classPath : String, message : T) = Start(Module(name, classPath), message)
 
 }
