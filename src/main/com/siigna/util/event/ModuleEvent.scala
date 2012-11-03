@@ -50,7 +50,18 @@ final case class Start[T](module : ModuleInstance, message : T) extends ModuleEv
 object Start {
 
   /**
-   * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
+   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
+   * returns it, so the controller can load and the new module. This is useful when modules needs to
+   * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
+   * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
+   *
+   * @param module The [[com.siigna.module.ModuleInstance]] to create
+   * @return A [[com.siigna.module.ModuleInstance]] to be read by the controller.
+   */
+  def apply(module : ModuleInstance) : Start[Unit] = new Start[Unit](module, Unit)
+
+  /**
+   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
    * returns it, so the controller can load and the new module. This is useful when modules needs to
    * wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
    * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
@@ -62,7 +73,7 @@ object Start {
   def apply(name : Symbol, classPath : String) : Start[_] = new Start(Module(name, classPath), Unit)
 
   /**
-   * Creates a [[com.siigna.module.ModuleInstance]] of a module with the given name and class-path and
+   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
    * returns it, so the controller can load and the new module with the given message. This is useful when modules
    * needs to wrap the underlying understanding of [[com.siigna.module.ModuleInstance]]s and
    * [[com.siigna.module.ModulePackage]]s away and maintain the simple module semantic.
