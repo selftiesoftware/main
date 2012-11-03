@@ -24,7 +24,7 @@ import java.io.IOException
 object ModuleLoader extends ClassLoader(Controller.getClass.getClassLoader) {
 
   // Create a default package
-  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  load(ModulePackage('base, "rls.siigna.com/base/com/siigna/siigna-module_2.9.2/preAlpha", "siigna-module_2.9.2-preAlpha.jar", false))
 
   /**
    * The loaded classes.
