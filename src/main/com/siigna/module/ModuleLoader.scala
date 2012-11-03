@@ -24,8 +24,8 @@ import java.net.{URL, URLClassLoader}
  */
 object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClassLoader) {
 
-  // Create a default package
-  load(ModulePackage('base, "rls.siigna.com/base/com/siigna/siigna-module_2.9.2/preAlpha", "siigna-module_2.9.2-preAlpha.jar", false))
+  // Create a default packages
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base/nightly", "siigna-base_2.9.2-nightly.jar", false))
 
   /**
    * The loaded classes.

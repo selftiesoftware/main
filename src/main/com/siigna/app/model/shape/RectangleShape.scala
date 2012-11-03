@@ -11,7 +11,16 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   type T = RectangleShape
 
-  def apply(s : ShapeSelector) = None
+  def apply(part : ShapeSelector) = None
+  /*part match {
+    case Selector(b) => {
+      Some(new PartialShape(this, (t : TransformationMatrix) => RectangleShape(
+
+      )))
+    }
+    case FullSelector => Some(new PartialShape(this, transform))
+    case _ => None
+  }*/
 
   def delete(part : ShapeSelector) = Nil
 
@@ -24,14 +33,15 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def setAttributes(attributes : Attributes) = copy(attributes = attributes)
 
-  def transform(matrix : TransformationMatrix) =
+  def transform(matrix : TransformationMatrix) = {
     new RectangleShape(
-      center.transform(matrix),
+    center.transform(matrix),
       width * matrix.scaleFactor,
       height * matrix.scaleFactor,
-      rotation, //+ (Vector2D(0, 0) - matrix.transform(Vector2D(1, 1)))
+      rotation + matrix.rotation,
       attributes
     )
+  }
 
 }
 

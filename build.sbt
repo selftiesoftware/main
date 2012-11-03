@@ -1,6 +1,6 @@
 name := "siigna-main"
 
-version := "preAlpha"
+version := "nightly"
 
 organization := "com.siigna"
 
@@ -16,13 +16,12 @@ mainClass in (Compile, run) := Some("com.siigna.app.SiignaApplication")
 
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
-publishTo := Some(Resolver.file("file",  new File( "../rls/base" )) )
+publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
 
-resolvers += "Siigna" at "http://rls.siigna.com/base"
+resolvers += "Siigna" at "http://rls.siigna.com"
 
 fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
-//  "com.siigna" %% "siigna-module" % "preAlpha",
   "org.scala-lang" % "scala-library" % "2.9.2"
 )
