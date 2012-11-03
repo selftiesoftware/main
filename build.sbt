@@ -18,7 +18,7 @@ mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
 publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
 
-resolvers += "Siigna" at "http://rls.siigna.com/base"
+resolvers += "Siigna" at "http://rls.siigna.com"
 
 fork in run := true // Do this. All day everyday
 
