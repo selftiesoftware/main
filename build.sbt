@@ -16,7 +16,7 @@ mainClass in (Compile, run) := Some("com.siigna.app.SiignaApplication")
 
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
-publishTo := Some(Resolver.file("file",  new File( "../rls/base" )) )
+publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
 
 resolvers += "Siigna" at "http://rls.siigna.com/base"
 
