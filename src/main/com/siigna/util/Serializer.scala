@@ -13,13 +13,7 @@ import com.siigna.app.model.action.RemoteAction
  */
 object Serializer {
 
-  private def writeToBytesExt[T<:Externalizable] (ser: T): Array[Byte] = {
-    val baos = new ByteArrayOutputStream()
-    val oos = new ObjectOutputStream(baos)
-    ser.writeExternal(oos)
-    baos.toByteArray
-  }
-
+  // Writes a serializable object to a byte array
   private def writeToBytesSer[T<:Serializable] (ser: T): Array[Byte] = {
     val baos = new ByteArrayOutputStream()
     val oos = new ObjectOutputStream(baos)
