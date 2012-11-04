@@ -139,6 +139,9 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               // Start painting the module
               module.interface.chain(s.module.module.interface)
 
+              // Parse the events to the event parser so it can initialize
+              s.module.module.eventParser.parse(parsedEvents)
+
               // Send the start message through this class again
               apply(s :: events)
 
