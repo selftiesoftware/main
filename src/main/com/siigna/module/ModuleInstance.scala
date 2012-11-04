@@ -107,7 +107,6 @@ final case class ModuleInstance(name : Symbol, module : Module) {
 
   /**
    * Copies the ModuleInstance to avoid using old duplicates of modules.
-   * @todo
    * @return  A new ModuleInstance
    */
   def copy = {
