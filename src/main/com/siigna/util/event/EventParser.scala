@@ -112,6 +112,14 @@ class EventParser {
   def mousePosition = mouse
 
   /**
+   * Sets the mouse position to the given vector. This is used by [[com.siigna.module.ModuleInstance]] to set up
+   * the right mouse coordinates when starting the module (initial coordinates is defined as Vector2D.empty,
+   * which might not always look good).
+   * @param v  The mouse position to set.
+   */
+  def mousePosition_=(v : Vector2D) { mouse = v }
+
+  /**
    * Let the track and the snappers paint. This is handy if a track, for instance, wishes to show some kind
    * of guideline as to where the current events are tracked to.
    */

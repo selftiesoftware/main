@@ -19,7 +19,6 @@ import com.siigna.util.event.KeyUp
 import com.siigna.util.event.KeyDown
 import scala.Some
 
-
 /**
  * <p>
  *   A ModuleInstance is an entry in a [[com.siigna.module.ModulePackage]].
@@ -107,6 +106,15 @@ final case class ModuleInstance(name : Symbol, module : Module) {
   }
 
   /**
+   * Copies the ModuleInstance to avoid using old duplicates of modules.
+   * @todo
+   * @return  A new ModuleInstance
+   */
+  def copy = {
+    new ModuleInstance(name, module.getClass.newInstance().asInstanceOf[Module])
+  }
+
+  /**
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
@@ -139,8 +147,8 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               // Start painting the module
               module.interface.chain(s.module.module.interface)
 
-              // Parse the events to the event parser so it can initialize
-              s.module.module.eventParser.parse(parsedEvents)
+              // Set the mouse position of the new event parser
+              s.module.module.eventParser.mousePosition = module.mousePosition
 
               // Send the start message through this class again
               apply(s :: events)
