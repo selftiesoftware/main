@@ -107,7 +107,7 @@ object ModuleLoader {
         Controller.initModule = new ModuleInstance('ModuleInit, m)
         Log.success("ModuleLoader: Reloaded init module.")
       } catch {
-        case e => e.printStackTrace() // No module found
+        case e => // No module found
       }
 
       // Add to cache
