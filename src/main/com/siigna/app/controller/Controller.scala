@@ -45,7 +45,7 @@ object Controller extends Actor with EventController {
    * Call <code>initModule_=()</code> if you want to change the behavior.
    * @see [[com.siigna.module.Module]]
    */
-  def initModule : ModuleInstance = _initModule.getOrElse(new ModuleInstance('Init, ModuleLoader.DummyModule))
+  def initModule : ModuleInstance = _initModule.getOrElse(new ModuleInstance('Init, ModuleLoader.dummyModule))
 
   /**
    * Sets the init module so every events from the Controller will be forwarded to the init module instead.
