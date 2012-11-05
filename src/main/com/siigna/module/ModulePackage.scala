@@ -20,16 +20,15 @@ import com.siigna.util.logging.Log
 
 /**
  * <p>A ModulePackage is a number of modules grouped in a ''.jar'' file. This class represents the package and
- * its version number, title and location of that file and thus a means to retrieve it. A ModulePackage can be
- * downloaded through the [[com.siigna.module.ModuleLoader]] via its
- * <code>load</code> method. A ModulePackage can also be transformed to a URL via the <code>toURL</code> method.</p>
+ * its version number, title and location of that file and thus a means to retrieve it. A ModulePackage can
+ * be transformed to a URL via the <code>toURL</code> method.</p>
 
  * <p>The last two parameter ''domain'' and ''path'' are meant to be understood like a Uniform Resource Locator (URL)
  * where the domain comes first (fx ''www.example.org'') followed by the path (fx ''files/example.jar'').
- * So if I wanted to load a bundle of modules called ''ExampleModules'' from http://example.org/modules/example.jar,
- * this class should be instantiated like so:
+ * So if I wanted to load a bundle of modules called ''ExampleModules'' in the file ''example.jar''
+ * from http://example.org/modules/example.jar, the ModulePackage equivalent should be instantiated like so:
  * {{{
- *   ModulePackage("ExampleModules", "1.0", "example.org", "modules/example.jar")
+ *   ModulePackage("ExampleModules", "example.org", "modules/example.jar")
  * }}}
  * </p>
  *
@@ -39,6 +38,19 @@ import com.siigna.util.logging.Log
  *   available on the www.
  * </p>
  *
+ * <h2>Overriding or replacing default behaviour</h2>
+ * <p>
+ *   It is possible to override the default behaviour for modules and [[com.siigna.module.ModulePackage]]s. Every
+ *   time a ModulePackage is loaded we check for a class called <code>ModuleInit</code> in the
+ *   <code>com.siigna.module</code> package. If this class exist we assume that it can work as the base of the package
+ *   and will override every other init-modules previously implemented.
+ * </p>
+ * <p>
+ *   So: If a [[com.siigna.module.ModulePackage]] wishes to define or override the
+ *   initializing module, <b>a module needs to be placed in the <code>com.siigna.module</code>
+ *   package under the name <code>ModuleInit</code>!</b>. If it is not, the init module will not work as intended.
+ * </p>
+ *
  * @see http://en.wikipedia.org/wiki/Uniform_resource_locator
  * @param name  The name of the modules pack, e. g. <i>'base</i> or <i>'randomModules</i>
  * @param domain  The www-domain of the pack, e. g. ''www.example.org''.
@@ -46,14 +58,6 @@ import com.siigna.util.logging.Log
  * @param local  If set to true we treat this resource as local on the current machine, see <code>toURL</code>
  */
 final case class ModulePackage(name : Symbol, domain : String, path : String, local : Boolean = false) {
-
-  /**
-   * The JarFile containing the modules lying in the domain with the path given by the constructor. If the file
-   * has not been fetched before this method will attempt to retrieve it. This is normally not a concern, since the
-   * [[com.siigna.module.ModuleLoader]] should handle all this. But if you do decide to call this method, be careful.
-   * @return  A JarFile containing exciting Java classes!
-   */
-  def jar = toURL.openConnection().asInstanceOf[JarURLConnection].getJarFile
 
   override def toString = "ModulePackage " + name + ": (" + domain + "/" + path + ")"
 

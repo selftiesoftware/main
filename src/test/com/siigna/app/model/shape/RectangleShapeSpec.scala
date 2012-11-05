@@ -8,7 +8,7 @@ import com.siigna.util.collection.Attributes
 /**
  * Tests the [[com.siigna.app.model.shape.RectangleShape]] class.
  */
-class RectangleShapeSpec extends FunSpec with ShouldMatchers {
+/*class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
   describe("A RectangleShape") {
 
@@ -36,3 +36,4 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
 
 }
+       */

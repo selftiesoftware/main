@@ -37,7 +37,7 @@ import java.awt.geom.{AffineTransform, Point2D}
  *
  * @param t  The transformation matrix derived from AWT.
  */
-@SerialVersionUID(414468046)
+@SerialVersionUID(-1812748115)
 case class TransformationMatrix(t : AffineTransform) {
 
   def this() = this(new AffineTransform)
@@ -107,6 +107,18 @@ case class TransformationMatrix(t : AffineTransform) {
    */
   def rotate(degrees : Double, point : Vector2D) =
     TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
+
+  /**
+   * Calculates the rotation for this transformation-matrix from the translated origin. Given in degrees,
+   * counter clockwise.
+   * @return  A Double from 0 to 360.
+   */
+  def rotation = {
+    val v = Vector(1, 0)             // The vector
+    val t = translate(-getTranslate) // Extract translation
+    val p = v.transform(this)        // Transform the vector
+    math.atan2(p.y, p.x)
+  }
 
   /**
    * Scales a transformation by a factor and concatenates it with this
@@ -225,13 +237,12 @@ case class TransformationMatrix(t : AffineTransform) {
 /**
  * A companion object to the TransformationMatrix.
  */
-object TransformationMatrix
-{
+object TransformationMatrix {
 
   /**
    * Creates a transformation matrix that doesn't move, scale or rotate anything.
    */
-  def apply() : TransformationMatrix = new TransformationMatrix()
+  def apply() : TransformationMatrix = empty
 
   /**
    * Creates a transformation matrix which moves and rotates by the given params.
@@ -244,6 +255,6 @@ object TransformationMatrix
   /**
    * Creates a transformation matrix that doesn't move, scale or rotate anything.
    */
-  def empty = new TransformationMatrix()
+  val empty = new TransformationMatrix()
 
 }

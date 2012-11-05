@@ -41,7 +41,7 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
     if (shouldExit) {
       Left(Error(0, "Connection shutting down", message.session))
     } else {
-      Log.info("Remote: Sending: " + message)
+      Log.debug("Remote: Sending: " + message)
       val res = remote.!?(timeout, message) match {
         case Some(data) => { // Call the callback function
           try {

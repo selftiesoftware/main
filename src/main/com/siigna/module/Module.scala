@@ -80,6 +80,19 @@ import com.siigna.util.geom.TransformationMatrix
  *   the module if you wish.
  * </p>
  *
+ * <h2>Overriding or replacing default behaviour</h2>
+ * <p>
+ *   It is possible to override the default behaviour for modules and [[com.siigna.module.ModulePackage]]s. Every
+ *   time a ModulePackage is loaded we check for a class called <code>ModuleInit</code> in the
+ *   <code>com.siigna.module</code> package. If this class exist we assume that it can work as the base of the package
+ *   and will override every other init-modules previously implemented.
+ * </p>
+ * <p>
+ *   So: If a [[com.siigna.module.ModulePackage]] wishes to define or override the
+ *   initializing module, <b>a module needs to be placed in the <code>com.siigna.module</code>
+ *   package under the name <code>ModuleInit</code>!</b>. If it is not, the init module will not work as intended.
+ * </p>
+ *
  * @todo Elaborate documentation
  * @see http://en.wikipedia.org/wiki/Finite-state_machine
  * @see http://en.wikipedia.org/wiki/State_(computer_science)
