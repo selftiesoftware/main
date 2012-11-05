@@ -25,7 +25,7 @@ import java.net.{URL, URLClassLoader}
 object ModuleLoader extends URLClassLoader(Array(), Controller.getClass.getClassLoader) {
 
   // Create a default package
-  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  load(ModulePackage('base, "c:/siigna/siigna/out/artifacts", "base.jar", true))
 
   /**
    * The loaded classes.
