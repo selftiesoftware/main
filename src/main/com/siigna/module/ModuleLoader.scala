@@ -41,9 +41,10 @@ object ModuleLoader {
   }
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base/nightly", "siigna-base_2.9.2-nightly.jar", false))
-  load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-  load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
