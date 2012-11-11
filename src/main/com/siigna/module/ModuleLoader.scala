@@ -15,7 +15,7 @@ import com.siigna.util.logging.Log
 import java.util.jar.{JarEntry, JarFile}
 import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
-import java.io.IOException
+import java.io.{FileNotFoundException, IOException}
 import java.net.{URL, URLClassLoader}
 
 /**
@@ -97,24 +97,32 @@ object ModuleLoader {
    */
   def load(pack : ModulePackage) {
     if (!modules.contains(pack)) {
-      // Add package to URL base
-      val url = pack.toURL
-      loader = new URLClassLoader(loader.getURLs.:+(url), Controller.getClass.getClassLoader)
-
-      // Check for ModuleInit in that package
       try {
-        val c = loader.loadClass("com.siigna.module.ModuleInit")
-        val m = classToModule(c)
-        Controller.initModule = new ModuleInstance('ModuleInit, m)
-        Log.success("ModuleLoader: Reloaded init module.")
+        val url = pack.toURL
+
+        // Does the content exist?
+        url.openConnection().connect()
+
+        // Add package to URL base
+        loader = new URLClassLoader(loader.getURLs.:+(url), Controller.getClass.getClassLoader)
+
+        // Check for ModuleInit in that package
+        try {
+          val c = loader.loadClass("com.siigna.module.ModuleInit")
+          val m = classToModule(c)
+          Controller.initModule = new ModuleInstance('ModuleInit, m)
+          Log.success("ModuleLoader: Reloaded init module.")
+        } catch {
+          case e => e.printStackTrace() // No module found
+        }
+
+        // Add to cache
+        modules += pack -> collection.mutable.Map()
+
+        Log.success("ModuleLoader: Sucessfully loaded the module package " + pack)
       } catch {
-        case e => e.printStackTrace() // No module found
+        case e : FileNotFoundException => Log.error("ModuleLoader: Could not find module package at URL: " + pack.toURL)
       }
-
-      // Add to cache
-      modules += pack -> collection.mutable.Map()
-
-      Log.success("ModuleLoader: Sucessfully stored the module package " + pack)
     } else {
       Log.info("ModuleLoader: Unnecessary loading of package " + pack + " - already in cache.")
     }
