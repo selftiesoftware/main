@@ -1,6 +1,6 @@
 package com.siigna.app.model.shape
 
-import org.scalatest.path.FunSpec
+/*import org.scalatest.path.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
@@ -8,7 +8,7 @@ import com.siigna.util.collection.Attributes
 /**
  * Tests the [[com.siigna.app.model.shape.RectangleShape]] class.
  */
-/*class RectangleShapeSpec extends FunSpec with ShouldMatchers {
+class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
   describe("A RectangleShape") {
 
