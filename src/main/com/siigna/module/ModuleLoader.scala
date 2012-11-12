@@ -12,11 +12,10 @@
 package com.siigna.module
 
 import com.siigna.util.logging.Log
-import java.util.jar.{JarEntry, JarFile}
 import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
-import java.io.{FileNotFoundException, IOException}
-import java.net.{URL, URLClassLoader}
+import java.io.FileNotFoundException
+import java.net.URLClassLoader
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
@@ -36,7 +35,7 @@ object ModuleLoader {
   /**
    * A dummy module to use if the loading fails.
    */
-  lazy val DummyModule : Module = new Module {
+  val DummyModule : Module = new Module {
     val stateMap : StateMap = Map('Start -> { case _ => End })
   }
 
@@ -55,7 +54,8 @@ object ModuleLoader {
 
   /**
    * Attempts to load a [[com.siigna.module.Module]] by looking through all the available packages,
-   * starting with the ones loaded first. If that
+   * starting with the ones loaded first. If the module could not be found we insert a dummy module
+   * to provide certainty that a module will be returned.
    * @param name  The symbolic name of the module
    * @param classPath  The class path, e. g. "com.siigna.module.base"
    * @return  The module if it could be found, or a dummy module if no suitable entry existed.
@@ -113,7 +113,8 @@ object ModuleLoader {
           Controller.initModule = new ModuleInstance('ModuleInit, m)
           Log.success("ModuleLoader: Reloaded init module.")
         } catch {
-          case e => e.printStackTrace() // No module found
+          // No module found
+          case e : ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
         }
 
         // Add to cache

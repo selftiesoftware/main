@@ -39,22 +39,28 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    */
   def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
     if (shouldExit) {
-      Left(Error(0, "Connection shutting down", message.session))
+      Left(Error(0, "Connection closing", message.session))
     } else {
       Log.debug("Remote: Sending: " + message)
       val res = remote.!?(timeout, message) match {
         case Some(data) => { // Call the callback function
-          try {
-            val r = f(data)     // Parse the data
-            _isConnected = true // We're now connected for sure
-            Right(r)            // Return
+          val result = try {
+            Right(f(data)) // Parse the data
           } catch {
-            case e : Error => Left(e)
+            case e : Error => Left(e) // Return an error
             case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
           }
+
+          // We're now connected for sure
+          _isConnected = true
+          if (!_isConnected) Log.debug("Server: Connection (re)established.")
+
+          // Return
+          result
         }
-        case None      => { // Timeout
+        case _ => { // Timeout
           _isConnected = false // We're no longer connected
+          Log.warning("Server: Connection failed.")
           apply(message, f) // Retry
         }
       }

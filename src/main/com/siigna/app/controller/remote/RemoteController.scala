@@ -11,10 +11,9 @@
 
 package com.siigna.app.controller.remote
 
-import actors.remote.RemoteActor
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{TIMEOUT, DaemonActor, Actor}
+import actors.{TIMEOUT, DaemonActor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -53,12 +52,12 @@ protected[controller] object RemoteController extends DaemonActor {
    * The acting part of the RemoteController.
    */
   def act() {
-    // The time of the most recent ping
-    var lastPing = System.currentTimeMillis()
-
     try {
       // First of all fetch the current drawing
       remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
+
+      // If we reach this code we are connected
+      Log.success("Remote: Connection established.")
 
       loop {
 
@@ -76,7 +75,7 @@ protected[controller] object RemoteController extends DaemonActor {
           }
 
           // Timeout
-          case TIMEOUT =>
+          case TIMEOUT => // Do nothing
 
           // We can't handle any other commands actively...
           case message => {
@@ -166,7 +165,12 @@ protected[controller] object RemoteController extends DaemonActor {
 
           // Implement the model
           SiignaDrawing.execute(LoadDrawing(model), false)
-          actionIndices + model.attributes.int("lastAction").getOrElse(0)
+
+          // Search for the lastAction attribute, or retrieve it manually
+          model.attributes.int("lastAction") match {
+            case Some(i : Int) => actionIndices + i
+            case _ => remote(Get(ActionId, null, session), handleGetActionId)
+          }
           Log.success("Remote: Successfully received drawing from server")
         } catch {
           case e => Log.error("Remote: Error when reading data from server", e)
