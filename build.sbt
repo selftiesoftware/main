@@ -23,5 +23,6 @@ resolvers += "Siigna" at "http://rls.siigna.com"
 fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-library" % "2.9.2"
+  "org.scala-lang" % "scala-library" % "2.9.2",
+  "org.scalatest" %% "scalatest" % "1.8" % "test"
 )

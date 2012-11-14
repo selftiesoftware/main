@@ -12,14 +12,14 @@ import com.siigna.util.Serializer
 /**
  * A mock server
  */
-class MockServer extends DaemonActor {
+object MockServer extends DaemonActor {
 
   val ids = Stream.from(0, 1).iterator
 
   private var error : Option[Error] = None
 
   def action = CreateShape(ids.next(), shape)
-  val drawing = new RemoteModel(new Model(Map(ids.next, shape), Nil, Nil), Attributes())
+  val drawing = new RemoteModel(new Model(Map(ids.next -> shape), Nil, Nil), Attributes())
   val shape = LineShape(0, 0, 10, 10)
 
   def act() {

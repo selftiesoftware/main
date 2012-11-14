@@ -40,10 +40,10 @@ object ModuleLoader {
   }
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
-  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
-  load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-  load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
+  //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
@@ -71,7 +71,9 @@ object ModuleLoader {
         try {
           module = Some(classToModule(loader.loadClass(path)))
         } catch {
-          case e : Exception => Log.debug("ModuleLoader: Error when loading module", e)
+          case e : ClassNotFoundException => Log.debug("ModuleLoader: Class " + path + " could not be found.")
+          case e : InstantiationException => Log.debug("ModuleLoader: Class " + path + " could not be converted to a Module.")
+          case e : Exception => Log.debug("ModuleLoader: Error when loading module ", e)
         }
       }
     }
