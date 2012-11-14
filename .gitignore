@@ -2,6 +2,7 @@
 *.iml
 api/
 doc/
+lib/
 docs/
 out/
 target/
