@@ -158,4 +158,5 @@ package object siigna extends com.siigna.util.Implicits {
   // Log
   val Log = com.siigna.util.logging.Log
 
+
 }
