@@ -43,7 +43,7 @@ protected[controller] object RemoteController extends DaemonActor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("62.243.118.234", Mode.Production)
+  val remote = new Server("54.247.115.111", Mode.Production)
   // val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
@@ -84,7 +84,8 @@ protected[controller] object RemoteController extends DaemonActor {
         }
       }
     } catch {
-      case e : Error => Log.error("Remote: Error, shutting down.", e)
+      case e : Error => Log.info("Remote: Shutting down on error: " + e)
+      case e : Exception => Log.error("Remote: Unknown error, shutting down.", e)
     }
   }
 
@@ -101,6 +102,7 @@ protected[controller] object RemoteController extends DaemonActor {
    */
   protected def handleGetActionId(any : Any) {
     any match {
+      case Error(code, message, _) => Log.error("Remote: Error when retrieving action: " + code + ": " + message)
       case Set(ActionId, id : Int, _) => {
         // Store the id if it's the first we get
         if (actionIndices.isEmpty) {
@@ -116,7 +118,10 @@ protected[controller] object RemoteController extends DaemonActor {
                     case true  => SiignaDrawing.undo(action.action, false)
                     case false => SiignaDrawing.execute(action.action, false)
                   }
-                  actionIndices + i
+
+                  // Store the id in the action indices
+                  // Note to self: "+=" and NOT "+"... Sigh...
+                  actionIndices += i
                 } catch {
                   case e => Log.error("Remote: Error when reading data from server", e)
                 }
@@ -127,10 +132,11 @@ protected[controller] object RemoteController extends DaemonActor {
         }
 
         // After the check it should be fine to add the index to the set of action indices
-        actionIndices + id
+        // Note to self: "+=" and NOT "+"... Sigh...
+        actionIndices += id
       }
       case e => {
-        throw new IllegalArgumentException("Remote: Error when updating ActionId: Expected Set(ActionId, Int, _), got: " + any)
+        Log.error("Remote: Error when updating ActionId: Expected Set(ActionId, Int, _), got: " + any)
       }
     }
   }
@@ -158,6 +164,7 @@ protected[controller] object RemoteController extends DaemonActor {
    */
   protected def handleGetDrawing(any : Any) {
     any match {
+      case Error(code, message, _) => Log.error("Remote: Received error when loading drawing: " + code + ": " + message)
       case Set(Drawing, bytes : Array[Byte], _) => {
         // Read the bytes
         try {

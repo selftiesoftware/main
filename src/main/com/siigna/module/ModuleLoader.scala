@@ -73,7 +73,9 @@ object ModuleLoader {
         try {
           module = Some(classToModule(loader.loadClass(path)))
         } catch {
-          case e : Exception => Log.debug("ModuleLoader: Error when loading module", e)
+          case e : ClassNotFoundException => Log.debug("ModuleLoader: Class " + path + " could not be found.")
+          case e : InstantiationException => Log.debug("ModuleLoader: Class " + path + " could not be converted to a Module.")
+          case e : Exception => Log.debug("ModuleLoader: Error when loading module ", e)
         }
       }
     }
