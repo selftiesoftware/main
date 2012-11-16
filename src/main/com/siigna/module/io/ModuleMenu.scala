@@ -168,7 +168,9 @@ object ModuleMenu {
 
       frameExpanded.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
       //g draw TextShape("BASE MODULES",Vector2D(16,8),9)
-      g draw TextShape("SIIGNA "+Siigna.version, Vector2D(11,6),7)
+      g draw TextShape("SIIGNA ", Vector2D(11,6),9)
+      g draw TextShape(Siigna.version, Vector2D(11,19),7)
+
     } else {
       g setColor menuColor
       g.g.fillPolygon(logoFillX, logoFillY, logoFill.size)
