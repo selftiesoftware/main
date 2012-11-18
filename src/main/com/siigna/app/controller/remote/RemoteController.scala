@@ -13,7 +13,7 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{TIMEOUT, DaemonActor}
+import actors.{Actor, TIMEOUT, DaemonActor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -25,10 +25,7 @@ import com.siigna.util.Serializer
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  */
-protected[controller] object RemoteController extends DaemonActor {
-
-  // Set remote class loader
-  //RemoteActor.classLoader = getClass.getClassLoader
+protected[controller] object RemoteController extends Actor {
 
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()
@@ -43,7 +40,7 @@ protected[controller] object RemoteController extends DaemonActor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("54.247.115.111", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Production)
   // val remote = select(Node("localhost", 20004), 'siigna)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
@@ -55,9 +52,6 @@ protected[controller] object RemoteController extends DaemonActor {
     try {
       // First of all fetch the current drawing
       remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
-
-      // If we reach this code we are connected
-      Log.success("Remote: Connection established.")
 
       loop {
 
@@ -164,7 +158,8 @@ protected[controller] object RemoteController extends DaemonActor {
    */
   protected def handleGetDrawing(any : Any) {
     any match {
-      case Error(code, message, _) => Log.error("Remote: Received error when loading drawing: " + code + ": " + message)
+      case Error(404, message, _) => Log.error("Remote: Cannot find drawing with id " + session.drawing)
+      case Error(code, message, _) => Log.error("Remote: Unknown error when loading drawing: [" + code + "]" + message)
       case Set(Drawing, bytes : Array[Byte], _) => {
         // Read the bytes
         try {

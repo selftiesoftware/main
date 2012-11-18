@@ -18,6 +18,7 @@ import com.siigna.util.logging.Log
 import com.siigna.util.event.KeyUp
 import com.siigna.util.event.KeyDown
 import scala.Some
+import com.siigna.app.view.View
 
 /**
  * <p>
@@ -66,6 +67,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
       // Give the events to the child
       child.get.apply(events) match {
         // The child ended without a message
+        // - also catches escape events
         case Some(End) => {
           val name = child.get.toString
 
@@ -121,12 +123,6 @@ final case class ModuleInstance(name : Symbol, module : Module) {
     // The event to return
     var event : Option[ModuleEvent] = None
 
-    // Quit if the user presses escape
-    events match {
-      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => return Some(End)
-      case _ =>
-    }
-
     // Parse the events
     val parsedEvents = module.eventParser.parse(events)
 
@@ -147,7 +143,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               module.interface.chain(s.module.module.interface)
 
               // Set the mouse position of the new event parser
-              s.module.module.eventParser.mousePosition = module.mousePosition
+              s.module.module.eventParser.mousePosition = View.mousePosition
 
               // Send the start message through this class again
               apply(s :: events)
