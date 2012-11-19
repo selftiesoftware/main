@@ -168,6 +168,7 @@ class EventParser {
       // Perform 2D query
       val model = Drawing(View.mousePosition, margin)
 
+
       // Parse the track
       var newEvent = track.parse(events, model)
 

@@ -48,7 +48,7 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
             Right(f(data)) // Parse the data
           } catch {
             case e : Error => Left(e) // Return an error
-            case e => throw new UnknownError("Remote: Unknown data received from the server: " + e)
+            case e => Left(Error(-1, "Remote: Unknown data received from the server: " + e, message.session))
           }
 
           // We're now connected for sure

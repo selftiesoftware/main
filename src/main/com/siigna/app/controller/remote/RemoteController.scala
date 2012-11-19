@@ -50,8 +50,26 @@ protected[controller] object RemoteController extends Actor {
    */
   def act() {
     try {
-      // First of all fetch the current drawing
-      remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
+      def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
+
+      // If we have a drawing we need to fetch it if we don't we need to reserve it
+      drawingId match {
+        case Some(i) => remote(Get(Drawing, drawingId, session), handleGetDrawing)
+        case None    => {
+          // We need to ask for a new drawing
+          remote(Get(DrawingId, null, session), _ match {
+            case Set(DrawingId, id : Long, _) => {
+              // Gotcha! Set the drawing id
+              SiignaDrawing.attributes += "id" -> id
+              Log.success("Remote: Successfully reserved a new drawing")
+            }
+            case e => {
+              Log.error("Remote: Could not reserve new drawing, shutting down.")
+              exit()
+            }
+          })
+        }
+      }
 
       loop {
 
@@ -158,9 +176,13 @@ protected[controller] object RemoteController extends Actor {
    */
   protected def handleGetDrawing(any : Any) {
     any match {
-      case Error(404, message, _) => Log.error("Remote: Cannot find drawing with id " + session.drawing)
+      case Error(404, message, _) => {
+        Log.error("Remote: Cannot find drawing with id " + session.drawing + ". Requesting empty drawing")
+        remote(Get(Drawing, null, session), handleGetDrawing)
+      }
       case Error(code, message, _) => Log.error("Remote: Unknown error when loading drawing: [" + code + "]" + message)
       case Set(Drawing, bytes : Array[Byte], _) => {
+
         // Read the bytes
         try {
           val model = Serializer.readDrawing(bytes)
@@ -244,14 +266,7 @@ protected[controller] object RemoteController extends Actor {
    * Attempts to fetch the session for the current client.
    * @return A session if possible.
    */
-  protected def session : Session = try {
-    Session(SiignaDrawing.attributes.long("id").get, Siigna.user)
-  } catch {
-    case _ => {
-      Log.error("Remote: Cannot find a drawing id which is necessary to make a connection; shutting down.")
-      exit("Remote: Cannot connect to server without a drawing id.")
-      throw new ExceptionInInitializerError("Remote: No id found for the current drawing.")
-    }
-  }
+  protected def session : Session =
+    Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
 
 }

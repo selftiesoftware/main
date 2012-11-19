@@ -42,13 +42,13 @@ case object EndPoints extends EventSnap {
         case LineShape(start, end, _) => closestTwo(start, end)
         case s : PolylineShape => closestPoints(s.geometry.vertices.toSeq)
         case s : TextShape => closestPoints(s.geometry.vertices)
+        case _ => point
       })
       val closestPoint = res.reduceLeft(closestTwo)
 
       if (closestPoint.distanceTo(point) * View.zoom <= 10) {
         closestPoint
-      }
-      else point
+      } else point
     } else point
   }
 
