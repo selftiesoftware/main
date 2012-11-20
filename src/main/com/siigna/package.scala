@@ -120,6 +120,8 @@ package object siigna extends com.siigna.util.Implicits {
   val MouseDrag = com.siigna.util.event.MouseDrag
   type MouseEnter = com.siigna.util.event.MouseEnter
   val MouseEnter = com.siigna.util.event.MouseEnter
+  type MouseDouble = com.siigna.util.event.MouseDouble
+  val MouseDouble = com.siigna.util.event.MouseDouble
   type MouseExit = com.siigna.util.event.MouseExit
   val MouseExit = com.siigna.util.event.MouseExit
   type MouseMove = com.siigna.util.event.MouseMove

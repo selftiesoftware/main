@@ -13,7 +13,7 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{TIMEOUT, DaemonActor}
+import actors.{Actor, TIMEOUT, DaemonActor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -25,10 +25,7 @@ import com.siigna.util.Serializer
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  */
-protected[controller] object RemoteController extends DaemonActor {
-
-  // Set remote class loader
-  //RemoteActor.classLoader = getClass.getClassLoader
+protected[controller] object RemoteController extends Actor {
 
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()
@@ -43,8 +40,8 @@ protected[controller] object RemoteController extends DaemonActor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("54.247.115.111", Mode.Production)
-  // val remote = select(Node("localhost", 20004), 'siigna)
+  val remote = new Server("62.243.118.234", Mode.Production)
+  //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -53,11 +50,31 @@ protected[controller] object RemoteController extends DaemonActor {
    */
   def act() {
     try {
-      // First of all fetch the current drawing
-      remote(Get(Drawing, SiignaDrawing.attributes.long("id"), session), handleGetDrawing)
+      def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
-      // If we reach this code we are connected
-      Log.success("Remote: Connection established.")
+      // If we have a drawing we need to fetch it if we don't we need to reserve it
+      drawingId match {
+        case Some(i) => remote(Get(Drawing, drawingId, session), handleGetDrawing)
+        case None    => {
+          // We need to ask for a new drawing
+          remote(Get(DrawingId, null, session), _ match {
+            case Set(DrawingId, id : Long, _) => {
+              // Gotcha! Set the drawing id
+              SiignaDrawing.attributes += "id" -> id
+              Log.success("Remote: Successfully reserved a new drawing " + id)
+            }
+            case Set(DrawingId, id : Int, _) => {
+              // Gotcha! Set the drawing id
+              SiignaDrawing.attributes += "id" -> id.toLong
+              Log.success("Remote: Successfully reserved a new drawing" + id)
+            }
+            case e => {
+              Log.error("Remote: Could not reserve new drawing, shutting down.", e)
+              exit()
+            }
+          })
+        }
+      }
 
       loop {
 
@@ -70,8 +87,11 @@ protected[controller] object RemoteController extends DaemonActor {
             // Parse the local action to ensure all the ids are up to date
             val updatedAction = parseLocalAction(action, undo)
 
+            // Write to bytes
+            val data = Serializer.writeAction(updatedAction)
+
             // Dispatch the updated action
-            remote(Set(Action, updatedAction, session), handleSetAction)
+            remote(Set(Action, data, session), handleSetAction)
           }
 
           // Timeout
@@ -114,6 +134,7 @@ protected[controller] object RemoteController extends DaemonActor {
               case Set(Action, array : Array[Byte], _) => {
                 try {
                   val action = Serializer.readAction(array)
+
                   action.undo match {
                     case true  => SiignaDrawing.undo(action.action, false)
                     case false => SiignaDrawing.execute(action.action, false)
@@ -153,7 +174,11 @@ protected[controller] object RemoteController extends DaemonActor {
         // TODO: Correctly handle errors
       }
       case Set(ActionId, id : Int, _) => {
-        actionIndices + id
+        actionIndices += id
+        Log.success("Remote: Received and updated action id")
+      }
+      case Set(ActionId, id : Long, _) => {
+        actionIndices += id.toInt
         Log.success("Remote: Received and updated action id")
       }
     }
@@ -164,8 +189,13 @@ protected[controller] object RemoteController extends DaemonActor {
    */
   protected def handleGetDrawing(any : Any) {
     any match {
-      case Error(code, message, _) => Log.error("Remote: Received error when loading drawing: " + code + ": " + message)
+      case Error(404, message, _) => {
+        Log.error("Remote: Cannot find drawing with id " + session.drawing + ". Requesting empty drawing")
+        remote(Get(Drawing, null, session), handleGetDrawing)
+      }
+      case Error(code, message, _) => Log.error("Remote: Unknown error when loading drawing: [" + code + "]" + message)
       case Set(Drawing, bytes : Array[Byte], _) => {
+
         // Read the bytes
         try {
           val model = Serializer.readDrawing(bytes)
@@ -249,14 +279,7 @@ protected[controller] object RemoteController extends DaemonActor {
    * Attempts to fetch the session for the current client.
    * @return A session if possible.
    */
-  protected def session : Session = try {
-    Session(SiignaDrawing.attributes.long("id").get, Siigna.user)
-  } catch {
-    case _ => {
-      Log.error("Remote: Cannot find a drawing id which is necessary to make a connection; shutting down.")
-      exit("Remote: Cannot connect to server without a drawing id.")
-      throw new ExceptionInInitializerError("Remote: No id found for the current drawing.")
-    }
-  }
+  protected def session : Session =
+    Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
 
 }

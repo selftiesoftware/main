@@ -28,7 +28,7 @@ object Serializer {
    */
   def readFromBytes(arr: Array[Byte]): AnyRef = {
     val stream = new ObjectInputStream(new ByteArrayInputStream(arr))
-    stream.readObject
+    stream.readObject()
   }
 
   /**

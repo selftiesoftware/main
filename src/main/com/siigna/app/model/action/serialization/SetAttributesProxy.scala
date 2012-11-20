@@ -23,8 +23,8 @@ import com.siigna.app.model.action.{SetAttributes, DeleteShapes}
  * @param shapes  The ids and the shapes that are associated with the ids.
  */
 @SerialVersionUID(-1845902943)
-sealed protected[action] class SetAttributesProxy(private var shapes : Map[Int, Attributes], private var attributes : Attributes)
-  extends SerializationProxy(() => SetAttributes(shapes, attributes)) {
+sealed protected[action] class SetAttributesProxy(shapes : Map[Int, Attributes], attributes : Attributes)
+  extends SerializationProxy(() => SetAttributes(SAP.shapes, SAP.attributes)) {
 
   /**
      * A public, empty constructor required by the Externalizable trait.
@@ -43,10 +43,16 @@ sealed protected[action] class SetAttributesProxy(private var shapes : Map[Int, 
 
     def readExternal(in: ObjectInput) {
       val size = in.readInt()
-      shapes = new Array[(Int, Attributes)](size).map(_ => {
+      SAP.shapes = new Array[(Int, Attributes)](size).map(_ => {
         in.readInt() -> in.readObject().asInstanceOf[Attributes]
       }).toMap
-      attributes = in.readObject().asInstanceOf[Attributes]
+      SAP.attributes = in.readObject().asInstanceOf[Attributes]
     }
 
+}
+
+// An object for persistant storage
+private[serialization] object SAP {
+  var shapes : Map[Int, Attributes] = Map()
+  var attributes = Attributes()
 }

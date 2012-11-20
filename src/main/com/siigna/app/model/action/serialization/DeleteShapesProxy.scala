@@ -22,8 +22,8 @@ import java.io.{ObjectInput, ObjectOutput}
  * @param shapes  The ids and the shapes that are associated with the ids.
  */
 @SerialVersionUID(-1262265471)
-sealed protected[action] class DeleteShapesProxy(private var shapes : Map[Int, Shape])
-  extends SerializationProxy(() => DeleteShapes(shapes)) {
+sealed protected[action] class DeleteShapesProxy(shapes : Map[Int, Shape])
+  extends SerializationProxy(() => DeleteShapes(DSP.shapes)) {
 
   /**
      * A public, empty constructor required by the Externalizable trait.
@@ -41,9 +41,14 @@ sealed protected[action] class DeleteShapesProxy(private var shapes : Map[Int, S
 
     def readExternal(in: ObjectInput) {
       val size = in.readInt()
-      shapes = new Array[(Int, Shape)](size).map(_ => {
+      DSP.shapes = new Array[(Int, Shape)](size).map(_ => {
         in.readInt() -> in.readObject().asInstanceOf[Shape]
       }).toMap
     }
 
+}
+
+// An object for persistant storage
+private[serialization] object DSP {
+  var shapes : Map[Int, Shape] = Map()
 }
