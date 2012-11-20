@@ -102,7 +102,7 @@ object Track extends EventTrack {
       }
 
       // Update mousePosition
-      this.mousePosition = m
+      this.mousePosition = m.transform(View.deviceTransformation)
       var shape : Option[Int] = None
       
       // Get the nearest shape if it is defined

@@ -46,7 +46,7 @@ case object EndPoints extends EventSnap {
       })
       val closestPoint = res.reduceLeft(closestTwo)
 
-      if (closestPoint.distanceTo(point) * View.zoom <= 10) {
+      if (closestPoint.distanceTo(point.transform(View.deviceTransformation)) * View.zoom <= 10) {
         closestPoint
       } else point
     } else point

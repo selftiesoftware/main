@@ -33,7 +33,9 @@ trait SpatialModel[Key, Value <: Shape] {
    * Query for shapes inside the given boundary.
    */
   def apply(query : Rectangle2D) : Map[Key, Value] = {
-    shapes.filter((s : (Key, Value)) => query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry.boundary))
+    shapes.filter((s : (Key, Value)) => {
+      query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
+    })
   }
 
   /**
@@ -42,7 +44,9 @@ trait SpatialModel[Key, Value <: Shape] {
    * @param radius  (Optional) The radius added to the point.
    */
   def apply(query : Vector2D, radius : Double = 5.0) : Map[Key, Value] = {
-    apply(Rectangle2D(query.x - radius, query.y - radius, query.x + radius, query.y + radius))
+    shapes.filter((s : (Key, Value)) => {
+      s._2.geometry.distanceTo(query) <= radius
+    })
   }
 
   /**
