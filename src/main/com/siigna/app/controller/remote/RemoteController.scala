@@ -184,12 +184,10 @@ protected[controller] object RemoteController extends Actor {
       }
       case Set(ActionId, id : Int, _) => {
         actionIndices += id
-        println("AI: " + id)
         Log.success("Remote: Received and updated action id")
       }
       case Set(ActionId, id : Long, _) => {
         actionIndices += id.toInt
-        println("AI: " + id)
         Log.success("Remote: Received and updated action id")
       }
     }
