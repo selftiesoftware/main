@@ -26,9 +26,9 @@ import com.siigna.app.model.action.TransformShapeParts
  * @param transformation  The transformation to apply.
  */
 @SerialVersionUID(-540105375)
-sealed protected[action] class TransformShapePartsProxy(private var shapes : Map[Int, ShapeSelector], 
-                                                        private var transformation : TransformationMatrix) 
-  extends SerializationProxy(() => new TransformShapeParts(shapes, transformation)) {
+sealed protected[action] class TransformShapePartsProxy(shapes : Map[Int, ShapeSelector],
+                                                        transformation : TransformationMatrix)
+  extends SerializationProxy(() => new TransformShapeParts(TSPPValues.shapes, TSPPValues.transformation)) {
 
   /**
    * A public, empty constructor required by the Externalizable trait.
@@ -47,9 +47,17 @@ sealed protected[action] class TransformShapePartsProxy(private var shapes : Map
 
   def readExternal(in: ObjectInput) {
     val size = in.readInt()
-    shapes = new Array[(Int, ShapeSelector)](size).map(_ => {
+    TSPPValues.shapes = new Array[(Int, ShapeSelector)](size).map(_ => {
       in.readInt() -> in.readObject().asInstanceOf[ShapeSelector]
     }).toMap
-    transformation = in.readObject().asInstanceOf[TransformationMatrix]
+    TSPPValues.transformation = in.readObject().asInstanceOf[TransformationMatrix]
   }
+}
+
+// An object to store persistance values
+private[serialization] object TSPPValues {
+
+  var shapes : Map[Int, ShapeSelector] = Map()
+  var transformation : TransformationMatrix = TransformationMatrix()
+
 }

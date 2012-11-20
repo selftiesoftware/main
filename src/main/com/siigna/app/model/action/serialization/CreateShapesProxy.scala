@@ -21,8 +21,8 @@ import com.siigna.app.model.action.CreateShapes
  * @param shapes  The ids and the shapes that are associated with the ids.
  */
 @SerialVersionUID(572887823)
-sealed protected[action] class CreateShapesProxy(private var shapes : Map[Int, Shape])
-  extends SerializationProxy(() => new CreateShapes(shapes)) {
+sealed protected[action] class CreateShapesProxy(shapes : Map[Int, Shape])
+  extends SerializationProxy(() => new CreateShapes(CSPValues.shapes)) {
 
   /**
    * A public, empty constructor required by the Externalizable trait.
@@ -40,8 +40,13 @@ sealed protected[action] class CreateShapesProxy(private var shapes : Map[Int, S
 
   def readExternal(in: ObjectInput) {
     val size = in.readInt()
-    shapes = new Array[(Int, Shape)](size).map(_ => {
+    CSPValues.shapes = new Array[(Int, Shape)](size).map(_ => {
       in.readInt() -> in.readObject().asInstanceOf[Shape]
     }).toMap
   }
+}
+
+// An object to store persistant values
+private[serialization] object CSPValues {
+  var shapes = Map[Int, Shape]()
 }

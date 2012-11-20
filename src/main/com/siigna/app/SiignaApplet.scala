@@ -84,7 +84,7 @@ class SiignaApplet extends Applet {
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }
-    } catch { case e => Log.info("No user or drawing found. Siigna will be running in local mode.")}
+    } catch { case e => Log.info("No user or drawing found. Siigna will be running in anonymous mode.")}
 
     // Set the layout
     setLayout(new BorderLayout())

@@ -34,8 +34,8 @@ import java.io.{ObjectInput, ObjectOutput}
  * @param newShapes  The shapes that emerges after the parts have been removed from the old shapes
  */
 @SerialVersionUID(1130567644)
-sealed protected[action] class DeleteShapePartsProxy(private var oldShapes : Map[Int, Shape], private var newShapes : Map[Int, Shape]) 
-  extends SerializationProxy(() => DeleteShapeParts(oldShapes, newShapes)) {
+sealed protected[action] class DeleteShapePartsProxy(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape])
+  extends SerializationProxy(() => DeleteShapeParts(DSPP.oldShapes, DSPP.newShapes)) {
 
   /**
      * A public, empty constructor required by the Externalizable trait.
@@ -62,8 +62,14 @@ sealed protected[action] class DeleteShapePartsProxy(private var oldShapes : Map
           in.readInt() -> in.readObject().asInstanceOf[Shape]
         }).toMap
       }
-      oldShapes = readMap
-      newShapes = readMap
+      DSPP.oldShapes = readMap
+      DSPP.newShapes = readMap
     }
   
+}
+
+// An object for persistant storage
+private[serialization] object DSPP {
+  var oldShapes : Map[Int, Shape] = Map()
+  var newShapes : Map[Int, Shape] = Map()
 }

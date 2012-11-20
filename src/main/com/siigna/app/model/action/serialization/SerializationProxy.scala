@@ -37,7 +37,7 @@ protected[action] abstract class SerializationProxy(f : () => Action) extends Ex
    * @see The description for [[com.siigna.app.model.action.serialization.SerializationProxy]]
    * @param in  The ObjectInput to read from
    */
-  def readExternal(in: ObjectInput) 
+  def readExternal(in: ObjectInput)
   
   /**
    * When de-serializing we read the proxy as if it was an instance of the action wrapped by the proxy.
