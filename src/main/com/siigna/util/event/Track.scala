@@ -126,9 +126,28 @@ object Track extends EventTrack {
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
+      //TODO: add a way to delete the guides if the shape is DELETED - (not just too far away to react to nearestShape)
       } else if(!shape.isDefined) {
-        //pointOne = None
-        //pointTwo = None
+         //pointOne = None
+         //pointTwo = None
+
+       // val horizontalOne = horizontalGuide(pointOne.get)
+       // val verticalOne = verticalGuide(pointOne.get)
+       // val distHoriOne = horizontalOne.distanceTo(m)
+       // val distVertOne = verticalOne.distanceTo(m)
+
+        //if the mouse is outside the point one track line, delete point one.
+       // if(distHoriOne > trackDistance && distVertOne > trackDistance) pointOne = None
+
+        //if the mouse is outside the point two track line, delete point two.
+       // if (pointTwo.isDefined) {
+       //   val horizontalTwo = horizontalGuide(pointTwo.get)
+       //   val verticalTwo = verticalGuide(pointTwo.get)
+       //   val distHoriTwo = horizontalTwo.distanceTo(m)
+       //  val distVertTwo = verticalTwo.distanceTo(m)
+
+          //if the mouse is outside the point two track line, delete point two.
+       //   if(distHoriTwo > trackDistance && distVertTwo > trackDistance) pointTwo = None
       }
 
       //Snap the event
