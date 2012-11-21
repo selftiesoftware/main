@@ -13,7 +13,7 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{Actor, TIMEOUT, DaemonActor}
+import actors.{Exit, Actor, TIMEOUT, DaemonActor}
 import collection.mutable.BitSet
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
@@ -97,6 +97,12 @@ protected[controller] object RemoteController extends Actor {
           // Timeout
           case TIMEOUT => // Do nothing
 
+          // Exit
+          case 'exit => {
+            remote.disconnect()
+            exit()
+          }
+
           // We can't handle any other commands actively...
           case message => {
             Log.warning("Remote: Unknown input '" + message + "', expected a remote action.")
@@ -124,11 +130,14 @@ protected[controller] object RemoteController extends Actor {
     any match {
       case Error(code, message, _) => Log.error("Remote: Error when retrieving action: " + code + ": " + message)
       case Set(ActionId, id : Int, _) => {
+        Log.info("Remote: Got latest action id " + id)
+
         // Store the id if it's the first we get
         if (actionIndices.isEmpty) {
           actionIndices += id
         // If the id is above the action indices then we have a gap to fill!
         } else if(id > actionIndices.last) {
+
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
             remote(Get(Action, Some(i), session), _ match {
               case Set(Action, array : Array[Byte], _) => {
@@ -249,6 +258,8 @@ protected[controller] object RemoteController extends Actor {
 
               // Update the model
               SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
+
+              // Note to self: We should NOT save the ids in the action indices since the actions ids apparently are not final
 
               // Return the updated action
               action.update(localIdMap)

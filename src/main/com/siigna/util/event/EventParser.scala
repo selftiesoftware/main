@@ -157,17 +157,14 @@ class EventParser {
       case KeyDown(AWTKeyEvent.CHAR_UNDEFINED, _) :: tail => tail
       case KeyUp(AWTKeyEvent.CHAR_UNDEFINED,_ ) :: tail   => tail
       // Merges mouse events to avoid ridiculously long lists of MouseMove or MouseDrag.
-      case (e : MouseMove) :: (_ : MouseMove) :: tail => mouse = e.position; e :: tail
-      case (e : MouseDrag) :: (_ : MouseDrag) :: tail => mouse = e.position; e :: tail
-      case (e : MouseMove) :: tail => mouse = e.position; e :: tail
-      case (e : MouseDrag) :: tail => mouse = e.position; e :: tail
+      case (e : MouseMove) :: (_ : MouseMove) :: tail => e :: tail
+      case (e : MouseDrag) :: (_ : MouseDrag) :: tail => e :: tail
       case _ => list
     }
 
-    if (enabled) {
+    val parsedEvents = if (enabled) {
       // Perform 2D query
-      val model = Drawing(View.mousePosition, margin)
-
+      val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin)
 
       // Parse the track
       var newEvent = track.parse(events, model)
@@ -180,6 +177,16 @@ class EventParser {
       // Return the edited list and slice the list to the size defined in <code>listSize</code>.
       newEvent :: events.tail.slice(0, listSize - 1)
     } else list
+
+    // Set (the snapped) mouse position
+    // Merges any sequences of events that doesn't provide additional info.
+    parsedEvents match {
+      case (e : MouseMove) :: tail => mouse = e.position
+      case (e : MouseDrag) :: tail => mouse = e.position
+      case _ =>
+    }
+
+    parsedEvents
   } else list
 
   /**

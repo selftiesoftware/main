@@ -71,7 +71,9 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
   /**
    * Disconnects from the server and stops any future attempts to send messages so the thread can quit.
    */
-  def disconnect() { shouldExit = true }
+  def disconnect() {
+    shouldExit = true
+  }
 
 }
 

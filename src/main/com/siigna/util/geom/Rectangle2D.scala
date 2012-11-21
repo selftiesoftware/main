@@ -213,6 +213,8 @@ case class Rectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Doubl
   def intersects(geom : Geometry2D) = geom match {
     case arc : Arc2D => arc.intersects(this)
     case circle : Circle2D => circle.intersects(this)
+    case collection : CollectionGeometry => collection.intersects(this)
+
     /**
      * Examines whether a given rectangle intersects with this rectangle.
      *

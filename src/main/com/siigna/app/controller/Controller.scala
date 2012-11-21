@@ -106,6 +106,9 @@ object Controller extends Actor with EventController {
         case 'exit => {
           Log.info("Controller is shutting down")
 
+          // Quit the RemoteController
+          RemoteController ! 'exit
+
           // Quit the thread
           exit()
         }

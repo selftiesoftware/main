@@ -30,7 +30,8 @@ case object EndPoints extends EventSnap {
     case some => some
   }
 
-  def snap(point : Vector2D, model : Map[Int, Shape]) : Vector2D = {
+  def snap(q : Vector2D, model : Map[Int, Shape]) : Vector2D = {
+    val point = q.transform(View.deviceTransformation)
     def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
     def closestPoints(points : Seq[Vector2D]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
 
@@ -47,9 +48,9 @@ case object EndPoints extends EventSnap {
       val closestPoint = res.reduceLeft(closestTwo)
 
       if (closestPoint.distanceTo(point) * View.zoom <= 10) {
-        closestPoint
-      } else point
-    } else point
+        closestPoint.transform(View.drawingTransformation)
+      } else q
+    } else q
   }
 
 }
