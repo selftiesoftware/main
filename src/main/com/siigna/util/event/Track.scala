@@ -91,7 +91,7 @@ object Track extends EventTrack {
 
       // Get mouse event
       // The events has been unchecked since this match cannot occur if the event-list is empty
-      val (m : Vector2D, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
+      val (x : Vector2D, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
         case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
         case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
         case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))
@@ -102,7 +102,8 @@ object Track extends EventTrack {
       }
 
       // Update mousePosition
-      this.mousePosition = m.transform(View.deviceTransformation)
+      val m = x.transform(View.deviceTransformation)
+      this.mousePosition = m
       var shape : Option[Int] = None
       
       // Get the nearest shape if it is defined
