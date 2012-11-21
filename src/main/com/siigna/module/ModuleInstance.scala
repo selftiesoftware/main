@@ -62,49 +62,57 @@ final case class ModuleInstance(name : Symbol, module : Module) {
    * @param events  The events from the user
    */
   def apply(events : List[Event]) : Option[ModuleEvent] = {
+    // Stops the child
+    def endChild(message : String = null){
+      val name = child.get.toString
+
+      // Remove the child
+      child = None
+
+      // Stop painting the child
+      module.interface.unchain()
+
+      // Log it
+      Log.debug("Module '" + module + "': Ended module " + name +
+        (if (message != null) " with message [" + message + "]." else ".") )
+    }
+
     // Proceed if the child is defined
     if (child.isDefined) {
-      // Give the events to the child
-      child.get.apply(events) match {
-        // The child ended without a message
-        // - also catches escape events
-        case Some(End) => {
-          val name = child.get.toString
 
-          // Remove the child
-          child = None
-
-          // Stop painting the child
-          module.interface.unchain()
-
-          // Log it
-          Log.debug("Module '" + module + "': Ended module " + name)
-
-          // Continue to run the current module and return the result
-          parse(End :: events)
+      // Catch escape events
+      events match {
+        // End the child module if we get an escape key
+        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+          endChild("Caught Escape")
+          None
         }
+        // Otherwise we give the events to the child
+        case _ => child.get.apply(events) match {
+          // The child ended without a message
+          // - also catches escape events
+          case Some(End) => {
+            endChild()
 
-        // The child ended with a message
-        case Some(m : End[_]) => {
-          val name = child.get.toString
+            // Continue to run the current module and return the result
+            parse(End :: events)
+          }
 
-          // Remove the child
-          child = None
+          // The child ended with a message
+          case Some(m : End[_]) => {
+            endChild(m.message.toString)
 
-          // Stop painting the child
-          module.interface.unchain()
-
-          // Log it
-          Log.debug("Module '" + module + "': Ended module " + name + " with message " + m.message)
-
-          // Continue to run the current module and return the result
-          parse(m :: events)
+            // Continue to run the current module and return the result
+            parse(m :: events)
+          }
+          // The return value was not recognized, nothing should happen
+          case x => None
         }
-        // The return value was not recognized, nothing should happen
-        case x => None
       }
     // Otherwise we handle the events inside this module
-    } else parse(events)
+    } else {
+      parse(events)
+    }
   }
 
   /**

@@ -112,7 +112,8 @@ class ModuleInterface(module : Module) extends Interface {
    * Unchains any interfaces from this interface.
    */
   def unchain() {
-    chain = None
+    chain.foreach(_.unchain()) // Unchain sub-children
+    chain = None // Unchain child
   }
 
 }
