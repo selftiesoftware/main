@@ -65,6 +65,7 @@ object ModuleLoader {
   def load(name : Symbol, classPath : String) : Module = {
     var module : Option[Module] = None
     val path = classPath + "." + name.name
+    println(name, classPath, path)
 
     modules.values.find(_.contains(name)) match {
       case Some(map) => module = Some(classToModule(map(name)))
