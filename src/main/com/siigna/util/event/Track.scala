@@ -102,14 +102,14 @@ object Track extends EventTrack {
       }
 
       // Update mousePosition
+      val model = Drawing(m)
       val m = x.transform(View.deviceTransformation)
       var shape : Option[Int] = None
-      
+
       // Get the nearest shape if it is defined
-      if (Drawing(m).size > 0) {
+      if (Drawing(model.size) > 0) {
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
-          
           val nearest = Drawing(m).reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
@@ -153,7 +153,7 @@ object Track extends EventTrack {
       })
 
       // Return snapped coordinate
-      eventFunction(mousePosition.transform(View.drawingTransformation))
+      eventFunction(mousePosition)
     } else events.head
   }
 
