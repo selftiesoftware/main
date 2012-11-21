@@ -39,7 +39,7 @@ object Track extends EventTrack {
   protected var mousePosition = View.mousePosition
     
   // Get the track distance
-  val trackDistance = Siigna.double("trackDistance").getOrElse(3.0)
+  val trackDistance = Siigna.double("trackDistance").getOrElse(9.0)
 
   // Code to get the horizontal guide from a point
   def horizontalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x + 1, p.y))
@@ -111,7 +111,6 @@ object Track extends EventTrack {
       if (model.size > 0) {
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
-          
           val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
@@ -128,11 +127,11 @@ object Track extends EventTrack {
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
       } else if(!shape.isDefined) {
-        pointOne = None
-        pointTwo = None
+        //pointOne = None
+        //pointTwo = None
       }
 
-      // Snap the event
+      //Snap the event
       val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
         opt match {
           case Some(snapPoint : Vector2D) => {
@@ -140,7 +139,10 @@ object Track extends EventTrack {
             val vertical = verticalGuide(snapPoint)
             val distHori = horizontal.distanceTo(p)
             val distVert = vertical.distanceTo(p)
+
             if (distHori <= distVert && distHori < trackDistance) {
+              //print("distHori <= distVert")
+              //print("distHori < trackDistance")
               isTracking = true
               horizontal.closestPoint(p)
             } else if (distVert < distHori && distVert < trackDistance) {
