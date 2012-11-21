@@ -153,7 +153,7 @@ object Track extends EventTrack {
       })
 
       // Return snapped coordinate
-      eventFunction(mousePosition)
+      eventFunction(mousePosition.transform(View.drawingTransformation))
     } else events.head
   }
 

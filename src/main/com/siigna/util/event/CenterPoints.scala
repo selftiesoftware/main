@@ -26,14 +26,15 @@ case object CenterPoints extends EventSnap {
     case some => some
   }
 
-  def snap(point : Vector2D, model : Map[Int,  Shape]) : Vector2D = {
+  def snap(q : Vector2D, model : Map[Int,  Shape]) : Vector2D = {
+    val point = q.transform(View.deviceTransformation)
     if (!model.isEmpty) {
       val res = model.map(_._2.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
       if (res.distanceTo(point) * View.zoom <= 10) {
-        res
+        res.transform(View.drawingTransformation)
       }
-      else point
-    } else point
+      else q
+    } else q
   }
 
 }

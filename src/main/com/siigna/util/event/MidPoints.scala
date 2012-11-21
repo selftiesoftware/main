@@ -14,6 +14,7 @@ package com.siigna.util.event
 import com.siigna.util.geom._
 import com.siigna.app.model.shape.Shape
 import collection.parallel.immutable.{ParMap, ParIterable}
+import com.siigna.app.view.View
 
 /**
  * A hook for parsing points that snap to mid-points on objects.
@@ -26,13 +27,14 @@ case object MidPoints extends EventSnap {
   }
 
   // TODO: Finish this
-  def snap(point : Vector2D, model : Map[Int, Shape]) : Vector2D = {
+  def snap(q : Vector2D, model : Map[Int, Shape]) : Vector2D = {
+    //val point = q.transform(View.deviceTransformation)
     if (!model.isEmpty) {
       //val res = model.map(_ geometry match {
       //  case _ =>
       //})
-      point
-    } else point
+      q
+    } else q
   }
 
 }
