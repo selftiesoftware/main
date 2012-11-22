@@ -141,7 +141,7 @@ object Track extends EventTrack {
         activeShape = Drawing(pointOne.get,1)
         if(activeShape == Map()) {
           pointOne = None
-          pointTwo = None
+          if(pointTwo.isDefined) pointTwo = None
         }
       }
 
