@@ -11,15 +11,19 @@
 
 package com.siigna.util.event
 
-import com.siigna.app.model.shape._
 import com.siigna.app.view.{View, Graphics}
 import com.siigna.util.geom.{Line2D, Vector2D, TransformationMatrix}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.Drawing
-import com.siigna.app.Siigna
-import com.siigna.util.Implicits._
+import com.siigna._
+import app.model.shape.LineShape
+import app.model.shape.Shape
+import scala.Some
 
 object Track extends EventTrack {
+
+  //evaluate if the shape exists (used to clear the track points if the shape is deleted:
+  var activeShape : Map[Int, Shape] = Map()
 
   /**
    * A flag to toggle track on or off.
@@ -48,8 +52,8 @@ object Track extends EventTrack {
   def verticalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x, p.y + 1))
 
   // Points to track from
-  protected var pointOne : Option[Vector2D] = None
-  protected var pointTwo : Option[Vector2D] = None
+  var pointOne : Option[Vector2D] = None
+  var pointTwo : Option[Vector2D] = None
 
   /**
    * Find a point from a distance, assuming there's a track active.  
@@ -84,8 +88,9 @@ object Track extends EventTrack {
 
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
+
     if(trackEnabled) {
-    
+
       // Set isTracking to false
       isTracking = false
 
@@ -108,9 +113,11 @@ object Track extends EventTrack {
       
       // Get the nearest shape if it is defined
       val model = Drawing(m)
+
       if (model.size > 0) {
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
+
           val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
@@ -126,28 +133,16 @@ object Track extends EventTrack {
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
-      //TODO: add a way to delete the guides if the shape is DELETED - (not just too far away to react to nearestShape)
-      } else if(!shape.isDefined) {
-         //pointOne = None
-         //pointTwo = None
+        //TODO: add a way to delete the guides if the shape is DELETED - (not just too far away to react to nearestShape)
+      }
 
-       // val horizontalOne = horizontalGuide(pointOne.get)
-       // val verticalOne = verticalGuide(pointOne.get)
-       // val distHoriOne = horizontalOne.distanceTo(m)
-       // val distVertOne = verticalOne.distanceTo(m)
-
-        //if the mouse is outside the point one track line, delete point one.
-       // if(distHoriOne > trackDistance && distVertOne > trackDistance) pointOne = None
-
-        //if the mouse is outside the point two track line, delete point two.
-       // if (pointTwo.isDefined) {
-       //   val horizontalTwo = horizontalGuide(pointTwo.get)
-       //   val verticalTwo = verticalGuide(pointTwo.get)
-       //   val distHoriTwo = horizontalTwo.distanceTo(m)
-       //  val distVertTwo = verticalTwo.distanceTo(m)
-
-          //if the mouse is outside the point two track line, delete point two.
-       //   if(distHoriTwo > trackDistance && distVertTwo > trackDistance) pointTwo = None
+      //evaluate if the shape exists (used to clear the track points if the shape is deleted:
+      if(pointOne.isDefined) {
+        activeShape = Drawing(pointOne.get,1)
+        if(activeShape == Map()) {
+          pointOne = None
+          pointTwo = None
+        }
       }
 
       //Snap the event
