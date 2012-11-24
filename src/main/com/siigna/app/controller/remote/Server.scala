@@ -11,13 +11,18 @@ import com.siigna.util.logging.Log
  * @param host  The URL of the host.
  * @param mode  The mode of the connection, can be in production or testing mode
  */
-class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
+class Server(host : String, mode : Mode.Mode, val timeout : Int = 4000) {
 
   // The remote server
   private val remote = select(Node(host, mode.id), 'siigna)
 
-  // A boolean flag to indicate if we have a connection with this server
-  protected var _isConnected = false
+  /**
+   * An int that shows how many retries have been made AND is used to signal connectivity.
+   * -1 means that we have not connected yet
+   * 0  means that we are online
+   * 1  and above means that we have tried _retries number of times.
+   */
+  protected var _retries = -1
 
   // A boolean flag to indicate that the we should cut the connection
   protected var shouldExit = false
@@ -26,45 +31,50 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
    * A boolean value to indicate whether a connection has been successfully made to this server.
    * @return  True if a connection is available, false otherwise
    */
-  def isConnected = _isConnected
+  def isConnected = _retries == 0
 
   /**
    * A method that sends a remote command synchronously with an associated callback function
    * with side effects. The method repeats the procedure until something is received.
    * @param message  The message to send
    * @param f  The callback function to execute when data is successfully retrieved
-   * @tparam R  The return type of the callback function
-   * @return  Right[R] if things go well, Left[Error] if not
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
-  def apply[R](message : RemoteCommand, f : Any => R) : Either[Error, R] = {
-    if (shouldExit) {
-      Left(Error(0, "Connection closing", message.session))
-    } else {
-      Log.debug("Remote: Sending: " + message)
-      val res = remote.!?(timeout, message) match {
-        case Some(data) => { // Call the callback function
-          val result = try {
-            Right(f(data)) // Parse the data
-          } catch {
-            case e : Error => Left(e) // Return an error
-            case e => Left(Error(-1, "Remote: Unknown data received from the server: " + e, message.session))
+  def apply(message : RemoteCommand, f : Any => Unit) {
+    try {
+      if (shouldExit) {
+        Log.info("Server: Connection closing", message.session)
+      } else {
+        remote.!?(timeout, message) match {
+          case Some(data) => { // Call the callback function
+            f(data) // Parse the data
+
+            // We're now connected for sure
+            if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
+            _retries = 0 // Reset retries
           }
+          case _ => { // Timeout
+            // Increment retries
+            if (_retries < 0) {
+              _retries = 0
+            } else {
+              _retries += 1
+            }
 
-          // We're now connected for sure
-          _isConnected = true
-          if (!_isConnected) Log.debug("Server: Connection (re)established.")
+            if (_retries % 10 == 0) {
+              Log.warning("Server: Connection failed after " + retries + " attempts, retrying: " + message + ".")
+            }
 
-          // Return
-          result
-        }
-        case _ => { // Timeout
-          _isConnected = false // We're no longer connected
-          Log.warning("Server: Connection failed.")
-          apply(message, f) // Retry
+            // Retry
+            apply(message, f)
+          }
         }
       }
-      res
+    } catch {
+      case e : StackOverflowError => {
+        shouldExit = true
+        Log.error("Server: " + retries + " means stack overflow :-( Shutting down!")
+      }
     }
   }
 
@@ -74,6 +84,13 @@ class Server(host : String, mode : Mode.Mode, timeout : Int = 4000) {
   def disconnect() {
     shouldExit = true
   }
+
+  /**
+   * An integer describing how many times we have attempted to send the latest message. This can be quite large
+   * since the server never gives up.
+   * @return An integer describing the number of times the latest message has been sent without a reply.
+   */
+  def retries = math.max(_retries, 0)
 
 }
 

@@ -246,35 +246,30 @@ protected[controller] object RemoteController extends Actor {
         // Find the local ids
         val localIds = ids.filter(_ < 0)
 
-        def handleGetShapeId(any : Any) = {
-          any match {
-            case Set(ShapeId, i : Range, _) => {
-
-              // Find out how the ids map to the action
-              val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
-
-              // Update the map in the remote controller
-              localIdMap ++= map
-
-              // Update the model
-              SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
-
-              // Note to self: We should NOT save the ids in the action indices since the actions ids apparently are not final
-
-              // Return the updated action
-              action.update(localIdMap)
-            }
-            case e => {
-              throw new UnknownError("Remote: Expected Set(ShapeId, Range, _), got: " + e)
-            }
-          }
-        }
+        var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        val result = remote[Action](Get(ShapeId, localIds.size, session), handleGetShapeId)
+        remote(Get(ShapeId, localIds.size, session), _ match {
+          case Set(ShapeId, i : Range, _) => {
 
-        if (result.isRight) result.right.get
-        else throw new UnknownError("Remote: Error when retrieving action ids: " + result.left.get)
+            // Find out how the ids map to the action
+            val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
+
+            // Update the map in the remote controller
+            localIdMap ++= map
+
+            // Update the model
+            SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
+
+            // Return the updated action
+            updatedAction = Some(action.update(localIdMap))
+          }
+          case e => {
+            throw new UnknownError("Remote: Expected Set(ShapeId, Range, _), got: " + e)
+          }
+        })
+
+        updatedAction.getOrElse(throw new IllegalArgumentException("Remote: Server did not return expected value."))
       } else { // Else give the action the new ids
         action.update(localIds.zip(ids).toMap)
       }
