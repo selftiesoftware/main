@@ -126,7 +126,7 @@ protected[controller] object RemoteController extends Actor {
    * has received the latest actions from the server.
    * @param any  The result of the request.
    */
-  protected def handleGetActionId(any : Any) {
+  def handleGetActionId(any : Any) {
     any match {
       case Error(code, message, _) => Log.error("Remote: Error when retrieving action: " + code + ": " + message)
       case Set(ActionId, id : Int, _) => {
@@ -176,7 +176,7 @@ protected[controller] object RemoteController extends Actor {
    * clients on the server.
    * @param any  The data received from the server
    */
-  protected def handleSetAction(any : Any) {
+  def handleSetAction(any : Any) {
     any match {
       case Error(code, message, _) => {
         Log.error("Remote: Error when sending action - retrying: " + message)
@@ -233,7 +233,7 @@ protected[controller] object RemoteController extends Actor {
    * @throws UnknownError  If the server returned something illegible
    * @return A RemoteAction with updated ids, if any.
    */
-  protected def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
+  def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
     // Parse the action to an updated version
     val updated : Action = if (action.isLocal) {
       val localIds = action.ids.filter(_ < 0).toSeq
@@ -285,7 +285,7 @@ protected[controller] object RemoteController extends Actor {
    * Attempts to fetch the session for the current client.
    * @return A session if possible.
    */
-  protected def session : Session =
+  def session : Session =
     Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
 
 }

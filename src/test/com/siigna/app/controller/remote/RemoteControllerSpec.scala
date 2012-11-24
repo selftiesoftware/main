@@ -1,8 +1,11 @@
 package com.siigna.app.controller.remote
 
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfter, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.controller.remote.{RemoteConstants => RC, RemoteController => R}
+import com.siigna.app.model.Drawing
+import com.siigna.app.Siigna
+import com.siigna.util.Serializer
 
 /**
  * Tests the remote actor.
@@ -10,22 +13,51 @@ import com.siigna.app.controller.remote.{RemoteConstants => RC, RemoteController
 class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
   // Set all members accessible in RemoteController
-  val c = R.getClass
-  val m = c.getDeclaredMethods
-  val f = c.getDeclaredFields
-  (m ++ f).foreach(_.setAccessible(true))
-  val sink = new Server("localhost", Mode.Production)
-  val session = c.getMethod("session").invoke(c).asInstanceOf[Session]
+  val sink = new Server("62.243.118.234", Mode.Production)
+  var session : Session = null
 
+  sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),
+    r => session = Session(r.asInstanceOf[Set].value.asInstanceOf[Long], Siigna.user))
 
-  describe("The remote controller") {
+  describe("The Remote Controller") {
 
-    it ("can establish connection to a server") {
-      assert(sink(Get(RC.Drawing, null, session), r => r).isInstanceOf[Right[_, _]])
+    it ("can fetch a new drawing id") {
+      sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)), r => {
+        val set = r.asInstanceOf[Set]
+        set.name should equal(RC.DrawingId)
+        val id = set.value.asInstanceOf[Long]
+        id should be > 0L
+        session = Session(id, Siigna.user)
+      })
     }
 
-    it("can receive a drawing") {
+    it ("can get the latest action id for a drawing") {
+      sink(Get(RC.ActionId, null, session), r => {
+        val set = r.asInstanceOf[Set]
+        val id = set.value.asInstanceOf[Int]
+        id should equal (0)
+      })
+    }
 
+    it ("can get a drawing") {
+      sink(Get(RC.Drawing, session.drawing, session), r => {
+        val set = r.asInstanceOf[Set]
+        val bytes = set.value.asInstanceOf[Array[Byte]]
+        val remote = Serializer.readDrawing(bytes)
+        remote.model.shapes.size should equal (0)
+      })
+    }
+
+    it ("can get shape ids") {
+      def getRange(x : Int) {
+        sink(Get(RC.ShapeId, x, session), r => {
+          val set = r.asInstanceOf[Set]
+          val range = set.value.asInstanceOf[Range]
+          range.size should equal (x)
+        })
+      }
+      getRange(1)
+      getRange(12)
     }
 
   }

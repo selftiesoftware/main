@@ -6,7 +6,7 @@ import com.siigna.app.Siigna
 import org.scalatest.exceptions.TestFailedException
 
 /**
- * Tests connectivity and
+ * Tests connectivity and fault tolerance of the server.
  */
 class ServerSpec extends FunSpec with ShouldMatchers with OneInstancePerTest with BeforeAndAfter {
 
