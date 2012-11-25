@@ -22,7 +22,7 @@ import scala.Some
 
 object Track extends EventTrack {
 
-  //evaluate if the shape exists (used to clear the track points if the shape is deleted:
+  //evaluate if the shape exists (used to clear the track points if the shape is deleted):
   var activeShape : Map[Int, Shape] = Map()
 
   /**
@@ -55,12 +55,14 @@ object Track extends EventTrack {
   var pointOne : Option[Vector2D] = None
   var pointTwo : Option[Vector2D] = None
 
+
   /**
    * Find a point from a distance, assuming there's a track active.  
    * @param dist The distance to go in the line of the track.
    * @return  Some[Vector2D] if track is active, otherwise None.
    */
   def getPointFromDistance(dist : Double) : Option[Vector2D] = {
+
     /** Get the best fitting line (horizontal or vertical)
      * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
      */ 
@@ -90,7 +92,6 @@ object Track extends EventTrack {
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
 
     if(trackEnabled) {
-
       // Set isTracking to false
       isTracking = false
 
@@ -110,9 +111,11 @@ object Track extends EventTrack {
       val m = x.transform(View.deviceTransformation)
       this.mousePosition = m
       var shape : Option[Int] = None
-      
+
       // Get the nearest shape if it is defined
       val model = Drawing(m)
+
+      //if a shape is in the process of being made (not in the model yet), use it too.
 
       if (model.size > 0) {
         //if a tracking point is defined, and the mouse is placed on top of a second point
@@ -133,7 +136,6 @@ object Track extends EventTrack {
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
-        //TODO: add a way to delete the guides if the shape is DELETED - (not just too far away to react to nearestShape)
       }
 
       //evaluate if the shape exists (used to clear the track points if the shape is deleted:

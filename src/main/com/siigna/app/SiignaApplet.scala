@@ -77,7 +77,7 @@ class SiignaApplet extends Applet {
       }
 
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-      val drawingId = 30
+      val drawingId = 22
 
       if (drawingId != null) try {
         val id = drawingId.toLong
