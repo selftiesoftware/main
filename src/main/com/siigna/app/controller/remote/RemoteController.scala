@@ -126,7 +126,7 @@ protected[controller] object RemoteController extends Actor {
    * has received the latest actions from the server.
    * @param any  The result of the request.
    */
-  protected def handleGetActionId(any : Any) {
+  def handleGetActionId(any : Any) {
     any match {
       case Error(code, message, _) => Log.error("Remote: Error when retrieving action: " + code + ": " + message)
       case Set(ActionId, id : Int, _) => {
@@ -176,7 +176,7 @@ protected[controller] object RemoteController extends Actor {
    * clients on the server.
    * @param any  The data received from the server
    */
-  protected def handleSetAction(any : Any) {
+  def handleSetAction(any : Any) {
     any match {
       case Error(code, message, _) => {
         Log.error("Remote: Error when sending action - retrying: " + message)
@@ -233,7 +233,7 @@ protected[controller] object RemoteController extends Actor {
    * @throws UnknownError  If the server returned something illegible
    * @return A RemoteAction with updated ids, if any.
    */
-  protected def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
+  def parseLocalAction(action : Action, undo : Boolean) : RemoteAction = {
     // Parse the action to an updated version
     val updated : Action = if (action.isLocal) {
       val localIds = action.ids.filter(_ < 0).toSeq
@@ -246,35 +246,30 @@ protected[controller] object RemoteController extends Actor {
         // Find the local ids
         val localIds = ids.filter(_ < 0)
 
-        def handleGetShapeId(any : Any) = {
-          any match {
-            case Set(ShapeId, i : Range, _) => {
-
-              // Find out how the ids map to the action
-              val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
-
-              // Update the map in the remote controller
-              localIdMap ++= map
-
-              // Update the model
-              SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
-
-              // Note to self: We should NOT save the ids in the action indices since the actions ids apparently are not final
-
-              // Return the updated action
-              action.update(localIdMap)
-            }
-            case e => {
-              throw new UnknownError("Remote: Expected Set(ShapeId, Range, _), got: " + e)
-            }
-          }
-        }
+        var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        val result = remote[Action](Get(ShapeId, localIds.size, session), handleGetShapeId)
+        remote(Get(ShapeId, localIds.size, session), _ match {
+          case Set(ShapeId, i : Range, _) => {
 
-        if (result.isRight) result.right.get
-        else throw new UnknownError("Remote: Error when retrieving action ids: " + result.left.get)
+            // Find out how the ids map to the action
+            val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
+
+            // Update the map in the remote controller
+            localIdMap ++= map
+
+            // Update the model
+            SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
+
+            // Return the updated action
+            updatedAction = Some(action.update(localIdMap))
+          }
+          case e => {
+            throw new UnknownError("Remote: Expected Set(ShapeId, Range, _), got: " + e)
+          }
+        })
+
+        updatedAction.getOrElse(throw new IllegalArgumentException("Remote: Server did not return expected value."))
       } else { // Else give the action the new ids
         action.update(localIds.zip(ids).toMap)
       }
@@ -290,7 +285,7 @@ protected[controller] object RemoteController extends Actor {
    * Attempts to fetch the session for the current client.
    * @return A session if possible.
    */
-  protected def session : Session =
+  def session : Session =
     Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
 
 }
