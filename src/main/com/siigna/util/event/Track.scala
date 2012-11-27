@@ -28,7 +28,12 @@ object Track extends EventTrack {
   /**
    * A flag to toggle track on or off.
    */  
-  var trackEnabled : Boolean = true 
+  var trackEnabled : Boolean = true
+
+  //A flag to see, if horizontal or vertical guides are active:
+  var horizontalGuideActive: Boolean = false
+  var verticalGuideActive: Boolean = false
+  var trackedPoint: Option[Vector2D] = None
   
   // Get the track color
   protected val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
@@ -178,20 +183,32 @@ object Track extends EventTrack {
   }
 
 
+
+
   override def paint(g : Graphics, t : TransformationMatrix) {
     def paintPoint(p : Vector2D) {
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(mousePosition) < trackDistance) {
+      if (vertical.distanceTo(mousePosition) < trackDistance && verticalGuideActive == false ) {
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
+        verticalGuideActive = true
+        trackedPoint = Some(p)
+      } else {
+        verticalGuideActive = false
       }
 
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(mousePosition) < trackDistance) {
+      if (horizontal.distanceTo(mousePosition) < trackDistance && horizontalGuideActive == false ) {
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
+        horizontalGuideActive = true
+        trackedPoint = Some(p)
+      } else {
+        horizontalGuideActive = false
       }
+
+      if (horizontalGuideActive == false && verticalGuideActive == false) trackedPoint = None
     }
     
     //PAINT TRACKING POINT ONE

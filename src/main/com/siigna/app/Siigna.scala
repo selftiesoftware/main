@@ -43,7 +43,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * The active color.
    */
   var activeColor = "new Color(0.00f, 0.00f, 0.00f, 1.00f)"
-
+  var activeLineWeight = "0.2"
   /**
    * The active display, if any.
    */
