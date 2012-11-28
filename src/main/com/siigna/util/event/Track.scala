@@ -97,7 +97,6 @@ object Track extends EventTrack {
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
 
     if(trackEnabled) {
-      println("Tracking before reset:" + isTracking)
       // Set isTracking to false
       isTracking = false
 
