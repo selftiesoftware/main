@@ -29,7 +29,8 @@ import java.io.InputStream
 trait Importer extends (InputStream => Unit) {
 
   // Adds the importer on instantiation.
-  Import.addImporter(this)
+  var imp = new Import
+  imp.addImporter(this)
 
   /**
    * The extension of the file-type, for example <code>dxf</code>, <code>pdf</code> or even <code>doc</code>.

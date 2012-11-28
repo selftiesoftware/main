@@ -1,5 +1,3 @@
-package com.siigna.module.io
-
 /*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
@@ -11,16 +9,18 @@ package com.siigna.module.io
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-/* 2010 (C) Copyright by Siigna, all rights reserved. */
+package com.siigna.module.io
 
-import java.awt.{Color, FileDialog, Frame}
 import com.siigna._
+import java.awt.{FileDialog, Frame, Color}
+import module.io.dxf._
 import java.io.{FileInputStream, File}
 
 /**
  * Imports data from files into Siigna using [[com.siigna.module.io.Importer]] objects.
  */
-object Import extends Module {
+
+class Import extends Module {
 
   lazy val anthracite = new Color(0.25f, 0.25f, 0.25f, 1.00f)
 
@@ -32,7 +32,7 @@ object Import extends Module {
   var fileLength: Int = 0
 
   // A map of file extensions to a given importer
-  protected var importers : Map[String, Importer] = Map()
+  protected var importers : Map[String, Importer] = Map("dxf" -> DXFImporter)
 
   //graphics to show the loading progress
   def loadBar(point: Int): Shape = PolylineShape(Rectangle2D(Vector2D(103, 297), Vector2D(point + 103, 303))).setAttribute("raster" -> anthracite)
@@ -67,7 +67,6 @@ object Import extends Module {
 
               // Retrieve the streams for the file
               val fileStream = new FileInputStream(file)
-
               // Import!
               importers(extension)(fileStream)
 
@@ -85,17 +84,12 @@ object Import extends Module {
             }
           }
         }
-        'End
-      }
-    },
-    // Dispose of the frame so the thread can close down.
-    'End -> {
-      case _ => {
+        // Dispose of the frame so the thread can close down.
         fileLength = 0
         frameIsLoaded = false
         frame.dispose()
         startTime = None
-        'End
+        End
       }
     }
   )
