@@ -27,14 +27,14 @@ object Track extends EventTrack {
 
   /**
    * A flag to toggle track on or off.
-   */  
+   */
   var trackEnabled : Boolean = true
 
   //A flag to see, if horizontal or vertical guides are active:
   var horizontalGuideActive: Boolean = false
   var verticalGuideActive: Boolean = false
   var trackedPoint: Option[Vector2D] = None
-  
+
   // Get the track color
   protected val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
 
@@ -43,10 +43,10 @@ object Track extends EventTrack {
 
   // Get method
   var isTracking: Boolean = false
-  
+
   // The up-to-date mouse position
   protected var mousePosition = View.mousePosition
-    
+
   // Get the track distance
   val trackDistance = Siigna.double("trackDistance").getOrElse(9.0)
 
@@ -69,8 +69,8 @@ object Track extends EventTrack {
   def getPointFromDistance(dist : Double) : Option[Vector2D] = {
 
     /** Get the best fitting line (horizontal or vertical)
-     * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
-     */ 
+      * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
+      */
     def getTrackPoint(p : Vector2D) : Vector2D = {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
@@ -80,14 +80,14 @@ object Track extends EventTrack {
         val closestPoint = horiz.closestPoint(mousePosition)
         if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
         else                      Vector2D(p.x + dist, p.y)
-      // Vertical!
+        // Vertical!
       } else {
         val closestPoint = vert.closestPoint(mousePosition)
         if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
         else                      Vector2D(p.x, p.y + dist)
-      } 
+      }
     }
-    
+
     if (pointOne.isDefined) {
       Some(getTrackPoint(pointOne.get))
     } else None
@@ -99,7 +99,7 @@ object Track extends EventTrack {
     if(trackEnabled) {
       println("Tracking before reset:" + isTracking)
       // Set isTracking to false
-      //isTracking = false
+      isTracking = false
 
       // Get mouse event
       // The events has been unchecked since this match cannot occur if the event-list is empty
@@ -121,7 +121,7 @@ object Track extends EventTrack {
       } else {
         m = this.mousePosition
       }
-      
+
       var shape : Option[Int] = None
 
       // Get the nearest shape if it is defined
@@ -195,10 +195,6 @@ object Track extends EventTrack {
 
 
   override def paint(g : Graphics, t : TransformationMatrix) {
-
-    println("T: "+isTracking)
-
-
     def paintPoint(p : Vector2D) {
 
       val horizontal = horizontalGuide(p)
@@ -220,7 +216,7 @@ object Track extends EventTrack {
         horizontalGuideActive = false
       }
     }
-    
+
     //PAINT TRACKING POINT ONE
     if (pointOne.isDefined) paintPoint(pointOne.get)
 
