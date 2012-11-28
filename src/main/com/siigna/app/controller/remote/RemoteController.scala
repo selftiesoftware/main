@@ -179,7 +179,7 @@ protected[controller] object RemoteController extends Actor {
   def handleSetAction(any : Any) {
     any match {
       case Error(code, message, _) => {
-        Log.error("Remote: Error when sending action - retrying: " + message)
+        Log.error("Remote: Error when sending action: " + message)
         // TODO: Correctly handle errors
       }
       case Set(ActionId, id : Int, _) => {
