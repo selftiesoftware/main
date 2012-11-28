@@ -133,8 +133,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   val Snap = com.siigna.util.event.Snap
   val Track = com.siigna.util.event.Track
-  val isTracking = com.siigna.util.event.Track.isTracking
-
 
   // Geometry
   type Arc2D = com.siigna.util.geom.Arc2D
