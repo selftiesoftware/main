@@ -98,7 +98,7 @@ object Track extends EventTrack {
 
     if(trackEnabled) {
       // Set isTracking to false
-      isTracking = false
+      //isTracking = false
 
       // Get mouse event
       // The events has been unchecked since this match cannot occur if the event-list is empty
@@ -186,6 +186,10 @@ object Track extends EventTrack {
 
 
   override def paint(g : Graphics, t : TransformationMatrix) {
+
+    println("T: "+isTracking)
+
+
     def paintPoint(p : Vector2D) {
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
