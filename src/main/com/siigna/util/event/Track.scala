@@ -187,8 +187,6 @@ object Track extends EventTrack {
       })
 
       // Return snapped coordinate
-      println("Ret. snapped coords. Tracking: " + isTracking)
-      println("x: " + x)
       eventFunction(mousePosition.transform(View.drawingTransformation))
     } else events.head
   }
