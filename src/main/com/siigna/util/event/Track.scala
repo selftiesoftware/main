@@ -42,7 +42,7 @@ object Track extends EventTrack {
   protected val attributes = Attributes("Infinite" -> true, color)
 
   // Get method
-  var isTracking = false
+  var isTracking: Boolean = false
   
   // The up-to-date mouse position
   protected var mousePosition = View.mousePosition
@@ -97,6 +97,7 @@ object Track extends EventTrack {
   def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
 
     if(trackEnabled) {
+      println("Tracking before reset:" + isTracking)
       // Set isTracking to false
       isTracking = false
 
@@ -113,8 +114,14 @@ object Track extends EventTrack {
       }
 
       // Update mousePosition
-      val m = x.transform(View.deviceTransformation)
-      this.mousePosition = m
+      var m = Vector2D(0,0)
+      if (x != this.mousePosition) {
+        m = x.transform(View.deviceTransformation)
+        this.mousePosition = m
+      } else {
+        m = this.mousePosition
+      }
+      
       var shape : Option[Int] = None
 
       // Get the nearest shape if it is defined
@@ -173,11 +180,15 @@ object Track extends EventTrack {
               p
             }
           }
-          case None => p
+          case None => {
+            p
+          }
         }
       })
 
       // Return snapped coordinate
+      println("Ret. snapped coords. Tracking: " + isTracking)
+      println("x: " + x)
       eventFunction(mousePosition.transform(View.drawingTransformation))
     } else events.head
   }
@@ -187,6 +198,7 @@ object Track extends EventTrack {
 
   override def paint(g : Graphics, t : TransformationMatrix) {
     def paintPoint(p : Vector2D) {
+
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
 
@@ -194,7 +206,6 @@ object Track extends EventTrack {
       if (vertical.distanceTo(mousePosition) < trackDistance && verticalGuideActive == false ) {
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
         verticalGuideActive = true
-        trackedPoint = Some(p)
       } else {
         verticalGuideActive = false
       }
@@ -203,12 +214,9 @@ object Track extends EventTrack {
       if (horizontal.distanceTo(mousePosition) < trackDistance && horizontalGuideActive == false ) {
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
         horizontalGuideActive = true
-        trackedPoint = Some(p)
       } else {
         horizontalGuideActive = false
       }
-
-      if (horizontalGuideActive == false && verticalGuideActive == false) trackedPoint = None
     }
     
     //PAINT TRACKING POINT ONE
