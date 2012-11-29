@@ -59,9 +59,12 @@ final case class ModuleInstance(name : Symbol, module : Module) {
 
   /**
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
-   * @param events  The events from the user
+   * @param event  The events from the user
    */
-  def apply(events : List[Event]) : Option[ModuleEvent] = {
+  def apply(event : Event) : Option[ModuleEvent] = {
+    // Parse the events
+    val events = module.eventParser.parse(event)
+
     if (_child.isDefined) {
       // Parse the child if it has been defined
       parseChild(events)
@@ -91,10 +94,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
    */
   protected def parse(events : List[Event]) : Option[ModuleEvent] = {
     // The event to return
-    var event : Option[ModuleEvent] = None
-
-    // Parse the events
-    val parsedEvents = module.eventParser.parse(events)
+    var moduleEvent : Option[ModuleEvent] = None
 
     // React on the event parsed and execute the function associated with the state;
     // These lines are in a try-catch loop in case anything goes wrong in a module.
@@ -102,8 +102,8 @@ final case class ModuleInstance(name : Symbol, module : Module) {
     try {
       // Retrieve the function from the map and apply them if they exist
       module.stateMap.get(state) match {
-        case Some(f) if (f.isDefinedAt(parsedEvents)) => {
-          f(parsedEvents) match {
+        case Some(f) if (f.isDefinedAt(events)) => {
+          f(events) match {
             // Forward to a module
             case s : Start[_] => {
               // Try to load the module
@@ -119,12 +119,12 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               Log.debug("Module '" + module + "': Forwarding to " + s.module)
 
               // Let the child react on the start
-              event = parseChild(s :: events)
+              moduleEvent = parseChild(s :: events)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => state = s
             // If module returns a ModuleEvent (e. g. End), return it immediately
-            case e : ModuleEvent => event = Some(e)
+            case e : ModuleEvent => moduleEvent = Some(e)
             case e => // Function return value does not match: Do nothing
           }
         }
@@ -132,12 +132,12 @@ final case class ModuleInstance(name : Symbol, module : Module) {
       }
     } catch {
       case e : Exception => {
-        Log.error(toString + ": Error when executing state " + state + " with events " + parsedEvents + ".", e)
+        Log.error(toString + ": Error when executing state " + state + " with events " + events + ".", e)
       }
     }
 
-    // Return the event
-    event
+    // Return the module event
+    moduleEvent
   }
 
   /**
@@ -168,7 +168,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
         None
       }
       // Otherwise we give the events to the child and match on the result
-      case _ => _child.get.apply(events) match {
+      case _ => _child.get.apply(events.head) match {
         // The child ended without a message
         // - also catches escape events
         case Some(End) => {

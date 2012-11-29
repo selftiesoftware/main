@@ -81,8 +81,6 @@ object Controller extends Actor with EventController {
     // Init ModuleLoader
     ModuleLoader
 
-    var events : List[Event] = Nil
-
     // Loop and react on incoming messages
     loop {
       react {
@@ -95,11 +93,8 @@ object Controller extends Actor with EventController {
 
         // Handle events
         case event : Event => {
-          // Concatenate the event (to a max of 10)
-          events = (event :: events).take(10)
-
-          // Send the events on to the modules!
-          initModule(events)
+          // Send the event on to the modules!
+          initModule(event)
         }
 
         // Exit
