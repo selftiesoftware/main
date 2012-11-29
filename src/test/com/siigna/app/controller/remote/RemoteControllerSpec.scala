@@ -6,6 +6,8 @@ import com.siigna.app.controller.remote.{RemoteConstants => RC, RemoteController
 import com.siigna.app.model.Drawing
 import com.siigna.app.Siigna
 import com.siigna.util.Serializer
+import com.siigna.app.model.action.{CreateShape, RemoteAction}
+import com.siigna.app.model.shape.LineShape
 
 /**
  * Tests the remote actor.
@@ -19,7 +21,14 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
   sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),
     r => session = Session(r.asInstanceOf[Set].value.asInstanceOf[Long], Siigna.user))
 
+  //describe("The Remote Controller Handles") {
+
+    // Test handles
+
+  //}
+
   describe("The Remote Controller") {
+    var range : Range = null
 
     it ("can fetch a new drawing id") {
       sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)), r => {
@@ -58,6 +67,17 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
       }
       getRange(1)
       getRange(12)
+    }
+
+    it ("can set an action") {
+      // TODO: Find a better solution in coming scalatest versions
+      if (range != null) {
+        val action = RemoteAction(CreateShape(range.head, LineShape(0, 0, 10, 10)))
+        sink(Set(RC.Action, action, session), r => {
+          val set = r.asInstanceOf[Set]
+          set.value.isInstanceOf[Int] should be (true)
+        })
+      }
     }
 
   }

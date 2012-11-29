@@ -8,13 +8,18 @@ import org.scalatest.exceptions.TestFailedException
 /**
  * Tests connectivity and fault tolerance of the server.
  */
-class ServerSpec extends FunSpec with ShouldMatchers with OneInstancePerTest with BeforeAndAfter {
+class ServerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
-  lazy val badSink  = new Server("localhost", Mode.Production, 1)
-  lazy val goodSink = new Server("62.243.118.234", Mode.Production)
+  var badSink : Server  = null
+  var goodSink : Server = null
 
   lazy val dummyGet = Get(null, null, dummySession)
   lazy val dummySession = Session(0L, Siigna.user)
+
+  before {
+    badSink  = new Server("localhost", Mode.Production, 1)
+    goodSink = new Server("62.243.118.234", Mode.Production)
+  }
 
   after {
     badSink.disconnect()
