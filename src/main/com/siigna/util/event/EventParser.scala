@@ -31,15 +31,14 @@ import com.siigna.app.model.shape.{CircleShape, Shape}
  */
 class EventParser {
 
-  /**
-   * The default snap-modules.
-   */
+  // The default snap-modules.
   protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
 
-  /**
-   * A boolean value of whether the EventParser is enable or not. Defaults to true.
-   */
+  // A boolean value of whether the EventParser is enable or not. Defaults to true.
   protected var enabled : Boolean = true
+
+  // The list of events stored for each instance, so every module can keep track of previously snapped events
+  protected var events : List[Event] = Nil
 
   /**
    * The size of the list the EventParser returns. Defaults to 10.
@@ -150,44 +149,49 @@ class EventParser {
    *     and return the list.</li>
    * </ol>
    */
-  def parse(list : List[Event]) : List[Event] = if (!list.isEmpty) {
+  def parse(event : Event) : List[Event] = {
+    // Store the event as the head of the events (max 10)
+    events = (event :: events).take(10)
+
     // Merges any sequences of events that doesn't provide additional info.
-    val events = list match {
+    events = events match {
       // Removes unknown KeyEvents.
       case KeyDown(AWTKeyEvent.CHAR_UNDEFINED, _) :: tail => tail
       case KeyUp(AWTKeyEvent.CHAR_UNDEFINED,_ ) :: tail   => tail
       // Merges mouse events to avoid ridiculously long lists of MouseMove or MouseDrag.
       case (e : MouseMove) :: (_ : MouseMove) :: tail => e :: tail
       case (e : MouseDrag) :: (_ : MouseDrag) :: tail => e :: tail
-      case _ => list
+      case _ => events
     }
 
-    val parsedEvents = if (enabled) {
-      // Perform 2D query
-      val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin)
+    if (enabled) {
+      events = {
+        // Perform 2D query
+        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin)
 
-      // Parse the track
-      var newEvent = track.parse(events, model)
+        // Parse the track
+        var newEvent = track.parse(events, model)
 
-      // Parse the snap
-      if(Snap.snapEnabled == true) {
-        snap foreach {a => newEvent = a.parse(newEvent, model)}
+        // Parse the snap
+        if(Snap.snapEnabled == true) {
+          snap foreach {a => newEvent = a.parse(newEvent, model)}
+        }
+
+        // Return the edited list and slice the list to the size defined in <code>listSize</code>.
+        newEvent :: events.tail.slice(0, listSize - 1)
       }
-
-      // Return the edited list and slice the list to the size defined in <code>listSize</code>.
-      newEvent :: events.tail.slice(0, listSize - 1)
-    } else list
+    }
 
     // Set (the snapped) mouse position
     // Merges any sequences of events that doesn't provide additional info.
-    parsedEvents match {
+    events match {
       case (e : MouseMove) :: tail => mouse = e.position
       case (e : MouseDrag) :: tail => mouse = e.position
       case _ =>
     }
 
-    parsedEvents
-  } else list
+    events
+  }
 
   /**
    * Stop snapping to the given event snap. If the module is nowhere to be found in the snap
