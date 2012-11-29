@@ -37,22 +37,17 @@ class EventParser {
   // A boolean value of whether the EventParser is enable or not. Defaults to true.
   protected var enabled : Boolean = true
 
-  // The list of events stored for each instance, so every module can keep track of previously snapped events
-  protected var events : List[Event] = Nil
 
   /**
-   * The size of the list the EventParser returns. Defaults to 10.
-   * Edit this if you need larger event-lists for very complex modules. But note
-   * that the size of the event-list given when the modules initiates depends on
-   * the <code>listSize</code> variable in the previous module's EventParser.
-   * Thus it's only inside the current module that the list-sizing is applicable.
+   * The events attached to the event parser. These events have been parsed one-by-one which means that they are
+   * parsed in accordance with what the module want, but probably does not correspond to the events originated
+   * from the user.
+   * @return  A list of parsed events
    */
-  var listSize : Int = 10
+  var events : List[Event] = Nil
 
-  /**
-   * The most recent MouseMove or MouseDrag event received by the event-parser.
-   */
-  protected var mouse : Vector2D = Vector2D.empty
+  // The most recent MouseMove or MouseDrag event received by the event-parser.
+  var mousePosition : Vector2D = Vector2D.empty
 
   /**
    * The margin of the graphical query done by the parser i. e. how large a space is included in the search
@@ -61,8 +56,17 @@ class EventParser {
   var margin : Double = 5
 
   /**
-   * The current EventTracker.
+   * The size of the list the EventParser returns. Defaults to 10.
+   * Edit this if you need larger event-lists for very complex modules. But note
+   * that the size of the event-list given when the modules initiates depends on
+   * the <code>listSize</code> variable in the previous module's EventParser.
+   * Thus it's only inside the current module that the list-sizing is applicable.
+   *
+   * This value should be positive.
    */
+  var maxNumberOfEvents : Int = 10
+
+  // The current EventTracker.
   private var track : EventTrack = Track
 
   /**
@@ -72,6 +76,9 @@ class EventParser {
    * Defaults to: CenterPoints, MidPoints and EndPoints.
    */
   private var snap = defaultSnap
+
+  // A snap model for snapping to temporary or not-yet-created shapes
+  private var snapModel : Seq[() => Shape] = Nil
 
   /**
    * Clears any snap-modules that is not a part of the default snap set.
@@ -101,22 +108,6 @@ class EventParser {
    * Examines whether the EventParser is tracking or not.
    */
   def isTracking = track.isTracking
-
-  /**
-   * Returns the most recent mouse position seen from the event-parsers perspective. This coordinate
-   * is (often) not the same as the views since the snap and track functionalities used by this parser
-   * is included.
-   * @return A Vector2D which is empty if the event has not received any mouseevents yet.
-   */
-  def mousePosition = mouse
-
-  /**
-   * Sets the mouse position to the given vector. This is used by [[com.siigna.module.ModuleInstance]] to set up
-   * the right mouse coordinates when starting the module (initial coordinates is defined as Vector2D.empty,
-   * which might not always look good).
-   * @param v  The mouse position to set.
-   */
-  def mousePosition_=(v : Vector2D) { mouse = v }
 
   /**
    * Let the track and the snappers paint. This is handy if a track, for instance, wishes to show some kind
@@ -151,7 +142,7 @@ class EventParser {
    */
   def parse(event : Event) : List[Event] = {
     // Store the event as the head of the events (max 10)
-    events = (event :: events).take(10)
+    events = (event :: events).take(maxNumberOfEvents)
 
     // Merges any sequences of events that doesn't provide additional info.
     events = events match {
@@ -166,8 +157,8 @@ class EventParser {
 
     if (enabled) {
       events = {
-        // Perform 2D query
-        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin)
+        // Perform 2D query and add any selections
+        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel.map(_())
 
         // Parse the track
         var newEvent = track.parse(events, model)
@@ -178,15 +169,15 @@ class EventParser {
         }
 
         // Return the edited list and slice the list to the size defined in <code>listSize</code>.
-        newEvent :: events.tail.slice(0, listSize - 1)
+        newEvent :: events.tail.slice(0, maxNumberOfEvents - 1)
       }
     }
 
     // Set (the snapped) mouse position
     // Merges any sequences of events that doesn't provide additional info.
     events match {
-      case (e : MouseMove) :: tail => mouse = e.position
-      case (e : MouseDrag) :: tail => mouse = e.position
+      case (e : MouseMove) :: tail => mousePosition = e.position
+      case (e : MouseDrag) :: tail => mousePosition = e.position
       case _ =>
     }
 
@@ -206,6 +197,13 @@ class EventParser {
    * perform the snap-functionality given in the snap.
    */
   def snapTo(snap : EventSnap) { this.snap = this.snap :+ snap }
+
+  /**
+   * Snaps to the given function, returning a shape. Useful for adding shapes that has not yet been saved in the
+   * Drawing to the dynamic snap method.
+   * @param shape  The function returning the shape the event parser should snap to.
+   */
+  def snapTo(shape : () => Shape) { snapModel :+= shape }
 
   /**
    * Track to a given track module.
@@ -236,7 +234,7 @@ abstract class EventSnap {
   /**
    * Parses an event by the given snap-settings.
    */
-  def parse(event : Event, model : Map[Int, Shape]) : Event
+  def parse(event : Event, model : Traversable[Shape]) : Event
 }
 
 /**
@@ -260,6 +258,6 @@ abstract class EventTrack {
   /**
    * Parses a list into a single event.
    */
-  def parse(events : List[Event], model : Map[Int, Shape]) : Event
+  def parse(events : List[Event], model : Traversable[Shape]) : Event
 
 }

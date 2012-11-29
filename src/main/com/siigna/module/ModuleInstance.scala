@@ -112,6 +112,9 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               // Start painting the module
               module.interface.chain(s.module.module.interface)
 
+              // Set the events of the new event parser
+              s.module.module.eventParser.events = events
+
               // Set the mouse position of the new event parser
               s.module.module.eventParser.mousePosition = View.mousePosition
 

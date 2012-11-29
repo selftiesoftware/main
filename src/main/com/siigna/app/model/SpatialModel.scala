@@ -14,6 +14,8 @@ package com.siigna.app.model
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.Shape
 import collection.GenMap
+import com.siigna.app.view.View
+import com.siigna.app.Siigna
 
 /**
  * An interface that supplies
@@ -41,9 +43,9 @@ trait SpatialModel[Key, Value <: Shape] {
   /**
    * Query for shapes close to the given point by a given radius.
    * @param query  The point to query.
-   * @param radius  (Optional) The radius added to the point.
+   * @param radius  (Optional) The radius added to the selection distance
    */
-  def apply(query : Vector2D, radius : Double = 5.0) : Map[Key, Value] = {
+  def apply(query : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
     shapes.filter((s : (Key, Value)) => {
       s._2.geometry.distanceTo(query) <= radius
     })

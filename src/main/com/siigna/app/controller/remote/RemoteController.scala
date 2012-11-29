@@ -52,6 +52,8 @@ protected[controller] object RemoteController extends Actor {
     try {
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
+      println(session)
+
       // If we have a drawing we need to fetch it if we don't we need to reserve it
       drawingId match {
         case Some(i) => remote(Get(Drawing, drawingId, session), handleGetDrawing)
