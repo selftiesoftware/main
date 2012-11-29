@@ -136,7 +136,7 @@ object Track extends EventTrack {
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           if (nearestPoint.distanceTo(m) < trackDistance) {
-            if  (!(pointOne.get.distanceTo(m) < 10)) pointTwo = pointOne
+            if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
           }
         }
