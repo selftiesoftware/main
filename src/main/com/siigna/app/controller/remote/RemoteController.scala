@@ -215,8 +215,8 @@ protected[controller] object RemoteController extends Actor {
           SiignaDrawing.execute(LoadDrawing(model), false)
 
           // Search for the lastAction attribute, or retrieve it manually
-          model.attributes.int("lastAction") match {
-            case Some(i : Int) => actionIndices + i
+          SiignaDrawing.attributes.int("lastAction") match {
+            case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
           Log.success("Remote: Successfully received drawing from server")
