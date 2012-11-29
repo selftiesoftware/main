@@ -35,8 +35,8 @@ object Log extends scala.util.logging.ConsoleLogger {
    *
    * TODO: Use twitter's util-logging instead of inventing the wheel damnit!
    */
-  var level : Int = ERROR + WARNING + INFO + SUCCESS + DEBUG
-
+  //var level : Int = ERROR + WARNING + INFO + SUCCESS + DEBUG
+  var level : Int = INFO
   /**
    * The line-number.
    */
