@@ -50,7 +50,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
   /**
    * The forwarding module, if any
    */
-  protected var child : Option[ModuleInstance] = None
+  protected var _child : Option[ModuleInstance] = None
 
   /**
    * The current state of the module given by a symbol. Every module always starts in 'Start.
@@ -62,58 +62,20 @@ final case class ModuleInstance(name : Symbol, module : Module) {
    * @param events  The events from the user
    */
   def apply(events : List[Event]) : Option[ModuleEvent] = {
-    // Stops the child
-    def endChild(message : String = null){
-      val name = child.get.toString
-
-      // Remove the child
-      child = None
-
-      // Stop painting the child
-      module.interface.unchain()
-
-      // Log it
-      Log.debug("Module '" + module + "': Ended module " + name +
-        (if (message != null) " with message [" + message + "]." else ".") )
-    }
-
-    // Proceed if the child is defined
-    if (child.isDefined) {
-
-      // Catch escape events
-      events match {
-        // End the child module if we get an escape key
-        case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
-          endChild("Caught Escape")
-          None
-        }
-        // Otherwise we give the events to the child
-        case _ => child.get.apply(events) match {
-          // The child ended without a message
-          // - also catches escape events
-          case Some(End) => {
-            endChild()
-
-            // Continue to run the current module and return the result
-            parse(End :: events)
-          }
-
-          // The child ended with a message
-          case Some(m : End[_]) => {
-            endChild(m.message.toString)
-
-            // Continue to run the current module and return the result
-            parse(m :: events)
-          }
-          // The return value was not recognized, nothing should happen
-          case x => None
-        }
-      }
-    // Otherwise we handle the events inside this module
+    if (_child.isDefined) {
+      // Parse the child if it has been defined
+      parseChild(events)
     } else {
+      // Otherwise we handle the events inside this module
       parse(events)
     }
   }
+
+  /**
+   * The child (if any) this module is forwarding to.
+   * @return  Some[ModuleInstance] if the module is forwarding, None otherwise
+   */
+  def child = _child
 
   /**
    * Copies the ModuleInstance to avoid using old duplicates of modules.
@@ -145,7 +107,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
             // Forward to a module
             case s : Start[_] => {
               // Try to load the module
-              child = Some(s.module)
+              _child = Some(s.module)
 
               // Start painting the module
               module.interface.chain(s.module.module.interface)
@@ -153,11 +115,11 @@ final case class ModuleInstance(name : Symbol, module : Module) {
               // Set the mouse position of the new event parser
               s.module.module.eventParser.mousePosition = View.mousePosition
 
-              // Send the start message through this class again
-              apply(s :: events)
-
               // Log success
-              Log.debug("Module '" + module + "': Forwarded to " + s.module)
+              Log.debug("Module '" + module + "': Forwarding to " + s.module)
+
+              // Let the child react on the start
+              event = parseChild(s :: events)
             }
             // Set the state
             case s : Symbol if (module.stateMap.contains(s)) => state = s
@@ -176,6 +138,57 @@ final case class ModuleInstance(name : Symbol, module : Module) {
 
     // Return the event
     event
+  }
+
+  /**
+   * Parses the events to the child. Assumes the child has been defined
+   * @param events  The events to give to the child
+   * @return Some[ModuleEvent] if something interesting occurred, None otherwise
+   */
+  protected def parseChild(events : List[Event]) = {
+    // Stops the child
+    def endChild(message : String = null){
+      val name = child.get.toString
+
+      // Remove the child
+      _child = None
+
+      // Stop painting the child
+      module.interface.unchain()
+
+      Log.debug("Module '" + module + "': Ended module " + name +
+        (if (message != null) " with message [" + message + "]." else ".") )
+    }
+
+    // Catch escape events
+    events match {
+      // End the child module if we get an escape key
+      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+        endChild("Caught Escape")
+        None
+      }
+      // Otherwise we give the events to the child and match on the result
+      case _ => _child.get.apply(events) match {
+        // The child ended without a message
+        // - also catches escape events
+        case Some(End) => {
+          endChild()
+
+          // Continue to run the current module and return the result
+          parse(End :: events)
+        }
+
+        // The child ended with a message
+        case Some(m : End[_]) => {
+          endChild(m.message.toString)
+
+          // Continue to run the current module and return the result
+          parse(m :: events)
+        }
+        // The return value was not recognized, nothing should happen
+        case x => None
+      }
+    }
   }
 
   /**

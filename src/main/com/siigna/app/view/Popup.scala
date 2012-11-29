@@ -49,21 +49,23 @@ class Popup(message : String) extends Display {
   def isEnabled = (timeElapsed < displayTime + fadeTime)
 
   def paint(graphics : Graphics) {
-    // Define the transparency for the message
-    val alpha : Double =
-      if (timeElapsed > displayTime && displayTime > 0)
-        (fadeTime - timeElapsed + displayTime).toDouble / fadeTime
-      else
-        1
+    if (!message.isEmpty) {
+      // Define the transparency for the message
+      val alpha : Double =
+        if (timeElapsed > displayTime && displayTime > 0)
+          (fadeTime - timeElapsed + displayTime).toDouble / fadeTime
+        else
+          1
 
-    // Retrieve the relative alpha in relation the the time
-    // expired since startTime for the given color
-    def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
+      // Retrieve the relative alpha in relation the the time
+      // expired since startTime for the given color
+      def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
-    // Define the text shape, draw the frame and draw the text
-    val text = TextShape(message, View.center, 10, Attributes("TextAlignment" -> Vector(0.5, 0.5), "Color" -> setTransparency(color)))
-    paintFrame(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 20, setTransparency(backgroundColor))
-    graphics draw text
+      // Define the text shape, draw the frame and draw the text
+      val text = TextShape(message, View.center, 10, Attributes("TextAlignment" -> Vector(0.5, 0.5), "Color" -> setTransparency(color)))
+      paintFrame(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 20, setTransparency(backgroundColor))
+      graphics draw text
+    }
   }
 
   /**
