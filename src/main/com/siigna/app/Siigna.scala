@@ -141,7 +141,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   /**
    * The selection-distance.
    */
-  def selectionDistance : Double = int("selectionDistance").getOrElse(3) * View.zoom
+  def selectionDistance : Double = int("selectionDistance").getOrElse(5) / View.zoom
 
   /**
    * Set's the current cursor of Siigna. Overrides the current value.
