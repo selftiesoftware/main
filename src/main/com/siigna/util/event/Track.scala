@@ -194,33 +194,45 @@ object Track extends EventTrack {
 
 
   override def paint(g : Graphics, t : TransformationMatrix) {
-    def paintPoint(p : Vector2D) {
+    def paintOnePoint(p : Vector2D) {
 
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(mousePosition) < trackDistance && verticalGuideActive == false ) {
+      if (vertical.distanceTo(mousePosition) < trackDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
-        verticalGuideActive = true
-      } else {
-        verticalGuideActive = false
-      }
 
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(mousePosition) < trackDistance && horizontalGuideActive == false ) {
+      if (horizontal.distanceTo(mousePosition) < trackDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
-        horizontalGuideActive = true
-      } else {
-        horizontalGuideActive = false
-      }
+    }
+
+    def paintTwoPoints(p1 : Vector2D, p2 : Vector2D) {
+
+      val horizontal1 = horizontalGuide(p1)
+      val vertical1   = verticalGuide(p1)
+      val horizontal2 = horizontalGuide(p2)
+      val vertical2   = verticalGuide(p2)
+
+      //draw the vertical tracking guide
+      if (vertical1.distanceTo(mousePosition) < trackDistance && vertical1.distanceTo(mousePosition) < vertical2.distanceTo(mousePosition))
+        g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
+      if (vertical2.distanceTo(mousePosition) < trackDistance && vertical2.distanceTo(mousePosition) < vertical1.distanceTo(mousePosition))
+        g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
+
+      //draw the horizontal tracking guide
+      if (horizontal1.distanceTo(mousePosition) < trackDistance && horizontal1.distanceTo(mousePosition) < horizontal2.distanceTo(mousePosition))
+        g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
+      if (horizontal2.distanceTo(mousePosition) < trackDistance && horizontal2.distanceTo(mousePosition) < horizontal1.distanceTo(mousePosition))
+        g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 
     //PAINT TRACKING POINT ONE
-    if (pointOne.isDefined) paintPoint(pointOne.get)
+    if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
 
-    //PAINT TRACKING POINT TWO
-    if (pointTwo.isDefined) paintPoint(pointTwo.get)
+    //PAINT BOTH TRACKING POINTS, IF THEY ARE THERE:::
+    if (pointTwo.isDefined) paintTwoPoints(pointOne.get, pointTwo.get)
   }
 
 }
