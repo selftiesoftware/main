@@ -14,6 +14,7 @@ package com.siigna.app.model
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.Shape
 import collection.GenMap
+import com.siigna._
 
 /**
  * An interface that supplies
@@ -43,7 +44,8 @@ trait SpatialModel[Key, Value <: Shape] {
    * @param query  The point to query.
    * @param radius  (Optional) The radius added to the point.
    */
-  def apply(query : Vector2D, radius : Double = 5.0) : Map[Key, Value] = {
+  def apply(query : Vector2D, radius : Double = 4.0 / View.zoom) : Map[Key, Value] = {
+    //TODO: the radius is set twice in each paint cycle - to this value, and to 5 ??!! - even though it is only set once, here.
     shapes.filter((s : (Key, Value)) => {
       s._2.geometry.distanceTo(query) <= radius
     })

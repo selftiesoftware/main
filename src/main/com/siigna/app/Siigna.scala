@@ -139,6 +139,14 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def paperScale : Int = Drawing.boundaryScale
 
   /**
+   * The selection-distance.
+   */
+  def selectionDistance : Double = {
+    println("SEL DIST IN SIIGNA: " + int("selectionDistance").getOrElse(5) / View.zoom)
+    int("selectionDistance").getOrElse(5) / View.zoom
+  }
+
+  /**
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
