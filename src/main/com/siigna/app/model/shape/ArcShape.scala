@@ -15,6 +15,8 @@ package com.siigna.app.model.shape
 import com.siigna.util.geom.{Rectangle2D, Arc2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
+import com.siigna._
+import scala.Some
 
 /**
  * This class draws an arc.
@@ -54,7 +56,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").getOrElse(5.0)) FullSelector else EmptySelector
+  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullSelector else EmptySelector
   
   def getShape(s : ShapeSelector) = s match {
     case FullSelector => Some(this)
