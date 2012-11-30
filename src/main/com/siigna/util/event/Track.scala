@@ -94,7 +94,7 @@ object Track extends EventTrack {
   }
 
   // Track on the basis of a maximum of two tracking points.
-  def parse(events : List[Event], model : Map[Int, Shape]) : Event = {
+  def parse(events : List[Event], model : Traversable[Shape]) : Event = {
 
     if(trackEnabled) {
       // Set isTracking to false

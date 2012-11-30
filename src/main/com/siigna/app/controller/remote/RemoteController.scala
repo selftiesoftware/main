@@ -52,6 +52,8 @@ protected[controller] object RemoteController extends Actor {
     try {
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
+      println(session)
+
       // If we have a drawing we need to fetch it if we don't we need to reserve it
       drawingId match {
         case Some(i) => remote(Get(Drawing, drawingId, session), handleGetDrawing)
@@ -213,8 +215,8 @@ protected[controller] object RemoteController extends Actor {
           SiignaDrawing.execute(LoadDrawing(model), false)
 
           // Search for the lastAction attribute, or retrieve it manually
-          model.attributes.int("lastAction") match {
-            case Some(i : Int) => actionIndices + i
+          SiignaDrawing.attributes.int("lastAction") match {
+            case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
           Log.success("Remote: Successfully received drawing from server")

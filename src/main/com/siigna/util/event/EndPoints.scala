@@ -22,7 +22,7 @@ import collection.parallel.immutable.{ParMap, ParIterable}
  */
 case object EndPoints extends EventSnap {
 
-  def parse(event : Event, model : Map[Int, Shape]) = event match {
+  def parse(event : Event, model : Traversable[Shape]) = event match {
     case MouseDown(point, a, b)  => MouseDown(snap(point, model), a, b)
     case MouseDrag(point, a, b)  => MouseDrag(snap(point, model), a, b)
     case MouseMove(point, a, b)  => MouseMove(snap(point, model), a, b)
@@ -30,13 +30,13 @@ case object EndPoints extends EventSnap {
     case some => some
   }
 
-  def snap(q : Vector2D, model : Map[Int, Shape]) : Vector2D = {
+  def snap(q : Vector2D, model : Traversable[Shape]) : Vector2D = {
     val point = q.transform(View.deviceTransformation)
     def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
     def closestPoints(points : Seq[Vector2D]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
 
     if (!model.isEmpty) {
-      val res = model.map(_._2 match {
+      val res = model.map(_ match {
         case s : ArcShape => closestPoints(s.geometry.vertices)
         case s : CircleShape => closestPoints(s.geometry.vertices)
         //case s : ImageShape => closestPoints(s.geometry.vertices)
