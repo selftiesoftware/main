@@ -303,11 +303,6 @@ object PolylineShape {
   case class Selector(xs : BitSet) extends ShapeSelector
 
   /**
-   * Creates an empty PolylineShape.
-   */
-  def empty = new PolylineShape(Vector2D.empty, Seq[InnerPolylineShape](), Attributes())
-
-  /**
    * Creates a PolylineShape from a number of points.
    *
    * @param points  The points to use.
@@ -320,6 +315,7 @@ object PolylineShape {
    *
    * @param points  The collection of points to use. Duplicates are removed.
    * @param closed  A flag signalling whether to close the PolylineShape by adding the first point at the end. Defaults to false.
+   * @return  A PolylineShape containing the given points, or, if no points are given, an empty PolylineShape
    */
   def apply(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
     val lines = points.tail.toSeq.distinct.map(p => new PolylineLineShape(p))
