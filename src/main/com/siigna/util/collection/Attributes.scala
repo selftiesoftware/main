@@ -12,6 +12,8 @@
 package com.siigna.util.collection
 
 import scala.collection.immutable.Map
+import com.siigna.util.{SerializableProxy, SerializationProxy}
+import java.io.{ObjectOutput, ObjectInput}
 
 /**
  * Represents a set of immutable attributes for a shape, a group of shapes
@@ -43,7 +45,10 @@ import scala.collection.immutable.Map
  * @param  self  a map of keys and their values.
  */
 @SerialVersionUID(1171008500)
-case class Attributes(self : Map[String, Any]) extends Map[String, Any] with AttributesLike {
+case class Attributes(self : Map[String, Any])
+     extends SerializableProxy(() => new AttributesSerializationProxy(self))
+     with Map[String, Any]
+     with AttributesLike {
 
   /**
    * Creates an empty instance of attributes.
@@ -355,5 +360,33 @@ object Attributes {
    * Creates a new set of attributes, only containing an five-letter identifier under the key "id".
    */
   def withId = Attributes("id" -> java.util.UUID.randomUUID.toString)
+
+}
+
+// A private object to store persistent data
+private object AttributesValues {
+  var map : Map[String, Any] = Map()
+}
+
+// A serialization proxy to marshal and un-marshal an Attributes instance
+private sealed class AttributesSerializationProxy(map : Map[String, Any])
+  extends SerializationProxy(() => new Attributes(AttributesValues.map)) {
+
+  def readExternal(in : ObjectInput) {
+    synchronized {
+      val size = in.readInt()
+      for (i <- 0 until size) {
+        AttributesValues.map += (in.readUTF() -> in.readObject())
+      }
+    }
+  }
+
+  def writeExternal(out : ObjectOutput) {
+    out.writeInt(map.size)
+    for (e <- map) {
+      out.writeUTF(e._1)
+      out.writeObject(e._2)
+    }
+  }
 
 }

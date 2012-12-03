@@ -25,6 +25,7 @@ package com.siigna.app.model.action.serialization
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.action.DeleteShapeParts
 import java.io.{ObjectInput, ObjectOutput}
+import com.siigna.util.SerializationProxy
 
 /**
  * A proxy class used to serialize and de-serialize instances of DeleteShapes.

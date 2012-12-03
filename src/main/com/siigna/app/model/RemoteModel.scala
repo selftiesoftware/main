@@ -32,21 +32,13 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
   def readExternal(in : ObjectInput) {
     var fail = false
     try {
-      val numberOfShapes = in.readInt()
-      var shapes : Map[Int, Shape] = Map()
-      for (i <- 0 until numberOfShapes) {
-        val id    = in.readInt()
-        val shape = in.readObject().asInstanceOf[Shape]
-        shapes = shapes + (id -> shape)
-      }
-      model = new Model(shapes, Seq(), Seq())
+      model = in.readObject().asInstanceOf[Model]
     } catch {
       case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
     }
     
     try {
-      val attr = in.readObject()
-      attributes = attr.asInstanceOf[Attributes]
+      attributes = in.readObject().asInstanceOf[Attributes]
     } catch {
       case e => Log.error("Model: Failed to read attribtues from data.", e); fail = true
     }

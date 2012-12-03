@@ -9,13 +9,12 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.util.geom
+package com.siigna.app.model
 
 import org.scalatest.matchers.ShouldMatchers
 import collection.parallel.immutable.ParHashMap
-import com.siigna.app.model.Model
-import com.siigna.app.model.shape.LineShape
-import org.scalatest.{FunSpec, Spec}
+import org.scalatest.FunSpec
+import com.siigna._
 
 /**
  * Test an arc.
@@ -23,10 +22,11 @@ import org.scalatest.{FunSpec, Spec}
 class ModelSpec extends FunSpec with ShouldMatchers {
 
   val model = new Model(Map(), Seq(), Seq())
+  val populatedModel = new Model(Map(-1 -> LineShape(0, 0, 12, math.Pi)), Nil, Nil)
 
   describe("An immutable model") {
-    val v1 = Vector(0, 0)
-    val v2 = Vector(10, 10)
+    val v1 = Vector2D(0, 0)
+    val v2 = Vector2D(10, 10)
     val l1 = LineShape(v1, v2)
     val l2 = LineShape(v2, v1)
     val lines = Map(0 -> l1, 1 -> l2)
@@ -61,6 +61,19 @@ class ModelSpec extends FunSpec with ShouldMatchers {
       model.add(lines).remove(Seq(0, 1)).shapes should equal(ParHashMap())
       model.add(lines).remove(1).shapes should equal(ParHashMap(0 -> l1))
       model.add(lines).remove(0).shapes should equal(ParHashMap(1 -> l2))
+    }
+
+    it ("can be serialized and de-serialized with the same informations") {
+      {
+        import java.io._
+        val b = new ByteArrayOutputStream()
+        val o = new ObjectOutputStream(b)
+        o.writeObject(populatedModel)
+        val bytes = b.toByteArray
+        val bi = new ByteArrayInputStream(bytes)
+        val oi = new ObjectInputStream(bi)
+        oi.readObject() should equal (populatedModel)
+      }
     }
 
   }

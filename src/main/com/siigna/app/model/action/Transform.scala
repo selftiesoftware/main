@@ -14,6 +14,7 @@ import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
 import com.siigna.app.model.{Drawing, Model}
 import serialization.TransformShapePartsProxy
+import com.siigna.util.SerializableProxy
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -101,7 +102,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
  */
 @SerialVersionUID(-1080215160)
 case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix)
-  extends SerializableProxyAction(() => new TransformShapePartsProxy(shapes, transformation)) {
+  extends SerializableProxy(() => new TransformShapePartsProxy(shapes, transformation)) with Action {
 
   def execute(model : Model) = {
     model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
