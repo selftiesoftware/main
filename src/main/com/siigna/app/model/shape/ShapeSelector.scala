@@ -20,7 +20,7 @@ import collection.BitSet
  * are not. 
  * 
  * <br /><b>Note: The specific implementation varies for each shape</b>, but the standard is to 
- * use an number of booleans equal to the number of segments in the shape to indicate which part has 
+ * use a number of booleans equal to the number of segments in the shape to indicate which part has
  * been selected (true) or not selected (false).
  */
 trait ShapeSelector extends Serializable
