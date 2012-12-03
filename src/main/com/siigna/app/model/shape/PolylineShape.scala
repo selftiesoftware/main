@@ -145,30 +145,69 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
     } else EmptySelector
 
   def getPart(point: Vector2D) = { // TODO: Test this
-    val set = BitSet()
+    println("GetPart in polyline starting - inner shapes are: " + innerShapes)
+    val fullShapesSet = BitSet()
+    val partShapesSet = BitSet()
 
     // Iterate the shapes to find the ones who matches
     for (i <- 0 until shapes.size) {
+      var fullShapeSelected: Boolean = false
+      var pointSelected: Boolean = false
+      //Check the individual shape parts for closeness to selection point:
+      println("Checking shapepart nr. " + i + " - " + shapes(i) + " point: " + point)
       shapes(i).getPart(point) match {
+        //If the whole shape would be within selection distance of selection point:
         case FullSelector => { // Include both numbers
-          if (set.size <= 1) {
-            set add i
-            set add (i + 1)
-          } else { // ... but only allow one segment to be selected as max
-            set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
-              case Some(n) => set remove n; set add i
-              case None => // Don't add the new shape since it's further away
-            }
-          }
+          println("FullSelector")
+          fullShapeSelected = true
+          //If nothing is selected yet: Add point "i" to the selection, and point i+1, as that will be the two points, that define the shape.
+          //If more than one whole segment is selected with click-selection (for instance if zoomed very far out),
+          //Select both segments
+          //TODO: In much later version: Make it possible to choose which shapes or points to select.
+          //if (set.size <= 1) {
+          fullShapesSet add i
+          fullShapesSet add (i + 1)
+          //}
+            //else { // ... but only allow one segment to be selected as max
+            //set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
+            //  case Some(n) => set remove n; set add i
+            //  case None => // Don't add the new shape since it's further away
+            //}
+          //}
         }
+        //If a part of a line (a point on a line) has been selected, and no full shapes are selected,
+        //then this point should be selected (so that when you're zoomed so far out that you can't see the points
+        // properly, only full shapes are selected:
+        //TODO: In much later version: Make it possible to choose which shapes or points to select.
         case LineShape.Selector(x) => {
-          if (set.size > 1) { // Only allow one segment to be selected as max
-            set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
-              case Some(n) => set remove n; set add i; set add (i + 1)
-              case None => // Don't add the new shape since it's further away
+          println("Selector: Selector(" + x + ")")
+          if (partShapesSet.size > 0) {
+            //If another point has been selected, choose the one closest to the selection point:
+            shapes(i) match {
+              //To find the shapes' points, we need to make sure it is understood as a LineShape:
+              case s1: LineShape => {
+                //And we need to find the points in the formerly selected shape parts, to see which one is closest:
+                partShapesSet.find(n => {
+                  shapes(n) match {
+                    case s2: LineShape => {
+                      //Check which of the points is closest to the selection point:
+                      //If lineselector returned true (x), it is the first point in the shape, that has been marked for selection (i)
+                      //If false is returned, it is point two (i+1):
+                      if (s1.p1.distanceTo(point) < s2.p1.distanceTo(point) && x == true)
+                        partShapesSet remove n; partShapesSet add i
+                      if (s1.p2.distanceTo(point) < s2.p1.distanceTo(point) && x == false)
+                        partShapesSet remove n; partShapesSet add (i+1)
+                    }
+                    case _ => false
+                  }
+                })
+              }
+              case _ => false
             }
           } else {
-            set add (if (x) i else i + 1)
+            //If lineselector returned true, it is the first point in the shape, that has been marked for selection (i)
+            //If false is returned, it is point two (i+1):
+            partShapesSet add (if (x) i else i + 1)
           }
         }
         case _ =>
@@ -176,10 +215,12 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
     }
 
     // Return
-    if (set.size == shapes.size + 1) {
+    if (fullShapesSet.size == shapes.size + 1) {
       FullSelector
-    } else if (set.size > 0) {
-      Selector(set)
+    } else if (fullShapesSet.size > 0) {
+      Selector(fullShapesSet)
+    } else if (partShapesSet.size > 0) {
+      Selector(partShapesSet)
     } else EmptySelector
   }
 
