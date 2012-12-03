@@ -145,7 +145,6 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
     } else EmptySelector
 
   def getPart(point: Vector2D) = { // TODO: Test this
-    println("GetPart in polyline starting - inner shapes are: " + innerShapes)
     val fullShapesSet = BitSet()
     val partShapesSet = BitSet()
 
@@ -154,11 +153,9 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
       var fullShapeSelected: Boolean = false
       var pointSelected: Boolean = false
       //Check the individual shape parts for closeness to selection point:
-      println("Checking shapepart nr. " + i + " - " + shapes(i) + " point: " + point)
       shapes(i).getPart(point) match {
         //If the whole shape would be within selection distance of selection point:
         case FullSelector => { // Include both numbers
-          println("FullSelector")
           fullShapeSelected = true
           //If nothing is selected yet: Add point "i" to the selection, and point i+1, as that will be the two points, that define the shape.
           //If more than one whole segment is selected with click-selection (for instance if zoomed very far out),
@@ -180,23 +177,22 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
         // properly, only full shapes are selected:
         //TODO: In much later version: Make it possible to choose which shapes or points to select.
         case LineShape.Selector(x) => {
-          println("Selector: Selector(" + x + ")")
           if (partShapesSet.size > 0) {
             //If another point has been selected, choose the one closest to the selection point:
             shapes(i) match {
               //To find the shapes' points, we need to make sure it is understood as a LineShape:
               case s1: LineShape => {
                 //And we need to find the points in the formerly selected shape parts, to see which one is closest:
-                partShapesSet.find(n => {
+                partShapesSet.foreach(n => {
                   shapes(n) match {
                     case s2: LineShape => {
                       //Check which of the points is closest to the selection point:
                       //If lineselector returned true (x), it is the first point in the shape, that has been marked for selection (i)
                       //If false is returned, it is point two (i+1):
                       if (s1.p1.distanceTo(point) < s2.p1.distanceTo(point) && x == true)
-                        partShapesSet remove n; partShapesSet add i
-                      if (s1.p2.distanceTo(point) < s2.p1.distanceTo(point) && x == false)
-                        partShapesSet remove n; partShapesSet add (i+1)
+                      { partShapesSet remove n; partShapesSet add i }
+                      else if (s1.p2.distanceTo(point) < s2.p1.distanceTo(point) && x == false)
+                      { partShapesSet remove n; partShapesSet add (i+1) }
                     }
                     case _ => false
                   }

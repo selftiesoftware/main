@@ -81,10 +81,9 @@ trait Shape extends ShapeLike {
   def apply(selector : ShapeSelector) : Option[PartialShape]
 
   /**
-   * Calculates the closest distance to the shape using the views current zoom
-   * scale.
+   * Calculates the closest distance to the shape.
    */
-  def distanceTo(point : Vector2D) : Double = distanceTo(point, View.zoom)
+  def distanceTo(point : Vector2D) : Double = distanceTo(point, 1)
 
   /**
    * Calculates the closest distance to the shape in the given scale.

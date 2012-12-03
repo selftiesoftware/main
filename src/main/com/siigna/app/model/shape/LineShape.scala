@@ -76,9 +76,6 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def getPart(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
-    //TODO: Fix that selection distance to the whole shape is different than to the points, which results
-    //In that the three points away from the click can be selected, if clicking near the corner of a small square.
-    println("Dist to whole shape: " + distanceTo(p))
     if (distanceTo(p) > selectionDistance) {
       //If shape is not within selection distance of point, return Empty selector
       EmptySelector
@@ -86,23 +83,17 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       //If both points are within selection distance, select the whole shape:
       //TODO: In much later version: Make it possible to choose which point to select.
       if (p1.distanceTo(p) <= selectionDistance && p2.distanceTo(p) <= selectionDistance) {
-        println("Dist to shape 1: " + p1.distanceTo(p) + " selection distance: " + selectionDistance)
         FullSelector
       } else if (p1.distanceTo(p) < p2.distanceTo(p) && p1.distanceTo(p) <= selectionDistance) {
       //If lineshape's point one is closer to selection point than point two, and within selection distance,
       //Return true - if point two is closest to selection point, and within selection distance, return false
-        println("Dist to shape 2: " + p1.distanceTo(p) + " selection distance: " + selectionDistance)
-
         Selector(true)
       } else if (p2.distanceTo(p) < p1.distanceTo(p) && p2.distanceTo(p) <= selectionDistance) {
-        println("Dist to shape 3: " + p1.distanceTo(p) + " selection distance: " + selectionDistance)
 
         Selector(false)
       } else {
         //If shape is within selection distance of selection point, but none of the line's endpoints are,
         //The line should be selected - that means, both the points.
-        println("Dist to shape 4: " + p1.distanceTo(p) + " selection distance: " + selectionDistance)
-
         FullSelector
 
       }
