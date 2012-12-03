@@ -75,7 +75,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 
   def getPart(p : Vector2D) = {
-    val selectionDistance = Siigna.double("selectionDistance").get
+    val selectionDistance = Siigna.selectionDistance
     if (distanceTo(p) > selectionDistance) {
       EmptySelector
     } else {
