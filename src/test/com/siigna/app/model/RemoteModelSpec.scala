@@ -34,6 +34,7 @@ class RemoteModelSpec extends FunSpec with ShouldMatchers {
         val b = new ByteArrayOutputStream()
         val o = new ObjectOutputStream(b)
         o.writeObject(model)
+        o.flush()
         val bytes = b.toByteArray
         val bi = new ByteArrayInputStream(bytes)
         val oi = new ObjectInputStream(bi)

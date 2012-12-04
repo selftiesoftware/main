@@ -15,7 +15,6 @@ import com.siigna.app.model.shape.Shape
 import java.io.{ObjectInput, ObjectOutput}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.action.{SetAttributes, DeleteShapes}
-import com.siigna.util.SerializationProxy
 
 /**
  * A proxy class used to serialize and de-serialize instances of DeleteShapes.

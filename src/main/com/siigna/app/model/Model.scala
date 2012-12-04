@@ -46,22 +46,20 @@ private sealed class ModelSerializationProxy(shapes : Map[Int, Shape])
   def this() = this(Map())
 
   def readExternal(in: ObjectInput) {
-    synchronized {
-      val numberOfShapes = in.readInt()
-      ModelValues.shapes = Map() // Clear previous values
-      for (i <- 0 until numberOfShapes) {
-        val id    = in.readInt()
-        val shape = in.readObject().asInstanceOf[Shape]
-        ModelValues.shapes += (id -> shape)
-      }
+    val numberOfShapes = in.readInt()
+    ModelValues.shapes = Map() // Clear previous values
+    for (i <- 0 until numberOfShapes) {
+      val id    = in.readInt()
+      val shape = in.readObject().asInstanceOf[Shape]
+      ModelValues.shapes += (id -> shape)
     }
   }
 
   def writeExternal(out: ObjectOutput) {
-    println("Writing: " + shapes.size)
     out.writeInt(shapes.size)
     for (s <- shapes) {
-      out.writeObject(s)
+      out.writeInt(s._1) // Write both id and shape
+      out.writeObject(s._2)
     }
   }
 }

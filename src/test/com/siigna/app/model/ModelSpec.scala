@@ -69,6 +69,7 @@ class ModelSpec extends FunSpec with ShouldMatchers {
         val b = new ByteArrayOutputStream()
         val o = new ObjectOutputStream(b)
         o.writeObject(populatedModel)
+        o.flush()
         val bytes = b.toByteArray
         val bi = new ByteArrayInputStream(bytes)
         val oi = new ObjectInputStream(bi)

@@ -372,6 +372,8 @@ private object AttributesValues {
 private sealed class AttributesSerializationProxy(map : Map[String, Any])
   extends SerializationProxy(() => new Attributes(AttributesValues.map)) {
 
+  def this() = this(Map())
+
   def readExternal(in : ObjectInput) {
     synchronized {
       val size = in.readInt()

@@ -13,7 +13,6 @@ package com.siigna.app.model.action.serialization
 import java.io.{ObjectInput, ObjectOutput}
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.action.CreateShapes
-import com.siigna.util.SerializationProxy
 
 /**
  * A proxy class used to serialize and de-serialize instances of CreateShapes.

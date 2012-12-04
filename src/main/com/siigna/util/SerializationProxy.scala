@@ -21,7 +21,7 @@ import java.io._
  * @see Effective Java 2nd Edition, item 78.
  * @param f  A function that creates a new instance of the proxy object
  */
-abstract class SerializationProxy(f : () => Object) extends Serializable {
+abstract class SerializationProxy(f : () => Object) extends Externalizable {
 
   /**
    * Writes the TransformShapePartsProxy to the given ObjectOutput.

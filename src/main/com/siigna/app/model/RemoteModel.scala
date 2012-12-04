@@ -56,11 +56,7 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
   }
 
   def writeExternal(out : ObjectOutput) {
-    out.writeInt(model.shapes.size)
-    for (t <- model.shapes) {
-      out.writeInt(t._1)
-      out.writeObject(t._2)
-    }
+    out.writeObject(model)
     out.writeObject(attributes)
   }
   
