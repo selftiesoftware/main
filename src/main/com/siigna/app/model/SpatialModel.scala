@@ -14,6 +14,7 @@ package com.siigna.app.model
 import com.siigna.util.geom.{Vector2D, Rectangle2D}
 import shape.Shape
 import com.siigna.app.view.View
+import com.siigna.app.Siigna
 
 
 /**
@@ -45,7 +46,7 @@ trait SpatialModel[Key, Value <: Shape] {
    * @param radius  (Optional) The radius added to the selection distance
    */
 
-  def apply(query : Vector2D, radius : Double = 4.0 / View.zoom) : Map[Key, Value] = {
+  def apply(query : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
     //TODO: the radius is set twice in each paint cycle - to this value, and to 5 ??!! - even though it is only set once, here.
 
     shapes.filter((s : (Key, Value)) => {
