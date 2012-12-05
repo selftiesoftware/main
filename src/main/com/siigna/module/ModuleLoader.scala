@@ -45,8 +45,8 @@ object ModuleLoader {
   //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
   load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
-  load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
+  //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
+  load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
 
 
   /**
