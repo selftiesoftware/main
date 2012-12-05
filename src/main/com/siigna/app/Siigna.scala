@@ -142,8 +142,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * The selection-distance.
    */
   def selectionDistance : Double = {
-    println("SEL DIST IN SIIGNA: " + int("selectionDistance").getOrElse(5) / View.zoom)
-    int("selectionDistance").getOrElse(5) / View.zoom
+    int("selectionDistance").get / View.zoom
   }
 
   /**

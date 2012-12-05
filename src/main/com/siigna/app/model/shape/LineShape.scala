@@ -75,16 +75,27 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 
   def getPart(p : Vector2D) = {
-    val selectionDistance = Siigna.double("selectionDistance").get
+    val selectionDistance = Siigna.selectionDistance
     if (distanceTo(p) > selectionDistance) {
+      //If shape is not within selection distance of point, return Empty selector
       EmptySelector
     } else {
-      if (p.distanceTo(p1) < p.distanceTo(p2) && p.distanceTo(p1) <= selectionDistance) {
+      //If both points are within selection distance, select the whole shape:
+      //TODO: In much later version: Make it possible to choose which point to select.
+      if (p1.distanceTo(p) <= selectionDistance && p2.distanceTo(p) <= selectionDistance) {
+        FullSelector
+      } else if (p1.distanceTo(p) < p2.distanceTo(p) && p1.distanceTo(p) <= selectionDistance) {
+      //If lineshape's point one is closer to selection point than point two, and within selection distance,
+      //Return true - if point two is closest to selection point, and within selection distance, return false
         Selector(true)
-      } else if (p.distanceTo(p2) < p.distanceTo(p1) && p.distanceTo(p2) <= selectionDistance) {
+      } else if (p2.distanceTo(p) < p1.distanceTo(p) && p2.distanceTo(p) <= selectionDistance) {
+
         Selector(false)
       } else {
+        //If shape is within selection distance of selection point, but none of the line's endpoints are,
+        //The line should be selected - that means, both the points.
         FullSelector
+
       }
     }
   }
