@@ -23,11 +23,17 @@ import shape.Shape
 /**
  * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
  */
-@SerialVersionUID(2113124332)
+@SerialVersionUID(-1862878236)
 class RemoteModel(var model : Model, var attributes : Attributes) extends HasAttributes
                      with Externalizable {
 
   type T = RemoteModel
+
+  /**
+   * Creates a remote model with an empty model and attributes.
+   * @return An empty RemoteModel
+   */
+  def this() = this(new Model(Map(), Nil, Nil), Attributes())
 
   def readExternal(in : ObjectInput) {
     var fail = false
@@ -52,15 +58,11 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
   }
 
   override def toString: String = {
-    "shapes: "+model.shapes+"\n attributes:"+attributes
+    "Model: \n shapes: "+model.shapes+"\n attributes:"+attributes + "\n"
   }
 
   def writeExternal(out : ObjectOutput) {
-    out.writeInt(model.shapes.size)
-    for (t <- model.shapes) {
-      out.writeInt(t._1)
-      out.writeObject(t._2)
-    }
+    out.writeObject(model)
     out.writeObject(attributes)
   }
   

@@ -72,7 +72,8 @@ class ModelSpec extends FunSpec with ShouldMatchers {
         val bytes = b.toByteArray
         val bi = new ByteArrayInputStream(bytes)
         val oi = new ObjectInputStream(bi)
-        oi.readObject() should equal (populatedModel)
+        val model = oi.readObject().asInstanceOf[Model]
+        model.shapes should equal (populatedModel.shapes)
       }
     }
 

@@ -9,38 +9,32 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.model
+package com.siigna.util
 
+import collection.Attributes
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import shape.LineShape
-import java.awt.Color
-import com.siigna.util.collection.Attributes
 
 /**
- * Tests the remote model.
+ * Tests the Attributes class
  */
-class RemoteModelSpec extends FunSpec with ShouldMatchers {
+class AttributesSpec extends FunSpec with ShouldMatchers {
 
-  val attributes = Attributes("Color" -> Color.orange)
-  val immutableModel = new Model(Map(-1 -> LineShape(0, 0, 12, math.Pi)), Nil, Nil)
-  val model = new RemoteModel(immutableModel, attributes)
+  val populatedAttributes = Attributes("Color" -> "#4568AB")
 
-  describe ("The Remote Model") {
+  describe("Attributes") {
 
-    it ("can be serialized and de-serialized with the same informations") {
+    it ("can be serialized and de-serialized") {
       {
         import java.io._
         val b = new ByteArrayOutputStream()
         val o = new ObjectOutputStream(b)
-        o.writeObject(model)
+        o.writeObject(populatedAttributes)
         o.flush()
         val bytes = b.toByteArray
         val bi = new ByteArrayInputStream(bytes)
         val oi = new ObjectInputStream(bi)
-        val remote = oi.readObject().asInstanceOf[RemoteModel]
-        remote.model.shapes should equal (immutableModel.shapes)
-        remote.attributes should equal (attributes)
+        oi.readObject() should equal (populatedAttributes)
       }
     }
 
