@@ -15,7 +15,6 @@ import com.siigna.app.model.shape.ShapeSelector
 import com.siigna.util.geom.TransformationMatrix
 import java.io.{ObjectInput, ObjectOutput, Externalizable}
 import com.siigna.app.model.action.TransformShapeParts
-import com.siigna.util.SerializationProxy
 
 /**
  * A proxy class used to serialize and de-serialize instances of TransformShapeParts. This class is used

@@ -58,7 +58,7 @@ private sealed class ModelSerializationProxy(shapes : Map[Int, Shape])
   def writeExternal(out: ObjectOutput) {
     out.writeInt(shapes.size)
     for (s <- shapes) {
-      out.writeInt(s._1)
+      out.writeInt(s._1) // Write both id and shape
       out.writeObject(s._2)
     }
   }
