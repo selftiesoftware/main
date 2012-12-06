@@ -17,64 +17,39 @@ import org.scalatest.FunSpec
 import com.siigna._
 
 /**
- * Test an arc.
+ * Test the model
  */
 class ModelSpec extends FunSpec with ShouldMatchers {
 
   val model = new Model(Map(), Seq(), Seq())
   val populatedModel = new Model(Map(-1 -> LineShape(0, 0, 12, math.Pi)), Nil, Nil)
 
-  describe("An immutable model") {
-    val v1 = Vector2D(0, 0)
-    val v2 = Vector2D(10, 10)
-    val l1 = LineShape(v1, v2)
-    val l2 = LineShape(v2, v1)
-    val lines = Map(0 -> l1, 1 -> l2)
+  private def marshalUnmarshal(model : Model) = {
+    {
+      import java.io._
+      val b = new ByteArrayOutputStream()
+      val o = new ObjectOutputStream(b)
+      o.writeObject(model)
+      o.flush()
+      val bytes = b.toByteArray
+      val bi = new ByteArrayInputStream(bytes)
+      val oi = new ObjectInputStream(bi)
+      oi.readObject().asInstanceOf[Model]
+    }
+  }
 
-    it("can add one shape") {
-      // Single shape
-      model.add(0, l1).shapes should equal(ParHashMap(0 -> l1))
-      model.shapes.size should equal(0)
+  describe("An empty model") {
 
-      // Single shape, weird ids
-      model.add(-500, l1).shapes should equal(ParHashMap(-500 -> l1))
-      model.add(Int.MaxValue + 1, l1).shapes should equal(ParHashMap(Int.MinValue -> l1))
-      
-      // Single shape, override id
-      model.add(1442, l1).add(1442, l2).shapes should equal (ParHashMap(1442 -> l2))
+    it ("can be serialized and de-serialized") {
+      marshalUnmarshal(model) should equal (model)
     }
 
-    it("can add several shapes") {
-      // Several shapes
-      model.add(lines).shapes should equal(ParHashMap(0 -> LineShape(v1, v2), 1 -> LineShape(v2, v1)))
-    }
+  }
 
-    it("can remove a shape") {
-      // Single shape
-      model.add(0, l1).remove(0).shapes should equal(ParHashMap())
+  describe("A empty model") {
 
-      // Non-existing
-      model.remove(0).shapes should equal(ParHashMap())
-    }
-
-    it("can remove several shapes") {
-      model.add(lines).remove(Seq(0, 1)).shapes should equal(ParHashMap())
-      model.add(lines).remove(1).shapes should equal(ParHashMap(0 -> l1))
-      model.add(lines).remove(0).shapes should equal(ParHashMap(1 -> l2))
-    }
-
-    it ("can be serialized and de-serialized with the same informations") {
-      {
-        import java.io._
-        val b = new ByteArrayOutputStream()
-        val o = new ObjectOutputStream(b)
-        o.writeObject(populatedModel)
-        o.flush()
-        val bytes = b.toByteArray
-        val bi = new ByteArrayInputStream(bytes)
-        val oi = new ObjectInputStream(bi)
-        oi.readObject() should equal (populatedModel)
-      }
+    it ("can be serialized and de-serialized") {
+      marshalUnmarshal(populatedModel) should equal (populatedModel)
     }
 
   }
