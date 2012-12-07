@@ -320,7 +320,7 @@ sealed case class PolylineShape(startPoint : Vector2D, innerShapes : Seq[InnerPo
 
   override def toString = "PolylineShape[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
-  def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)).distinct, attributes)
+  def transform(t : TransformationMatrix) = PolylineShape(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
 
 }
 
@@ -355,7 +355,7 @@ object PolylineShape {
    * @return  A PolylineShape containing the given points
    */
   def apply(points : Traversable[Vector2D], closed : Boolean = false) : PolylineShape = {
-    val lines = points.tail.toSeq.distinct.map(p => new PolylineLineShape(p))
+    val lines = points.tail.toSeq.map(p => new PolylineLineShape(p))
 
     PolylineShape(points.head,
                   // Close the shape, if requested
