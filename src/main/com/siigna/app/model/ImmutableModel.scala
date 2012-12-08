@@ -11,6 +11,8 @@
 
 package com.siigna.app.model
 
+import com.siigna.util.collection.HasAttributes
+
 /**
  * An immutable model containing shapes
  * @tparam Key  The keys in the Model.

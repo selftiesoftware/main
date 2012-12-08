@@ -14,7 +14,7 @@ package com.siigna.app.model
 import action.{VolatileAction, Action}
 import shape.Shape
 import com.siigna.util.logging.Log
-import com.siigna.util.collection.Attributes
+import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
 
