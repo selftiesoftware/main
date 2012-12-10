@@ -55,19 +55,14 @@ object Select {
   }
   //def apply(r : Rectangle2D, enclosed : Boolean = true) {
   def apply(r : Rectangle2D, entireShape : Boolean) {
-    println("selectEntireShape?; "+entireShape)
-    val filtered = if (!entireShape) {
-      println("do not select entire shape. select: "+ Drawing(r))
-
+      val filtered = if (!entireShape) {
       Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
-    } else {
-      var parts = Map[Int, ShapeSelector]()
-      println("selectEntireShape. parts: "+ Drawing(r))
-      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-      Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
-
-      parts
-    }
+      } else {
+        var parts = Map[Int, ShapeSelector]()
+        // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
+        Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
+        parts
+      }
     Drawing.select(Selection(filtered))
   }
 

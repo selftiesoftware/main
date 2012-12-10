@@ -40,8 +40,8 @@ object ModuleLoader {
   }
 
   // Create a default packages
-  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
-  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
+  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
   //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
 
@@ -53,8 +53,8 @@ object ModuleLoader {
 
   // ****** OLE DESKTOP ******
 
-  //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
+  load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+  load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
 
   /**
@@ -75,7 +75,7 @@ object ModuleLoader {
   def load(name : Symbol, classPath : String) : Module = {
     var module : Option[Module] = None
     val path = classPath + "." + name.name
-    println(name, classPath, path)
+    //println(name, classPath, path)
 
     modules.values.find(_.contains(name)) match {
       case Some(map) => module = Some(classToModule(map(name)))
