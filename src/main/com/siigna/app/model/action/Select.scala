@@ -38,7 +38,6 @@ import com.siigna.app.model.{Drawing, Selection, Model}
  * @see Shape
  */
 object Select {
-
   /**
    * Selects one whole [[com.siigna.app.model.shape.Shape]].
    * @param id  The ID of the shape to getPart.
@@ -54,14 +53,19 @@ object Select {
   def apply(id : Int, r : Rectangle2D) {
     Drawing.select(id, Drawing(id).getPart(r))
   }
-  
-  def apply(r : Rectangle2D, enclosed : Boolean = true) {
-    val filtered = if (enclosed) {
+  //def apply(r : Rectangle2D, enclosed : Boolean = true) {
+  def apply(r : Rectangle2D, entireShape : Boolean) {
+    println("selectEntireShape?; "+entireShape)
+    val filtered = if (!entireShape) {
+      println("do not select entire shape. select: "+ Drawing(r))
+
       Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
     } else {
       var parts = Map[Int, ShapeSelector]()
+      println("selectEntireShape. parts: "+ Drawing(r))
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
       Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
+
       parts
     }
     Drawing.select(Selection(filtered))

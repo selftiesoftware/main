@@ -40,14 +40,22 @@ object ModuleLoader {
   }
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
-  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
-  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
-  load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
+  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
+  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+
+  // ****** OLE LAPTOP ******
+
   //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
 
+  // ****** OLE DESKTOP ******
+
+  //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
+  //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
