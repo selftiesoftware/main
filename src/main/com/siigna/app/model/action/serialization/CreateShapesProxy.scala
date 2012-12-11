@@ -46,7 +46,7 @@ sealed protected[action] class CreateShapesProxy(shapes : Map[Int, Shape])
   }
 }
 
-// An object to store persistant values
+// An object to store persistent values
 private[serialization] object CSPValues {
   var shapes = Map[Int, Shape]()
 }

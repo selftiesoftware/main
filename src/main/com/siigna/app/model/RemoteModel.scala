@@ -23,30 +23,28 @@ import shape.Shape
 /**
  * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
  */
-@SerialVersionUID(2113124332)
+@SerialVersionUID(-1862878236)
 class RemoteModel(var model : Model, var attributes : Attributes) extends HasAttributes
                      with Externalizable {
 
   type T = RemoteModel
 
+  /**
+   * Creates a remote model with an empty model and attributes.
+   * @return An empty RemoteModel
+   */
+  def this() = this(new Model(Map(), Nil, Nil), Attributes())
+
   def readExternal(in : ObjectInput) {
     var fail = false
     try {
-      val numberOfShapes = in.readInt()
-      var shapes : Map[Int, Shape] = Map()
-      for (i <- 0 until numberOfShapes) {
-        val id    = in.readInt()
-        val shape = in.readObject().asInstanceOf[Shape]
-        shapes = shapes + (id -> shape)
-      }
-      model = new Model(shapes, Seq(), Seq())
+      model = in.readObject().asInstanceOf[Model]
     } catch {
       case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
     }
     
     try {
-      val attr = in.readObject()
-      attributes = attr.asInstanceOf[Attributes]
+      attributes = in.readObject().asInstanceOf[Attributes]
     } catch {
       case e => Log.error("Model: Failed to read attribtues from data.", e); fail = true
     }
@@ -60,15 +58,11 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
   }
 
   override def toString: String = {
-    "shapes: "+model.shapes+"\n attributes:"+attributes
+    "Model: \n shapes: "+model.shapes+"\n attributes:"+attributes + "\n"
   }
 
   def writeExternal(out : ObjectOutput) {
-    out.writeInt(model.shapes.size)
-    for (t <- model.shapes) {
-      out.writeInt(t._1)
-      out.writeObject(t._2)
-    }
+    out.writeObject(model)
     out.writeObject(attributes)
   }
   

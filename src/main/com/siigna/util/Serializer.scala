@@ -9,15 +9,20 @@ import com.siigna.app.model.action.RemoteAction
  * A Serializer to marshal and unmarshal objects, in particular [[com.siigna.app.model.Drawing]] and
  * [[com.siigna.app.model.action.RemoteAction]].
  *
- * Author: csp
+ * Author: csp <csp@siigna.com>
  */
 object Serializer {
 
-  // Writes a serializable object to a byte array
-  private def writeToBytesSer[T<:Serializable] (ser: T): Array[Byte] = {
+  /**
+   * Writes a serializable object to a byte array.
+   * @tparam T  The type of the object to serialize.
+   * @param obj  The object to serialize.
+   * @return  An array of bytes containing the serialized object.
+   */
+  private def writeToBytesSer[T <: Serializable](obj : T) : Array[Byte] = {
     val baos = new ByteArrayOutputStream()
     val oos = new ObjectOutputStream(baos)
-    oos.writeObject(ser)
+    oos.writeObject(obj)
     baos.toByteArray
   }
 
@@ -26,7 +31,7 @@ object Serializer {
    * @param arr  The array to read
    * @return  An object
    */
-  def readFromBytes(arr: Array[Byte]): AnyRef = {
+  private def readFromBytes(arr: Array[Byte]): AnyRef = {
     val stream = new ObjectInputStream(new ByteArrayInputStream(arr))
     stream.readObject()
   }
@@ -46,6 +51,7 @@ object Serializer {
    * @return An array of bytes containing the RemoteAction
    */
   def writeAction(ra: RemoteAction): Array[Byte] = {
+    if (ra == null) throw new NullPointerException("Cannot serialize null")
     writeToBytesSer(ra)
   }
 
@@ -68,6 +74,7 @@ object Serializer {
    * @return A byte array containing the RemoteModel.
    */
   def writeDrawing(rm: RemoteModel): Array[Byte] = {
+    if (rm == null) throw new NullPointerException("Cannot serialize null")
     val bytes = new ByteArrayOutputStream
     val out = new ObjectOutputStream(bytes)
     rm.writeExternal(out)

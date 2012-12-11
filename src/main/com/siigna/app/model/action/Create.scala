@@ -14,6 +14,7 @@ import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
 import com.siigna.app.model.{Drawing, Model}
 import serialization.CreateShapesProxy
+import com.siigna.util.SerializableProxy
 
 /**
 * An object that allows you to create one or more shapes.
@@ -64,13 +65,19 @@ object Create {
 }
 
 /**
+ * A super class to all actions that create shapes.
+ * @author csp <csp@siigna.com>
+ */
+trait CreateAction extends Action
+
+/**
  * <p>Creates a shape with an associated id.</p>
  *
  * @define actionFactory [[com.siigna.app.model.action.Create]]
  * $actionDescription
  */
 @SerialVersionUID(71837821)
-case class CreateShape(id : Int, shape : Shape) extends Action with CreateAction {
+case class CreateShape(id : Int, shape : Shape) extends CreateAction {
   
   def execute(model : Model) = model add (id, shape)
 
@@ -89,7 +96,7 @@ case class CreateShape(id : Int, shape : Shape) extends Action with CreateAction
  */
 @SerialVersionUID(-1426451986)
 case class CreateShapes(shapes : Map[Int, Shape])
-  extends SerializableProxyAction(() => new CreateShapesProxy(shapes)) with CreateAction {
+  extends SerializableProxy(() => new CreateShapesProxy(shapes)) with CreateAction {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")
   
