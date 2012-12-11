@@ -40,11 +40,6 @@ import com.siigna.util.event.Track
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
-   * The active color.
-   */
-  var activeColor = new Color(0.00f, 0.00f, 0.00f, 1.00f)
-  var activeLineWeight = 0.2
-  /**
    * The active display, if any.
    */
   protected var display : Option[Display] = None
