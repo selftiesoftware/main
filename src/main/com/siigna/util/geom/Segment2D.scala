@@ -85,7 +85,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   }
 
   /**
-   * Determines whether this segment intersects with a given Arc.
+   * Determines whether this segment intersects with a given Line.
    */
   def intersects(geom : Geometry2D) = geom match {
     /**
@@ -119,7 +119,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
     }
     case r : Rectangle2D => {
-      Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderTop).exists(_.intersects(this))
+      Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
     case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
   }
