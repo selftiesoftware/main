@@ -369,6 +369,7 @@ private object AttributesValues {
 }
 
 // A serialization proxy to marshal and un-marshal an Attributes instance
+@SerialVersionUID(-2124138502)
 private sealed class AttributesSerializationProxy(map : Map[String, Any])
   extends SerializationProxy(() => new Attributes(AttributesValues.map)) {
 

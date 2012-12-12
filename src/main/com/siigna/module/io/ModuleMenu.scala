@@ -29,7 +29,7 @@ object ModuleMenu {
    */
   protected var highlighted = false
   val modules = ModuleLoader.packages.toList
-  val activeModule = modules.head.name
+  val activeModule = modules.headOption
 
   //LOGO
   val frameLogo =  Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
