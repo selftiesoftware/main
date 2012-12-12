@@ -28,16 +28,18 @@ object ModuleMenu {
    * A boolean flag to indicate whether the menu is active or not.
    */
   protected var highlighted = false
+  val modules = ModuleLoader.packages.toList
+  val activeModule = modules.head.name
 
   //LOGO
-  val frameLogo = Iterable(LineShape(Vector2D(8.345,2),Vector2D(25.56,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(30,25.56),Vector2D(30,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(26.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(26.65,5.34),3.34,0,90),ArcShape(Vector2D(26.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
+  val frameLogo =  Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
   val logo = Iterable(PolylineShape(Vector2D(10.24,6.938),Vector2D(12.10,12.49),Vector2D(12.67,25),Vector2D(13.52,25),Vector2D(13.65,12.49),Vector2D(15.96,6.938),Vector2D(10.24,6.938)),(PolylineShape(Vector2D(18.24,6.938),Vector2D(20.10,12.49),Vector2D(20.67,25),Vector2D(21.52,25),Vector2D(21.65,12.49),Vector2D(23.96,6.938),Vector2D(18.24,6.938))))
-  val logoFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(25.56,2),Vector2D(30,5.345),Vector2D(30,25.56),Vector2D(26.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
+  val logoFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(101.7,2),Vector2D(105,5.345),Vector2D(105,25.56),Vector2D(101.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
 
   //the frame without horizontal divider for flyout menu (only needed when modules changing is implemented)
-  val frameExpanded = Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
+  val frameExpanded = Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,225.56),Vector2D(5,5.345)),LineShape(Vector2D(105,225.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,228.91),Vector2D(101.7,228.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,225.56),3.34,0,-90),ArcShape(Vector2D(8.34,225.56),3.34,180,90))
 
-  val expandedFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(101.7,2),Vector2D(105,5.345),Vector2D(105,25.56),Vector2D(101.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
+  val expandedFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(101.7,2),Vector2D(105,5.345),Vector2D(105,225.56),Vector2D(101.7,228.91),Vector2D(8.34,228.91),Vector2D(5,225.56))
 
   val expandedColor = new Color(0.75f, 0.75f, 0.75f, 0.80f)
   val menuColor = new Color(0.95f, 0.95f, 0.95f, 0.90f)
@@ -47,6 +49,8 @@ object ModuleMenu {
 
   val logoFillX = logoFill.map(_.x.toInt).toArray
   val logoFillY = logoFill.map(_.y.toInt).toArray
+
+  var isOpen = false
 
   def init() {
     val f = new Frame("Siigna Module Menu")
@@ -149,28 +153,40 @@ object ModuleMenu {
 
   def isHighlighted(m : Vector2D) : Boolean = {
     if(m.x < 30 & m.y < 30) {
-      if (!highlighted) View.setCursor(Interface.Cursors.hand)
+      View.setCursor(Interface.Cursors.hand)
       highlighted = true
-      true
-    } else {
-      if (highlighted) View.setCursor(Interface.Cursors.crosshair)
-      highlighted = false
-      false
+      isOpen = true
     }
+    else if(m.x > 110 & m.y < 350) {
+      View.setCursor(Interface.Cursors.crosshair)
+      highlighted = false
+      isOpen = false
+    }
+    isOpen
   }
 
   def paint (g : Graphics, t : TransformationMatrix) {
     val highlight = isHighlighted(View.mousePosition)
 
+    //draw modules selection menu
     if(highlight == true) {
+
+      def drawModuleString(s : String, pos : Int, t : Float) = {
+        TextShape(s,Vector2D(5,pos),10).setAttribute("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.90f))
+      }
+
+      g draw LineShape(Vector2D(10,30),Vector2D(100,30)) //spacer
+      //the loaded modules
+      for (i <- 0 to modules.size -1) g draw drawModuleString(modules(i).name.toString,i * 20 + 40, 1.00f)
+
       g setColor expandedColor
       g.g.fillPolygon(expandedX, expandedY, expandedFill.size)
 
       frameExpanded.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
-      //g draw TextShape("BASE MODULES",Vector2D(16,8),9)
       g draw TextShape("SIIGNA ", Vector2D(11,6),9)
       g draw TextShape(Siigna.version, Vector2D(11,19),7)
 
+      //draw logo and active module
     } else {
       g setColor menuColor
       g.g.fillPolygon(logoFillX, logoFillY, logoFill.size)
@@ -178,5 +194,7 @@ object ModuleMenu {
       frameLogo.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
 
     }
+    g draw TextShape(activeModule.toString,Vector2D(56,6),8).setAttribute("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.90f))
+
   }
 }

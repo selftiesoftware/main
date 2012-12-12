@@ -47,8 +47,6 @@ trait SpatialModel[Key, Value <: Shape] {
    */
 
   def apply(query : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
-    //TODO: the radius is set twice in each paint cycle - to this value, and to 5 ??!! - even though it is only set once, here.
-
     shapes.filter((s : (Key, Value)) => {
       s._2.geometry.distanceTo(query) <= radius
     })
