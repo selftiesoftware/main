@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import action.{SetAttributes, TransformShapeParts, Action}
+import action.{AddAttributes, SetAttributes, TransformShapeParts, Action}
 import com.siigna.util.logging.Log
 
 
@@ -60,7 +60,7 @@ trait MutableModel extends SelectableModel {
       } else None
 
       val attributeAction : Option[Action] = if (!a.isEmpty) {
-        Some(SetAttributes(s.keys, a))
+        Some(AddAttributes(s.keys, a))
       } else None
 
       // Remove the selection before executing actions to avoid recursion
