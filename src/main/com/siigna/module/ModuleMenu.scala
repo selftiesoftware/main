@@ -18,7 +18,6 @@ import com.siigna.app.Siigna
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.{Interface, View, Graphics}
-import com.siigna.module.{ModulePackage, ModuleLoader}
 import event._
 import com.siigna.util.logging.Log
 
