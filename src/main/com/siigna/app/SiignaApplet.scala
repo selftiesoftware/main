@@ -68,8 +68,8 @@ class SiignaApplet extends Applet {
     // Start by reading the applet parameters
     try {
       // Get the active user, if a log in was performed at www.siigna.com
-      //val userName = getParameter("contributorName")
-      val userName = "anonymous"
+      val userName = getParameter("contributorName")
+
       if (userName != null) {
         // TODO: Refine this
         Siigna.user = User(0, userName, util.Random.nextString(20))
@@ -84,7 +84,7 @@ class SiignaApplet extends Applet {
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }
-    } catch { case e => Log.info("No user or drawing found. Siigna will be running in anonymous mode.")}
+    } catch { case _ => Log.info("Applet: No user or drawind-id found.")}
 
     // Set the layout
     setLayout(new BorderLayout())
