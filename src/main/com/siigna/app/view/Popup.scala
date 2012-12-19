@@ -11,9 +11,7 @@
 
 package com.siigna.app.view
 
-import com.siigna.app.Siigna
 import com.siigna.app.model.shape.TextShape
-import com.siigna.util.Implicits._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.Vector
 import java.awt.Color
@@ -27,7 +25,7 @@ class Popup(message : String) extends Display {
   /**
    * The color of the message text.
    */
-  private var color = new Color(0, 0, 0, 255);
+  private var color = new Color(0, 0, 0, 255)
 
   /**
    * The time the display is "alive", i. e. not fading.
@@ -37,7 +35,7 @@ class Popup(message : String) extends Display {
   /**
    * The time it takes for the display to fade in milliseconds.
    */
-  private var fadeTime = 3000
+  private var fadeTime = 1200
 
   /**
    * The time the display was initiated.

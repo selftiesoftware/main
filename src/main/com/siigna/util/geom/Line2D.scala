@@ -10,6 +10,9 @@
  */
 package com.siigna.util.geom
 
+import com.siigna.app.model.action.Create
+import com.siigna.app.model.shape.LineShape
+
 /**
  * An endless mathematically representation of a line with infinite length.
  * TODO: Can this be represented as a equation?
@@ -99,10 +102,14 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
       // To calculate the point of intersection we insert u in the line equation.
       // If the determinant = 0, the lines are parallel
-      if (det == 0)
+      if (det == 0) {
         Set()
+      }
       else
-        Set[Vector2D](A * u + C)
+        //println("U: "+u)
+        //println("intersects: "+A * u + C)
+      //Set[Vector2D](A * u + C)
+      Set[Vector2D](A * u + C)
     }
     case g => throw new UnsupportedOperationException("Line: Intersections not yet implemented with " + g)
   }

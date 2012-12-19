@@ -13,8 +13,6 @@ package com.siigna.app.view
 
 import java.awt.Color
 
-import com.siigna.app.Siigna
-import com.siigna.util.Implicits._
 
 /**
  * A 'Display' can display information on the screen.
