@@ -12,28 +12,46 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{FunSuite, FlatSpec}
+import org.scalatest.FunSpec
 
 /**
  * A test class for the Transformation Matrix.
  */
-class TransformationMatrixSpec extends FunSuite with ShouldMatchers {
+class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
 
-  // Concatenate
-  test("A TransformationMatrix can concatenate itself with other matrices") {
-    val t1 = TransformationMatrix()
-    val t2 = TransformationMatrix(Vector(10, 10), 1000)
+  val t = TransformationMatrix()
+  val u = TransformationMatrix(Vector2D(math.Pi, math.E), 12.2)
+  val v = Vector2D(1, 1)
 
-    val t3 = TransformationMatrix(Vector(-10, 25.5), -5)
-    val t4 = TransformationMatrix(Vector(20, 75), 5)
+  describe("An empty TransformationMatrix") {
 
-    t1.concatenate(t2) should equal (TransformationMatrix(Vector(10, 10), 1000))
+    it ("can concatenate itself with other empty matrices") {
+      t.concatenate(t) should equal(t)
+    }
 
-    t3.concatenate(t4) should equal (TransformationMatrix(Vector(-10, 100.5), 0))
+    it ("can concatenate itself with other non-empty matrices") {
+      t.concatenate(u) should equal(u)
+      u.concatenate(t) should equal(u)
+    }
+
+    it ("can flip the x axis") {
+      t.flipX.transform(v) should equal (Vector2D(-1, 1))
+    }
+
+    it ("can flip the y axis") {
+      t.flipY.transform(v) should equal (Vector2D(1, -1))
+    }
   }
 
-  //TODO: Something is horribly wrong with concatenation!
-  //Test-case: Vector(0, 0).flipY = Vector(0, 184) !!
-  //Later..: Can't find the problem...
+  describe("A non-empty TransformationMatrix") {
+
+    it ("can concatenate itself with other matrices") {
+      val t1 = TransformationMatrix()
+      val t2 = TransformationMatrix(Vector(10, 10), 1000)
+
+      t1.concatenate(t2) should equal (t2)
+    }
+
+  }
 
 }

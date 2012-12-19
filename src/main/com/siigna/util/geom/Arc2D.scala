@@ -32,17 +32,26 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   /**
    * The point where the arc ends.
    */
-  private lazy val endPoint = Vector(math.cos(endAngle) * radius, math.sin(endAngle) * radius) + center
+  lazy val endPoint = Vector(math.cos(endAngle) * radius, math.sin(endAngle) * radius) + center
 
   /**
-   * Calculates the length of the arc.
+   * Calculates the length of the arc, that is the distance the circumference spans.
    */
   lazy val length = radius * radius * math.Pi * (angle / 360.0)
 
   /**
-   * The point where the arc starts.
+   * Calculates the middle point of the arc (the point between the start and end point on the circumference).
    */
-  private lazy val startPoint = Vector(math.cos(startAngle) * radius, math.sin(startAngle) * radius) + center
+  lazy val midPoint = {
+    val middleAngle = endAngle - startAngle
+    val a = if (insideArcDegrees(middleAngle)) middleAngle else (middleAngle + 180) % 360
+    Vector(math.cos(middleAngle) * radius, math.sin(middleAngle) * radius) + center
+  }
+
+  /**
+   * The point where the arc starts. Remember we calculate angles from 3 o'clock counter-clockwise.
+   */
+  lazy val startPoint = Vector(math.cos(startAngle) * radius, math.sin(startAngle) * radius) + center
 
   /**
    * Calculates the boundary of the arc.
@@ -202,8 +211,6 @@ object Arc2D {
     // Find out which side of the line from start to end, the middle point is on.
     // If it's positive, the arc is counter-clockwise
     val det = (end.x - start.x) * (middle.y - start.y) - (end.y - start.y) * (middle.x - start.x)
-
-    val middleAngle = (middle - center).angle
 
     if (det > 0) {
       new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))

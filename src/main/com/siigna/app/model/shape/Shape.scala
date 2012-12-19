@@ -11,10 +11,7 @@
 
 package com.siigna.app.model.shape
 
-import com.siigna.util.collection.Attributes
-import com.siigna.app.view.View
-
-//import com.siigna.util.dxf.DXFSection
+import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.geom._
 
 /**
@@ -36,11 +33,11 @@ import com.siigna.util.geom._
  * The shape hierarchy looks like this:
  * <pre>
  *
- *             HasAttributes
- *                 |
- *                 +--------+ Selection
- *                 |
- *               Shape
+ *                  HasAttributes
+ *                        |
+ *                 +-------------+
+ *                 |             |
+ *               Shape        Selection
  *                 |
  *      +----------+-----------+
  *      |          |           |
@@ -67,7 +64,7 @@ import com.siigna.util.geom._
  *                 +--- TextShape
  * </pre>
  */
-trait Shape extends ShapeLike {
+trait Shape extends HasAttributes {
 
   type T <: Shape
 
@@ -81,12 +78,18 @@ trait Shape extends ShapeLike {
   def apply(selector : ShapeSelector) : Option[PartialShape]
 
   /**
-   * Calculates the closest distance to the shape.
+   * Calculates the closest distance to the shape from the given point.
+   * @param point  The point to examine
+   * @return  A double value indicating the distance from the given point to the closest point on this shape.
    */
   def distanceTo(point : Vector2D) : Double = distanceTo(point, 1)
 
   /**
    * Calculates the closest distance to the shape in the given scale.
+   * @param point  The point to examine
+   * @param scale  The scale to add to the distance
+   * @return  A double value indicating the distance from the given point to the closest point on this shape,
+   *          timed with the scale value.
    */
   def distanceTo(point : Vector2D, scale : Double) = geometry.distanceTo(point) * scale
 
@@ -141,18 +144,21 @@ trait Shape extends ShapeLike {
   /**
    * Retrives the affected points from the given ShapeSelector
    * @param selector  The selector, i. e. the combination of the shape to be retrieved in points.
-   * @return  A sequence of points, can be empty.
+   * @return  A sequence of points. Can be empty.
    */
   def getVertices(selector : ShapeSelector) : Seq[Vector2D]
 
   /**
-   * Returns a setAttributes of the shape. In other words return a shape with a new id,
-   * but otherwise the same attributes.
+   * Completely replace the attributes of the shape with the given attributes.
+   * @param attributes  The attributes to give to this shape
+   * @return  A new shape with the given attributes
    */
   def setAttributes(attributes : Attributes) : T
 
   /**
    * Applies a transformation to the shape.
+   * @param transformation  The transformation with which to transform this shape
+   * @return  A new shape that has been transformed with the transformation.
    */
   def transform(transformation : TransformationMatrix) : T
 
@@ -171,26 +177,14 @@ trait BasicShape extends Shape {
    */
   override def geometry : GeometryBasic2D
 
-  /**
-   * Returns a setAttributes of the shape. In other words return a shape with a new id,
-   * but otherwise the same attributes.
-   */
-  def setAttributes(attributes : Attributes) : T
-
-  /**
-   * Applies a transformation to the BasicShape.
-   */
-  def transform(transformation : TransformationMatrix) : T
-
 }
 
 /**
- * A trait for immutable shapes containing other immutable shapes.
+ * A trait for immutable shapes that contains other immutable shapes.
  * @tparam G  The type of shapes inside the collection.
  */
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
-  
-  // TODO: Rewrite this to something more clever - or what?
+
   def geometry : CollectionGeometry = CollectionGeometry(shapes.map(_.geometry))
 
   /**
@@ -225,16 +219,5 @@ trait EnclosedShape extends Shape {
   type T <: EnclosedShape
 
   override def geometry : GeometryEnclosed2D
-
-  /**
-   * Returns a setAttributes of the shape. In other words return a shape with a new id,
-   * but otherwise the same attributes.
-   */
-  def setAttributes(attributes : Attributes) : T
-
-  /**
-   * Applies a transformation to the BasicShape.
-   */
-  def transform(transformation : TransformationMatrix) : T
 
 }

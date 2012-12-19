@@ -121,8 +121,6 @@ class Graphics(val g : Graphics2D)
               drawLine(s.p1, s.p2)
             else
               drawSegment(s.p1, s.p2)
-            //draw(s.p1)
-            //draw(s.p2)
           }
 
           /** COLLECTION SHAPES **/

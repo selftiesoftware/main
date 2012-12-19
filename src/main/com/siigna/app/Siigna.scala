@@ -57,9 +57,9 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   var navigation = true
 
   /**
-   * The current user logged in to Siigna.
+   * The current user logged in to Siigna. Set to anonymous user as default.
    */
-  var user : User = User(util.Random.nextLong(), util.Random.nextString(10), util.Random.nextString(12))
+  var user : User = User(0L, "Anonymous", "")
 
   /**
    * The version of Siigna.

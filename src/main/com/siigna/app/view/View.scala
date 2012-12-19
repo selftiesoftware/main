@@ -240,12 +240,12 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      Drawing.selection.foreach(s => s.selectedShapes.foreach(e => {
+      Drawing.selection.par.foreach(s => s.selectedShapes.foreach(e => {
         graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
       }))
 
       // Draw vertices
-      Drawing.selection.foreach(_.foreach(i => {
+      Drawing.selection.par.foreach(_.foreach(i => {
         Drawing(i._1).getVertices(i._2).foreach(p => {
           graphics.draw(transformation.transform(p), color)
         })
