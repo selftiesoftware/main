@@ -20,7 +20,7 @@ import com.siigna.app.model.shape.{Shape, PolylineShape}
 import java.awt.image.BufferedImage
 import com.siigna.app.model.Drawing
 import scala.Some
-import com.siigna.module.io.ModuleMenu
+import com.siigna.module.ModuleMenu
 
 /**
  * <p>

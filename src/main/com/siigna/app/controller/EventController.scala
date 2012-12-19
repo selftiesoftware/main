@@ -28,7 +28,7 @@ import com.siigna.util.event.KeyUp
 import com.siigna.util.event.MouseMove
 import com.siigna.util.event.MouseUp
 import com.siigna.util.event.MouseDrag
-import com.siigna.module.io.ModuleMenu
+import com.siigna.module.ModuleMenu
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
