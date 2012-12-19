@@ -127,7 +127,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
     } else parts + (id -> selector)
   }
 
-  override def toString = "Selection[" + parts + "]"
+  override def toString() = "Selection[" + parts + "]"
 
   /**
    * Transforms the underlying Shape by adding a TransformShape action to the list of actions
