@@ -16,6 +16,9 @@ import java.awt.font._
 
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom._
+import com.siigna.app.Siigna
+import com.siigna.app.model.shape.TextShape.Selector
+import com.siigna.app.view.View
 
 /**
  * This class represents a text-string.
@@ -38,7 +41,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   final val GlobalFontScale = 0.1
 
-  val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize)
+  val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
 
   val points = Iterable(position)
 
@@ -46,7 +49,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
-  def apply(part : ShapeSelector) = None
+  def apply(part : ShapeSelector) = Some(new PartialShape(this, transform))
 
   def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
@@ -78,9 +81,28 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-  def getPart(rect: Rectangle2D) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+  def getPart(rect: Rectangle2D) = {
+    if (rect.intersects(geometry)) {
+      Selector(true)
+      FullSelector
+    }
+    else {
+      Selector(false)
+      EmptySelector
+    }
+  }
 
-  def getPart(point: Vector2D) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+  def getPart(point: Vector2D) = {
+    val selectionDistance = Siigna.selectionDistance
+    if (distanceTo(point) < selectionDistance) {
+      Selector(true)
+      FullSelector
+    }
+    else {
+      Selector(false)
+      EmptySelector
+    }
+  }
 
   def getShape(s : ShapeSelector) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
 
@@ -88,29 +110,19 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
-  /*
-  def toDXF = DXFSection(DXFValue(0, "TEXT"),
-                         DXFValue(5, scala.util.Random.nextString(4)),
-                         DXFValue(100, "AcDbEntity"),
-                         DXFValue(100, "AcDbText"),
-                         DXFValue(62, 1),
-                         DXFValue(40, fontSize)) // TODO: + position.toDXF +
-              DXFSection(DXFValue(1, text),
-                         DXFValue(100, "AcDbText"))
-
-*/
-
   // TODO: Should we be able to scale the text-factor?
-  def transform(transformation : TransformationMatrix) =
+  def transform(transformation : TransformationMatrix) = {
     TextShape(text,
               position.transform(transformation),
               scale * transformation.scaleFactor,
               attributes)
-
+  }
 }
 
 object TextShape
 {
+  @SerialVersionUID(1738298316)
+  sealed case class Selector(part : Boolean) extends ShapeSelector
 
   def apply(text : String, position : Vector2D)                    = new TextShape(text, position, 1.0, Attributes())
   def apply(text : String, position : Vector2D, attr : Attributes) = new TextShape(text, position, 1.0, attr)

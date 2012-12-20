@@ -11,7 +11,7 @@
 package com.siigna.app.model
 
 import action.{Delete, Action}
-import com.siigna.util.collection.Attributes
+import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import collection.immutable.{Map, MapProxy}
 import shape._
@@ -127,7 +127,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
     } else parts + (id -> selector)
   }
 
-  override def toString = "Selection[" + parts + "]"
+  override def toString() = "Selection[" + parts + "]"
 
   /**
    * Transforms the underlying Shape by adding a TransformShape action to the list of actions

@@ -11,10 +11,9 @@
 
 package com.siigna.app.model.action.serialization
 
-import com.siigna.app.model.shape.Shape
 import java.io.{ObjectInput, ObjectOutput}
 import com.siigna.util.collection.Attributes
-import com.siigna.app.model.action.{SetAttributes, DeleteShapes}
+import com.siigna.app.model.action.SetAttributes
 
 /**
  * A proxy class used to serialize and de-serialize instances of DeleteShapes.
@@ -27,27 +26,27 @@ sealed protected[action] class SetAttributesProxy(shapes : Map[Int, Attributes],
   extends SerializationProxy(() => SetAttributes(SAP.shapes, SAP.attributes)) {
 
   /**
-     * A public, empty constructor required by the Externalizable trait.
-     * @return  An empty SetAttributesProxy
-     */
-    def this() = this(Map(), Attributes())
+   * A public, empty constructor required by the Externalizable trait.
+   * @return  An empty SetAttributesProxy
+   */
+  def this() = this(Map(), Attributes())
 
-    def writeExternal(out: ObjectOutput) {
-      out.writeInt(shapes.size)
-      shapes.foreach{ case (i : Int, a : Attributes) => {
-        out.writeInt(i)
-        out.writeObject(a)
-      }}
-      out.writeObject(attributes)
-    }
+  def writeExternal(out: ObjectOutput) {
+    out.writeInt(shapes.size)
+    shapes.foreach{ case (i : Int, a : Attributes) => {
+      out.writeInt(i)
+      out.writeObject(a)
+    }}
+    out.writeObject(attributes)
+  }
 
-    def readExternal(in: ObjectInput) {
-      val size = in.readInt()
-      SAP.shapes = new Array[(Int, Attributes)](size).map(_ => {
-        in.readInt() -> in.readObject().asInstanceOf[Attributes]
-      }).toMap
-      SAP.attributes = in.readObject().asInstanceOf[Attributes]
-    }
+  def readExternal(in: ObjectInput) {
+    val size = in.readInt()
+    SAP.shapes = new Array[(Int, Attributes)](size).map(_ => {
+      in.readInt() -> in.readObject().asInstanceOf[Attributes]
+    }).toMap
+    SAP.attributes = in.readObject().asInstanceOf[Attributes]
+  }
 
 }
 

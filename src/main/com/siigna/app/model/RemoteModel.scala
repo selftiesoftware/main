@@ -15,7 +15,7 @@ import action.Action
 import java.io._
 
 import com.siigna.util.logging.Log
-import com.siigna.util.collection.Attributes
+import com.siigna.util.collection.{HasAttributes, Attributes}
 import reflect.Type
 import scala.reflect
 import shape.Shape

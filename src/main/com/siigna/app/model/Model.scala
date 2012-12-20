@@ -40,6 +40,7 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
 private object ModelValues { var shapes : Map[Int, Shape] = Map() }
 
 // A serialization proxy class to marshal and un-marshal the model
+@SerialVersionUID(2042463183)
 private sealed class ModelSerializationProxy(shapes : Map[Int, Shape])
   extends SerializationProxy(() => new Model(ModelValues.shapes, Nil, Nil)) {
 

@@ -40,12 +40,15 @@ import com.siigna.util.event.Track
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
+<<<<<<< HEAD
    * The active color and line weight.
    */
   var activeColor = new Color(0.00f, 0.00f, 0.00f, 1.00f)
   var activeLineWeight = 0.2
 
   /**
+=======
+>>>>>>> 324c2ea98e77185a7aa67b50ace693ebcd02ca3c
    * The active display, if any.
    */
   protected var display : Option[Display] = None
@@ -63,9 +66,9 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   var navigation = true
 
   /**
-   * The current user logged in to Siigna.
+   * The current user logged in to Siigna. Set to anonymous user as default.
    */
-  var user : User = User(util.Random.nextLong(), util.Random.nextString(10), util.Random.nextString(12))
+  var user : User = User(0L, "Anonymous", "")
 
   /**
    * The version of Siigna.

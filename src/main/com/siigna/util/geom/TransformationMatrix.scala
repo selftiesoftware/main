@@ -116,7 +116,7 @@ case class TransformationMatrix(t : AffineTransform) {
   def rotation = {
     val v = Vector(1, 0)             // The vector
     val t = translate(-getTranslate) // Extract translation
-    val p = v.transform(this)        // Transform the vector
+    val p = v.transform(t)           // Transform the vector
     math.atan2(p.y, p.x)
   }
 

@@ -15,7 +15,7 @@ package com.siigna.app.model.shape
 import com.siigna.util.geom.{Rectangle2D, Circle2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
-
+import com.siigna.app.model.shape.CircleShape.Selector
 /**
  * This class represents a circle.
  *
@@ -45,7 +45,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   }
 
   def delete(part: ShapeSelector) = part match {
-    //case PartialSelector(_) | FullSelector => None
+    case Selector(_) | FullSelector => Nil
     case _ => Seq(this)
   }
 

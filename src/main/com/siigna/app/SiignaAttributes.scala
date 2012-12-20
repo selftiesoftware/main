@@ -75,6 +75,8 @@ trait SiignaAttributes extends Map[String, Any] with AttributesLike {
   def self = toMap
 
   // Set the values
+  this("activeColor")           = new Color(0.00f, 0.00f, 0.00f, 1.00f)
+  this("activeLineWidth")      = 0.2
   this("antiAliasing")          = true
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color

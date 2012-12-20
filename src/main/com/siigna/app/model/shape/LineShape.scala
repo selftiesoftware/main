@@ -113,16 +113,6 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   def setAttributes(attributes : Attributes) = LineShape(p1, p2, attributes)
 
-  /*
-  def toDXF = DXFSection(DXFValue(0, "LWPOLYLINE"),
-                         DXFValue(5, scala.util.Random.nextString(4)),
-                         DXFValue(100, "AcDbEntity"),
-                         DXFValue(100, "AcDbPolyline"),
-                         DXFValue(62, 1)) +
-              DXFSection.fromVector(p1) +
-              DXFSection.fromVector(p2)
-  */
-
   override def toString = "LineShape[" + p1 + ", " + p2 + " (" + attributes + ")]"
 
   def transform(transformation : TransformationMatrix) : LineShape = {

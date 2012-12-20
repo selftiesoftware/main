@@ -47,9 +47,6 @@ object Track extends EventTrack {
   // The up-to-date mouse position
   protected var mousePosition = View.mousePosition
 
-  // Get the track distance
-  val trackDistance = Siigna.double("trackDistance").getOrElse(9.0)
-
   // Code to get the horizontal guide from a point
   def horizontalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x + 1, p.y))
 
@@ -135,8 +132,8 @@ object Track extends EventTrack {
           val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-          if (nearestPoint.distanceTo(m) < trackDistance) {
-            if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
+          if (nearestPoint.distanceTo(m) < Siigna.selectionDistance) {
+            if  (!(pointOne.get.distanceTo(m) < Siigna.selectionDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
           }
         }
@@ -145,7 +142,7 @@ object Track extends EventTrack {
           val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
           shape = Some(nearest._1)
           val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
-          pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
+          pointOne = if (nearestPoint.distanceTo(m) < Siigna.selectionDistance) Some(nearestPoint) else None
         }
       }
 
@@ -167,12 +164,12 @@ object Track extends EventTrack {
             val distHori = horizontal.distanceTo(p)
             val distVert = vertical.distanceTo(p)
 
-            if (distHori <= distVert && distHori < trackDistance) {
+            if (distHori <= distVert && distHori < Siigna.selectionDistance) {
               //print("distHori <= distVert")
               //print("distHori < trackDistance")
               isTracking = true
               horizontal.closestPoint(p)
-            } else if (distVert < distHori && distVert < trackDistance) {
+            } else if (distVert < distHori && distVert < Siigna.selectionDistance) {
               isTracking = true
               vertical.closestPoint(p)
             } else {
@@ -200,11 +197,11 @@ object Track extends EventTrack {
       val vertical   = verticalGuide(p)
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(mousePosition) < trackDistance)
+      if (vertical.distanceTo(mousePosition) < Siigna.selectionDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(mousePosition) < trackDistance)
+      if (horizontal.distanceTo(mousePosition) < Siigna.selectionDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
     }
 
@@ -216,15 +213,15 @@ object Track extends EventTrack {
       val vertical2   = verticalGuide(p2)
 
       //draw the vertical tracking guide
-      if (vertical1.distanceTo(mousePosition) < trackDistance && vertical1.distanceTo(mousePosition) < vertical2.distanceTo(mousePosition))
+      if (vertical1.distanceTo(mousePosition) < Siigna.selectionDistance && vertical1.distanceTo(mousePosition) < vertical2.distanceTo(mousePosition))
         g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
-      if (vertical2.distanceTo(mousePosition) < trackDistance && vertical2.distanceTo(mousePosition) < vertical1.distanceTo(mousePosition))
+      if (vertical2.distanceTo(mousePosition) < Siigna.selectionDistance && vertical2.distanceTo(mousePosition) < vertical1.distanceTo(mousePosition))
         g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal1.distanceTo(mousePosition) < trackDistance && horizontal1.distanceTo(mousePosition) < horizontal2.distanceTo(mousePosition))
+      if (horizontal1.distanceTo(mousePosition) < Siigna.selectionDistance && horizontal1.distanceTo(mousePosition) < horizontal2.distanceTo(mousePosition))
         g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
-      if (horizontal2.distanceTo(mousePosition) < trackDistance && horizontal2.distanceTo(mousePosition) < horizontal1.distanceTo(mousePosition))
+      if (horizontal2.distanceTo(mousePosition) < Siigna.selectionDistance && horizontal2.distanceTo(mousePosition) < horizontal1.distanceTo(mousePosition))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 

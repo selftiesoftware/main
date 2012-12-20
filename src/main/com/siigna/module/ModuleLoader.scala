@@ -45,17 +45,12 @@ object ModuleLoader {
   //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
 
-  // ****** OLE LAPTOP ******
-
-  //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
-
   // ****** OLE DESKTOP ******
 
   load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
   load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
@@ -75,7 +70,6 @@ object ModuleLoader {
   def load(name : Symbol, classPath : String) : Module = {
     var module : Option[Module] = None
     val path = classPath + "." + name.name
-    //println(name, classPath, path)
 
     modules.values.find(_.contains(name)) match {
       case Some(map) => module = Some(classToModule(map(name)))
