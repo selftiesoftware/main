@@ -357,6 +357,11 @@ object Attributes {
   def apply(attributes : (String, Any)*) : Attributes = new Attributes(attributes)
 
   /**
+   * An empty set of attributes.
+   */
+  val empty : Attributes = Attributes()
+
+  /**
    * Creates a new set of attributes, only containing an five-letter identifier under the key "id".
    */
   def withId = Attributes("id" -> java.util.UUID.randomUUID.toString)

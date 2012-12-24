@@ -53,7 +53,7 @@ import com.siigna.util.geom._
  *      |            |
  *      |            +----- LineShape
  *      |
- *    EnclosedShape (encapsulates a given area)
+ *    ClosedShape (encapsulates a given area)
  *          |
  *          +--- CircleShape
  *          |
@@ -182,6 +182,8 @@ trait BasicShape extends Shape {
 /**
  * A trait for immutable shapes that contains other immutable shapes.
  * @tparam G  The type of shapes inside the collection.
+ *
+ * TODO: Implement additions and subtractions
  */
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 
@@ -214,10 +216,10 @@ trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 /**
  * A shape that's closed, that is to say a shape that encases a closed space.
  */
-trait EnclosedShape extends Shape {
+trait ClosedShape extends Shape {
 
-  type T <: EnclosedShape
+  type T <: ClosedShape
 
-  override def geometry : GeometryEnclosed2D
+  override def geometry : GeometryClosed2D
 
 }

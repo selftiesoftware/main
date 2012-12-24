@@ -21,7 +21,7 @@ import com.siigna._
  * If the pre-condition isn't fulfilled, the ellipse is created with a very small b.
  */
 @SerialVersionUID(-428914763)
-case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse //with GeometryEnclosed2D
+case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse //with GeometryClosed2D
 {
 
   lazy val area = math.Pi * a * b

@@ -15,7 +15,7 @@ package com.siigna.util.geom
  * A <code>Geometry</code> that encloses (surrounds) a n-dimensional space. E. g. a <code>Rectangle</code>.
  * TODO: Set the methods in here and introduce generic type
  */
-sealed trait GeometryEnclosed {
+sealed trait GeometryClosed {
 
   /**
    * Determines the enclosed area of the geometry.
@@ -27,9 +27,9 @@ sealed trait GeometryEnclosed {
 /**
  * A geometry that encloses a 2-dimensional space.
  */
-trait GeometryEnclosed2D extends GeometryEnclosed with Geometry2D {
+trait GeometryClosed2D extends GeometryClosed with Geometry2D {
 
-  type T <: GeometryEnclosed2D
+  type T <: GeometryClosed2D
 
   // TODO: Introduce expand
 
