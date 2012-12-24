@@ -88,11 +88,8 @@ protected[controller] object RemoteController extends Actor {
             // Parse the local action to ensure all the ids are up to date
             val updatedAction = parseLocalAction(action, undo)
 
-            // Write to bytes
-            val data = Serializer.writeAction(updatedAction)
-
             // Dispatch the updated action
-            remote(Set(Action, data, session), handleSetAction)
+            remote(Set(Action, updatedAction, session), handleSetAction)
           }
 
           // Timeout

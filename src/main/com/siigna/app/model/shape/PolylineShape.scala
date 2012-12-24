@@ -390,7 +390,7 @@ object PolylineShape {
   private case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
-    protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) =
+    protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =
       PolylineShape(startPoint, innerShapes, attributes)
 
     protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
