@@ -48,6 +48,11 @@ object ModuleLoader {
   load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
 
+  //Niels' modules:
+  //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cadSuite, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
