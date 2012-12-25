@@ -19,6 +19,7 @@ import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
 import com.siigna.util.Serializer
+import actors.remote.RemoteActor
 
 /**
  * Controls any remote connection(s).
@@ -26,6 +27,10 @@ import com.siigna.util.Serializer
  * re-established before pushing all the received events/requests in the given order.
  */
 protected[controller] object RemoteController extends Actor {
+
+  // Set the class loader for the remote actor - important to avoid class not found exceptions on the receiving end.
+  // See http://stackoverflow.com/questions/3542360/why-is-setting-the-classloader-necessary-with-scala-remoteactors
+  RemoteActor.classLoader = getClass.getClassLoader
 
   // All the ids of the actions that have been executed on the client
   protected val actionIndices = BitSet()
@@ -40,8 +45,8 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 4000
 
   // The remote server
-  val remote = new Server("62.243.118.234", Mode.Production)
-  //val remote = new Server("localhost", Mode.Production)
+  //val remote = new Server("62.243.118.234", Mode.Production)
+  val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -51,11 +56,12 @@ protected[controller] object RemoteController extends Actor {
   def act() {
     try {
 
+      SiignaDrawing.addAttribute("id" -> 38L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
       drawingId match {
-        case Some(i) => remote(Get(Drawing, drawingId, session), handleGetDrawing)
+        case Some(i) => remote(Get(Drawing, i, session), handleGetDrawing)
         case None    => {
           // We need to ask for a new drawing
           remote(Get(DrawingId, null, session), _ match {
@@ -137,7 +143,7 @@ protected[controller] object RemoteController extends Actor {
         } else if(id > actionIndices.last) {
 
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
-            remote(Get(Action, Some(i), session), _ match {
+            remote(Get(Action, i, session), _ match {
               case Set(Action, array : Array[Byte], _) => {
                 try {
                   val action = Serializer.readAction(array)
@@ -215,7 +221,7 @@ protected[controller] object RemoteController extends Actor {
             case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
-          Log.success("Remote: Successfully received drawing from server")
+          Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
           case e => Log.error("Remote: Error when reading data from server", e)
         }
