@@ -45,8 +45,8 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 4000
 
   // The remote server
-  //val remote = new Server("62.243.118.234", Mode.Production)
-  val remote = new Server("localhost", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Production)
+  //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -94,8 +94,11 @@ protected[controller] object RemoteController extends Actor {
             // Parse the local action to ensure all the ids are up to date
             val updatedAction = parseLocalAction(action, undo)
 
-            // Dispatch the updated action
-            remote(Set(Action, updatedAction, session), handleSetAction)
+            // Write to bytes
+            val data = Serializer.writeAction(updatedAction)
+
+            // Dispatch the data
+            remote(Set(Action, data, session), handleSetAction)
           }
 
           // Timeout
