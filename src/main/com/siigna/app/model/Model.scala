@@ -23,6 +23,7 @@ import java.io._
  * @param executed  The actions that have been executed on this model.
  * @param undone  The actions that have been undone on this model.
  */
+@SerialVersionUID(-1979203416)
 sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action])
        extends SerializableProxy(() => new ModelSerializationProxy(shapes))
           with ImmutableModel[Int, Shape]
