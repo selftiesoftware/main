@@ -10,8 +10,10 @@ import com.siigna.util.logging.Log
  *
  * @param host  The URL of the host.
  * @param mode  The mode of the connection, can be in production or testing mode
+ * @param timeout  The timeout in milliseconds before we re-send a request to the server.
+ *                 Defaults to 10 seconds (10000 ms).
  */
-class Server(host : String, mode : Mode.Mode, val timeout : Int = 4000) {
+class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
 
   // The remote server
   private val remote = select(Node(host, mode.id), 'siigna)
@@ -20,7 +22,7 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 4000) {
    * An int that shows how many retries have been made AND is used to signal connectivity.
    * -1 means that we have not connected yet
    * 0  means that we are online
-   * 1  and above means that we have tried _retries number of times.
+   * 1  and above means that we have tried <code>_retries</code> number of times.
    */
   protected var _retries = -1
 
@@ -88,7 +90,7 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 4000) {
   /**
    * An integer describing how many times we have attempted to send the latest message. This can be quite large
    * since the server never gives up.
-   * @return An integer describing the number of times the latest message has been sent without a reply.
+   * @return An integer > 0 describing the number of times the latest message has been sent without a reply.
    */
   def retries = math.max(_retries, 0)
 

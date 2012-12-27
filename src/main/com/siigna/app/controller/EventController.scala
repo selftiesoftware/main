@@ -17,7 +17,6 @@ import java.awt.event.{KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, _}
 import com.siigna.util.event._
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
-import scala.Some
 import com.siigna.util.logging.Log
 import com.siigna.util.event.MouseDown
 import com.siigna.util.event.KeyDown
@@ -155,7 +154,6 @@ trait EventController {
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
       case MouseDown  (_, _, _) => {
         if (ModuleMenu.isHighlighted(point)) {
-          ModuleMenu.init()
           None
         } else Some(MouseDown(point, button, keys))
       }

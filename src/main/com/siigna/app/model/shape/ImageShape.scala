@@ -34,7 +34,7 @@ import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
  *
  * TODO: Refactor the imageDimension to another type than rectangle. Preferably one that can rotate.
  */
-case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int, attributes : Attributes) extends EnclosedShape {
+case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int, attributes : Attributes) extends ClosedShape {
 
   type T = ImageShape
 

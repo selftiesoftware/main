@@ -26,7 +26,7 @@ import com.siigna.app.model.shape.CircleShape.Selector
  * </pre>
  */
 @SerialVersionUID(-746797736)
-case class CircleShape(center : Vector2D, radius : Double, attributes : Attributes) extends EnclosedShape {
+case class CircleShape(center : Vector2D, radius : Double, attributes : Attributes) extends ClosedShape {
 
   type T = CircleShape
 

@@ -13,22 +13,31 @@ package com.siigna.module
 
 import java.awt._
 
-import com.siigna.app.model.shape._
 import com.siigna.app.Siigna
-import com.siigna.util.geom.TransformationMatrix
 import com.siigna.util.geom.Vector2D
-import com.siigna.app.view.{Interface, View, Graphics}
-import event._
-import com.siigna.util.logging.Log
+import com.siigna.app.view.{Interface, View}
+import com.siigna._
+import app.model.shape.ArcShape
+import app.model.shape.LineShape
+import app.model.shape.PolylineShape
+import app.model.shape.TextShape
+
+/**
+ * A menu for viewing and configuring [[com.siigna.module.ModulePackage]]s.
+ */
 
 object ModuleMenu {
-
   /**
    * A boolean flag to indicate whether the menu is active or not.
    */
   protected var highlighted = false
-  val modules = ModuleLoader.packages.toList
-  val activeModule = modules.headOption
+  def modules = ModuleLoader.packages.toList
+
+  // Colours
+  val colorActive = new Color(0.10f, 0.10f, 0.10f, 1f)
+  val colorFrame = new Color(0.10f, 0.10f, 0.10f, 0.30f)
+  val colorInactive = new Color(0.10f, 0.10f, 0.10f, 0.90f)
+  val colorLogo = new Color(0.10f, 0.10f, 0.10f, 0.50f)
 
   //LOGO
   val frameLogo =  Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
@@ -51,107 +60,11 @@ object ModuleMenu {
 
   var isOpen = false
 
-  def init() {
-    val f = new Frame("Siigna Module Menu")
-    val l = new GridLayout()
-    l.setHgap(2)
-    l.setVgap(2)
-    l.setColumns(3)
-    l.setRows(2)
-    f.setLayout(l)
-
-    f.setLocation(View.center.toPoint)
-    f.setPreferredSize(new Dimension(300, 240))
-    f.setVisible(true)
-    f.requestFocus()
-    f.revalidate()
-    f.setAlwaysOnTop(true)
-    f.pack()
-
-    f.addWindowListener(new WindowAdapter {
-      override def windowClosing(e: WindowEvent) {
-        f.dispose()
-      }
-    })
-
-    // List of module packages
-    val list = new List()
-    ModuleLoader.packages.foreach(p => list.add(p.name.name))
-    f.add(new Label("Loaded packages"))
-    f.add(list)
-
-    // Remove module package
-    val buttonRemove = new Button("Remove")
-    buttonRemove.setEnabled(false)
-    f.add(buttonRemove)
-
-    list.addFocusListener(new FocusListener {
-      def focusGained(e: FocusEvent) {
-        val item = list.getSelectedItem
-        if (item != null) {
-          buttonRemove.setEnabled(true)
-        }
-      }
-
-      def focusLost(e: FocusEvent) {
-        buttonRemove.setEnabled(false)
-      }
-    })
-    buttonRemove.addActionListener(new ActionListener {
-      def actionPerformed(e: ActionEvent) {
-        val item = list.getSelectedItem
-        if (item != null) {
-          ModuleLoader.packages.find(_.name.name == item) match {
-            case Some(pack) => {
-              ModuleLoader.unload(pack)
-              list.remove(item)
-              Log.success("Module: Successfully removed package " + item)
-            }
-            case _ => Log.error("Module: Could not find package to remove: " + item)
-          }
-        }
-      }
-    })
-
-    // Add module packages
-    val labelAdd        = new Label("Add package")
-    val buttonAddLocal  = new Button("Local")
-    val buttonAddRemote = new Button("Remote")
-    f.add(labelAdd)
-    f.add(buttonAddLocal)
-    f.add(buttonAddRemote)
-    buttonAddRemote.setEnabled(false)
-
-    // Add module package local
-    buttonAddLocal.addActionListener(new ActionListener {
-      def actionPerformed(e: ActionEvent) {
-        val dialog = new FileDialog(f, "Add package")
-        dialog.setVisible(true)
-
-        val dir  = dialog.getDirectory
-        val file = dialog.getFile
-        try {
-          val name = file.replace(".jar", "")
-
-          // Load the package
-          ModuleLoader load ModulePackage(Symbol(name), dir, file, true)
-
-          // Add the package to the list
-          if (!list.getItems.contains(name)) list.add(name)
-          Log.success("Module: Successfully imported module package " + file)
-        } catch {
-          case e : NullPointerException => // Aborted
-          case e : Exception => Log.error("Module: Import of module package " + file + " failed", e)
-        }
-
-        // Close dialog
-        dialog.dispose()
-      }
-    })
-  }
+  // Load the package
+  //ModuleLoader load ModulePackage(Symbol(name), dir, file, true)
 
   def isHighlighted(m : Vector2D) : Boolean = {
-    if(m.x < 30 & m.y < 30) {
+    if(m.x < 110 & m.y < 30) {
       View.setCursor(Interface.Cursors.hand)
       highlighted = true
       isOpen = true
@@ -164,36 +77,46 @@ object ModuleMenu {
     isOpen
   }
 
-  def paint (g : Graphics, t : TransformationMatrix) {
+  val stateMap: StateMap = Map(
+
+    'Start -> {
+      case _ => println("test")
+    })
+
+  def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
     val highlight = isHighlighted(View.mousePosition)
 
     //draw modules selection menu
     if(highlight == true) {
 
-      def drawModuleString(s : String, pos : Int, t : Float) = {
-        TextShape(s,Vector2D(5,pos),10).setAttribute("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.90f))
+      // Retrieves a text shape with some text in the given position with the given color
+      def moduleString(s : String, pos : Int, color : Color) = {
+        TextShape(s,Vector2D(10,pos),10).setAttribute("Color" -> color)
       }
 
-      g draw LineShape(Vector2D(10,30),Vector2D(100,30)) //spacer
-      //the loaded modules
-      for (i <- 0 to modules.size -1) g draw drawModuleString(modules(i).name.toString,i * 20 + 40, 1.00f)
-
+      // Draw frame & background
       g setColor expandedColor
       g.g.fillPolygon(expandedX, expandedY, expandedFill.size)
-
-      frameExpanded.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
+      frameExpanded.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
       g draw TextShape("SIIGNA ", Vector2D(11,6),9)
       g draw TextShape(Siigna.version, Vector2D(11,19),7)
 
-      //draw logo and active module
+      // spacer
+      g draw LineShape(Vector2D(10,30),Vector2D(100,30))
+
+      // the loaded modules
+      for (i <- 0 until modules.size) {
+        g draw moduleString(modules(i).name.name, i * 20 + 40, colorActive)
+      }
+
     } else {
       g setColor menuColor
       g.g.fillPolygon(logoFillX, logoFillY, logoFill.size)
-      logo.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.50f))))
-      frameLogo.foreach(s => g.draw(s.setAttributes("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.30f))))
-
+      logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
+      frameLogo.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
     }
-    g draw TextShape(activeModule.toString,Vector2D(56,6),8).setAttribute("Color" -> new Color(0.10f, 0.10f, 0.10f, 0.90f))
 
+    // Draw the currently active module package
+    modules.headOption.foreach(p => g draw TextShape(p.name.name,Vector2D(56,6),8).setAttribute("Color" -> colorActive))
   }
 }
