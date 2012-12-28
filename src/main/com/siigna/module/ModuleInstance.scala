@@ -12,8 +12,6 @@
 package com.siigna.module
 
 import com.siigna.util.event._
-import actors.Future
-import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.util.event.KeyUp
 import com.siigna.util.event.KeyDown
