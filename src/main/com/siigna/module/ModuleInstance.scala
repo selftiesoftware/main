@@ -165,7 +165,7 @@ final case class ModuleInstance(name : Symbol, module : Module) {
 
     // Catch escape events
     events match {
-      // End the child module if we get two escape keys as a safety precaution if any module spins out of control
+      // Force-quit any module if we get two escape keys. Safety precaution if any module spins out of control
       // We chose to match on two clicks and not one to let the modules catch the single escape key
       case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
         endChild("Caught Escape")
