@@ -446,7 +446,7 @@ object PolylineShape {
    * Returns a closed PolylineShape with four lines, representing the given Rectangle.
    * @param rect  The [[com.siigna.util.geom.SimpleRectangle2D]] to construct the Polyline from.
    */
-  def apply(rect : SimpleRectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
+  def apply(rect : Rectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
 
   /**
    * Constructs a PolylineShape from regular lines and arcs. A polyline requires that the shapes are connected, so

@@ -1,9 +1,8 @@
 package com.siigna.app.controller.remote
 
-import org.scalatest.{BeforeAndAfter, FunSpec}
+import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.app.controller.remote.{RemoteConstants => RC, RemoteController => R}
-import com.siigna.app.model.Drawing
+import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
 import com.siigna.util.Serializer
 import com.siigna.app.model.action.{CreateShape, RemoteAction}

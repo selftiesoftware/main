@@ -141,20 +141,27 @@ package object siigna extends com.siigna.util.Implicits {
   type Circle2D = com.siigna.util.geom.Circle2D
   val Circle2D = com.siigna.util.geom.Circle2D
 
+  type ComplexRectangle2D = com.siigna.util.geom.ComplexRectangle2D
+  val ComplexRectangle2D = com.siigna.util.geom.ComplexRectangle2D
+
   //type Ellipse = com.siigna.util.geom.Ellipse
   //lazy val Ellipse = com.siigna.util.geom.Ellipse
 
   type Line2D = com.siigna.util.geom.Line2D
   val Line2D = com.siigna.util.geom.Line2D
 
-  type Rectangle2D = com.siigna.util.geom.SimpleRectangle2D
-  val Rectangle2D = com.siigna.util.geom.SimpleRectangle2D
+  type Rectangle2D = com.siigna.util.geom.Rectangle2D
+  val Rectangle2D = com.siigna.util.geom.Rectangle2D
 
   type Segment2D = com.siigna.util.geom.Segment2D
   val Segment2D = com.siigna.util.geom.Segment2D
 
+  type SimpleRectangle2D = com.siigna.util.geom.SimpleRectangle2D
+  val SimpleRectangle2D = com.siigna.util.geom.SimpleRectangle2D
+
   type TransformationMatrix = com.siigna.util.geom.TransformationMatrix
   val TransformationMatrix = com.siigna.util.geom.TransformationMatrix
+
   type Vector2D = com.siigna.util.geom.Vector2D
   val Vector2D = com.siigna.util.geom.Vector2D
 

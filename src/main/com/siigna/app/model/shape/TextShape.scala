@@ -41,11 +41,11 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   final val GlobalFontScale = 0.1
 
-  val geometry = SimpleRectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
+  val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
 
   val points = Iterable(position)
 
-  def alignment           = attributes.vector2D("TextAlignment") getOrElse (Vector(0, 0))
+  def alignment           = attributes.vector2D("TextAlignment") getOrElse (Vector2D(0, 0))
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
@@ -77,7 +77,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 //              else if (attributes.int("Rotation").isDefined) attributes.int("Rotation").get.toDouble
 //              else 0.0
 
-    val transformation = TransformationMatrix(Vector(0, 0), 1) //.rotate(rotation, position.point)
+    val transformation = TransformationMatrix(Vector2D(0, 0), 1) //.rotate(rotation, position.point)
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 

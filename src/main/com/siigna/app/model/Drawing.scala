@@ -95,11 +95,11 @@ object Drawing extends ActionModel
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      SimpleRectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
+                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
-      SimpleRectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
+                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 
@@ -128,11 +128,11 @@ object Drawing extends ActionModel
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      SimpleRectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
+                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
-      SimpleRectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
+                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 

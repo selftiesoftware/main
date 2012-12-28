@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, Rectangle2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, ComplexRectangle2D}
 import shape.Shape
 import com.siigna.app.view.View
 import com.siigna.app.Siigna
