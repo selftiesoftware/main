@@ -57,7 +57,6 @@ object Track extends EventTrack {
   var pointOne : Option[Vector2D] = None
   var pointTwo : Option[Vector2D] = None
 
-
   /**
    * Find a point from a distance, assuming there's a track active.  
    * @param dist The distance to go in the line of the track.

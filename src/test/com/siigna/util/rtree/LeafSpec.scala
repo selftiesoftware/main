@@ -8,21 +8,21 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-
+                  /*
 package com.siigna.util.rtree
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSpec, Spec}
-import com.siigna.util.geom.Rectangle2D
+import com.siigna.util.geom.SimpleRectangle2D
 
 /**
  * A test for the Leaf clas.
- */
+ *
 class LeafSpec extends FunSpec with ShouldMatchers {
 
-  val elem1 = (10020, Rectangle2D(15.23, 17.30, 89.3502, 123.273))
-  val elem2 = (0, Rectangle2D.empty)
-  val elem3 = (Int.MaxValue, Rectangle2D(0, 26, -15, -70000))
+  val elem1 = (10020, SimpleRectangle2D(15.23, 17.30, 89.3502, 123.273))
+  val elem2 = (0, SimpleRectangle2D.empty)
+  val elem3 = (Int.MaxValue, SimpleRectangle2D(0, 26, -15, -70000))
 
   describe("An empty leaf") {                        
     val leaf = new Leaf.EmptyLeaf(8, OrderMinX);
@@ -59,11 +59,11 @@ class LeafSpec extends FunSpec with ShouldMatchers {
     }
     
     it("can find the worst MBR") {
-      leaf.worst should equal (Rectangle2D.empty)
+      leaf.worst should equal (SimpleRectangle2D.empty)
     }
     
     it("has an empty MBR") {
-      leaf.mbr should equal (Rectangle2D.empty)
+      leaf.mbr should equal (SimpleRectangle2D.empty)
     }
     
     it("has a size of 0") {
@@ -109,12 +109,12 @@ class LeafSpec extends FunSpec with ShouldMatchers {
 
     it("can find the worst MBR") {
       leaf1.worst should equal (elem1._2)
-      leaf2.worst should equal (Rectangle2D.empty)
+      leaf2.worst should equal (SimpleRectangle2D.empty)
     }
 
     it("has an MBR") {
       leaf1.mbr should equal (elem1._2)
-      leaf2.mbr should equal (Rectangle2D.empty)
+      leaf2.mbr should equal (SimpleRectangle2D.empty)
     }
 
     it("has a size of 1") {
@@ -163,7 +163,7 @@ class LeafSpec extends FunSpec with ShouldMatchers {
 
       it("can find the worst MBR") {
         leaf1.worst should equal (elem1._2)
-        leaf2.worst should equal (Rectangle2D.empty)
+        leaf2.worst should equal (SimpleRectangle2D.empty)
       }
 
       it("has an MBR") {
@@ -178,3 +178,4 @@ class LeafSpec extends FunSpec with ShouldMatchers {
     }
   
 }
+ */

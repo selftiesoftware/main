@@ -13,12 +13,10 @@ package com.siigna.util.event
 
 import java.awt.event.{KeyEvent => AWTKeyEvent}
 
-import com.siigna.app.Siigna
 import com.siigna.app.view.{View, Graphics}
-import collection.parallel.immutable.{ParMap, ParIterable}
 import com.siigna.util.geom.{Vector2D, TransformationMatrix}
-import com.siigna.app.model.{Drawing, Model}
-import com.siigna.app.model.shape.{CircleShape, Shape}
+import com.siigna.app.model.Drawing
+import com.siigna.app.model.shape.Shape
 
 /**
  * <p>
@@ -60,7 +58,7 @@ class EventParser {
   var events : List[Event] = Nil
 
   // The most recent MouseMove or MouseDrag event received by the event-parser.
-  var mousePosition : Vector2D = Vector2D.empty
+  var mousePosition : Vector2D = null
 
   /**
    * The margin of the graphical query done by the parser i. e. how large a space is included in the search

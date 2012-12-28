@@ -118,7 +118,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
       (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
     }
-    case r : Rectangle2D => {
+    case r : SimpleRectangle2D => {
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
     case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)

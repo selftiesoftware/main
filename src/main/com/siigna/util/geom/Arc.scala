@@ -18,6 +18,12 @@ package com.siigna.util.geom
 trait Arc {
 
   /**
+   * The circle with the same center and radius as this Arc.
+   * @return  A Circle with the same center and radius.
+   */
+  def circle : Circle
+
+  /**
    * A value used to signal arcs defined counter-clockwise.
    */
   val cw, CW, clockwise = 0

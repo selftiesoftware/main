@@ -12,11 +12,14 @@
 package com.siigna.util.geom
 
 /**
- * An N-dimensional <code>Geometry</code>. Contains methods that's able to calculate different
- * geometrical properties, such as the distance to another geometry, intersection(s)
- * with another geometry, whether the geometry overlaps with another geometry etc.
- * TODO: Test everything!
+ * <p>
+ *   An N-dimensional <code>Geometry</code>. Contains methods that's able to calculate different
+ *   geometrical properties, such as the distance to another geometry, intersection(s)
+ *   with another geometry, whether the geometry overlaps with another geometry etc.
+ * </p>
+ *
  */
+// TODO: Test everything!
 trait Geometry {
 
   /**
@@ -81,7 +84,7 @@ trait Geometry2D extends Geometry {
   /**
    * The boundary of the shape.
    */
-  override def boundary : Rectangle2D
+  override def boundary : SimpleRectangle2D
 
   /**
    * The center of the shape.

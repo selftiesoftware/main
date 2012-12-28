@@ -20,7 +20,7 @@ import java.awt.Point
 case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   type T = Vector2D
-  type R = Rectangle2D
+  type R = SimpleRectangle2D
 
   /**
    * Returns the sum of this vector with another vector.
@@ -75,12 +75,12 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   /**
    * Defines the boundary of the Vector as an empty rectangle.
    */
-  def boundary = Rectangle2D(this.x, this.y, this.x, this.y)
+  def boundary = SimpleRectangle2D(this.x, this.y, this.x, this.y)
 
   /**
    * Confines the vector to the bounds of the given rectangle.
    */
-  def confine(rectangle : Rectangle2D) = Vector2D(
+  def confine(rectangle : SimpleRectangle2D) = Vector2D(
     if (x < rectangle.xMin) rectangle.xMin else if (x > rectangle.xMax) rectangle.xMax else x,
     if (y < rectangle.yMin) rectangle.yMin else if (y > rectangle.yMax) rectangle.yMax else y)
   
@@ -135,8 +135,6 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
  * Companion object to Vector2D.
  */
 object Vector2D {
-  
-  import java.lang.Double.NaN
 
   /**
    * Creates a Vector2D from a given [[java.awt.Point]].
@@ -161,11 +159,6 @@ object Vector2D {
    * @return  the determinant value.
    */
   def determinant(a : Vector2D, b : Vector2D) = a.x * b.y - a.y * b.x
-
-  /**
-   * Creates an empty vector with two NaN.
-   */
-  def empty = Vector(NaN, NaN)
   
   /**
    * Calculates the shortest angle between two vectors.

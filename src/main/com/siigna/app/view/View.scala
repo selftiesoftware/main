@@ -83,7 +83,7 @@ object View {
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
-  var boundaryShape : Rectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
+  var boundaryShape : SimpleRectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
   
   /**
    * The frames in the current second.
@@ -126,7 +126,7 @@ object View {
                                    confine(offScreenBoundary.topLeft.y, 0, height))
     val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, width),
                                    confine(offScreenBoundary.bottomRight.y, 0, height))
-    Rectangle2D(topLeft, bottomRight)
+    SimpleRectangle2D(topLeft, bottomRight)
   }
 
   /**
@@ -224,7 +224,7 @@ object View {
 
     // Draw model
     if (Drawing.size > 0) try {
-      val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+      val mbr = SimpleRectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
       Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
     } catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
@@ -369,7 +369,7 @@ object View {
   /**
    * The screen as a rectangle, given in device coordinates.
    */
-  def screen = Rectangle2D(0, 0, width, height)
+  def screen = SimpleRectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom

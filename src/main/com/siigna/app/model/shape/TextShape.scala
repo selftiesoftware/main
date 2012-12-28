@@ -41,7 +41,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   final val GlobalFontScale = 0.1
 
-  val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
+  val geometry = SimpleRectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
 
   val points = Iterable(position)
 
@@ -81,7 +81,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-  def getPart(rect: Rectangle2D) = {
+  def getPart(rect: SimpleRectangle2D) = {
     if (rect.intersects(geometry)) {
       Selector(true)
       FullSelector

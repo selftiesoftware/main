@@ -61,7 +61,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
       def getRange(x : Int) {
         sink(Get(RC.ShapeId, x, session), r => {
           val set = r.asInstanceOf[Set]
-          val range = set.value.asInstanceOf[Range]
+          range = set.value.asInstanceOf[Range]
           range.size should equal (x)
         })
       }
@@ -75,7 +75,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
         val action = RemoteAction(CreateShape(range.head, LineShape(0, 0, 10, 10)))
         sink(Set(RC.Action, action, session), r => {
           val set = r.asInstanceOf[Set]
-          set.value.isInstanceOf[Int] should be (true)
+          set.value.isInstanceOf[Int] should be (right = true)
         })
       }
     }

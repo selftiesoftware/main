@@ -12,7 +12,7 @@
 package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Rectangle2D, Arc2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Arc2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna._
@@ -66,7 +66,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case _ => Seq(this)
   }
 
-  def getPart(rect: Rectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
+  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
 
   def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullSelector else EmptySelector
   

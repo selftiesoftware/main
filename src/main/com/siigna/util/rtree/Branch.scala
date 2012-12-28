@@ -11,7 +11,7 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.util.geom.Rectangle2D
+import com.siigna.util.geom.SimpleRectangle2D
 
 /**
  * In a PR-tree a branch contains of 4 priority-nodes and 2 subtrees.
@@ -25,7 +25,7 @@ import com.siigna.util.geom.Rectangle2D
   /**
    * Adds a number of elements to the branch.
    */
-  def add(elems : Traversable[(String, Rectangle2D)]) = {
+  def add(elems : Traversable[(String, SimpleRectangle2D)]) = {
     // If there's more elements than can be contained in a single
     // block, then add them manually.
     if (elems.size + size <= branchFactor) { 
@@ -42,7 +42,7 @@ import com.siigna.util.geom.Rectangle2D
    * 
    * @param elems  The elements to add.
    */
-  def bulkload(elems : Traversable[(String, Rectangle2D)]) : Branch = {
+  def bulkload(elems : Traversable[(String, SimpleRectangle2D)]) : Branch = {
     Branch.empty(branchFactor) // Erm..
   }
    
@@ -54,7 +54,7 @@ import com.siigna.util.geom.Rectangle2D
   /**
    * Replace a single element in the Node.
    */
-  def update(key : String, value : Rectangle2D) : Node
+  def update(key : String, value : SimpleRectangle2D) : Node
 }
 
 /**
@@ -71,16 +71,16 @@ object Branch {
    * An empty branch.
    */
   class EmptyBranch(branchFactor : Int) extends Branch {
-    def add(key : String, value : Rectangle2D) = new SingleBlockBranch(Traversable(key -> value), branchFactor)
-    def apply(query : Rectangle2D) = Iterator.empty
+    def add(key : String, value : SimpleRectangle2D) = new SingleBlockBranch(Traversable(key -> value), branchFactor)
+    def apply(query : SimpleRectangle2D) = Iterator.empty
     def traversable = Traversable.empty
-    def mbr = Rectangle2D.empty
+    def mbr = SimpleRectangle2D.empty
     def rebalance = this
-    def remove(key : String, value : Rectangle2D) = throw new UnsupportedOperationException("Unable to delete element from empty branch.")
-    def remove(elems : Iterator[(String, Rectangle2D)]) = this
+    def remove(key : String, value : SimpleRectangle2D) = throw new UnsupportedOperationException("Unable to delete element from empty branch.")
+    def remove(elems : Iterator[(String, SimpleRectangle2D)]) = this
     val size = 0
     val toString = "Branch[ ]"
-    def update(key : String, value : Rectangle2D) = this
+    def update(key : String, value : SimpleRectangle2D) = this
   }
 
   /**
@@ -88,8 +88,8 @@ object Branch {
    * 
    * @param elems  The array containing the elements.
    */
-  class SingleBlockBranch(elems : Traversable[(String, Rectangle2D)], branchFactor : Int) extends Branch(branchFactor) {
-    def add(key : String, value : Rectangle2D) = {
+  class SingleBlockBranch(elems : Traversable[(String, SimpleRectangle2D)], branchFactor : Int) extends Branch(branchFactor) {
+    def add(key : String, value : SimpleRectangle2D) = {
       if (elems.size < branchFactor) {
         new SingleBlockBranch(elems :+ (key -> value), branchFactor)
       } else {
@@ -108,7 +108,7 @@ object Branch {
      * Add a single element to the branch. If the element cannot fit in the priority leaves,
      * the branch will grow in depth.
      */
-    def add(key : String, value : Rectangle2D) = {
+    def add(key : String, value : SimpleRectangle2D) = {
       // First try all the priority leaves to see if they're not full
       if (leafMinX.size < branchFactor)      leafMinX.add(key, value)
       else if (leafMinY.size < branchFactor) leafMinY.add(key, value)
@@ -139,31 +139,30 @@ object Branch {
 
 class Branch(val branchFactor : Int) extends Node {
 
-  private var map = Map[Int, Rectangle2D]()
+  private var map = Map[Int, SimpleRectangle2D]()
 
-  def add(key : Int, value : Rectangle2D) = map = map + (key -> value)
+  def add(key : Int, value : SimpleRectangle2D) = map = map + (key -> value)
   
-  def add(elem : (Int, Rectangle2D)) = {
+  def add(elem : (Int, SimpleRectangle2D)) = {
     map = map + elem
     this
   }
 
-  def add(elems : Map[Int, Rectangle2D]) = map = map ++ elems
+  def add(elems : Map[Int, SimpleRectangle2D]) = map = map ++ elems
 
-  def add(elems : Traversable[(Int, Rectangle2D)]) = {
+  def add(elems : Traversable[(Int, SimpleRectangle2D)]) = {
     map = map ++ elems
     this
   }
 
-  def apply(mbr : Rectangle2D) = map.filter(_._2.intersects(mbr)).keys
+  def apply(mbr : SimpleRectangle2D) = map.filter(_._2.intersects(mbr)).keys
 
-  def mbr : Rectangle2D =
-  	if (map.isEmpty) Rectangle2D.empty
-  	else map.values.reduceLeft((p1, p2) => (p1.expand(p2)))
+  def mbr : SimpleRectangle2D =
+  	map.values.reduceLeft((p1, p2) => (p1.expand(p2)))
 
-  def remove(elems : Map[Int, Rectangle2D]) { map = map.--(elems.keys) }
+  def remove(elems : Map[Int, SimpleRectangle2D]) { map = map.--(elems.keys) }
 
-  def remove(key : Int, elem : Rectangle2D) { map = map.filterNot(_ == (key, elem)) }
+  def remove(key : Int, elem : SimpleRectangle2D) { map = map.filterNot(_ == (key, elem)) }
 
   def size = map.size
 

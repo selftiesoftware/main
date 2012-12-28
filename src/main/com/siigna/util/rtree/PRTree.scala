@@ -11,7 +11,7 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.util.geom.{Rectangle2D}
+import com.siigna.util.geom.{SimpleRectangle2D}
 
 /**
  * A priority tree containing references to the shapes in the static Model.
@@ -30,7 +30,7 @@ class PRTree(branchFactor : Int) extends Branch(branchFactor) {
   override def mbr = {
     if (!java.lang.Double.isNaN(super.mbr.xMin)) {
       super.mbr
-    } else Rectangle2D(0, 0, 0, 0)
+    } else SimpleRectangle2D(0, 0, 0, 0)
   }
 
 }

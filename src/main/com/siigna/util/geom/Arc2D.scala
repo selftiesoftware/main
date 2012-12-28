@@ -24,6 +24,8 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
   type T = Arc2D
 
+  val circle = Circle2D(center, radius)
+
   /**
    * The end angle of the arc.
    */
@@ -73,7 +75,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     val maxY = if (crop(startAngle - 90)  > crop(endAngle - 90))   radius else math.max(startY, endY)
 
     // Return the corresponding rectangle
-    Rectangle2D(center.x + minX, center.y + minY, center.x + maxX, center.y + maxY)
+    SimpleRectangle2D(center.x + minX, center.y + minY, center.x + maxX, center.y + maxY)
   }
 
   def closestPoint(vector : Vector2D) = (vector - center).unit * radius
@@ -229,13 +231,6 @@ object Arc2D {
       new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
     }
     */
-  }
-
-  /**
-   * Creates an empty arc.
-   */
-  def empty() = {
-    new Arc2D(Vector2D.empty, NaN, NaN, NaN)
   }
 
 }

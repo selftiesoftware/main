@@ -147,8 +147,8 @@ package object siigna extends com.siigna.util.Implicits {
   type Line2D = com.siigna.util.geom.Line2D
   val Line2D = com.siigna.util.geom.Line2D
 
-  type Rectangle2D = com.siigna.util.geom.Rectangle2D
-  val Rectangle2D = com.siigna.util.geom.Rectangle2D
+  type Rectangle2D = com.siigna.util.geom.SimpleRectangle2D
+  val Rectangle2D = com.siigna.util.geom.SimpleRectangle2D
 
   type Segment2D = com.siigna.util.geom.Segment2D
   val Segment2D = com.siigna.util.geom.Segment2D

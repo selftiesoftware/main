@@ -59,11 +59,11 @@ object Rectangle {
   /**
    * Creates a 2-dimensional rectangle.
    */
-  def apply(xMin : Double, yMin : Double, xMax : Double, yMax : Double) = new Rectangle2D(xMin, yMin, xMax, yMax)
+  def apply(xMin : Double, yMin : Double, xMax : Double, yMax : Double) = new SimpleRectangle2D(xMin, yMin, xMax, yMax)
 
   /**
    * Creates a 2-dimensional rectangle.
    */
-  def apply(v1 : Vector2D, v2 : Vector2D) = Rectangle2D(v1, v2)
+  def apply(v1 : Vector2D, v2 : Vector2D) = SimpleRectangle2D(v1, v2)
 
 }

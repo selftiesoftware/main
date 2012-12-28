@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import com.siigna.util.geom.{Vector2D, Rectangle2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, Rectangle2D}
 import shape.Shape
 import com.siigna.app.view.View
 import com.siigna.app.Siigna
@@ -34,7 +34,7 @@ trait SpatialModel[Key, Value <: Shape] {
   /**
    * Query for shapes inside the given boundary.
    */
-  def apply(query : Rectangle2D) : Map[Key, Value] = {
+  def apply(query : SimpleRectangle2D) : Map[Key, Value] = {
     shapes.filter((s : (Key, Value)) => {
       query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
     })
@@ -57,8 +57,8 @@ trait SpatialModel[Key, Value <: Shape] {
    * elements in the model.
    * @return  The minimum-bounding rectangle
    */
-  def mbr : Rectangle2D =
-    shapes.foldLeft[Rectangle2D](Rectangle2D(0, 0, 0, 0))((a : Rectangle2D, b : (Key, Value)) => a.expand(b._2.geometry.boundary))
+  def mbr : SimpleRectangle2D =
+    shapes.foldLeft[SimpleRectangle2D](SimpleRectangle2D(0, 0, 0, 0))((a : SimpleRectangle2D, b : (Key, Value)) => a.expand(b._2.geometry.boundary))
 
 
 }
