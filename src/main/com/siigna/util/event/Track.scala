@@ -200,12 +200,15 @@ object Track extends EventTrack {
       val vertical   = verticalGuide(p)
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(mousePosition) < trackDistance)
+      if (vertical.distanceTo(mousePosition) < trackDistance) {
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
-
+        println("Vertical track guide")
+      }
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(mousePosition) < trackDistance)
+      if (horizontal.distanceTo(mousePosition) < trackDistance) {
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
+        println("Horizontal track guide")
+      }
     }
 
     def paintTwoPoints(p1 : Vector2D, p2 : Vector2D) {
@@ -216,15 +219,15 @@ object Track extends EventTrack {
       val vertical2   = verticalGuide(p2)
 
       //draw the vertical tracking guide
-      if (vertical1.distanceTo(mousePosition) < trackDistance && vertical1.distanceTo(mousePosition) < vertical2.distanceTo(mousePosition))
+      if (vertical1.distanceTo(mousePosition) < trackDistance && vertical1.distanceTo(mousePosition) <= vertical2.distanceTo(mousePosition))
         g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
-      if (vertical2.distanceTo(mousePosition) < trackDistance && vertical2.distanceTo(mousePosition) < vertical1.distanceTo(mousePosition))
+      if (vertical2.distanceTo(mousePosition) < trackDistance && vertical2.distanceTo(mousePosition) <= vertical1.distanceTo(mousePosition))
         g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal1.distanceTo(mousePosition) < trackDistance && horizontal1.distanceTo(mousePosition) < horizontal2.distanceTo(mousePosition))
+      if (horizontal1.distanceTo(mousePosition) < trackDistance && horizontal1.distanceTo(mousePosition) <= horizontal2.distanceTo(mousePosition))
         g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
-      if (horizontal2.distanceTo(mousePosition) < trackDistance && horizontal2.distanceTo(mousePosition) < horizontal1.distanceTo(mousePosition))
+      if (horizontal2.distanceTo(mousePosition) < trackDistance && horizontal2.distanceTo(mousePosition) <= horizontal1.distanceTo(mousePosition))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 
