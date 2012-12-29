@@ -12,7 +12,7 @@
 package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{Rectangle2D, Circle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Circle2D, TransformationMatrix, Vector2D}
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
 import com.siigna.app.model.shape.CircleShape.Selector
@@ -54,7 +54,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    */
   def distanceToHandlesFrom(point : Vector2D) = geometry.vertices.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def getPart(rect: Rectangle2D) = 
+  def getPart(rect: SimpleRectangle2D) =
     if (rect.contains(geometry)) FullSelector 
     else {
       val contains = geometry.vertices.exists(p => rect.contains(p))

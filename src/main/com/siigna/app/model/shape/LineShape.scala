@@ -12,7 +12,7 @@
 package com.siigna.app.model.shape
 
 //import com.siigna.util.dxf.{DXFSection, DXFValue}
-import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D, Segment2D}
+import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, Segment2D}
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
 import com.siigna._
@@ -60,7 +60,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     case _ => Seq(this)
   }
 
-  def getPart(r : Rectangle2D) = {
+  def getPart(r : SimpleRectangle2D) = {
     if (r.intersects(boundary)) {
       val cond1 = r.contains(p1)
       val cond2 = r.contains(p2)

@@ -12,8 +12,6 @@
 package com.siigna.module
 
 import com.siigna.util.event._
-import actors.Future
-import actors.Futures._
 import com.siigna.util.logging.Log
 import com.siigna.util.event.KeyUp
 import com.siigna.util.event.KeyDown
@@ -165,8 +163,9 @@ final case class ModuleInstance(name : Symbol, module : Module) {
 
     // Catch escape events
     events match {
-      // End the child module if we get an escape key
-      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+      // Force-quit any module if we get two escape keys. Safety precaution if any module spins out of control
+      // We chose to match on two clicks and not one to let the modules catch the single escape key
+      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
         endChild("Caught Escape")
         None
       }

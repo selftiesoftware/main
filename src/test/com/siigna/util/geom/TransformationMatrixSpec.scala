@@ -47,7 +47,7 @@ class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
 
     it ("can concatenate itself with other matrices") {
       val t1 = TransformationMatrix()
-      val t2 = TransformationMatrix(Vector(10, 10), 1000)
+      val t2 = TransformationMatrix(Vector2D(10, 10), 1000)
 
       t1.concatenate(t2) should equal (t2)
     }

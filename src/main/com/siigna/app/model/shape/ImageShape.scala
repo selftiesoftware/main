@@ -19,7 +19,7 @@ import com.siigna._
 import com.siigna.app.view.Graphics
 
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D}
 
 /**
  * An ImageShape.
@@ -38,7 +38,7 @@ case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : 
 
   type T = ImageShape
 
-  val geometry = Rectangle2D(p1, p2)
+  val geometry = SimpleRectangle2D(p1, p2)
 
   val points = Iterable(p1, p2)
 

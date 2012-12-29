@@ -11,7 +11,7 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.util.geom.{Rectangle2D, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 import com.siigna.app.model.shape.{ShapeSelector, EmptySelector, Shape}
 import com.siigna.app.model.{Drawing, Selection, Model}
 
@@ -50,11 +50,11 @@ object Select {
     Drawing.select(id, Drawing(id).getPart(point))
   }
   
-  def apply(id : Int, r : Rectangle2D) {
+  def apply(id : Int, r : SimpleRectangle2D) {
     Drawing.select(id, Drawing(id).getPart(r))
   }
-  //def apply(r : Rectangle2D, enclosed : Boolean = true) {
-  def apply(r : Rectangle2D, entireShape : Boolean) {
+  //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
+  def apply(r : SimpleRectangle2D, entireShape : Boolean) {
       val filtered = if (!entireShape) {
       Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
       } else {

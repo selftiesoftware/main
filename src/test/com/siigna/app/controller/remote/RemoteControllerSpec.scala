@@ -1,9 +1,8 @@
 package com.siigna.app.controller.remote
 
-import org.scalatest.{BeforeAndAfter, FunSpec}
+import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.app.controller.remote.{RemoteConstants => RC, RemoteController => R}
-import com.siigna.app.model.Drawing
+import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
 import com.siigna.util.Serializer
 import com.siigna.app.model.action.{CreateShape, RemoteAction}
@@ -61,7 +60,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
       def getRange(x : Int) {
         sink(Get(RC.ShapeId, x, session), r => {
           val set = r.asInstanceOf[Set]
-          val range = set.value.asInstanceOf[Range]
+          range = set.value.asInstanceOf[Range]
           range.size should equal (x)
         })
       }
@@ -75,7 +74,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
         val action = RemoteAction(CreateShape(range.head, LineShape(0, 0, 10, 10)))
         sink(Set(RC.Action, action, session), r => {
           val set = r.asInstanceOf[Set]
-          set.value.isInstanceOf[Int] should be (true)
+          set.value.isInstanceOf[Int] should be (right = true)
         })
       }
     }

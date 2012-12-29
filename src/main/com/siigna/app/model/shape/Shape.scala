@@ -123,7 +123,7 @@ trait Shape extends HasAttributes {
    * @param rect  The rectangle to base the selection on.
    * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapeSelector]].
    */
-  def getPart(rect : Rectangle2D) : ShapeSelector
+  def getPart(rect : SimpleRectangle2D) : ShapeSelector
 
   /**
    * Gets part of the shape by a single point. The part of the shape that is closest to that point will be selected.
@@ -187,7 +187,7 @@ trait BasicShape extends Shape {
  */
 trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 
-  def geometry : CollectionGeometry = CollectionGeometry(shapes.map(_.geometry))
+  def geometry : CollectionGeometry2D = CollectionGeometry2D(shapes.map(_.geometry))
 
   /**
    * Joins this CollectionShape with a single new shape and forms a new CollectionShape.

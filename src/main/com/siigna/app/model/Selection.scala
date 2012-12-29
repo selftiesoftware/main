@@ -65,7 +65,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
 
   /**
    * The boundary of the underlying ImmutableShapes.
-   * @return A Rectangle2D.
+   * @return A SimpleRectangle2D.
    */
   def boundary = parts.map(s => Drawing(s._1)).foldLeft(Drawing(parts.head._1).boundary)((a, b) => a.expand(b.boundary))
 
