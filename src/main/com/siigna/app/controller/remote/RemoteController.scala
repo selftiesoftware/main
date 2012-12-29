@@ -42,7 +42,7 @@ protected[controller] object RemoteController extends Actor {
   var pingTime = 2000
 
   // Timeout to the server
-  var timeout = 4000
+  var timeout = 10000
 
   // The remote server
   val remote = new Server("62.243.118.234", Mode.Production)
@@ -137,7 +137,7 @@ protected[controller] object RemoteController extends Actor {
     any match {
       case Error(code, message, _) => Log.error("Remote: Error when retrieving action: " + code + ": " + message)
       case Set(ActionId, id : Int, _) => {
-        Log.info("Remote: Got latest action id " + id)
+        Log.debug("Remote: Got latest action id " + id)
 
         // Store the id if it's the first we get
         if (actionIndices.isEmpty) {

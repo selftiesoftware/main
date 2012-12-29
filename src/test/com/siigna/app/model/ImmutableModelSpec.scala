@@ -25,8 +25,8 @@ class ImmutableModelSpec extends FunSpec with ShouldMatchers {
   val model = new Model(Map(), Seq(), Seq())
 
   describe("An immutable model") {
-    val v1 = Vector(0, 0)
-    val v2 = Vector(10, 10)
+    val v1 = Vector2D(0, 0)
+    val v2 = Vector2D(10, 10)
     val l1 = LineShape(v1, v2)
     val l2 = LineShape(v2, v1)
     val lines = Map(0 -> l1, 1 -> l2)

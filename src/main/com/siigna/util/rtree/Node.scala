@@ -11,7 +11,7 @@
 
 package com.siigna.util.rtree
 
-import com.siigna.util.geom.Rectangle2D
+import com.siigna.util.geom.SimpleRectangle2D
 
 /**
  * A node in a PR-tree. This can effectively be either a leaf or a branch.
@@ -25,17 +25,17 @@ trait Node {
   /**
    * Adds a single element to the Node.
    */
-  def add(elem : (Int, Rectangle2D)) : T
+  def add(elem : (Int, SimpleRectangle2D)) : T
   
   /**
    * Adds a number of elements to the Node.
    */
-  def add(elems : Traversable[(Int, Rectangle2D)]) : T
+  def add(elems : Traversable[(Int, SimpleRectangle2D)]) : T
 
   /**
    * Queries for elements in the node whose MBR is contained or intersected by a given MBR.
    */
-  def apply(query : Rectangle2D) : Traversable[Int]
+  def apply(query : SimpleRectangle2D) : Traversable[Int]
 
   /**
    * The branch factor for the node.
@@ -45,12 +45,12 @@ trait Node {
   /**
    * The MinimumBoundingRectangle of the node.
    */
-  def mbr : Rectangle2D
+  def mbr : SimpleRectangle2D
 
   /**
    * Retrieve the traversable for all elements in the node.
    */
-  def traversable : Traversable[(Int, Rectangle2D)]
+  def traversable : Traversable[(Int, SimpleRectangle2D)]
 
   /**
    * The number of elements in the Node.

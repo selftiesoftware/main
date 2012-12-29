@@ -83,7 +83,7 @@ object View {
   /**
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
-  var boundaryShape : Rectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
+  var boundaryShape : SimpleRectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
   
   /**
    * The frames in the current second.
@@ -122,11 +122,11 @@ object View {
 
     //
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
-    val topLeft           = Vector(confine(offScreenBoundary.topLeft.x, 0, width),
+    val topLeft           = Vector2D(confine(offScreenBoundary.topLeft.x, 0, width),
                                    confine(offScreenBoundary.topLeft.y, 0, height))
-    val bottomRight       = Vector(confine(offScreenBoundary.bottomRight.x, 0, width),
+    val bottomRight       = Vector2D(confine(offScreenBoundary.bottomRight.x, 0, width),
                                    confine(offScreenBoundary.bottomRight.y, 0, height))
-    Rectangle2D(topLeft, bottomRight)
+    Rectangle2D(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
   }
 
   /**
@@ -215,7 +215,7 @@ object View {
 
     // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt,
+    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
                   boundary.width.toInt, boundary.height.toInt)
 
     // Draw a white rectangle inside the boundary of the current model.
@@ -251,7 +251,7 @@ object View {
         })
       }))
     } catch {
-      case e => Log.error("View: Unable to draw the dynamic Model: ", e)
+      case e : Exception => Log.error("View: Unable to draw the dynamic Model: ", e)
     }
 
     // Paint the module-loading icon in the top left corner
@@ -369,7 +369,7 @@ object View {
   /**
    * The screen as a rectangle, given in device coordinates.
    */
-  def screen = Rectangle2D(0, 0, width, height)
+  def screen = SimpleRectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom

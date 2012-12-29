@@ -92,7 +92,7 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Returns the origin of the TransformationMatrix as a Vector.
    */
-  def getTranslate = Vector(t.getTranslateX, t.getTranslateY)
+  def getTranslate = Vector2D(t.getTranslateX, t.getTranslateY)
 
   /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
@@ -114,7 +114,7 @@ case class TransformationMatrix(t : AffineTransform) {
    * @return  A Double from 0 to 360.
    */
   def rotation = {
-    val v = Vector(1, 0)             // The vector
+    val v = Vector2D(1, 0)             // The vector
     val t = translate(-getTranslate) // Extract translation
     val p = v.transform(t)           // Transform the vector
     math.atan2(p.y, p.x)

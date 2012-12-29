@@ -15,7 +15,7 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.shape.TextShape
 import com.siigna.util.Implicits._
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.Vector
+import com.siigna.util.geom.{Vector2D, Vector}
 import java.awt.Color
 
 /**
@@ -62,7 +62,7 @@ class Popup(message : String) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(message, View.center, 10, Attributes("TextAlignment" -> Vector(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(message, View.center, 10, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
       paintFrame(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 20, setTransparency(backgroundColor))
       graphics draw text
     }

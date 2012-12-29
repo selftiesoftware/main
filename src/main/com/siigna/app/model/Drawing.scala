@@ -14,7 +14,7 @@ package com.siigna.app.model
 import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{Vector2D, Rectangle2D}
+import com.siigna.util.geom.{Vector2D, SimpleRectangle2D}
 
 /**
  * <p>
@@ -95,11 +95,11 @@ object Drawing extends ActionModel
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
+                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
-      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
+                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 
@@ -128,11 +128,11 @@ object Drawing extends ActionModel
 
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
-      Rectangle2D(Vector2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5),
-                Vector2D(center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5))
+      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
+                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
-      Rectangle2D(Vector2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5),
-                Vector2D(center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5))
+      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
+                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 
