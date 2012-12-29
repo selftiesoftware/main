@@ -44,9 +44,6 @@ object Track extends EventTrack {
   // Get method
   var isTracking: Boolean = false
 
-  // The up-to-date mouse position
-  protected var mousePosition = View.mousePosition
-
   // Get the track distance
   val trackDistance = Siigna.double("trackDistance").getOrElse(9.0)
 
@@ -59,7 +56,6 @@ object Track extends EventTrack {
   // Points to track from
   var pointOne : Option[Vector2D] = None
   var pointTwo : Option[Vector2D] = None
-
 
   /**
    * Find a point from a distance, assuming there's a track active.  
@@ -76,13 +72,13 @@ object Track extends EventTrack {
       val vert  = verticalGuide(p)
 
       // Horizontal!
-      if (horiz.distanceTo(mousePosition) < vert.distanceTo(mousePosition)) {
-        val closestPoint = horiz.closestPoint(mousePosition)
+      if (horiz.distanceTo(View.mousePositionDrawing) < vert.distanceTo(View.mousePositionDrawing)) {
+        val closestPoint = horiz.closestPoint(View.mousePosition)
         if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
         else                      Vector2D(p.x + dist, p.y)
         // Vertical!
       } else {
-        val closestPoint = vert.closestPoint(mousePosition)
+        val closestPoint = vert.closestPoint(View.mousePositionDrawing)
         if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
         else                      Vector2D(p.x, p.y + dist)
       }
@@ -95,7 +91,6 @@ object Track extends EventTrack {
 
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], model : Traversable[Shape]) : Event = {
-
     if(trackEnabled) {
       // Set isTracking to false
       isTracking = false
@@ -109,22 +104,11 @@ object Track extends EventTrack {
         case MouseDrag (p, a, b) :: tail => (p, (v : Vector2D) => MouseDrag(v, a, b))
         case MouseDown (p, a, b) :: tail => (p, (v : Vector2D) => MouseDown(v, a, b))
         case MouseUp   (p, a, b) :: tail => (p, (v : Vector2D) => MouseUp  (v, a, b))
-        case e :: tail => (this.mousePosition, (v : Vector2D) => e)
+        case e :: tail => (View.mousePosition, (v : Vector2D) => e)
       }
 
-      // Update mousePosition
-      var m = Vector2D(0,0)
-      if (x != this.mousePosition) {
-        m = x.transform(View.deviceTransformation)
-        this.mousePosition = m
-      } else {
-        m = this.mousePosition
-      }
-
-      var shape : Option[Int] = None
-
-      // Get the nearest shape if it is defined
-      val model = Drawing(m)
+      val m : Vector2D = View.mousePositionDrawing
+      var shape : Option[Shape] = None
 
       //if a shape is in the process of being made (not in the model yet), use it too.
 
@@ -132,9 +116,9 @@ object Track extends EventTrack {
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
 
-          val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
-          shape = Some(nearest._1)
-          val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          val nearest = model.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
+          shape = Some(nearest)
+          val nearestPoint = nearest.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           if (nearestPoint.distanceTo(m) < trackDistance) {
             if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
@@ -142,9 +126,9 @@ object Track extends EventTrack {
         }
         //if no tracking point is defined, set the first point.
         else {
-          val nearest = model.reduceLeft((a, b) => if (a._2.geometry.distanceTo(m) < b._2.geometry.distanceTo(m)) a else b)
-          shape = Some(nearest._1)
-          val nearestPoint = nearest._2.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          val nearest = model.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
+          shape = Some(nearest)
+          val nearestPoint = nearest.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
       }
@@ -190,9 +174,6 @@ object Track extends EventTrack {
     } else events.head
   }
 
-
-
-
   override def paint(g : Graphics, t : TransformationMatrix) {
     def paintOnePoint(p : Vector2D) {
 
@@ -200,15 +181,12 @@ object Track extends EventTrack {
       val vertical   = verticalGuide(p)
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(mousePosition) < trackDistance) {
+      if (vertical.distanceTo(View.mousePosition) < trackDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
-        println("Vertical track guide")
-      }
+
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(mousePosition) < trackDistance) {
+      if (horizontal.distanceTo(View.mousePosition) < trackDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
-        println("Horizontal track guide")
-      }
     }
 
     def paintTwoPoints(p1 : Vector2D, p2 : Vector2D) {
@@ -217,17 +195,18 @@ object Track extends EventTrack {
       val vertical1   = verticalGuide(p1)
       val horizontal2 = horizontalGuide(p2)
       val vertical2   = verticalGuide(p2)
+      val m = View.mousePositionDrawing
 
       //draw the vertical tracking guide
-      if (vertical1.distanceTo(mousePosition) < trackDistance && vertical1.distanceTo(mousePosition) <= vertical2.distanceTo(mousePosition))
+      if (vertical1.distanceTo(m) < trackDistance && vertical1.distanceTo(m) < vertical2.distanceTo(m))
         g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
-      if (vertical2.distanceTo(mousePosition) < trackDistance && vertical2.distanceTo(mousePosition) <= vertical1.distanceTo(mousePosition))
+      if (vertical2.distanceTo(m) < trackDistance && vertical2.distanceTo(m) < vertical1.distanceTo(m))
         g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal1.distanceTo(mousePosition) < trackDistance && horizontal1.distanceTo(mousePosition) <= horizontal2.distanceTo(mousePosition))
+      if (horizontal1.distanceTo(m) < trackDistance && horizontal1.distanceTo(m) < horizontal2.distanceTo(m))
         g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
-      if (horizontal2.distanceTo(mousePosition) < trackDistance && horizontal2.distanceTo(mousePosition) <= horizontal1.distanceTo(mousePosition))
+      if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) < horizontal1.distanceTo(m))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 
