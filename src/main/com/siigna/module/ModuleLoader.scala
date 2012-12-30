@@ -156,6 +156,8 @@ object ModuleLoader {
         } catch {
           // No module found
           case e : ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
+          // Modules are out of date
+          case e : AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
         }
 
         // Add to cache
