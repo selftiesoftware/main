@@ -154,6 +154,7 @@ trait EventController {
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
       case MouseDown  (_, _, _) => {
         if (ModuleMenu.isHighlighted(point)) {
+          ModuleMenu.onMouseDown(point) // Give the event to the module menu
           None
         } else Some(MouseDown(point, button, keys))
       }

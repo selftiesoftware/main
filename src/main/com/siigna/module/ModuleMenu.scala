@@ -77,11 +77,13 @@ object ModuleMenu {
     isOpen
   }
 
-  val stateMap: StateMap = Map(
-
-    'Start -> {
-      case _ => println("test")
-    })
+  /**
+   * Triggered when a mouse down event is detected above the module menu.
+   * @param point  The point over the module menu.
+   */
+  def onMouseDown(point : Vector2D) {
+    Log.info("ModuleMenu got point " + point)
+  }
 
   def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
     val highlight = isHighlighted(View.mousePosition)
