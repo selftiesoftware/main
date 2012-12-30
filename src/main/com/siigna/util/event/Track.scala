@@ -65,8 +65,8 @@ object Track extends EventTrack {
   def getPointFromDistance(dist : Double) : Option[Vector2D] = {
 
     /** Get the best fitting line (horizontal or vertical)
-      * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
-      */
+     * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
+     */
     def getTrackPoint(p : Vector2D) : Vector2D = {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
