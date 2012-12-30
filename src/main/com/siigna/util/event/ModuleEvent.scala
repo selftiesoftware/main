@@ -10,7 +10,7 @@
  */
 package com.siigna.util.event
 
-import com.siigna.module.{Module, ModuleInstance}
+import com.siigna.module.{Module}
 
 /**
  * Events the modules can use to signal to each other.
@@ -41,10 +41,18 @@ case object End extends ModuleEvent { val symbol = 'ModuleEnd }
 /**
  * An event that signals that a [[com.siigna.module.Module]] wishes to initialize and forward to the given module.
  * This can be used effectively by splitting functionality into different modules and invoking them when needed.
- * @param module  The module to initialize and forward to.
- * @param message  An optional message to the new module.
+ * <br>
+ * To load the module stored in the value ''module'' with the message "Hello World":
+ * {{{
+ *   Start(module, "Hello World")
+ * }}}
+ *
+ * @tparam T  The type of the message to pass on. Can be anything <: Any.
+ * @param module  The [[com.siigna.module.Module]] to load.
+ * @param message  A message to pass on of type T.
+ * @return A Start event referring to a [[com.siigna.module.Module]] and containing a message of type T.
  */
-final case class Start[T](module : ModuleInstance, message : T) extends ModuleEvent { val symbol = 'ModuleStart }
+final case class Start[T](module : Module, message : T) extends ModuleEvent { val symbol = 'ModuleStart }
 
 /**
  * Companion object for case class [[com.siigna.util.event.Start]]
@@ -52,32 +60,16 @@ final case class Start[T](module : ModuleInstance, message : T) extends ModuleEv
 object Start {
 
   /**
-   * Starts a [[com.siigna.module.ModuleInstance]] with the given module path and
-   * returns it, so the controller can load and the new module.
+   * Creates a Start event with the given [[com.siigna.module.Module]], so the controller can load the new module.
+   * <br>
+   * To load the module stored in the value ''module'':
+   * {{{
+   *   Start(module)
+   * }}}
    *
-   * @param module The [[com.siigna.module.ModuleInstance]] to create
-   * @return A [[com.siigna.module.ModuleInstance]]
+   * @param module The [[com.siigna.module.Module]] to create
+   * @return A [[com.siigna.module.Module]]
    */
-  def apply(module : ModuleInstance) : Start[Unit] = new Start[Unit](module, Unit)
-
-  /**
-   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
-   * returns it, so the controller can load and the new module.
-   *
-   * @param name  The name of the module
-   * @param classPath  The class path of the module
-   * @return A [[com.siigna.module.ModuleInstance]]
-   */
-  def apply(name : Symbol, classPath : String) : Start[_] = new Start(Module(name, classPath), Unit)
-
-  /**
-   * Starts a [[com.siigna.module.ModuleInstance]] with the given name and class-path and
-   * returns it, so the controller can load and the new module with the given message.
-   *
-   * @param name  The name of the module
-   * @param classPath  The class path of the module
-   * @return A [[com.siigna.module.ModuleInstance]]
-   */
-  def apply[T](name : Symbol, classPath : String, message : T) : Start[T] = new Start[T](Module(name, classPath), message)
+  def apply(module : Module) : Start[Unit] = new Start[Unit](module, Unit)
 
 }

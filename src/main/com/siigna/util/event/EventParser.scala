@@ -91,6 +91,9 @@ class EventParser {
   // A snap model for snapping to temporary or not-yet-created shapes
   private var snapModel : Seq[() => Traversable[Shape]] = Nil
 
+  // A snap model for snapping to temporary points
+  private var trackModel : Seq[Vector2D] = Nil
+
   /**
    * Clears any snap-modules that is not a part of the default snap set.
    */
@@ -173,7 +176,7 @@ class EventParser {
         val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel.flatMap(_())
 
         // Parse the track
-        var newEvent = track.parse(events, model)
+        var newEvent = track.parse(events, model, trackModel)
 
         // Parse the snap
         if(Snap.snapEnabled == true) {
@@ -221,6 +224,20 @@ class EventParser {
    */
   def trackTo(track : EventTrack) { this.track = track }
 
+  /**
+   * Tracks to a temporary point. The point gets destroyed along with the [[com.siigna.util.event.EventParser]] when
+   * the module it is attached to, dies.
+   * @param point  The point to track to.
+   */
+  def trackTo(point : Vector2D) { this.trackModel :+= point }
+
+  /**
+   * Tracks to a number of temporary points. The points gets destroyed along with the
+   * [[com.siigna.util.event.EventParser]] when the module it is attached to, dies.
+   * @param points  The points to track to.
+   */
+  def trackTo(points : Traversable[Vector2D]) { this.trackModel ++= points }
+
 }
 
 /**
@@ -248,10 +265,10 @@ abstract class EventSnap {
   /**
    * Parses an event by the given snap-settings.
    * @param event  The event to parse.
-   * @param model  A Model containing shapes the parser can choose to react to.
+   * @param shapes  A number of shapes the parser can choose to react to.
    * @return  An event that might have been changed by the parser to fit the parsing rules.
    */
-  def parse(event : Event, model : Traversable[Shape]) : Event
+  def parse(event : Event, shapes : Traversable[Shape]) : Event
 }
 
 /**
@@ -278,10 +295,11 @@ abstract class EventTrack {
   /**
    * Parses a list into a single event.
    * @param events  The events to parse.
-   * @param model  A Model containing shapes the tracker can choose to react to.
+   * @param shapes  A number of shapes the tracker can choose to react on.
+   * @param points  A number of points the tracker can choose to react on.
    * @return  A single event (representing the latest event in the given list) that might have been
    *          changed by the parser to fit the parsing rules.
    */
-  def parse(events : List[Event], model : Traversable[Shape]) : Event
+  def parse(events : List[Event], shapes : Traversable[Shape], points : Traversable[Vector2D]) : Event
 
 }

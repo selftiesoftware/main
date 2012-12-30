@@ -28,22 +28,21 @@ object ModuleLoader {
   protected var loader = new URLClassLoader(Array(), Controller.getClass.getClassLoader)
 
   /**
-   * The loaded classes.
+   * The loaded classes ordered in the name of the module packages and a map of class paths and classes (modules).
    */
-  protected lazy val modules = collection.mutable.Map[ModulePackage, collection.mutable.Map[Symbol, Class[_ <: Module]]]()
+  protected lazy val modules = collection.mutable.Map[Symbol, collection.mutable.Map[String, Class[_ <: Module]]]()
 
   /**
-   * A dummy module to use if the loading fails.
+   * The class path to siigna modules. Currently set to "com.siigna.module".
    */
-  val DummyModule : Module = new Module {
-    val stateMap : StateMap = Map('Start -> { case _ => End })
-  }
+  final val modulePath = "com.siigna.module"
 
   // Create a default packages
-  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", false))
-  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", false))
-  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
+  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
+  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
+  load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
@@ -65,39 +64,34 @@ object ModuleLoader {
   protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
 
   /**
-   * Attempts to load a [[com.siigna.module.Module]] by looking through all the available packages,
-   * starting with the ones loaded first. If the module could not be found we insert a dummy module
-   * to provide certainty that a module will be returned.
-   * @param name  The symbolic name of the module
-   * @param classPath  The class path, e. g. "com.siigna.module.base"
-   * @return  The module if it could be found, or a dummy module if no suitable entry existed.
+   * Attempts to load a [[com.siigna.module.Module]] by looking through the given package for resources at the given
+   * class path.
+   * @param packageName The symbolic name of the package in which the module belongs, e. g. 'base.
+   * @param classPath  The class path, e. g. "Menu".
+   * @return  Some[Module] if a module could be found, None otherwise
    */
-  def load(name : Symbol, classPath : String) : Module = {
-    var module : Option[Module] = None
-    val path = classPath + "." + name.name
-
-    modules.values.find(_.contains(name)) match {
-      case Some(map) => module = Some(classToModule(map(name)))
-      case _ => {
-        // Try to load the class from the loaded class definitions
-        try {
-          module = Some(classToModule(loader.loadClass(path)))
-        } catch {
-          case e : ClassNotFoundException => Log.debug("ModuleLoader: Class " + path + " could not be found.")
-          case e : InstantiationException => Log.debug("ModuleLoader: Class " + path + " could not be converted to a Module.")
-          case e : Exception => Log.debug("ModuleLoader: Error when loading module ", e)
-        }
+  def load(packageName : Symbol, classPath : String) : Option[Module] = {
+    modules.get(packageName) match {
+      case Some(p) => {
+        p.get(classPath).map { module => {
+            try {
+              classToModule(module)
+            } catch {
+              case e : ClassNotFoundException =>
+                Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be found.")
+              case e : InstantiationException =>
+                Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be converted to a Module.")
+              case e : Exception =>
+                Log.debug("ModuleLoader: Error when loading module ", e)
+            }
+          }
+        }.collect { case s : Module => s; }
+      }
+      case None => {
+        Log.warning("ModuleLoader: Package " + packageName + " not loaded.")
+        None
       }
     }
-
-    module match {
-      case Some(m) => m  // Gotcha!
-      case _ => {        // No module was found
-        Log.warning("ModuleLoader: Could not find module " + path + ", inserting dummy module instead.")
-        DummyModule
-      }
-    }
-
   }
 
   /**
@@ -110,7 +104,7 @@ object ModuleLoader {
    * @throws IOException  If something went wrong while trying to download the .jar file
    */
   def load(pack : ModulePackage) {
-    if (!modules.contains(pack)) {
+    if (!modules.contains(pack.name)) {
       try {
         val url = pack.toURL
 
@@ -124,7 +118,7 @@ object ModuleLoader {
         try {
           val c = loader.loadClass("com.siigna.module.ModuleInit")
           val m = classToModule(c)
-          Controller.initModule = new ModuleInstance('ModuleInit, m)
+          Controller.initModule = m
           Log.success("ModuleLoader: Reloaded init module.")
         } catch {
           // No module found
@@ -132,7 +126,7 @@ object ModuleLoader {
         }
 
         // Add to cache
-        modules += pack -> collection.mutable.Map()
+        modules += pack.name -> collection.mutable.Map()
 
         Log.success("ModuleLoader: Sucessfully loaded the module package " + pack)
       } catch {
@@ -155,7 +149,7 @@ object ModuleLoader {
    * @param pack  The package to unload.
    */
   def unload(pack : ModulePackage) {
-    modules -= pack
+    modules -= pack.name
     loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), Controller.getClass.getClassLoader)
   }
 
