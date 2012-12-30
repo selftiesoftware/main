@@ -16,7 +16,7 @@ import com.siigna.util.collection.Attributes
 import collection.immutable.BitSet
 
 //import com.siigna.util.dxf.{DXFValue, DXFSection}
-import com.siigna.util.geom.{Rectangle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D}
 
 /**
  * A Group that contains <b>references</b> to other shape and is thus only used as a container.
@@ -45,7 +45,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
     }
   }
 
-  def getPart(rect: Rectangle2D) = {
+  def getPart(rect: SimpleRectangle2D) = {
     var parts = Map[Int, ShapeSelector]()
 
     for (i <- 0 until shapes.size) {

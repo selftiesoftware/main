@@ -103,4 +103,5 @@ object Mode extends Enumeration {
   type Mode = Value
   val Production = Value(20004)
   val Testing    = Value(20005)
+  val Cleaning   = Value(20006)
 }

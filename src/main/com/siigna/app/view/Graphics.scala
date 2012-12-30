@@ -213,10 +213,10 @@ class Graphics(val g : Graphics2D)
    * Draws a rectangle from two points
    */
   def drawRectangle(p1 : Vector2D, p2 : Vector2D) {
-    val topLeft     = Vector(scala.math.min(p1.x, p2.x), scala.math.max(p1.y, p2.y))
-    val topRight    = Vector(scala.math.max(p1.x, p2.x), scala.math.max(p1.y, p2.y))
-    val bottomLeft  = Vector(scala.math.min(p1.x, p2.x), scala.math.min(p1.y, p2.y))
-    val bottomRight = Vector(scala.math.max(p1.x, p2.x), scala.math.min(p1.y, p2.y))
+    val topLeft     = Vector2D(scala.math.min(p1.x, p2.x), scala.math.max(p1.y, p2.y))
+    val topRight    = Vector2D(scala.math.max(p1.x, p2.x), scala.math.max(p1.y, p2.y))
+    val bottomLeft  = Vector2D(scala.math.min(p1.x, p2.x), scala.math.min(p1.y, p2.y))
+    val bottomRight = Vector2D(scala.math.max(p1.x, p2.x), scala.math.min(p1.y, p2.y))
 
     drawSegment(topLeft, topRight)
     drawSegment(topRight, bottomRight)

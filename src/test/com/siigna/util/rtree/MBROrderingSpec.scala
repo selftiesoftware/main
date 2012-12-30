@@ -8,10 +8,10 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-
+/*
 package com.siigna.util.rtree
 
-import com.siigna.util.geom.Rectangle2D
+import com.siigna.util.geom.SimpleRectangle2D
 
 import org.scalatest.{FunSpec, Spec}
 import org.scalatest.matchers.ShouldMatchers
@@ -21,8 +21,8 @@ import org.scalatest.matchers.ShouldMatchers
  */
 class MBROrderingSpec extends FunSpec with ShouldMatchers {
 
-  val r1 = Rectangle2D(0, 0, 10, 10);
-  val r2 = Rectangle2D(20, 20, 0, 0);
+  val r1 = SimpleRectangle2D(0, 0, 10, 10);
+  val r2 = SimpleRectangle2D(20, 20, 0, 0);
 
   describe("A MBROrdering") {
 
@@ -53,3 +53,4 @@ class MBROrderingSpec extends FunSpec with ShouldMatchers {
   }
 
 }
+*/

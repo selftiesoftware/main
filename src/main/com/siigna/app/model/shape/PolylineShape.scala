@@ -12,7 +12,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
-import collection.mutable.BitSet
+import collection.mutable
 import com.siigna.app.model.shape.PolylineShape.Selector
 
 /**
@@ -40,8 +40,6 @@ import com.siigna.app.model.shape.PolylineShape.Selector
  *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
  *                         in the PolylineShape.
  * </pre></p>
- *
- * TODO: Implement more robust geometry for PolylineShapes
  */
 @SerialVersionUID(1147278759)
 trait PolylineShape extends CollectionShape[BasicShape] {
@@ -135,11 +133,11 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     case EmptySelector => Seq(this)
   }
 
-  def getPart(rect: Rectangle2D) =
+  def getPart(rect: SimpleRectangle2D) =
     if (rect.contains(geometry.boundary)) {
       FullSelector
     } else if (rect.intersects(geometry.boundary)) {
-      val set = BitSet()
+      val set = mutable.BitSet()
       // Add the start point if it is inside the rectangle
       if (rect.contains(startPoint)) {
         set add 0
@@ -154,13 +152,12 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     } else EmptySelector
 
   def getPart(point: Vector2D) = { // TODO: Test this
-    val fullShapesSet = BitSet()
-    val partShapesSet = BitSet()
+    val fullShapesSet = mutable.BitSet()
+    val partShapesSet = mutable.BitSet()
 
     // Iterate the shapes to find the ones who matches
     for (i <- 0 until shapes.size) {
       var fullShapeSelected: Boolean = false
-      var pointSelected: Boolean = false
       //Check the individual shape parts for closeness to selection point:
       shapes(i).getPart(point) match {
         //If the whole shape would be within selection distance of selection point:
@@ -416,7 +413,7 @@ object PolylineShape {
    * @see CollectionShape
    */
   @SerialVersionUID(515068925)
-  case class Selector(xs : BitSet) extends ShapeSelector
+  case class Selector(xs : mutable.BitSet) extends ShapeSelector
 
   /**
    * Creates a PolylineShape connecting the given points with lines. If the first and last point are the same the
@@ -447,7 +444,7 @@ object PolylineShape {
 
   /**
    * Returns a closed PolylineShape with four lines, representing the given Rectangle.
-   * @param rect  The [[com.siigna.util.geom.Rectangle2D]] to construct the Polyline from.
+   * @param rect  The [[com.siigna.util.geom.SimpleRectangle2D]] to construct the Polyline from.
    */
   def apply(rect : Rectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
 

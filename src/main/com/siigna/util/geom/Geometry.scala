@@ -12,11 +12,14 @@
 package com.siigna.util.geom
 
 /**
- * An N-dimensional <code>Geometry</code>. Contains methods that's able to calculate different
- * geometrical properties, such as the distance to another geometry, intersection(s)
- * with another geometry, whether the geometry overlaps with another geometry etc.
- * TODO: Test everything!
+ * <p>
+ *   An N-dimensional <code>Geometry</code>. Contains methods that's able to calculate different
+ *   geometrical properties, such as the distance to another geometry, intersection(s)
+ *   with another geometry, whether the geometry overlaps with another geometry etc.
+ * </p>
+ *
  */
+// TODO: Test everything!
 trait Geometry {
 
   /**
@@ -81,12 +84,12 @@ trait Geometry2D extends Geometry {
   /**
    * The boundary of the shape.
    */
-  override def boundary : Rectangle2D
+  def boundary : Rectangle2D
 
   /**
    * The center of the shape.
    */
-  override def center = boundary.center
+  def center = boundary.center
 
   /**
    * Determines the distance from the geometry to an arc.
@@ -102,5 +105,48 @@ trait Geometry2D extends Geometry {
    * Returns the intersections between this and the given geometry, if any.
    */
   def intersections(geometry : Geometry2D) : Set[Vector2D]
+
+}
+
+/**
+ * A <code>Geometry</code> for basic geometries included by the <code>Polyline</code> class.
+ */
+sealed trait GeometryBasic
+
+/**
+ * A <code>Geometry</code> type for basic 2-dimensional geometries.
+ */
+trait GeometryBasic2D extends Geometry2D with GeometryBasic {
+
+  type T <: GeometryBasic2D
+
+}
+
+/**
+ * A <code>Geometry</code> that encloses (surrounds) a n-dimensional space. E. g. a <code>Rectangle</code>.
+ */
+sealed trait GeometryClosed {
+
+  /**
+   * Determines the enclosed area of the geometry.
+   */
+  def area : Double
+
+}
+
+/**
+ * A geometry that encloses a 2-dimensional space.
+ */
+trait GeometryClosed2D extends GeometryClosed with Geometry2D {
+
+  type T <: GeometryClosed2D
+
+  // TODO: Introduce expand
+
+  /**
+   * Examines whether a the given geometry is completely enclosed by this geometry.
+   * @return true if the given geometry is inside, false otherwise
+   */
+  def contains(geometry : Geometry2D) : Boolean
 
 }
