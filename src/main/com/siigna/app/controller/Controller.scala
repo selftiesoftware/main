@@ -44,7 +44,7 @@ object Controller extends Actor with EventController {
    * Call <code>initModule_=()</code> if you want to change the behavior.
    * @see [[com.siigna.module.Module]]
    */
-  def initModule : Option[Module] = None
+  def initModule : Option[Module] = _initModule
 
   /**
    * Sets the init module so every events from the Controller will be forwarded to the init module instead.
@@ -63,7 +63,7 @@ object Controller extends Actor with EventController {
    *   [[com.siigna.util.event.Event]]s. If an action is sent to the controller it is forwarded to the
    *   RemoteController to be passed on to the remote system and other clients. Actions can be sent as a
    *   <code>(Action, Boolean)</code> [[scala.Tuple2]]. The second boolean parameter indicates whether the action
-   *   should be undone (true) or simply executed(false).
+   *   should be undone (true) or simply executed (false).
    * </p>
    *
    * <p>

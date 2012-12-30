@@ -12,13 +12,12 @@
 package com.siigna.module
 
 import com.siigna.util.logging.Log
-import com.siigna.util.event.End
 import com.siigna.app.controller.Controller
 import java.io.FileNotFoundException
 import java.net.URLClassLoader
 
 /**
- * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.ModuleInstance]]s.
+ * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
  * This class loader loads and caches modules in Siigna.
  * @todo implement caching on a per package basis
  */
@@ -30,7 +29,7 @@ object ModuleLoader {
   /**
    * The loaded classes ordered in the name of the module packages and a map of class paths and classes (modules).
    */
-  protected lazy val modules = collection.mutable.Map[Symbol, collection.mutable.Map[String, Class[_ <: Module]]]()
+  protected lazy val modules = collection.mutable.Map[Symbol, collection.mutable.Map[String, Class[Module]]]()
 
   /**
    * The class path to siigna modules. Currently set to "com.siigna.module".
@@ -38,11 +37,11 @@ object ModuleLoader {
   final val modulePath = "com.siigna.module"
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
-  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
-  load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
-  load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
-  load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
+  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
+  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
   //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
@@ -73,19 +72,45 @@ object ModuleLoader {
   def load(packageName : Symbol, classPath : String) : Option[Module] = {
     modules.get(packageName) match {
       case Some(p) => {
-        p.get(classPath).map { module => {
-            try {
-              classToModule(module)
-            } catch {
-              case e : ClassNotFoundException =>
-                Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be found.")
-              case e : InstantiationException =>
-                Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be converted to a Module.")
-              case e : Exception =>
-                Log.debug("ModuleLoader: Error when loading module ", e)
+        // Retrieve the module class
+        val clazz = p.get(classPath) match {
+          // Return the class
+          case s : Some[Class[Module]] => s
+
+          // Search for the class in the package
+          case _ => try {
+            val path = modulePath + "." + packageName.name + "." + classPath
+            val c = loader.loadClass(path).asInstanceOf[Class[Module]]
+            modules(packageName) += classPath -> c
+            Some(c)
+          } catch {
+            case e : ClassNotFoundException => {
+              Log.debug("ModuleLoader: Class " + classPath + " could not be found in package " + packageName)
+              None
             }
           }
-        }.collect { case s : Module => s; }
+        }
+
+        // Attempt to initialize the class, if found
+        clazz match {
+          case Some(c) => {
+            try {
+              Some(classToModule(c))
+            } catch {
+              case e : InstantiationException => {
+                Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be converted to a Module.")
+                None
+              }
+              case e : Exception => {
+                Log.debug("ModuleLoader: Error when loading module ", e)
+                None
+              }
+            }
+          }
+
+          case _ => None
+        }
+
       }
       case None => {
         Log.warning("ModuleLoader: Package " + packageName + " not loaded.")
@@ -133,7 +158,7 @@ object ModuleLoader {
         case e : FileNotFoundException => Log.error("ModuleLoader: Could not find module package at URL: " + pack.toURL)
       }
     } else {
-      Log.info("ModuleLoader: Unnecessary loading of package " + pack + " - already in cache.")
+      Log.info("ModuleLoader: A package named '" + pack + "' has already been loaded.")
     }
   }
 

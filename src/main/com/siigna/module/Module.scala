@@ -144,13 +144,13 @@ trait Module {
    * The EventParser that parses the event-stream from the given snap- and
    * track-settings.
    */
-  final val eventParser : EventParser = new EventParser()
+  lazy val eventParser : EventParser = new EventParser()
 
   /**
    * An interface the module can utilize to communicate with the controller and
    * view.
    */
-  final var interface : ModuleInterface = new ModuleInterface(this)
+  lazy val interface : ModuleInterface = new ModuleInterface(this)
 
   /**
    * The current state of the module given by a symbol, representing the current node in the
@@ -162,7 +162,7 @@ trait Module {
    * Passes the given events on to the underlying module(s) and processes them as described in their state machine.
    * @param event  The events from the user
    */
-  final def apply(event : Event) : Option[ModuleEvent] = {
+  def apply(event : Event) : Option[ModuleEvent] = {
     // Parse the events
     val events = eventParser.parse(event)
 
@@ -187,7 +187,13 @@ trait Module {
    * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the cursor
    *          in the context of this module
    */
-  final def mousePosition = eventParser.mousePosition
+  def mousePosition = eventParser.mousePosition
+
+  /**
+   * Returns a new instance of the current module.
+   * @return  A new instance of the same module.
+   */
+  protected def newInstance : Module = getClass.newInstance().asInstanceOf[Module]
 
   /**
    * <p>The state map and "heart" of the module. This state map describes all the states that exists in the module
@@ -217,7 +223,7 @@ trait Module {
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
-  final private def parse(events : List[Event]) : Option[ModuleEvent] = {
+  protected def parse(events : List[Event]) : Option[ModuleEvent] = {
     // The event to return
     var moduleEvent : Option[ModuleEvent] = None
 
@@ -231,7 +237,7 @@ trait Module {
           f(events) match {
             // Forward to a module
             case s : Start[_] => {
-              // Try to load the module
+              // Try to load a new instance of the module
               _child = Some(s.module)
 
               // Start painting the module
@@ -273,7 +279,7 @@ trait Module {
    * @param events  The events to give to the child
    * @return Some[ModuleEvent] if something interesting occurred, None otherwise
    */
-  final private def parseChild(events : List[Event]) = {
+  protected def parseChild(events : List[Event]) = {
     // Stops the child
     def endChild(message : String = null){
       val name = child.get.toString
@@ -324,7 +330,7 @@ trait Module {
    * Returns the simple name of the module.
    * @return  The simple name of the module without package information.
    */
-  final override def toString = this.getClass.getSimpleName.replace("$", "")
+  override def toString = this.getClass.getSimpleName.replace("$", "")
 
 }
 

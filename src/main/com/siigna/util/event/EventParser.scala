@@ -58,7 +58,7 @@ class EventParser {
   var events : List[Event] = Nil
 
   // The most recent MouseMove or MouseDrag event received by the event-parser.
-  var mousePosition : Vector2D = null
+  var mousePosition : Vector2D = View.mousePosition
 
   /**
    * The margin of the graphical query done by the parser i. e. how large a space is included in the search
