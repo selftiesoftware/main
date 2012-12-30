@@ -13,8 +13,8 @@ package com.siigna.app
 
 import com.siigna.util.collection.AttributesLike
 import collection.mutable.{Map}
-import java.awt.{Color, Dimension}
 import com.siigna.util.Implicits._
+import java.awt.{Color, Dimension}
 
 /**
  * <p>
