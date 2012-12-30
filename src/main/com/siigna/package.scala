@@ -69,8 +69,6 @@ package object siigna extends com.siigna.util.Implicits {
   // ------------------ MODULE ------------------ //
   type Module         = com.siigna.module.Module
   val  Module         = com.siigna.module.Module
-  type ModuleInstance = com.siigna.module.ModuleInstance
-  val  ModuleInstance = com.siigna.module.ModuleInstance
   val  ModuleLoader   = com.siigna.module.ModuleLoader
   type ModulePackage  = com.siigna.module.ModulePackage
   val  ModulePackage  = com.siigna.module.ModulePackage

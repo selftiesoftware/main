@@ -71,13 +71,15 @@ object Track extends EventTrack {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
 
-      // Horizontal!
+      // Horizontal is closest to mouse position:
       if (horiz.distanceTo(View.mousePositionDrawing) < vert.distanceTo(View.mousePositionDrawing)) {
-        val closestPoint = horiz.closestPoint(View.mousePosition)
+        //The point on the horizontal line, that is closest to the mouse position:
+        val closestPoint = horiz.closestPoint(View.mousePositionDrawing)
         if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
         else                      Vector2D(p.x + dist, p.y)
-        // Vertical!
+        // Vertical is closest to mouse position:
       } else {
+        //The point on the vertical line, that is closest to the mouse position:
         val closestPoint = vert.closestPoint(View.mousePositionDrawing)
         if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
         else                      Vector2D(p.x, p.y + dist)
@@ -90,7 +92,7 @@ object Track extends EventTrack {
   }
 
   // Track on the basis of a maximum of two tracking points.
-  def parse(events : List[Event], model : Traversable[Shape]) : Event = {
+  def parse(events : List[Event], shapes : Traversable[Shape], points : Traversable[Vector2D]) : Event = {
     if(trackEnabled) {
       // Set isTracking to false
       isTracking = false
@@ -108,17 +110,22 @@ object Track extends EventTrack {
       }
 
       val m : Vector2D = View.mousePositionDrawing
-      var shape : Option[Shape] = None
 
-      //if a shape is in the process of being made (not in the model yet), use it too.
+      // Only compute the nearest point if we have one.
+      if (shapes.nonEmpty || points.nonEmpty) {
+        // Find the nearest point
+        val nearestPoint = if (shapes.nonEmpty) {
+          // Locate the nearest shape and point
+          val nearest = shapes.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
+          (nearest.geometry.vertices ++ points).reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
 
-      if (model.size > 0) {
+        } else {
+          // Locate the nearest point
+          points.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+        }
+
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
-
-          val nearest = model.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
-          shape = Some(nearest)
-          val nearestPoint = nearest.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           if (nearestPoint.distanceTo(m) < trackDistance) {
             if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
@@ -126,9 +133,6 @@ object Track extends EventTrack {
         }
         //if no tracking point is defined, set the first point.
         else {
-          val nearest = model.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
-          shape = Some(nearest)
-          val nearestPoint = nearest.geometry.vertices.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
           pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
         }
       }
@@ -152,8 +156,6 @@ object Track extends EventTrack {
             val distVert = vertical.distanceTo(p)
 
             if (distHori <= distVert && distHori < trackDistance) {
-              //print("distHori <= distVert")
-              //print("distHori < trackDistance")
               isTracking = true
               horizontal.closestPoint(p)
             } else if (distVert < distHori && distVert < trackDistance) {

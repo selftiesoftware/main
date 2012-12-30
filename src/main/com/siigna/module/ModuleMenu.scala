@@ -108,7 +108,7 @@ object ModuleMenu {
 
       // the loaded modules
       for (i <- 0 until modules.size) {
-        g draw moduleString(modules(i).name.name, i * 20 + 40, colorActive)
+        g draw moduleString(modules(i).name, i * 20 + 40, colorActive)
       }
 
     } else {
@@ -119,6 +119,6 @@ object ModuleMenu {
     }
 
     // Draw the currently active module package
-    modules.headOption.foreach(p => g draw TextShape(p.name.name,Vector2D(56,6),8).setAttribute("Color" -> colorActive))
+    modules.headOption.foreach(p => g draw TextShape(p.name,Vector2D(56,6),8).setAttribute("Color" -> colorActive))
   }
 }

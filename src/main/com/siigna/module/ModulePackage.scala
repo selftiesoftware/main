@@ -20,8 +20,8 @@ import com.siigna.util.logging.Log
 
 /**
  * <p>A ModulePackage is a number of modules grouped in a ''.jar'' file. This class represents the package and
- * its version number, title and location of that file and thus a means to retrieve it. A ModulePackage can
- * be transformed to a URL via the <code>toURL</code> method.</p>
+ * its version number, title and location of the .jar file and thus a means to retrieve it via a URL given in
+ * the <code>toURL</code> method.</p>
 
  * <p>The last two parameter ''domain'' and ''path'' are meant to be understood like a Uniform Resource Locator (URL)
  * where the domain comes first (fx ''www.example.org'') followed by the path (fx ''files/example.jar'').
