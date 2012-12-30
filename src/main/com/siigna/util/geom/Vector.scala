@@ -96,7 +96,8 @@ trait Vector extends Geometry {
   def transform(transformation : TransformationMatrix) : T
 
   /**
-   * Calculates the unit-vector of this.
+   * Calculates the unit-vector of this vector. If the length of the vector is <= [[scala.Double#MinPositiveValue]] we
+   * return a zero vector instead.
    */
   def unit : T
 
@@ -246,10 +247,7 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
    */
   def transform(transformation : TransformationMatrix) = transformation.transform(this)
 
-  /**
-   * Calculates the unit-vector of this.
-   */
-  def unit = Vector2D(this.x / this.length, this.y / this.length)
+  def unit = if (length <= Double.MinPositiveValue) Vector2D(0, 0) else Vector2D(this.x / this.length, this.y / this.length)
 
   def distanceTo(geometry : Geometry2D) = geometry.distanceTo(this)
 
