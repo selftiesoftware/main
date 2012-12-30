@@ -71,13 +71,15 @@ object Track extends EventTrack {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
 
-      // Horizontal!
+      // Horizontal is closest to mouse position:
       if (horiz.distanceTo(View.mousePositionDrawing) < vert.distanceTo(View.mousePositionDrawing)) {
-        val closestPoint = horiz.closestPoint(View.mousePosition)
+        //The point on the horizontal line, that is closest to the mouse position:
+        val closestPoint = horiz.closestPoint(View.mousePositionDrawing)
         if (closestPoint.x < p.x) Vector2D(p.x - dist, p.y)
         else                      Vector2D(p.x + dist, p.y)
-        // Vertical!
+        // Vertical is closest to mouse position:
       } else {
+        //The point on the vertical line, that is closest to the mouse position:
         val closestPoint = vert.closestPoint(View.mousePositionDrawing)
         if (closestPoint.y < p.y) Vector2D(p.x, p.y - dist)
         else                      Vector2D(p.x, p.y + dist)
