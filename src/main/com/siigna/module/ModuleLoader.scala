@@ -59,7 +59,7 @@ object ModuleLoader {
 
   //Niels' modules:
   //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cadSuite, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
 
 
