@@ -16,12 +16,18 @@ import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.app.model.shape.{PolylineShape}
 import com.siigna.app.view.{Graphics, View}
 import collection.parallel.immutable.{ParMap, ParIterable}
+import java.awt.Color
+import com.siigna.app.Siigna
 
 /**
  * A hook for parsing points that snaps to end-points of objects.
  */
 case object EndPoints extends EventSnap {
 
+  def snapBox (p : Vector2D) = {
+    val a = 0.3 * Siigna.selectionDistance
+    Array(Vector2D(p.x-a,p.y-a),Vector2D(p.x-a,p.y+a),Vector2D(p.x+a,p.y+a),Vector2D(p.x+a,p.y-a),Vector2D(p.x-a,p.y-a))
+  }
   var snapPoint : Option[Vector2D] = None
 
   def parse(event : Event, model : Traversable[Shape]) = event match {
@@ -63,7 +69,16 @@ case object EndPoints extends EventSnap {
   }
 
   override def paint(g : Graphics, t : TransformationMatrix) {
-    snapPoint.foreach(p => g.draw(CircleShape(p.transform(t), 10)))
+    def drawFill (fillShape: Array[Vector2D], color : Color, transformation : TransformationMatrix) {
+      val fillVector2Ds = fillShape.map(_.transform(transformation))
+      val fillScreenX = fillVector2Ds.map(_.x.toInt).toArray
+      val fillScreenY = fillVector2Ds.map(_.y.toInt).toArray
+      g setColor color
+      g.g.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
+    }
+
+    snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.10f),t))
+    //snapPoint.foreach(p => g.draw(CircleShape(p.transform(t), 5)))
   }
 
 }
