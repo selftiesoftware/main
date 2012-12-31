@@ -14,6 +14,7 @@ import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
 import collection.mutable
 import com.siigna.app.model.shape.PolylineShape.Selector
+import com.siigna.app.Siigna
 
 /**
  * <p>
@@ -151,79 +152,40 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       Selector(set)
     } else EmptySelector
 
-  def getPart(point: Vector2D) = { // TODO: Test this
-    val fullShapesSet = mutable.BitSet()
-    val partShapesSet = mutable.BitSet()
+  def getPart(point: Vector2D) = {
+    // Find the distance to all the points and get their index
+    val points = innerShapes.par.map(_.point.distanceTo(point)).+:(startPoint.distanceTo(point)).zipWithIndex
+    // Find the points that are within the selection distance
+    val closeVertices = points.filter(t => t._1 <= Siigna.selectionDistance).map(_._2)
 
-    // Iterate the shapes to find the ones who matches
-    for (i <- 0 until shapes.size) {
-      var fullShapeSelected: Boolean = false
-      //Check the individual shape parts for closeness to selection point:
-      shapes(i).getPart(point) match {
-        //If the whole shape would be within selection distance of selection point:
-        case FullSelector => { // Include both numbers
-          fullShapeSelected = true
-          //If nothing is selected yet: Add point "i" to the selection, and point i+1, as that will be the two points, that define the shape.
-          //If more than one whole segment is selected with click-selection (for instance if zoomed very far out),
-          //Select both segments
-          //TODO: In much later version: Make it possible to choose which shapes or points to select.
-          //if (set.size <= 1) {
-          fullShapesSet add i
-          fullShapesSet add (i + 1)
-          //}
-          //else { // ... but only allow one segment to be selected as max
-          //set.find(n => shapes(n).distanceTo(point) < shapes(i).distanceTo(point)) match {
-          //  case Some(n) => set remove n; set add i
-          //  case None => // Don't add the new shape since it's further away
-          //}
-          //}
-        }
-        //If a part of a line (a point on a line) has been selected, and no full shapes are selected,
-        //then this point should be selected (so that when you're zoomed so far out that you can't see the points
-        // properly, only full shapes are selected:
-        //TODO: In much later version: Make it possible to choose which shapes or points to select.
-        case LineShape.Selector(x) => {
-          if (partShapesSet.size > 0) {
-            //If another point has been selected, choose the one closest to the selection point:
-            shapes(i) match {
-              //To find the shapes' points, we need to make sure it is understood as a LineShape:
-              case s1: LineShape => {
-                //And we need to find the points in the formerly selected shape parts, to see which one is closest:
-                partShapesSet.foreach(n => {
-                  shapes(n) match {
-                    case s2: LineShape => {
-                      //Check which of the points is closest to the selection point:
-                      //If lineselector returned true (x), it is the first point in the shape, that has been marked for selection (i)
-                      //If false is returned, it is point two (i+1):
-                      if (s1.p1.distanceTo(point) < s2.p1.distanceTo(point) && x == true)
-                      { partShapesSet remove n; partShapesSet add i }
-                      else if (s1.p2.distanceTo(point) < s2.p1.distanceTo(point) && x == false)
-                      { partShapesSet remove n; partShapesSet add (i+1) }
-                    }
-                    case _ => false
-                  }
-                })
-              }
-              case _ => false
-            }
-          } else {
-            //If lineselector returned true, it is the first point in the shape, that has been marked for selection (i)
-            //If false is returned, it is point two (i+1):
-            partShapesSet add (if (x) i else i + 1)
-          }
-        }
-        case _ =>
+    // If only one point is close, then we return a single index (point)
+    if (closeVertices.size == 1) {
+      Selector(mutable.BitSet(closeVertices.head))
+    } else {
+      // If there are zero or several close points, we should check for selection of segments
+      val closeShapes = shapes.zipWithIndex.par.filter(_._1.distanceTo(point) <= Siigna.selectionDistance)
+
+      // If no shapes are close, nothing is selected
+      if (closeShapes.isEmpty) {
+        EmptySelector
+      } else {
+        // Otherwise we add the vertices of the close shapes
+        val closeShapeVertices = mutable.BitSet()
+        val isClosed = isInstanceOf[PolylineShape.PolylineShapeClosed]
+        closeShapes.foreach( t => {
+          closeShapeVertices add t._2
+
+          // Make sure not to duplicate points in a closed polylineShape
+          closeShapeVertices add (
+            if (isClosed && t._2 == innerShapes.size) 0
+            else t._2 + 1
+          )
+        })
+
+        // Lastly we take the intersection of the closes shapes and the vertices
+        Selector(closeShapeVertices)
       }
     }
-
-    // Return
-    if (fullShapesSet.size == shapes.size + 1) {
-      FullSelector
-    } else if (fullShapesSet.size > 0) {
-      Selector(fullShapesSet)
-    } else if (partShapesSet.size > 0) {
-      Selector(partShapesSet)
-    } else EmptySelector
   }
 
   def getShape(s : ShapeSelector) = s match {
@@ -350,7 +312,7 @@ object PolylineShape {
    */
   // TODO extend ClosedShape
   @SerialVersionUID(1672443115)
-  private case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+  case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) =
@@ -384,7 +346,7 @@ object PolylineShape {
    * @param attributes  The attributes to give the PolylineShape
    */
   @SerialVersionUID(1916049058)
-  private case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+  case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =

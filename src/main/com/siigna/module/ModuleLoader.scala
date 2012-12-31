@@ -24,7 +24,7 @@ import java.net.URLClassLoader
 object ModuleLoader {
 
   // The underlying class loader
-  protected var loader = new URLClassLoader(Array(), Controller.getClass.getClassLoader)
+  protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
 
   /**
    * The loaded classes ordered in the name of the module packages and a map of class paths and classes (modules).
@@ -39,7 +39,7 @@ object ModuleLoader {
   // Create a default packages
   load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
   load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
-  load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.9.2/nightly", "siigna-porter_2.9.2-nightly.jar", local = false))
+  //load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.9.2/nightly", "siigna-porter_2.9.2-nightly.jar", local = false))
   //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
@@ -105,7 +105,7 @@ object ModuleLoader {
             try {
               Some(classToModule(c))
             } catch {
-              case e : InstantiationException => {
+              case _ : InstantiationException | _ : ClassCastException => {
                 Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be converted to a Module.")
                 None
               }
@@ -185,7 +185,7 @@ object ModuleLoader {
    */
   def unload(pack : ModulePackage) {
     modules -= pack.name
-    loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), Controller.getClass.getClassLoader)
+    loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), this.getClass.getClassLoader)
   }
 
 }
