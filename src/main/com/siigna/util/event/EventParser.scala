@@ -269,6 +269,7 @@ abstract class EventSnap {
    * @return  An event that might have been changed by the parser to fit the parsing rules.
    */
   def parse(event : Event, shapes : Traversable[Shape]) : Event
+
 }
 
 /**
