@@ -163,7 +163,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       Selector(mutable.BitSet(closeVertices.head))
     } else {
       // If there are zero or several close points, we should check for selection of segments
-      val closeShapes = shapes.zipWithIndex.par.filter(_._1.distanceTo(point) <= Siigna.selectionDistance)
+      val closeShapes = shapes.zipWithIndex.par.map(t => t._1.distanceTo(point) -> t._2).filter(_._1 <= Siigna.selectionDistance)
 
       // If no shapes are close, nothing is selected
       if (closeShapes.isEmpty) {
@@ -172,7 +172,15 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         // Otherwise we add the vertices of the close shapes
         val closeShapeVertices = mutable.BitSet()
         val isClosed = isInstanceOf[PolylineShape.PolylineShapeClosed]
-        closeShapes.foreach( t => {
+
+        // Fetch the shapes
+        val xs = if (closeShapes.size <= 2) {
+          closeShapes.toArray
+        } else {
+          closeShapes.toArray.sortBy(t => t._1).take(1)
+        }
+
+        xs.foreach( t => {
           closeShapeVertices add t._2
 
           // Make sure not to duplicate points in a closed polylineShape
@@ -182,7 +190,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
           )
         })
 
-        // Lastly we take the intersection of the closes shapes and the vertices
+        // Lastly we return
         Selector(closeShapeVertices)
       }
     }
