@@ -12,15 +12,17 @@
 package com.siigna.util.event
 
 import com.siigna.app.model.shape._
-import com.siigna.util.geom.{Vector2D}
+import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.app.model.shape.{PolylineShape}
-import com.siigna.app.view.View
+import com.siigna.app.view.{Graphics, View}
 import collection.parallel.immutable.{ParMap, ParIterable}
 
 /**
  * A hook for parsing points that snaps to end-points of objects.
  */
 case object EndPoints extends EventSnap {
+
+  var snapPoint : Option[Vector2D] = None
 
   def parse(event : Event, model : Traversable[Shape]) = event match {
     case MouseDown(point, a, b)  => MouseDown(snap(point, model), a, b)
@@ -48,9 +50,20 @@ case object EndPoints extends EventSnap {
       val closestPoint = res.reduceLeft(closestTwo)
 
       if (closestPoint.distanceTo(point) * View.zoom <= 10) {
+        snapPoint = Some(closestPoint)
         closestPoint.transform(View.drawingTransformation)
-      } else q
-    } else q
+      } else {
+        snapPoint = None
+        q
+      }
+    } else {
+      snapPoint = None
+      q
+    }
+  }
+
+  override def paint(g : Graphics, t : TransformationMatrix) {
+    snapPoint.foreach(p => g.draw(CircleShape(p.transform(t), 10)))
   }
 
 }
