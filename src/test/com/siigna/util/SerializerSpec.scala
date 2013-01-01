@@ -11,18 +11,24 @@
 
 package com.siigna.util
 
-import org.scalatest.FunSpec
+import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
-import java.io.{ObjectInputStream, ByteArrayInputStream, ObjectOutputStream, ByteArrayOutputStream}
+import java.io._
 import com.siigna._
+import app.model.action.CreateShape
+import app.model.action.RemoteAction
 import app.model.action.{CreateShape, RemoteAction}
+import app.model.Model
+import app.model.shape.CircleShape
 import app.model.{Model, RemoteModel}
 import java.awt.Color
+import scala.util.Random
+import scala.Some
 
 /**
  * Tests the Serializer.
  */
-class SerializerSpec extends FunSpec with ShouldMatchers {
+class SerializerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
   private def in(o : Array[Byte]) = {
     val b = new ByteArrayInputStream(o)
@@ -31,7 +37,13 @@ class SerializerSpec extends FunSpec with ShouldMatchers {
 
   private def out(o : Any) = {
     val b = new ByteArrayOutputStream()
-    new ObjectOutputStream(b).writeObject(action)
+    new ObjectOutputStream(b).writeObject(o)
+    b.toByteArray
+  }
+
+  private def out(o : Externalizable) = {
+    val b = new ByteArrayOutputStream()
+    o.writeExternal(new ObjectOutputStream(b))
     b.toByteArray
   }
 
@@ -66,11 +78,15 @@ class SerializerSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("can write a remote model to a byte array") {
-      Serializer.writeDrawing(remoteModel) should equal (remoteBytes)
+      val b1 = Serializer.writeDrawing(remoteModel)
+      b1 should equal (remoteBytes)
     }
 
     it ("can read a remote model from a byte array") {
-      Serializer.readDrawing(remoteBytes) should equal (remoteModel)
+      val d = Serializer.readDrawing(remoteBytes)
+
+      d.model should equal (remoteModel.model)
+      d.attributes should equal (remoteModel.attributes)
     }
 
     it ("can fail when serializing a null model") {
@@ -83,6 +99,52 @@ class SerializerSpec extends FunSpec with ShouldMatchers {
       evaluating {
         Serializer.readDrawing(null)
       } should produce[NullPointerException]
+    }
+
+    it("Should be able to marshal and unmarshal a drawing with attributes"){
+
+      given("A new RemoteModel")
+      val rmodel = new RemoteModel()
+
+      given("A random attribute name")
+      val attrName = Random.nextString(20)
+
+      given("A random attribute value")
+      val attrVal = Random.nextInt
+
+      when("We set some random attribute on it")
+      rmodel.setAttribute(attrName,attrVal)
+
+      when("We marshal it")
+      val data = Serializer.writeDrawing(rmodel)
+
+      when("we unmarshal it")
+      val drawing = Serializer.readDrawing(data)
+
+      then("The same attributes should be set")
+      drawing.attributes.get(attrName) match {
+
+        case None => assert(false)
+
+        case Some(attrVal) => assert(true)
+
+        case _ => assert(false)
+      }
+    }
+
+    it("Should be able to marshal and unmarshal a drawing with actions performed"){
+
+      given("A new remote model")
+      val rmodel = new RemoteModel()
+
+      given("A create action")
+      val action = CreateShape(1, CircleShape(new Vector2D(0,0), new Vector2D(0,0)))
+
+      when("We execute the action on the remote model's model")
+      val newModel = action execute rmodel.model
+
+      then("It should contain a shape")
+      assert(newModel.shapes.get(1) != None)
     }
 
   }
