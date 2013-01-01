@@ -178,16 +178,16 @@ object Track extends EventTrack {
 
   override def paint(g : Graphics, t : TransformationMatrix) {
     def paintOnePoint(p : Vector2D) {
-
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
+      val m = View.mousePositionDrawing
 
       //draw the vertical tracking guide
-      if (vertical.distanceTo(View.mousePosition) < trackDistance)
+      if (vertical.distanceTo(m) < trackDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(View.mousePosition) < trackDistance)
+      if (horizontal.distanceTo(m) < trackDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
     }
 
@@ -200,15 +200,15 @@ object Track extends EventTrack {
       val m = View.mousePositionDrawing
 
       //draw the vertical tracking guide
-      if (vertical1.distanceTo(m) < trackDistance && vertical1.distanceTo(m) < vertical2.distanceTo(m))
+      if (vertical1.distanceTo(m) < trackDistance && vertical1.distanceTo(m) <= vertical2.distanceTo(m))
         g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
-      if (vertical2.distanceTo(m) < trackDistance && vertical2.distanceTo(m) < vertical1.distanceTo(m))
+      if (vertical2.distanceTo(m) < trackDistance && vertical2.distanceTo(m) <= vertical1.distanceTo(m))
         g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal1.distanceTo(m) < trackDistance && horizontal1.distanceTo(m) < horizontal2.distanceTo(m))
+      if (horizontal1.distanceTo(m) < trackDistance && horizontal1.distanceTo(m) <= horizontal2.distanceTo(m))
         g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
-      if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) < horizontal1.distanceTo(m))
+      if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) <= horizontal1.distanceTo(m))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 
