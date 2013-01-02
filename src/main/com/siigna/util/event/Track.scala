@@ -50,9 +50,6 @@ object Track extends EventTrack {
   // Get method
   var isTracking: Boolean = false
 
-  // Get the track distance
-  val trackDistance = Siigna.double("trackDistance").getOrElse(9.0)
-
   // Code to get the horizontal guide from a point
   def horizontalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x + 1, p.y))
 
@@ -132,13 +129,13 @@ object Track extends EventTrack {
 
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
-          if (nearestPoint.distanceTo(m) < trackDistance) {
-            if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
+          if (nearestPoint.distanceTo(m) < Siigna.trackDistance) {
+            if  (!(pointOne.get.distanceTo(m) < Siigna.trackDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
           }
         } else {
           //if no tracking point is defined, set the first point.
-          val i = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
+          val i = if (nearestPoint.distanceTo(m) < Siigna.trackDistance) Some(nearestPoint) else None
           pointOne = i
         }
       }
@@ -165,10 +162,10 @@ object Track extends EventTrack {
             val distHori = horizontal.distanceTo(p)
             val distVert = vertical.distanceTo(p)
 
-            if (distHori <= distVert && distHori < trackDistance) {
+            if (distHori <= distVert && distHori < Siigna.trackDistance) {
               isTracking = true
               horizontal.closestPoint(p)
-            } else if (distVert < distHori && distVert < trackDistance) {
+            } else if (distVert < distHori && distVert < Siigna.trackDistance) {
               isTracking = true
               vertical.closestPoint(p)
             } else {
@@ -192,11 +189,11 @@ object Track extends EventTrack {
       val vertical   = verticalGuide(p)
       val m = View.mousePositionDrawing
       //draw the vertical tracking guide
-      if (vertical.distanceTo(m) < trackDistance)
+      if (vertical.distanceTo(m) < Siigna.trackDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal.distanceTo(m) < trackDistance)
+      if (horizontal.distanceTo(m) < Siigna.trackDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
     }
 
@@ -209,15 +206,15 @@ object Track extends EventTrack {
       val m = View.mousePositionDrawing
 
       //draw the vertical tracking guide
-      if (vertical1.distanceTo(m) < trackDistance && vertical1.distanceTo(m) <= vertical2.distanceTo(m))
+      if (vertical1.distanceTo(m) < Siigna.trackDistance && vertical1.distanceTo(m) <= vertical2.distanceTo(m))
         g draw LineShape(vertical1.p1, vertical1.p2, attributes).transform(t)
-      if (vertical2.distanceTo(m) < trackDistance && vertical2.distanceTo(m) <= vertical1.distanceTo(m))
+      if (vertical2.distanceTo(m) < Siigna.trackDistance && vertical2.distanceTo(m) <= vertical1.distanceTo(m))
         g draw LineShape(vertical2.p1, vertical2.p2, attributes).transform(t)
 
       //draw the horizontal tracking guide
-      if (horizontal1.distanceTo(m) < trackDistance && horizontal1.distanceTo(m) <= horizontal2.distanceTo(m))
+      if (horizontal1.distanceTo(m) < Siigna.trackDistance && horizontal1.distanceTo(m) <= horizontal2.distanceTo(m))
         g draw LineShape(horizontal1.p1, horizontal1.p2, attributes).transform(t)
-      if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) <= horizontal1.distanceTo(m))
+      if (horizontal2.distanceTo(m) < Siigna.trackDistance && horizontal2.distanceTo(m) <= horizontal1.distanceTo(m))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 

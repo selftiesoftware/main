@@ -148,6 +148,13 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   }
 
   /**
+   * The track-distance.
+   */
+  def trackDistance : Double = {
+    int("trackDistance").get / View.zoom
+  }
+
+  /**
    * Set's the current cursor of Siigna. Overrides the current value.
    */
   def setCursor(cursor : Cursor) {
