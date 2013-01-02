@@ -42,7 +42,7 @@ import com.siigna.app.model.shape.Shape
  *      [[com.siigna.module.Module]] - The module trait
  */
 class EventParser {
-
+  println("INITIATING EVENTPARSER")
   // The default snap-modules.
   protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
 
@@ -56,6 +56,8 @@ class EventParser {
    * @return  A list of parsed events
    */
   var events : List[Event] = Nil
+
+  var test = List[Vector2D](Vector2D(0,0))
 
   // The most recent MouseMove or MouseDrag event received by the event-parser.
   var mousePosition : Vector2D = View.mousePosition
@@ -89,10 +91,13 @@ class EventParser {
   private var snap = defaultSnap
 
   // A snap model for snapping to temporary or not-yet-created shapes
-  private var snapModel : Seq[() => Traversable[Shape]] = Nil
+  var snapModel : Traversable[Shape] = Nil
 
   // A snap model for snapping to temporary points
-  private var trackModel : Seq[Vector2D] = Nil
+  var trackModel : List[Vector2D] = {
+    println("resetting trackModel")
+    Nil
+  }
 
   /**
    * Clears any snap-modules that is not a part of the default snap set.
@@ -156,6 +161,9 @@ class EventParser {
    * </ol>
    */
   def parse(event : Event) : List[Event] = {
+    if(!trackModel.isEmpty) test = trackModel
+
+    println("TREWT: "+test)
     // Store the event as the head of the events (max 10)
     events = (event :: events).take(maxNumberOfEvents)
 
@@ -173,11 +181,13 @@ class EventParser {
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
-        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel.flatMap(_())
+        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel
 
+        //println("model: "+model)
+        //println("snapenabled?: "+Snap.snapEnabled)
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)
-
+        //println("newEvent; "+newEvent)
         // Parse the snap
         if(Snap.snapEnabled == true) {
           snap foreach {a => newEvent = a.parse(newEvent, model)}
@@ -190,7 +200,9 @@ class EventParser {
 
     // Set (the snapped) mouse position
     events match {
-      case (e : MouseMove) :: tail => mousePosition = e.position
+      case (e : MouseMove) :: tail => {
+        mousePosition = e.position
+      }
       case (e : MouseDrag) :: tail => mousePosition = e.position
       case _ =>
     }
@@ -217,7 +229,7 @@ class EventParser {
    * Drawing to the dynamic snap method.
    * @param shape  The function returning the shape the event parser should snap to.
    */
-  def snapTo(shape : () => Traversable[Shape]) { snapModel :+= shape }
+  //def snapTo(shape : Traversable[Shape]) { snapModel = shape }
 
   /**
    * Track to a given track module.

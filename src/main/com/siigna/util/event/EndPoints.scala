@@ -23,13 +23,12 @@ import com.siigna.app.Siigna
  * A hook for parsing points that snaps to end-points of objects.
  */
 case object EndPoints extends EventSnap {
+  var snapPoint : Option[Vector2D] = None
 
   def snapBox (p : Vector2D) = {
     val a = 0.3 * Siigna.selectionDistance
     Array(Vector2D(p.x-a,p.y-a),Vector2D(p.x-a,p.y+a),Vector2D(p.x+a,p.y+a),Vector2D(p.x+a,p.y-a),Vector2D(p.x-a,p.y-a))
   }
-  var snapPoint : Option[Vector2D] = None
-
   def parse(event : Event, model : Traversable[Shape]) = event match {
     case MouseDown(point, a, b)  => MouseDown(snap(point, model), a, b)
     case MouseDrag(point, a, b)  => MouseDrag(snap(point, model), a, b)
@@ -54,7 +53,6 @@ case object EndPoints extends EventSnap {
         case _ => point
       })
       val closestPoint = res.reduceLeft(closestTwo)
-
       if (closestPoint.distanceTo(point) * View.zoom <= 10) {
         snapPoint = Some(closestPoint)
         closestPoint.transform(View.drawingTransformation)
@@ -63,7 +61,7 @@ case object EndPoints extends EventSnap {
         q
       }
     } else {
-      snapPoint = None
+      //snapPoint = None
       q
     }
   }
@@ -76,9 +74,8 @@ case object EndPoints extends EventSnap {
       g setColor color
       g.g.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
     }
-
-    snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.10f),t))
-    //snapPoint.foreach(p => g.draw(CircleShape(p.transform(t), 5)))
+    //show the snappoints
+    snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
   }
 
 }

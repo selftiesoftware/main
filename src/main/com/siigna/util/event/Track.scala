@@ -96,7 +96,6 @@ object Track extends EventTrack {
     if(trackEnabled) {
       // Set isTracking to false
       isTracking = false
-
       // Get mouse event
       // The events has been unchecked since this match cannot occur if the event-list is empty
       val (x : Vector2D, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
@@ -211,12 +210,13 @@ object Track extends EventTrack {
       if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) <= horizontal1.distanceTo(m))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
+    if(trackEnabled == true) {
+      //PAINT TRACKING POINT ONE
+      if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
 
-    //PAINT TRACKING POINT ONE
-    if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
-
-    //PAINT BOTH TRACKING POINTS, IF THEY ARE THERE:::
-    if (pointTwo.isDefined) paintTwoPoints(pointOne.get, pointTwo.get)
+      //PAINT BOTH TRACKING POINTS, IF THEY ARE THERE:::
+      if (pointTwo.isDefined) paintTwoPoints(pointOne.get, pointTwo.get)
+    }
   }
 
 }
