@@ -152,6 +152,8 @@ trait Module {
    */
   lazy val interface : ModuleInterface = new ModuleInterface(this)
 
+  val count = 0
+
   /**
    * The current state of the module given by a symbol, representing the current node in the
    * [[com.siigna.module.Module#stateMap]]. Every module always starts in 'Start.

@@ -25,6 +25,8 @@ object Track extends EventTrack {
   //evaluate if the shape exists (used to clear the track points if the shape is deleted):
   var activeShape : Map[Int, Shape] = Map()
 
+  var counter = 0
+
   /**
    * A flag to toggle track on or off.
    */
@@ -140,13 +142,15 @@ object Track extends EventTrack {
           pointOne = i
         }
       }
-
       //**** evaluate if the shape exists (used to clear the track points if the shape is deleted:
       if(pointOne.isDefined) {
-        if(!shapes.isEmpty) trackShapes = shapes
+        if(!shapes.isEmpty) {
+          counter = 0
+          trackShapes = shapes
+        } else counter = counter + 1 //TODO: OUUUH. OUCH! Veery ugly hack to prevent guides from resetting..
 
         activeShape = Drawing(pointOne.get,1)
-        if(activeShape == Map() && trackShapes.isEmpty) {
+        if(activeShape == Map() && counter > 6) {
           pointOne = None
           if(pointTwo.isDefined) pointTwo = None
         }
@@ -168,8 +172,6 @@ object Track extends EventTrack {
               isTracking = true
               vertical.closestPoint(p)
             } else {
-              //TODO: a hack to prevent the trackShapes from resetting constantly if done in **** is to reset them here.
-              trackShapes = Traversable[Shape]()
               p
             }
           }

@@ -73,6 +73,7 @@ object Controller extends Actor with EventController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
+
     // Start RemoteController
     RemoteController.start()
 
@@ -93,6 +94,7 @@ object Controller extends Actor with EventController {
         case event : Event => {
           // Send the event on to the modules!
           initModule.foreach(_ apply event)
+
         }
 
         // Exit
