@@ -138,13 +138,13 @@ object Track extends EventTrack {
       }
 
       //evaluate if the shape exists (used to clear the track points if the shape is deleted:
-      /*if(pointOne.isDefined) {
+      if(pointOne.isDefined) {
         activeShape = Drawing(pointOne.get,1)
-        if(activeShape == Map()) {
+        if(activeShape == Map() && shapes.isEmpty) {
           pointOne = None
           if(pointTwo.isDefined) pointTwo = None
         }
-      }*/
+      }
 
       //Snap the event
       val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
