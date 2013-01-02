@@ -41,6 +41,10 @@ object Track extends EventTrack {
   // Define the attributes of the track lines
   protected val attributes = Attributes("Infinite" -> true, color)
 
+  //a placeholder for shapes not yet in the model.
+  //TODO: hack because the TrackModel is reset constantly.
+  var trackShapes = Traversable[Shape]()
+
   // Get method
   var isTracking: Boolean = false
 
@@ -137,10 +141,12 @@ object Track extends EventTrack {
         }
       }
 
-      //evaluate if the shape exists (used to clear the track points if the shape is deleted:
+      //**** evaluate if the shape exists (used to clear the track points if the shape is deleted:
       if(pointOne.isDefined) {
+        if(!shapes.isEmpty) trackShapes = shapes
+
         activeShape = Drawing(pointOne.get,1)
-        if(activeShape == Map() && shapes.isEmpty) {
+        if(activeShape == Map() && trackShapes.isEmpty) {
           pointOne = None
           if(pointTwo.isDefined) pointTwo = None
         }
@@ -162,6 +168,8 @@ object Track extends EventTrack {
               isTracking = true
               vertical.closestPoint(p)
             } else {
+              //TODO: a hack to prevent the trackShapes from resetting constantly if done in **** is to reset them here.
+              trackShapes = Traversable[Shape]()
               p
             }
           }
