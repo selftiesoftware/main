@@ -91,7 +91,7 @@ class EventParser {
   private var snap = defaultSnap
 
   // A snap model for snapping to temporary or not-yet-created shapes
-  var snapModel : Traversable[Shape] = Nil
+  var snapModel : () => Traversable[Shape] = () => Nil
 
   // A snap model for snapping to temporary points
   var trackModel : List[Vector2D] = {
@@ -161,9 +161,6 @@ class EventParser {
    * </ol>
    */
   def parse(event : Event) : List[Event] = {
-    if(!trackModel.isEmpty) test = trackModel
-
-    println("TREWT: "+test)
     // Store the event as the head of the events (max 10)
     events = (event :: events).take(maxNumberOfEvents)
 
@@ -181,13 +178,11 @@ class EventParser {
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
-        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel
+        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel()
 
-        //println("model: "+model)
-        //println("snapenabled?: "+Snap.snapEnabled)
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)
-        //println("newEvent; "+newEvent)
+
         // Parse the snap
         if(Snap.snapEnabled == true) {
           snap foreach {a => newEvent = a.parse(newEvent, model)}
@@ -225,11 +220,11 @@ class EventParser {
   def snapTo(snap : EventSnap) { this.snap = this.snap :+ snap }
 
   /**
-   * Snaps to the given function, returning a shape. Useful for adding shapes that has not yet been saved in the
-   * Drawing to the dynamic snap method.
+   * Snaps to the given function, returning a number of shapes. Useful for adding shapes that has not yet been saved
+   * in the [[com.siigna.app.model.Drawing]] to the dynamic snap method.
    * @param shape  The function returning the shape the event parser should snap to.
    */
-  //def snapTo(shape : Traversable[Shape]) { snapModel = shape }
+  def snapTo(shape : () => Traversable[Shape]) { snapModel = shape }
 
   /**
    * Track to a given track module.

@@ -129,21 +129,21 @@ object Track extends EventTrack {
             if  (!(pointOne.get.distanceTo(m) < trackDistance)) pointTwo = pointOne
             pointOne = Some(nearestPoint)
           }
-        }
-        //if no tracking point is defined, set the first point.
-        else {
-          pointOne = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
+        } else {
+          //if no tracking point is defined, set the first point.
+          val i = if (nearestPoint.distanceTo(m) < trackDistance) Some(nearestPoint) else None
+          pointOne = i
         }
       }
 
       //evaluate if the shape exists (used to clear the track points if the shape is deleted:
-      if(pointOne.isDefined) {
+      /*if(pointOne.isDefined) {
         activeShape = Drawing(pointOne.get,1)
         if(activeShape == Map()) {
           pointOne = None
           if(pointTwo.isDefined) pointTwo = None
         }
-      }
+      }*/
 
       //Snap the event
       val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
@@ -210,6 +210,7 @@ object Track extends EventTrack {
       if (horizontal2.distanceTo(m) < trackDistance && horizontal2.distanceTo(m) <= horizontal1.distanceTo(m))
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
+
     if(trackEnabled == true) {
       //PAINT TRACKING POINT ONE
       if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
