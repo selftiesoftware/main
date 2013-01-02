@@ -57,8 +57,6 @@ class EventParser {
    */
   var events : List[Event] = Nil
 
-  var test = List[Vector2D](Vector2D(0,0))
-
   // The most recent MouseMove or MouseDrag event received by the event-parser.
   var mousePosition : Vector2D = View.mousePosition
 
@@ -94,10 +92,7 @@ class EventParser {
   var snapModel : () => Traversable[Shape] = () => Nil
 
   // A snap model for snapping to temporary points
-  var trackModel : List[Vector2D] = {
-    println("resetting trackModel")
-    Nil
-  }
+  var trackModel : List[Vector2D] = Nil
 
   /**
    * Clears any snap-modules that is not a part of the default snap set.

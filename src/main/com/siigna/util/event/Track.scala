@@ -112,6 +112,7 @@ object Track extends EventTrack {
 
       // Only compute the nearest point if we have one.
       if (shapes.nonEmpty || points.nonEmpty) {
+
         // Find the nearest point
         val nearestPoint = if (shapes.nonEmpty) {
           // Locate the nearest shape and point
@@ -147,8 +148,10 @@ object Track extends EventTrack {
 
       //Snap the event
       val mousePosition = (pointOne :: pointTwo :: Nil).foldLeft(m)((p : Vector2D, opt : Option[Vector2D]) => {
+        println("AA")
         opt match {
           case Some(snapPoint : Vector2D) => {
+            println("got snappoint: "+snapPoint)
             val horizontal = horizontalGuide(snapPoint)
             val vertical = verticalGuide(snapPoint)
             val distHori = horizontal.distanceTo(p)
@@ -180,7 +183,6 @@ object Track extends EventTrack {
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
       val m = View.mousePositionDrawing
-
       //draw the vertical tracking guide
       if (vertical.distanceTo(m) < trackDistance)
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
