@@ -65,8 +65,8 @@ object Track extends EventTrack {
   def getPointFromDistance(dist : Double) : Option[Vector2D] = {
 
     /** Get the best fitting line (horizontal or vertical)
-     * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
-     */
+      * @return A line and a boolean indicating if the line is horizonal (false) or vertical (true)
+      */
     def getTrackPoint(p : Vector2D) : Vector2D = {
       val horiz = horizontalGuide(p)
       val vert  = verticalGuide(p)
@@ -118,11 +118,12 @@ object Track extends EventTrack {
           // Locate the nearest shape and point
           val nearest = shapes.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
           (nearest.geometry.vertices ++ points).reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+
         } else {
           // Locate the nearest point
           points.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
         }
-        println(nearestPoint.distanceTo(m))
+
         //if a tracking point is defined, and the mouse is placed on top of a second point
         if (pointOne.isDefined) {
           if (nearestPoint.distanceTo(m) < trackDistance) {
@@ -135,7 +136,7 @@ object Track extends EventTrack {
           pointOne = i
         }
       }
-      println("PT ONE; "+pointOne)
+
       //evaluate if the shape exists (used to clear the track points if the shape is deleted:
       /*if(pointOne.isDefined) {
         activeShape = Drawing(pointOne.get,1)
@@ -211,11 +212,8 @@ object Track extends EventTrack {
     }
 
     if(trackEnabled == true) {
-      println("pt one is defined? "+pointOne.isDefined)
       //PAINT TRACKING POINT ONE
-      if (pointOne.isDefined && pointTwo.isEmpty ) {
-        paintOnePoint(pointOne.get)
-      }
+      if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
 
       //PAINT BOTH TRACKING POINTS, IF THEY ARE THERE:::
       if (pointTwo.isDefined) paintTwoPoints(pointOne.get, pointTwo.get)

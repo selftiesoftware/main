@@ -42,7 +42,6 @@ import com.siigna.app.model.shape.Shape
  *      [[com.siigna.module.Module]] - The module trait
  */
 class EventParser {
-  println("INITIATING EVENTPARSER")
   // The default snap-modules.
   protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
 
