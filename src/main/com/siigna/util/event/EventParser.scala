@@ -161,7 +161,6 @@ class EventParser {
    */
   def parse(event : Event) : List[Event] = {
 
-    println("TREWT: "+snapModel)
     // Store the event as the head of the events (max 10)
     events = (event :: events).take(maxNumberOfEvents)
 
@@ -179,7 +178,6 @@ class EventParser {
       events = {
         // Perform 2D query and add any custom additions
         val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel
-        println("istracking; "+isTracking)
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)
         //println("newEvent; "+newEvent)
