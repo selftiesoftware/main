@@ -95,7 +95,6 @@ class EventParser {
 
   // A snap model for snapping to temporary points
   var trackModel : List[Vector2D] = {
-    println("resetting trackModel")
     Nil
   }
 
@@ -161,9 +160,8 @@ class EventParser {
    * </ol>
    */
   def parse(event : Event) : List[Event] = {
-    if(!trackModel.isEmpty) test = trackModel
 
-    println("TREWT: "+test)
+    println("TREWT: "+snapModel)
     // Store the event as the head of the events (max 10)
     events = (event :: events).take(maxNumberOfEvents)
 
@@ -177,14 +175,11 @@ class EventParser {
       case (e : MouseDrag) :: (_ : MouseDrag) :: tail => e :: tail
       case _ => events
     }
-
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
         val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel
-
-        //println("model: "+model)
-        //println("snapenabled?: "+Snap.snapEnabled)
+        println("istracking; "+isTracking)
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)
         //println("newEvent; "+newEvent)

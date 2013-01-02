@@ -40,15 +40,12 @@ import com.siigna.util.event.Track
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
-<<<<<<< HEAD
    * The active color and line weight.
    */
   var activeColor = new Color(0.00f, 0.00f, 0.00f, 1.00f)
   var activeLineWeight = 0.2
 
   /**
-=======
->>>>>>> 324c2ea98e77185a7aa67b50ace693ebcd02ca3c
    * The active display, if any.
    */
   protected var display : Option[Display] = None
@@ -122,6 +119,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * modules ending, module-information being garbage collected and what not.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
+
     // Paint the tracking - if needed
     Track.paint(graphics, transformation)
 
