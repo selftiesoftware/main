@@ -113,7 +113,7 @@ trait AttributesLike {
       try {
         Some(typeConversion(self(attributeName)))
       } catch {
-        case _ => None
+        case _ : Throwable => None
       }
 
   /**

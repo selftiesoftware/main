@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
  * to Share — to copy, distribute and transmit the work,
  * to Remix — to adapt the work
@@ -25,7 +26,6 @@ trait Ellipse {
   /**
    * Calculates the distance from a ellipse to a point.
    */
-/** Todo...
   def distanceToPoint(point : Vector) =
   {
     // Creates a transformation matrix that translates (pans) and rotates the
@@ -105,7 +105,6 @@ trait Ellipse {
       newtonIteration(guess)
     }
   }
-  */
   
 }
 
@@ -125,10 +124,7 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   val center = (f1 + f2)/2
 
   val a = ((f1 - p).length + (f2 - p).length)/2
-  val b = try { p.y / scala.math.sqrt(scala.math.abs(1 - (p.x / a) * (p.x / a))) } catch {
-    case e => //Log.warning("The two focal points are the same, parsing a very very small number.")
-      0.00000001
-  }
+  val b = p.y / scala.math.sqrt(scala.math.abs(1 - (p.x / a) * (p.x / a)))
   val e = (center - f1).length / a
 
   def boundary = Rectangle2D(Vector2D(center.x - b, center.y - a), Vector2D(center.x + b, center.y + a))
@@ -141,7 +137,6 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
   /**
    * Calculates the distance from a ellipse to a point.
    */
-  /** Todo...
   def distanceToPoint(point : Vector) =
   {
     // Creates a transformation matrix that translates (pans) and rotates the
@@ -221,7 +216,6 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
       newtonIteration(guess)
     }
   }
-    */
 
   /**
    * Examines whether the ellipse intersects with a segment
@@ -233,4 +227,4 @@ case class Ellipse2D(f1 : Vector2D, f2 : Vector2D, p : Vector2D) extends Ellipse
    */
   def intersections(geom : Geometry2D) = throw new UnsupportedOperationException("Ellipse: Not yet implemented with " + geom)
 
-}
+}*/

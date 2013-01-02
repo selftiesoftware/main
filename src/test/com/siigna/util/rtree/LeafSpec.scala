@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free 
  * to Share — to copy, distribute and transmit the work, 
  * to Remix — to adapt the work
@@ -8,7 +9,6 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-                  /*
 package com.siigna.util.rtree
 
 import org.scalatest.matchers.ShouldMatchers
@@ -17,7 +17,7 @@ import com.siigna.util.geom.SimpleRectangle2D
 
 /**
  * A test for the Leaf clas.
- *
+ */
 class LeafSpec extends FunSpec with ShouldMatchers {
 
   val elem1 = (10020, SimpleRectangle2D(15.23, 17.30, 89.3502, 123.273))

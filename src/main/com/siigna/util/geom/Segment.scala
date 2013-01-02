@@ -157,7 +157,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       val g           = p1 - circle.center
       val determinant = (f * g) * (f * g) - (f * f) * (g * g - circle.radius * circle.radius)
 
-      val t =
+      val t : Set[Double] =
         if (determinant < 0)
           Set()
         else if (determinant > 0)
@@ -167,7 +167,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
           Set(-(f * g) / (f * f))
 
       // Filter out the points, that isn't on the line-segment.
-      t.map(f * _ + p1).filter( point =>
+      t.map(x => f * x + p1).filter( point =>
         ((p2 - p1) * (point - p1) >= 0 &&
           (p1 - p2) * (point - p2) >= 0)
       )
@@ -183,6 +183,17 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 }
 
 object Segment2D {
+
+  /**
+   * Creates a [[com.siigna.util.geom.Segment2D]] from the two coordinates, written in pairs.
+   * @param x1  The smallest x-coordinate
+   * @param y1  The smallest y-coordinate
+   * @param x2  The largest x-coordinate
+   * @param y2  The largest y-coordinate
+   * @return  An instance of a [[com.siigna.util.geom.Segment2D]]
+   */
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) =
+    new Segment2D(Vector2D(x1, y1), Vector2D(x2, y2))
 
   /**
    * Transforms a list of points into a list of lines, that doesn't

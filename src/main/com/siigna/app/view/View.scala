@@ -228,7 +228,7 @@ object View {
       Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
     } catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      case e => Log.error("View: Unable to draw Drawing: "+e)
+      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
     }
 
     // Draw the boundary shape
@@ -262,7 +262,7 @@ object View {
       Siigna.paint(graphics, transformation)
     } catch {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
-      case e => Log.error("View: Unknown error while painting the modules.", e)
+      case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
     }
   }
 

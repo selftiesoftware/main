@@ -15,10 +15,7 @@ import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
 import java.io._
 import com.siigna._
-import app.model.action.CreateShape
-import app.model.action.RemoteAction
 import app.model.action.{CreateShape, RemoteAction}
-import app.model.Model
 import app.model.shape.CircleShape
 import app.model.{Model, RemoteModel}
 import java.awt.Color

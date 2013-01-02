@@ -84,7 +84,7 @@ class SiignaApplet extends Applet {
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
       }
-    } catch { case _ => Log.info("Applet: No user or drawind-id found.")}
+    } catch { case _ : Throwable => Log.info("Applet: No user or drawind-id found.")}
 
     // Set the layout
     setLayout(new BorderLayout())

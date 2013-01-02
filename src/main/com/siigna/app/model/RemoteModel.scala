@@ -11,14 +11,10 @@
 
 package com.siigna.app.model
 
-import action.Action
 import java.io._
 
 import com.siigna.util.logging.Log
 import com.siigna.util.collection.{HasAttributes, Attributes}
-import reflect.Type
-import scala.reflect
-import shape.Shape
 
 /**
  * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
@@ -40,13 +36,13 @@ class RemoteModel(var model : Model, var attributes : Attributes) extends HasAtt
     try {
       model = in.readObject().asInstanceOf[Model]
     } catch {
-      case e => Log.error("Model: Failed to read shapes from data.", e); fail = true
+      case e : Throwable => Log.error("Model: Failed to read shapes from data.", e); fail = true
     }
     
     try {
       attributes = in.readObject().asInstanceOf[Attributes]
     } catch {
-      case e => Log.error("Model: Failed to read attribtues from data.", e); fail = true
+      case e : Throwable => Log.error("Model: Failed to read attribtues from data.", e); fail = true
     }
 
     if (!fail) Log.success("Model: Sucessfully read data.")

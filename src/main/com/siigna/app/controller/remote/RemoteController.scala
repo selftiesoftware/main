@@ -117,7 +117,6 @@ protected[controller] object RemoteController extends Actor {
         }
       }
     } catch {
-      case e : Error => Log.info("Remote: Shutting down on error: " + e)
       case e : Exception => Log.error("Remote: Unknown error, shutting down.", e)
     }
   }
@@ -226,7 +225,7 @@ protected[controller] object RemoteController extends Actor {
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
-          case e => Log.error("Remote: Error when reading data from server", e)
+          case e : Throwable => Log.error("Remote: Error when reading data from server", e)
         }
       }
     }

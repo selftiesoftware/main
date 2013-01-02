@@ -68,7 +68,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
   def intersects(geom : Geometry2D) = throw new UnsupportedOperationException("Line: Intersects not yet implemented with " + geom)
 
-  def intersections(geom : Geometry2D) = geom match {
+  def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
     /**
      * Returns a list of points, defined as the intersection(s) between the
      * line and the circle.
@@ -78,7 +78,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       val g           = p1 - circle.center
       val determinant = (f * g) * (f * g) - (f * f) * (g * g - circle.radius * circle.radius)
 
-      val t =
+      val t : Set[Double] =
         if (determinant < 0)
           Set()
         else if (determinant > 0)

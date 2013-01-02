@@ -15,7 +15,7 @@ import com.siigna.module.{Module, ModuleLoader}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import remote.RemoteController
-import actors.Actor
+import scala.actors.Actor
 import com.siigna.app.Siigna
 
 /**

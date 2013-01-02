@@ -39,7 +39,7 @@ class RichColorString(string : String) {
       try {
         new Color(Integer parseInt(value substring(1), 16))
       } catch {
-        case ex => throw new IllegalArgumentException("Expected a color, but got: " + value, ex)
+        case ex : Throwable => throw new IllegalArgumentException("Expected a color, but got: " + value, ex)
       }
     else
       throw new IllegalArgumentException("Expected a color, but got: " + value)

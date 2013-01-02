@@ -11,9 +11,8 @@
 
 package com.siigna.app.model
 
-import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, ComplexRectangle2D}
+import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
 import shape.Shape
-import com.siigna.app.view.View
 import com.siigna.app.Siigna
 
 
@@ -47,9 +46,7 @@ trait SpatialModel[Key, Value <: Shape] {
    */
 
   def apply(query : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
-    shapes.filter((s : (Key, Value)) => {
-      s._2.geometry.distanceTo(query) <= radius
-    })
+    shapes.filter(_._2.geometry.distanceTo(query) <= radius)
   }
 
   /**
@@ -57,8 +54,14 @@ trait SpatialModel[Key, Value <: Shape] {
    * elements in the model.
    * @return  The minimum-bounding rectangle
    */
-  def mbr : SimpleRectangle2D =
-    shapes.foldLeft[SimpleRectangle2D](SimpleRectangle2D(0, 0, 0, 0))((a : SimpleRectangle2D, b : (Key, Value)) => a.expand(b._2.geometry.boundary))
+  def mbr : Rectangle2D =
+    if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
+    else if (shapes.size == 1) shapes.head._2.geometry.boundary
+    else {
+      shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : Rectangle2D, b : (Key, Value)) => {
+        a.expand(b._2.geometry.boundary)
+      })
+    }
 
 
 }

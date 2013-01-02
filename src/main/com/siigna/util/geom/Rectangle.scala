@@ -307,7 +307,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     /**
      * Examines whether an ellipse is within the four boundaries
      * of a rectangle.
-     */
+     *
     case e : Ellipse2D => {
       if (e == null) {
         false
@@ -328,7 +328,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
 
         (contains(topLeft) && contains(topRight) && contains(bottomLeft) && contains(bottomRight))
       }
-    }
+    }*/
 
     /**
      * Examines whether a line is within (or on top of) the four boundaries
@@ -404,11 +404,11 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * Expands this rectangle to include another rectangle.
      */
     case rect : SimpleRectangle2D => {
-      val newTopLeft     = Vector2D(scala.math.min(topLeft.x, rect.topLeft.x),
-        scala.math.max(topLeft.y, rect.topLeft.y))
-      val newBottomRight = Vector2D(scala.math.max(bottomRight.x, rect.bottomRight.x),
-        scala.math.min(bottomRight.y, rect.bottomRight.y))
-      SimpleRectangle2D(newTopLeft.x, newTopLeft.y, newBottomRight.x, newBottomRight.y)
+      val xMin = scala.math.min(topLeft.x, rect.topLeft.x)
+      val yMin = scala.math.min(bottomRight.y, rect.bottomRight.y)
+      val xMax = scala.math.max(bottomRight.x, rect.bottomRight.x)
+      val yMax = scala.math.max(topLeft.y, rect.topLeft.y)
+      new SimpleRectangle2D(xMin, yMin, xMax, yMax)
     }
 
     case g => throw new UnsupportedOperationException("Rectangle: Expand not yet implemented for " + g)

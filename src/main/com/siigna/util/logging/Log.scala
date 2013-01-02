@@ -13,8 +13,17 @@ package com.siigna.util.logging
 
 /**
  * A simple log object used to log messages to the console.
+ *
+ * Log-levels are as follows:
+ * <ol>
+ *  <li>Error - Critical errors, preventing code from being executed.</li>
+ *  <li>Warning - Unexpected behaviour causing the program to choose alternate actions.</li>
+ *  <li>Info - Information about code being passed.</li>
+ *  <li>Debug - Debug-information. Note: Can log quite a bit of lines.</li>
+ *  <li>Success - Reports when something succeeds... Sometimes.</li>
+ * </ol>
  */
-object Log extends scala.util.logging.ConsoleLogger {
+object Log {
 
   val ERROR   = 1
   val WARNING = 2
@@ -24,19 +33,10 @@ object Log extends scala.util.logging.ConsoleLogger {
   val ALL     = ERROR + WARNING + INFO + SUCCESS
   
   /**
-   * The debug-level. Levels are following:
-   * <ol>
-   *  <li>Error - Critical errors, preventing code from being executed.</li>
-   *  <li>Warning - Unexpected behaviour causing the program to choose alternate actions.</li>
-   *  <li>Info - Information about code being passed.</li>
-   *  <li>Debug - Debug-information. Note: Can log quite a bit of lines.</li>
-   *  <li>Success - Reports when something succeeds... Sometimes.</li>
-   * </ol>
-   *
-   * TODO: Use twitter's util-logging instead of inventing the wheel damnit!
+   * The debug-level.
    */
-  var level : Int = ERROR + WARNING + INFO + SUCCESS + DEBUG
-  //var level : Int = INFO
+  var level : Int = ERROR + WARNING
+
   /**
    * The line-number.
    */
@@ -55,7 +55,7 @@ object Log extends scala.util.logging.ConsoleLogger {
          message.toString + " " + refs.mkString(", ") + errorString
       } else message.toString + errorString
 
-      log(lineNumber.toString + ": " + text)
+      println(lineNumber.toString + ": " + text)
     }
   }
 

@@ -83,7 +83,7 @@ object Drawing extends ActionModel
     // If the format is too small for the least proportion, then up the size
     // one format.
     // TODO: Optimize!
-    //TODO: prevent margin from multiplying as well. It should be fixed regardless of paper scale.
+    //TODO: prevent margin from multuttiplying as well. It should be fixed regardless of paper scale.
     val list = List[Double](2, 2.5, 2)
     var take = 0 // which element to "take" from the above list
     while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
