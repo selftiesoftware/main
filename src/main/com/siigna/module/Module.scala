@@ -175,7 +175,7 @@ trait Module {
     }
   }
 
-/**
+  /**
    * The child (if any) this module is forwarding to.
    * @return  Some[Module] if the module is forwarding, None otherwise.
    */
