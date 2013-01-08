@@ -120,7 +120,10 @@ object View {
     def confine(coordinate : Double, lower : Double, higher : Double) : Double =
       if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
 
-    //
+    // 1: objekt initialiseringer top left bottom left rect offscreen bd
+    // 2: afhænger af drawing boundary (fixed) så snart man laver en shape/ action  - kan caches
+
+
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
     val topLeft           = Vector2D(confine(offScreenBoundary.topLeft.x, 0, width),
                                    confine(offScreenBoundary.topLeft.y, 0, height))

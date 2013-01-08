@@ -67,6 +67,9 @@ trait ActionModel extends SelectableModel with HasAttributes {
       // Execute in the model
       model = action.execute(model)
 
+      //redraw boundary
+
+
       // Store the action if it is not a VolatileAction
       action match {
         case v : VolatileAction => // Do nothing here!
