@@ -28,6 +28,7 @@ import com.siigna.util.logging.Log
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
+import javax.management.relation.RelationNotFoundException
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -48,9 +49,22 @@ trait ActionModel extends SelectableModel with HasAttributes {
   protected var localIdStream = Stream.iterate(-1)(i => if (i - 1 > 0) -1 else i - 1).iterator
 
   /**
+   * Listeners that receives events whenever an action is executed, undone or redone.
+   */
+  protected var listeners : Seq[() => Unit] = Nil
+
+  /**
    * The underlying immutable model of Siigna.
    */
   protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
+
+  /**
+   * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
+   * @param listener  The function to be executed whenever an action is executed, undone or redone.
+   */
+  def addActionListener(listener : () => Unit) {
+    listeners :+= listener
+  }
   
   /**
    * <p>Executes an action, lists it as executed and clears the undone stack to make way for new actions
@@ -74,6 +88,9 @@ trait ActionModel extends SelectableModel with HasAttributes {
           model = new Model(model.shapes, model.executed.+:(action), Seq())
         }
       }
+
+      // Notify listeners
+      notifyListeners()
 
       // Send it to the server
       if (remote) Controller ! action
@@ -105,6 +122,13 @@ trait ActionModel extends SelectableModel with HasAttributes {
   def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(getId -> _).toMap
 
   /**
+   * Notifies the listeners that an action has been executed, undone or redone.
+   */
+  protected def notifyListeners() {
+    listeners.foreach(_())
+  }
+
+  /**
    * Redo the latest undone action by re-executing it on the model.
    */
   def redo() {
@@ -120,6 +144,9 @@ trait ActionModel extends SelectableModel with HasAttributes {
         // Execute the event and add it to the executed list
         model = action.execute(model)
         model = new Model(model.shapes, model.executed.+:(action), undone)
+
+        // Notify listeners
+        notifyListeners()
 
         // Send to server
         Controller ! action
@@ -167,6 +194,9 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
       // Undo it
       model = action.undo(model)
+
+      // Notify listeners
+      notifyListeners()
 
       // Send the action to server with the undone flag set to true!
       if (remote) Controller ! (action, true)
