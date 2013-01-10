@@ -84,7 +84,7 @@ object ModuleMenu {
   def onMouseDown(point : Vector2D) {
     Log.info("ModuleMenu got point " + point)
   }
-
+   /*
   def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
     val highlight = isHighlighted(View.mousePosition)
 
@@ -121,4 +121,5 @@ object ModuleMenu {
     // Draw the currently active module package
     modules.headOption.foreach(p => g draw TextShape(p.name,Vector2D(56,6),8).setAttribute("Color" -> colorActive))
   }
+  */
 }

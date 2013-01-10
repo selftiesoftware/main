@@ -1,0 +1,1572 @@
+"Name";"Instance count";"Size (bytes)"
+"com.siigna.util.geom.Vector2D";168584;5394688
+"java.lang.Object[ ]";48553;2731880
+"int[ ]";36300;20245656
+"scala.collection.immutable.$colon$colon";27967;671208
+"scala.collection.immutable.HashMap[ ]";23346;1321216
+"char[ ]";23340;2669256
+"scala.collection.immutable.HashMap$HashTrieMap";23303;559272
+"scala.collection.mutable.WrappedArray$ofRef";22766;546384
+"scala.collection.TraversableLike$$anonfun$map$1";21585;518040
+"scala.collection.generic.GenTraversableFactory$GenericCanBuildFrom";21563;345008
+"scala.collection.mutable.ArrayBuffer";21046;505104
+"com.siigna.util.geom.SimpleRectangle2D";20221;1294144
+"java.lang.String";18426;589632
+"scala.collection.immutable.HashMap$HashMap1";16449;526368
+"scala.collection.generic.Growable$$anonfun$$plus$plus$eq$1";12488;199808
+"scala.collection.mutable.ListBuffer";12429;397728
+"com.siigna.util.geom.Segment2D";12360;395520
+"com.siigna.app.model.shape.LineShape";12356;494240
+"com.siigna.util.collection.Attributes$$anonfun$$init$$1";11720;187520
+"com.siigna.util.collection.Attributes";11718;281232
+"com.siigna.util.geom.Vector2D[ ]";11616;279224
+"scala.collection.mutable.MapBuilder";11494;275856
+"scala.collection.TraversableOnce$$anonfun$toMap$1";11089;266136
+"scala.runtime.RichInt";10793;259032
+"com.siigna.app.model.shape.BasicShape[ ]";10721;257464
+"scala.collection.immutable.Range";10718;428720
+"com.siigna.app.model.shape.PolylineShape$PolylineShapeOpen$$anonfun$shapes$2";10703;256872
+"com.siigna.util.geom.CollectionGeometry2D";10401;249624
+"com.siigna.util.geom.CollectionGeometry2D$$anonfun$1";10400;166400
+"com.siigna.app.model.shape.CollectionShape$$anonfun$geometry$1";10400;166400
+"com.siigna.util.geom.CollectionGeometry2D$$anonfun$boundary$2";10197;163152
+"com.siigna.util.geom.CollectionGeometry2D$$anonfun$boundary$1";10197;163152
+"short[ ]";8025;530104
+"scala.Tuple2";7576;181824
+"scala.Some";6234;99744
+"java.lang.Object";5605;89680
+"byte[ ]";5026;9441632
+"java.util.concurrent.ConcurrentHashMap$HashEntry";4512;144384
+"java.awt.geom.Point2D$Double";4505;144160
+"java.util.HashMap$Entry";4225;135200
+"java.lang.Class";3808;3752512
+"java.util.HashMap$Entry[ ]";3328;279040
+"java.awt.geom.Rectangle2D$Float";3283;105056
+"java.lang.StringBuilder";2655;63720
+"java.util.HashMap";2564;123072
+"java.awt.geom.Point2D$Float";2553;61272
+"java.util.HashMap$Values";2477;39632
+"scala.collection.mutable.StringBuilder";2457;39312
+"java.util.NoSuchElementException";2455;78560
+"java.util.LinkedHashMap$Entry";2278;91120
+"com.jprofiler.agent.util.a.i";1952;31232
+"java.util.Hashtable$Entry";1768;56576
+"java.awt.geom.AffineTransform";1760;126720
+"java.lang.Double";1575;37800
+"sun.font.DelegatingShape";1212;19392
+"com.siigna.util.collection.AttributesLike$$anonfun$boolean$1";1127;18032
+"com.siigna.util.collection.AttributesLike$$anonfun$color$1";1056;16896
+"java.lang.Integer";933;14928
+"float[ ]";913;43160
+"com.jprofiler.agent.util.a.d";894;28608
+"java.lang.ref.SoftReference";876;35040
+"com.siigna.util.geom.TransformationMatrix";865;13840
+"com.siigna.util.collection.AttributesLike$$anonfun$double$1";856;13696
+"com.siigna.app.model.shape.PolylineLineShape";825;13200
+"java.util.LinkedHashMap";758;42448
+"com.siigna.util.collection.AttributesLike$$anonfun$transformationMatrix$1";725;11600
+"com.siigna.app.view.Graphics$$anonfun$2";725;11600
+"com.siigna.app.view.Graphics$$anonfun$3";725;11600
+"com.siigna.app.model.shape.PolylineShape$PolylineShapeOpen";711;17064
+"java.lang.String[ ]";683;22640
+"sun.font.FontStrikeDesc";658;26320
+"com.siigna.app.model.shape.PolylineShape$$anonfun$transform$1";623;9968
+"sun.font.FontLineMetrics";607;14568
+"sun.font.TextLineComponent[ ]";579;20072
+"java.util.concurrent.ConcurrentHashMap$HashEntry[ ]";565;54384
+"java.util.concurrent.locks.ReentrantLock$NonfairSync";546;17472
+"java.util.HashMap$EntrySet";544;8704
+"java.util.Vector";532;17024
+"java.lang.ref.WeakReference";530;16960
+"java.util.Hashtable$Entry[ ]";504;37464
+"java.util.Hashtable";494;23712
+"java.util.concurrent.ConcurrentHashMap$Segment";493;19720
+"java.lang.reflect.Method";484;38720
+"scala.concurrent.forkjoin.ForkJoinPool$WaitQueueNode";481;15392
+"com.jprofiler.agent.triggers.nanoxml.XMLElement";442;21216
+"java.lang.ref.Finalizer";438;17520
+"java.lang.reflect.Field";427;30744
+"java.lang.Class[ ]";415;7512
+"java.awt.BasicStroke";410;16400
+"java.lang.Float";408;6528
+"java.lang.Short";405;6480
+"scala.collection.immutable.Map$Map1";393;9432
+"com.siigna.app.view.Graphics$$anonfun$draw$4";390;6240
+"com.siigna.app.view.Graphics$$anonfun$draw$3";390;6240
+"sun.reflect.annotation.AnnotationInvocationHandler";377;9048
+"$Proxy3";369;5904
+"scala.collection.mutable.DefaultEntry";362;8688
+"java.util.WeakHashMap$Entry";358;14320
+"com.siigna.app.view.Graphics$$anonfun$draw$7";317;7608
+"scala.collection.immutable.Map$Map2";307;9824
+"scala.Tuple2[ ]";302;9624
+"scala.collection.mutable.HashTable$$anon$1";300;7200
+"scala.collection.immutable.Map$Map3";298;11920
+"scala.collection.immutable.Map$Map4";298;14304
+"scala.collection.immutable.HashMap";297;4752
+"scala.collection.mutable.HashMap$$anonfun$foreach$1";297;4752
+"scala.collection.generic.GenMapFactory$MapCanBuildFrom";297;4752
+"java.lang.Long";274;6576
+"com.siigna.util.geom.TransformationMatrix$$anonfun$scale$1";265;6360
+"com.siigna.util.geom.TransformationMatrix$$anonfun$translate$1";265;4240
+"java.util.ArrayList";260;6240
+"com.siigna.util.event.ModifierKeys";248;3968
+"scala.collection.immutable.Iterable[ ][ ]";239;9560
+"scala.Symbol";229;3664
+"java.awt.font.FontRenderContext";227;7264
+"java.awt.Font";224;16128
+"sun.font.AttributeValues";222;21312
+"sun.font.CoreMetrics";221;14144
+"sun.font.GlyphLayout$SDCache$SDKey";218;5232
+"scala.actors.MQueueElement";214;5136
+"java.lang.reflect.Constructor";204;14688
+"java.util.zip.ZStreamRef";202;4848
+"com.siigna.util.geom.CollectionGeometry2D$$anonfun$distanceTo$1";202;3232
+"com.siigna.util.geom.CollectionGeometry2D$$anonfun$distanceTo$2";202;3232
+"java.util.zip.Inflater";202;6464
+"sun.java2d.loops.Blit";199;9552
+"scala.collection.immutable.HashMap$HashTrieMap$$anon$1";197;7880
+"sun.font.StandardGlyphVector$GlyphStrike";196;6272
+"sun.font.StandardGlyphVector";196;15680
+"sun.font.ExtendedTextSourceLabel";193;10808
+"java.awt.font.TextLayout";193;10808
+"com.siigna.app.model.shape.TextShape$$anonfun$fontSize$1";193;3088
+"sun.font.TextLabelFactory";193;7720
+"java.awt.font.TextLine$TextLineMetrics";193;6176
+"sun.font.StandardTextSource";193;10808
+"sun.font.AttributeMap";193;6176
+"java.awt.font.TextLine";193;13896
+"javax.management.ImmutableDescriptor";189;4536
+"java.awt.Shape[ ]";186;7920
+"sun.java2d.loops.ScaledBlit";163;7824
+"com.siigna.util.geom.Circle2D";156;6240
+"java.lang.ref.PhantomReference";154;4928
+"scala.collection.immutable.Stream$$anonfun$iterate$1";152;3648
+"com.siigna.app.model.action.CreateShape";152;3648
+"scala.collection.immutable.Stream$Cons";152;3648
+"sun.java2d.DefaultDisposerRecord";146;4672
+"scala.runtime.ObjectRef";143;2288
+"java.io.ObjectStreamField";140;5600
+"com.siigna.app.model.shape.ArcShape";139;6672
+"com.siigna.util.geom.Arc2D";139;15568
+"com.sun.jmx.mbeanserver.MXBeanMapping[ ]";135;2536
+"double[ ]";135;6256
+"java.util.TreeMap$Entry";134;5360
+"com.sun.jmx.mbeanserver.ConvertingMethod";128;4096
+"java.lang.Character";128;2048
+"scala.concurrent.forkjoin.LinkedTransferQueue$QNode";126;4032
+"scala.actors.Reactor$$anonfun$seq$1";125;3000
+"scala.actors.Combinators$$anonfun$loop$1";125;3000
+"java.awt.Rectangle";125;4000
+"scala.actors.ActorTask";117;5616
+"scala.collection.parallel.AdaptiveWorkStealingForkJoinTasks$TaskImpl";113;3616
+"long[ ]";112;21576
+"scala.actors.remote.Locator";110;2640
+"java.awt.Color";105;3360
+"char[ ][ ]";104;2520
+"java.net.Inet4Address";101;3232
+"java.lang.ref.ReferenceQueue$Lock";100;1600
+"java.net.DualStackPlainSocketImpl";100;8000
+"java.net.SocksSocketImpl";100;11200
+"java.util.concurrent.atomic.AtomicInteger";99;1584
+"scala.collection.mutable.WrappedArray$ofDouble";98;1568
+"java.lang.ref.ReferenceQueue";98;3136
+"java.lang.reflect.Method[ ]";98;4488
+"scala.collection.TraversableOnce$$anonfun$foldLeft$1";98;2352
+"com.siigna.app.model.SpatialModel$$anonfun$mbr$1";98;1568
+"java.net.Socket";98;3136
+"com.siigna.util.event.MouseMove";97;3104
+"scala.actors.Channel";97;1552
+"java.io.FileDescriptor";95;3040
+"scala.collection.immutable.Vector";94;5264
+"scala.actors.scheduler.ForkJoinScheduler$$anon$2";93;1488
+"java.util.logging.LogManager$LoggerWeakRef";93;4464
+"com.jprofiler.agent.probe.structures.o";92;3680
+"scala.runtime.RichDouble";92;4416
+"java.util.concurrent.locks.AbstractQueuedSynchronizer$Node";91;2912
+"java.math.BigInteger";89;3560
+"sun.java2d.loops.MaskBlit";88;4224
+"scala.actors.remote.DelegateActor$$anonfun$act$1$$anonfun$apply$1";85;1360
+"scala.actors.Channel$$anonfun$receiveWithin$1";85;2040
+"scala.actors.Actor$$anon$5";85;3400
+"scala.actors.ActorCanReply$$anonfun$$bang$qmark$1";85;1360
+"scala.actors.Actor$$anonfun$1";85;2040
+"java.util.HashSet";81;1296
+"java.util.concurrent.ConcurrentHashMap$Segment[ ]";80;6400
+"java.util.concurrent.ConcurrentHashMap";80;3840
+"com.siigna.app.model.shape.Shape[ ]";75;4672
+"java.util.zip.ZipFile$ZipFileInflaterInputStream";72;4032
+"java.util.zip.ZipFile$ZipFileInputStream";72;4032
+"java.net.URL";69;4416
+"com.siigna.app.model.Drawing$$anonfun$4";66;1056
+"com.siigna.app.model.Drawing$$anonfun$5";66;1056
+"java.util.logging.LogManager$LogNode";66;1584
+"sun.reflect.generics.tree.TypeArgument[ ]";66;1112
+"sun.reflect.generics.tree.SimpleClassTypeSignature";66;1584
+"scala.collection.parallel.immutable.ParVector$$anon$1";65;5200
+"scala.collection.parallel.ParIterableLike$Foreach";65;2080
+"scala.collection.parallel.immutable.ParVector";65;1560
+"scala.actors.MQueue";65;2080
+"com.siigna.util.event.MouseUp";64;2048
+"scala.util.control.Breaks$$anon$1";64;1536
+"scala.collection.parallel.Tasks$Task$$anonfun$tryLeaf$1";64;1536
+"scala.collection.parallel.Tasks$Task$$anonfun$tryLeaf$2";64;1024
+"com.jprofiler.agent.util.a.b";61;3416
+"com.jprofiler.agent.util.a.i[ ]";61;8784
+"com.jprofiler.agent.util.a.d[ ]";61;16976
+"javax.management.MBeanAttributeInfo";60;1920
+"scala.concurrent.forkjoin.ForkJoinPool$AdaptedRunnable";59;1888
+"java.util.WeakHashMap$Entry[ ]";59;9104
+"sun.reflect.DelegatingConstructorAccessorImpl";59;944
+"java.lang.reflect.Constructor[ ]";58;1288
+"java.util.ArrayList$Itr";58;1856
+"scala.actors.Reactor$$anonfun$startSearch$1$$anonfun$apply$mcV$sp$1";57;912
+"scala.collection.mutable.ArrayOps$ofRef";57;912
+"scala.actors.Reactor$$anonfun$startSearch$1";57;1824
+"sun.reflect.NativeConstructorAccessorImpl";56;1344
+"java.net.InetSocketAddress";55;1320
+"java.net.URI";55;4400
+"scala.actors.remote.NamedSend";55;1760
+"scala.Predef$ArrowAssoc";53;848
+"sun.java2d.loops.SurfaceType";53;1696
+"java.util.concurrent.locks.ReentrantLock";53;848
+"com.siigna.util.event.MouseDown";52;1664
+"java.util.WeakHashMap";52;2496
+"scala.collection.parallel.ParIterableLike$Accessor$$anonfun$split$2";49;784
+"scala.collection.parallel.AdaptiveWorkStealingForkJoinTasks$TaskImpl$$anonfun$split$1";49;784
+"scala.collection.parallel.AdaptiveWorkStealingTasks$TaskImpl$$anonfun$spawnSubtasks$1";49;784
+"scala.collection.parallel.ParIterableLike$SignalContextPassingIterator$$anonfun$split$1";49;784
+"sun.util.locale.LocaleObjectCache$CacheEntry";48;2304
+"javax.management.MBeanInfo";48;2304
+"java.util.concurrent.CopyOnWriteArrayList";48;1152
+"javax.management.MBeanAttributeInfo[ ]";48;2448
+"sun.java2d.loops.MaskFill";47;2256
+"sun.font.StrikeCache$SoftDisposerRef";47;2256
+"sun.font.FileFontStrike";47;5640
+"java.io.ExpiringCache$Entry";47;1128
+"java.io.ObjectStreamField[ ]";47;1392
+"sun.font.FontStrikeDisposer";47;2256
+"java.lang.Package";47;2632
+"java.security.Provider$ServiceKey";46;1104
+"java.security.AccessControlContext";46;1472
+"java.util.logging.Logger";46;2944
+"com.sun.jmx.mbeanserver.PerInterface$MethodAndSig";46;1104
+"scala.reflect.ClassTypeManifest";45;1080
+"java.security.Principal[ ]";45;720
+"scala.collection.parallel.ParIterableLike$Map";45;1800
+"java.security.ProtectionDomain$Key";45;720
+"java.security.ProtectionDomain";45;1800
+"javax.management.openmbean.OpenMBeanAttributeInfoSupport";45;2880
+"java.security.CodeSource";45;1440
+"scala.collection.mutable.ArrayBuilder$ofRef";45;1440
+"com.siigna.util.event.KeyDown";44;1056
+"com.siigna.util.event.KeyUp";44;1056
+"com.siigna.util.geom.TransformationMatrix$$anonfun$flipY$1";44;704
+"javax.management.MBeanOperationInfo";43;1720
+"com.jprofiler.agent.util.a.a.v";42;3024
+"scala.collection.immutable.TrieIterator$$anon$1";42;2016
+"com.siigna.app.model.shape.PolylineShape$PolylineShapeClosed";41;984
+"javax.management.ObjectName$Property[ ]";41;976
+"com.jprofiler.agent.probe.a.a.s";40;960
+"com.siigna.app.controller.Controller$$anonfun$act$1$$anonfun$apply$1";40;640
+"javax.management.MBeanOperationInfo[ ]";39;1192
+"scala.collection.immutable.VectorBuilder";39;1872
+"java.lang.ThreadLocal$ThreadLocalMap$Entry";37;1184
+"sun.reflect.DelegatingClassLoader";36;2304
+"javax.management.MBeanParameterInfo";35;1120
+"sun.util.logging.PlatformLogger";34;544
+"sun.reflect.BootstrapConstructorAccessorImpl";34;544
+"java.util.Date";34;816
+"sun.util.logging.PlatformLogger$JavaLogger";34;1088
+"java.util.Collections$SingletonList";33;792
+"scala.collection.mutable.HashEntry[ ]";33;7760
+"sun.java2d.StateTrackableDelegate";33;792
+"com.siigna.app.model.Drawing$$anonfun$boundaryScale$1";33;528
+"com.siigna.app.model.Drawing$$anonfun$3";32;512
+"com.siigna.app.model.Drawing$$anonfun$1";32;512
+"com.siigna.app.model.Drawing$$anonfun$2";32;512
+"sun.awt.SunHints$Value";32;768
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$IdentityMapping";32;768
+"sun.font.SunFontManager$FontRegistrationInfo";31;992
+"com.siigna.util.geom.Line2D";31;744
+"com.siigna.util.event.EventParser";31;1736
+"com.siigna.app.view.ModuleInterface";31;744
+"scala.collection.parallel.ForkJoinTaskSupport";31;744
+"sun.java2d.loops.DrawGlyphListAA";30;1440
+"javax.management.ObjectName$Property";30;720
+"java.security.Provider$EngineDescription";30;960
+"scala.Array$$anon$2";30;480
+"scala.collection.parallel.immutable.LazyParVectorCombiner";30;720
+"int[ ][ ]";30;856
+"com.siigna.util.event.Start";30;720
+"sun.java2d.pipe.PixelToParallelogramConverter";30;1440
+"javax.management.MBeanParameterInfo[ ]";30;728
+"scala.util.PropertiesTrait$$anonfun$isJavaAtLeast$1";30;480
+"com.siigna.app.model.shape.TextShape";29;1392
+"sun.misc.URLClassPath$JarLoader";29;1392
+"java.awt.AWTKeyStroke";29;696
+"java.math.BigDecimal";28;1120
+"com.jprofiler.agent.util.a.s";28;1344
+"scala.collection.parallel.immutable.ParVector$ParVectorIterator$$anonfun$psplit$1";28;672
+"scala.collection.parallel.immutable.ParVector$ParVectorIterator$$anonfun$psplit$2";28;448
+"scala.collection.parallel.ParSeqLike$SignalContextPassingIterator$$anonfun$psplit$1";28;448
+"scala.collection.mutable.WrappedArray$ofInt";28;448
+"com.jprofiler.agent.util.a.t[ ]";28;2240
+"sun.java2d.loops.BlitBg";27;1296
+"scala.collection.mutable.ArrayOps$ofInt";27;432
+"scala.collection.mutable.ArrayBuilder$ofInt";27;648
+"com.siigna.module.base.radialmenu.MenuModule";27;648
+"com.jprofiler.agent.probe.a.a.s[ ]";26;656
+"java.util.Locale";26;624
+"sun.nio.cs.UTF_8$Encoder";26;1248
+"sun.util.locale.BaseLocale$Key";25;1000
+"sun.font.StrikeMetrics";25;1400
+"sun.util.locale.BaseLocale";25;800
+"sun.font.GlyphLayout$SDCache";25;1000
+"sun.awt.image.IntegerInterleavedRaster";24;2496
+"sun.awt.image.BufImgSurfaceData";24;1728
+"java.awt.image.BufferedImage";24;1152
+"sun.font.EAttribute";24;768
+"java.awt.image.SinglePixelPackedSampleModel";24;1152
+"java.awt.image.DataBufferInt";24;1152
+"com.jprofiler.api.agent.probe.ThreadLocalStack";23;368
+"java.security.Provider$UString";23;552
+"com.jprofiler.api.agent.probe.ThreadLocalStack$1";23;552
+"java.security.Provider$Service";23;1288
+"java.awt.font.TextAttribute";23;368
+"com.siigna.util.event.EventParser$$anonfun$1";23;368
+"java.util.jar.Attributes$Name";23;552
+"scala.Tuple3";22;528
+"scala.collection.mutable.HashMap";22;704
+"sun.reflect.generics.tree.ClassTypeSignature";21;336
+"long[ ][ ]";21;4032
+"scala.collection.TraversableOnce$$anonfun$sum$1";21;336
+"scala.collection.parallel.immutable.ParHashMap$ParHashMapIterator$$anon$4";21;840
+"scala.collection.parallel.immutable.ParHashMap$ParHashMapIterator$$anon$3";21;840
+"java.util.Locale$LocaleKey";21;504
+"javax.management.ObjectName";21;840
+"sun.font.Font2DHandle";21;336
+"scala.collection.immutable.TrieIterator$$anonfun$iteratorWithSize$1";21;336
+"com.siigna.app.view.Popup";21;840
+"scala.collection.parallel.immutable.ParHashMap$ParHashMapIterator[ ]";21;504
+"boolean[ ]";21;664
+"sun.font.PhysicalFont[ ]";20;1440
+"com.sun.jmx.mbeanserver.NamedObject";20;480
+"java.lang.reflect.Field[ ]";20;1648
+"sun.font.CompositeFont";20;1920
+"com.jprofiler.agent.probe.structures.MetaDataImpl";20;1920
+"com.sun.jmx.mbeanserver.WeakIdentityHashMap$IdentityWeakReference";19;608
+"java.io.ObjectStreamClass";19;1976
+"java.util.zip.ZipCoder";19;608
+"sun.java2d.loops.CompositeType";19;456
+"java.util.ArrayDeque";19;456
+"java.util.TreeMap";19;912
+"java.io.ObjectStreamClass$WeakClassKey";19;608
+"com.sun.jmx.mbeanserver.MXBeanSupport";18;720
+"java.io.FileInputStream";18;576
+"com.siigna.app.model.shape.CircleShape";17;544
+"sun.java2d.loops.DrawGlyphList";17;816
+"sun.java2d.loops.FillRect";17;816
+"com.siigna.util.collection.AttributesLike$$anonfun$int$1";17;272
+"scala.Enumeration$Val";17;544
+"java.util.Collections$SynchronizedMap";17;544
+"com.siigna.util.event.MouseDrag";16;512
+"sun.java2d.loops.FillSpans";16;768
+"sun.java2d.loops.DrawPath";16;768
+"sun.java2d.loops.FillPath";16;768
+"sun.java2d.loops.DrawRect";16;768
+"java.lang.Thread";16;1664
+"java.lang.management.PlatformComponent[ ]";16;328
+"java.io.ObjectStreamClass$ClassDataSlot";16;384
+"java.util.HashMap$KeySet";16;256
+"sun.java2d.loops.DrawPolygons";16;768
+"sun.java2d.loops.DrawLine";16;768
+"java.io.ObjectStreamClass$FieldReflectorKey";15;600
+"javax.management.openmbean.ArrayType";15;840
+"java.lang.management.PlatformComponent";15;720
+"java.io.ObjectStreamClass$FieldReflector";15;600
+"scala.collection.immutable.Set$Set1";15;240
+"scala.collection.mutable.SetBuilder";15;360
+"com.jprofiler.agent.probe.structures.s";14;336
+"com.jprofiler.agent.probe.structures.q";14;336
+"com.jprofiler.agent.probe.structures.r";14;336
+"com.siigna.util.event.End";14;336
+"com.siigna.util.collection.AttributesLike$$anonfun$vector2D$1";14;224
+"javax.management.StandardMBean";14;336
+"java.io.File";14;336
+"short[ ][ ]";14;440
+"javax.management.openmbean.SimpleType";14;560
+"sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData[ ]";14;280
+"java.lang.ThreadLocal$ThreadLocalMap";14;336
+"java.lang.ThreadLocal$ThreadLocalMap$Entry[ ]";14;1120
+"java.util.jar.JarFile";14;896
+"java.util.LinkedList$Node";14;336
+"sun.awt.CausedFocusEvent$Cause";14;336
+"java.lang.ThreadLocal";14;224
+"javax.management.MBeanConstructorInfo[ ]";14;240
+"sun.java2d.loops.TransformHelper";14;672
+"com.siigna.app.model.shape.TextShape$$anonfun$alignment$1";14;224
+"com.jprofiler.agent.probe.t";14;224
+"com.jprofiler.agent.probe.s";14;336
+"com.jprofiler.agent.probe.r";14;1904
+"com.siigna.app.model.shape.PolylineShape$PolylineShapeClosed$$anonfun$shapes$1";13;312
+"java.io.ObjectStreamClass$ClassDataSlot[ ]";13;312
+"com.sun.jmx.mbeanserver.PerInterface";13;520
+"com.jprofiler.agent.r";13;416
+"java.security.ProtectionDomain[ ]";13;368
+"sun.font.TrueTypeFont$DirectoryEntry";13;416
+"sun.java2d.loops.DrawGlyphListLCD";13;624
+"com.siigna.app.view.Graphics$$anonfun$colorDraw$1";12;192
+"com.siigna.app.view.Graphics$$anonfun$draw$1";12;192
+"java.awt.geom.ArcIterator";12;1056
+"byte[ ][ ]";12;488
+"java.awt.geom.Arc2D$Double";12;768
+"com.jprofiler.agent.util.a.k";12;192
+"scala.collection.IndexedSeqLike$Elements";12;384
+"java.awt.AlphaComposite";12;288
+"sun.java2d.loops.GraphicsPrimitiveProxy";12;672
+"com.jprofiler.agent.probe.a.a.t";12;288
+"sun.misc.MetaIndex";12;288
+"scala.collection.immutable.VectorIterator";12;768
+"sun.java2d.loops.RenderCache$Entry";12;384
+"com.siigna.module.cad.create.Input";11;968
+"sun.java2d.pipe.Region";11;440
+"javax.management.MBeanNotificationInfo[ ]";11;240
+"com.siigna.module.cad.create.Input$$anonfun$1";11;176
+"com.siigna.app.model.Model$$anonfun$$init$$1";10;160
+"com.jprofiler.agent.probe.structures.a";10;240
+"sun.java2d.SunGraphics2D";10;2080
+"com.siigna.app.model.Selection";10;240
+"java.lang.ClassLoader$NativeLibrary";10;320
+"sun.security.jca.ProviderConfig";10;320
+"com.siigna.app.model.Model";10;320
+"java.nio.file.StandardOpenOption";10;240
+"java.nio.DirectByteBuffer";10;640
+"java.lang.reflect.Type[ ]";10;208
+"sun.java2d.d3d.D3DMaskFill";10;480
+"com.siigna.app.view.Graphics";10;240
+"com.siigna.util.event.MouseEnter";9;288
+"java.util.logging.Level";9;216
+"sun.reflect.generics.tree.FieldTypeSignature[ ]";9;168
+"sun.awt.SunHints$Value[ ]";9;432
+"com.siigna.util.event.MouseExit";9;288
+"java.util.Arrays$ArrayList";9;216
+"sun.java2d.loops.FontInfo";9;504
+"scala.collection.parallel.immutable.LazyParVectorCombiner$$anonfun$result$1";9;144
+"sun.reflect.UnsafeQualifiedStaticObjectFieldAccessorImpl";9;288
+"javax.management.openmbean.CompositeType";9;504
+"java.util.LinkedList";9;288
+"sun.awt.SunHints$Key";9;216
+"java.lang.annotation.ElementType";8;192
+"java.lang.OutOfMemoryError";8;256
+"sun.java2d.d3d.D3DSwToSurfaceScale";8;384
+"sun.text.bidi.BidiBase$ImpTabPair";8;192
+"float[ ][ ]";8;1536
+"sun.reflect.generics.factory.CoreReflectionFactory";8;192
+"javax.management.openmbean.OpenMBeanParameterInfoSupport";8;448
+"com.siigna.module.base.radialmenu.category.FileCategory$$anonfun$2 [2 classes]";8;408
+"com.siigna.module.cad.create.Input$$anonfun$1$$anonfun$2";8;128
+"sun.java2d.loops.RenderCache$Entry[ ]";8;688
+"sun.misc.ProxyGenerator$PrimitiveTypeInfo";8;256
+"sun.java2d.d3d.D3DSwToTextureBlit";8;384
+"com.jprofiler.api.agent.probe.DataType";8;128
+"com.siigna.module.cad.create.Vector2DGuide";8;128
+"sun.reflect.generics.tree.FormalTypeParameter[ ]";8;144
+"java.awt.geom.Rectangle2D$Double";8;384
+"sun.java2d.d3d.D3DSwToSurfaceTransform";8;384
+"sun.java2d.d3d.D3DSwToSurfaceBlit";8;384
+"java.util.jar.JarFile$JarFileEntry";8;640
+"byte[ ][ ][ ]";8;192
+"com.siigna.module.cad.create.InputRequest";8;448
+"sun.java2d.loops.RenderCache";8;128
+"java.math.RoundingMode";8;192
+"scala.concurrent.forkjoin.ForkJoinWorkerThread";7;1064
+"scala.collection.TraversableLike$$anonfun$filter$1";7;168
+"sun.misc.PerfCounter";7;168
+"scala.concurrent.forkjoin.ForkJoinTask[ ]";7;229488
+"java.util.Properties";7;336
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CompositeMapping";7;336
+"sun.java2d.windows.GDIBlitLoops";7;448
+"com.jprofiler.agent.n";7;112
+"java.util.Collections$UnmodifiableRandomAccessList";7;168
+"sun.management.counter.Units";7;168
+"com.siigna.app.model.shape.PolylineShape$$anonfun$8";7;112
+"java.nio.DirectLongBufferU";7;392
+"sun.java2d.loops.RenderLoops";7;448
+"com.siigna.app.view.Graphics$$anonfun$1";7;112
+"sun.java2d.StateTrackableDelegate$1";6;96
+"com.siigna.module.base.radialmenu.EventSSE$ [2 classes]";6;112
+"java.awt.geom.GeneralPath";6;192
+"java.net.InetAddress[ ]";6;144
+"java.util.concurrent.atomic.AtomicLong";6;144
+"java.lang.RuntimePermission";6;144
+"java.net.InetAddress$CacheEntry";6;144
+"java.awt.geom.Path2D$Float$TxIterator";6;192
+"sun.font.FontFamily";6;240
+"sun.font.SunFontManager$FamilyDescription";6;288
+"sun.java2d.pipe.AAShapePipe";6;96
+"sun.reflect.generics.tree.MethodTypeSignature";6;192
+"sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl";6;144
+"sun.reflect.generics.repository.MethodRepository";6;240
+"sun.reflect.generics.tree.TypeSignature[ ]";6;96
+"sun.reflect.generics.scope.MethodScope";6;144
+"sun.java2d.pipe.TextRenderer";6;96
+"scala.collection.Parallelizable$$anonfun$par$1";6;96
+"sun.java2d.d3d.D3DMaskBlit";6;336
+"scala.concurrent.forkjoin.LinkedTransferQueue$PaddedAtomicReference";6;480
+"com.siigna.module.base.radialmenu.EventS$ [2 classes]";6;312
+"scala.collection.immutable.Set$Set2";6;144
+"java.awt.image.DirectColorModel";6;864
+"sun.management.MemoryPoolImpl$PoolSensor";5;200
+"com.siigna.module.base.paperHeader";5;280
+"sun.net.www.protocol.jar.URLJarFile";5;400
+"java.util.Collections$SynchronizedSet";5;120
+"sun.java2d.loops.DrawParallelogram";5;240
+"sun.nio.fs.WindowsPathType";5;120
+"sun.management.MemoryPoolImpl";5;280
+"java.awt.ColorPaintContext";5;120
+"java.security.Permissions";5;160
+"sun.java2d.pipe.AlphaPaintPipe$TileContext";5;240
+"scala.collection.immutable.StreamIterator$LazyCell";5;160
+"java.lang.annotation.ElementType[ ]";5;168
+"sun.awt.EventQueueItem";5;120
+"java.lang.management.MemoryUsage";5;240
+"java.util.Stack";5;160
+"sun.awt.FontDescriptor[ ][ ]";5;160
+"sun.management.MemoryPoolImpl$CollectionSensor";5;200
+"sun.java2d.loops.FillParallelogram";5;240
+"java.util.Collections$UnmodifiableMap";5;160
+"com.siigna.module.cad.create.InputTwoValues";4;448
+"java.awt.AWTKeyStroke[ ]";4;80
+"java.awt.Dialog$ModalityType";4;96
+"java.net.InetAddress";4;128
+"java.nio.HeapByteBuffer";4;192
+"java.awt.Queue";4;96
+"sun.misc.Cleaner";4;160
+"java.util.Collections$UnmodifiableSet";4;64
+"sun.net.www.protocol.jar.Handler";4;64
+"java.math.MathContext";4;96
+"com.siigna.util.geom.TransformationMatrix$$anonfun$concatenate$1";4;64
+"scala.actors.Reactor$$anonfun$2";4;64
+"com.jprofiler.agent.probe.a.a.t[ ]";4;128
+"com.siigna.module.cad.create.InputTwoValues$$anonfun$1";4;64
+"java.math.BigInteger[ ]";4;440
+"java.awt.RenderingHints";4;64
+"java.awt.Point";4;96
+"sun.java2d.StateTrackable$State";4;96
+"java.beans.PropertyChangeSupport$PropertyChangeListenerMap";4;64
+"com.siigna.app.view.View$$anonfun$1";4;64
+"java.util.Collections$SingletonMap";4;160
+"javax.management.StandardEmitterMBean";4;128
+"scala.collection.immutable.MapLike$$anonfun$$plus$plus$1";4;64
+"sun.reflect.annotation.AnnotationType";4;128
+"java.lang.String[ ][ ]";4;216
+"scala.collection.immutable.StreamIterator$$anonfun$next$1";4;64
+"sun.java2d.loops.GraphicsPrimitiveMgr$PrimitiveSpec";4;64
+"javax.management.MBeanNotificationInfo";4;128
+"com.jprofiler.agent.ThreadManager";4;320
+"java.awt.BufferCapabilities$FlipContents";4;96
+"com.jprofiler.agent.probe.l";4;96
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$ArrayMapping";4;128
+"com.jprofiler.api.agent.probe.Unit";4;64
+"java.util.IdentityHashMap";4;160
+"sun.reflect.DelegatingMethodAccessorImpl";4;64
+"sun.misc.URLClassPath";4;160
+"java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject";4;96
+"com.jprofiler.api.agent.ProbeObjectType";3;48
+"sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType";3;72
+"java.lang.annotation.RetentionPolicy";3;72
+"java.beans.PropertyChangeSupport";3;72
+"java.awt.EventQueue$3";3;72
+"com.siigna.util.RichColorString";3;48
+"com.siigna.util.geom.Line2D[ ]";3;96
+"com.siigna.util.geom.SimpleRectangle2D$$anonfun$intersections$1";3;48
+"scala.collection.parallel.immutable.ParHashMap$$anon$1";3;120
+"sun.font.GlyphLayout$LayoutEngineKey";3;72
+"java.beans.PropertyChangeListener[ ]";3;64
+"java.lang.StringCoding$StringEncoder";3;96
+"com.sun.nio.file.ExtendedOpenOption";3;72
+"sun.font.EAttribute[ ]";3;336
+"scala.util.DynamicVariable";3;72
+"java.awt.Window$Type";3;72
+"java.io.OutputStreamWriter";3;96
+"com.siigna.app.model.SpatialModel$$anonfun$apply$1";3;48
+"com.siigna.app.model.SpatialModel$$anonfun$apply$2";3;72
+"sun.awt.RepaintArea";3;48
+"sun.nio.cs.UTF_8$Decoder";3;120
+"scala.collection.generic.ParFactory$GenericCanCombineFrom";3;72
+"scala.collection.TraversableLike$$anonfun$flatMap$1";3;72
+"com.siigna.util.event.EventParser$$anonfun$paint$1";3;72
+"scala.collection.generic.GenSetFactory$$anon$1";3;48
+"sun.nio.cs.StreamEncoder";3;168
+"scala.collection.mutable.HashMap$$anon$1$$anonfun$foreach$2";3;48
+"scala.collection.mutable.HashMap$$anon$1";3;72
+"java.security.BasicPermissionCollection";3;96
+"java.io.FilePermission";3;96
+"sun.reflect.generics.tree.FormalTypeParameter";3;72
+"sun.net.www.protocol.http.HttpURLConnection$TunnelState";3;72
+"java.io.BufferedWriter";3;144
+"sun.awt.SunDisplayChanger";3;48
+"com.siigna.app.view.View$$anonfun$paint$1";3;48
+"com.siigna.app.view.View$$anonfun$paint$3";3;72
+"com.siigna.app.view.View$$anonfun$paint$2";3;48
+"com.siigna.app.view.View$$anonfun$paint$4";3;72
+"sun.misc.URLClassPath$Loader";3;72
+"com.siigna.util.event.EndPoints$$anonfun$4";3;48
+"com.siigna.util.event.EndPoints$$anonfun$3";3;48
+"com.siigna.util.event.EndPoints$$anonfun$5";3;48
+"java.awt.EventFilter$FilterAction";3;72
+"com.siigna.module.ModuleMenu$$anonfun$paint$3";3;48
+"com.siigna.module.ModuleMenu$$anonfun$paint$5";3;48
+"com.siigna.module.ModuleMenu$$anonfun$paint$4";3;48
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$EnumMapping";3;96
+"sun.font.SunLayoutEngine";3;72
+"scala.collection.parallel.ParIterableLike$$anon$13";3;72
+"java.lang.StringBuffer";3;72
+"com.siigna.app.view.View$$anonfun$5";3;48
+"com.siigna.app.model.action.TransformShapeParts";3;72
+"sun.java2d.pipe.PixelToShapeConverter";3;48
+"javax.management.openmbean.OpenMBeanOperationInfoSupport";3;168
+"java.io.FilePermissionCollection";3;72
+"sun.nio.fs.NativeBuffer";3;96
+"scala.util.DynamicVariable$$anon$1";3;72
+"java.awt.ComponentOrientation";3;48
+"sun.text.normalizer.CharTrie$FriendAgent";3;48
+"com.siigna.util.event.EndPoints$$anonfun$paint$1";3;72
+"scala.collection.parallel.ParIterableLike$$anonfun$map$1$$anonfun$apply$1";3;48
+"java.awt.Cursor$CursorDisposer";3;72
+"sun.awt.FontDescriptor";3;120
+"java.net.Proxy$Type";3;72
+"sun.text.normalizer.CharTrie";3;144
+"com.jprofiler.agent.probe.b.d";3;48
+"com.siigna.app.model.action.TransformShapeParts$$anonfun$$init$$1";3;72
+"scala.concurrent.forkjoin.ForkJoinWorkerThread[ ]";3;88
+"sun.nio.fs.NativeBuffer$Deallocator";3;72
+"sun.text.normalizer.Trie$DefaultGetFoldingOffset";3;48
+"java.text.AttributedCharacterIterator$Attribute";3;48
+"com.siigna.module.cad.create.Copy$$anonfun$1$$anonfun$2";3;48
+"scala.collection.parallel.immutable.ParHashMap";3;72
+"scala.collection.immutable.StringOps";3;48
+"java.nio.charset.CodingErrorAction";3;48
+"scala.collection.parallel.package$$anon$2$$anon$5";3;72
+"java.util.LinkedHashSet";3;48
+"scala.collection.parallel.ParIterableLike$$anon$13$$anon$4";3;96
+"sun.java2d.pipe.SpanClipRenderer";3;48
+"scala.collection.parallel.package$$anon$2";3;48
+"java.awt.Rectangle[ ]";3;96
+"sun.awt.EventQueueItem[ ]";3;120
+"scala.collection.immutable.Set$Set4";3;96
+"scala.collection.immutable.Set$Set3";3;72
+"java.nio.file.StandardCopyOption";3;72
+"java.awt.ImageCapabilities";3;48
+"scala.collection.parallel.ParIterableLike$$anonfun$map$2";3;72
+"scala.collection.parallel.ParIterableLike$$anonfun$map$1";3;72
+"$Proxy2";3;48
+"$Proxy0";3;48
+"java.awt.Dialog$ModalExclusionType";3;72
+"sun.reflect.generics.reflectiveObjects.TypeVariableImpl";3;96
+"com.jprofiler.agent.probe.y";3;48
+"sun.java2d.d3d.D3DSurfaceData";3;312
+"sun.java2d.d3d.D3DGeneralBlit";2;112
+"java.net.ServerSocket";2;48
+"sun.java2d.loops.Blit$GeneralMaskBlit";2;96
+"java.awt.Insets";2;64
+"java.io.BufferedOutputStream";2;48
+"java.io.DataOutputStream";2;64
+"java.lang.annotation.Annotation[ ]";2;32
+"java.lang.StackTraceElement[ ]";2;32
+"sun.security.jca.ProviderList";2;48
+"java.nio.charset.CoderResult";2;48
+"java.lang.ThreadGroup";2;96
+"java.util.concurrent.locks.ReentrantReadWriteLock$WriteLock";2;32
+"java.util.concurrent.locks.ReentrantReadWriteLock$ReadLock";2;32
+"java.lang.Shutdown$Lock";2;32
+"java.awt.event.MouseEvent";2;160
+"java.awt.LightweightDispatcher";2;96
+"java.io.ByteArrayOutputStream";2;48
+"sun.reflect.generics.tree.ClassTypeSignature[ ]";2;40
+"java.util.ResourceBundle$LoaderReference";2;64
+"java.net.SocketPermissionCollection";2;48
+"java.lang.VirtualMachineError";2;64
+"java.lang.Boolean";2;32
+"sun.security.provider.SecureRandom";2;64
+"sun.java2d.loops.MaskBlit$General";2;144
+"sun.java2d.d3d.D3DVolatileSurfaceManager";2;112
+"java.util.concurrent.locks.ReentrantReadWriteLock$Sync$ThreadLocalHoldCounter";2;32
+"sun.misc.Signal";2;48
+"sun.security.jca.ProviderList$3";2;48
+"java.net.InetAddress$Cache$Type";2;48
+"sun.reflect.generics.repository.ClassRepository";2;64
+"scala.actors.remote.Node";2;48
+"sun.java2d.d3d.D3DGraphicsDevice";2;192
+"java.util.concurrent.locks.ReentrantReadWriteLock";2;48
+"com.siigna.module.cad.radialmenu.category.HelpersCategory$$anonfun$3 [2 classes]";2;32
+"scala.util.control.BreakControl";2;64
+"com.jprofiler.agent.util.a.a.p";2;80
+"scala.math.BigDecimal";2;48
+"sun.nio.fs.NativeBuffer[ ]";2;64
+"java.util.HashMap$EntryIterator";2;80
+"sun.awt.image.SunVolatileImage";2;112
+"sun.awt.util.IdentityArrayList";2;48
+"java.net.InetSocketAddress[ ]";2;48
+"com.jprofiler.agent.util.c";2;48
+"com.siigna.module.base.radialmenu.MenuModule$ [2 classes]";2;64
+"java.awt.Cursor[ ]";2;144
+"sun.security.jca.ProviderConfig[ ]";2;72
+"java.io.PrintStream";2;64
+"sun.util.calendar.ZoneInfo";2;112
+"sun.reflect.NativeMethodAccessorImpl";2;48
+"scala.math.BigInt";2;32
+"java.io.ExpiringCache";2;80
+"com.jprofiler.agent.probe.a.a.p";2;352
+"sun.net.spi.DefaultProxySelector$NonProxyInfo";2;64
+"sun.security.provider.SHA";2;112
+"java.lang.management.ManagementPermission";2;48
+"javax.management.openmbean.TabularType";2;96
+"scala.collection.mutable.BitSet";2;32
+"com.sun.jmx.mbeanserver.MBeanIntrospector$MBeanInfoMap";2;96
+"sun.reflect.generics.scope.ClassScope";2;48
+"com.sun.jmx.mbeanserver.ClassLoaderRepositorySupport$LoaderEntry[ ]";2;40
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$TabularMapping";2;80
+"java.net.InetAddress$Cache";2;48
+"java.security.MessageDigest$Delegate";2;64
+"java.io.ExpiringCache$1";2;112
+"scala.actors.OutputChannel[ ]";2;48
+"sun.reflect.generics.tree.ClassSignature";2;48
+"java.lang.Thread[ ]";2;160
+"java.util.logging.Handler[ ]";2;32
+"java.nio.file.StandardOpenOption[ ]";2;112
+"sun.misc.NativeSignalHandler";2;48
+"java.lang.management.MemoryType";2;48
+"java.lang.StringCoding$StringDecoder";2;64
+"com.sun.jmx.mbeanserver.ClassLoaderRepositorySupport$LoaderEntry";2;48
+"sun.management.ManagementFactoryHelper$1";2;48
+"java.util.jar.Attributes";2;32
+"sun.java2d.d3d.D3DGraphicsConfig";2;80
+"double[ ][ ]";2;144
+"java.lang.annotation.RetentionPolicy[ ]";2;64
+"sun.java2d.pipe.SpanShapeRenderer$Composite";2;32
+"com.siigna.module.cad.radialmenu.category.PropertiesCategory$ [2 classes]";2;80
+"java.lang.InheritableThreadLocal";2;32
+"java.io.InvalidClassException";2;80
+"com.siigna.module.cad.radialmenu.category.PropertiesCategory$$anonfun$1 [2 classes]";2;72
+"sun.java2d.pipe.Region$ImmutableRegion";2;80
+"java.awt.Dimension";2;48
+"java.util.ResourceBundle$CacheKey";2;112
+"com.siigna.module.base.radialmenu.category.FileCategory$ [2 classes]";2;48
+"sun.java2d.d3d.D3DContext$D3DContextCaps";2;48
+"scala.runtime.IntRef";2;32
+"java.awt.BorderLayout";2;112
+"javax.management.MBeanConstructorInfo";2;64
+"com.siigna.module.cad.create.Copy$$anonfun$1$$anonfun$4";2;32
+"com.siigna.module.cad.create.Copy$$anonfun$1$$anonfun$3";2;32
+"com.siigna.module.cad.Selection";2;112
+"scala.concurrent.forkjoin.LinkedTransferQueue";2;48
+"com.siigna.module.base.radialmenu.EventE$ [2 classes]";2;48
+"sun.awt.image.BufImgSurfaceManager";2;48
+"java.awt.Cursor";2;80
+"scala.Option$$anonfun$orNull$1";2;32
+"java.awt.event.InvocationEvent";2;128
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$8 [2 classes]";2;72
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$7 [2 classes]";2;32
+"com.siigna.module.cad.create.DoubleGuide";2;32
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$CollectionMapping";2;64
+"java.math.BigDecimal[ ]";2;144
+"java.net.SocketPermission";2;112
+"sun.reflect.UnsafeBooleanFieldAccessorImpl";2;48
+"com.siigna.app.controller.Controller$$anonfun$act$1$$anonfun$apply$1$$anonfun$apply$2";2;32
+"com.siigna.module.base.radialmenu.EventNNW$ [2 classes]";2;48
+"sun.util.locale.UnicodeLocaleExtension";2;64
+"sun.java2d.loops.GraphicsPrimitive[ ]";2;3280
+"java.util.Random";2;64
+"java.util.jar.Manifest";2;48
+"com.siigna.module.base.radialmenu.MenuIcons$ [2 classes]";2;392
+"sun.util.locale.LocaleExtensions";2;48
+"java.io.FileOutputStream";2;64
+"java.lang.ref.ReferenceQueue$Null";2;64
+"scala.actors.Actor$$anonfun$5";2;48
+"java.util.concurrent.atomic.AtomicReferenceFieldUpdater$AtomicReferenceFieldUpdaterImpl";2;64
+"java.util.ResourceBundle$BundleReference";2;96
+"java.nio.ByteOrder";2;32
+"sun.awt.im.InputMethodLocator";2;48
+"sun.management.GarbageCollectorImpl";2;96
+"$Proxy1";2;32
+"sun.awt.MostRecentKeyValue";2;48
+"com.sun.jmx.mbeanserver.WeakIdentityHashMap";2;48
+"sun.java2d.d3d.D3DContext";2;128
+"com.jprofiler.agent.probe.q";2;48
+"java.lang.reflect.TypeVariable[ ]";2;48
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$5 [2 classes]";2;56
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$6 [2 classes]";2;32
+"com.sun.jmx.mbeanserver.MBeanIntrospector$PerInterfaceMap";2;96
+"sun.java2d.d3d.D3DSurfaceData$D3DWindowSurfaceData";2;224
+"com.siigna.app.Siigna$";1;64
+"scala.reflect.NoManifest$";1;16
+"sun.management.MemoryManagerImpl";1;40
+"sun.java2d.NullSurfaceData";1;56
+"java.io.RandomAccessFile";1;32
+"com.siigna.app.controller.remote.Server";1;32
+"sun.font.TrueTypeGlyphMapper";1;32
+"scala.actors.scheduler.DrainableForkJoinPool";1;80
+"sun.misc.Launcher";1;16
+"com.siigna.module.base.radialmenu.EventENE$";1;32
+"java.util.ResourceBundle$Control";1;16
+"java.lang.management.PlatformComponent$9";1;16
+"java.lang.management.PlatformComponent$5";1;16
+"sun.java2d.loops.RenderLoops[ ]";1;40
+"scala.collection.immutable.Map$";1;16
+"java.lang.management.PlatformComponent$6";1;16
+"java.lang.management.PlatformComponent$7";1;16
+"java.lang.management.PlatformComponent$8";1;16
+"java.lang.ArrayStoreException";1;32
+"java.lang.management.PlatformComponent$1";1;16
+"java.lang.management.PlatformComponent$2";1;16
+"java.lang.management.PlatformComponent$3";1;16
+"java.lang.management.PlatformComponent$4";1;16
+"java.awt.EventQueue$4";1;24
+"java.awt.EventQueue$2";1;16
+"java.awt.EventQueue$1";1;16
+"scala.collection.immutable.Traversable$";1;16
+"sun.nio.cs.StandardCharsets$Classes";1;40
+"com.siigna.util.event.KeyUp$";1;16
+"sun.java2d.windows.GDIWindowSurfaceData";1;72
+"javax.management.JMX";1;16
+"java.util.TimerTask[ ]";1;528
+"java.lang.ref.Reference$Lock";1;16
+"scala.actors.Actor$";1;24
+"sun.misc.FloatingDecimal$1";1;16
+"scala.collection.immutable.$colon$colon$";1;16
+"sun.awt.Win32GraphicsEnvironment";1;24
+"com.siigna.module.ModuleMenu$";1;80
+"com.siigna.module.base.radialmenu.MenuCategory";1;16
+"scala.collection.mutable.StringBuilder$";1;16
+"scala.collection.immutable.StreamIterator$$anonfun$$init$$1";1;16
+"com.siigna.util.geom.Segment2D$";1;16
+"com.jprofiler.agent.triggers.TriggerInterceptor";1;40
+"sun.java2d.d3d.D3DScreenUpdateManager$1";1;16
+"scala.sys.package$";1;16
+"java.nio.Bits$1$1";1;16
+"com.siigna.util.event.Key$";1;168
+"java.util.Collections$SingletonSet";1;16
+"java.awt.color.ICC_ColorSpace";1;64
+"sun.management.CompilationImpl";1;24
+"java.awt.Container$1";1;16
+"java.lang.NullPointerException";1;32
+"scala.actors.remote.Terminate$";1;16
+"java.util.jar.JavaUtilJarAccessImpl";1;16
+"scala.actors.remote.RemoteActor$$anonfun$createNetKernelOnPort$1";1;24
+"javax.management.MBeanServerBuilder";1;16
+"sun.java2d.pipe.OutlineTextRenderer";1;16
+"com.siigna.util.geom.Line$";1;16
+"sun.nio.cs.StandardCharsets$Aliases";1;40
+"sun.misc.Unsafe";1;16
+"sun.font.CompositeFont[ ]";1;96
+"sun.util.resources.TimeZoneNames_en";1;40
+"scala.collection.immutable.Map$EmptyMap$";1;16
+"java.util.logging.LogManager";1;48
+"com.jprofiler.agent.probe.structures.e";1;72
+"java.lang.management.MemoryPoolMXBean[ ]";1;40
+"com.siigna.util.event.MidPoints$";1;16
+"sun.font.CMap$NullCMapClass";1;16
+"com.siigna.util.collection.DirectedGraph$";1;16
+"scala.util.control.NoStackTrace$";1;16
+"sun.security.provider.Sun";1;96
+"sun.text.normalizer.UBiDiProps";1;32
+"java.awt.Queue[ ]";1;32
+"sun.awt.windows.WInputMethodDescriptor";1;16
+"com.siigna.module.base.Menu$";1;24
+"java.awt.color.ICC_Profile$1";1;16
+"sun.java2d.loops.SurfaceType[ ]";1;40
+"sun.reflect.GeneratedConstructorAccessor16";1;16
+"sun.reflect.GeneratedConstructorAccessor17";1;16
+"sun.reflect.GeneratedConstructorAccessor14";1;16
+"sun.reflect.GeneratedConstructorAccessor15";1;16
+"sun.awt.image.PixelConverter$Xbgr";1;16
+"sun.reflect.GeneratedConstructorAccessor12";1;16
+"sun.reflect.GeneratedConstructorAccessor13";1;16
+"sun.reflect.GeneratedConstructorAccessor10";1;16
+"sun.reflect.GeneratedConstructorAccessor11";1;16
+"sun.util.resources.LocaleData$LocaleDataResourceBundleControl";1;16
+"com.siigna.module.cad.create.Line";1;48
+"java.util.Timer";1;24
+"com.siigna.util.event.Track$";1;48
+"com.siigna.util.event.KeyDown$";1;16
+"com.siigna.module.cad.create.Line$$anonfun$1$$anonfun$2";1;16
+"scala.collection.mutable.ArrayBuilder$";1;16
+"com.siigna.module.cad.radialmenu.category.ModifyCategory$$anonfun$2";1;16
+"com.siigna.app.model.shape.GroupShape$";1;16
+"com.siigna.module.cad.radialmenu.category.ModifyCategory$$anonfun$1";1;16
+"com.siigna.module.cad.radialmenu.category.ModifyCategory$$anonfun$4";1;16
+"com.siigna.module.cad.radialmenu.category.ModifyCategory$$anonfun$3";1;16
+"sun.font.GlyphLayout$EngineRecord";1;40
+"sun.java2d.d3d.D3DSurfaceToGDIWindowSurfaceTransform";1;48
+"java.awt.image.DataBuffer$1";1;16
+"sun.font.CMap$CMapFormat4";1;48
+"sun.java2d.pipe.GeneralCompositePipe";1;16
+"scala.util.Random";1;16
+"sun.awt.PostEventQueue";1;24
+"sun.java2d.pipe.AlphaColorPipe";1;16
+"sun.awt.SunHints$Value[ ][ ]";1;56
+"sun.java2d.pipe.NullPipe";1;16
+"java.util.Timer$1";1;16
+"com.siigna.app.controller.remote.RemoteController$$anonfun$act$2";1;16
+"sun.font.Decoration";1;16
+"java.net.Proxy";1;24
+"scala.actors.Reactor$$anon$1";1;16
+"scala.actors.Reactor$$anon$3";1;24
+"scala.actors.Reactor$$anon$2";1;16
+"java.util.Collections$EmptyIterator";1;16
+"com.siigna.app.SiignaApplication$";1;16
+"sun.reflect.GeneratedConstructorAccessor8";1;16
+"sun.reflect.GeneratedConstructorAccessor7";1;16
+"sun.reflect.GeneratedConstructorAccessor6";1;16
+"sun.reflect.GeneratedConstructorAccessor5";1;16
+"com.siigna.util.event.MouseDouble$";1;16
+"sun.reflect.GeneratedConstructorAccessor9";1;16
+"sun.java2d.loops.SetDrawPathANY";1;48
+"sun.reflect.GeneratedConstructorAccessor3";1;16
+"sun.reflect.GeneratedConstructorAccessor4";1;16
+"sun.reflect.GeneratedConstructorAccessor1";1;16
+"com.siigna.app.model.shape.LineShape$";1;16
+"scala.Predef$Pair$";1;16
+"java.awt.font.TextLayout$CaretPolicy";1;16
+"java.util.Set[ ]";1;32
+"sun.java2d.d3d.D3DRTTSurfaceToSurfaceTransform";1;48
+"java.security.cert.Certificate[ ]";1;16
+"sun.awt.FontDescriptor[ ][ ][ ]";1;40
+"com.jprofiler.agent.util.a.a.ad";1;64
+"sun.awt.windows.WingDings$Encoder";1;48
+"com.siigna.util.Implicits$";1;16
+"scala.reflect.Manifest$$anon$11";1;24
+"scala.reflect.Manifest$$anon$12";1;24
+"scala.reflect.Manifest$$anon$13";1;24
+"scala.reflect.Manifest$$anon$14";1;24
+"java.lang.Throwable[ ]";1;16
+"java.util.Collections$SetFromMap";1;24
+"java.awt.KeyboardFocusManager$1";1;16
+"scala.reflect.Manifest$$anon$10";1;24
+"com.siigna.util.geom.Line2D$";1;16
+"com.siigna.app.model.shape.PolylineShape$Selector";1;16
+"sun.awt.image.PixelConverter$Rgba";1;16
+"javax.management.NotificationBroadcasterSupport$1";1;16
+"sun.launcher.LauncherHelper";1;24
+"sun.nio.fs.WindowsFileSystem";1;32
+"sun.misc.SoftCache";1;32
+"scala.actors.Actor$State$";1;72
+"java.nio.file.StandardCopyOption[ ]";1;32
+"java.nio.DirectByteBuffer$Deallocator";1;32
+"sun.java2d.StateTracker$1";1;16
+"sun.java2d.StateTracker$2";1;16
+"sun.awt.AppContext";1;56
+"scala.reflect.Manifest$";1;72
+"sun.awt.image.PixelConverter$Rgbx";1;16
+"scala.sys.BooleanProp$$anonfun$keyExists$1";1;16
+"sun.awt.windows.WToolkit$ToolkitDisposer";1;16
+"scala.collection.immutable.Vector$";1;24
+"scala.collection.immutable.Set$";1;16
+"scala.collection.parallel.immutable.ParIterable$";1;16
+"scala.collection.immutable.Range$";1;16
+"sun.nio.cs.ThreadLocalCoders$1";1;24
+"sun.nio.cs.ThreadLocalCoders$2";1;24
+"com.jprofiler.agent.probe.c.b";1;24
+"com.jprofiler.agent.probe.c.c";1;48
+"java.awt.AWTEvent$1";1;16
+"com.jprofiler.agent.probe.c.a";1;24
+"com.siigna.app.model.action.DeleteShapes$$anonfun$$init$$2";1;16
+"java.lang.reflect.ReflectPermission";1;24
+"sun.java2d.pipe.BufferedRenderPipe$AAParallelogramPipe";1;16
+"sun.java2d.pipe.AATextRenderer";1;16
+"com.siigna.module.base.radialmenu.category.FileCategory$$anonfun$1";1;16
+"com.siigna.module.base.radialmenu.EventNNE$";1;32
+"scala.actors.Reactor$$anonfun$seq$1$$anonfun$apply$1";1;16
+"sun.awt.windows.WToolkit";1;72
+"scala.collection.parallel.mutable.package$";1;16
+"java.util.ResourceBundle$Control$CandidateListCache";1;24
+"com.siigna.util.event.MouseEnter$";1;16
+"sun.awt.windows.WKeyboardFocusManagerPeer";1;16
+"sun.awt.image.PixelConverter$UshortGray";1;16
+"scala.collection.parallel.immutable.ParSeq$";1;16
+"sun.nio.cs.ISO_8859_1";1;24
+"com.siigna.module.cad.radialmenu.category.StartCategory$";1;32
+"scala.actors.scheduler.ThreadPoolConfig$";1;32
+"scala.actors.remote.TcpService";1;136
+"sun.security.jca.ProviderList$1";1;96
+"com.siigna.app.model.shape.CircleShape$";1;16
+"sun.nio.fs.WindowsPathType[ ]";1;40
+"scala.actors.scheduler.ForkJoinScheduler";1;56
+"sun.awt.windows.WGlobalCursorManager";1;32
+"sun.nio.cs.StandardCharsets$Cache";1;40
+"sun.java2d.cmm.ProfileDeferralInfo";1;32
+"sun.java2d.loops.SetFillPathANY";1;48
+"com.siigna.util.event.Start$";1;16
+"java.lang.CharacterDataLatin1";1;16
+"java.net.InetAddress$1";1;16
+"scala.collection.immutable.Seq$";1;16
+"scala.actors.remote.RemoteActor$";1;24
+"com.sun.jmx.mbeanserver.ClassLoaderRepositorySupport";1;24
+"com.sun.jmx.interceptor.DefaultMBeanServerInterceptor$ResourceContext$1";1;16
+"java.security.SecureRandom";1;64
+"scala.math.BigDecimal$";1;40
+"scala.reflect.ClassManifest$";1;72
+"java.lang.ArithmeticException";1;32
+"com.siigna.util.geom.SimpleRectangle2D$";1;16
+"java.util.Collections$EmptyMap";1;24
+"java.awt.GraphicsDevice[ ]";1;24
+"com.jprofiler.agent.probe.JavaCollector";1;48
+"sun.java2d.d3d.D3DGraphicsConfig$D3DImageCaps";1;16
+"sun.java2d.d3d.D3DTextureToSurfaceTransform";1;48
+"com.siigna.module.cad.radialmenu.category.HelpersCategory$$anonfun$1";1;16
+"com.siigna.module.cad.radialmenu.category.HelpersCategory$$anonfun$2";1;16
+"sun.net.www.http.KeepAliveStream";1;64
+"java.util.Collections$EmptyEnumeration";1;16
+"scala.collection.mutable.WrappedArray$";1;16
+"sun.java2d.d3d.D3DTextureToSurfaceBlit";1;48
+"java.awt.Component$1";1;16
+"java.util.logging.LogManager$RootLogger";1;72
+"com.siigna.app.controller.Controller$$anonfun$act$1";1;16
+"scala.math.package$";1;32
+"com.siigna.util.event.MouseButtonLeft$";1;16
+"sun.awt.image.ImageRepresentation";1;96
+"java.security.Provider[ ]";1;16
+"scala.actors.Actor$$anonfun$searchMailbox$1";1;16
+"scala.sys.BooleanProp$";1;16
+"sun.awt.GlobalCursorManager$NativeUpdater";1;24
+"com.siigna.module.ModuleInit$$anonfun$stateMap$1";1;16
+"java.nio.file.attribute.FileAttribute[ ]";1;16
+"java.io.WinNTFileSystem";1;32
+"java.awt.Window$1";1;16
+"sun.font.FileFont[ ]";1;96
+"com.jprofiler.agent.util.a.a.k";1;40
+"sun.font.TrueTypeFont$TTDisposerRecord";1;16
+"com.siigna.util.event.EventParser$$anonfun$parse$1";1;24
+"sun.misc.URLClassPath$FileLoader";1;24
+"java.util.ResourceBundle$RBClassLoader";1;64
+"java.awt.image.DataBufferByte";1;48
+"com.siigna.app.model.shape.FullSelector$";1;16
+"sun.management.ManagementFactoryHelper$PlatformLoggingImpl";1;16
+"scala.collection.immutable.NumericRange$";1;16
+"javax.management.NotificationBroadcasterSupport";1;24
+"sun.security.provider.NativeSeedGenerator";1;16
+"scala.collection.MapLike$DefaultValuesIterable$$anonfun$foreach$4";1;16
+"scala.collection.MapLike$DefaultValuesIterable$$anonfun$foreach$3";1;16
+"sun.awt.windows.WCustomCursor";1;40
+"com.siigna.app.model.action.DeleteShapes";1;24
+"com.jprofiler.agent.Sampler";1;104
+"sun.font.GlyphList";1;80
+"sun.misc.Launcher$Factory";1;16
+"sun.text.normalizer.UCharacterProperty";1;56
+"java.awt.Component$AWTTreeLock";1;16
+"com.siigna.util.logging.Log$";1;48
+"sun.java2d.d3d.D3DRenderQueue";1;24
+"sun.java2d.d3d.D3DTextRenderer";1;16
+"sun.font.GlyphLayout";1;64
+"com.sun.nio.file.ExtendedOpenOption[ ]";1;32
+"com.sun.jmx.mbeanserver.StandardMBeanSupport";1;24
+"com.siigna.app.model.shape.ArcShape$";1;16
+"com.sun.jmx.mbeanserver.MXBeanIntrospector";1;16
+"sun.awt.CausedFocusEvent$Cause[ ]";1;72
+"com.siigna.app.model.shape.PolylineShape$";1;16
+"sun.font.FontRunIterator";1;40
+"com.sun.jmx.mbeanserver.JmxMBeanServer";1;40
+"com.siigna.module.ModulePackage$";1;16
+"sun.awt.windows.WCanvasPeer";1;128
+"scala.util.MurmurHash$";1;64
+"java.util.Hashtable$EntrySet";1;16
+"scala.collection.mutable.HashTable$";1;16
+"scala.actors.remote.DelegateActor$$anonfun$act$1";1;16
+"com.siigna.module.base.radialmenu.EventSSW$";1;32
+"java.util.Collections$SynchronizedCollection";1;24
+"java.math.RoundingMode[ ]";1;48
+"sun.java2d.SurfaceData$PixelToShapeLoopConverter";1;16
+"java.net.URLClassLoader";1;80
+"java.awt.color.ICC_ProfileRGB";1;40
+"java.net.Inet6Address";1;56
+"java.awt.Font$FontAccessImpl";1;16
+"java.awt.geom.AffineTransform[ ]";1;88
+"java.util.Map[ ]";1;32
+"java.lang.management.PlatformComponent$14";1;16
+"java.lang.management.PlatformComponent$15";1;16
+"java.lang.management.PlatformComponent$12";1;16
+"java.lang.management.PlatformComponent$13";1;16
+"java.lang.management.PlatformComponent$10";1;16
+"java.lang.management.PlatformComponent$11";1;16
+"java.lang.CharacterData00";1;16
+"com.sun.management.OperatingSystem";1;24
+"sun.management.ThreadImpl";1;24
+"sun.java2d.d3d.D3DScreenUpdateManager";1;32
+"scala.collection.parallel.mutable.ParArray$";1;16
+"scala.collection.parallel.package$";1;40
+"com.jprofiler.agent.util.i";1;64
+"java.util.TaskQueue";1;24
+"java.lang.Long[ ]";1;1040
+"scala.actors.remote.JavaSerializer";1;24
+"java.awt.image.PixelInterleavedSampleModel";1;56
+"sun.java2d.SurfaceDataProxy$1";1;40
+"sun.awt.image.PixelConverter$Ushort555Rgb";1;16
+"com.siigna.util.geom.TransformationMatrix$";1;16
+"sun.net.www.protocol.jar.JarFileFactory";1;16
+"scala.collection.mutable.ArrayBuffer$";1;16
+"java.awt.DefaultKeyboardFocusManager";1;72
+"java.awt.Window$Type[ ]";1;32
+"sun.net.www.protocol.http.AuthCacheImpl";1;16
+"sun.awt.windows.WFontPeer";1;40
+"scala.math.Numeric$DoubleAsIfIntegral$";1;16
+"java.awt.Image$1";1;16
+"scala.collection.immutable.Stream$";1;24
+"sun.java2d.pipe.ValidatePipe";1;16
+"scala.collection.parallel.immutable.ParRange$";1;16
+"sun.awt.image.PixelConverter$ByteGray";1;16
+"java.lang.Runnable[ ]";1;56
+"scala.Option$";1;16
+"sun.dc.pr.Rasterizer$ConsumerDisposer";1;24
+"java.awt.GraphicsCallback$PaintCallback";1;16
+"sun.launcher.LauncherHelper[ ]";1;24
+"sun.reflect.ReflectionFactory";1;16
+"com.siigna.util.collection.Attributes$";1;16
+"sun.font.T2KFontScaler";1;32
+"com.siigna.util.event.MouseDown$";1;16
+"java.lang.ref.Reference";1;32
+"sun.nio.fs.WindowsFileSystemProvider";1;16
+"java.lang.Object[ ][ ]";1;48
+"sun.misc.Launcher$ExtClassLoader";1;80
+"sun.util.locale.BaseLocale$Cache";1;24
+"sun.java2d.d3d.D3DSurfaceToGDIWindowSurfaceBlit";1;48
+"java.awt.EventQueue";1;64
+"java.lang.ProcessEnvironment$EntryComparator";1;16
+"sun.awt.PaintEventDispatcher";1;16
+"com.siigna.app.model.action.Select$";1;16
+"sun.font.FontStrike[ ]";1;48
+"sun.management.RuntimeImpl";1;24
+"scala.collection.Iterator$$anon$3";1;16
+"java.lang.System$2";1;16
+"sun.util.LocaleServiceProviderPool";1;32
+"sun.nio.cs.US_ASCII";1;24
+"java.io.PrintWriter";1;48
+"com.siigna.app.ApplicationWindow";1;424
+"java.awt.AWTKeyStroke[ ][ ]";1;32
+"scala.reflect.Manifest$$anon$5";1;16
+"scala.reflect.Manifest$$anon$4";1;16
+"scala.reflect.Manifest$$anon$7";1;16
+"scala.reflect.Manifest$$anon$6";1;16
+"scala.reflect.Manifest$$anon$1";1;16
+"scala.reflect.Manifest$$anon$3";1;16
+"scala.reflect.Manifest$$anon$2";1;16
+"scala.reflect.Manifest$$anon$9";1;16
+"scala.reflect.Manifest$$anon$8";1;16
+"java.lang.Short[ ]";1;1040
+"sun.nio.fs.WindowsPath";1;40
+"java.awt.Canvas";1;208
+"sun.java2d.pipe.DrawImage";1;16
+"com.jprofiler.agent.probe.a.a.u";1;40
+"com.siigna.module.base.Menu$$anon$1";1;32
+"com.jprofiler.agent.probe.a.a.n";1;80
+"com.jprofiler.agent.probe.a.a.i";1;72
+"com.siigna.app.model.action.Create$";1;16
+"scala.actors.TIMEOUT$";1;16
+"com.siigna.util.event.Track$$anonfun$4";1;24
+"scala.collection.mutable.IndexedSeq$";1;16
+"com.jprofiler.agent.probe.a.a.z";1;56
+"sun.awt.windows.WPanelPeer";1;136
+"java.util.logging.LoggingPermission";1;24
+"com.jprofiler.agent.probe.a.a.b";1;24
+"com.jprofiler.agent.probe.a.a.a";1;48
+"java.awt.EventDispatchThread$HierarchyEventFilter";1;16
+"com.siigna.app.controller.remote.Get";1;24
+"sun.net.www.http.KeepAliveStreamCleaner";1;32
+"scala.actors.remote.FreshNameCreator$";1;24
+"scala.actors.ActorProxy";1;64
+"com.siigna.module.cad.modify.Move$$anonfun$1$$anonfun$4";1;16
+"sun.nio.ch.FileDispatcherImpl";1;16
+"java.awt.EventFilter$FilterAction[ ]";1;32
+"sun.nio.ch.Util$BufferCache";1;24
+"java.security.ProtectionDomain$1";1;16
+"sun.font.GlyphLayout$GVData";1;32
+"java.security.ProtectionDomain$3";1;16
+"java.net.InetAddress$Cache$Type[ ]";1;24
+"scala.collection.parallel.mutable.ResizableParArrayCombiner$";1;16
+"scala.collection.BitSetLike$";1;24
+"java.lang.Character[ ]";1;528
+"scala.collection.parallel.ForkJoinTasks$";1;16
+"com.sun.jmx.remote.util.ClassLogger";1;24
+"java.lang.Terminator$1";1;16
+"com.siigna.app.controller.EventController$$anonfun$dispatch$1$1";1;16
+"sun.nio.ch.Util$1";1;16
+"scala.collection.parallel.immutable.HashMapCombiner$";1;24
+"java.nio.channels.spi.AbstractInterruptibleChannel$1";1;16
+"java.awt.DefaultFocusTraversalPolicy";1;32
+"com.siigna.app.view.View$$anonfun$4";1;16
+"scala.collection.Traversable$";1;16
+"java.lang.ProcessEnvironment";1;48
+"scala.math.BigInt$";1;32
+"java.util.concurrent.atomic.AtomicBoolean";1;16
+"com.siigna.util.event.MouseMove$";1;16
+"java.awt.Dialog$ModalExclusionType[ ]";1;32
+"java.util.concurrent.locks.ReentrantReadWriteLock$FairSync";1;48
+"scala.collection.mutable.UnrolledBuffer$";1;24
+"scala.actors.Actor$blocker$";1;16
+"com.siigna.app.SiignaApplet$$anon$2";1;112
+"com.siigna.app.SiignaApplet$$anon$1";1;112
+"com.siigna.module.cad.radialmenu.category.CreateCategory$";1;32
+"com.siigna.module.cad.radialmenu.category.HelpersCategory$";1;32
+"com.siigna.module.inputFeedback";1;32
+"scala.actors.remote.DelegateActor";1;88
+"sun.nio.ch.FileChannelImpl";1;56
+"scala.Predef$$anon$3";1;16
+"scala.Predef$$anon$4";1;16
+"sun.awt.image.PixelConverter$Bgrx";1;16
+"java.lang.management.MemoryManagerMXBean[ ]";1;32
+"scala.math.Ordering$";1;16
+"scala.Predef$$anon$6";1;16
+"com.siigna.util.geom.Vector2D$";1;16
+"sun.java2d.d3d.D3DScreenUpdateManager$1$1";1;16
+"java.lang.ref.Reference$ReferenceHandler";1;104
+"java.math.BigDecimal$1";1;16
+"scala.collection.MapLike$DefaultValuesIterable";1;16
+"sun.misc.Launcher$AppClassLoader";1;80
+"sun.font.SunFontManager$T1Filter";1;16
+"sun.java2d.d3d.D3DRTTSurfaceToSurfaceScale";1;48
+"java.nio.charset.CoderResult$2";1;16
+"java.nio.charset.CoderResult$1";1;16
+"scala.collection.immutable.HashMap$";1;16
+"sun.dc.pr.PathFiller";1;24
+"sun.awt.image.PixelConverter$Ushort4444Argb";1;16
+"scala.runtime.ScalaRunTime$";1;24
+"sun.java2d.pipe.SolidTextRenderer";1;16
+"scala.collection.immutable.Set$EmptySet$";1;16
+"sun.java2d.d3d.D3DSurfaceToSurfaceTransform";1;48
+"sun.java2d.loops.DrawGlyphListAA$General";1;48
+"com.siigna.app.SiignaApplet";1;296
+"sun.awt.SunToolkit$ModalityListenerList";1;16
+"java.awt.KeyboardFocusManager$HeavyweightFocusRequest";1;24
+"java.lang.ThreadGroup[ ]";1;32
+"java.awt.EventDispatchThread";1;120
+"sun.nio.cs.UTF_8";1;24
+"com.sun.jmx.mbeanserver.MBeanAnalyzer$MethodOrder";1;16
+"com.siigna.app.controller.EventController$$anon$4";1;16
+"com.siigna.app.controller.EventController$$anon$3";1;16
+"com.siigna.app.controller.EventController$$anon$2";1;16
+"com.siigna.app.controller.EventController$$anon$1";1;16
+"java.util.WeakHashMap$KeySet";1;16
+"java.lang.ref.Finalizer$FinalizerThread";1;104
+"sun.management.counter.Units[ ]";1;48
+"java.nio.Bits$1";1;16
+"scala.util.control.Breaks";1;16
+"sun.net.www.protocol.http.Handler";1;24
+"sun.awt.windows.WToolkit$2";1;16
+"com.siigna.util.geom.ComplexRectangle2D$";1;16
+"sun.net.DefaultProgressMeteringPolicy";1;16
+"java.awt.font.TextLine$2";1;16
+"java.awt.font.TextLine$3";1;16
+"java.awt.font.TextLine$1";1;16
+"sun.awt.windows.WWindowPeer$ActiveWindowListener";1;16
+"java.awt.font.TextLine$4";1;16
+"scala.collection.parallel.immutable.ParHashMap$";1;16
+"java.lang.Integer[ ]";1;1040
+"scala.xml.TopScope$";1;24
+"scala.util.control.Breaks$";1;16
+"com.siigna.util.geom.Arc2D$";1;16
+"com.siigna.module.base.radialmenu.EventWSW$";1;32
+"scala.collection.mutable.FlatHashTable$";1;16
+"java.awt.Component$FlipSubRegionBufferStrategy";1;48
+"sun.awt.im.ExecutableInputMethodManager";1;56
+"sun.dc.DuctusRenderingEngine";1;16
+"scala.collection.immutable.Vector$$anon$2";1;16
+"sun.java2d.loops.DrawGlyphList$General";1;48
+"java.net.Proxy$Type[ ]";1;32
+"sun.java2d.d3d.D3DSurfaceToGDIWindowSurfaceScale";1;48
+"com.siigna.app.model.ActionModel$$anonfun$1";1;16
+"com.siigna.app.model.shape.TextShape$";1;16
+"com.siigna.app.model.shape.EmptySelector$";1;16
+"sun.nio.cs.MS1252";1;24
+"com.siigna.util.event.MouseButtonRight$";1;16
+"com.siigna.module.Module$";1;16
+"com.jprofiler.agent.triggers.TriggerInterceptor$1";1;24
+"java.lang.ApplicationShutdownHooks$1";1;16
+"scala.util.Properties$";1;40
+"sun.nio.ch.NativeThreadSet";1;24
+"sun.misc.ASCIICaseInsensitiveComparator";1;16
+"java.io.InputStreamReader";1;24
+"scala.math.Ordered$";1;16
+"sun.net.www.http.KeepAliveCache";1;48
+"scala.math.Equiv$";1;16
+"sun.management.HotSpotDiagnostic";1;16
+"com.siigna.app.model.action.Transform$";1;16
+"scala.collection.immutable.Nil$";1;16
+"sun.awt.image.PixelConverter$Xrgb";1;16
+"sun.java2d.d3d.D3DSurfaceToSwBlit";1;48
+"com.jprofiler.agent.probe.PayloadHotspots";1;32
+"scala.collection.generic.IdleSignalling$";1;16
+"com.siigna.util.geom.Circle2D$";1;16
+"java.awt.event.InputEvent$1";1;16
+"com.siigna.module.cad.radialmenu.category.PropertiesCategory$$anonfun$2";1;16
+"com.jprofiler.agent.util.a.a.a.c";1;16
+"sun.java2d.pipe.hw.ExtendedBufferCapabilities$VSyncType[ ]";1;32
+"java.lang.ClassCastException";1;32
+"int[ ][ ][ ]";1;40
+"sun.java2d.loops.SetFillSpansANY";1;48
+"com.siigna.app.controller.remote.RemoteController$";1;88
+"sun.util.locale.InternalLocaleBuilder$CaseInsensitiveChar";1;16
+"java.util.Collections$EmptySet";1;16
+"char[ ][ ][ ]";1;432
+"scala.Symbol$";1;32
+"com.siigna.app.model.server.User";1;32
+"sun.font.TrueTypeFont";1;136
+"scala.runtime.BoxedUnit";1;16
+"scala.math.Numeric$LongIsIntegral$";1;16
+"com.siigna.module.ModuleLoader$";1;32
+"com.siigna.util.event.End$";1;16
+"com.siigna.module.cad.create.Line$$anonfun$1";1;16
+"java.util.logging.LoggingProxyImpl";1;16
+"sun.java2d.d3d.D3DSurfaceToSurfaceScale";1;48
+"scala.collection.immutable.List$";1;16
+"java.io.BufferedInputStream";1;40
+"java.lang.OutOfMemoryError[ ]";1;32
+"scala.actors.Reactor$$anonfun$dostart$1";1;16
+"sun.awt.Symbol";1;24
+"scala.collection.immutable.HashMap$EmptyHashMap$";1;16
+"java.util.concurrent.locks.ReentrantReadWriteLock$NonfairSync";1;48
+"sun.nio.cs.UTF_16";1;24
+"sun.management.MemoryImpl";1;32
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory";1;16
+"sun.reflect.UnsafeObjectFieldAccessorImpl";1;24
+"sun.java2d.windows.GDIRenderer";1;16
+"sun.awt.windows.WWindowPeer$GuiDisposedListener";1;16
+"scala.collection.Seq$";1;16
+"com.siigna.app.view.Interface$Cursors$";1;32
+"sun.awt.image.PixelConverter$Argb";1;16
+"com.jprofiler.agent.probe.a.a.aa";1;24
+"com.jprofiler.agent.probe.a.a.ac";1;24
+"com.jprofiler.agent.probe.a.a.ab";1;24
+"sun.dc.pr.Rasterizer";1;32
+"sun.java2d.d3d.D3DTextureToSurfaceScale";1;48
+"com.intellij.rt.execution.application.AppMain$1";1;16
+"com.siigna.util.event.MouseButtonMiddle$";1;16
+"sun.management.VMManagementImpl";1;24
+"java.lang.Runtime";1;16
+"sun.net.ProgressMonitor";1;24
+"com.siigna.util.event.MouseUp$";1;16
+"java.text.AttributedCharacterIterator$Attribute[ ]";1;24
+"scala.math.Numeric$DoubleIsFractional$";1;16
+"com.jprofiler.agent.b";1;104
+"com.jprofiler.agent.k";1;16
+"com.sun.jmx.mbeanserver.SecureClassLoaderRepository";1;16
+"com.siigna.module.base.radialmenu.EventWNW$";1;32
+"sun.java2d.StateTrackable$State[ ]";1;32
+"java.io.BufferedReader";1;48
+"scala.actors.Scheduler$";1;16
+"sun.nio.fs.WindowsSecurityDescriptor";1;24
+"sun.java2d.pipe.BufferedRenderPipe$BufferedDrawHandler";1;64
+"java.util.BitSet";1;24
+"scala.math.BigInt[ ]";1;8216
+"com.siigna.package$";1;240
+"com.siigna.module.base.radialmenu.EventC$";1;32
+"sun.awt.im.InputMethodContext";1;64
+"com.siigna.app.model.shape.InnerPolylineShape[ ]";1;24
+"sun.misc.PerformanceLogger$TimeData";1;24
+"scala.collection.immutable.Stream$$hash$colon$colon$";1;16
+"java.awt.image.ComponentColorModel";1;104
+"sun.awt.windows.WInputMethod";1;48
+"sun.java2d.d3d.D3DSurfaceDataProxy";1;48
+"sun.awt.image.PixelConverter$RgbaPre";1;16
+"com.siigna.util.event.MouseExit$";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor1";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor2";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor3";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor4";1;16
+"scala.collection.immutable.StreamIterator";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor9";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor5";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor6";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor7";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor8";1;16
+"sun.awt.windows.WToolkit$2$1";1;16
+"com.jprofiler.agent.probe.d";1;16
+"com.jprofiler.agent.probe.f";1;112
+"short[ ][ ][ ]";1;40
+"com.jprofiler.agent.probe.e";1;16
+"java.awt.Frame$1";1;16
+"sun.nio.fs.WindowsChannelFactory$1";1;16
+"com.sun.jmx.mbeanserver.MBeanInstantiator";1;16
+"com.sun.jmx.mbeanserver.MXBeanLookup";1;24
+"sun.awt.AWTAutoShutdown";1;40
+"scala.actors.remote.TcpService$";1;24
+"java.io.DeleteOnExitHook$1";1;16
+"sun.java2d.Disposer";1;16
+"com.siigna.app.model.action.Delete$";1;16
+"com.sun.jmx.interceptor.DefaultMBeanServerInterceptor";1;40
+"sun.java2d.d3d.D3DDrawImage";1;16
+"com.siigna.util.event.Track$$anonfun$12";1;16
+"sun.java2d.d3d.D3DRenderer";1;32
+"com.siigna.util.event.MouseButtonNone$";1;16
+"java.util.Collections$EmptyList";1;16
+"sun.misc.Perf";1;16
+"scala.collection.Iterator$";1;16
+"sun.awt.resources.awt";1;40
+"scala.Console$";1;112
+"scala.actors.Reactor$";1;24
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$4";1;16
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$3";1;16
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$2";1;16
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$1";1;16
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$6";1;16
+"sun.java2d.pipe.AlphaPaintPipe";1;16
+"com.siigna.module.cad.radialmenu.category.StartCategory$$anonfun$5";1;16
+"scala.math.Numeric$IntIsIntegral$";1;16
+"sun.nio.cs.StreamDecoder";1;48
+"scala.collection.mutable.BitSet$";1;16
+"java.awt.Component$DummyRequestFocusController";1;16
+"com.siigna.app.controller.remote.RemoteConstants$";1;72
+"java.lang.reflect.ReflectAccess";1;16
+"sun.awt.image.PixelConverter";1;16
+"sun.java2d.WindowsSurfaceManagerFactory";1;16
+"sun.java2d.loops.SetDrawPolygonsANY";1;48
+"java.awt.Dialog$ModalityType[ ]";1;32
+"java.util.TimerThread";1;112
+"sun.net.www.protocol.file.Handler";1;16
+"com.siigna.util.event.EndPoints$";1;24
+"sun.awt.windows.WFontConfiguration";1;104
+"com.siigna.app.model.Drawing$";1;24
+"sun.net.www.protocol.http.HttpURLConnection$TunnelState[ ]";1;32
+"scala.actors.SuspendActorControl";1;32
+"com.siigna.module.base.radialmenu.EventN$";1;32
+"scala.math.Numeric$CharIsIntegral$";1;16
+"com.sun.jmx.mbeanserver.DescriptorCache";1;16
+"scala.concurrent.forkjoin.ForkJoinPool$DefaultForkJoinWorkerThreadFactory";1;16
+"sun.font.SunFontManager$TTFilter";1;16
+"sun.awt.SunHints$LCDContrastKey";1;24
+"scala.collection.IndexedSeq$";1;16
+"sun.awt.image.PixelConverter$Ushort565Rgb";1;16
+"com.siigna.util.event.ModifierKeys$";1;24
+"sun.dc.pr.PathDasher";1;24
+"scala.Predef$";1;48
+"sun.awt.image.ToolkitImage";1;48
+"sun.java2d.SurfaceData$PixelToPgramLoopConverter";1;48
+"sun.java2d.loops.GraphicsPrimitiveMgr$2";1;16
+"scala.actors.remote.NetKernel";1;32
+"sun.java2d.loops.GraphicsPrimitiveMgr$1";1;16
+"java.net.Inet6AddressImpl";1;24
+"sun.java2d.loops.TransformBlit";1;48
+"sun.net.spi.DefaultProxySelector";1;16
+"com.siigna.module.cad.radialmenu.category.ModifyCategory$";1;32
+"sun.awt.Win32FontManager";1;160
+"scala.collection.immutable.Iterable$";1;16
+"com.jprofiler.agent.probe.a.o";1;24
+"sun.awt.image.PixelConverter$ArgbPre";1;16
+"com.siigna.module.cad.create.Polyline$$anonfun$1$$anonfun$2";1;16
+"com.jprofiler.agent.probe.a.q";1;32
+"com.jprofiler.agent.probe.a.s";1;24
+"com.jprofiler.agent.probe.a.r";1;24
+"com.jprofiler.agent.probe.a.v";1;24
+"sun.awt.windows.WFramePeer";1;176
+"com.jprofiler.agent.probe.a.a";1;24
+"com.jprofiler.agent.probe.a.b";1;24
+"com.jprofiler.agent.probe.a.d";1;64
+"com.jprofiler.agent.probe.a.e";1;16
+"com.jprofiler.agent.probe.a.f";1;24
+"com.jprofiler.agent.probe.a.k";1;32
+"com.siigna.app.controller.Controller$";1;72
+"java.nio.ByteBuffer[ ]";1;48
+"com.sun.jmx.mbeanserver.StandardMBeanIntrospector";1;16
+"scala.None$";1;16
+"java.awt.image.MemoryImageSource";1;48
+"sun.java2d.pipe.RenderBuffer";1;48
+"com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory$Mappings";1;48
+"scala.sys.BooleanProp$BooleanPropImpl";1;24
+"sun.nio.cs.UTF_16LE";1;24
+"java.util.ResourceBundle$1";1;40
+"sun.java2d.loops.SetFillRectANY";1;48
+"scala.math.Numeric$";1;16
+"sun.java2d.pipe.LoopPipe";1;16
+"com.jprofiler.api.agent.mbean.RemoteController";1;16
+"com.siigna.app.view.View$";1;64
+"sun.java2d.pipe.LCDTextRenderer";1;16
+"scala.collection.mutable.Map$";1;16
+"sun.font.TrueTypeFont$DirectoryEntry[ ]";1;72
+"com.siigna.app.ApplicationWindow$$anon$1";1;16
+"com.siigna.app.ApplicationWindow$$anon$2";1;16
+"com.siigna.module.base.radialmenu.EventW$";1;32
+"java.net.URLClassLoader$7";1;16
+"java.lang.String$CaseInsensitiveComparator";1;16
+"sun.awt.FontDescriptor[ ]";1;32
+"java.util.logging.LogManager$Cleaner";1;112
+"scala.sys.SystemProperties$";1;48
+"scala.package$";1;104
+"scala.Array$";1;16
+"sun.awt.Symbol$Encoder";1;48
+"sun.management.ClassLoadingImpl";1;16
+"java.util.Locale[ ]";1;56
+"scala.collection.parallel.immutable.ParVector$";1;16
+"com.siigna.util.event.MouseWheel$";1;16
+"sun.java2d.d3d.D3DSurfaceToSurfaceBlit";1;48
+"sun.awt.image.ImageWatched$Link";1;16
+"sun.dc.pr.PathStroker";1;32
+"com.sun.jmx.mbeanserver.MBeanServerDelegateImpl";1;40
+"scala.collection.Iterable$";1;16
+"sun.text.normalizer.VersionInfo";1;16
+"scala.actors.Debug$";1;24
+"sun.nio.ch.FileChannelImpl$1";1;16
+"sun.java2d.d3d.D3DRTTSurfaceToSurfaceBlit";1;48
+"com.siigna.app.controller.remote.Session";1;24
+"com.sun.jmx.mbeanserver.Repository";1;32
+"com.jprofiler.agent.probe.a.ad";1;24
+"com.jprofiler.agent.probe.a.ac";1;40
+"java.awt.EventDispatchThread$1";1;16
+"com.jprofiler.agent.probe.a.an";1;32
+"sun.reflect.GeneratedSerializationConstructorAccessor12";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor13";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor10";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor11";1;16
+"com.jprofiler.agent.probe.a.ak";1;24
+"sun.util.resources.TimeZoneNames";1;40
+"sun.java2d.loops.SetDrawLineANY";1;48
+"com.jprofiler.agent.probe.a.aj";1;24
+"sun.reflect.GeneratedSerializationConstructorAccessor17";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor16";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor15";1;16
+"sun.reflect.GeneratedSerializationConstructorAccessor14";1;16
+"java.awt.Component[ ]";1;16
+"sun.font.ScriptRun";1;48
+"sun.awt.image.PixelConverter$ArgbBm";1;16
+"sun.awt.windows.WingDings";1;24
+"sun.util.CoreResourceBundleControl";1;16
+"sun.nio.cs.UTF_16BE";1;24
+"sun.awt.image.ByteInterleavedRaster";1;120
+"javax.management.openmbean.SimpleType[ ]";1;72
+"sun.nio.cs.StandardCharsets";1;32
+"com.siigna.util.geom.Rectangle2D$";1;16
+"scala.collection.mutable.HashSet$";1;16
+"com.siigna.app.controller.remote.Mode$";1;56
+"com.siigna.module.ModuleInit";1;56
+"java.net.SocketInputStream";1;48
+"scala.concurrent.forkjoin.ForkJoinPool";1;80
+"java.util.Locale$Cache";1;24
+"com.jprofiler.agent.probe.o";1;16
+"scala.actors.remote.Proxy";1;32
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$1";1;16
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$2";1;16
+"java.lang.ProcessEnvironment$NameComparator";1;16
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$7";1;16
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$8";1;16
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$3";1;16
+"com.siigna.module.cad.radialmenu.category.CreateCategory$$anonfun$4";1;16
+"java.awt.Toolkit$DesktopPropertyChangeSupport";1;24
+"scala.collection.parallel.ParSeq$";1;16
+"com.siigna.util.event.MouseDrag$";1;16
+"com.siigna.app.controller.remote.Server$";1;16
+"java.lang.Enum[ ]";1;16
+"sun.awt.image.PixelConverter$Ushort555Rgbx";1;16
+"com.siigna.util.event.CenterPoints$";1;16
+"com.siigna.util.event.Snap$";1;16
+"sun.java2d.loops.SetDrawRectANY";1;48
+"java.awt.BufferCapabilities";1;24
+"scala.collection.parallel.immutable.ParMap$";1;16
+"sun.font.TextRecord";1;32
+"java.io.FileDescriptor$1";1;16
+"sun.nio.cs.UTF_16$Decoder";1;56
+"sun.reflect.generics.tree.TypeVariableSignature";1;16
+"com.siigna.app.model.Selection$";1;16
+"sun.reflect.GeneratedMethodAccessor1";1;16
+"sun.reflect.GeneratedMethodAccessor2";1;16
+"com.siigna.module.base.radialmenu.EventESE$";1;32
+"java.lang.management.MemoryType[ ]";1;24
+"sun.util.calendar.Gregorian";1;16

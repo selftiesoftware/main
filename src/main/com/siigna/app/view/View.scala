@@ -254,8 +254,8 @@ object View {
       case e : Exception => Log.error("View: Unable to draw the dynamic Model: ", e)
     }
 
-    // Paint the module-loading icon in the top left corner
-    ModuleMenu.paint(graphics,transformation)
+    //Paint the module-loading icon in the top left corner
+    //ModuleMenu.paint(graphics,transformation)
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {
