@@ -64,6 +64,8 @@ object Drawing extends ActionModel
   // Calculates the boundary of the model whenever it changes
   addActionListener(() => _boundary = calculateBoundary())
 
+  //calculates the paper header whenever it changes
+
   // The private boundary instance
   private var _boundary = calculateBoundary()
 
