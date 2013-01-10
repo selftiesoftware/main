@@ -200,7 +200,14 @@ object View {
   *
   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
   */
+
+  def fps(fps : Int) = 1000/fps
+
   def paint(screenGraphics : AWTGraphics) {
+
+    //Reduce CPU load by setting FPS
+    //Thread.sleep(fps(30))
+
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
 
