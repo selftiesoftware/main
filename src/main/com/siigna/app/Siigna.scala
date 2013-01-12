@@ -119,14 +119,11 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * modules ending, module-information being garbage collected and what not.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
+    // Paint the interface
+    if (interface.isDefined) interface.get.paint(graphics, transformation)
 
     // Paint the tracking - if needed
     Track.paint(graphics, transformation)
-
-    // Paint the interface
-    synchronized {
-      if (interface.isDefined) interface.get.paint(graphics, transformation)
-    }
 
     // Paint the display or remove it if needed
     if (display.isDefined && display.get.isEnabled)

@@ -18,7 +18,7 @@ import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.shape.{Shape, PolylineShape}
 import java.awt.image.BufferedImage
-import com.siigna.app.model.Drawing
+import com.siigna.app.model.{Selection, Drawing}
 import scala.Some
 import com.siigna.module.ModuleMenu
 
@@ -183,24 +183,35 @@ object View {
    */
   def height = if (canvas.isDefined) canvas.get.getHeight else 0
 
- /**
-  * Draws the [[com.siigna.app.model.Model]] and the [[com.siigna.module.Module]]s.<br />
-  *
-  * This function uses a hack that eliminates all flickering caused by
-  * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
-  * Instead of server everything on the views Graphics-object immediately it
-  * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
-  * when iterating through the DOM. When the image has been drawn, it then
-  * returns the image with the graphical informations. This is done in
-  * order to avoid the software from server several times on the view at
-  * the same time (which is done when iterating through the DOM), and then
-  * potentially clearing paint-methods that are in the making. This can
-  * create 'black-outs' (also known as double-buffering) which makes us
-  * saaaad pandas.
-  *
-  * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
-  */
-  def paint(screenGraphics : AWTGraphics) {
+  /**
+   * <p>
+   *   Draws the classical chess-checkered pattern, cleans the drawing area with a white rectangle and draw
+   *   the given [[com.siigna.app.model.shape.Shape]]s, [[com.siigna.app.view.Interface]] and
+   *   [[com.siigna.app.model.Selection]].
+   * </p>
+   *
+   * This function uses a hack that eliminates all flickering caused by
+   * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
+   * Instead of server everything on the views Graphics-object immediately it
+   * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
+   * when iterating through the DOM. When the image has been drawn, it then
+   * returns the image with the graphical informations. This is done in
+   * order to avoid the software from server several times on the view at
+   * the same time (which is done when iterating through the DOM), and then
+   * potentially clearing paint-methods that are in the making. This can
+   * create 'black-outs' (also known as double-buffering) which makes us
+   * saaaad pandas.
+   *
+   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
+   *
+   * @param screenGraphics  The AWT screen graphics to output the graphics to.
+   * @param model  The shapes to draw mapped with their id's. The id's are used to collect any shape parts from the
+   *               selection, if needed.
+   * @param selection  The selection to draw, if any.
+   * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
+   *                   Defaults to None.
+   */
+  def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
 
@@ -221,14 +232,9 @@ object View {
     graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
                   boundary.width.toInt, boundary.height.toInt)
 
-    // Draw a white rectangle inside the boundary of the current model.
-    //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
-    //g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
-
     // Draw model
     if (Drawing.size > 0) try {
-      val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-      Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+      model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
     } catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
@@ -243,15 +249,15 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      Drawing.selection.par.foreach(s => s.selectedShapes.foreach(e => {
+      selection.par.foreach(s => s.selectedShapes.foreach(e => {
         graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
       }))
 
       // Draw vertices
-      Drawing.selection.par.foreach(_.foreach(i => {
-        Drawing(i._1).getVertices(i._2).foreach(p => {
+      selection.par.foreach(_.foreach(i => {
+        model.get(i._1).foreach(_.getVertices(i._2).foreach(p => {
           graphics.draw(transformation.transform(p), color)
-        })
+        }))
       }))
     } catch {
       case e : Exception => Log.error("View: Unable to draw the dynamic Model: ", e)
@@ -262,7 +268,7 @@ object View {
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {
-      Siigna.paint(graphics, transformation)
+      interface.foreach(_.paint(graphics, transformation))
     } catch {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
       case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
