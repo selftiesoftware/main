@@ -15,9 +15,6 @@ import com.siigna.app.view.{View, ModuleInterface, Graphics}
 import com.siigna.util.event._
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.util.logging.Log
-import scala.Some
-import scala.Some
-import scala.Some
 import com.siigna.util.event.KeyUp
 import com.siigna.util.event.KeyDown
 import scala.Some
