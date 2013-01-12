@@ -22,9 +22,6 @@ package object siigna extends com.siigna.util.Implicits {
   val Select = com.siigna.app.model.action.Select
   val Transform = com.siigna.app.model.action.Transform
 
-  // Controller
-  val Controller = com.siigna.app.controller.Controller
-
   // Model
   val Drawing = com.siigna.app.model.Drawing
 

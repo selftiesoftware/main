@@ -12,7 +12,6 @@
 package com.siigna.module
 
 import com.siigna.util.logging.Log
-import com.siigna.app.controller.Controller
 import java.io.FileNotFoundException
 import java.net.URLClassLoader
 
@@ -22,6 +21,16 @@ import java.net.URLClassLoader
  * @todo implement caching on a per package basis
  */
 object ModuleLoader {
+
+  // The private init module.. ssshhh
+  private var _initModule : Option[Module] = None
+
+  /**
+   * The init [[com.siigna.module.Module]] that we're sending events to.
+   * Call <code>initModule_=()</code> if you want to change the behavior.
+   * @see [[com.siigna.module.Module]]
+   */
+  def initModule : Option[Module] = _initModule
 
   // The underlying class loader
   protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
@@ -145,13 +154,13 @@ object ModuleLoader {
         url.openConnection().connect()
 
         // Add package to URL base
-        loader = new URLClassLoader(loader.getURLs.:+(url), Controller.getClass.getClassLoader)
+        loader = new URLClassLoader(loader.getURLs.:+(url), this.getClass.getClassLoader)
 
         // Check for ModuleInit in that package
         try {
           val c = loader.loadClass("com.siigna.module.ModuleInit")
           val m = classToModule(c)
-          Controller.initModule = m
+          _initModule = Some(m)
           Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
         } catch {
           // No module found

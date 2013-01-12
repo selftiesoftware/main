@@ -102,12 +102,6 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def getInterface = interface
 
   /**
-   * Examines whether this client is connected with the server.
-   * @return True if the connection has been established correctly, false otherwise.
-   */
-  def isOnline = Controller.isOnline
-
-  /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
    * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
    * needs to use/reverse some of the transformations that already have been applied to the view.
