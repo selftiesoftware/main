@@ -155,7 +155,6 @@ class SiignaApplet extends Applet {
     // Get the strategy
     val strategy = canvas.getBufferStrategy
 
-    println(shouldExit)
     // Run, run, run
     while(!shouldExit) {
 
@@ -173,7 +172,7 @@ class SiignaApplet extends Applet {
           val model = Drawing(mbr)
 
           // Paint the view
-          View.paint(graphics, model)
+          View.paint(graphics, model,Drawing.selection, Some(Siigna))
 
           // Dispose of the graphics
           graphics.dispose()
