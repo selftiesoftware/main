@@ -38,10 +38,12 @@ object Track extends EventTrack {
   var trackedPoint: Option[Vector2D] = None
 
   // Get the track color
-  protected val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
+  // Must be lazy to avoid instantiation errors!
+  protected lazy val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
 
   // Define the attributes of the track lines
-  protected val attributes = Attributes("Infinite" -> true, color)
+  // Must be lazy to avoid instantiation errors!
+  protected lazy val attributes = Attributes("Infinite" -> true, color)
 
   //a placeholder for shapes not yet in the model.
   //TODO: hack because the TrackModel is reset constantly.

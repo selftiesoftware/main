@@ -51,7 +51,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * Listeners that receives events whenever an action is executed, undone or redone.
    */
-  protected var listeners : Seq[() => Unit] = Nil
+  protected var listeners : Seq[(Action, Boolean) => Unit] = Nil
 
   /**
    * The underlying immutable model of Siigna.
@@ -60,9 +60,10 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
-   * @param listener  The function to be executed whenever an action is executed, undone or redone.
+   * @param listener  The function to be executed receiving an action that has been executed and a boolean
+   *                  value indicating whether the action was executed (true; includes redo) or undone (false).
    */
-  def addActionListener(listener : () => Unit) {
+  def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
   }
   
@@ -93,10 +94,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       }
 
       // Notify listeners
-      notifyListeners()
-
-      // Send it to the server
-      if (remote) Controller ! action
+      if (remote) notifyListeners(action, executed = true)
 
       Log.success("ActionModel: Successfully executed action: " + action)
     } catch {
@@ -126,9 +124,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
   /**
    * Notifies the listeners that an action has been executed, undone or redone.
+   * @param action  The action that has been executed or undone
+   * @param executed  Whether the action has been executed (true) or undone (false).
    */
-  protected def notifyListeners() {
-    listeners.foreach(_())
+  protected def notifyListeners(action : Action, executed : Boolean) {
+    listeners.foreach(_(action, executed))
   }
 
   /**
@@ -149,10 +149,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
         model = new Model(model.shapes, model.executed.+:(action), undone)
 
         // Notify listeners
-        notifyListeners()
-
-        // Send to server
-        Controller ! action
+        notifyListeners(action, executed = true)
 
         Log.success("ActionModel: Action successfully redone: " + action)
       } catch {
@@ -182,7 +179,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def undo() { 
     model.executed.headOption match {
-      case Some(action) => undo(action, true)
+      case Some(action) => undo(action, remote = true)
       case None => Log.debug("ActionModel: No more actions to undo.")
     } 
   }
@@ -198,11 +195,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
       // Undo it
       model = action.undo(model)
 
-      // Notify listeners
-      notifyListeners()
-
       // Send the action to server with the undone flag set to true!
-      if (remote) Controller ! (action, true)
+      if (remote) notifyListeners(action, executed = false)
 
       Log.success("ActionModel: Action successfully undone: " + action)
     } catch {

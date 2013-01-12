@@ -152,7 +152,7 @@ object ModuleLoader {
           val c = loader.loadClass("com.siigna.module.ModuleInit")
           val m = classToModule(c)
           Controller.initModule = m
-          Log.success("ModuleLoader: Reloaded init module.")
+          Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
         } catch {
           // No module found
           case e : ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)

@@ -32,6 +32,7 @@ import java.awt.{Canvas, BorderLayout}
 import model.Drawing
 import model.server.User
 import view.View
+import com.siigna.util.geom.Rectangle2D
 
 /**
  * The entry-point of Siigna.
@@ -48,6 +49,9 @@ class SiignaApplet extends Applet {
   // The canvas on which we can paint
   private var canvas : Canvas = null
 
+  // The controller to whom we send events
+  private var controller : Controller = null
+
   // The paint thread
   private val paintThread = new Thread() { override def run() { paintLoop() } }
 
@@ -59,7 +63,7 @@ class SiignaApplet extends Applet {
     shouldExit = true
 
     // Stop the controller by interruption so we're sure the controller shuts it
-    Controller ! 'exit
+    if (controller != null) controller ! 'exit
               
     // Wait for the paint thread (max 500ms)
     paintThread.join(500)
@@ -114,10 +118,12 @@ class SiignaApplet extends Applet {
     // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
 
-    Controller.setupEventListenersOn(canvas)
+    // Get the controller and setup event-listeners
+    controller = new Controller()
+    controller.setupEventListenersOn(canvas)
 
     // Start the controller
-    Controller.start()
+    controller.start()
 
     // Paint the view
     new Thread() {
@@ -149,8 +155,10 @@ class SiignaApplet extends Applet {
     // Get the strategy
     val strategy = canvas.getBufferStrategy
 
+    println(shouldExit)
     // Run, run, run
     while(!shouldExit) {
+
       // Render a single frame
       if (strategy != null) do {
 
@@ -160,8 +168,12 @@ class SiignaApplet extends Applet {
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
 
+          // Get the model
+          val mbr   = Rectangle2D(View.boundary.topLeft, View.boundary.bottomRight).transform(View.drawingTransformation.inverse)
+          val model = Drawing(mbr)
+
           // Paint the view
-          View.paint(graphics)
+          View.paint(graphics, model)
 
           // Dispose of the graphics
           graphics.dispose()

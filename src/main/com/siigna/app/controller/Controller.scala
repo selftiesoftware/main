@@ -17,6 +17,7 @@ import com.siigna.app.model.action.Action
 import remote.RemoteController
 import scala.actors.Actor
 import com.siigna.app.Siigna
+import com.siigna.app.model.Drawing
 
 /**
  * <p>
@@ -34,7 +35,10 @@ import com.siigna.app.Siigna
  *  application carries on. Hurray!
  * </p>
  */
-object Controller extends Actor with EventController {
+class Controller extends EventController {
+
+  // Listen to the drawing
+  Drawing.addActionListener((a, b) => this.!(a, b))
 
   // The private init module.. ssshhh
   private var _initModule : Option[Module] = None
