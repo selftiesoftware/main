@@ -18,14 +18,14 @@ import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.shape.{Shape, PolylineShape}
 import java.awt.image.BufferedImage
-import com.siigna.app.model.Drawing
+import com.siigna.app.model.{Selection, Drawing}
 import scala.Some
 import com.siigna.module.ModuleMenu
 
 /**
  * <p>
  *   This is the view part of the
-  *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
+ *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
  *   The view is responsible for painting the appropriate content (in this case the [[com.siigna.app.model.Drawing]])
  *   and transforming the content to the correct zoom scale and pan vector.
  * </p>
@@ -76,6 +76,13 @@ object View {
   private var cachedBackground : BufferedImage = null
 
   /**
+   * An image of the model that can be re-used instead of calculating the shapes.
+   */
+  private var cachedModel : BufferedImage = null
+
+  var currentZoom : Double = 0.0
+  var currentPan : Vector2D = Vector2D(0,0)
+  /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
   private var canvas : Option[Canvas] = None
@@ -84,7 +91,7 @@ object View {
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
   var boundaryShape : SimpleRectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
-  
+
   /**
    * The frames in the current second.
    * @todo Use these!
@@ -126,9 +133,9 @@ object View {
 
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
     val topLeft           = Vector2D(confine(offScreenBoundary.topLeft.x, 0, width),
-                                   confine(offScreenBoundary.topLeft.y, 0, height))
+      confine(offScreenBoundary.topLeft.y, 0, height))
     val bottomRight       = Vector2D(confine(offScreenBoundary.bottomRight.x, 0, width),
-                                   confine(offScreenBoundary.bottomRight.y, 0, height))
+      confine(offScreenBoundary.bottomRight.y, 0, height))
     Rectangle2D(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
   }
 
@@ -183,31 +190,35 @@ object View {
    */
   def height = if (canvas.isDefined) canvas.get.getHeight else 0
 
- /**
-  * Draws the [[com.siigna.app.model.Model]] and the [[com.siigna.module.Module]]s.<br />
-  *
-  * This function uses a hack that eliminates all flickering caused by
-  * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
-  * Instead of server everything on the views Graphics-object immediately it
-  * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
-  * when iterating through the DOM. When the image has been drawn, it then
-  * returns the image with the graphical informations. This is done in
-  * order to avoid the software from server several times on the view at
-  * the same time (which is done when iterating through the DOM), and then
-  * potentially clearing paint-methods that are in the making. This can
-  * create 'black-outs' (also known as double-buffering) which makes us
-  * saaaad pandas.
-  *
-  * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
-  */
-
-  def fps(fps : Int) = 1000/fps
-
-  def paint(screenGraphics : AWTGraphics) {
-
-    //Reduce CPU load by setting FPS
-    //Thread.sleep(fps(30))
-
+  /**
+   * <p>
+   *   Draws the classical chess-checkered pattern, cleans the drawing area with a white rectangle and draw
+   *   the given [[com.siigna.app.model.shape.Shape]]s, [[com.siigna.app.view.Interface]] and
+   *   [[com.siigna.app.model.Selection]].
+   * </p>
+   *
+   * This function uses a hack that eliminates all flickering caused by
+   * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
+   * Instead of server everything on the views Graphics-object immediately it
+   * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
+   * when iterating through the DOM. When the image has been drawn, it then
+   * returns the image with the graphical informations. This is done in
+   * order to avoid the software from server several times on the view at
+   * the same time (which is done when iterating through the DOM), and then
+   * potentially clearing paint-methods that are in the making. This can
+   * create 'black-outs' (also known as double-buffering) which makes us
+   * saaaad pandas.
+   *
+   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
+   *
+   * @param screenGraphics  The AWT screen graphics to output the graphics to.
+   * @param model  The shapes to draw mapped with their id's. The id's are used to collect any shape parts from the
+   *               selection, if needed.
+   * @param selection  The selection to draw, if any.
+   * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
+   *                   Defaults to None.
+   */
+  def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
 
@@ -226,20 +237,25 @@ object View {
     // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
     graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
-                  boundary.width.toInt, boundary.height.toInt)
+      boundary.width.toInt, boundary.height.toInt)
 
-    // Draw a white rectangle inside the boundary of the current model.
-    //g.g.setBackground(new Color(1.00f, 1.00f, 1.00f, paperColor))
-    //g.g.clearRect(boundary.xMin.toInt, boundary.yMin.toInt, boundary.width.toInt, boundary.height.toInt)
+    if (Drawing.size > 0) {
+      try {
+        // Render and draw the model
+        graphics2D drawImage(renderModel(model, transformation), 0, 0, null)
+      }catch {
+        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+        case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      }
+    }
 
     // Draw model
-    if (Drawing.size > 0) try {
-      val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-      Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-    } catch {
-      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-    }
+    //if (Drawing.size > 0) try {
+    //  model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+    //} catch {
+    //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+    //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+    //}
 
     // Draw the boundary shape
     graphics draw boundaryShape(boundary)
@@ -250,26 +266,26 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      Drawing.selection.par.foreach(s => s.selectedShapes.foreach(e => {
+      selection.par.foreach(s => s.selectedShapes.foreach(e => {
         graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
       }))
 
       // Draw vertices
-      Drawing.selection.par.foreach(_.foreach(i => {
-        Drawing(i._1).getVertices(i._2).foreach(p => {
+      selection.par.foreach(_.foreach(i => {
+        model.get(i._1).foreach(_.getVertices(i._2).foreach(p => {
           graphics.draw(transformation.transform(p), color)
-        })
+        }))
       }))
     } catch {
       case e : Exception => Log.error("View: Unable to draw the dynamic Model: ", e)
     }
 
-    // Paint the module-loading icon in the top left corner
+    //Paint the module-loading icon in the top left corner
     //ModuleMenu.paint(graphics,transformation)
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {
-      Siigna.paint(graphics, transformation)
+      interface.foreach(_.paint(graphics, transformation))
     } catch {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
       case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
@@ -307,7 +323,7 @@ object View {
    */
   def renderBackground : BufferedImage = {
     if (cachedBackground == null || cachedBackground.getHeight != height
-                                 || cachedBackground.getWidth  != width) {
+      || cachedBackground.getWidth  != width) {
       // Create image
       val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics
@@ -334,6 +350,43 @@ object View {
       cachedBackground = image
     }
     cachedBackground
+  }
+
+  /**
+   * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
+   * local variable. If the renderBackground method is called again, we simply return the cached copy
+   * unless the dimensions of the view has changed, in which case we need to re-render it.
+   */
+  def renderModel(m : Map[Int, Shape], t : TransformationMatrix) : BufferedImage = {
+    //if (Drawing.size > 0){
+    if (cachedModel == null || pan != currentPan || zoom  != currentZoom) {
+      println("update image")
+      // Create image
+      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+      //enable drawing on the image
+      val g = image.getGraphics.asInstanceOf[Graphics2D]
+      val graphics = new Graphics(g)
+
+      //m.par.map(_._2) foreach(s => {
+      //  println(s)
+      //  graphics.draw(s.transform(t))
+      //})
+      m.foreach(tuple => {
+        graphics.draw(tuple._2.transform(t))
+      })
+
+      //store the zoom and pan settings
+      currentZoom = zoom
+      currentPan  = pan
+
+      //
+      cachedModel = image
+      println("model: "+m)
+      cachedModel
+    } else {
+      cachedModel
+    }
+    //}
   }
 
   /**
