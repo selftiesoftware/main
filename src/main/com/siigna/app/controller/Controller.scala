@@ -15,8 +15,6 @@ import com.siigna.module.{Module, ModuleLoader}
 import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import remote.RemoteController
-import scala.actors.Actor
-import com.siigna.app.Siigna
 import com.siigna.app.model.Drawing
 
 /**
@@ -77,7 +75,6 @@ class Controller extends EventController {
         case event : Event => {
           // Send the event on to the modules!
           ModuleLoader.initModule.foreach(_ apply event)
-
         }
 
         // Exit

@@ -172,7 +172,7 @@ class SiignaApplet extends Applet {
           val model = Drawing(mbr)
 
           // Paint the view
-          View.paint(graphics, model)
+          View.paint(graphics, model,Drawing.selection, Some(Siigna))
 
           // Dispose of the graphics
           graphics.dispose()
