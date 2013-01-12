@@ -79,6 +79,7 @@ object View {
    * An image of the model that can be re-used instead of calculating the shapes.
    */
   private var cachedModel : BufferedImage = null
+
   var currentZoom : Double = 0.0
   var currentPan : Vector2D = Vector2D(0,0)
   /**
@@ -233,10 +234,15 @@ object View {
     // Render and draw the background
     graphics2D drawImage(renderBackground, 0, 0, null)
 
+    // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
+    graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
+    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
+      boundary.width.toInt, boundary.height.toInt)
+
     if (Drawing.size > 0) {
       try {
         // Render and draw the model
-        graphics2D drawImage(renderModel, 0, 0, null)
+        graphics2D drawImage(renderModel(model, transformation), 0, 0, null)
       }catch {
         case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
         case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
@@ -250,11 +256,6 @@ object View {
     //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
     //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
     //}
-
-    // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-    graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
-                  boundary.width.toInt, boundary.height.toInt)
 
      // Draw the boundary shape
     graphics draw boundaryShape(boundary)
@@ -356,12 +357,23 @@ object View {
    * local variable. If the renderBackground method is called again, we simply return the cached copy
    * unless the dimensions of the view has changed, in which case we need to re-render it.
    */
-  def renderModel : BufferedImage = {
+  def renderModel(m : Map[Int, Shape], t : TransformationMatrix) : BufferedImage = {
     //if (Drawing.size > 0){
-      //if (cachedModel == null || pan != currentPan || zoom  != currentZoom) {
+      if (cachedModel == null || pan != currentPan || zoom  != currentZoom) {
         println("update image")
         // Create image
         val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+        //enable drawing on the image
+        val g = image.getGraphics.asInstanceOf[Graphics2D]
+        val graphics = new Graphics(g)
+
+        //m.par.map(_._2) foreach(s => {
+        //  println(s)
+        //  graphics.draw(s.transform(t))
+        //})
+        m.foreach(tuple => {
+          graphics.draw(tuple._2.transform(t))
+        })
 
         //store the zoom and pan settings
         currentZoom = zoom
@@ -369,8 +381,11 @@ object View {
 
         //
         cachedModel = image
-      //}
-      cachedModel
+        println("model: "+m)
+        cachedModel
+      } else {
+        cachedModel
+      }
     //}
   }
 
