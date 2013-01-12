@@ -79,9 +79,8 @@ object View {
    * An image of the model that can be re-used instead of calculating the shapes.
    */
   private var cachedModel : BufferedImage = null
-  var currentPan : Double = 0.0
-  var currentZoom : Vector2D = Vector2D(0,0)
-
+  var currentZoom : Double = 0.0
+  var currentPan : Vector2D = Vector2D(0,0)
   /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
@@ -234,23 +233,30 @@ object View {
     // Render and draw the background
     graphics2D drawImage(renderBackground, 0, 0, null)
 
-    // Render and draw the model
-    graphics2D drawImage(renderModel, 0, 0, null)
+    if (Drawing.size > 0) {
+      try {
+        // Render and draw the model
+        graphics2D drawImage(renderModel, 0, 0, null)
+      }catch {
+        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+        case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      }
+    }
+
+    // Draw model
+    //if (Drawing.size > 0) try {
+    //  model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+    //} catch {
+    //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+    //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+    //}
 
     // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
     graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
                   boundary.width.toInt, boundary.height.toInt)
 
-    // Draw model
-    if (Drawing.size > 0) try {
-      model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-    } catch {
-      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-    }
-
-    // Draw the boundary shape
+     // Draw the boundary shape
     graphics draw boundaryShape(boundary)
 
     // Fetch and draw the dynamic layer.
@@ -351,23 +357,22 @@ object View {
    * unless the dimensions of the view has changed, in which case we need to re-render it.
    */
   def renderModel : BufferedImage = {
+    //if (Drawing.size > 0){
+      //if (cachedModel == null || pan != currentPan || zoom  != currentZoom) {
+        println("update image")
+        // Create image
+        val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
 
+        //store the zoom and pan settings
+        currentZoom = zoom
+        currentPan  = pan
 
-    if (cachedModel == null || View.pan != currentPan || View.zoom  != currentZoom) {
-      // Create image
-      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      val g = image.getGraphics
-
-      //store the zoom and pan settings
-      currentZoom = View.pan
-      currentPan  = View.zoom
-
-      //
-      cachedModel = image
-    }
-    cachedModel
+        //
+        cachedModel = image
+      //}
+      cachedModel
+    //}
   }
-
 
   /**
    * Resizes the view to the given boundary.
