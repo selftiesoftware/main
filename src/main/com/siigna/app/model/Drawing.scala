@@ -62,7 +62,7 @@ object Drawing extends ActionModel
                   with MapProxy[Int, Shape] {
 
   // Calculates the boundary of the model whenever it changes
-  addActionListener(() => _boundary = calculateBoundary())
+  addActionListener((_, _) => _boundary = calculateBoundary())
 
   //calculates the paper header whenever it changes
 

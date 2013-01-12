@@ -28,11 +28,12 @@ import com.siigna.util.event.MouseMove
 import com.siigna.util.event.MouseUp
 import com.siigna.util.event.MouseDrag
 import com.siigna.module.ModuleMenu
+import actors.Actor
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
  */
-trait EventController {
+trait EventController extends Actor {
 
   private var mouseButtonLeft   = false
   private var mouseButtonMiddle = false
@@ -172,7 +173,7 @@ trait EventController {
    */
   def setupEventListenersOn(canvas : Canvas) {
     // Dispatches events to the controller
-    def dispatch(e : Option[Event]) { e foreach Controller.! }
+    def dispatch(e : Option[Event]) { e.foreach(this.!) }
 
     // Add event listeners
     canvas.addKeyListener(new KeyListener {

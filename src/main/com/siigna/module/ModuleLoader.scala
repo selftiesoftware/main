@@ -12,7 +12,6 @@
 package com.siigna.module
 
 import com.siigna.util.logging.Log
-import com.siigna.app.controller.Controller
 import java.io.FileNotFoundException
 import java.net.URLClassLoader
 
@@ -22,6 +21,16 @@ import java.net.URLClassLoader
  * @todo implement caching on a per package basis
  */
 object ModuleLoader {
+
+  // The private init module.. ssshhh
+  private var _initModule : Option[Module] = None
+
+  /**
+   * The init [[com.siigna.module.Module]] that we're sending events to.
+   * Call <code>initModule_=()</code> if you want to change the behavior.
+   * @see [[com.siigna.module.Module]]
+   */
+  def initModule : Option[Module] = _initModule
 
   // The underlying class loader
   protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
@@ -37,9 +46,9 @@ object ModuleLoader {
   final val modulePath = "com.siigna.module"
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
-  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
-  //load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.9.2/nightly", "siigna-porter_2.9.2-nightly.jar", local = false))
+  load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.9.2/nightly", "siigna-base_2.9.2-nightly.jar", local = false))
+  load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.9.2/nightly", "siigna-cad-suite_2.9.2-nightly.jar", local = false))
+  load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.9.2/nightly", "siigna-porter_2.9.2-nightly.jar", local = false))
   //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
@@ -50,9 +59,9 @@ object ModuleLoader {
   //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
 
-  load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
-  load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
-  load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
+  //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
   //load(ModulePackage('base, "/home/jens/workspace/siigna/main/project/target/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/project/target/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/project/target/artifacts", "porter.jar", true))
@@ -145,14 +154,14 @@ object ModuleLoader {
         url.openConnection().connect()
 
         // Add package to URL base
-        loader = new URLClassLoader(loader.getURLs.:+(url), Controller.getClass.getClassLoader)
+        loader = new URLClassLoader(loader.getURLs.:+(url), this.getClass.getClassLoader)
 
         // Check for ModuleInit in that package
         try {
           val c = loader.loadClass("com.siigna.module.ModuleInit")
           val m = classToModule(c)
-          Controller.initModule = m
-          Log.success("ModuleLoader: Reloaded init module.")
+          _initModule = Some(m)
+          Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
         } catch {
           // No module found
           case e : ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
