@@ -76,6 +76,13 @@ object View {
   private var cachedBackground : BufferedImage = null
 
   /**
+   * An image of the model that can be re-used instead of calculating the shapes.
+   */
+  private var cachedModel : BufferedImage = null
+  var currentPan : Double = 0.0
+  var currentZoom : Vector2D = Vector2D(0,0)
+
+  /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
   private var canvas : Option[Canvas] = None
@@ -227,6 +234,9 @@ object View {
     // Render and draw the background
     graphics2D drawImage(renderBackground, 0, 0, null)
 
+    // Render and draw the model
+    graphics2D drawImage(renderModel, 0, 0, null)
+
     // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
     graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
@@ -334,6 +344,30 @@ object View {
     }
     cachedBackground
   }
+
+  /**
+   * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
+   * local variable. If the renderBackground method is called again, we simply return the cached copy
+   * unless the dimensions of the view has changed, in which case we need to re-render it.
+   */
+  def renderModel : BufferedImage = {
+
+
+    if (cachedModel == null || View.pan != currentPan || View.zoom  != currentZoom) {
+      // Create image
+      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
+      val g = image.getGraphics
+
+      //store the zoom and pan settings
+      currentZoom = View.pan
+      currentPan  = View.zoom
+
+      //
+      cachedModel = image
+    }
+    cachedModel
+  }
+
 
   /**
    * Resizes the view to the given boundary.
