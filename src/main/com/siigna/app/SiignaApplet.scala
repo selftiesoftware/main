@@ -155,7 +155,6 @@ class SiignaApplet extends Applet {
     // Get the strategy
     val strategy = canvas.getBufferStrategy
 
-    println(shouldExit)
     // Run, run, run
     while(!shouldExit) {
 
