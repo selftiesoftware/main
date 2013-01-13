@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage
 import com.siigna.app.model.{Selection, Drawing}
 import scala.Some
 import com.siigna.module.ModuleMenu
-
+import com.siigna.app.model.Drawing._
 /**
  * <p>
  *   This is the view part of the
@@ -66,6 +66,12 @@ import com.siigna.module.ModuleMenu
  * </p>
  */
 object View {
+  //add actionlostener
+  addActionListener((_, _) => {
+    //call rendermodel
+    println("ACTIONLISTENER")
+    renderModel(true)
+  })
 
   // The most recent mouse position
   private var _mousePosition = Vector2D(0, 0)
@@ -79,9 +85,9 @@ object View {
    * An image of the model that can be re-used instead of calculating the shapes.
    */
   private var cachedModel : BufferedImage = null
-
   var currentZoom : Double = 0.0
   var currentPan : Vector2D = Vector2D(0,0)
+
   /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
@@ -231,22 +237,29 @@ object View {
     val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
     graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
-    // Render and draw the background
-    graphics2D drawImage(renderBackground, 0, 0, null)
+    try {
+      // Render and draw the background
+      graphics2D drawImage(renderBackground, 0, 0, null)
 
-    // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-    graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
+      // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
+      graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
+      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
       boundary.width.toInt, boundary.height.toInt)
 
-    if (Drawing.size > 0) {
-      try {
-        // Render and draw the model
-        graphics2D drawImage(renderModel(model, transformation), 0, 0, null)
-      }catch {
-        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-        case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-      }
+      // OBSOLETE (no cache) : Draw model
+      //if (Drawing.size > 0) try {
+      //  val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+      //  Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+      //} catch {
+      //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      //}
+
+      // Render and draw the model - with cache
+      graphics2D drawImage(renderModel(false), 0, 0, null)
+    }catch {
+      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
     }
 
     // Draw model
@@ -357,36 +370,34 @@ object View {
    * local variable. If the renderBackground method is called again, we simply return the cached copy
    * unless the dimensions of the view has changed, in which case we need to re-render it.
    */
-  def renderModel(m : Map[Int, Shape], t : TransformationMatrix) : BufferedImage = {
-    //if (Drawing.size > 0){
-    if (cachedModel == null || pan != currentPan || zoom  != currentZoom) {
-      println("update image")
-      // Create image
-      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      //enable drawing on the image
-      val g = image.getGraphics.asInstanceOf[Graphics2D]
+
+  //TODO: updating of the cachedModel one step behind of the paint loop
+  //TODO: cachedModel is not antiAliased.
+
+  def renderModel(fromAction : Boolean) : BufferedImage = {
+    def updateCache = {
+      val m = Drawing
+      val t = drawingTransformation
+      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)  // Create image
+      val g = image.getGraphics.asInstanceOf[Graphics2D]  //enable drawing on the image
       val graphics = new Graphics(g)
 
-      //m.par.map(_._2) foreach(s => {
-      //  println(s)
-      //  graphics.draw(s.transform(t))
-      //})
-      m.foreach(tuple => {
-        graphics.draw(tuple._2.transform(t))
-      })
-
-      //store the zoom and pan settings
-      currentZoom = zoom
+      //apply the graphics class to the model with g - (adds the changes to the image)
+      m.foreach(tuple => {graphics.draw(tuple._2.transform(t))})
+      currentZoom = zoom  //store the zoom and pan settings
       currentPan  = pan
-
-      //
-      cachedModel = image
-      println("model: "+m)
-      cachedModel
-    } else {
-      cachedModel
+      cachedModel = image //update the image
+      cachedModel //return it
     }
-    //}
+
+    //if (Drawing.size > 0){
+      if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
+        println("A")
+        updateCache
+      } else {
+        cachedModel
+      }
+    //} else cachedModel
   }
 
   /**
