@@ -69,7 +69,6 @@ object View {
   //add actionlostener
   addActionListener((_, _) => {
     //call rendermodel
-    println("ACTIONLISTENER")
     renderModel(true)
   })
 
@@ -227,7 +226,6 @@ object View {
   def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
-
     // Retrieve graphics objects
     val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
     val graphics = new Graphics(graphics2D)
@@ -254,9 +252,16 @@ object View {
       //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
       //}
-
       // Render and draw the model - with cache
-      graphics2D drawImage(renderModel(false), 0, 0, null)
+      val panVector = pan
+      val x = (panVector.x).toInt
+      val y = (panVector.y).toInt
+      
+      println("pan: "+pan)
+      println("zoom: "+zoom)
+      
+      graphics2D drawImage(renderModel(false), x , y, null)
+      
     }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
@@ -375,29 +380,39 @@ object View {
   //TODO: cachedModel is not antiAliased.
 
   def renderModel(fromAction : Boolean) : BufferedImage = {
+
+    // Setup anti-aliasing
+    val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
+    val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+
     def updateCache = {
       val m = Drawing
-      val t = drawingTransformation
+      //val t = drawingTransformation
       val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)  // Create image
       val g = image.getGraphics.asInstanceOf[Graphics2D]  //enable drawing on the image
+
+      g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
+
       val graphics = new Graphics(g)
 
+
+
       //apply the graphics class to the model with g - (adds the changes to the image)
-      m.foreach(tuple => {graphics.draw(tuple._2.transform(t))})
+      m.foreach(tuple => {graphics.draw(tuple._2.transform(drawingTransformation))})
       currentZoom = zoom  //store the zoom and pan settings
       currentPan  = pan
       cachedModel = image //update the image
       cachedModel //return it
     }
 
-    //if (Drawing.size > 0){
-      if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
-        println("A")
-        updateCache
-      } else {
-        cachedModel
-      }
-    //} else cachedModel
+    //if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
+    if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
+      updateCache
+    } else {
+      //TODO: pan the cachedModel.
+      println("PAN HERE!!")
+      cachedModel
+    }
   }
 
   /**
