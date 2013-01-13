@@ -260,7 +260,7 @@ object View {
       println("pan: "+pan)
       println("zoom: "+zoom)
       
-      graphics2D drawImage(renderModel(false), x , y, null)
+      //graphics2D drawImage(renderModel(false), x , y, null)
       
     }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
@@ -268,12 +268,12 @@ object View {
     }
 
     // Draw model
-    //if (Drawing.size > 0) try {
-    //  model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-    //} catch {
-    //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-    //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-    //}
+    if (Drawing.size > 0) try {
+      model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+    } catch {
+      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+    }
 
     // Draw the boundary shape
     graphics draw boundaryShape(boundary)
