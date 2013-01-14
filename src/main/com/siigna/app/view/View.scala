@@ -245,32 +245,22 @@ object View {
       boundary.width.toInt, boundary.height.toInt)
 
       // OBSOLETE (no cache) : Draw model
-      //if (Drawing.size > 0) try {
-      //  val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-      //  Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-      //} catch {
-      //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-      //}
+      if (Drawing.size > 0) try {
+        val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+        Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+      } catch {
+        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+        case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      }
       // Render and draw the model - with cache
-      val panVector = pan
+
+      val panVector = pan - Vector2D(width/2,height/2)
       val x = (panVector.x).toInt
       val y = (panVector.y).toInt
-      
-      println("pan: "+pan)
-      println("zoom: "+zoom)
-      
+
       //graphics2D drawImage(renderModel(false), x , y, null)
       
     }catch {
-      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-    }
-
-    // Draw model
-    if (Drawing.size > 0) try {
-      model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-    } catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
     }
@@ -398,7 +388,9 @@ object View {
 
 
       //apply the graphics class to the model with g - (adds the changes to the image)
-      m.foreach(tuple => {graphics.draw(tuple._2.transform(drawingTransformation))})
+      m.foreach(tuple => {
+        graphics.draw(tuple._2.transform(TransformationMatrix(Vector2D(width/2,height/2),drawingTransformation.scaleFactor).flipY))
+      })
       currentZoom = zoom  //store the zoom and pan settings
       currentPan  = pan
       cachedModel = image //update the image
@@ -409,8 +401,6 @@ object View {
     if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
       updateCache
     } else {
-      //TODO: pan the cachedModel.
-      println("PAN HERE!!")
       cachedModel
     }
   }
