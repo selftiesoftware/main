@@ -401,7 +401,7 @@ object View {
 
     //if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
     if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
-      updateCache
+      if(com.siigna.app.view.View.isImporting == false) updateCache else cachedModel
     } else {
       cachedModel
     }
