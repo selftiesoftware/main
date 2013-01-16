@@ -165,6 +165,8 @@ object View {
    */
   def drawingTransformation = TransformationMatrix(pan, zoom).flipY
 
+  var isImporting = false
+
   /**
    * Finds the mouse position for the mouse in device coordinates, that is the coordinate system where the upper
    * left corner of the entire Siigna drawing surface (on your computer screen) is (0, 0) and the bottom right
@@ -258,7 +260,7 @@ object View {
       val x = (panVector.x).toInt
       val y = (panVector.y).toInt
 
-      graphics2D drawImage(renderModel(false), x , y, null)
+      if(isImporting == false) graphics2D drawImage(renderModel(false), x , y, null)
 
     }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
