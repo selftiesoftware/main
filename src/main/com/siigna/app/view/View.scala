@@ -68,7 +68,7 @@ import com.siigna.app.model.Drawing._
 object View {
   //add actionlostener
   addActionListener((_, _) => {
-    //call rendermodel
+    //and send the renderModel
     renderModel(true)
   })
 
@@ -242,24 +242,24 @@ object View {
       // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
       graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
       graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
-      boundary.width.toInt, boundary.height.toInt)
+        boundary.width.toInt, boundary.height.toInt)
 
       // OBSOLETE (no cache) : Draw model
-      if (Drawing.size > 0) try {
-        val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-        Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-      } catch {
-        case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-        case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-      }
+      //if (Drawing.size > 0) try {
+      //  val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+      //  Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+      //} catch {
+      //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      //}
       // Render and draw the model - with cache
 
       val panVector = pan - Vector2D(width/2,height/2)
       val x = (panVector.x).toInt
       val y = (panVector.y).toInt
 
-      //graphics2D drawImage(renderModel(false), x , y, null)
-      
+      graphics2D drawImage(renderModel(false), x , y, null)
+
     }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
