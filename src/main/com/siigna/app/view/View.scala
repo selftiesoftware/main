@@ -128,19 +128,9 @@ object View {
    * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
    * */
   def boundary = {
-    // Confines a coordinate within a lower and a higher boundary.
-    def confine(coordinate : Double, lower : Double, higher : Double) : Double =
-      if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
-
-    // 1: objekt initialiseringer top left bottom left rect offscreen bd
-    // 2: afhænger af drawing boundary (fixed) så snart man laver en shape/ action  - kan caches
-
-
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
-    val topLeft           = Vector2D(confine(offScreenBoundary.topLeft.x, 0, width),
-      confine(offScreenBoundary.topLeft.y, 0, height))
-    val bottomRight       = Vector2D(confine(offScreenBoundary.bottomRight.x, 0, width),
-      confine(offScreenBoundary.bottomRight.y, 0, height))
+    val topLeft           = Vector2D(offScreenBoundary.topLeft.x,offScreenBoundary.topLeft.y)
+    val bottomRight       = Vector2D(offScreenBoundary.bottomRight.x,offScreenBoundary.bottomRight.y)
     Rectangle2D(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
   }
 
@@ -164,8 +154,6 @@ object View {
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
   def drawingTransformation = TransformationMatrix(pan, zoom).flipY
-
-  var isImporting = false
 
   /**
    * Finds the mouse position for the mouse in device coordinates, that is the coordinate system where the upper
@@ -243,8 +231,10 @@ object View {
 
       // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
       graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
-        boundary.width.toInt, boundary.height.toInt)
+      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,boundary.width.toInt, boundary.height.toInt)
+
+      //graphics.drawRectangle(pan - boundary.topLeft + Vector2D(4, 4), pan - boundary.topLeft - Vector2D(4, 4))
+     // graphics.drawRectangle(Vector2D(boundary.xMin.toInt-2, boundary.yMin.toInt-2), Vector2D(boundary.xMax+2, boundary.yMax+2))
 
       // OBSOLETE (no cache) : Draw model
       //if (Drawing.size > 0) try {
@@ -254,13 +244,19 @@ object View {
       //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
       //}
+      
       // Render and draw the model - with cache
+      //val bound = Drawing.boundary.transform(drawingTransformation)
 
-      val panVector = pan - Vector2D(width/2,height/2)
+      //a test rectangle showing the current boundary TOP LEFT CORNER
+      graphics.drawRectangle(Vector2D(0, 0), Drawing.boundary.transform(drawingTransformation).bottomLeft)
+      graphics.drawRectangle(Vector2D(-2, -2), Vector2D(2, 2))
+
+      val panVector = pan - Vector2D(boundary.width.toInt/2,boundary.height.toInt/2)
       val x = (panVector.x).toInt
       val y = (panVector.y).toInt
 
-      if(isImporting == false) graphics2D drawImage(renderModel(false), x , y, null)
+      graphics2D drawImage(renderModel(false), x , y, null)
 
     }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
@@ -368,29 +364,30 @@ object View {
    * unless the dimensions of the view has changed, in which case we need to re-render it.
    */
 
-  //TODO: updating of the cachedModel one step behind of the paint loop
-  //TODO: cachedModel is not antiAliased.
-
   def renderModel(fromAction : Boolean) : BufferedImage = {
-
-    // Setup anti-aliasing
-    val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
-    val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
 
     def updateCache = {
       val m = Drawing
-      //val t = drawingTransformation
+      val s = drawingTransformation.scaleFactor
+      def width = (m.boundary.width * s + 1).toInt
+      def height = (m.boundary.height * s + 1).toInt
       val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)  // Create image
       val g = image.getGraphics.asInstanceOf[Graphics2D]  //enable drawing on the image
+
+      // Setup anti-aliasing
+      val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
+      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
 
       g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
       val graphics = new Graphics(g)
 
-
+      //TODO: Why is 0,0 not always located in the TOP LEFT corner of the paper?!?!
+      graphics.drawRectangle(Vector2D(0, 0), Vector2D(5, 5))
+      //graphics.drawRectangle(Vector2D(0, 0), Vector2D(width/2,height/2))
 
       //apply the graphics class to the model with g - (adds the changes to the image)
-      m.foreach(tuple => {
+      Drawing.foreach(tuple => {
         graphics.draw(tuple._2.transform(TransformationMatrix(Vector2D(width/2,height/2),drawingTransformation.scaleFactor).flipY))
       })
       currentZoom = zoom  //store the zoom and pan settings
@@ -401,7 +398,7 @@ object View {
 
     //if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
     if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
-      if(com.siigna.app.view.View.isImporting == false) updateCache else cachedModel
+      updateCache
     } else {
       cachedModel
     }
