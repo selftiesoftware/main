@@ -4,9 +4,9 @@ version := "nightly"
 
 organization := "com.siigna"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.0"
 
-crossScalaVersions := Seq("2.9.2")
+crossScalaVersions := Seq("2.10.0", "2.9.2")
 
 scalaSource in Compile <<= (baseDirectory in Compile)(_ / "src" / "main")
 
@@ -23,6 +23,7 @@ resolvers += "Siigna" at "http://rls.siigna.com"
 fork in run := true // Do this. All day everyday
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-library" % "2.9.2",
-  "org.scalatest" %% "scalatest" % "1.8" % "test"
+  "org.scala-lang" % "scala-actors" % "2.10.0",
+  "org.scala-lang" % "scala-library" % "2.10.0",
+  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )
