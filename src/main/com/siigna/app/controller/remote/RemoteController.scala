@@ -13,13 +13,13 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
 import com.siigna.util.logging.Log
-import actors.{Exit, Actor, TIMEOUT, DaemonActor}
-import collection.mutable.BitSet
+import actors.{Actor, TIMEOUT}
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
 import com.siigna.util.Serializer
 import actors.remote.RemoteActor
+import collection.mutable
 
 /**
  * Controls any remote connection(s).
@@ -33,7 +33,7 @@ protected[controller] object RemoteController extends Actor {
   RemoteActor.classLoader = getClass.getClassLoader
 
   // All the ids of the actions that have been executed on the client
-  protected val actionIndices = BitSet()
+  protected val actionIndices = mutable.BitSet()
 
   // A map of local ids mapped to their remote counterparts
   protected var localIdMap : Map[Int, Int] = Map()
@@ -56,7 +56,6 @@ protected[controller] object RemoteController extends Actor {
    */
   def act() {
     try {
-      //SiignaDrawing.addAttribute("id" -> 3L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
@@ -151,15 +150,15 @@ protected[controller] object RemoteController extends Actor {
                   val action = Serializer.readAction(array)
 
                   action.undo match {
-                    case true  => SiignaDrawing.undo(action.action, false)
-                    case false => SiignaDrawing.execute(action.action, false)
+                    case true  => SiignaDrawing.undo(action.action, remote = false)
+                    case false => SiignaDrawing.execute(action.action, remote = false)
                   }
 
                   // Store the id in the action indices
                   // Note to self: "+=" and NOT "+"... Sigh...
                   actionIndices += i
                 } catch {
-                  case e => Log.error("Remote: Error when reading data from server", e)
+                  case e: Throwable => Log.error("Remote: Error when reading data from server", e)
                 }
               }
               case e : Error => Log.error("Remote: Unexpected format: " + e)
@@ -216,9 +215,10 @@ protected[controller] object RemoteController extends Actor {
           val model = Serializer.readDrawing(bytes)
 
           // Implement the model
-          SiignaDrawing.execute(LoadDrawing(model), false)
+          SiignaDrawing.execute(LoadDrawing(model), remote = false)
 
-          // Search for the lastAction attribute, or retrieve it manually
+          // Search for the lastAction attribute, or retrieve it manually,
+          // which sets the last executed action on the drawing
           SiignaDrawing.attributes.int("lastAction") match {
             case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
@@ -265,7 +265,7 @@ protected[controller] object RemoteController extends Actor {
             localIdMap ++= map
 
             // Update the model
-            SiignaDrawing.execute(UpdateLocalActions(localIdMap), false)
+            SiignaDrawing.execute(UpdateLocalActions(localIdMap), remote = false)
 
             // Return the updated action
             updatedAction = Some(action.update(localIdMap))
