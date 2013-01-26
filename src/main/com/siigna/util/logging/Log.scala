@@ -30,12 +30,12 @@ object Log {
   val INFO    = 4
   val DEBUG   = 8
   val SUCCESS = 16
-  val ALL     = ERROR + WARNING + INFO + SUCCESS
+  val ALL     = ERROR + WARNING + INFO + DEBUG + SUCCESS
   
   /**
    * The debug-level.
    */
-  var level : Int = ERROR + WARNING
+  var level : Int = ERROR + WARNING + INFO
 
   /**
    * The line-number.

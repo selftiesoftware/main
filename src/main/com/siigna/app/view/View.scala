@@ -21,11 +21,11 @@ import java.awt.image.BufferedImage
 import com.siigna.app.model.{Selection, Drawing}
 import scala.Some
 import com.siigna.module.ModuleMenu
-
+import com.siigna.app.model.Drawing._
 /**
  * <p>
  *   This is the view part of the
-  *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
+ *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
  *   The view is responsible for painting the appropriate content (in this case the [[com.siigna.app.model.Drawing]])
  *   and transforming the content to the correct zoom scale and pan vector.
  * </p>
@@ -66,6 +66,11 @@ import com.siigna.module.ModuleMenu
  * </p>
  */
 object View {
+  //add actionlostener
+  addActionListener((_, _) => {
+    //and send the renderModel
+    renderModel(true)
+  })
 
   // The most recent mouse position
   private var _mousePosition = Vector2D(0, 0)
@@ -76,6 +81,13 @@ object View {
   private var cachedBackground : BufferedImage = null
 
   /**
+   * An image of the model that can be re-used instead of calculating the shapes.
+   */
+  private var cachedModel : BufferedImage = null
+  var currentZoom : Double = 0.0
+  var currentPan : Vector2D = Vector2D(0,0)
+
+  /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
   private var canvas : Option[Canvas] = None
@@ -84,7 +96,7 @@ object View {
    * The shape used to draw the boundary. Overwrite to draw another boundary.
    */
   var boundaryShape : SimpleRectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
-  
+
   /**
    * The frames in the current second.
    * @todo Use these!
@@ -116,19 +128,9 @@ object View {
    * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
    * */
   def boundary = {
-    // Confines a coordinate within a lower and a higher boundary.
-    def confine(coordinate : Double, lower : Double, higher : Double) : Double =
-      if (coordinate < lower) lower else if (coordinate > higher) higher else coordinate
-
-    // 1: objekt initialiseringer top left bottom left rect offscreen bd
-    // 2: afhænger af drawing boundary (fixed) så snart man laver en shape/ action  - kan caches
-
-
     val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
-    val topLeft           = Vector2D(confine(offScreenBoundary.topLeft.x, 0, width),
-                                   confine(offScreenBoundary.topLeft.y, 0, height))
-    val bottomRight       = Vector2D(confine(offScreenBoundary.bottomRight.x, 0, width),
-                                   confine(offScreenBoundary.bottomRight.y, 0, height))
+    val topLeft           = Vector2D(offScreenBoundary.topLeft.x,offScreenBoundary.topLeft.y)
+    val bottomRight       = Vector2D(offScreenBoundary.bottomRight.x,offScreenBoundary.bottomRight.y)
     Rectangle2D(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
   }
 
@@ -214,7 +216,6 @@ object View {
   def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
-
     // Retrieve graphics objects
     val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
     val graphics = new Graphics(graphics2D)
@@ -224,18 +225,40 @@ object View {
     val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
     graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
-    // Render and draw the background
-    graphics2D drawImage(renderBackground, 0, 0, null)
+    try {
+      // Render and draw the background
+      graphics2D drawImage(renderBackground, 0, 0, null)
 
-    // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-    graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-    graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,
-                  boundary.width.toInt, boundary.height.toInt)
+      // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
+      graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
+      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,boundary.width.toInt, boundary.height.toInt)
 
-    // Draw model
-    if (Drawing.size > 0) try {
-      model.par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-    } catch {
+      //graphics.drawRectangle(pan - boundary.topLeft + Vector2D(4, 4), pan - boundary.topLeft - Vector2D(4, 4))
+     // graphics.drawRectangle(Vector2D(boundary.xMin.toInt-2, boundary.yMin.toInt-2), Vector2D(boundary.xMax+2, boundary.yMax+2))
+
+      // OBSOLETE (no cache) : Draw model
+      //if (Drawing.size > 0) try {
+      //  val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
+      //  Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
+      //} catch {
+      //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
+      //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      //}
+      
+      // Render and draw the model - with cache
+      //val bound = Drawing.boundary.transform(drawingTransformation)
+
+      //a test rectangle showing the current boundary TOP LEFT CORNER
+      graphics.drawRectangle(Vector2D(0, 0), Drawing.boundary.transform(drawingTransformation).bottomLeft)
+      graphics.drawRectangle(Vector2D(-2, -2), Vector2D(2, 2))
+
+      val panVector = pan - Vector2D(boundary.width.toInt/2,boundary.height.toInt/2)
+      val x = (panVector.x).toInt
+      val y = (panVector.y).toInt
+
+      graphics2D drawImage(renderModel(false), x , y, null)
+
+    }catch {
       case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
       case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
     }
@@ -306,7 +329,7 @@ object View {
    */
   def renderBackground : BufferedImage = {
     if (cachedBackground == null || cachedBackground.getHeight != height
-                                 || cachedBackground.getWidth  != width) {
+      || cachedBackground.getWidth  != width) {
       // Create image
       val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics
@@ -333,6 +356,52 @@ object View {
       cachedBackground = image
     }
     cachedBackground
+  }
+
+  /**
+   * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
+   * local variable. If the renderBackground method is called again, we simply return the cached copy
+   * unless the dimensions of the view has changed, in which case we need to re-render it.
+   */
+
+  def renderModel(fromAction : Boolean) : BufferedImage = {
+
+    def updateCache = {
+      val m = Drawing
+      val s = drawingTransformation.scaleFactor
+      def width = (m.boundary.width * s + 1).toInt
+      def height = (m.boundary.height * s + 1).toInt
+      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)  // Create image
+      val g = image.getGraphics.asInstanceOf[Graphics2D]  //enable drawing on the image
+
+      // Setup anti-aliasing
+      val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
+      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+
+      g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
+
+      val graphics = new Graphics(g)
+
+      //TODO: Why is 0,0 not always located in the TOP LEFT corner of the paper?!?!
+      graphics.drawRectangle(Vector2D(0, 0), Vector2D(5, 5))
+      //graphics.drawRectangle(Vector2D(0, 0), Vector2D(width/2,height/2))
+
+      //apply the graphics class to the model with g - (adds the changes to the image)
+      Drawing.foreach(tuple => {
+        graphics.draw(tuple._2.transform(TransformationMatrix(Vector2D(width/2,height/2),drawingTransformation.scaleFactor).flipY))
+      })
+      currentZoom = zoom  //store the zoom and pan settings
+      currentPan  = pan
+      cachedModel = image //update the image
+      cachedModel //return it
+    }
+
+    //if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
+    if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
+      updateCache
+    } else {
+      cachedModel
+    }
   }
 
   /**

@@ -67,7 +67,7 @@ class Controller extends EventController {
 
         // Handle actions (execute, not undo)
         case action : Action                   => RemoteController ! (action, false)
-          
+
         // Handle actions with an undo flag
         case (action : Action, undo : Boolean) => RemoteController ! (action, undo)
 

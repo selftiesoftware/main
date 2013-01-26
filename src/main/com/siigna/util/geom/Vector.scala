@@ -258,7 +258,6 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   def closestPoint(vector: Vector2D) = this
 
   def vertices = Seq(this)
-
 }
 
 /**
@@ -304,5 +303,4 @@ object Vector2D {
       scala.math.acos(inner) * 180 / scala.math.Pi
     } else 0.0
   }
-
 }
