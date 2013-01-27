@@ -10,11 +10,10 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.util.logging.Log
 import com.siigna.app.model.shape.{CollectionShape, Shape}
 import com.siigna.app.model.{Drawing, Model}
 import serialization.CreateShapesProxy
-import com.siigna.util.SerializableProxy
+import com.siigna.util.{Log, SerializableProxy}
 
 /**
 * An object that allows you to create one or more shapes.

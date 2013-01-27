@@ -24,11 +24,11 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import shape.Shape
-import com.siigna.util.logging.Log
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
 import javax.management.relation.RelationNotFoundException
+import com.siigna.util.Log
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.

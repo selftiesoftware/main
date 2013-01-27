@@ -16,7 +16,7 @@ import java.util.jar.JarFile
 
 import actors.Futures._
 import actors.Future
-import com.siigna.util.logging.Log
+import com.siigna.util.Log
 
 /**
  * <p>A ModulePackage is a number of modules grouped in a ''.jar'' file. This class represents the package and

@@ -12,12 +12,13 @@
 package com.siigna.app.view
 
 import com.siigna.util.Implicits._
-import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.{Selection, Drawing}
+import com.siigna.util.Log
+
 /**
  * <p>
  *   This is the view part of the

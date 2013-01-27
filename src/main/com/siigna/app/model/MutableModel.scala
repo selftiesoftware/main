@@ -12,7 +12,7 @@
 package com.siigna.app.model
 
 import action.{AddAttributes, SetAttributes, TransformShapeParts, Action}
-import com.siigna.util.logging.Log
+import com.siigna.util.Log
 
 
 /**

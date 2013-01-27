@@ -17,7 +17,6 @@ import java.awt.event.{KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, _}
 import com.siigna.util.event._
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.Siigna
-import com.siigna.util.logging.Log
 import com.siigna.util.event.MouseDown
 import com.siigna.util.event.KeyDown
 import com.siigna.util.event.MouseExit
@@ -28,6 +27,7 @@ import com.siigna.util.event.MouseMove
 import com.siigna.util.event.MouseUp
 import com.siigna.util.event.MouseDrag
 import actors.Actor
+import com.siigna.util.Log
 
 /**
  * The EventController is responsible for setting up event-listeners on the view
