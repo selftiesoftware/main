@@ -15,9 +15,9 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
-import com.siigna.util.Serializer
 import com.siigna.app.model.action.{CreateShape, RemoteAction}
 import com.siigna.app.model.shape.LineShape
+import com.siigna.util.persistence.Serializer
 
 /**
  * Tests the remote actor.

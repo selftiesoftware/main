@@ -44,8 +44,8 @@ trait RemoteCommand extends Serializable {
  * @param value  A parameter to send with the request
  * @param session  A session to authenticate the request
  */
-@SerialVersionUID(-348100723)
-sealed case class Get(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
+@SerialVersionUID(2134932846)
+sealed case class Get(name : RemoteConstant, value : Array[Byte], session : Session) extends RemoteCommand
 
 /**
  * A RemoteCommand signalling that some error occurred on the server side.
@@ -62,6 +62,6 @@ sealed case class Error(code : Int, message : String, session : Session) extends
  * @param value  A parameter value to send with the request
  * @param session  A session to authenticate the request
  */
-@SerialVersionUID(-1044323852)
-sealed case class Set(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
+@SerialVersionUID(1178866764)
+sealed case class Set(name : RemoteConstant, value : Array[Byte], session : Session) extends RemoteCommand
 

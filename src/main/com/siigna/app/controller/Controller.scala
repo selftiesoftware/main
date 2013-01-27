@@ -12,10 +12,10 @@ package com.siigna.app.controller
 
 import com.siigna.util.event.Event
 import com.siigna.module.{Module, ModuleLoader}
-import com.siigna.util.logging.Log
 import com.siigna.app.model.action.Action
 import remote.RemoteController
 import com.siigna.app.model.Drawing
+import com.siigna.util.Log
 
 /**
  * <p>

@@ -11,6 +11,7 @@
 
 package com.siigna.util
 
+import persistence.Serializer
 import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
 import java.io._

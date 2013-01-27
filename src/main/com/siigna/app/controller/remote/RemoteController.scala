@@ -12,14 +12,15 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
-import com.siigna.util.logging.Log
 import actors.{Actor, TIMEOUT}
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
-import com.siigna.util.Serializer
 import actors.remote.RemoteActor
 import collection.mutable
+import java.nio.ByteBuffer
+import com.siigna.util.{Log}
+import com.siigna.util.persistence.Serializer
 
 /**
  * Controls any remote connection(s).
@@ -64,7 +65,7 @@ protected[controller] object RemoteController extends Actor {
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
       drawingId match {
-        case Some(i) => remote(Get(Drawing, i, session), handleGetDrawing)
+        case Some(i) => remote(Get(Drawing, ByteBuffer.allocate(8).putLong(i).array, session), handleGetDrawing)
         case None    => {
           // We need to ask for a new drawing
           remote(Get(DrawingId, null, session), _ match {
@@ -148,7 +149,7 @@ protected[controller] object RemoteController extends Actor {
         } else if(id > actionIndices.last) {
 
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
-            remote(Get(Action, i, session), _ match {
+            remote(Get(Action, ByteBuffer.allocate(4).putInt(i).array(), session), _ match {
               case Set(Action, array : Array[Byte], _) => {
                 try {
                   val action = Serializer.readAction(array)
@@ -259,7 +260,7 @@ protected[controller] object RemoteController extends Actor {
         var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        remote(Get(ShapeId, localIds.size, session), _ match {
+        remote(Get(ShapeId, ByteBuffer.allocate(4).putInt(localIds.size).array(), session), _ match {
           case Set(ShapeId, i : Range, _) => {
 
             // Find out how the ids map to the action

@@ -9,20 +9,33 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.util
+package com.siigna.util.persistence
 
 import java.io._
 import com.siigna.app.model.{Model, RemoteModel}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.action.RemoteAction
+import com.siigna.app.controller.remote.RemoteCommand
 
 /**
- * A Serializer to marshal and unmarshal objects, in particular [[com.siigna.app.model.Drawing]] and
- * [[com.siigna.app.model.action.RemoteAction]].
+ * Marshals objects according to the constants defined in the [[com.siigna.util.persistence]] package.
  *
- * Author: csp <csp@siigna.com>
+ * @author csp <csp@siigna.com>
+ * @author jegp <jegp@siigna.com>
  */
-object Serializer {
+object Marshal {
+
+  def apply(attributes : Attributes) = {
+    map.size
+    for (e <- map) {
+      out.writeUTF(e._1)
+      out.writeObject(e._2)
+    }
+  }
+
+  def apply(command : RemoteCommand) = {
+
+  }
 
   /**
    * Writes a serializable object to a byte array.
@@ -38,25 +51,6 @@ object Serializer {
   }
 
   /**
-   * Read an object from a byte array.
-   * @param arr  The array to read
-   * @return  An object
-   */
-  private def readFromBytes(arr: Array[Byte]): AnyRef = {
-    val stream = new ObjectInputStream(new ByteArrayInputStream(arr))
-    stream.readObject()
-  }
-
-  /**
-   * Attempts to read an action from a byte array.
-   * @param arr  The array with the action-bytes
-   * @return An instance of a RemoteAction
-   */
-  def readAction(arr: Array[Byte]): RemoteAction = {
-    readFromBytes(arr).asInstanceOf[RemoteAction]
-  }
-
-  /**
    * Write a remote action to a byte array
    * @param ra The RemoteAction to write
    * @return An array of bytes containing the RemoteAction
@@ -64,19 +58,6 @@ object Serializer {
   def writeAction(ra: RemoteAction): Array[Byte] = {
     if (ra == null) throw new NullPointerException("Cannot serialize null")
     writeToBytesSer(ra)
-  }
-
-  /**
-   * Attempts to read a [[com.siigna.app.model.RemoteModel]] from the given byte array
-   * @param arr The array to read from
-   * @return A remote model
-   */
-  def readDrawing(arr: Array[Byte]): RemoteModel = {
-    val rmodel = new RemoteModel(new Model(Map(), Seq(), Seq()), Attributes())
-    val stream = new ObjectInputStream(new ByteArrayInputStream(arr))
-    rmodel.readExternal(stream)
-
-    rmodel
   }
 
   /**

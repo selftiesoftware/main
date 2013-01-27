@@ -13,7 +13,7 @@ package com.siigna.app.controller.remote
 
 import actors.remote.RemoteActor._
 import actors.remote.Node
-import com.siigna.util.logging.Log
+import com.siigna.util.Log
 
 /**
  * An instance of a specific server located at the given host and the given port that can
@@ -47,16 +47,16 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
   def isConnected = _retries == 0
 
   /**
-   * A method that sends a remote command synchronously with an associated callback function
-   * with side effects. The method repeats the procedure until something is received.
-   * @param message  The message to send
+   * A method that sends a remote command, represented as a byte array, synchronously with an associated callback
+   * function with side effects. The method repeats the procedure until something is received.
+   * @param message  The message to send as an array of bytes
    * @param f  The callback function to execute when data is successfully retrieved
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
-  def apply(message : RemoteCommand, f : Any => Unit) {
+  def apply(message : Array[Byte], f : Any => Unit) {
     try {
       if (shouldExit) {
-        Log.info("Server: Connection closing", message.session)
+        Log.info("Server: Connection closing.")
       } else {
         remote.!?(timeout, message) match {
           case Some(data) => { // Call the callback function
@@ -89,6 +89,17 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
         Log.error("Server: " + retries + " means stack overflow :-( Shutting down!")
       }
     }
+  }
+
+  /**
+   * A method that sends a remote command synchronously with an associated callback function
+   * with side effects. The method repeats the procedure until something is received.
+   * @param message  The message to send
+   * @param f  The callback function to execute when data is successfully retrieved
+   * @throws UnknownException  If the data returned did not match expected type(s)
+   */
+  def apply(message : RemoteCommand, f : Any => Unit) {
+
   }
 
   /**

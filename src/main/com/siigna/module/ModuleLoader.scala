@@ -11,10 +11,10 @@
 
 package com.siigna.module
 
-import com.siigna.util.logging.Log
 import java.io.FileNotFoundException
 import java.net.URLClassLoader
 import com.siigna.app.Siigna
+import com.siigna.util.Log
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.

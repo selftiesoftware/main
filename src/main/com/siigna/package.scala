@@ -11,6 +11,8 @@
 
 package com
 
+import siigna.util.Log
+
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //

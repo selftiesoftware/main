@@ -13,11 +13,11 @@ package com.siigna.app.model
 
 import java.io._
 
-import com.siigna.util.logging.Log
 import com.siigna.util.collection.{HasAttributes, Attributes}
+import com.siigna.util.Log
 
 /**
- * <p>A RemoteModel with the responsibilities of marshalling and unmarshalling a model.</p>
+ * <p>A RemoteModel with the responsibilities of persistence and unmarshalling a model.</p>
  */
 @SerialVersionUID(-1862878236)
 class RemoteModel(var model : Model, var attributes : Attributes) extends HasAttributes
