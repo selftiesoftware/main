@@ -110,7 +110,7 @@ object Track extends EventTrack {
         case MouseDrag (p, a, b) :: tail => (p, (v : Vector2D) => MouseDrag(v, a, b))
         case MouseDown (p, a, b) :: tail => (p, (v : Vector2D) => MouseDown(v, a, b))
         case MouseUp   (p, a, b) :: tail => (p, (v : Vector2D) => MouseUp  (v, a, b))
-        case e :: tail => (View.mousePosition, (v : Vector2D) => e)
+        case e :: tail => (View.mousePositionScreen, (v : Vector2D) => e)
       }
 
       val m : Vector2D = View.mousePositionDrawing

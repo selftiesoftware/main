@@ -245,7 +245,7 @@ trait Module {
               s.module.eventParser.events = events
 
               // Set the mouse position of the new event parser
-              s.module.eventParser.mousePosition = View.mousePosition
+              s.module.eventParser.mousePosition = View.mousePositionScreen
 
               // Log success
               Log.debug("Module '" + toString+ "': Forwarding to " + s.module)

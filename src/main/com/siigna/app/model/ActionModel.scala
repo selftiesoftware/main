@@ -61,7 +61,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
    * @param listener  The function to be executed receiving an action that has been executed and a boolean
-   *                  value indicating whether the action was executed (true; includes redo) or undone (false).
+   *                  value indicating whether the action was undone (true) or executed (false; includes redo).
    */
   def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
