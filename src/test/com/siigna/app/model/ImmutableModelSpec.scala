@@ -22,7 +22,7 @@ import org.scalatest.FunSpec
  */
 class ImmutableModelSpec extends FunSpec with ShouldMatchers {
 
-  val model = new Model(Map(), Seq(), Seq())
+  val model = new Model()
 
   describe("An immutable model") {
     val v1 = Vector2D(0, 0)

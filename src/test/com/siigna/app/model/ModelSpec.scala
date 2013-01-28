@@ -21,8 +21,8 @@ import com.siigna._
  */
 class ModelSpec extends FunSpec with ShouldMatchers {
 
-  val model = new Model(Map(), Seq(), Seq())
-  val populatedModel = new Model(Map(-1 -> LineShape(0, 0, 12, math.Pi)), Nil, Nil)
+  val model = new Model()
+  val populatedModel = new Model(Map(-1 -> LineShape(0, 0, 12, math.Pi)), Nil, Nil, Attributes())
 
   private def marshalUnmarshal(model : Model) = {
     {

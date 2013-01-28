@@ -16,7 +16,7 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, 
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
 import com.siigna._
-import app.model.shape.LineShape.Selector
+import app.model.shape.LineShape.Part
 import scala.Some
 
 /**
@@ -44,19 +44,19 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 
   val start = p1
 
-  def apply(part : ShapeSelector) = part match {
-    case Selector(xs) => {
+  def apply(part : ShapePart) = part match {
+    case Part(xs) => {
       Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(
         if(xs)  p1.transform(t) else p1,
         if(!xs) p2.transform(t) else p2,
         attributes)))
     }
-    case FullSelector => Some(new PartialShape(this, transform))
+    case FullShapePart => Some(new PartialShape(this, transform))
     case _ => None
   }
 
-  def delete(part : ShapeSelector) = part match {
-    case Selector(_) | FullSelector => Nil
+  def delete(part : ShapePart) = part match {
+    case Part(_) | FullShapePart => Nil
     case _ => Seq(this)
   }
 
@@ -65,49 +65,49 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       val cond1 = r.contains(p1)
       val cond2 = r.contains(p2)
       if (cond1 && cond2) {
-        FullSelector
+        FullShapePart
       } else if (cond1) {
-        Selector(true)
+        Part(true)
       } else if (cond2) {
-        Selector(false)
-      } else EmptySelector
-    } else EmptySelector
+        Part(false)
+      } else EmptyShapePart
+    } else EmptyShapePart
   }
 
   def getPart(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     if (distanceTo(p) > selectionDistance) {
       //If shape is not within selection distance of point, return Empty selector
-      EmptySelector
+      EmptyShapePart
     } else {
       //If both points are within selection distance, select the whole shape:
       //TODO: In much later version: Make it possible to choose which point to select.
       if (p1.distanceTo(p) <= selectionDistance && p2.distanceTo(p) <= selectionDistance) {
-        FullSelector
+        FullShapePart
       } else if (p1.distanceTo(p) < p2.distanceTo(p) && p1.distanceTo(p) <= selectionDistance) {
       //If lineshape's point one is closer to selection point than point two, and within selection distance,
       //Return true - if point two is closest to selection point, and within selection distance, return false
-        Selector(true)
+        Part(true)
       } else if (p2.distanceTo(p) < p1.distanceTo(p) && p2.distanceTo(p) <= selectionDistance) {
 
-        Selector(false)
+        Part(false)
       } else {
         //If shape is within selection distance of selection point, but none of the line's endpoints are,
         //The line should be selected - that means, both the points.
-        FullSelector
+        FullShapePart
 
       }
     }
   }
   
-  def getShape(s : ShapeSelector) = s match {
-    case FullSelector => Some(this)
+  def getShape(s : ShapePart) = s match {
+    case FullShapePart => Some(this)
     case _ => None
   }
 
-  def getVertices(selector: ShapeSelector) = selector match {
-    case FullSelector => geometry.vertices
-    case Selector(x) => Seq(if(x) p1 else p2)
+  def getVertices(selector: ShapePart) = selector match {
+    case FullShapePart => geometry.vertices
+    case Part(x) => Seq(if(x) p1 else p2)
     case _ => Seq()
   }
 
@@ -129,11 +129,10 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
 object LineShape {
 
   /**
-   * The selector specific for LineShapes.
+   * The part specific for LineShapes.
    * @param part  A boolean flag indicating if the first point is a part of the selection (true) or the second point (false).
    */
-  @SerialVersionUID(219744478)
-  sealed case class Selector(part : Boolean) extends ShapeSelector
+  sealed case class Part(part : Boolean) extends ShapePart
 
   def apply(p1 : Vector2D, p2 : Vector2D) : LineShape =
     new LineShape(p1, p2, Attributes())

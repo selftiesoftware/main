@@ -11,39 +11,15 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.Shape
-import com.siigna.app.model.{RemoteModel, Drawing, Model}
-import com.siigna.util.collection.Attributes
-
+import com.siigna.app.model.Model
 
 /**
  * Loads a drawing from a given input.
  *
- * @param shapes  The shapes in the drawing.
- * @param actions  The actions that have been executed on the model.
+ * @param model  The model to store containing the shapes, actions and attributes of the new model.
  */
-case class LoadDrawing(shapes : Map[Int, Shape], actions : Seq[Action], attributes : Attributes) extends VolatileAction {
+case class LoadDrawing(model : Model) extends VolatileAction {
 
-  def execute(model : Model) = {
-    // Store the attributes
-    Drawing.addAttributes(attributes)
-
-    // Store the shapes and the executed actions.
-    new Model(shapes, actions, Seq())
-  }
+  def execute(old : Model) = model
   
-}
-
-/**
- * A companion object to LoadDrawing.
- */
-object LoadDrawing {
-
-  /**
-   * Creates a LoadDrawing action from the given RemoteModel.
-   * @param model  The model to load.
-   * @return  An instance of LoadDrawing.
-   */
-  def apply(model : RemoteModel) = new LoadDrawing(model.model.shapes, Seq(), model.attributes)
-
 }

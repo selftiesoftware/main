@@ -36,7 +36,7 @@ protected[remote] sealed case class UpdateLocalActions(map : Map[Int, Int]) exte
     val undone = replaceActionSeq(model.undone)
 
     // Return the new model
-    new Model(shapes.seq.toMap, executed, undone)
+    new Model(shapes.seq.toMap, executed, undone, model.attributes)
   }
 
 }

@@ -12,7 +12,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
-import com.siigna.app.model.shape.{ShapeSelector, EmptySelector, Shape}
+import com.siigna.app.model.shape.{ShapePart, EmptyShapePart, Shape}
 import com.siigna.app.model.{Drawing, Selection, Model}
 
 /**
@@ -29,7 +29,7 @@ import com.siigna.app.model.{Drawing, Selection, Model}
  * <br />
  * Selection does not duplicate the shapes, since this would take up way too much space, but
  * contains information about which parts of the shapes are selected (the
- * [[com.siigna.app.model.shape.ShapeSelector]]). If a user chooses to select only one point of
+ * [[com.siigna.app.model.shape.ShapePart]]). If a user chooses to select only one point of
  * a larger shape for instance, the selection has to support this.
  *
  * @see Model
@@ -56,9 +56,9 @@ object Select {
   //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
   def apply(r : SimpleRectangle2D, entireShape : Boolean) {
       val filtered = if (!entireShape) {
-      Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapeSelector) => i -> p}
+      Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapePart) => i -> p}
       } else {
-        var parts = Map[Int, ShapeSelector]()
+        var parts = Map[Int, ShapePart]()
         // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
         Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
         parts

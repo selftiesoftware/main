@@ -31,11 +31,11 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 
   type T = GroupShape
 
-  def apply(part : ShapeSelector) = None
+  def apply(part : ShapePart) = None
 
-  def delete(part : ShapeSelector) = {
+  def delete(part : ShapePart) = {
     part match {
-      case GroupShape.Selector(parts) => {
+      case GroupShape.Part(parts) => {
         Seq(copy(shapes = parts.foldLeft(shapes)((shapes, part) => {
           val (head, tail) = shapes.splitAt(part._1)
           head ++ shapes(part._1).delete(part._2) ++ tail.tail
@@ -46,25 +46,25 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
   }
 
   def getPart(rect: SimpleRectangle2D) = {
-    var parts = Map[Int, ShapeSelector]()
+    var parts = Map[Int, ShapePart]()
 
     for (i <- 0 until shapes.size) {
       shapes(i).getPart(rect) match {
-        case EmptySelector =>
-        case s : ShapeSelector => parts = parts + (i -> s)
+        case EmptyShapePart =>
+        case s : ShapePart => parts = parts + (i -> s)
       }
     }
 
-    GroupShape.Selector(parts)
+    GroupShape.Part(parts)
   }
 
   def getPart(point: Vector2D) = {
     shapes.reduceLeft((a : Shape, b : Shape) => if (a.distanceTo(point) <= b.distanceTo(point)) a else b).getPart(point)
   }
   
-  def getShape(s : ShapeSelector) = s match {
-    case FullSelector => Some(this)
-    case GroupShape.Selector(xs) => {
+  def getShape(s : ShapePart) = s match {
+    case FullShapePart => Some(this)
+    case GroupShape.Part(xs) => {
       Some(copy(shapes = xs.map(t => shapes(t._1).getShape(t._2)).collect {
         case Some(s : Shape) => s
       }.toSeq))
@@ -72,7 +72,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
     case _ => None
   }
 
-  def getVertices(selector: ShapeSelector) = shapes.flatMap(_.getVertices(selector))
+  def getVertices(selector: ShapePart) = shapes.flatMap(_.getVertices(selector))
 
   def join(shape : Shape) = copy(shapes = shapes :+ shape)
 
@@ -96,8 +96,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 object GroupShape {
 
   // TODO: There must be a smarter way to do this instead of spending one class-reference per selected object.
-  @SerialVersionUID(-468271378)
-  sealed case class Selector(selectors : Map[Int, ShapeSelector]) extends ShapeSelector
+  sealed case class Part(selectors : Map[Int, ShapePart]) extends ShapePart
 
   def apply(shapes : Traversable[Shape]) = new GroupShape(shapes.toSeq, Attributes())
 

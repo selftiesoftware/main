@@ -22,7 +22,7 @@ import collection.mutable.BitSet
  *
  * <p>
  * A selection does not store entire shapes (that would be annoyingly expensive!) but instead remembers
- * subsets of shapes (the [[com.siigna.app.model.shape.ShapeSelector]]s). These subsets can be given to
+ * subsets of shapes (the [[com.siigna.app.model.shape.ShapePart]]s). These subsets can be given to
  * the shapes stored in the model and through the [[com.siigna.app.model.shape.Shape.apply]] method
  * the shapes will provide [[com.siigna.app.model.shape.PartialShape]]s which can be used to manipulate
  * these subsets.</p>
@@ -35,7 +35,7 @@ import collection.mutable.BitSet
  * @see [[com.siigna.app.model.MutableModel]]
  */
 @SerialVersionUID(2104259901)
-case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes with MapProxy[Int, ShapeSelector] {
+case class Selection(var parts: Map[Int, ShapePart]) extends HasAttributes with MapProxy[Int, ShapePart] {
 
   type T = Selection
 
@@ -82,7 +82,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    * @return A number of selected sub-shapes.
    */
   def selectedShapes : Iterable[Shape] = {
-    parts.map((t : (Int, ShapeSelector)) => {
+    parts.map((t : (Int, ShapePart)) => {
       Drawing(t._1).getShape(t._2)
     }).collect { case Some(s : Shape) => s.setAttributes(attributes) }
   }
@@ -92,7 +92,7 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    * @return A map containing the ids and the shapes used in the current selection.
    */
   def shapes : Map[Int, Shape] = {
-    parts.map((t : (Int, ShapeSelector)) => {
+    parts.map((t : (Int, ShapePart)) => {
       (t._1 -> Drawing(t._1).addAttributes(attributes))
     })
   }
@@ -109,19 +109,19 @@ case class Selection(var parts: Map[Int, ShapeSelector]) extends HasAttributes w
    * @param id  The id of the shape whose part we wish to toggle
    * @param selector  The selector describing which part(s) of the shape to select
    */
-  def toggle(id : Int, selector : ShapeSelector) {
+  def toggle(id : Int, selector : ShapePart) {
     if (parts contains id) {
       parts(id) match {
-        case PolylineShape.Selector(xs) => parts = parts + (id -> PolylineShape.Selector({
+        case PolylineShape.Part(xs) => parts = parts + (id -> PolylineShape.Part({
           val set = BitSet()
           for (i <- 0 to xs.max) {
             if (!xs(i)) set + i
           }
           set
         }))
-        case EmptySelector          => parts = parts + (id -> selector)
-        case FullSelector           => parts = parts - id
-        case LineShape.Selector(x)  => parts = parts + (id -> LineShape.Selector(!x))
+        case EmptyShapePart          => parts = parts + (id -> selector)
+        case FullShapePart           => parts = parts - id
+        case LineShape.Part(x)  => parts = parts + (id -> LineShape.Part(!x))
         case _ =>
       }
     } else parts + (id -> selector)
@@ -151,7 +151,7 @@ object Selection {
   /**
    * A method to create a Selection with only one id.
    */
-  def apply(id: Int, part : ShapeSelector) = {
+  def apply(id: Int, part : ShapePart) = {
     new Selection(Map(id -> part))
   }
 

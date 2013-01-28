@@ -12,8 +12,6 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.collection.Attributes
-import com.siigna.util.SerializableProxy
-import serialization.{AddAttributesProxy, SerializationProxy, SetAttributesProxy}
 import com.siigna.app.model.{Drawing, Model}
 
 /**
@@ -22,9 +20,7 @@ import com.siigna.app.model.{Drawing, Model}
  * @param shapes  The shapes to give the attribute
  * @param attributes  The attributes to add
  */
-@SerialVersionUID(1306561642)
-case class AddAttributes(shapes : Map[Int, Attributes], attributes : Attributes)
-  extends SerializableProxy(() => new AddAttributesProxy(shapes, attributes)) with Action {
+case class AddAttributes(shapes : Map[Int, Attributes], attributes : Attributes) extends Action {
 
   def execute(model: Model) = model.add(ids.map(i => i -> model.shapes(i).addAttributes(attributes)).toMap)
 
@@ -75,8 +71,7 @@ object AddAttributes {
  * @param attributes  The attributes to set.
  */
 @SerialVersionUID(-1003577121)
-case class SetAttributes(shapes : Map[Int, Attributes], attributes : Attributes)
-  extends SerializableProxy(() => new SetAttributesProxy(shapes, attributes)) with Action {
+case class SetAttributes(shapes : Map[Int, Attributes], attributes : Attributes) extends Action {
 
   def execute(model: Model) = model.add(ids.map(i => i -> model.shapes(i).setAttributes(attributes)).toMap)
 
