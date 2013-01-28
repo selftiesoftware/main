@@ -13,6 +13,7 @@ package com.siigna.util.io
 
 import java.nio.ByteBuffer
 import org.ubjson.io.ByteArrayOutputStream
+import version.IOVersion
 
 /**
  * Marshals objects to binary according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
@@ -31,23 +32,24 @@ object Marshal {
    * @return  A ByteBuffer containing the marshalled command, useful for being send over network or to a file..
    * @throws IllegalArgumentException  If the object could not be recognized.
    */
-  def apply(any : Any) = marshal(_.write(any))
+  def apply(any : Any) = marshal(_.writeObject(any))
 
   /**
    * Prepares the right output stream, so the given function f can be executed, and wraps the output stream up
    * and turn it into a ByteBuffer
    * @param f  The function to execute of the SiignaOutputStream
-   * @return  A ByteBuffer with the contents written by the function fZ
-   * @todo Optimize
+   * @return  A ByteBuffer with the contents written by the function f.
    */
   protected def marshal(f : (SiignaOutputStream) => Unit) : ByteBuffer = {
-    // Create the buffer while making room for the length (int32) and version number (byte)
-    val arr = new ByteArrayOutputStream()
-    val out = new SiignaOutputStream(arr)
+    //todo Optimize using ByteBuffer
+    val bytes = new ByteArrayOutputStream()
+    val out = new SiignaOutputStream(bytes, IOVersion(IOVersion.Current))
 
-    out.writeByte(Version) // Write the version of the content
+    // Write the version of the content
+    out.writeString("version")
+    out.writeByte(IOVersion.Current)
 
-    // Write the object
+    // Write the object itself
     f(out)
 
     // Flush and close
@@ -55,8 +57,8 @@ object Marshal {
     out.close()
 
     // Return the buffer itself
-    // TODO: Optimize
-    ByteBuffer.wrap(arr.getArray)
+    val arr = bytes.getArray
+    ByteBuffer.wrap(arr)
   }
 
 }

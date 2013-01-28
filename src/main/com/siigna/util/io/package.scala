@@ -15,6 +15,7 @@ package object io extends Enumeration {
     val Get     = 1.asInstanceOf[Byte]
     val Set     = 2.asInstanceOf[Byte]
     val Session = 3.asInstanceOf[Byte]
+    val User    = 4.asInstanceOf[Byte]
 
     // Util
     val Attributes = 50.asInstanceOf[Byte]
@@ -25,8 +26,6 @@ package object io extends Enumeration {
     // Scala
     val Iterable = 80.asInstanceOf[Byte]
     val Map      = 81.asInstanceOf[Byte]
-    val Tuple2   = 82.asInstanceOf[Byte]
-    val Tuple3   = 83.asInstanceOf[Byte]
 
     // Actions
     val AddAttributes       = 100.asInstanceOf[Byte]
@@ -69,7 +68,5 @@ package object io extends Enumeration {
     val RectangleShapePart = 236.asInstanceOf[Byte]
     val TextShapePart      = 237.asInstanceOf[Byte]
   }
-
-  val Version = 1.asInstanceOf[Byte]
 
 }
