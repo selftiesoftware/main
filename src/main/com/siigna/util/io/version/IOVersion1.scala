@@ -12,109 +12,75 @@ import java.awt.geom.AffineTransform
 import com.siigna.app.model.Model
 import com.siigna.app.model.server.User
 import remote.{Session, RemoteConstants}
-import reflect.runtime.universe._
 
 /**
  * The first take at implementing I/O functionality in Siigna.
  */
 object IOVersion1 extends IOVersion {
 
-  def readSiignaObject(in : SiignaInputStream, members : Int) : (reflect.runtime.universe.Type, Any) = {
-    // TODO: User the member-count
+  def readSiignaObject(in : SiignaInputStream, members : Int) : Any = {
+    // TODO: Use the member-count
 
+    // Retrieve the type of the siigna object
+    in.checkMemberName("type")
     val byte = in.readByte()
 
     // Match the type
     byte match {
-      case Type.AddAttributes    => typeOf[AddAttributes] ->
-        new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.ArcShape         => typeOf[ArcShape] ->
-        new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
+      case Type.AddAttributes    => new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
+      case Type.ArcShape         => new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
                      in.readMember[Double]("startAngle"), in.readMember("angle"), in.readMember[Attributes]("attributes"))
-      case Type.ArcShapePart     => typeOf[ArcShape.Part] ->
-        new ArcShape.Part(in.readMember[Byte]("part"))
-      case Type.Attributes       => typeOf[Attributes] ->
-        new Attributes(in.readMember[Map[String, Any]]("self"))
-      case Type.CircleShape      => typeOf[CircleShape] ->
-        new CircleShape(in.readMember[Vector2D]("center"), in.readMember("radius"), in.readMember[Attributes]("attributes"))
-      case Type.CircleShapePart  => typeOf[CircleShape.Part] ->
-        new CircleShape.Part(in.readMember[Byte]("part"))
-      case Type.CreateShape      => typeOf[CreateShape] ->
-        new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
-      case Type.CreateShapes     => typeOf[CreateShapes] ->
-        new CreateShapes(in.readMember[Map[Int, Shape]]("shapes"))
-      case Type.DeleteShape      => typeOf[DeleteShape] ->
-        new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
-      case Type.DeleteShapePart  => typeOf[DeleteShapePart] ->
-        new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part"))
-      case Type.DeleteShapeParts => typeOf[AddAttributes] ->
-        new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes"))
-      case Type.DeleteShapes     => typeOf[DeleteShapes] ->
-        new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes"))
-      case Type.Error            => typeOf[remote.Error] ->
-        remote.Error(in.readMember[Int]("constant"), in.readMember[String]("message"), in.readMember[Session]("session"))
-      case Type.Get              => typeOf[remote.Get] ->
-        remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
-      case Type.GroupShape       => typeOf[GroupShape] ->
-        new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.GroupShapePart   => typeOf[GroupShape.Part] ->
-        GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes"))
+      case Type.ArcShapePart     => new ArcShape.Part(in.readMember[Byte]("part"))
+      case Type.Attributes       => new Attributes(in.readMember[Map[String, Any]]("self"))
+      case Type.CircleShape      => new CircleShape(in.readMember[Vector2D]("center"), in.readMember("radius"), in.readMember[Attributes]("attributes"))
+      case Type.CircleShapePart  => new CircleShape.Part(in.readMember[Byte]("part"))
+      case Type.CreateShape      => new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
+      case Type.CreateShapes     => new CreateShapes(in.readMember[Map[Int, Shape]]("shapes"))
+      case Type.DeleteShape      => new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
+      case Type.DeleteShapePart  => new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part"))
+      case Type.DeleteShapeParts => new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes"))
+      case Type.DeleteShapes     => new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes"))
+      case Type.Error            => remote.Error(in.readMember[Int]("constant"), in.readMember[String]("message"), in.readMember[Session]("session"))
+      case Type.Get              => remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
+      case Type.GroupShape       => new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
+      case Type.GroupShapePart   => GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes"))
       //case Type.ImageShape       => // Nothing here yet
       //case Type.ImageShapePart   => // Nothing here yet
-      case Type.Iterable         => typeOf[Iterable[Any]] -> {
+      case Type.Iterable         => {
         in.checkMemberName("array")
         new Array[Any](in.readArrayLength()).map(_ => in.readObject)
       }
-      case Type.LineShape        => typeOf[LineShape] ->
-        new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
-      case Type.LineShapePart    => typeOf[LineShape.Part] -> LineShape.Part(readBoolean())
-      case Type.Map              => typeOf[Map[Any, Any]] -> {
-        in.checkMemberName("array")
+      case Type.LineShape        => new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
+      case Type.LineShapePart    => LineShape.Part(readBoolean())
+      case Type.Map              => {
+        in.checkMemberName("map")
         new Array[Any](in.readArrayLength()).map(_ => in.readObject -> in.readObject).toMap
       }
-      case Type.Model            => typeOf[Model] -> {
+      case Type.Model            => {
         new Model(in.readMember[Map[Int, Shape]]("shapes"), in.readMember[Seq[Action]]("executed"),
                   in.readMember[Seq[Action]]("undone"), in.readMember[Attributes]("attributes"))
       }
-      case Type.PolylineArcShape      => typeOf[PolylineArcShape] ->
-        new PolylineArcShape(in.readMember[Vector2D]("point"), in.readMember[Vector2D]("middle"))
-      case Type.PolylineLineShape     => typeOf[PolylineLineShape] ->
-        new PolylineLineShape(in.readMember[Vector2D]("point"))
-      case Type.PolylineShapeClosed   => typeOf[PolylineShape.PolylineShapeClosed] ->
-        new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
-      case Type.PolylineShapeOpen     => typeOf[PolylineShape.PolylineShapeOpen] ->
-        new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
-      case Type.PolylineShapePart     => typeOf[PolylineShape.Part] ->
-        PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs"))
+      case Type.PolylineArcShape      => new PolylineArcShape(in.readMember[Vector2D]("point"), in.readMember[Vector2D]("middle"))
+      case Type.PolylineLineShape     => new PolylineLineShape(in.readMember[Vector2D]("point"))
+      case Type.PolylineShapeClosed   => new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
+      case Type.PolylineShapeOpen     => new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
+      case Type.PolylineShapePart     => PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs"))
       //case Type.RectangleShapeComplex => // Nothing here yet
       //case Type.RectangleShapePart    => // Nothing here yet
       //case Type.RectangleShapeSimple  => // Nothing here yet
-      case Type.RemoteAction     => typeOf[RemoteAction] ->
-        new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo"))
-      case Type.SequenceAction   => typeOf[SequenceAction] ->
-        new SequenceAction(in.readMember[Seq[Action]]("actions"))
-      case Type.Session          => typeOf[Session] ->
-        new Session(in.readMember[Long]("drawing"), in.readMember[User]("user"))
-      case Type.Set              => typeOf[remote.Set] ->
-        remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
-      case Type.SetAttributes    => typeOf[SetAttributes] ->
-        new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.TextShape        => typeOf[TextShape] ->
-        new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember("scale"), in.readMember[Attributes]("attributes"))
-      case Type.TextShapePart    => typeOf[TextShape.Part] ->
-        TextShape.Part(in.readMember[Byte]("part"))
-      case Type.TransformationMatrix => typeOf[TransformationMatrix] ->
-        new TransformationMatrix(new AffineTransform(in.readMember[Array[Double]]("matrix")))
-      case Type.TransformShape       => typeOf[TransformShape] ->
-        new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("matrix"))
-      case Type.TransformShapeParts  => typeOf[TransformShapeParts] ->
-        new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation"))
-      case Type.TransformShapes      => typeOf[TransformShape] ->
-        new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation"))
-      case Type.User             => typeOf[User] ->
-        new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token"))
-      case Type.Vector2D         => typeOf[Vector2D] ->
-        new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y"))
+      case Type.RemoteAction     => new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo"))
+      case Type.SequenceAction   => new SequenceAction(in.readMember[Seq[Action]]("actions"))
+      case Type.Session          => new Session(in.readMember[Long]("drawing"), in.readMember[User]("user"))
+      case Type.Set              => remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
+      case Type.SetAttributes    => new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
+      case Type.TextShape        => new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember("scale"), in.readMember[Attributes]("attributes"))
+      case Type.TextShapePart    => TextShape.Part(in.readMember[Byte]("part"))
+      case Type.TransformationMatrix => new TransformationMatrix(new AffineTransform(in.readMember[Array[Double]]("matrix")))
+      case Type.TransformShape       => new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("matrix"))
+      case Type.TransformShapeParts  => new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation"))
+      case Type.TransformShapes      => new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation"))
+      case Type.User             => new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token"))
+      case Type.Vector2D         => new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y"))
       case e => throw new UBJFormatException(in.getPosition, "SiignaInputStream: Unknown type: " + e)
     }
   }
@@ -131,8 +97,12 @@ object IOVersion1 extends IOVersion {
     obj match {
       case a : Attributes => 1 // One for the actual map
       case t : TransformationMatrix => 6 // A matrix has 6 double values underneath.. FYI
-      case i : Iterable[_] => 1 // One for the array of contents
-      case _ => obj.getClass.getConstructors.apply(0).getParameterTypes.size
+      case i : Iterable[Any] => 1 // One for the array of contents
+      case _ => try {
+        obj.getClass.getConstructors.apply(0).getParameterTypes.size
+      } catch {
+        case e : ArrayIndexOutOfBoundsException => throw new IllegalArgumentException(s"IOVersion1: Could not understand object $obj.")
+      }
     }
   }
 
@@ -266,13 +236,8 @@ object IOVersion1 extends IOVersion {
    */
   protected def writeHeader(output : SiignaOutputStream, obj : Any) {
     val size = getMemberCount(obj) + 1 // Plus one for the type
-    obj match {
-      case _ : Map[_, _] | _ : Iterable[_] => output.writeArrayHeader(size)
-      case _ => {
-        output.writeObjectHeader(size)
-        output.writeString("type") // Prepare for 1-byte type annotation
-      }
-    }
+    output.writeObjectHeader(size)
+    output.writeString("type") // Prepare for 1-byte type annotation
   }
 
   def writeSiignaObject(out: SiignaOutputStream, obj : Any) {
