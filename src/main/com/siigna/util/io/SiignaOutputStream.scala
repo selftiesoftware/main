@@ -12,6 +12,16 @@ import version.IOVersion
 class SiignaOutputStream(out : OutputStream, version : IOVersion) extends UBJOutputStream(out) {
 
   /**
+   * Writes a member in the UBJSON format by first writing the name and then the object.
+   * @param name  The name of the member, fx "id"
+   * @param obj  The name of the object, fx 12L
+   */
+  def writeMember(name : String, obj : Any) {
+    writeString(name)
+    writeObject(obj)
+  }
+
+  /**
    * Writes a given object to the underlying output stream.
    * @param obj  The object to write
    * @throws IllegalArgumentException  If the object could not be recognized.

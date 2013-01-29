@@ -3,29 +3,82 @@ package com.siigna.util.io
 import java.nio.ByteBuffer
 import org.ubjson.io.{UBJInputStream, ByteBufferInputStream}
 import version.IOVersion
+import com.siigna.util.Log
+import scala.reflect.runtime.universe._
 
 /**
- * Unmarshals objects from binary encoding according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
- * We use [[java.nio.ByteBuffer]]s internally since they in many ways are faster than output streams.
+ * <p>
+ *   Unmarshals objects from binary encoding according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
+ *   We use [[java.nio.ByteBuffer]]s internally since they in many ways are faster than output streams.
+ * </p>
+ * <p>
+ *   <b>Important: If not type tag is given we can not parse the type, so a type-less attempt would result in None!</b>
+ * </p>
+ *
+ * Examples:
+ * {{{
+ *   // Read a double
+ *   val marshalledDouble = ...
+ *   val double = Unmarshal[Double](marshalledDouble)
+ *
+ *   // Read a line shape
+ *   val marshalledLineShape = ...
+ *   val object = Unmarshal[LineShape](marshalledLineShape)
+ *
+ *   // .. and so forth
+ * }}}
  */
-object Unmarshal {
+object Unmarshal { // extends App {
+
+
+  //import com.siigna.app.model.shape.LineShape
+
+  //val obj = "Hello"
+  //val out = Marshal(obj)
+  //val in  = Unmarshal[Any](out)
+  //println("In: " + in)
 
   /**
-   * Attempts to read a well-known Siigna object from the given [[java.nio.ByteBuffer]]. Internally we wrap it
-   * as a [[org.ubjson.io.UBJInputStream]].
+   * <p>
+   *   Attempts to read a well-known Siigna object from the given [[java.nio.ByteBuffer]] and cast it to the
+   *   given type T.
+   *   <br>
+   *   <b>Important: If no type tag is provided we simply return None</b> since we cannot determine the type to
+   *   read.
+   * </p>
    * @param buffer  The ByteBuffer containing the data to be read.
-   * @tparam T  The type of the object to be read.
+   * @tparam T  The expected type of the object to be read.
    * @return  Some[T] if the object could be read and successfully parsed, None otherwise
+   * @throws UBJFormatException  If the formatting could not be understood.
+   * @throws IOException  If an I/O error occurred.
    */
-  def apply[T](buffer : ByteBuffer) : Option[T] = {
-    val in = getInputStream(buffer)
+  def apply[T : TypeTag](buffer : ByteBuffer) : Option[T] = {
+    // The type to read
+    val readType = typeOf[T]
 
-    // Read the "main" object
-    val obj = in.readObject
+    // Make sure the type parameter has been specified
+    if(readType =:= typeOf[Nothing]) {
+      Log.error("Unmarshal: Please specify type parameters for expected type.")
+      None
+    } else {
+      val in = getInputStream(buffer)
 
-    obj match {
-      case s : Some[T] => s
-      case _ => None
+      // Read the "main" object
+      try {
+        val (tpe, obj) = in.readObject
+
+        obj match {
+          case _ if(readType =:= tpe) => Some(obj.asInstanceOf[T])
+          case _ => {
+            val actual = obj.getClass
+            val expected = typeTag[T].getClass.getName
+            Log.warning(s"Unmarshal: Found obj of type $actual, but expected $expected.")
+            None
+          }
+        }
+      } catch {
+        case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
+      }
     }
   }
 
@@ -35,7 +88,7 @@ object Unmarshal {
    * @tparam T  The type of the object to be retrieved.
    * @return  Some[T] if the object could be read and successfully parsed, None otherwise
    */
-  def apply[T](array : Array[Byte]) : Option[T] = apply(ByteBuffer.wrap(array))
+  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = apply[T](ByteBuffer.wrap(array))
 
   /**
    * Creates the correct version of a [[com.siigna.util.io.SiignaInputStream]] capable of reading binary data in the
@@ -49,9 +102,12 @@ object Unmarshal {
 
     // Read the version
     assert(UBJInput.readString() == "version", "Could not identify version number")
-    val version = IOVersion(UBJInput.readByte)
+    val version = UBJInput.readByte
+    val inputVersion = IOVersion(version)
 
-    new SiignaInputStream(bufferInput, version)
+    Log.debug(s"Unmarshal: Created input stream of version $version")
+
+    new SiignaInputStream(bufferInput, inputVersion)
   }
 
 }

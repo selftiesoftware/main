@@ -14,14 +14,13 @@ package com.siigna.util.io
 import java.nio.ByteBuffer
 import org.ubjson.io.ByteArrayOutputStream
 import version.IOVersion
+import com.siigna.util.Log
 
 /**
  * Marshals objects to binary according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
- * This object uses [[java.nio.ByteBuffer]]s since they in many ways are faster than output streams.
  *
  * @author csp <csp@siigna.com>
  * @author jegp <jegp@siigna.com>
- * @see [[http://www3.ntu.edu.sg/home/ehchua/programming/java/J5b_IO_advanced.html Chua Hock Chuans notes on advanced I/O]]
  * @see [[https://github.com/thebuzzmedia/universal-binary-json-java/ UBJSON on GitHub]]
  */
 object Marshal {
@@ -32,22 +31,25 @@ object Marshal {
    * @return  A ByteBuffer containing the marshalled command, useful for being send over network or to a file..
    * @throws IllegalArgumentException  If the object could not be recognized.
    */
-  def apply(any : Any) = marshal(_.writeObject(any))
+  def apply(any : Any) : Array[Byte] = marshal(_.writeObject(any))
 
   /**
    * Prepares the right output stream, so the given function f can be executed, and wraps the output stream up
    * and turn it into a ByteBuffer
    * @param f  The function to execute of the SiignaOutputStream
-   * @return  A ByteBuffer with the contents written by the function f.
+   * @return  A byte array containing the objects written to it.
    */
-  protected def marshal(f : (SiignaOutputStream) => Unit) : ByteBuffer = {
+  protected def marshal(f : (SiignaOutputStream) => Unit) : Array[Byte] = {
     //todo Optimize using ByteBuffer
-    val bytes = new ByteArrayOutputStream()
+    val bytes = new ByteArrayOutputStream(512)
     val out = new SiignaOutputStream(bytes, IOVersion(IOVersion.Current))
+    val version = IOVersion.Current
+
+    Log.debug(s"Unmarshal: Marshalling byte stream with version $version")
 
     // Write the version of the content
     out.writeString("version")
-    out.writeByte(IOVersion.Current)
+    out.writeByte(version)
 
     // Write the object itself
     f(out)
@@ -57,8 +59,7 @@ object Marshal {
     out.close()
 
     // Return the buffer itself
-    val arr = bytes.getArray
-    ByteBuffer.wrap(arr)
+    bytes.getArray
   }
 
 }
