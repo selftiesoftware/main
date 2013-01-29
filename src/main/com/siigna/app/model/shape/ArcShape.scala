@@ -16,7 +16,7 @@ import com.siigna.util.geom.{SimpleRectangle2D, Arc2D, TransformationMatrix, Vec
 import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna._
-import app.model.shape.ArcShape.ArcShapeSelector
+import app.model.shape.ArcShape.Part
 import scala.Some
 
 /**
@@ -42,9 +42,9 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   val geometry = Arc2D(center, radius, startAngle, angle)
 
-  def apply(part : ShapeSelector) = part match {
-    case FullSelector => Some(new PartialShape(this, transform))
-    case ArcShapeSelector(x : Byte) => {
+  def apply(part : ShapePart) = part match {
+    case FullShapePart => Some(new PartialShape(this, transform))
+    case Part(x : Byte) => {
       // Calculate the mathematical arc as a function to a given transformation matrix
       val arc = (t : TransformationMatrix) => x match {
         case 1 => Arc2D(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint)
@@ -61,28 +61,28 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case _ => None
   }
 
-  def delete(part: ShapeSelector) = part match {
-    case ArcShapeSelector(_) | FullSelector => Nil
+  def delete(part: ShapePart) = part match {
+    case Part(_) | FullShapePart => Nil
     case _ => Seq(this)
   }
 
-  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullSelector else EmptySelector
+  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapePart else EmptyShapePart
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullSelector else EmptySelector
+  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapePart else EmptyShapePart
   
-  def getShape(s : ShapeSelector) = s match {
-    case FullSelector => Some(this)
+  def getShape(s : ShapePart) = s match {
+    case FullShapePart => Some(this)
     case _ => None
   }
 
-  def getVertices(selector: ShapeSelector) = selector match {
-    case FullSelector        => geometry.vertices
-    case ArcShapeSelector(1) => Seq(geometry.startPoint)
-    case ArcShapeSelector(2) => Seq(geometry.midPoint)
-    case ArcShapeSelector(3) => Seq(geometry.startPoint + geometry.midPoint)
-    case ArcShapeSelector(4) => Seq(geometry.endPoint)
-    case ArcShapeSelector(5) => Seq(geometry.startPoint + geometry.endPoint)
-    case ArcShapeSelector(6) => Seq(geometry.midPoint + geometry.endPoint)
+  def getVertices(selector: ShapePart) = selector match {
+    case FullShapePart        => geometry.vertices
+    case Part(1) => Seq(geometry.startPoint)
+    case Part(2) => Seq(geometry.midPoint)
+    case Part(3) => Seq(geometry.startPoint + geometry.midPoint)
+    case Part(4) => Seq(geometry.endPoint)
+    case Part(5) => Seq(geometry.startPoint + geometry.endPoint)
+    case Part(6) => Seq(geometry.midPoint + geometry.endPoint)
     case _ => Seq()
   }
 
@@ -103,7 +103,7 @@ object ArcShape
 {
 
   /**
-   * A [[com.siigna.app.model.shape.ShapeSelector]] for ArcShapes.
+   * A [[com.siigna.app.model.shape.ShapePart]] for ArcShapes.
    * Arcs can be selected in the following way:
    * <pre>
    *  1         :  a single handle - the handle with the lowest degree (from 3 o'clock counter clockwise)
@@ -114,7 +114,7 @@ object ArcShape
    *  2 + 4 = 6 :  both the second and last handle
    * @param byte  The handles to select
    */
-  sealed case class ArcShapeSelector(byte : Byte) extends ShapeSelector
+  sealed case class Part(byte : Byte) extends ShapePart
 
   /**
    * Creates an arc from three given points by calculating the center and setting the right radius and angles.

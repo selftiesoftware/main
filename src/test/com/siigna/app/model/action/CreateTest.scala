@@ -25,7 +25,7 @@ class CreateTest extends FunSpec with ShouldMatchers {
 
   val id = 123142
   val line = LineShape(Vector2D(0, 0), Vector2D(13, 14))
-  val model = new Model(Map(), Seq(), Seq())
+  val model = new Model()
 
   describe("CreateShape") {
     val action = CreateShape(id, line)

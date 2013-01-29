@@ -14,7 +14,7 @@ package com.siigna.app.model
 import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{Rectangle2D, Vector2D, SimpleRectangle2D}
+import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D}
 
 /**
  * <p>

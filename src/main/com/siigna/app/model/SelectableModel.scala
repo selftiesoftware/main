@@ -11,7 +11,7 @@
 
 package com.siigna.app.model
 
-import shape.{FullSelector, EmptySelector, ShapeSelector}
+import shape.{FullShapePart, EmptyShapePart, ShapePart}
 
 /**
  * A trait that provides an interface to manipulate a [[com.siigna.app.model.MutableModel]] and through
@@ -44,15 +44,15 @@ trait SelectableModel {
   def select(ids : Traversable[Int]) { model select ids }
 
   /**
-   * Selects a part of a shape based on its id. If the ShapeSelector is a FullSelector then getPart the
+   * Selects a part of a shape based on its id. If the ShapePart is a FullShapePart then getPart the
    * entire shape, if the part is empty then do nothing.
    * @param id  The id of the shape
    * @param part  The part of the shape to getPart
    */
-  def select(id : Int, part : ShapeSelector) {
+  def select(id : Int, part : ShapePart) {
     part match {
-      case EmptySelector =>
-      case FullSelector => select(id)
+      case EmptyShapePart =>
+      case FullShapePart => select(id)
       case _ => model select Selection(id, part)
     }
   }

@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
 import collection.mutable
-import com.siigna.app.model.shape.PolylineShape.Selector
+import com.siigna.app.model.shape.PolylineShape.Part
 import com.siigna.app.Siigna
 
 /**
@@ -47,9 +47,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
   type T = PolylineShape
 
-  def apply(part : ShapeSelector) = part match {
-    case FullSelector => Some(new PartialShape(this, transform))
-    case Selector(xs) => {
+  def apply(part : ShapePart) = part match {
+    case FullShapePart => Some(new PartialShape(this, transform))
+    case Part(xs) => {
       // The selected parts, needed for drawing
       var selected = Seq[BasicShape]()
 
@@ -94,9 +94,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    */
   protected def copy(startPoint : Vector2D = startPoint, innerShapes : Seq[InnerPolylineShape] = innerShapes, attributes : Attributes = attributes) : T
 
-  def delete(part : ShapeSelector) = part match {
-    case FullSelector => Nil
-    case Selector(xs) => {
+  def delete(part : ShapePart) = part match {
+    case FullShapePart => Nil
+    case Part(xs) => {
 
       if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
         Nil
@@ -131,12 +131,12 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         groups
       }
     }
-    case EmptySelector => Seq(this)
+    case EmptyShapePart => Seq(this)
   }
 
   def getPart(rect: SimpleRectangle2D) =
     if (rect.contains(geometry.boundary)) {
-      FullSelector
+      FullShapePart
     } else if (rect.intersects(geometry.boundary)) {
       val set = mutable.BitSet()
       // Add the start point if it is inside the rectangle
@@ -149,8 +149,8 @@ trait PolylineShape extends CollectionShape[BasicShape] {
           set add (i + 1) // Add one since we already included the startPoint (at index 0)
         }
       }
-      Selector(set)
-    } else EmptySelector
+      Part(set)
+    } else EmptyShapePart
 
   def getPart(point: Vector2D) = {
     // Find the distance to all the points and get their index
@@ -160,14 +160,14 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
     // If only one point is close, then we return a single index (point)
     if (closeVertices.size == 1) {
-      Selector(mutable.BitSet(closeVertices.head))
+      Part(mutable.BitSet(closeVertices.head))
     } else {
       // If there are zero or several close points, we should check for selection of segments
       val closeShapes = shapes.zipWithIndex.par.map(t => t._1.distanceTo(point) -> t._2).filter(_._1 <= Siigna.selectionDistance)
 
       // If no shapes are close, nothing is selected
       if (closeShapes.isEmpty) {
-        EmptySelector
+        EmptyShapePart
       } else {
         // Otherwise we add the vertices of the close shapes
         val closeShapeVertices = mutable.BitSet()
@@ -191,14 +191,14 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         })
 
         // Lastly we return
-        Selector(closeShapeVertices)
+        Part(closeShapeVertices)
       }
     }
   }
 
-  def getShape(s : ShapeSelector) = s match {
-    case FullSelector => Some(this)
-    case Selector(xs) => {
+  def getShape(s : ShapePart) = s match {
+    case FullShapePart => Some(this)
+    case Part(xs) => {
       if (xs.size < 2) None
       else {
         var firstPoint = false
@@ -239,9 +239,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     case _ => None
   }
 
-  def getVertices(selector: ShapeSelector) = selector match {
-    case FullSelector => geometry.vertices
-    case Selector(xs) => {
+  def getVertices(selector: ShapePart) = selector match {
+    case FullShapePart => geometry.vertices
+    case Part(xs) => {
       var inner = Seq[Vector2D]()
 
       // Add startPoint
@@ -382,8 +382,7 @@ object PolylineShape {
    * @see BitSet
    * @see CollectionShape
    */
-  @SerialVersionUID(515068925)
-  case class Selector(xs : mutable.BitSet) extends ShapeSelector
+  case class Part(xs : mutable.BitSet) extends ShapePart
 
   /**
    * Creates a PolylineShape connecting the given points with lines. If the first and last point are the same the
@@ -497,7 +496,6 @@ sealed trait InnerPolylineShape {
  * A LineShape representation used inside a PolylineShape.
  * @param point  The point given to create a LineShape.
  */
-@SerialVersionUID(-1210960374)
 sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
   def apply(v : Vector2D) = LineShape(v, point)
   override def toString = "PolylineLineShape(" + point + ")"
@@ -509,7 +507,6 @@ sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape
  * @param middle  The center point of the arc
  * @param point The point given to create a LineShape.
  */
-@SerialVersionUID(882064197)
 sealed case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
   def apply(v : Vector2D) = ArcShape(v, middle, point)
   override def toString = "PolylineArcShape(" + middle + ", " + point + ")"

@@ -8,7 +8,7 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-
+/*
 package com.siigna.app.controller.remote
 
 import org.scalatest.FunSpec
@@ -17,7 +17,6 @@ import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
 import com.siigna.app.model.action.{CreateShape, RemoteAction}
 import com.siigna.app.model.shape.LineShape
-import com.siigna.util.persistence.Serializer
 
 /**
  * Tests the remote actor.
@@ -92,4 +91,4 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
   }
 
-}
+}  */

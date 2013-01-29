@@ -26,11 +26,11 @@ import com.siigna.util.Log
  * many times before storing any final changes.
  *
  * <br />
- * The actual selection consists of a map of Ints and [[com.siigna.app.model.shape.ShapeSelector]]s.
+ * The actual selection consists of a map of Ints and [[com.siigna.app.model.shape.ShapePart]]s.
  *
  * @see Model
  * @see Selection
- * @see ShapeSelector
+ * @see ShapePart
  */
 trait MutableModel extends SelectableModel {
 

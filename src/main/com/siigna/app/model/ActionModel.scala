@@ -56,7 +56,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
+  protected var model = new Model()
 
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
@@ -86,7 +86,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       action match {
         case v : VolatileAction => // Do nothing here!
         case _ => { // Store the action
-          model = new Model(model.shapes, model.executed.+:(action), Seq())
+          model = new Model(model.shapes, model.executed.+:(action), Seq(), model.attributes)
         }
       }
 
@@ -143,7 +143,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
         // Execute the event and add it to the executed list
         model = action.execute(model)
-        model = new Model(model.shapes, model.executed.+:(action), undone)
+        model = new Model(model.shapes, model.executed.+:(action), undone, model.attributes)
 
         // Notify listeners
         notifyListeners(action, undo = false)
