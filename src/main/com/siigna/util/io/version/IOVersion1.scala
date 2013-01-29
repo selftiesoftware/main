@@ -1,6 +1,5 @@
 package com.siigna.util.io.version
 
-import java.io.OutputStream
 import com.siigna.util.io.{Type, SiignaInputStream, SiignaOutputStream}
 import org.ubjson.io.UBJFormatException
 import com.siigna.app.model.action._
@@ -8,18 +7,17 @@ import com.siigna.util.collection.Attributes
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.app.controller.remote
-import remote.RemoteCommand
-import scala.remote
 import collection.mutable
 import java.awt.geom.AffineTransform
 import com.siigna.app.model.Model
+import com.siigna.app.model.server.User
 
 /**
  * The first take at implementing I/O functionality in Siigna.
  */
 object IOVersion1 extends IOVersion {
 
-  def readSiignaObject(input : SiignaInputStream) : Any = {
+  def readSiignaObject(in : SiignaInputStream) : Any = {
     val shapeExtractor = (s : SiignaInputStream) => s.readInt32() -> input.readType[Shape]
 
     // Match the type
@@ -47,7 +45,9 @@ object IOVersion1 extends IOVersion {
       case Type.ImageShapePart   => // Nothing here yet
       case Type.LineShape        => new LineShape(readType[Vector2D], readType[Vector2D], readType[Attributes])
       case Type.LineShapePart    => LineShape.Part(readBoolean())
-      case Type.Model            => readModel()
+      case Type.Model            => {
+        new Model(in.readType[Map[Int, Shape]](s => s.readInt32() -> readType[Shape]), readType[Seq[Action]], readType[Seq[Action]], readType[Attributes])
+      }
       case Type.PolylineArcShape      => new PolylineArcShape(readType[Vector2D], readType[Vector2D])
       case Type.PolylineLineShape     => new PolylineLineShape(readType[Vector2D])
       case Type.PolylineShapeClosed   => new PolylineShape.PolylineShapeClosed(readType[Vector2D], readType[Seq[InnerPolylineShape]], readType[Attributes])
@@ -71,14 +71,6 @@ object IOVersion1 extends IOVersion {
       case Type.Vector2D         => new Vector2D(readDouble, readDouble)
       case e => throw new UBJFormatException(pos, "SiignaInputStream: Unknown type: " + e)
     }
-  }
-
-  /**
-   * Attempts to read a Model type from the input stream.
-   * @return  A Model containing shapes, executed and undone actions and attributes.
-   */
-  protected def readModel() : Model = {
-    new Model(readMap[Int, Shape](s => s.readInt32() -> readType[Shape]), readType[Seq[Action]], readType[Seq[Action]], readType[Attributes])
   }
 
   /**
@@ -111,28 +103,28 @@ object IOVersion1 extends IOVersion {
       case AddAttributes(shapes, attributes) => {
         out.writeByte(Type.AddAttributes)
         out.writeString("shapes")
-        out.writeObject(shapes)
+        writeSiignaObject(out, shapes)
         out.writeString("attributes")
-        writeAttributes(out, attributes)
+        writeSiignaObject(out, attributes)
       }
       case SetAttributes(shapes, attributes) => {
         out.writeByte(Type.SetAttributes)
         out.writeString("shapes")
-        out.writeObject(shapes)
+        writeSiignaObject(out, shapes)
         out.writeString("attributes")
-        writeAttributes(out, attributes)
+        writeSiignaObject(out, attributes)
       }
       case CreateShape(id, shape) => {
         out.writeByte(Type.CreateShape)
         out.writeString("id")
         out.writeInt32(id)
         out.writeString("shape")
-        writeShape(out, shape)
+        writeSiignaObject(out, shape)
       }
       case CreateShapes(shapes) => {
         out.writeByte(Type.CreateShapes)
         out.writeString("shapes")
-        out.writeObject(shapes)
+        writeSiignaObject(out, shapes)
       }
       case DeleteShape(id, shape) => {
         out.writeByte(Type.DeleteShape)
@@ -153,35 +145,35 @@ object IOVersion1 extends IOVersion {
       case DeleteShapeParts(oldShapes, newShapes) => {
         out.writeByte(Type.DeleteShapeParts)
         out.writeString("oldShapes")
-        out.writeObject(oldShapes)
+        writeSiignaObject(out, oldShapes)
         out.writeString("newShapes")
-        out.writeObject(newShapes)
+        writeSiignaObject(out, newShapes)
       }
       case SequenceAction(actions) => {
         out.writeByte(Type.SequenceAction)
         out.writeString("actions")
-        out.writeObject(actions)
+        writeSiignaObject(out, actions)
       }
       case TransformShape(id, transformation) => {
         out.writeByte(Type.TransformShape)
         out.writeString("id")
         out.writeInt32(id)
         out.writeString("transformation")
-        writeTransformationMatrix(out, transformation)
+        writeSiignaObject(out, transformation)
       }
       case TransformShapeParts(shapes, transformation) => {
         out.writeByte(Type.TransformShapeParts)
         out.writeString("shapes")
-        out.writeObject(shapes)
+        writeSiignaObject(out, shapes)
         out.writeString("transformation")
-        writeTransformationMatrix(out, transformation)
+        writeSiignaObject(out, transformation)
       }
       case TransformShapes(ids, transformation) => {
         out.writeByte(Type.TransformShapes)
         out.writeString("ids")
-        out.writeObject(ids)
+        writeSiignaObject(out, ids)
         out.writeString("transformation")
-        writeTransformationMatrix(out, transformation)
+        writeSiignaObject(out, transformation)
       }
 
       // Fall-through
@@ -190,156 +182,74 @@ object IOVersion1 extends IOVersion {
   }
 
   /**
-   * Write an inner polyline shape to the output stream.
-   * @param out  The output stream to write to
-   * @param shape  The inner polyline shape to write
-   */
-  protected def writeInnerPolylineShape(out : SiignaOutputStream, shape : InnerPolylineShape) {
-    shape match {
-      case s : PolylineArcShape => {
-        writeByte(Type.PolylineArcShape)
-        writeString("point")
-        writeVector2D(s.point)
-        writeString("middle")
-        writeVector2D(s.middle)
-      }
-      case s : PolylineLineShape => {
-        writeByte(Type.PolylineLineShape)
-        writeString("point")
-        writeVector2D(s.point)
-      }
-    }
-  }
-
-  /**
-   * Writes a model to this output stream.
-   * @param model  The model to write.
-   */
-  protected def writeModel(model : Model) {
-    writeByte(Type.Model)
-    writeMap(model.shapes)
-    writeIterable(model.executed)
-    writeIterable(model.undone)
-    writeAttributes(model.attributes)
-  }
-
-  /**
-   * Write a remote action by writing the inner action and the boolean undo-value.
-   * @param action  The remote action to write.
-   */
-  protected def writeRemoteAction(action : RemoteAction) {
-    writeByte(Type.RemoteAction)
-    writeAction(action.action)
-    writeBoolean(action.undo)
-  }
-
-  /**
-   * Writes a RemoteCommand by writing the remote constant, the data of the command and the session.
-   * @param command  The session to write
-   */
-  protected def writeRemoteCommand(command : remote.RemoteCommand) {
-    command match {
-      case remote.Error(code, message, session) => {
-        writeByte(Type.Error)
-        writeString(message)
-        writeSession(session)
-      }
-      case remote.Get(const, value, session) => {
-        writeByte(Type.Get)
-        writeInt32(const.id)
-        writeObject(value)
-        writeSession(session)
-      }
-      case remote.Set(const, value, session) => {
-        writeByte(Type.Set)
-        writeInt32(const.id)
-        writeObject(value)
-        writeSession(session)
-      }
-    }
-  }
-
-  /**
-   * Writes a session to the output stream.
-   * @param session  The session to write.
-   */
-  protected def writeSession(session : remote.Session) {
-    writeByte(Type.Session)
-    writeInt64(session.drawing)
-    writeByte(Type.User)
-    writeInt64(session.user.id)
-    writeString(session.user.name)
-    writeString(session.user.token)
-  }
-
-  /**
    * Writes a shape to the output stream.
+   * @param out  The output stream to write to
    * @param shape  The shape to write.
    */
-  protected def writeShape(shape : Shape) {
+  protected def writeShape(out : SiignaOutputStream, shape : Shape) {
     shape match {
       case ArcShape(center, radius, startAngle, angle, attributes) => {
-        writeByte(Type.ArcShape)
-        writeString("center")
-        writeVector2D(center)
-        writeString("radius")
-        writeDouble(radius)
-        writeString("startAngle")
-        writeDouble(startAngle)
-        writeString("angle")
-        writeDouble(angle)
-        writeString("attributes")
-        writeAttributes(attributes)
+        out.writeByte(Type.ArcShape)
+        out.writeString("center")
+        writeSiignaObject(out, center)
+        out.writeString("radius")
+        out.writeDouble(radius)
+        out.writeString("startAngle")
+        out.writeDouble(startAngle)
+        out.writeString("angle")
+        out.writeDouble(angle)
+        out.writeString("attributes")
+        writeSiignaObject(out, attributes)
       }
       case CircleShape(center, radius, attributes) => {
-        writeByte(Type.CircleShape)
-        writeString("center")
-        writeVector2D(center)
-        writeString("radius")
-        writeDouble(radius)
-        writeString("attributes")
-        writeAttributes(attributes)
+        out.writeByte(Type.CircleShape)
+        out.writeString("center")
+        writeSiignaObject(out, center)
+        out.writeString("radius")
+        out.writeDouble(radius)
+        out.writeString("attributes")
+        writeSiignaObject(out, attributes)
       }
       case GroupShape(shapes, attributes) => {
-        writeByte(Type.GroupShape)
-        writeString("shapes")
-        writeObject(shapes)
-        writeString("attributes")
-        writeAttributes(attributes)
+        out.writeByte(Type.GroupShape)
+        out.writeString("shapes")
+        writeSiignaObject(out, shapes)
+        out.writeString("attributes")
+        writeSiignaObject(out, attributes)
       }
       case LineShape(p1, p2, attributes) => {
-        writeByte(Type.LineShape)
-        writeString("p1")
-        writeVector2D(p1)
-        writeString("p2")
-        writeVector2D(p2)
-        writeString("attributes")
-        writeAttributes(attributes)
+        out.writeByte(Type.LineShape)
+        out.writeString("p1")
+        writeSiignaObject(out, p1)
+        out.writeString("p2")
+        writeSiignaObject(out, p2)
+        out.writeString("attributes")
+        writeSiignaObject(out, attributes)
       }
       case p : PolylineShape => {
         p match {
           case _ : PolylineShape.PolylineShapeClosed => {
-            writeByte(Type.PolylineShapeClosed)
+            out.writeByte(Type.PolylineShapeClosed)
           }
           case _ : PolylineShape.PolylineShapeOpen => {
-            writeByte(Type.PolylineShapeOpen)
+            out.writeByte(Type.PolylineShapeOpen)
           }
         }
-        writeString("startPoint")
-        writeVector2D(p.startPoint)
-        writeString("innerShapes")
-        writeObject(p.innerShapes)
+        out.writeString("startPoint")
+        writeSiignaObject(out, p.startPoint)
+        out.writeString("innerShapes")
+        writeSiignaObject(out, p.innerShapes)
       }
       case TextShape(text, position, scale, attributes) => {
-        writeByte(Type.TextShape)
-        writeString("text")
-        writeString(text)
-        writeString("position")
-        writeVector2D(position)
-        writeString("scale")
-        writeDouble(scale)
-        writeString("attributes")
-        writeAttributes(attributes)
+        out.writeByte(Type.TextShape)
+        out.writeString("text")
+        out.writeString(text)
+        out.writeString("position")
+        writeSiignaObject(out, position)
+        out.writeString("scale")
+        out.writeDouble(scale)
+        out.writeString("attributes")
+        writeSiignaObject(out, attributes)
       }
     }
   }
@@ -371,16 +281,99 @@ object IOVersion1 extends IOVersion {
       case a : Attributes => {
         out.writeByte(Type.Attributes)
         out.writeString("self")
-        writeMap(out, attributes.self)
+        writeSiignaObject(out, a.self)
       }
-      case i : InnerPolylineShape => writeInnerPolylineShape(out, i)
-      case m : Model => writeModel(out, m)
-      case r : RemoteAction => writeRemoteAction(out, r)
-      case r : RemoteCommand => writeRemoteCommand(out, r)
-      case s : Shape => writeShape(s)
-      case s : ShapePart => writeShapePart(s)
-      case t : TransformationMatrix => writeTransformationMatrix(t)
-      case v : Vector2D => writeVector2D(v)
+      case i : InnerPolylineShape => {
+        i match {
+          case s : PolylineArcShape => {
+            out.writeByte(Type.PolylineArcShape)
+            out.writeString("point")
+            writeSiignaObject(out, s.point)
+            out.writeString("middle")
+            writeSiignaObject(out, s.middle)
+          }
+          case s : PolylineLineShape => {
+            out.writeByte(Type.PolylineLineShape)
+            out.writeString("point")
+            writeSiignaObject(out, s.point)
+          }
+        }
+      }
+      case m : Model => {
+        out.writeByte(Type.Model)
+        out.writeString("shapes")
+        writeSiignaObject(out, m.shapes)
+        out.writeString("executed")
+        writeSiignaObject(out, m.executed)
+        out.writeString("undone")
+        writeSiignaObject(out, m.undone)
+        out.writeString("attributes")
+        writeSiignaObject(out, m.attributes)
+      }
+      case r : RemoteAction => {
+        out.writeByte(Type.RemoteAction)
+        out.writeString("action")
+        writeSiignaObject(out, r.action)
+        out.writeString("undo")
+        out.writeBoolean(r.undo)
+      }
+      case remote.Error(code, message, session) => {
+        out.writeByte(Type.Error)
+        out.writeString("message")
+        out.writeString(message)
+        out.writeString("session")
+        writeSiignaObject(out, session)
+      }
+      case remote.Get(const, value, session) => {
+        out.writeByte(Type.Get)
+        out.writeString("constant")
+        out.writeInt32(const.id)
+        out.writeString("value")
+        writeSiignaObject(out, value)
+        out.writeString("session")
+        writeSiignaObject(out, session)
+      }
+      case remote.Set(const, value, session) => {
+        out.writeByte(Type.Set)
+        out.writeString("constant")
+        out.writeInt32(const.id)
+        out.writeString("value")
+        writeSiignaObject(out, value)
+        out.writeString("session")
+        writeSiignaObject(out, session)
+      }
+      case remote.Session(drawing, user) => {
+        out.writeByte(Type.Session)
+        out.writeInt64(drawing)
+        writeSiignaObject(out, user)
+      }
+      case s : Shape => writeShape(out, s)
+      case s : ShapePart => writeShapePart(out, s)
+      case t : TransformationMatrix => {
+        val m = new Array[Double](6)
+        t.t.getMatrix(m)
+        out.writeByte(Type.TransformationMatrix)
+        out.writeArrayHeader(6)
+        out.writeDouble(m(0))
+        out.writeDouble(m(1))
+        out.writeDouble(m(2))
+        out.writeDouble(m(3))
+        out.writeDouble(m(4))
+        out.writeDouble(m(5))
+      }
+      case User(id, name, token) => {
+        out.writeByte(Type.User)
+        out.writeInt64(id)
+        out.writeString(name)
+        out.writeString(token)
+      }
+      case v : Vector2D => {
+        out.writeByte(Type.Vector2D)
+        out.writeString("x")
+        out.writeDouble(v.x)
+        out.writeString("y")
+        out.writeDouble(v.y)
+      }
 
       // Scala types
       case m : Map[_, _] => {
@@ -393,8 +386,8 @@ object IOVersion1 extends IOVersion {
       }
       case i : Iterable[_] => {
         out.writeByte(Type.Iterable)
-
-        writeIterable(i)
+        out.writeArrayHeader(i.size)
+        i foreach out.writeObject
       }
 
       // Fall-through
@@ -442,35 +435,4 @@ object IOVersion1 extends IOVersion {
     }
   }
 
-  /**
-   * Writes a TransformationMatrix to the output stream by writing the six underlying double-values of the
-   * [[java.awt.geom.AffineTransform]].
-   * @param out  The output stream to write to
-   * @param matrix  The TransformationMatrix to write.
-   */
-  protected def writeTransformationMatrix(out : SiignaOutputStream, matrix : TransformationMatrix) {
-    val m = new Array[Double](6)
-    matrix.t.getMatrix(m)
-    out.writeByte(Type.TransformationMatrix)
-    out.writeArrayHeader(6)
-    out.writeDouble(m(0))
-    out.writeDouble(m(1))
-    out.writeDouble(m(2))
-    out.writeDouble(m(3))
-    out.writeDouble(m(4))
-    out.writeDouble(m(5))
-  }
-
-  /**
-   * Writes a Vector2D to the output stream.
-   * @param out  The Siigna output stream to write to
-   * @param vector  The vector to write - 2D
-   */
-  protected def writeVector2D(out : SiignaOutputStream, vector : Vector2D) {
-    out.writeByte(Type.Vector2D)
-    out.writeString("x")
-    out.writeDouble(vector.x)
-    out.writeString("y")
-    out.writeDouble(vector.y)
-  }
 }
