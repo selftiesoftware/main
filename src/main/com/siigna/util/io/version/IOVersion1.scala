@@ -106,7 +106,10 @@ object IOVersion1 extends IOVersion {
       case _ => try {
         obj.getClass.getConstructors.apply(0).getParameterTypes.size
       } catch {
-        case e : ArrayIndexOutOfBoundsException => throw new IllegalArgumentException(s"IOVersion1: Could not understand object $obj.")
+        case e : ArrayIndexOutOfBoundsException => {
+          val tpe = obj.getClass.getName
+          throw new IllegalArgumentException(s"IOVersion1: Could not understand object $obj of type $tpe.")
+        }
       }
     }
   }
