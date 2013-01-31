@@ -44,7 +44,7 @@ object Unmarshal {
    */
   def apply[T : TypeTag](buffer : ByteBuffer) : Option[T] = {
     val expectedType = typeOf[T]
-    if (expectedType == typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
+    if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
 
     val in = getInputStream(buffer)
 
