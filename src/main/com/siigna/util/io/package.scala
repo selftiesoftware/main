@@ -27,6 +27,9 @@ package object io extends Enumeration {
     val Iterable = 80.asInstanceOf[Byte]
     val Map      = 81.asInstanceOf[Byte]
 
+    // Java
+    val Color    = 90.asInstanceOf[Byte]
+
     // Actions
     val AddAttributes       = 100.asInstanceOf[Byte]
     val SetAttributes       = 101.asInstanceOf[Byte]

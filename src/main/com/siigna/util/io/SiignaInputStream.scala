@@ -5,6 +5,7 @@ import org.ubjson.io.{UBJFormatException, UBJInputStream}
 import org.ubjson.io.IUBJTypeMarker._
 import version.IOVersion
 import java.nio.CharBuffer
+import reflect.runtime.universe.{typeOf, Type}
 
 /**
  * An input stream capable of reading objects familiar to the Siigna domain. Uses the [[org.ubjson.io.UBJInputStream]]
@@ -20,7 +21,7 @@ class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputS
    */
   def checkMemberName(name : String) {
     val actual = readString()
-    if(actual != name) throw new UBJFormatException(pos, s"SiignaInputStream: Expected '$name', got '$actual'")
+    if(!actual.equals(name)) throw new UBJFormatException(pos, s"SiignaInputStream: Expected '$name', got '$actual'")
   }
 
   /**
@@ -40,23 +41,23 @@ class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputS
    * instance of that object.
    * @return  An object read from the input stream
    */
-  def readObject : Any = {
+  def readObject : (Type, Any) = {
     // Match on the next valid byte
     nextType() match {
       // UBJSON types
-      case BYTE   => read
-      case DOUBLE => java.lang.Double.longBitsToDouble(readInt64Impl())
-      case FALSE  => false
-      case FLOAT  => java.lang.Float.intBitsToFloat(readInt32Impl())
-      case INT32  => readInt32Impl
-      case INT64  => readInt64Impl
-      case TRUE   => true
-      case STRING => {
+      case BYTE   => typeOf[Byte]    -> read
+      case DOUBLE => typeOf[Double]  -> java.lang.Double.longBitsToDouble(readInt64Impl())
+      case FALSE  => typeOf[Boolean] -> false
+      case FLOAT  => typeOf[Float]   -> java.lang.Float.intBitsToFloat(readInt32Impl())
+      case INT32  => typeOf[Int]     -> readInt32Impl
+      case INT64  => typeOf[Long]    -> readInt64Impl
+      case TRUE   => typeOf[Boolean] -> true
+      case STRING => typeOf[String]  -> {
         val buffer : CharBuffer = CharBuffer.allocate(readInt32)
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
       }
-      case STRING_COMPACT => {
+      case STRING_COMPACT => typeOf[String] -> {
         val buffer : CharBuffer = CharBuffer.allocate(read)
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
@@ -75,6 +76,6 @@ class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputS
    * @tparam T  The type to return.
    * @return  An object of type T. Or an exception.
    */
-  def readType[T] : T = readType.asInstanceOf[T]
+  protected def readType[T] : T = readObject._2.asInstanceOf[T]
 
 }
