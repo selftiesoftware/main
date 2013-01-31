@@ -10,14 +10,14 @@ import com.siigna.util.io.{SiignaOutputStream, SiignaInputStream}
 trait IOVersion {
 
   /**
-   * Attempts to read a siigna object from the given input stream. We return the object coupled with its type
-   * information to ensure type-safe casting.
+   * Attempts to read a siigna object from the given input stream. We return the object as an Any type for later
+   * casting.
    * @param in  The input stream to read from.
    * @param members  The amount of members in the expected object.
-   * @return  The type of the object that has been read and the object itself, from the underlying input stream.
+   * @return  The object that have been read from the underlying input stream.
    * @throws  UBJFormatException  If the format could not be matched.
    */
-  def readSiignaObject(in : SiignaInputStream, members : Int) : (reflect.runtime.universe.Type, Any)
+  def readSiignaObject(in : SiignaInputStream, members : Int) : Any
 
   /**
    * Write an object from the Siigna domain to the output stream.
