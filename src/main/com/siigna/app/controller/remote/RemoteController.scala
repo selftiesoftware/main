@@ -21,6 +21,7 @@ import collection.mutable
 import java.nio.ByteBuffer
 import com.siigna.util.Log
 import com.siigna.app.model.Model
+import com.siigna.util.collection.Attributes
 
 /**
  * Controls any remote connection(s).
@@ -46,8 +47,8 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  //val remote = new Server("62.243.118.234", Mode.Production)
-  val remote = new Server("localhost", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Production)
+  //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 

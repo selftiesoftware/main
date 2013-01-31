@@ -30,6 +30,7 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
           with HasAttributes{
 
   type T = Model
+
   /**
    * Creates an empty model.
    * @return  A model with no shapes, actions or attributes.
@@ -47,5 +48,6 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
    * @return  a HasAttributes object with the updated attributes.
    */
   def setAttributes(newAttributes: Attributes) = Model(shapes,executed,undone,newAttributes)
+
 }
 
