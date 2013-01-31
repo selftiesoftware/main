@@ -383,7 +383,7 @@ object View {
       val graphics = new Graphics(g)
 
       //TODO: Why is 0,0 not always located in the TOP LEFT corner of the paper?!?!
-      graphics.drawRectangle(Vector2D(0, 0), Vector2D(5, 5))
+      graphics.drawRectangle(Vector2D(0, 0) - Vector2D(boundary.width.toInt/2,boundary.height.toInt/2), Vector2D(5, 5)- Vector2D(boundary.width.toInt/2,boundary.height.toInt/2))
       //graphics.drawRectangle(Vector2D(0, 0), Vector2D(width/2,height/2))
 
       //apply the graphics class to the model with g - (adds the changes to the image)
