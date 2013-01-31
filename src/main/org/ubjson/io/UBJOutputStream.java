@@ -202,7 +202,10 @@ public class UBJOutputStream extends FilterOutputStream {
         if (text == null)
             throw new IllegalArgumentException("text cannot be null");
 
-        int length = text.remaining();
+        // Faulty line: byte length is NOT equal to the text length when dealing with special chars
+        // int length = text.remaining();
+        // TODO: Optimize this:
+        int length = text.toString().getBytes("UTF-8").length;
 
         // Write header
         if (length < 255) {
@@ -235,7 +238,7 @@ public class UBJOutputStream extends FilterOutputStream {
             throw new IllegalArgumentException("elementCount [" + elementCount
                     + "] must be >= 0.");
 
-		/*
+        /*
 		 * Streaming Support: If the element count is 255 or smaller, write it
 		 * out in compact representation. The value 255 (0xFF) specifically will
 		 * signify an unbounded container that must be terminated with a

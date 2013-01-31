@@ -4,8 +4,9 @@ import java.io.InputStream
 import org.ubjson.io.{UBJFormatException, UBJInputStream}
 import org.ubjson.io.IUBJTypeMarker._
 import version.IOVersion
-import java.nio.CharBuffer
+import java.nio.{ByteBuffer, Buffer, CharBuffer}
 import reflect.runtime.universe.{typeOf, Type}
+import java.nio.charset.Charset
 
 /**
  * An input stream capable of reading objects familiar to the Siigna domain. Uses the [[org.ubjson.io.UBJInputStream]]
@@ -45,6 +46,7 @@ class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputS
     // Match on the next valid byte
     nextType() match {
       // UBJSON types
+      case NULL   => typeOf[Null]    -> null
       case BYTE   => typeOf[Byte]    -> read
       case DOUBLE => typeOf[Double]  -> java.lang.Double.longBitsToDouble(readInt64Impl())
       case FALSE  => typeOf[Boolean] -> false
@@ -53,12 +55,12 @@ class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputS
       case INT64  => typeOf[Long]    -> readInt64Impl
       case TRUE   => typeOf[Boolean] -> true
       case STRING => typeOf[String]  -> {
-        val buffer : CharBuffer = CharBuffer.allocate(readInt32)
+        val buffer : CharBuffer = CharBuffer.allocate(readInt32())
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
       }
       case STRING_COMPACT => typeOf[String] -> {
-        val buffer : CharBuffer = CharBuffer.allocate(read)
+        val buffer : CharBuffer = CharBuffer.allocate(read())
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
       }

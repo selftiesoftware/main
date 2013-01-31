@@ -28,9 +28,6 @@ class PolylineShapeOpenSpec extends FunSpec with ShouldMatchers {
 
     it("can (re)create all the shapes inside the polyline") {
       pl1.shapes should equal(LineShape(0, 0, 10, 10))
-    }
-
-    it("can (re)create all the shapes inside the polyline") {
       pl2.shapes should equal(LineShape(0, 0, 10, 10), LineShape(10, 10, 0, 10))
     }
 
