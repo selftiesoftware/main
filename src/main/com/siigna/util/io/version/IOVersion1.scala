@@ -47,7 +47,7 @@ object IOVersion1 extends IOVersion {
       case Type.DeleteShapePart  => typeOf[DeleteShapePart] -> new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part"))
       case Type.DeleteShapeParts => typeOf[DeleteShapeParts] -> new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes"))
       case Type.DeleteShapes     => typeOf[DeleteShapes] -> new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes"))
-      case Type.Error            => typeOf[remote.Error] -> remote.Error(in.readMember[Int]("constant"), in.readMember[String]("message"), in.readMember[Session]("session"))
+      case Type.Error            => typeOf[remote.Error] -> remote.Error(in.readMember[Int]("message"), in.readMember[String]("message"), in.readMember[Session]("session"))
       case Type.Get              => typeOf[remote.Get] -> remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
       case Type.GroupShape       => typeOf[GroupShape] -> new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
       case Type.GroupShapePart   => typeOf[GroupShape.Part] -> GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes"))
@@ -57,7 +57,7 @@ object IOVersion1 extends IOVersion {
         in.checkMemberName("array")
         new Array[Any](in.readArrayLength()).map(_ => in.readObject._2).toIterable
       }
-      case Type.LineShape=> typeOf[LineShape] -> new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
+      case Type.LineShape        => typeOf[LineShape] -> new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
       case Type.LineShapePart    => typeOf[LineShape.Part] -> LineShape.Part(readBoolean())
       case Type.Map              => typeOf[Map[Any, Any]] -> {
         in.checkMemberName("map")
