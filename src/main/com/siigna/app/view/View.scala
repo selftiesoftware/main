@@ -389,5 +389,4 @@ object View {
       listenersZoom.foreach(_(zoom))
     }
   }
-
 }
