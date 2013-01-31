@@ -33,6 +33,10 @@ object IOVersion1 extends IOVersion {
       case Type.ArcShape         => typeOf[ArcShape] -> new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
                      in.readMember[Double]("startAngle"), in.readMember("angle"), in.readMember[Attributes]("attributes"))
       case Type.ArcShapePart     => typeOf[ArcShape.Part] -> new ArcShape.Part(in.readMember[Byte]("part"))
+      case Type.Array            => typeOf[Array[Any]] -> {
+        in.checkMemberName("array")
+        new Array[Any](in.readArrayLength()).map(_ => in.readObject._2)
+      }
       case Type.Attributes       => typeOf[Attributes] -> new Attributes(in.readMember[Map[String, Any]]("self"))
       case Type.CircleShape      => typeOf[CircleShape] -> new CircleShape(in.readMember[Vector2D]("center"), in.readMember("radius"), in.readMember[Attributes]("attributes"))
       case Type.CircleShapePart  => typeOf[CircleShape.Part] -> new CircleShape.Part(in.readMember[Byte]("part"))
@@ -99,6 +103,7 @@ object IOVersion1 extends IOVersion {
    */
   protected def getMemberCount(obj : Any) : Int = {
     obj match {
+      case a : Array[_] => 1 // One for the array of contents
       case a : Attributes => 1 // One for the actual map
       case c : Color => 1 // One for the color as an int
       case t : TransformationMatrix => 6 // A matrix has 6 double values underneath.. FYI
@@ -346,6 +351,12 @@ object IOVersion1 extends IOVersion {
         out.writeString("array")
         out.writeArrayHeader(i.size)
         i foreach out.writeObject
+      }
+      case a : Array[_] => {
+        out.writeByte(Type.Array)
+        out.writeString("array")
+        out.writeArrayHeader(a.size)
+        a foreach out.writeObject
       }
 
       // Fall-through

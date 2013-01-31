@@ -29,6 +29,7 @@ package object io extends Enumeration {
 
     // Java
     val Color    = 90.asInstanceOf[Byte]
+    val Array    = 91.asInstanceOf[Byte]
 
     // Actions
     val AddAttributes       = 100.asInstanceOf[Byte]
