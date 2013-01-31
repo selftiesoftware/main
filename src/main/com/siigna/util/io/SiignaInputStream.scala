@@ -14,7 +14,7 @@ import java.nio.charset.Charset
  * @param in  The InputStream from which to read data.
  * @see [[http://ubjson.org]] Universal Binary JSON
  */
-class SiignaInputStream(in : InputStream, version : IOVersion) extends UBJInputStream(in) {
+class SiignaInputStream(in : InputStream, val version : IOVersion) extends UBJInputStream(in) {
 
   /**
    * Affirms that the next member name equals the given string, by assertion.

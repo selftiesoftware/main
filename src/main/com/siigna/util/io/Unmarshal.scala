@@ -87,9 +87,10 @@ object Unmarshal {
     val version = UBJInput.readByte
     val inputVersion = IOVersion(version)
 
+    // Return
+    val input = new SiignaInputStream(bufferInput, inputVersion)
     Log.debug(s"Unmarshal: Created input stream of version $version")
-
-    new SiignaInputStream(bufferInput, inputVersion)
+    input
   }
 
 }

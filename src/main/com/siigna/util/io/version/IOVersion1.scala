@@ -45,20 +45,20 @@ object IOVersion1 extends IOVersion {
       case Type.DeleteShapes     => typeOf[DeleteShapes] -> new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes"))
       case Type.Error            => typeOf[remote.Error] -> remote.Error(in.readMember[Int]("constant"), in.readMember[String]("message"), in.readMember[Session]("session"))
       case Type.Get              => typeOf[remote.Get] -> remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
-      case Type.GroupShape=> typeOf[GroupShape] -> new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
+      case Type.GroupShape       => typeOf[GroupShape] -> new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
       case Type.GroupShapePart   => typeOf[GroupShape.Part] -> GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes"))
       //case Type.ImageShape       => // Nothing here yet
       //case Type.ImageShapePart   => // Nothing here yet
       case Type.Iterable         => typeOf[Iterable[Any]] -> {
         in.checkMemberName("array")
-        new Array[Any](in.readArrayLength()).map(_ => in.readObject).toIterable
+        new Array[Any](in.readArrayLength()).map(_ => in.readObject._2).toIterable
       }
       case Type.LineShape=> typeOf[LineShape] -> new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
       case Type.LineShapePart    => typeOf[LineShape.Part] -> LineShape.Part(readBoolean())
       case Type.Map              => typeOf[Map[Any, Any]] -> {
         in.checkMemberName("map")
         val size = in.readArrayLength() / 2 // We read two items at the time
-        new Array[Any](size).map(_ => in.readObject -> in.readObject).toMap
+        new Array[Any](size).map(_ => in.readObject._2 -> in.readObject._2).toMap
       }
       case Type.Model            => typeOf[Model] -> {
         new Model(in.readMember[Map[Int, Shape]]("shapes"), in.readMember[Seq[Action]]("executed"),
