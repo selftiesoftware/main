@@ -139,7 +139,7 @@ object LineShape {
     new LineShape(p1, p2, Attributes())
 
   def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : LineShape =
-    apply(Vector2D(x1, y2), Vector2D(x2, y2))
+    apply(Vector2D(x1, y1), Vector2D(x2, y2))
 
   def apply(line : Segment2D) : LineShape =
     LineShape(line.p1, line.p2)

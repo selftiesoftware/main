@@ -96,7 +96,7 @@ trait Shape extends HasAttributes {
   /**
    * Returns a rectangle that includes the entire shape.
    */
-  def boundary : Rectangle2D = geometry.boundary
+  lazy val boundary : Rectangle2D = geometry.boundary
 
   /**
    * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns an

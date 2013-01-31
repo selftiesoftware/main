@@ -189,8 +189,9 @@ trait Module {
   /**
    * Returns a new instance of the current module.
    * @return  A new instance of the same module.
+   * @throws InstantiationException  If the instantiation failed somehow.
    */
-  protected def newInstance : Module = getClass.newInstance().asInstanceOf[Module]
+  def newInstance : Module = getClass.newInstance()
 
   /**
    * <p>The state map and "heart" of the module. This state map describes all the states that exists in the module
@@ -244,7 +245,7 @@ trait Module {
               s.module.eventParser.events = events
 
               // Set the mouse position of the new event parser
-              s.module.eventParser.mousePosition = View.mousePosition
+              s.module.eventParser.mousePosition = View.mousePositionScreen
 
               // Log success
               Log.debug("Module '" + toString+ "': Forwarding to " + s.module)

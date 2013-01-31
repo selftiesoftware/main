@@ -27,7 +27,6 @@ import com.siigna.util.event.KeyUp
 import com.siigna.util.event.MouseMove
 import com.siigna.util.event.MouseUp
 import com.siigna.util.event.MouseDrag
-import com.siigna.module.ModuleMenu
 import actors.Actor
 
 /**
@@ -102,7 +101,7 @@ trait EventController extends Actor {
     val point = Vector2D(e getX, e getY)
 
     // Retrieves and updates the previous point
-    val delta = point - View.mousePosition
+    val delta = point - View.mousePositionScreen
     View.setMousePosition(point)
 
     // Saves the last mouse-button as a boolean in the case of a MouseDown event,
@@ -154,10 +153,10 @@ trait EventController extends Actor {
       case MouseEnter (_, _, _) => Some(MouseEnter(point, button, keys))
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
       case MouseDown  (_, _, _) => {
-        if (ModuleMenu.isHighlighted(point)) {
+        /*if (ModuleMenu.isHighlighted(point)) {
           ModuleMenu.onMouseDown(point) // Give the event to the module menu
           None
-        } else Some(MouseDown(point, button, keys))
+        } else */ Some(MouseDown(point, button, keys))
       }
       case MouseUp    (_, _, _) => Some(MouseUp(point, button, keys))
       case MouseDrag  (_, _, _) => Some(MouseDrag(point, button, keys))

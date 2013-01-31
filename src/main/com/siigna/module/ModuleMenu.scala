@@ -9,6 +9,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+/*
 package com.siigna.module
 
 import java.awt._
@@ -123,3 +124,4 @@ object ModuleMenu {
   }
   */
 }
+*/

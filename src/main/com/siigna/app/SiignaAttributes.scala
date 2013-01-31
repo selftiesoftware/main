@@ -12,7 +12,7 @@
 package com.siigna.app
 
 import com.siigna.util.collection.AttributesLike
-import collection.mutable.{Map}
+import collection.mutable
 import com.siigna.util.Implicits._
 import java.awt.{Color, Dimension}
 
@@ -67,7 +67,7 @@ import java.awt.{Color, Dimension}
  *    The speed with which the client zooms, given in percentages. Defaults to 0.5.
  * }}}
  */
-trait SiignaAttributes extends Map[String, Any] with AttributesLike {
+trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
 
   /**
    * The attributes of Siigna.

@@ -61,7 +61,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
    * @param listener  The function to be executed receiving an action that has been executed and a boolean
-   *                  value indicating whether the action was executed (true; includes redo) or undone (false).
+   *                  value indicating whether the action was undone (true) or executed (false; includes redo).
    */
   def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
@@ -82,9 +82,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
       // Execute in the model
       model = action.execute(model)
 
-      //redraw boundary
-
-
       // Store the action if it is not a VolatileAction
       action match {
         case v : VolatileAction => // Do nothing here!
@@ -94,7 +91,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       }
 
       // Notify listeners
-      if (remote) notifyListeners(action, executed = true)
+      if (remote) notifyListeners(action, undo = false)
 
       Log.success("ActionModel: Successfully executed action: " + action)
     } catch {
@@ -125,10 +122,10 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * Notifies the listeners that an action has been executed, undone or redone.
    * @param action  The action that has been executed or undone
-   * @param executed  Whether the action has been executed (true) or undone (false).
+   * @param undo  Whether the action has been undone (true) or executed (false).
    */
-  protected def notifyListeners(action : Action, executed : Boolean) {
-    listeners.foreach(_(action, executed))
+  protected def notifyListeners(action : Action, undo : Boolean) {
+    listeners.foreach(_(action, undo))
   }
 
   /**
@@ -149,7 +146,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
         model = new Model(model.shapes, model.executed.+:(action), undone)
 
         // Notify listeners
-        notifyListeners(action, executed = true)
+        notifyListeners(action, undo = false)
 
         Log.success("ActionModel: Action successfully redone: " + action)
       } catch {
@@ -196,7 +193,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       model = action.undo(model)
 
       // Send the action to server with the undone flag set to true!
-      if (remote) notifyListeners(action, executed = false)
+      if (remote) notifyListeners(action, undo = true)
 
       Log.success("ActionModel: Action successfully undone: " + action)
     } catch {

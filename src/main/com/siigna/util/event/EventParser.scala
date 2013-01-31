@@ -57,7 +57,7 @@ class EventParser {
   var events : List[Event] = Nil
 
   // The most recent MouseMove or MouseDrag event received by the event-parser.
-  var mousePosition : Vector2D = View.mousePosition
+  var mousePosition : Vector2D = View.mousePositionScreen
 
   /**
    * The margin of the graphical query done by the parser i. e. how large a space is included in the search
@@ -172,7 +172,7 @@ class EventParser {
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
-        val model = Drawing(View.mousePosition.transform(View.deviceTransformation), margin).values ++ snapModel()
+        val model = Drawing(View.mousePositionScreen.transform(View.deviceTransformation), margin).values ++ snapModel()
 
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)

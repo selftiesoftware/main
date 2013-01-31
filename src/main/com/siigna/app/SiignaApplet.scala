@@ -31,6 +31,7 @@ import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
 import model.Drawing
 import model.server.User
+import view.siigna.SiignaRenderer
 import view.View
 import com.siigna.util.geom.Rectangle2D
 
@@ -109,8 +110,9 @@ class SiignaApplet extends Applet {
     add(canvas, BorderLayout.CENTER)
     canvas.setIgnoreRepaint(true)
     canvas.requestFocus()
-    canvas.setSize(getSize)
     View.setCanvas(canvas)
+    canvas.setSize(getSize)
+
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
@@ -132,20 +134,9 @@ class SiignaApplet extends Applet {
   }
 
   /**
-   * Overrides resize to force the underlying View to resize.
-   * @param width  The width of the entire frame
-   * @param height  The height of the entire frame
-   */
-  override def resize(width : Int, height : Int) {
-    super.resize(width, height)
-    if (canvas != null)
-      View.resize(width, height)
-  }
-
-  /**
    * This is the actual paint-loop for the applet. The loop stops when <code>shouldExit</code> is set to true.
    *
-   * The code is stolen from Java's api-entry on
+   * The code is inspired by Java's api-entry on
    * <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/image/BufferStrategy.html">BufferStrategy</a>.
    */
   private def paintLoop() {
@@ -154,6 +145,12 @@ class SiignaApplet extends Applet {
 
     // Get the strategy
     val strategy = canvas.getBufferStrategy
+
+    // Add the Siigna renderer
+    // This have to be done here to avoid ExceptionInInitializer error
+    // - adding the code in View will mess up the initialization-order, causing the calls to the View to happen
+    // before the View has been initialized
+    View.renderer = SiignaRenderer
 
     // Run, run, run
     while(!shouldExit) {
@@ -182,6 +179,16 @@ class SiignaApplet extends Applet {
         strategy.show()
       } while (strategy.contentsLost())
     }
+  }
+
+  /**
+   * Overrides resize to force the underlying View to resize.
+   * @param width  The width of the entire frame
+   * @param height  The height of the entire frame
+   */
+  override def resize(width : Int, height : Int) {
+    super.resize(width, height)
+    View.resize(width, height)
   }
 
 }

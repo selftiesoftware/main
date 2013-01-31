@@ -72,7 +72,7 @@ case object EndPoints extends EventSnap {
       val fillScreenX = fillVector2Ds.map(_.x.toInt).toArray
       val fillScreenY = fillVector2Ds.map(_.y.toInt).toArray
       g setColor color
-      g.g.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
+      g.AWTGraphics.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
     }
     //show the snappoints
     snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))

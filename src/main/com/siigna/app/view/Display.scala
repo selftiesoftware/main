@@ -40,7 +40,7 @@ trait Display {
   def paintFrame(graphics : Graphics, width : Int, height : Int, color : Color = backgroundColor) {
     val center = View.center
     graphics setColor color
-    graphics.g.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
+    graphics.AWTGraphics.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
   }
 
 }

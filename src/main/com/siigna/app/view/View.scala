@@ -16,12 +16,8 @@ import com.siigna.util.logging.Log
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
-import com.siigna.app.model.shape.{Shape, PolylineShape}
-import java.awt.image.BufferedImage
+import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.{Selection, Drawing}
-import scala.Some
-import com.siigna.module.ModuleMenu
-import com.siigna.app.model.Drawing._
 /**
  * <p>
  *   This is the view part of the
@@ -66,36 +62,14 @@ import com.siigna.app.model.Drawing._
  * </p>
  */
 object View {
-  //add actionlostener
-  addActionListener((_, _) => {
-    //and send the renderModel
-    renderModel(true)
-  })
 
   // The most recent mouse position
   private var _mousePosition = Vector2D(0, 0)
 
   /**
-   * A background image that can be re-used to draw as background on the canvas.
-   */
-  private var cachedBackground : BufferedImage = null
-
-  /**
-   * An image of the model that can be re-used instead of calculating the shapes.
-   */
-  private var cachedModel : BufferedImage = null
-  var currentZoom : Double = 0.0
-  var currentPan : Vector2D = Vector2D(0,0)
-
-  /**
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
   private var canvas : Option[Canvas] = None
-
-  /**
-   * The shape used to draw the boundary. Overwrite to draw another boundary.
-   */
-  var boundaryShape : SimpleRectangle2D => Shape = PolylineShape.apply(_).setAttribute("Color" -> "#AAAAAA".color)
 
   /**
    * The frames in the current second.
@@ -110,19 +84,53 @@ object View {
   var fpsSecond : Double = 0
 
   /**
-   * The color of the paper (defaults to white)
-   */
-  var paperColor = 1.00f
-
-  /**
-   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane.
+   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
+   * screen of the application/applet. A [[com.siigna.util.geom.Vector]] of (0, 0) thus means that the center of the
+   * view-port (drawing) is in (0, 0) of the screen (top left corner). A Vector of (width / 2, height / 2) means
+   * that the center of the view-port is in the center of the drawing.
    */
   var pan : Vector2D = Vector2D(0, 0)
 
   /**
-   * The zoom-level of the View.
+   * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
+   * the [[com.siigna.app.model.Drawing]] or the standard chess-checkered background differently. For example like so:
+   * {{{
+   *   object MyOwnRenderer extends Renderer { ... }
+   *   View.renderer = MyOwnRenderer
+   * }}}
+   * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
+   */
+  var renderer : Renderer = null
+
+  /**
+   * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
+   */
+  private var listenersResize : Seq[(Rectangle2D) => Unit] = Nil
+
+  /**
+   * Zoom listeners to be called whenever the view changes zoom.
+   */
+  private var listenersZoom : Seq[(Double) => Unit] = Nil
+
+  /**
+   * The zoom-level of the View. Starts in 1. The smaller the zoom is the smaller the shapes will be scales, which
+   * is equivalent to zooming out. That bigger the zoom is the larger the shapes will be, similar to zooming in.
    */
   var zoom : Double = 1
+
+  /**
+   * Adds a resize listener that will be executed whenever the view is being resized.
+   * @param f  The function to execute after the resize operation has been made. The screen-dimensions represented by
+   *           a [[com.siigna.util.geom.Rectangle2D]] are given as a parameter to the callback-function.
+   */
+  def addResizeListener(f : (Rectangle2D) => Unit) { listenersResize :+= f }
+
+  /**
+   * Adds a listener that will be executed whenever the user zooms. The function to be called
+   * will receive a parameter with the current zoom.
+   * @param f  The function to be executed, taking the zoom-level after the zoom operation as a parameter.
+   */
+  def addZoomListener(f : (Double) => Unit) { listenersZoom :+= f }
 
   /**
    * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
@@ -169,7 +177,7 @@ object View {
    * }}}
    * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the screen.
    */
-  def mousePosition = _mousePosition
+  def mousePositionScreen = _mousePosition
 
   /**
    * Finds the coordinates of the mouse on the drawing. That means that we translate the mouse coordinates from the
@@ -211,14 +219,15 @@ object View {
    *               selection, if needed.
    * @param selection  The selection to draw, if any.
    * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
-   *                   Defaults to None.
+   *                   Don't worry about this if you don't know what it is. Defaults to None.
    */
   def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
+
     // Retrieve graphics objects
     val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
-    val graphics = new Graphics(graphics2D)
+    val graphics = Graphics(graphics2D)
 
     // Setup anti-aliasing
     val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
@@ -226,45 +235,12 @@ object View {
     graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     try {
-      // Render and draw the background
-      graphics2D drawImage(renderBackground, 0, 0, null)
-
-      // Draw the paper as a white rectangle with a margin to illustrate that the paper will have a margin when printed.
-      graphics2D.setBackground(new Color(1.00f, 1.00f, 1.00f, 0.96f))
-      graphics2D.clearRect(boundary.xMin.toInt, boundary.yMin.toInt - boundary.height.toInt,boundary.width.toInt, boundary.height.toInt)
-
-      //graphics.drawRectangle(pan - boundary.topLeft + Vector2D(4, 4), pan - boundary.topLeft - Vector2D(4, 4))
-     // graphics.drawRectangle(Vector2D(boundary.xMin.toInt-2, boundary.yMin.toInt-2), Vector2D(boundary.xMax+2, boundary.yMax+2))
-
-      // OBSOLETE (no cache) : Draw model
-      //if (Drawing.size > 0) try {
-      //  val mbr = Rectangle2D(boundary.topLeft, boundary.bottomRight).transform(drawingTransformation.inverse)
-      //  Drawing(mbr).par.map(_._2 transform transformation) foreach(graphics draw) // Draw the entire Drawing
-      //} catch {
-      //  case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      //  case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
-      //}
-      
-      // Render and draw the model - with cache
-      //val bound = Drawing.boundary.transform(drawingTransformation)
-
-      //a test rectangle showing the current boundary TOP LEFT CORNER
-      graphics.drawRectangle(Vector2D(0, 0), Drawing.boundary.transform(drawingTransformation).bottomLeft)
-      graphics.drawRectangle(Vector2D(-2, -2), Vector2D(2, 2))
-
-      val panVector = pan - Vector2D(boundary.width.toInt/2,boundary.height.toInt/2)
-      val x = (panVector.x).toInt
-      val y = (panVector.y).toInt
-
-      graphics2D drawImage(renderModel(false), x , y, null)
-
-    }catch {
-      case e : InterruptedException => Log.info("View: The view is shutting down; no wonder we get an error server!")
-      case e : Throwable => Log.error("View: Unable to draw Drawing: "+e)
+      // Render and draw the renderer
+      renderer.paint(graphics)
+    } catch {
+      case e : InterruptedException => Log.info("View: The view is shuttin while painting. Move along...!")
+      case e : Throwable => Log.error("View: Unable to render drawing: " + e)
     }
-
-    // Draw the boundary shape
-    graphics draw boundaryShape(boundary)
 
     // Fetch and draw the dynamic layer.
     // TODO: Cache this
@@ -323,91 +299,9 @@ object View {
   }
 
   /**
-   * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
-   * local variable. If the renderBackground method is called again, we simply return the cached copy
-   * unless the dimensions of the view has changed, in which case we need to re-render it.
+   * Resize the view to the given boundary.
    */
-  def renderBackground : BufferedImage = {
-    if (cachedBackground == null || cachedBackground.getHeight != height
-      || cachedBackground.getWidth  != width) {
-      // Create image
-      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
-      val g = image.getGraphics
-      val size = Siigna.int("backgroundTileSize").getOrElse(12)
-      var x = 0
-      var y = 0
-
-      // Clear background
-      g setColor Siigna.color("colorBackgroundDark").getOrElse("#DADADA".color)
-      g fillRect (0, 0, width, height)
-      g setColor Siigna.color("colorBackgroundLight").getOrElse("E9E9E9".color)
-
-      // Draw a chess-board pattern
-      var evenRow = false
-      while (x < width) {
-        while (y < height) {
-          g.fillRect(x, y, size, size)
-          y += size << 1
-        }
-        x += size
-        y = if (evenRow) 0 else size
-        evenRow = !evenRow
-      }
-      cachedBackground = image
-    }
-    cachedBackground
-  }
-
-  /**
-   * Renders a background-image consisting of "chess checkered" fields. When done the image is stored in a
-   * local variable. If the renderBackground method is called again, we simply return the cached copy
-   * unless the dimensions of the view has changed, in which case we need to re-render it.
-   */
-
-  def renderModel(fromAction : Boolean) : BufferedImage = {
-
-    def updateCache = {
-      val m = Drawing
-      val s = drawingTransformation.scaleFactor
-      def width = (m.boundary.width * s + 1).toInt
-      def height = (m.boundary.height * s + 1).toInt
-      val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)  // Create image
-      val g = image.getGraphics.asInstanceOf[Graphics2D]  //enable drawing on the image
-
-      // Setup anti-aliasing
-      val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
-      val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
-
-      g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
-
-      val graphics = new Graphics(g)
-
-      //TODO: Why is 0,0 not always located in the TOP LEFT corner of the paper?!?!
-      graphics.drawRectangle(Vector2D(0, 0) - Vector2D(boundary.width.toInt/2,boundary.height.toInt/2), Vector2D(5, 5)- Vector2D(boundary.width.toInt/2,boundary.height.toInt/2))
-      //graphics.drawRectangle(Vector2D(0, 0), Vector2D(width/2,height/2))
-
-      //apply the graphics class to the model with g - (adds the changes to the image)
-      Drawing.foreach(tuple => {
-        graphics.draw(tuple._2.transform(TransformationMatrix(Vector2D(width/2,height/2),drawingTransformation.scaleFactor).flipY))
-      })
-      currentZoom = zoom  //store the zoom and pan settings
-      currentPan  = pan
-      cachedModel = image //update the image
-      cachedModel //return it
-    }
-
-    //if (cachedModel == null || fromAction == true || pan != currentPan || zoom  != currentZoom) {
-    if (cachedModel == null || fromAction == true || zoom  != currentZoom) {
-      updateCache
-    } else {
-      cachedModel
-    }
-  }
-
-  /**
-   * Resizes the view to the given boundary.
-   */
-  def resize(width : Int, height : Int) {
+  protected[app] def resize(width : Int, height : Int) {
     if (canvas.isDefined) {
       // Resize the canvas
       canvas.get.setSize(width, height)
@@ -416,11 +310,15 @@ object View {
       if (View.pan == Vector2D(0, 0)) {
         View.pan(View.screen.center)
       }
+
+      // Notify the listeners
+      listenersResize.foreach(_(screen))
     }
   }
 
   /**
-   * Sets the underlying canvas for setting cursors, size etc.
+   * Sets the underlying canvas for setting cursors, size etc. This should not be touched by anyone outside the
+   * siigna.app package!
    * @param canvas  The underlying canvas of the View object.
    */
   protected[app] def setCanvas(canvas : Canvas) {
@@ -429,7 +327,7 @@ object View {
   }
 
   /**
-   * Sets the cursor for the view.
+   * Sets the cursor for Siigna.
    * @param cursor  The new cursor
    */
   def setCursor(cursor : Cursor) {
@@ -437,7 +335,7 @@ object View {
   }
 
   /**
-   * Sets the mouse position of the view. Only accessible by the controller package.
+   * Sets the mouse position of Siigna. Only accessible by the app package.
    * @param v  The position of the mouse.
    */
   protected[app] def setMousePosition(v : Vector2D) {
@@ -447,7 +345,7 @@ object View {
   /**
    * The screen as a rectangle, given in device coordinates.
    */
-  def screen = SimpleRectangle2D(0, 0, width, height)
+  def screen : Rectangle2D = SimpleRectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom
@@ -478,6 +376,7 @@ object View {
    * @see [[com.siigna.app.SiignaAttributes]]
    */
   def zoom(point : Vector2D, delta : Double) {
+    //TODO: Test this!
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
     if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
       val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
@@ -485,6 +384,9 @@ object View {
         zoom *= zoomFactor
       }
       pan = (pan - point) * zoomFactor + point
+
+      // Notify the listeners
+      listenersZoom.foreach(_(zoom))
     }
   }
 
