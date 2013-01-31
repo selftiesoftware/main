@@ -25,5 +25,6 @@ fork in run := true // Do this. All day everyday
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0",
   "org.scala-lang" % "scala-library" % "2.10.0",
+  "org.scala-lang" % "scala-reflect" % "2.10.0",
   "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )

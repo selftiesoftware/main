@@ -13,7 +13,6 @@ package com.siigna.app.model.action
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.shape.{PartialShape, ShapePart, Shape}
 import com.siigna.app.model.{Drawing, Model}
-import reflect.runtime.universe._
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -39,20 +38,24 @@ object Transform {
   }
 
   /**
-   * Transforms several shapes with the given TransformationMatrix and the given function.
-   * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
+   * Transforms several shapes or shape-parts with the given TransformationMatrix. Due to erasure the method
+   * accepts types of Int -> Any, but if anything else than [[com.siigna.app.model.shape.Shape]]s or
+   * [[com.siigna.app.model.shape.ShapePart]]s are given, an exception will be thrown.
+   * @param xs  The ids of the shapes or shape parts paired with a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply[T : TypeTag](shapes : Map[Int, T], transformation : TransformationMatrix) {
-    typeOf[T] match {
-      case t if t <:< typeOf[ShapePart] => {
-        Drawing execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapePart]], transformation)
-      }
-      case t if t <:< typeOf[Shape] => {
-        Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]].keys, transformation)
+  def apply(xs : Map[Int, Any], transformation : TransformationMatrix) { if (xs.nonEmpty) {
+    // Try to treat them as shapes
+    try {
+      val shapes = xs.asInstanceOf[Map[Int, Shape]]
+      shapes.head._2.geometry // If this works we are certain to deal with shapes
+      Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]].keys, transformation)
+    } catch {
+      case _ : Throwable => {
+        Drawing execute TransformShapeParts(xs.asInstanceOf[Map[Int, ShapePart]], transformation)
       }
     }
-  }
+  } }
 }
 
 /**

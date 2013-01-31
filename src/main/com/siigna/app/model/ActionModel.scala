@@ -36,13 +36,20 @@ import com.siigna.util.Log
 trait ActionModel extends SelectableModel with HasAttributes {
 
   type T = ActionModel
-  
+
   /**
    * The attributes of the model containing name, title, owner and other attributes
    * fetched from the server, necessary for Siigna.
    */
-  var attributes = Attributes() 
-  
+  def attributes = model.attributes
+
+  /**
+   * Sets the attributes of the model to the given attributes by completely replacing all current attributes.
+   * @param attr  The attributes to set.
+   */
+  def attributes_=(attr : Attributes) { setAttributes(attr) }
+
+
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -66,11 +73,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
   def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
   }
-  
+
   /**
    * <p>Executes an action, lists it as executed and clears the undone stack to make way for new actions
    * and sends it to the controller for remote handling.</p>
-   * 
+   *
    * @param action  The action to execute.
    * @param remote  Whether or not to send the action to the server.
    */
@@ -163,8 +170,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def shapes = model.shapes
 
-  def setAttributes(attributes : Attributes) = {
-    this.attributes = attributes
+  def setAttributes(newAttributes : Attributes) = {
+    model = model.copy(attributes = newAttributes)
     this
   }
 
@@ -174,11 +181,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
    * If no action have been executed, nothing happens.
    *
    */
-  def undo() { 
+  def undo() {
     model.executed.headOption match {
       case Some(action) => undo(action, remote = true)
       case None => Log.debug("ActionModel: No more actions to undo.")
-    } 
+    }
   }
 
   /**

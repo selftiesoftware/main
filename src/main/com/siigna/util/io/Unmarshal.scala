@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import org.ubjson.io.{UBJInputStream, ByteBufferInputStream}
 import version.IOVersion
 import com.siigna.util.Log
+import reflect.runtime.universe._
 
 /**
  * <p>
@@ -27,35 +28,37 @@ import com.siigna.util.Log
  *   // .. and so forth
  * }}}
  */
-object Unmarshal  extends App {
-
-
-  import com.siigna.app.model.shape.LineShape
-
-  val obj = "Hej"
-  val out = Marshal(obj)
-  val in  = Unmarshal[Long](out)
-  println("In: " + in)
+object Unmarshal {
 
   /**
    * <p>
    *   Attempts to read a well-known Siigna object from the given [[java.nio.ByteBuffer]] and cast it to the
-   *   given type T.
-   *   <br>
-   *   <b>Important: Due to erasure we cannot ensure that the expected type will be the returned type.</b>
+   *   given type T. If no type is given we cannot cast or return the type, so an exception will be cast.
    * </p>
    * @param buffer  The ByteBuffer containing the data to be read.
    * @tparam T  The expected type of the object to be read.
    * @return  Some[T] if the object could be read and successfully parsed, None otherwise
    * @throws UBJFormatException  If the formatting could not be understood.
    * @throws IOException  If an I/O error occurred.
+   * @throws IllegalArgumentException  If no type was specified.
    */
-  def apply[T](buffer : ByteBuffer) : Option[T] = {
+  def apply[T : TypeTag](buffer : ByteBuffer) : Option[T] = {
+    val expectedType = typeOf[T]
+    if (expectedType == typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
+
     val in = getInputStream(buffer)
 
     // Read the "main" object
     try {
-      Some(in.readObject.asInstanceOf[T])
+      val (actualType, obj) = in.readObject
+
+      if (actualType <:< expectedType) {
+        Log.success(s"Unmarshal: Successfully read type $actualType as an instance of $expectedType.")
+        Some(obj.asInstanceOf[T])
+      } else {
+        Log.warning(s"Unmarshal: Could not cast type $actualType to $expectedType. Returning None.")
+        None
+      }
     } catch {
       case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
     }
@@ -67,7 +70,7 @@ object Unmarshal  extends App {
    * @tparam T  The type of the object to be retrieved.
    * @return  Some[T] if the object could be read and successfully parsed, None otherwise
    */
-  def apply[T](array : Array[Byte]) : Option[T] = apply[T](ByteBuffer.wrap(array))
+  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = apply[T](ByteBuffer.wrap(array))
 
   /**
    * Creates the correct version of a [[com.siigna.util.io.SiignaInputStream]] capable of reading binary data in the
