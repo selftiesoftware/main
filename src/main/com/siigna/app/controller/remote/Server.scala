@@ -74,10 +74,8 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
 
         remote.!?(timeout, output) match {
           case Some(data : Array[Byte]) => { // Call the callback function
-            // Unmarshal the data
-            Unmarshal(data)
-
-            f(data) // Parse the data
+            // Parse the data
+            f(data)
 
             // We're now connected for sure
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")

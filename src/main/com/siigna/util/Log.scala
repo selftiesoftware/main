@@ -40,7 +40,7 @@ object Log {
   /**
    * The debug-level.
    */
-  var level : Int = ERROR + WARNING + INFO
+  var level : Int = ALL
 
   /**
    * The line-number.
