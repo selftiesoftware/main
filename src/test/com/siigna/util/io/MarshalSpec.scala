@@ -16,6 +16,10 @@ class MarshalSpec extends FunSpec with ShouldMatchers {
       a.slice(10, 11) should equal(Array[Byte](IOVersion.Current))
     }
 
+    it ("can marshal an array") {
+      Marshal(Array[Int](1, 4, 9, -132))
+    }
+
     it ("can write a siigna object") {
       import com.siigna.app.model.shape.LineShape
       Marshal(LineShape(0, 0, 10, 10))

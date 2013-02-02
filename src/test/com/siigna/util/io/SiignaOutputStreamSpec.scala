@@ -60,6 +60,12 @@ class SiignaOutputStreamSpec extends FunSpec with ShouldMatchers with BeforeAndA
       in.readInt64() should equal(n)
     }
 
+    it ("can write a double") {
+      val n = 7941.371562d
+      out.writeObject(n)
+      in.readDouble() should equal(n)
+    }
+
     it ("can write a string") {
       val s = "Hello world! ÆØÅ - §!\"#¤%&/()=? _ @£$€{[]} | ^\\ - ça va?"
       out.writeObject(s)

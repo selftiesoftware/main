@@ -20,7 +20,8 @@ import reflect.runtime.universe._
  */
 object IOVersion1 extends IOVersion {
 
-
+  // A mirror used to reflect on classes at runtime
+  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
   protected lazy val mirror = runtimeMirror(getClass.getClassLoader)
 
   /**
@@ -34,7 +35,7 @@ object IOVersion1 extends IOVersion {
     val tpe = reflect.runtime.universe.typeOf[E]
     tpe match {                // The returned Type is not an instance of universe.Type - hence the cast
       case TypeRef(_, _, args) => args.asInstanceOf[List[Type]]
-      case _ => throw new IllegalArgumentException("IOVersion1: Could not find type parameters in type " + tpe)
+      case _ => throw new IllegalArgumentException("Could not find type parameters in type " + tpe)
     }
   }
 
@@ -46,8 +47,8 @@ object IOVersion1 extends IOVersion {
    * @throws ClassCastException  If the element could not be correctly verified to be a subtype of E
    */
   protected def verifyType(elem : Any, expected : Type) {
-    val exp = mirror.reflect(elem).symbol.toType
-    exp match {
+    val actual = mirror.reflect(elem).symbol.toType
+    actual match {
       case x if x <:< expected =>   // We're good!
       case x if (x =:= typeOf[java.lang.Byte]    && expected =:= typeOf[Byte])    => // We're also good
       case x if (x =:= typeOf[java.lang.Boolean] && expected =:= typeOf[Boolean]) => // We're also good
@@ -62,35 +63,21 @@ object IOVersion1 extends IOVersion {
   }
 
   /**
-   * Attempts to verify the given array as an instance of E by retrieving the inner type-parameter for the
-   * expected array and matching that with each element.
-   * @param array  The array whose elements we want to verify.
-   * @tparam E  The expected type of the array.
-   * @return  A collection of type E.
-   * @throws  IllegalArgumentException  If we could not retrieve enough type parameters to match the inner type.
-   */
-  protected def verifyArrayType[E : TypeTag](array : Array[Any]) : E = {
-    val types = getTypeParameters[E]
-    require(types.size == 1, "Could not retrieve the necessary number of type parameters (1) from type " + typeOf[E])
-    val tpe = types(0)
-    array.foreach(e => verifyType(e, tpe))
-    array.asInstanceOf[E]
-  }
-
-  /**
    * Attempts to verify the given collection as an instance of E by retrieving the inner type-parameter for the
    * expected collection and matching that with each element.
-   * @param array  The collection whose elements we want to verify.
+   * @param col  The collection whose elements we want to verify.
    * @tparam E  The expected type of the collection.
    * @return  A collection of type E.
    * @throws  IllegalArgumentException  If we could not retrieve enough type parameters to match the inner type.
    */
-  protected def verifyCollectionType[E : TypeTag](array : Traversable[Any]) : E = {
+  protected def verifyCollectionType[E : TypeTag](col : Traversable[Any]) : E = {
+    // Avoid arrays since we cannot cast them
+    require(!(typeOf[E] <:< typeOf[Array[_]]), "Cannot cast native java arrays - please use scala collections.")
     val types = getTypeParameters[E]
     require(types.size == 1, "Could not retrieve the necessary number of type parameters (1) from type " + typeOf[E])
     val tpe = types(0)
-    array.foreach(e => verifyType(e, tpe))
-    array.asInstanceOf[E]
+    col.foreach(e => verifyType(e, tpe))
+    col.asInstanceOf[E]
   }
 
   /**
@@ -111,8 +98,6 @@ object IOVersion1 extends IOVersion {
   }
 
   def readSiignaObject[E : TypeTag](in : SiignaInputStream, members : Int) : E = {
-    // TODO: Use the member-count
-
     // Retrieve the type of the siigna object
     in.checkMemberName("type")
     val byte = in.readByte()
@@ -123,10 +108,6 @@ object IOVersion1 extends IOVersion {
       case Type.ArcShape         => in.readType[E, ArcShape](new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
                      in.readMember[Double]("startAngle"), in.readMember[Double]("angle"), in.readMember[Attributes]("attributes")))
       case Type.ArcShapePart     => in.readType[E, ArcShape.Part](new ArcShape.Part(in.readMember[Byte]("part")))
-      case Type.Array            => {
-        in.checkMemberName("array")
-        verifyArrayType[E](new Array[Any](in.readArrayLength()).map(_ => in.readObject[Any]))
-      }
       case Type.Attributes       => in.readType[E, Attributes](new Attributes(in.readMember[Map[String, Any]]("self")))
       case Type.CircleShape      => in.readType[E, CircleShape](new CircleShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"), in.readMember[Attributes]("attributes")))
       case Type.CircleShapePart  => in.readType[E, CircleShape.Part](new CircleShape.Part(in.readMember[Byte]("part")))
@@ -135,20 +116,25 @@ object IOVersion1 extends IOVersion {
       case Type.CreateShapes     => in.readType[E, CreateShapes](new CreateShapes(in.readMember[Map[Int, Shape]]("shapes")))
       case Type.DeleteShape      => in.readType[E, DeleteShape](new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
       case Type.DeleteShapePart  => in.readType[E, DeleteShapePart](new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part")))
-      case Type.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes")))
+      case Type.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("oldShapes"), in.readMember[Map[Int, Shape]]("newShapes")))
       case Type.DeleteShapes     => in.readType[E, DeleteShapes](new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes")))
-      case Type.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("message"), in.readMember[String]("message"), in.readMember[Session]("session")))
+      case Type.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("code"), in.readMember[String]("message"), in.readMember[Session]("session")))
       case Type.Get              => in.readType[E, remote.Get](remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
       case Type.GroupShape       => in.readType[E, GroupShape](new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes")))
-      case Type.GroupShapePart   => in.readType[E, GroupShape.Part](GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes")))
+      case Type.GroupShapePart   => {
+        val part = in.readMember[Map[Int, ShapePart]]("part")
+        in.readType[E, GroupShape.Part](GroupShape.Part(part))
+      }
       //case Type.ImageShape       => // Nothing here yet
       //case Type.ImageShapePart   => // Nothing here yet
       case Type.Traversable      => {
         in.checkMemberName("array")
-        verifyCollectionType[E](new Array[Any](in.readArrayLength()).map(_ => in.readObject[Any]).toTraversable)
+        var s = Seq[Any]()
+        for (i <- 0 until in.readArrayLength()) s:+= in.readObject[Any]
+        verifyCollectionType[E](s)
       }
       case Type.LineShape        => in.readType[E, LineShape](new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes")))
-      case Type.LineShapePart    => in.readType[E, LineShape.Part](LineShape.Part(readBoolean()))
+      case Type.LineShapePart    => in.readType[E, LineShape.Part](LineShape.Part(in.readMember[Boolean]("part")))
       case Type.Map              => {
         in.checkMemberName("map")
         val size  = in.readArrayLength() / 2 // We read two items at the time
@@ -159,7 +145,7 @@ object IOVersion1 extends IOVersion {
         new Model(in.readMember[Map[Int, Shape]]("shapes"), in.readMember[Seq[Action]]("executed"),
                   in.readMember[Seq[Action]]("undone"), in.readMember[Attributes]("attributes"))
       }
-      case Type.PolylineArcShape    => in.readType[E, PolylineArcShape](new PolylineArcShape(in.readMember[Vector2D]("point"), in.readMember[Vector2D]("middle")))
+      case Type.PolylineArcShape    => in.readType[E, PolylineArcShape](new PolylineArcShape(in.readMember[Vector2D]("middle"), in.readMember[Vector2D]("point")))
       case Type.PolylineLineShape   => in.readType[E, PolylineLineShape](new PolylineLineShape(in.readMember[Vector2D]("point")))
       case Type.PolylineShapeClosed => in.readType[E, PolylineShape.PolylineShapeClosed](new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
       case Type.PolylineShapeOpen   => in.readType[E, PolylineShape.PolylineShapeOpen](new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
@@ -174,8 +160,8 @@ object IOVersion1 extends IOVersion {
       case Type.SetAttributes    => in.readType[E, SetAttributes](new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
       case Type.TextShape        => in.readType[E, TextShape](new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember[Double]("scale"), in.readMember[Attributes]("attributes")))
       case Type.TextShapePart    => in.readType[E, TextShape.Part](TextShape.Part(in.readMember[Byte]("part")))
-      case Type.TransformationMatrix => in.readType[E, TransformationMatrix](new TransformationMatrix(new AffineTransform(in.readMember[Array[Double]]("matrix"))))
-      case Type.TransformShape       => in.readType[E, TransformShape](new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("matrix")))
+      case Type.TransformationMatrix => in.readType[E, TransformationMatrix](new TransformationMatrix(new AffineTransform(in.readMember[Seq[Double]]("matrix").toArray)))
+      case Type.TransformShape       => in.readType[E, TransformShape](new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("transformation")))
       case Type.TransformShapeParts  => in.readType[E, TransformShapeParts](new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation")))
       case Type.TransformShapes      => in.readType[E, TransformShapes](new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation")))
       case Type.User     => in.readType[E, User](new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token")))
@@ -243,6 +229,10 @@ object IOVersion1 extends IOVersion {
         out.writeMember("id", id)
         out.writeMember("shape", shape)
       }
+      case DeleteShapes(shapes) => {
+        out.writeByte(Type.DeleteShapes)
+        out.writeMember("shapes", shapes)
+      }
       case DeleteShapePart(id, shape, part) => {
         out.writeByte(Type.DeleteShapePart)
         out.writeMember("id", id)
@@ -277,6 +267,17 @@ object IOVersion1 extends IOVersion {
       // Fall-through
       case e => throw new UnsupportedOperationException("SiignaOutputStream: Did not recognize Action: " + e)
     }
+  }
+
+  /**
+   * Writes the header of the given object or array to the output stream.
+   * @param obj  The object to write. If the object is a map or iterable we write it as an array type, otherwise
+   *             we use the object mark. See the UBJSON specs.
+   */
+  protected def writeHeader(output : SiignaOutputStream, obj : Any) {
+    val size = getMemberCount(obj) + 1 // Plus one for the type
+    output.writeObjectHeader(size)
+    output.writeString("type") // Prepare for 1-byte type annotation
   }
 
   /**
@@ -322,6 +323,7 @@ object IOVersion1 extends IOVersion {
         }
         out.writeMember("startPoint", p.startPoint)
         out.writeMember("innerShapes", p.innerShapes)
+        out.writeMember("attributes", p.attributes)
       }
       case TextShape(text, position, scale, attributes) => {
         out.writeByte(Type.TextShape)
@@ -334,14 +336,37 @@ object IOVersion1 extends IOVersion {
   }
 
   /**
-   * Writes the header of the given object or array to the output stream.
-   * @param obj  The object to write. If the object is a map or iterable we write it as an array type, otherwise
-   *             we use the object mark. See the UBJSON specs.
+   * Writes a shape selector to the output stream.
+   * @param out  The output stream to write to
+   * @param part  The part to write
    */
-  protected def writeHeader(output : SiignaOutputStream, obj : Any) {
-    val size = getMemberCount(obj) + 1 // Plus one for the type
-    output.writeObjectHeader(size)
-    output.writeString("type") // Prepare for 1-byte type annotation
+  protected def writeShapePart(out : SiignaOutputStream, part : ShapePart) {
+    part match {
+      case ArcShape.Part(b) => {
+        out.writeByte(Type.ArcShapePart)
+        out.writeMember("part", b)
+      }
+      case CircleShape.Part(b) => {
+        out.writeByte(Type.CircleShapePart)
+        out.writeMember("part", b)
+      }
+      case GroupShape.Part(parts) => {
+        out.writeByte(Type.GroupShapePart)
+        out.writeMember("part", parts)
+      }
+      case LineShape.Part(b) => {
+        out.writeByte(Type.LineShapePart)
+        out.writeMember("part", b)
+      }
+      case PolylineShape.Part(xs) => {
+        out.writeByte(Type.PolylineShapePart)
+        out.writeMember("xs", xs)
+      }
+      case TextShape.Part(b) => {
+        out.writeByte(Type.TextShapePart)
+        out.writeMember("part", b)
+      }
+    }
   }
 
   def writeSiignaObject(out: SiignaOutputStream, obj : Any) {
@@ -364,8 +389,8 @@ object IOVersion1 extends IOVersion {
         i match {
           case s : PolylineArcShape => {
             out.writeByte(Type.PolylineArcShape)
-            out.writeMember("point", s.point)
             out.writeMember("middle", s.middle)
+            out.writeMember("point", s.point)
           }
           case s : PolylineLineShape => {
             out.writeByte(Type.PolylineLineShape)
@@ -387,6 +412,7 @@ object IOVersion1 extends IOVersion {
       }
       case remote.Error(code, message, session) => {
         out.writeByte(Type.Error)
+        out.writeMember("code", code)
         out.writeMember("message", message)
         out.writeMember("session", session)
       }
@@ -410,9 +436,9 @@ object IOVersion1 extends IOVersion {
       case s : Shape => writeShape(out, s)
       case s : ShapePart => writeShapePart(out, s)
       case t : TransformationMatrix => {
+        out.writeByte(Type.TransformationMatrix)
         val m = new Array[Double](6)
         t.t.getMatrix(m)
-        out.writeByte(Type.TransformationMatrix)
         out.writeMember("matrix", m)
       }
       case User(id, name, token) => {
@@ -444,48 +470,14 @@ object IOVersion1 extends IOVersion {
         i foreach out.writeObject
       }
       case a : Array[_] => {
-        out.writeByte(Type.Array)
+        out.writeByte(Type.Traversable)
         out.writeString("array")
         out.writeArrayHeader(a.size)
         a foreach out.writeObject
       }
 
       // Fall-through
-      case e => throw new IllegalArgumentException("SiignaOutputStream: Unknown object type: " + e)
-    }
-  }
-
-  /**
-   * Writes a shape selector to the output stream.
-   * @param out  The output stream to write to
-   * @param part  The part to write
-   */
-  protected def writeShapePart(out : SiignaOutputStream, part : ShapePart) {
-    part match {
-      case ArcShape.Part(b) => {
-        out.writeByte(Type.ArcShapePart)
-        out.writeMember("part", b)
-      }
-      case CircleShape.Part(b) => {
-        out.writeByte(Type.CircleShapePart)
-        out.writeMember("part", b)
-      }
-      case GroupShape.Part(parts) => {
-        out.writeByte(Type.GroupShapePart)
-        out.writeMember("part", parts)
-      }
-      case LineShape.Part(b) => {
-        out.writeByte(Type.LineShapePart)
-        out.writeMember("part", b)
-      }
-      case PolylineShape.Part(xs) => {
-        out.writeByte(Type.PolylineShapePart)
-        out.writeMember("part", xs)
-      }
-      case TextShape.Part(b) => {
-        out.writeByte(Type.TextShapePart)
-        out.writeMember("part", b)
-      }
+      case e => throw new IllegalArgumentException("SiignaOutputStream: Unknown object: " + e)
     }
   }
 

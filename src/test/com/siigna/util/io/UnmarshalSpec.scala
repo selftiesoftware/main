@@ -59,13 +59,6 @@ class UnmarshalSpec extends FunSpec with ShouldMatchers {
       o.get should equal(m)
     }
 
-    it ("can unmarshal a java array to the correct type") {
-      val a = Array[Byte](31, 42, 0, 123)
-      val x = Marshal(a)
-      val out = Unmarshal[Array[Byte]](x)
-      out.get should equal (a)
-    }
-
   }
 
 }

@@ -11,9 +11,8 @@
 
 package com.siigna.app.model.shape
 
-//import com.siigna.util.dxf.{DXFSection, DXFValue}
-import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, Segment2D}
-import com.siigna.util.collection.{Attributes}
+import com.siigna.util.geom.Vector2D
+import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna._
 import app.model.shape.LineShape.Part
@@ -67,9 +66,9 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       if (cond1 && cond2) {
         FullShapePart
       } else if (cond1) {
-        Part(true)
+        Part(part = true)
       } else if (cond2) {
-        Part(false)
+        Part(part = false)
       } else EmptyShapePart
     } else EmptyShapePart
   }
@@ -87,10 +86,10 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       } else if (p1.distanceTo(p) < p2.distanceTo(p) && p1.distanceTo(p) <= selectionDistance) {
       //If lineshape's point one is closer to selection point than point two, and within selection distance,
       //Return true - if point two is closest to selection point, and within selection distance, return false
-        Part(true)
+        Part(part = true)
       } else if (p2.distanceTo(p) < p1.distanceTo(p) && p2.distanceTo(p) <= selectionDistance) {
 
-        Part(false)
+        Part(part = false)
       } else {
         //If shape is within selection distance of selection point, but none of the line's endpoints are,
         //The line should be selected - that means, both the points.
@@ -134,13 +133,44 @@ object LineShape {
    */
   sealed case class Part(part : Boolean) extends ShapePart
 
+  /**
+   * Creates a line shape defined by the two points.
+   * @param p1  One of the end-points of the line.
+   * @param p2  The other end-point of the line.
+   * @return  A LineShape with no attributes
+   */
   def apply(p1 : Vector2D, p2 : Vector2D) : LineShape =
     new LineShape(p1, p2, Attributes())
 
+  /**
+   * Creates a LineShape with the given four coordinate values in pairs: x1, y1 and x2, y2.
+   * @param x1  The x-value of the first end-point of the Line
+   * @param y1  The y-value of the first end-point of the Line
+   * @param x2  The x-value of the second end-point of the Line
+   * @param y2  The y-value of the second end-point of the Line
+   * @return  A LineShape with no attributes
+   */
   def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : LineShape =
     apply(Vector2D(x1, y1), Vector2D(x2, y2))
 
-  def apply(line : Segment2D) : LineShape =
-    LineShape(line.p1, line.p2)
+  /**
+   * Creates a LineShape with the given four coordinate values in pairs (x1, y1 and x2, y2) and the given set
+   * of attributes.
+   * @param x1  The x-value of the first end-point of the Line
+   * @param y1  The y-value of the first end-point of the Line
+   * @param x2  The x-value of the second end-point of the Line
+   * @param y2  The y-value of the second end-point of the Line
+   * @param attributes  The attributes of the LineShape.
+   * @return  A LineShape with the given attributes.
+   */
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double, attributes : Attributes) : LineShape =
+    apply(Vector2D(x1, y1), Vector2D(x2, y2), attributes)
+
+  /**
+   * Creates a LineShape from its geometrical archetype - the [[com.siigna.util.geom.Segment2D]].
+   * @param segment  The segment that describes the LineShape.
+   * @return  A LineShape with no attributes.
+   */
+  def apply(segment : Segment2D) : LineShape = LineShape(segment.p1, segment.p2)
 
 }

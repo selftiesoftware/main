@@ -34,7 +34,7 @@ class SiignaInputStreamSpec extends FunSpec with ShouldMatchers with BeforeAndAf
     it ("can read a double") {
       val d = 123913.21832d
       out.writeDouble(d)
-      in.readObject[Double] should equal(123913.21832d)
+      in.readObject[Double] should equal(d)
     }
 
     it ("can read a boolean") {
