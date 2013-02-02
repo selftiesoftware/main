@@ -61,7 +61,7 @@ case object EndPoints extends EventSnap {
         q
       }
     } else {
-      //snapPoint = None
+      snapPoint = None
       q
     }
   }
@@ -75,7 +75,7 @@ case object EndPoints extends EventSnap {
       g.AWTGraphics.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
     }
     //show the snappoints
-    snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
+    if(snapPoint.isDefined) snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
   }
 
 }
