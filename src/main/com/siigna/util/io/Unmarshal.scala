@@ -14,6 +14,11 @@ import reflect.runtime.universe._
  * <p>
  *   <b>Important: If not type tag is given we can not parse the type, so a type-less attempt would result in None!</b>
  * </p>
+ * <p>
+ *  <b>Important: Due to type erasure Unmarshal currently cannot cast the types of collections!</b> If you want a
+ *  collection returned, please use the [[scala.Any]] type to reference the contents - otherwise None will be returned.
+ *  See below for examples.
+ * </p>
  *
  * Examples:
  * {{{
@@ -25,7 +30,17 @@ import reflect.runtime.universe._
  *   val marshalledLineShape = ...
  *   val object = Unmarshal[LineShape](marshalledLineShape)
  *
- *   // .. and so forth
+ *   // Reading a collection
+ *   // Please note the MANDATORY use og the Any type
+ *   val marshalledArray = ...
+ *   val object = Unmarshal[Array[Any]](marshalledArray) // This will work
+ *   val object = Unmarshal[Array[Int]](marshalledArray) // This will NOT work, due to type erasure
+ *
+ *   // Similar with maps
+ *   val marshalledMap = ...
+ *   val object = Unmarshal[Map[Any, Any]](marshalledMap) // This will work
+ *   val object = Unmarshal[Map[Int, Int]](marshalledMap) // This will NOT work
+ *
  * }}}
  */
 object Unmarshal {
@@ -50,16 +65,9 @@ object Unmarshal {
 
     // Read the "main" object
     try {
-      val (actualType, obj) = in.readObject
-
-      if (actualType <:< expectedType) {
-        Log.success(s"Unmarshal: Successfully read type $actualType as an instance of $expectedType.")
-        Some(obj.asInstanceOf[T])
-      } else {
-        Log.warning(s"Unmarshal: Could not cast type $actualType to $expectedType. Returning None.")
-        None
-      }
+      Some(in.readObject[T])
     } catch {
+      case e : ClassCastException => Log.warning("Unmarshal: " + e.getMessage); None
       case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
     }
   }

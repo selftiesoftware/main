@@ -20,7 +20,97 @@ import reflect.runtime.universe._
  */
 object IOVersion1 extends IOVersion {
 
-  def readSiignaObject(in : SiignaInputStream, members : Int) : (Type, Any) = {
+
+  protected lazy val mirror = runtimeMirror(getClass.getClassLoader)
+
+  /**
+   * Attempts to retrieve the type parameters for the given type. Useful for extracting types from classes with
+   * type parameters like Array[Int] => Int
+   * @tparam E  The type to extract the type parameters from.
+   * @return  The types of the type parameters for the given type E.
+   * @throws IllegalArgumentException  If no type parameter could be found for type E
+   */
+  protected def getTypeParameters[E : TypeTag] = {
+    val tpe = reflect.runtime.universe.typeOf[E]
+    tpe match {                // The returned Type is not an instance of universe.Type - hence the cast
+      case TypeRef(_, _, args) => args.asInstanceOf[List[Type]]
+      case _ => throw new IllegalArgumentException("IOVersion1: Could not find type parameters in type " + tpe)
+    }
+  }
+
+  /**
+   * Attempt to verify the type of the given element <code>elem</code> as the same type, or subtype, of the
+   * expected type <code>tpe</code>. If the element could not be recognized as a subtype, we throw an exception.
+   * @param elem  The element to match.
+   * @param expected  The expected type.
+   * @throws ClassCastException  If the element could not be correctly verified to be a subtype of E
+   */
+  protected def verifyType(elem : Any, expected : Type) {
+    val exp = mirror.reflect(elem).symbol.toType
+    exp match {
+      case x if x <:< expected =>   // We're good!
+      case x if (x =:= typeOf[java.lang.Byte]    && expected =:= typeOf[Byte])    => // We're also good
+      case x if (x =:= typeOf[java.lang.Boolean] && expected =:= typeOf[Boolean]) => // We're also good
+      case x if (x =:= typeOf[java.lang.Integer] && expected =:= typeOf[Int])     => // We're also good
+      case x if (x =:= typeOf[java.lang.Long]    && expected =:= typeOf[Long])    => // We're also good
+      case x if (x =:= typeOf[java.lang.Double]  && expected =:= typeOf[Double])  => // We're also good
+      case x if (x =:= typeOf[java.lang.Float]   && expected =:= typeOf[Float])   => // We're also good
+      case x              => { // We're not good - the types differ!
+        throw new ClassCastException(s"Could not cast $x to expected type $expected.")
+      }
+    }
+  }
+
+  /**
+   * Attempts to verify the given array as an instance of E by retrieving the inner type-parameter for the
+   * expected array and matching that with each element.
+   * @param array  The array whose elements we want to verify.
+   * @tparam E  The expected type of the array.
+   * @return  A collection of type E.
+   * @throws  IllegalArgumentException  If we could not retrieve enough type parameters to match the inner type.
+   */
+  protected def verifyArrayType[E : TypeTag](array : Array[Any]) : E = {
+    val types = getTypeParameters[E]
+    require(types.size == 1, "Could not retrieve the necessary number of type parameters (1) from type " + typeOf[E])
+    val tpe = types(0)
+    array.foreach(e => verifyType(e, tpe))
+    array.asInstanceOf[E]
+  }
+
+  /**
+   * Attempts to verify the given collection as an instance of E by retrieving the inner type-parameter for the
+   * expected collection and matching that with each element.
+   * @param array  The collection whose elements we want to verify.
+   * @tparam E  The expected type of the collection.
+   * @return  A collection of type E.
+   * @throws  IllegalArgumentException  If we could not retrieve enough type parameters to match the inner type.
+   */
+  protected def verifyCollectionType[E : TypeTag](array : Traversable[Any]) : E = {
+    val types = getTypeParameters[E]
+    require(types.size == 1, "Could not retrieve the necessary number of type parameters (1) from type " + typeOf[E])
+    val tpe = types(0)
+    array.foreach(e => verifyType(e, tpe))
+    array.asInstanceOf[E]
+  }
+
+  /**
+   * Attempts to verify the given map as an instance of by retrieving the inner type-parameters for the expected
+   * map and matching that with each element.
+   * @param map  The map whose elements we want to verify.
+   * @tparam E  The expected type of the map.
+   * @return  A map of type E.
+   * @throws  IllegalArgumentException  If we could not retrieve enough type parameters to match the inner type.
+   */
+  protected def verifyMapType[E : TypeTag](map : Map[Any, Any]) : E = {
+    val types = getTypeParameters[E]
+    require(types.size == 2, "Could not retrieve the necessary number of type parameters (2) from type " + typeOf[E])
+    val t1 = types(0)
+    val t2 = types(1)
+    map.foreach(t => { verifyType(t._1, t1); verifyType(t._2, t2) })
+    map.asInstanceOf[E]
+  }
+
+  def readSiignaObject[E : TypeTag](in : SiignaInputStream, members : Int) : E = {
     // TODO: Use the member-count
 
     // Retrieve the type of the siigna object
@@ -29,66 +119,67 @@ object IOVersion1 extends IOVersion {
 
     // Match the type
     byte match {
-      case Type.AddAttributes    => typeOf[AddAttributes] -> new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.ArcShape         => typeOf[ArcShape] -> new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
-                     in.readMember[Double]("startAngle"), in.readMember("angle"), in.readMember[Attributes]("attributes"))
-      case Type.ArcShapePart     => typeOf[ArcShape.Part] -> new ArcShape.Part(in.readMember[Byte]("part"))
-      case Type.Array            => typeOf[Array[Any]] -> {
+      case Type.AddAttributes    => in.readType[E, AddAttributes](new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
+      case Type.ArcShape         => in.readType[E, ArcShape](new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
+                     in.readMember[Double]("startAngle"), in.readMember[Double]("angle"), in.readMember[Attributes]("attributes")))
+      case Type.ArcShapePart     => in.readType[E, ArcShape.Part](new ArcShape.Part(in.readMember[Byte]("part")))
+      case Type.Array            => {
         in.checkMemberName("array")
-        new Array[Any](in.readArrayLength()).map(_ => in.readObject._2)
+        verifyArrayType[E](new Array[Any](in.readArrayLength()).map(_ => in.readObject[Any]))
       }
-      case Type.Attributes       => typeOf[Attributes] -> new Attributes(in.readMember[Map[String, Any]]("self"))
-      case Type.CircleShape      => typeOf[CircleShape] -> new CircleShape(in.readMember[Vector2D]("center"), in.readMember("radius"), in.readMember[Attributes]("attributes"))
-      case Type.CircleShapePart  => typeOf[CircleShape.Part] -> new CircleShape.Part(in.readMember[Byte]("part"))
-      case Type.Color            => typeOf[Color] -> new Color(in.readMember[Int]("color"), true)
-      case Type.CreateShape      => typeOf[CreateShape] -> new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
-      case Type.CreateShapes     => typeOf[CreateShapes] -> new CreateShapes(in.readMember[Map[Int, Shape]]("shapes"))
-      case Type.DeleteShape      => typeOf[DeleteShape] -> new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape"))
-      case Type.DeleteShapePart  => typeOf[DeleteShapePart] -> new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part"))
-      case Type.DeleteShapeParts => typeOf[DeleteShapeParts] -> new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes"))
-      case Type.DeleteShapes     => typeOf[DeleteShapes] -> new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes"))
-      case Type.Error            => typeOf[remote.Error] -> remote.Error(in.readMember[Int]("message"), in.readMember[String]("message"), in.readMember[Session]("session"))
-      case Type.Get              => typeOf[remote.Get] -> remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
-      case Type.GroupShape       => typeOf[GroupShape] -> new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.GroupShapePart   => typeOf[GroupShape.Part] -> GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes"))
+      case Type.Attributes       => in.readType[E, Attributes](new Attributes(in.readMember[Map[String, Any]]("self")))
+      case Type.CircleShape      => in.readType[E, CircleShape](new CircleShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"), in.readMember[Attributes]("attributes")))
+      case Type.CircleShapePart  => in.readType[E, CircleShape.Part](new CircleShape.Part(in.readMember[Byte]("part")))
+      case Type.Color            => in.readType[E, Color](new Color(in.readMember[Int]("color"), true))
+      case Type.CreateShape      => in.readType[E, CreateShape](new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
+      case Type.CreateShapes     => in.readType[E, CreateShapes](new CreateShapes(in.readMember[Map[Int, Shape]]("shapes")))
+      case Type.DeleteShape      => in.readType[E, DeleteShape](new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
+      case Type.DeleteShapePart  => in.readType[E, DeleteShapePart](new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part")))
+      case Type.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("newShapes"), in.readMember[Map[Int, Shape]]("oldShapes")))
+      case Type.DeleteShapes     => in.readType[E, DeleteShapes](new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes")))
+      case Type.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("message"), in.readMember[String]("message"), in.readMember[Session]("session")))
+      case Type.Get              => in.readType[E, remote.Get](remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
+      case Type.GroupShape       => in.readType[E, GroupShape](new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes")))
+      case Type.GroupShapePart   => in.readType[E, GroupShape.Part](GroupShape.Part(in.readMember[Map[Int, ShapePart]]("shapes")))
       //case Type.ImageShape       => // Nothing here yet
       //case Type.ImageShapePart   => // Nothing here yet
-      case Type.Iterable         => typeOf[Iterable[Any]] -> {
+      case Type.Traversable      => {
         in.checkMemberName("array")
-        new Array[Any](in.readArrayLength()).map(_ => in.readObject._2).toIterable
+        verifyCollectionType[E](new Array[Any](in.readArrayLength()).map(_ => in.readObject[Any]).toTraversable)
       }
-      case Type.LineShape        => typeOf[LineShape] -> new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes"))
-      case Type.LineShapePart    => typeOf[LineShape.Part] -> LineShape.Part(readBoolean())
-      case Type.Map              => typeOf[Map[Any, Any]] -> {
+      case Type.LineShape        => in.readType[E, LineShape](new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes")))
+      case Type.LineShapePart    => in.readType[E, LineShape.Part](LineShape.Part(readBoolean()))
+      case Type.Map              => {
         in.checkMemberName("map")
-        val size = in.readArrayLength() / 2 // We read two items at the time
-        new Array[Any](size).map(_ => in.readObject._2 -> in.readObject._2).toMap
+        val size  = in.readArrayLength() / 2 // We read two items at the time
+        val array = new Array[Any](size).map(_ => in.readObject[Any] -> in.readObject[Any]).toMap
+        verifyMapType[E](array)
       }
-      case Type.Model            => typeOf[Model] -> {
+      case Type.Model            => in.readType[E, Model]{
         new Model(in.readMember[Map[Int, Shape]]("shapes"), in.readMember[Seq[Action]]("executed"),
                   in.readMember[Seq[Action]]("undone"), in.readMember[Attributes]("attributes"))
       }
-      case Type.PolylineArcShape    => typeOf[PolylineArcShape] -> new PolylineArcShape(in.readMember[Vector2D]("point"), in.readMember[Vector2D]("middle"))
-      case Type.PolylineLineShape   => typeOf[PolylineLineShape] -> new PolylineLineShape(in.readMember[Vector2D]("point"))
-      case Type.PolylineShapeClosed => typeOf[PolylineShape.PolylineShapeClosed] -> new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
-      case Type.PolylineShapeOpen   => typeOf[PolylineShape.PolylineShapeOpen] -> new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes"))
-      case Type.PolylineShapePart   => typeOf[PolylineShape.Part] -> PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs"))
+      case Type.PolylineArcShape    => in.readType[E, PolylineArcShape](new PolylineArcShape(in.readMember[Vector2D]("point"), in.readMember[Vector2D]("middle")))
+      case Type.PolylineLineShape   => in.readType[E, PolylineLineShape](new PolylineLineShape(in.readMember[Vector2D]("point")))
+      case Type.PolylineShapeClosed => in.readType[E, PolylineShape.PolylineShapeClosed](new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
+      case Type.PolylineShapeOpen   => in.readType[E, PolylineShape.PolylineShapeOpen](new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
+      case Type.PolylineShapePart   => in.readType[E, PolylineShape.Part](PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs")))
       //case Type.RectangleShapeComplex => // Nothing here yet
       //case Type.RectangleShapePart    => // Nothing here yet
       //case Type.RectangleShapeSimple  => // Nothing here yet
-      case Type.RemoteAction     => typeOf[RemoteAction] -> new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo"))
-      case Type.SequenceAction   => typeOf[SequenceAction] -> new SequenceAction(in.readMember[Seq[Action]]("actions"))
-      case Type.Session          => typeOf[Session] -> new Session(in.readMember[Long]("drawing"), in.readMember[User]("user"))
-      case Type.Set              => typeOf[remote.Set] -> remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session"))
-      case Type.SetAttributes    => typeOf[SetAttributes] -> new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes"))
-      case Type.TextShape        => typeOf[TextShape] -> new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember("scale"), in.readMember[Attributes]("attributes"))
-      case Type.TextShapePart    => typeOf[TextShape.Part] -> TextShape.Part(in.readMember[Byte]("part"))
-      case Type.TransformationMatrix => typeOf[TransformationMatrix] -> new TransformationMatrix(new AffineTransform(in.readMember[Array[Double]]("matrix")))
-      case Type.TransformShape       => typeOf[TransformShape] -> new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("matrix"))
-      case Type.TransformShapeParts  => typeOf[TransformShapeParts] -> new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation"))
-      case Type.TransformShapes      => typeOf[TransformShapes] -> new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation"))
-      case Type.User     => typeOf[User] -> new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token"))
-      case Type.Vector2D => typeOf[Vector2D] -> new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y"))
+      case Type.RemoteAction     => in.readType[E, RemoteAction](new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo")))
+      case Type.SequenceAction   => in.readType[E, SequenceAction](new SequenceAction(in.readMember[Seq[Action]]("actions")))
+      case Type.Session          => in.readType[E, Session](new Session(in.readMember[Long]("drawing"), in.readMember[User]("user")))
+      case Type.Set              => in.readType[E, remote.Set](remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
+      case Type.SetAttributes    => in.readType[E, SetAttributes](new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
+      case Type.TextShape        => in.readType[E, TextShape](new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember[Double]("scale"), in.readMember[Attributes]("attributes")))
+      case Type.TextShapePart    => in.readType[E, TextShape.Part](TextShape.Part(in.readMember[Byte]("part")))
+      case Type.TransformationMatrix => in.readType[E, TransformationMatrix](new TransformationMatrix(new AffineTransform(in.readMember[Array[Double]]("matrix"))))
+      case Type.TransformShape       => in.readType[E, TransformShape](new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("matrix")))
+      case Type.TransformShapeParts  => in.readType[E, TransformShapeParts](new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation")))
+      case Type.TransformShapes      => in.readType[E, TransformShapes](new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation")))
+      case Type.User     => in.readType[E, User](new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token")))
+      case Type.Vector2D => in.readType[E, Vector2D](new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y")))
       case e => throw new UBJFormatException(in.getPosition, "SiignaInputStream: Unknown type: " + e)
     }
   }
@@ -347,7 +438,7 @@ object IOVersion1 extends IOVersion {
         })
       }
       case i : Iterable[_] => {
-        out.writeByte(Type.Iterable)
+        out.writeByte(Type.Traversable)
         out.writeString("array")
         out.writeArrayHeader(i.size)
         i foreach out.writeObject

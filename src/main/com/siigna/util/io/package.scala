@@ -24,8 +24,8 @@ package object io extends Enumeration {
     val Model      = 53.asInstanceOf[Byte]
 
     // Scala
-    val Iterable = 80.asInstanceOf[Byte]
-    val Map      = 81.asInstanceOf[Byte]
+    val Traversable = 80.asInstanceOf[Byte]
+    val Map         = 81.asInstanceOf[Byte]
 
     // Java
     val Color    = 90.asInstanceOf[Byte]

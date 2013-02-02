@@ -1,7 +1,7 @@
 package com.siigna.util.io.version
 
 import com.siigna.util.io.{SiignaOutputStream, SiignaInputStream}
-import reflect.runtime.universe.Type
+import reflect.runtime.universe.TypeTag
 
 /**
  * A specific version of the IO used to write and read bytes as it was done in one particular version.
@@ -11,15 +11,15 @@ import reflect.runtime.universe.Type
 trait IOVersion {
 
   /**
-   * Attempts to read a siigna object from the given input stream. We return the object coupled with its type for later
-   * casting.
+   * Attempts to read a siigna object from the given input stream.
    * @param in  The input stream to read from.
    * @param members  The amount of members in the expected object.
-   * @return  The object that have been read from the underlying input stream along with the type of the object used
-   *          for later casting and type-safety.
+   * @tparam E  The expected type of the object to read.
+   * @return  The object that have been read from the underlying input stream.
+   * @throws  ClassCastException  If the found object could not be cast to type E.
    * @throws  UBJFormatException  If the format could not be matched.
    */
-  def readSiignaObject(in : SiignaInputStream, members : Int) : (Type, Any)
+  def readSiignaObject[E : TypeTag](in : SiignaInputStream, members : Int) : E
 
   /**
    * Write an object from the Siigna domain to the output stream.

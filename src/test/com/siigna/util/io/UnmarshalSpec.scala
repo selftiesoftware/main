@@ -12,16 +12,10 @@ class UnmarshalSpec extends FunSpec with ShouldMatchers {
 
   describe("Unmarshal") {
 
-    it ("can get an input stream from a byte buffer") {
-      val a = Marshal(null)
-      val r = Unmarshal.getInputStream(ByteBuffer.wrap(a))
-      evaluating { r } should produce[SiignaInputStream]
-    }
-
     it ("can read with the right version") {
       val a = Marshal(null)
       val in = Unmarshal.getInputStream(ByteBuffer.wrap(a))
-      in.version should equal(IOVersion.Current)
+      in.version should equal(IOVersion(IOVersion.Current))
     }
 
     it ("can read a type") {
@@ -41,13 +35,35 @@ class UnmarshalSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("can unmarshal java-types to scala-types") {
-      val a = Marshal(14.78123d)
-      Unmarshal[Double](a) should equal(Some(a))
+      val d = 14.78123d
+      val a = Marshal(d)
+      Unmarshal[Double](a) should equal(Some(d))
     }
 
     it ("can recognize subtypes") {
       val a = Marshal(14L)
-      Unmarshal[AnyVal](a) should equal(Some(a))
+      Unmarshal[AnyVal](a) should equal(Some(14L))
+    }
+
+    it ("can unmarshal a traversable to the correct type") {
+      val i : Traversable[Int] = Traversable(314213, 123, 3124, 42)
+      val x = Marshal(i)
+      val o = Unmarshal[Traversable[Int]](x)
+      o.get should equal(i)
+    }
+
+    it ("can unmarshal a map to the correct type") {
+      val m : Map[Int, String] = Map(3123 -> "Hello world!", -9137 -> "Hello world! ÆØÅ - §!\"#¤%&/()=? _ @£$€{[]} | ^\\ - ça va?")
+      val x = Marshal(m)
+      val o = Unmarshal[Map[Int, String]](x)
+      o.get should equal(m)
+    }
+
+    it ("can unmarshal a java array to the correct type") {
+      val a = Array[Byte](31, 42, 0, 123)
+      val x = Marshal(a)
+      val out = Unmarshal[Array[Byte]](x)
+      out.get should equal (a)
     }
 
   }

@@ -4,9 +4,9 @@ import java.io.InputStream
 import org.ubjson.io.{UBJFormatException, UBJInputStream}
 import org.ubjson.io.IUBJTypeMarker._
 import version.IOVersion
-import java.nio.{ByteBuffer, Buffer, CharBuffer}
-import reflect.runtime.universe.{typeOf, Type}
-import java.nio.charset.Charset
+import java.nio.CharBuffer
+import reflect.runtime.universe._
+import reflect.ClassTag
 
 /**
  * An input stream capable of reading objects familiar to the Siigna domain. Uses the [[org.ubjson.io.UBJInputStream]]
@@ -26,58 +26,71 @@ class SiignaInputStream(in : InputStream, val version : IOVersion) extends UBJIn
   }
 
   /**
-   * Reads a member of an object with the given expected name and type.
+   * Reads a member of an object with the expected type E and the expected name of the member.
    * @param name  The name of the expected member
-   * @tparam T  The type of the expected member
+   * @tparam E  The expected type of the member
    * @return  An object of the given type.
    * @throws ClassCastException  If the object found could not be casted to the given type T
    */
-  def readMember[T](name : String) = {
+  def readMember[E : TypeTag : ClassTag](name : String) : E = {
     checkMemberName(name)
-    readType[T]
+    readObject[E]
+  }
+
+  /**
+   * Matches the expected type E with the actual type A. If A is a subtype of E (using the <:< notation) we
+   * execute the function f and attempts to cast it to the expected type E. If not we throw a class cast exception.
+   * This methods allows us to do recursive type-casting, so we can provide type-safety for nested types.
+   * @param f  The function to execute if the types match.
+   * @tparam E  The type we expect to return.
+   * @tparam A  The type we actually found.
+   * @return  An object of the expected type E. If the types did not match we throw a ClassCastException
+   * @throws  ClassCastException  If the type A is not the same class as E or a sub-class to E
+   */
+  def readType[E : TypeTag, A : TypeTag](f : => Any) : E = {
+    val actual = typeOf[A]
+    val expected = typeOf[E]
+    actual match {
+      case _ if (actual <:< expected) => f.asInstanceOf[E]
+      case _ => throw new ClassCastException(s"Could not cast the found type $actual to the expected type $expected.")
+    }
   }
 
   /**
    * Reads and parses a single object by first checking the type of the object and then attempting to create an
    * instance of that object.
-   * @return  An object read from the input stream
+   * @return  An object read from the input stream.
+   * @throws  ClassCastException  If the returned type differed from the expected.
    */
-  def readObject : (Type, Any) = {
+  def readObject[T : TypeTag] : T = {
     // Match on the next valid byte
     nextType() match {
       // UBJSON types
-      case NULL   => typeOf[Null]    -> null
-      case BYTE   => typeOf[Byte]    -> read
-      case DOUBLE => typeOf[Double]  -> java.lang.Double.longBitsToDouble(readInt64Impl())
-      case FALSE  => typeOf[Boolean] -> false
-      case FLOAT  => typeOf[Float]   -> java.lang.Float.intBitsToFloat(readInt32Impl())
-      case INT32  => typeOf[Int]     -> readInt32Impl
-      case INT64  => typeOf[Long]    -> readInt64Impl
-      case TRUE   => typeOf[Boolean] -> true
-      case STRING => typeOf[String]  -> {
+      case NULL   => readType[T, Null](null)
+      case BYTE   => readType[T, Byte](read.toByte)
+      case DOUBLE => readType[T, Double](java.lang.Double.longBitsToDouble(readInt64Impl()))
+      case FALSE  => readType[T, Boolean](false)
+      case FLOAT  => readType[T, Float](java.lang.Float.intBitsToFloat(readInt32Impl()))
+      case INT32  => readType[T, Int](readInt32Impl)
+      case INT64  => readType[T, Long](readInt64Impl)
+      case TRUE   => readType[T, Boolean](true)
+      case STRING => readType[T, String]({
         val buffer : CharBuffer = CharBuffer.allocate(readInt32())
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
-      }
-      case STRING_COMPACT => typeOf[String] -> {
+      })
+      case STRING_COMPACT => readType[T, String]({
         val buffer : CharBuffer = CharBuffer.allocate(read())
         readStringBodyAsCharsImpl(buffer.capacity(), buffer)
         new String(buffer.array, buffer.position, buffer.remaining)
-      }
+      })
 
       // Siigna object
-      case OBJECT         => version.readSiignaObject(this, readObjectLength())
-      case OBJECT_COMPACT => version.readSiignaObject(this, read)
+      case OBJECT         => version.readSiignaObject[T](this, readObjectLength())
+      case OBJECT_COMPACT => version.readSiignaObject[T](this, read)
 
       case e => throw new IllegalArgumentException("SiignaInputStream: Unknown type " + e)
     }
   }
-
-  /**
-   * Reads an object and attempts to cast it to type T.
-   * @tparam T  The type to return.
-   * @return  An object of type T. Or an exception.
-   */
-  protected def readType[T] : T = readObject._2.asInstanceOf[T]
 
 }
