@@ -1,6 +1,6 @@
 name := "siigna-main"
 
-version := "nightly"
+version := "experimental"
 
 organization := "com.siigna"
 
