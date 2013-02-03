@@ -47,11 +47,12 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  //val remote = new Server("62.243.118.234", Mode.Production)
-  val remote = new Server("localhost", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Testing)
+  //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
+  SiignaDrawing.addAttribute("id",2L)
   /**
    * The acting part of the RemoteController.
    */
@@ -250,7 +251,7 @@ protected[controller] object RemoteController extends Actor {
         var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        remote(Get(ShapeId, ByteBuffer.allocate(4).putInt(localIds.size).array(), session), _ match {
+        remote(Get(ShapeId, localIds.size, session), _ match {
           case Set(ShapeId, i : Range, _) => {
 
             // Find out how the ids map to the action
