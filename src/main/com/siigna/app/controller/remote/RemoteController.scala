@@ -45,19 +45,17 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  val remote = new Server("62.243.118.234", Mode.Testing)
+  val remote = new Server("62.243.118.234", Mode.Production)
   //val remote = new Server("localhost", Mode.Testing)
   //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
-  SiignaDrawing.addAttribute("id",2L)
   /**
    * The acting part of the RemoteController.
    */
   def act() {
     try {
-      SiignaDrawing.addAttribute("id", 2L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
