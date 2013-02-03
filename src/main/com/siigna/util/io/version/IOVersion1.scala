@@ -153,6 +153,7 @@ object IOVersion1 extends IOVersion {
       //case Type.RectangleShapeComplex => // Nothing here yet
       //case Type.RectangleShapePart    => // Nothing here yet
       //case Type.RectangleShapeSimple  => // Nothing here yet
+      case Type.Range            => in.readType[E, Range](new Range(in.readMember[Int]("start"), in.readMember[Int]("end"), in.readMember[Int]("step")))
       case Type.RemoteAction     => in.readType[E, RemoteAction](new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo")))
       case Type.SequenceAction   => in.readType[E, SequenceAction](new SequenceAction(in.readMember[Seq[Action]]("actions")))
       case Type.Session          => in.readType[E, Session](new Session(in.readMember[Long]("drawing"), in.readMember[User]("user")))
@@ -404,6 +405,12 @@ object IOVersion1 extends IOVersion {
         out.writeMember("executed", m.executed)
         out.writeMember("undone", m.undone)
         out.writeMember("attributes", m.attributes)
+      }
+      case r : Range => {
+        out.writeByte(Type.Range)
+        out.writeMember("start", r.start)
+        out.writeMember("end", r.end)
+        out.writeMember("step", r.step)
       }
       case r : RemoteAction => {
         out.writeByte(Type.RemoteAction)
