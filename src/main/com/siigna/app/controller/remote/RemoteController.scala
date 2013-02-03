@@ -47,9 +47,11 @@ protected[controller] object RemoteController extends Actor {
   // The remote server
   val remote = new Server("62.243.118.234", Mode.Testing)
   //val remote = new Server("localhost", Mode.Testing)
+  //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
+  SiignaDrawing.addAttribute("id",2L)
   /**
    * The acting part of the RemoteController.
    */
