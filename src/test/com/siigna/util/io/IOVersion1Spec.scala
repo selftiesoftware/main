@@ -190,6 +190,11 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       out.writeObject(x)
       in.readObject[PolylineShape.Part] should equal(x)
     }
+    it ("can read and write a Range") {
+      val x = Range(1, 10)
+      out.writeObject(x)
+      in.readObject[Range] should equal(x)
+    }
     it ("can read and write a RemoteAction") {
       val x = new RemoteAction(new CreateShape(13, LineShape(0, 0, 10, 10)))
       out.writeObject(x)
@@ -206,7 +211,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[Session] should equal(a)
     }
     it ("can read and write a remote Set") {
-      val set = remote.Set(RemoteConstants.ActionId, null, Session(14L, User(60L, "DinMor", "Hej Verden")))
+      val set = remote.Set(RemoteConstants.Action,
+        new RemoteAction(new CreateShape(13, LineShape(0, 0, 10, 10)), false),
+        Session(14L, User(60L, "DinMor", "Hej Verden")))
       out.writeObject(set)
       in.readObject[remote.Set] should equal(set)
     }

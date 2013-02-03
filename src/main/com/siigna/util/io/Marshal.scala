@@ -11,13 +11,33 @@
 
 package com.siigna.util.io
 
-import java.nio.ByteBuffer
 import org.ubjson.io.ByteArrayOutputStream
 import version.IOVersion
 import com.siigna.util.Log
 
 /**
- * Marshals objects to binary according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
+ * Marshals known objects to arrays of bytes according to the [http://ubjson.org UBJSON] (Universal Binary JSON)
+ * standard. See [[com.siigna.util.io.Type]] for a reference on known types.
+ *
+ * <h2>Examples</h2>
+ * {{{
+ *   // Writing and reading a double
+ *   val marshalledDouble = Marshal(42d)
+ *   val double = Unmarshal[Double](marshalledDouble) // Some(42)
+ *
+ *   // Writing and reading a shape
+ *   val marshalledLineShape = Marshal(LineShape(0, 0, 1, 1)
+ *   val object = Unmarshal[LineShape](marshalledLineShape) // Some(LineShape(0, 0, 1, 1)
+ *
+ *   // Writing and reading a collection
+ *   val marshalledSeq = Marshal(Seq(1, 1, 2, 3, 5, 7))
+ *   val object = Unmarshal[Seq[Int]](marshalledArray) // Some(Seq(1, 1, 2, 3, 5, 7))
+ *
+ *   // Similar with maps
+ *   val marshalledMap = Map(1 -> 1, 2 -> 3, 5 -> 7)
+ *   val object = Unmarshal[Map[Int, Int]](marshalledMap) // Some(Map(1 -> 1, 2 -> 3, 5 -> 7))
+ *
+ * }}}
  *
  * @author csp <csp@siigna.com>
  * @author jegp <jegp@siigna.com>
@@ -40,7 +60,6 @@ object Marshal {
    * @return  A byte array containing the objects written to it.
    */
   protected def marshal(f : (SiignaOutputStream) => Unit) : Array[Byte] = {
-    //todo Optimize using ByteBuffer
     val bytes = new ByteArrayOutputStream(512)
     val out = new SiignaOutputStream(bytes, IOVersion(IOVersion.Current))
     val version = IOVersion.Current

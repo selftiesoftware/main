@@ -8,38 +8,38 @@ import reflect.runtime.universe._
 
 /**
  * <p>
- *   Unmarshals objects from binary encoding according to the [http://ubjson.org UBJSON] (Universal Binary JSON) standard.
+ *   Unmarshals known objects from binary encoding according to the [http://ubjson.org UBJSON]
+ *   (Universal Binary JSON) standard.
  *   We use [[java.nio.ByteBuffer]]s internally since they in many ways are faster than output streams.
+ *   See [[com.siigna.util.io.Type]] for a reference on known types.
  * </p>
  * <p>
- *   <b>Important: If not type tag is given we can not parse the type, so a type-less attempt would result in None!</b>
+ *   <b>Important: If not type tag is given we can not parse the type, and an exception is thrown.</b> This is done
+ *   to avoid bugs where the return-type was None due to a missing type-parameter.
  * </p>
  * <p>
- *  <b>Important: Due to type erasure Unmarshal currently cannot cast the types of collections!</b> If you want a
- *  collection returned, please use the [[scala.Any]] type to reference the contents - otherwise None will be returned.
- *  See below for examples.
+ *   Also, due to type erasure Unmarshal currently cannot retrieve native arrays. It has something to do with type erasure
+ *   and casting of native java arrays. If you need arrays we recommend that you retrieve a scala-collection
+ *   (Traversable for instance) and run <code>.toArray</code> on it. That should do the trick.
  * </p>
  *
- * Examples:
+ * <h2>Examples</h2>
  * {{{
- *   // Read a double
- *   val marshalledDouble = ...
- *   val double = Unmarshal[Double](marshalledDouble)
+ *   // Writing and reading a double
+ *   val marshalledDouble = Marshal(42d)
+ *   val double = Unmarshal[Double](marshalledDouble) // Some(42)
  *
- *   // Read a line shape
- *   val marshalledLineShape = ...
- *   val object = Unmarshal[LineShape](marshalledLineShape)
+ *   // Writing and reading a shape
+ *   val marshalledLineShape = Marshal(LineShape(0, 0, 1, 1)
+ *   val object = Unmarshal[LineShape](marshalledLineShape) // Some(LineShape(0, 0, 1, 1)
  *
- *   // Reading a collection
- *   // Please note the MANDATORY use og the Any type
- *   val marshalledArray = ...
- *   val object = Unmarshal[Array[Any]](marshalledArray) // This will work
- *   val object = Unmarshal[Array[Int]](marshalledArray) // This will NOT work, due to type erasure
+ *   // Writing and reading a collection
+ *   val marshalledSeq = Marshal(Seq(1, 1, 2, 3, 5, 7))
+ *   val object = Unmarshal[Seq[Int]](marshalledArray) // Some(Seq(1, 1, 2, 3, 5, 7))
  *
  *   // Similar with maps
- *   val marshalledMap = ...
- *   val object = Unmarshal[Map[Any, Any]](marshalledMap) // This will work
- *   val object = Unmarshal[Map[Int, Int]](marshalledMap) // This will NOT work
+ *   val marshalledMap = Map(1 -> 1, 2 -> 3, 5 -> 7)
+ *   val object = Unmarshal[Map[Int, Int]](marshalledMap) // Some(Map(1 -> 1, 2 -> 3, 5 -> 7))
  *
  * }}}
  */
