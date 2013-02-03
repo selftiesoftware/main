@@ -18,10 +18,8 @@ import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
 import actors.remote.RemoteActor
 import collection.mutable
-import java.nio.ByteBuffer
 import com.siigna.util.Log
 import com.siigna.app.model.Model
-import com.siigna.util.collection.Attributes
 
 /**
  * Controls any remote connection(s).
@@ -47,8 +45,8 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  //val remote = new Server("62.243.118.234", Mode.Production)
-  val remote = new Server("localhost", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Testing)
+  //val remote = new Server("localhost", Mode.Testing)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
@@ -57,6 +55,7 @@ protected[controller] object RemoteController extends Actor {
    */
   def act() {
     try {
+      SiignaDrawing.addAttribute("id", 2L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
@@ -250,7 +249,7 @@ protected[controller] object RemoteController extends Actor {
         var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        remote(Get(ShapeId, ByteBuffer.allocate(4).putInt(localIds.size).array(), session), _ match {
+        remote(Get(ShapeId, localIds.size, session), _ match {
           case Set(ShapeId, i : Range, _) => {
 
             // Find out how the ids map to the action
