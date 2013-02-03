@@ -11,7 +11,7 @@ import reflect.runtime.universe._
  *   Unmarshals known objects from binary encoding according to the [http://ubjson.org UBJSON]
  *   (Universal Binary JSON) standard.
  *   We use [[java.nio.ByteBuffer]]s internally since they in many ways are faster than output streams.
- *   See [[com.siigna.util.io.Type]] for a reference on known types.
+ *   See [[com.siigna.util.io.ObjectType]] for a reference on known types.
  * </p>
  * <p>
  *   <b>Important: If not type tag is given we can not parse the type, and an exception is thrown.</b> This is done

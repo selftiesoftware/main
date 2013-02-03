@@ -1,5 +1,8 @@
 package com.siigna.util
 
+import java.io.File
+import actors.Actor._
+
 /**
  * The persistence package is capable of converting objects into byte arrays (marshalling), reading objects from
  * byte arrays (unmarshalling) and storing and reading content from disc.
@@ -14,7 +17,7 @@ package com.siigna.util
  *   It is currently only possible to marshal and unmarshal primitives and selected Java and Scala classes. Both
  *   Map and Traversable are one of these examples, so if you lack any implementation it is always possible to throw the
  *   object data into a collection. A complete overview of which types are supported can be found in the
- *   [[com.siigna.util.io.Type]] object, which reference the currently used data constants for object identification.
+ *   [[com.siigna.util.io.ObjectType]] object, which reference the currently used data constants for object identification.
  * </p>
  * <h3>Examples on (un)marshalling</h3>
  * <p>
@@ -49,16 +52,34 @@ package com.siigna.util
  *   a specific need you are welcome to contact us at [[http://siigna.com/development]].
  * </p>
  *
- * <h2>Storing contents to disc</h2>
+ * <h2>Storing to and reading contents from disc</h2>
  *
  */
-package object io extends Enumeration {
+package object io {
+
+  // A private class to perform type-safe callback invocations
+  private[io] case class IOAction[T](file : File, read : Boolean, f : (File => T))
+
+  // A private IO actor which is used to execute IO functionality on files.
+  // Not pretty, but can't think of an alternative
+  private[io] val IOActor = actor {
+    loop {
+      react {
+        case IOAction(file, read, f) => {
+          if (!read && !file.exists()) file.createNewFile()
+          if (read) file.setReadable(true) else file.setWritable(true)
+          reply(f(file))
+        }
+      }
+    }
+  }
 
   /**
-   * A Type object whose values we use to write to the byte-stream so we can identify the type of the marshalled
-   * object when we unmarshal it.
+   * The ObjectType object provides enumerations for the types of objects we and read from byte-streams so we can
+   * identify the type of the marshalled object when we unmarshal it. Used with the [[com.siigna.util.io.Marshal]] and
+   * [[com.siigna.util.io.Unmarshal]] objects.
    */
-  object Type {
+  object ObjectType {
     // Remote package
     val Error   = 0.toByte
     val Get     = 1.toByte

@@ -17,7 +17,7 @@ import com.siigna.util.Log
 
 /**
  * Marshals known objects to arrays of bytes according to the [http://ubjson.org UBJSON] (Universal Binary JSON)
- * standard. See [[com.siigna.util.io.Type]] for a reference on known types.
+ * standard. See [[com.siigna.util.io.ObjectType]] for a reference on known types.
  *
  * <h2>Examples</h2>
  * {{{

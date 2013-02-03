@@ -159,6 +159,11 @@ package object siigna extends com.siigna.util.Implicits {
   type Vector2D = com.siigna.util.geom.Vector2D
   val Vector2D = com.siigna.util.geom.Vector2D
 
+  // I/O
+  val Dialogue  = com.siigna.util.io.Dialogue
+  val Marshal   = com.siigna.util.io.Marshal
+  val Unmarshal = com.siigna.util.io.Unmarshal
+
   // Log
   val Log = com.siigna.util.Log
 

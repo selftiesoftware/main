@@ -1,6 +1,6 @@
 package com.siigna.util.io.version
 
-import com.siigna.util.io.{Type, SiignaInputStream, SiignaOutputStream}
+import com.siigna.util.io.{ObjectType, SiignaInputStream, SiignaOutputStream}
 import org.ubjson.io.UBJFormatException
 import com.siigna.app.model.action._
 import com.siigna.util.collection.Attributes
@@ -104,69 +104,69 @@ object IOVersion1 extends IOVersion {
 
     // Match the type
     byte match {
-      case Type.AddAttributes    => in.readType[E, AddAttributes](new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
-      case Type.ArcShape         => in.readType[E, ArcShape](new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
+      case ObjectType.AddAttributes    => in.readType[E, AddAttributes](new AddAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
+      case ObjectType.ArcShape         => in.readType[E, ArcShape](new ArcShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"),
                      in.readMember[Double]("startAngle"), in.readMember[Double]("angle"), in.readMember[Attributes]("attributes")))
-      case Type.ArcShapePart     => in.readType[E, ArcShape.Part](new ArcShape.Part(in.readMember[Byte]("part")))
-      case Type.Attributes       => in.readType[E, Attributes](new Attributes(in.readMember[Map[String, Any]]("self")))
-      case Type.CircleShape      => in.readType[E, CircleShape](new CircleShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"), in.readMember[Attributes]("attributes")))
-      case Type.CircleShapePart  => in.readType[E, CircleShape.Part](new CircleShape.Part(in.readMember[Byte]("part")))
-      case Type.Color            => in.readType[E, Color](new Color(in.readMember[Int]("color"), true))
-      case Type.CreateShape      => in.readType[E, CreateShape](new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
-      case Type.CreateShapes     => in.readType[E, CreateShapes](new CreateShapes(in.readMember[Map[Int, Shape]]("shapes")))
-      case Type.DeleteShape      => in.readType[E, DeleteShape](new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
-      case Type.DeleteShapePart  => in.readType[E, DeleteShapePart](new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part")))
-      case Type.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("oldShapes"), in.readMember[Map[Int, Shape]]("newShapes")))
-      case Type.DeleteShapes     => in.readType[E, DeleteShapes](new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes")))
-      case Type.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("code"), in.readMember[String]("message"), in.readMember[Session]("session")))
-      case Type.Get              => in.readType[E, remote.Get](remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
-      case Type.GroupShape       => in.readType[E, GroupShape](new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes")))
-      case Type.GroupShapePart   => {
+      case ObjectType.ArcShapePart     => in.readType[E, ArcShape.Part](new ArcShape.Part(in.readMember[Byte]("part")))
+      case ObjectType.Attributes       => in.readType[E, Attributes](new Attributes(in.readMember[Map[String, Any]]("self")))
+      case ObjectType.CircleShape      => in.readType[E, CircleShape](new CircleShape(in.readMember[Vector2D]("center"), in.readMember[Double]("radius"), in.readMember[Attributes]("attributes")))
+      case ObjectType.CircleShapePart  => in.readType[E, CircleShape.Part](new CircleShape.Part(in.readMember[Byte]("part")))
+      case ObjectType.Color            => in.readType[E, Color](new Color(in.readMember[Int]("color"), true))
+      case ObjectType.CreateShape      => in.readType[E, CreateShape](new CreateShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
+      case ObjectType.CreateShapes     => in.readType[E, CreateShapes](new CreateShapes(in.readMember[Map[Int, Shape]]("shapes")))
+      case ObjectType.DeleteShape      => in.readType[E, DeleteShape](new DeleteShape(in.readMember[Int]("id"), in.readMember[Shape]("shape")))
+      case ObjectType.DeleteShapePart  => in.readType[E, DeleteShapePart](new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part")))
+      case ObjectType.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("oldShapes"), in.readMember[Map[Int, Shape]]("newShapes")))
+      case ObjectType.DeleteShapes     => in.readType[E, DeleteShapes](new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes")))
+      case ObjectType.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("code"), in.readMember[String]("message"), in.readMember[Session]("session")))
+      case ObjectType.Get              => in.readType[E, remote.Get](remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
+      case ObjectType.GroupShape       => in.readType[E, GroupShape](new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes")))
+      case ObjectType.GroupShapePart   => {
         val part = in.readMember[Map[Int, ShapePart]]("part")
         in.readType[E, GroupShape.Part](GroupShape.Part(part))
       }
       //case Type.ImageShape       => // Nothing here yet
       //case Type.ImageShapePart   => // Nothing here yet
-      case Type.Traversable      => {
+      case ObjectType.Traversable      => {
         in.checkMemberName("array")
         var s = Seq[Any]()
         for (i <- 0 until in.readArrayLength()) s:+= in.readObject[Any]
         verifyCollectionType[E](s)
       }
-      case Type.LineShape        => in.readType[E, LineShape](new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes")))
-      case Type.LineShapePart    => in.readType[E, LineShape.Part](LineShape.Part(in.readMember[Boolean]("part")))
-      case Type.Map              => {
+      case ObjectType.LineShape        => in.readType[E, LineShape](new LineShape(in.readMember[Vector2D]("p1"), in.readMember[Vector2D]("p2"), in.readMember[Attributes]("attributes")))
+      case ObjectType.LineShapePart    => in.readType[E, LineShape.Part](LineShape.Part(in.readMember[Boolean]("part")))
+      case ObjectType.Map              => {
         in.checkMemberName("map")
         val size  = in.readArrayLength() / 2 // We read two items at the time
         val array = new Array[Any](size).map(_ => in.readObject[Any] -> in.readObject[Any]).toMap
         verifyMapType[E](array)
       }
-      case Type.Model            => in.readType[E, Model]{
+      case ObjectType.Model            => in.readType[E, Model]{
         new Model(in.readMember[Map[Int, Shape]]("shapes"), in.readMember[Seq[Action]]("executed"),
                   in.readMember[Seq[Action]]("undone"), in.readMember[Attributes]("attributes"))
       }
-      case Type.PolylineArcShape    => in.readType[E, PolylineArcShape](new PolylineArcShape(in.readMember[Vector2D]("middle"), in.readMember[Vector2D]("point")))
-      case Type.PolylineLineShape   => in.readType[E, PolylineLineShape](new PolylineLineShape(in.readMember[Vector2D]("point")))
-      case Type.PolylineShapeClosed => in.readType[E, PolylineShape.PolylineShapeClosed](new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
-      case Type.PolylineShapeOpen   => in.readType[E, PolylineShape.PolylineShapeOpen](new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
-      case Type.PolylineShapePart   => in.readType[E, PolylineShape.Part](PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs")))
+      case ObjectType.PolylineArcShape    => in.readType[E, PolylineArcShape](new PolylineArcShape(in.readMember[Vector2D]("middle"), in.readMember[Vector2D]("point")))
+      case ObjectType.PolylineLineShape   => in.readType[E, PolylineLineShape](new PolylineLineShape(in.readMember[Vector2D]("point")))
+      case ObjectType.PolylineShapeClosed => in.readType[E, PolylineShape.PolylineShapeClosed](new PolylineShape.PolylineShapeClosed(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
+      case ObjectType.PolylineShapeOpen   => in.readType[E, PolylineShape.PolylineShapeOpen](new PolylineShape.PolylineShapeOpen(in.readMember[Vector2D]("startPoint"), in.readMember[Seq[InnerPolylineShape]]("innerShapes"), in.readMember[Attributes]("attributes")))
+      case ObjectType.PolylineShapePart   => in.readType[E, PolylineShape.Part](PolylineShape.Part(mutable.BitSet() ++ in.readMember[Iterable[Int]]("xs")))
       //case Type.RectangleShapeComplex => // Nothing here yet
       //case Type.RectangleShapePart    => // Nothing here yet
       //case Type.RectangleShapeSimple  => // Nothing here yet
-      case Type.Range            => in.readType[E, Range](new Range(in.readMember[Int]("start"), in.readMember[Int]("end"), in.readMember[Int]("step")))
-      case Type.RemoteAction     => in.readType[E, RemoteAction](new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo")))
-      case Type.SequenceAction   => in.readType[E, SequenceAction](new SequenceAction(in.readMember[Seq[Action]]("actions")))
-      case Type.Session          => in.readType[E, Session](new Session(in.readMember[Long]("drawing"), in.readMember[User]("user")))
-      case Type.Set              => in.readType[E, remote.Set](remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
-      case Type.SetAttributes    => in.readType[E, SetAttributes](new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
-      case Type.TextShape        => in.readType[E, TextShape](new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember[Double]("scale"), in.readMember[Attributes]("attributes")))
-      case Type.TextShapePart    => in.readType[E, TextShape.Part](TextShape.Part(in.readMember[Byte]("part")))
-      case Type.TransformationMatrix => in.readType[E, TransformationMatrix](new TransformationMatrix(new AffineTransform(in.readMember[Seq[Double]]("matrix").toArray)))
-      case Type.TransformShape       => in.readType[E, TransformShape](new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("transformation")))
-      case Type.TransformShapeParts  => in.readType[E, TransformShapeParts](new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation")))
-      case Type.TransformShapes      => in.readType[E, TransformShapes](new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation")))
-      case Type.User     => in.readType[E, User](new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token")))
-      case Type.Vector2D => in.readType[E, Vector2D](new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y")))
+      case ObjectType.Range            => in.readType[E, Range](new Range(in.readMember[Int]("start"), in.readMember[Int]("end"), in.readMember[Int]("step")))
+      case ObjectType.RemoteAction     => in.readType[E, RemoteAction](new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo")))
+      case ObjectType.SequenceAction   => in.readType[E, SequenceAction](new SequenceAction(in.readMember[Seq[Action]]("actions")))
+      case ObjectType.Session          => in.readType[E, Session](new Session(in.readMember[Long]("drawing"), in.readMember[User]("user")))
+      case ObjectType.Set              => in.readType[E, remote.Set](remote.Set(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
+      case ObjectType.SetAttributes    => in.readType[E, SetAttributes](new SetAttributes(in.readMember[Map[Int, Attributes]]("shapes"), in.readMember[Attributes]("attributes")))
+      case ObjectType.TextShape        => in.readType[E, TextShape](new TextShape(in.readMember[String]("text"), in.readMember[Vector2D]("position"), in.readMember[Double]("scale"), in.readMember[Attributes]("attributes")))
+      case ObjectType.TextShapePart    => in.readType[E, TextShape.Part](TextShape.Part(in.readMember[Byte]("part")))
+      case ObjectType.TransformationMatrix => in.readType[E, TransformationMatrix](new TransformationMatrix(new AffineTransform(in.readMember[Seq[Double]]("matrix").toArray)))
+      case ObjectType.TransformShape       => in.readType[E, TransformShape](new TransformShape(in.readMember[Int]("id"), in.readMember[TransformationMatrix]("transformation")))
+      case ObjectType.TransformShapeParts  => in.readType[E, TransformShapeParts](new TransformShapeParts(in.readMember[Map[Int, ShapePart]]("shapes"), in.readMember[TransformationMatrix]("transformation")))
+      case ObjectType.TransformShapes      => in.readType[E, TransformShapes](new TransformShapes(in.readMember[Traversable[Int]]("ids"), in.readMember[TransformationMatrix]("transformation")))
+      case ObjectType.User     => in.readType[E, User](new User(in.readMember[Long]("id"), in.readMember[String]("name"), in.readMember[String]("token")))
+      case ObjectType.Vector2D => in.readType[E, Vector2D](new Vector2D(in.readMember[Double]("x"), in.readMember[Double]("y")))
       case e => throw new UBJFormatException(in.getPosition, "SiignaInputStream: Unknown type: " + e)
     }
   }
@@ -207,60 +207,60 @@ object IOVersion1 extends IOVersion {
       case v : VolatileAction => throw new IllegalArgumentException("Cannot persist VolatileActions: " + v)
 
       case AddAttributes(shapes, attributes) => {
-        out.writeByte(Type.AddAttributes)
+        out.writeByte(ObjectType.AddAttributes)
         out.writeMember("shapes", shapes)
         out.writeMember("attributes", attributes)
       }
       case SetAttributes(shapes, attributes) => {
-        out.writeByte(Type.SetAttributes)
+        out.writeByte(ObjectType.SetAttributes)
         out.writeMember("shapes", shapes)
         out.writeMember("attributes", attributes)
       }
       case CreateShape(id, shape) => {
-        out.writeByte(Type.CreateShape)
+        out.writeByte(ObjectType.CreateShape)
         out.writeMember("id", id)
         out.writeMember("shape", shape)
       }
       case CreateShapes(shapes) => {
-        out.writeByte(Type.CreateShapes)
+        out.writeByte(ObjectType.CreateShapes)
         out.writeMember("shapes", shapes)
       }
       case DeleteShape(id, shape) => {
-        out.writeByte(Type.DeleteShape)
+        out.writeByte(ObjectType.DeleteShape)
         out.writeMember("id", id)
         out.writeMember("shape", shape)
       }
       case DeleteShapes(shapes) => {
-        out.writeByte(Type.DeleteShapes)
+        out.writeByte(ObjectType.DeleteShapes)
         out.writeMember("shapes", shapes)
       }
       case DeleteShapePart(id, shape, part) => {
-        out.writeByte(Type.DeleteShapePart)
+        out.writeByte(ObjectType.DeleteShapePart)
         out.writeMember("id", id)
         out.writeMember("shape", shape)
         out.writeMember("part", part)
       }
       case DeleteShapeParts(oldShapes, newShapes) => {
-        out.writeByte(Type.DeleteShapeParts)
+        out.writeByte(ObjectType.DeleteShapeParts)
         out.writeMember("oldShapes", oldShapes)
         out.writeMember("newShapes", newShapes)
       }
       case SequenceAction(actions) => {
-        out.writeByte(Type.SequenceAction)
+        out.writeByte(ObjectType.SequenceAction)
         out.writeMember("actions", actions)
       }
       case TransformShape(id, transformation) => {
-        out.writeByte(Type.TransformShape)
+        out.writeByte(ObjectType.TransformShape)
         out.writeMember("id", id)
         out.writeMember("transformation", transformation)
       }
       case TransformShapeParts(shapes, transformation) => {
-        out.writeByte(Type.TransformShapeParts)
+        out.writeByte(ObjectType.TransformShapeParts)
         out.writeMember("shapes", shapes)
         out.writeMember("transformation", transformation)
       }
       case TransformShapes(ids, transformation) => {
-        out.writeByte(Type.TransformShapes)
+        out.writeByte(ObjectType.TransformShapes)
         out.writeMember("ids", ids)
         out.writeMember("transformation", transformation)
       }
@@ -289,7 +289,7 @@ object IOVersion1 extends IOVersion {
   protected def writeShape(out : SiignaOutputStream, shape : Shape) {
     shape match {
       case ArcShape(center, radius, startAngle, angle, attributes) => {
-        out.writeByte(Type.ArcShape)
+        out.writeByte(ObjectType.ArcShape)
         out.writeMember("center", center)
         out.writeMember("radius", radius)
         out.writeMember("startAngle", startAngle)
@@ -297,18 +297,18 @@ object IOVersion1 extends IOVersion {
         out.writeMember("attributes", attributes)
       }
       case CircleShape(center, radius, attributes) => {
-        out.writeByte(Type.CircleShape)
+        out.writeByte(ObjectType.CircleShape)
         out.writeMember("center", center)
         out.writeMember("radius", radius)
         out.writeMember("attributes", attributes)
       }
       case GroupShape(shapes, attributes) => {
-        out.writeByte(Type.GroupShape)
+        out.writeByte(ObjectType.GroupShape)
         out.writeMember("shapes", shapes)
         out.writeMember("attributes", attributes)
       }
       case LineShape(p1, p2, attributes) => {
-        out.writeByte(Type.LineShape)
+        out.writeByte(ObjectType.LineShape)
         out.writeMember("p1", p1)
         out.writeMember("p2", p2)
         out.writeMember("attributes", attributes)
@@ -316,10 +316,10 @@ object IOVersion1 extends IOVersion {
       case p : PolylineShape => {
         p match {
           case _ : PolylineShape.PolylineShapeClosed => {
-            out.writeByte(Type.PolylineShapeClosed)
+            out.writeByte(ObjectType.PolylineShapeClosed)
           }
           case _ : PolylineShape.PolylineShapeOpen => {
-            out.writeByte(Type.PolylineShapeOpen)
+            out.writeByte(ObjectType.PolylineShapeOpen)
           }
         }
         out.writeMember("startPoint", p.startPoint)
@@ -327,7 +327,7 @@ object IOVersion1 extends IOVersion {
         out.writeMember("attributes", p.attributes)
       }
       case TextShape(text, position, scale, attributes) => {
-        out.writeByte(Type.TextShape)
+        out.writeByte(ObjectType.TextShape)
         out.writeMember("text", text)
         out.writeMember("position", position)
         out.writeMember("scale", scale)
@@ -344,27 +344,27 @@ object IOVersion1 extends IOVersion {
   protected def writeShapePart(out : SiignaOutputStream, part : ShapePart) {
     part match {
       case ArcShape.Part(b) => {
-        out.writeByte(Type.ArcShapePart)
+        out.writeByte(ObjectType.ArcShapePart)
         out.writeMember("part", b)
       }
       case CircleShape.Part(b) => {
-        out.writeByte(Type.CircleShapePart)
+        out.writeByte(ObjectType.CircleShapePart)
         out.writeMember("part", b)
       }
       case GroupShape.Part(parts) => {
-        out.writeByte(Type.GroupShapePart)
+        out.writeByte(ObjectType.GroupShapePart)
         out.writeMember("part", parts)
       }
       case LineShape.Part(b) => {
-        out.writeByte(Type.LineShapePart)
+        out.writeByte(ObjectType.LineShapePart)
         out.writeMember("part", b)
       }
       case PolylineShape.Part(xs) => {
-        out.writeByte(Type.PolylineShapePart)
+        out.writeByte(ObjectType.PolylineShapePart)
         out.writeMember("xs", xs)
       }
       case TextShape.Part(b) => {
-        out.writeByte(Type.TextShapePart)
+        out.writeByte(ObjectType.TextShapePart)
         out.writeMember("part", b)
       }
     }
@@ -379,90 +379,90 @@ object IOVersion1 extends IOVersion {
       // Siigna types
       case a : Action => writeAction(out, a)
       case a : Attributes => {
-        out.writeByte(Type.Attributes)
+        out.writeByte(ObjectType.Attributes)
         out.writeMember("self", a.self)
       }
       case c : Color => {
-        out.writeByte(Type.Color)
+        out.writeByte(ObjectType.Color)
         out.writeMember("color", (c.getAlpha << 24) | (c.getRed << 16) | (c.getGreen << 8) | (c.getBlue))
       }
       case i : InnerPolylineShape => {
         i match {
           case s : PolylineArcShape => {
-            out.writeByte(Type.PolylineArcShape)
+            out.writeByte(ObjectType.PolylineArcShape)
             out.writeMember("middle", s.middle)
             out.writeMember("point", s.point)
           }
           case s : PolylineLineShape => {
-            out.writeByte(Type.PolylineLineShape)
+            out.writeByte(ObjectType.PolylineLineShape)
             out.writeMember("point", s.point)
           }
         }
       }
       case m : Model => {
-        out.writeByte(Type.Model)
+        out.writeByte(ObjectType.Model)
         out.writeMember("shapes", m.shapes)
         out.writeMember("executed", m.executed)
         out.writeMember("undone", m.undone)
         out.writeMember("attributes", m.attributes)
       }
       case r : Range => {
-        out.writeByte(Type.Range)
+        out.writeByte(ObjectType.Range)
         out.writeMember("start", r.start)
         out.writeMember("end", r.end)
         out.writeMember("step", r.step)
       }
       case r : RemoteAction => {
-        out.writeByte(Type.RemoteAction)
+        out.writeByte(ObjectType.RemoteAction)
         out.writeMember("action", r.action)
         out.writeMember("undo", r.undo)
       }
       case remote.Error(code, message, session) => {
-        out.writeByte(Type.Error)
+        out.writeByte(ObjectType.Error)
         out.writeMember("code", code)
         out.writeMember("message", message)
         out.writeMember("session", session)
       }
       case remote.Get(const, value, session) => {
-        out.writeByte(Type.Get)
+        out.writeByte(ObjectType.Get)
         out.writeMember("constant", const.id)
         out.writeMember("value", value)
         out.writeMember("session", session)
       }
       case remote.Set(const, value, session) => {
-        out.writeByte(Type.Set)
+        out.writeByte(ObjectType.Set)
         out.writeMember("constant", const.id)
         out.writeMember("value", value)
         out.writeMember("session", session)
       }
       case remote.Session(drawing, user) => {
-        out.writeByte(Type.Session)
+        out.writeByte(ObjectType.Session)
         out.writeMember("drawing", drawing)
         out.writeMember("user", user)
       }
       case s : Shape => writeShape(out, s)
       case s : ShapePart => writeShapePart(out, s)
       case t : TransformationMatrix => {
-        out.writeByte(Type.TransformationMatrix)
+        out.writeByte(ObjectType.TransformationMatrix)
         val m = new Array[Double](6)
         t.t.getMatrix(m)
         out.writeMember("matrix", m)
       }
       case User(id, name, token) => {
-        out.writeByte(Type.User)
+        out.writeByte(ObjectType.User)
         out.writeMember("id", id)
         out.writeMember("name", name)
         out.writeMember("token", token)
       }
       case v : Vector2D => {
-        out.writeByte(Type.Vector2D)
+        out.writeByte(ObjectType.Vector2D)
         out.writeMember("x", v.x)
         out.writeMember("y", v.y)
       }
 
       // Scala types
       case m : Map[_, _] => {
-        out.writeByte(Type.Map)
+        out.writeByte(ObjectType.Map)
         out.writeString("map")
         out.writeArrayHeader(m.size * 2)
         m foreach (t => {
@@ -471,13 +471,13 @@ object IOVersion1 extends IOVersion {
         })
       }
       case i : Iterable[_] => {
-        out.writeByte(Type.Traversable)
+        out.writeByte(ObjectType.Traversable)
         out.writeString("array")
         out.writeArrayHeader(i.size)
         i foreach out.writeObject
       }
       case a : Array[_] => {
-        out.writeByte(Type.Traversable)
+        out.writeByte(ObjectType.Traversable)
         out.writeString("array")
         out.writeArrayHeader(a.size)
         a foreach out.writeObject
