@@ -1,7 +1,6 @@
 package com.siigna.util
 
 import java.io.File
-import actors.Actor._
 import actors.Actor
 
 /**
