@@ -16,7 +16,8 @@ mainClass in (Compile, run) := Some("com.siigna.app.SiignaApplication")
 
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
-publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
+//publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
+publishTo := Some(Resolver.sftp("Siigna rls", "rls.siigna.com", 22, "/srv/rls") as ("siigna", new File("../budapest/jenkins.rsa")))
 
 resolvers += "Siigna" at "http://rls.siigna.com"
 
