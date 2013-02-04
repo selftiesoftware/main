@@ -2,6 +2,7 @@ package com.siigna.util
 
 import java.io.File
 import actors.Actor._
+import actors.Actor
 
 /**
  * The persistence package is capable of converting objects into byte arrays (marshalling), reading objects from
@@ -62,17 +63,22 @@ package object io {
 
   // A private IO actor which is used to execute IO functionality on files.
   // Not pretty, but can't think of an alternative
-  private[io] val IOActor = actor {
-    loop {
-      react {
-        case IOAction(file, read, f) => {
-          if (!read && !file.exists()) file.createNewFile()
-          if (read) file.setReadable(true) else file.setWritable(true)
-          reply(f(file))
+  private[io] val IOActor = new Actor() {
+    def act() {
+      loop {
+        react {
+          case IOAction(file, read, f) => {
+            if (!read && !file.exists()) file.createNewFile()
+            if (read) file.setReadable(true) else file.setWritable(true)
+            reply(f(file))
+          }
         }
       }
     }
   }
+
+  // Start the actor
+  IOActor.start()
 
   /**
    * The ObjectType object provides enumerations for the types of objects we and read from byte-streams so we can
