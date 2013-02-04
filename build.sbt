@@ -12,7 +12,7 @@ scalaSource in Compile <<= (baseDirectory in Compile)(_ / "src" / "main")
 
 scalaSource in Test <<= (baseDirectory in Compile)(_ / "src" / "test")
 
-mainClass in (Compile, run) := Some("com.siigna.app.SiignaApplication")
+mainClass in (run) := Some("com.siigna.app.SiignaApplication")
 
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 

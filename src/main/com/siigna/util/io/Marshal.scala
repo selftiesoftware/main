@@ -22,20 +22,20 @@ import com.siigna.util.Log
  * <h2>Examples</h2>
  * {{{
  *   // Writing and reading a double
- *   val marshalledDouble = Marshal(42d)
- *   val double = Unmarshal[Double](marshalledDouble) // Some(42)
+ *   val marshaledDouble = Marshal(42d)
+ *   val double = Unmarshal[Double](marshaledDouble) // Some(42)
  *
  *   // Writing and reading a shape
  *   val marshalledLineShape = Marshal(LineShape(0, 0, 1, 1)
- *   val object = Unmarshal[LineShape](marshalledLineShape) // Some(LineShape(0, 0, 1, 1)
+ *   val object = Unmarshal[LineShape](marshaledLineShape) // Some(LineShape(0, 0, 1, 1)
  *
  *   // Writing and reading a collection
  *   val marshalledSeq = Marshal(Seq(1, 1, 2, 3, 5, 7))
- *   val object = Unmarshal[Seq[Int]](marshalledArray) // Some(Seq(1, 1, 2, 3, 5, 7))
+ *   val object = Unmarshal[Seq[Int]](marshaledArray) // Some(Seq(1, 1, 2, 3, 5, 7))
  *
  *   // Similar with maps
  *   val marshalledMap = Map(1 -> 1, 2 -> 3, 5 -> 7)
- *   val object = Unmarshal[Map[Int, Int]](marshalledMap) // Some(Map(1 -> 1, 2 -> 3, 5 -> 7))
+ *   val object = Unmarshal[Map[Int, Int]](marshaledMap) // Some(Map(1 -> 1, 2 -> 3, 5 -> 7))
  *
  * }}}
  *
@@ -48,7 +48,7 @@ object Marshal {
   /**
    * Marshals a given object. See [[com.siigna.util.io.SiignaOutputStream]] for compatible objects.
    * @param any  The object to marshal.
-   * @return  A ByteBuffer containing the marshalled command, useful for being send over network or to a file..
+   * @return  A ByteBuffer containing the marshaled command, useful for being send over network or to a file..
    * @throws IllegalArgumentException  If the object could not be recognized.
    */
   def apply(any : Any) : Array[Byte] = marshal(_.writeObject(any))

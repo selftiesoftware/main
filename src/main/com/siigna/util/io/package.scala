@@ -4,13 +4,13 @@ import java.io.File
 import actors.Actor
 
 /**
- * The persistence package is capable of converting objects into byte arrays (marshalling), reading objects from
- * byte arrays (unmarshalling) and storing and reading content from disc.
+ * The persistence package is capable of converting objects into byte arrays (marshaling), reading objects from
+ * byte arrays (unmarshaling) and storing and reading content from disc.
  *
- * <h2>Marshalling and unmarshalling</h2>
+ * <h2>Marshaling and unmarshalling</h2>
  * <p>
  *   - is very simple to achieve. We have designed the library to be as independent as possible. No classes needs to
- *   inherit any interface or implement methods. This also gives us the power to version the (un)marshalling, which
+ *   inherit any interface or implement methods. This also gives us the power to version the (un)marshal(l)ing, which
  *   is done beneath the [[com.siigna.util.io.version]] package.
  * </p>
  * <p>
@@ -19,7 +19,7 @@ import actors.Actor
  *   object data into a collection. A complete overview of which types are supported can be found in the
  *   [[com.siigna.util.io.ObjectType]] object, which reference the currently used data constants for object identification.
  * </p>
- * <h3>Examples on (un)marshalling</h3>
+ * <h3>Examples on (un)marshaling</h3>
  * <p>
  *   To marshal objects you simply call the [[com.siigna.util.io.Marshal]] object with the data you would like to
  *   marshal like so:
@@ -34,7 +34,7 @@ import actors.Actor
  * </p>
  * <p>
  *   To unmarshal objects you simply call the [[com.siigna.util.io.Unmarshal]] object with the type of the
- *   object you expect to get back and the byte-array/byte buffer containing the marshalled data:
+ *   object you expect to get back and the byte-array/byte buffer containing the marshaled data:
  *   {{{
  *     import com.siigna.util.io.Unmarshal
  *     Unmarshal[Long](byteArray)     // Some(123456789L)
