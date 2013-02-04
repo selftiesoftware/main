@@ -24,11 +24,11 @@ package com.siigna.app.model
 
 import action.{VolatileAction, Action}
 import shape.Shape
-import com.siigna.util.logging.Log
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
 import javax.management.relation.RelationNotFoundException
+import com.siigna.util.Log
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -36,13 +36,20 @@ import javax.management.relation.RelationNotFoundException
 trait ActionModel extends SelectableModel with HasAttributes {
 
   type T = ActionModel
-  
+
   /**
    * The attributes of the model containing name, title, owner and other attributes
    * fetched from the server, necessary for Siigna.
    */
-  var attributes = Attributes() 
-  
+  def attributes = model.attributes
+
+  /**
+   * Sets the attributes of the model to the given attributes by completely replacing all current attributes.
+   * @param attr  The attributes to set.
+   */
+  def attributes_=(attr : Attributes) { setAttributes(attr) }
+
+
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -56,7 +63,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  protected var model = new Model(Map[Int, Shape](), Seq(), Seq())
+  protected var model = new Model()
 
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
@@ -66,11 +73,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
   def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
   }
-  
+
   /**
    * <p>Executes an action, lists it as executed and clears the undone stack to make way for new actions
    * and sends it to the controller for remote handling.</p>
-   * 
+   *
    * @param action  The action to execute.
    * @param remote  Whether or not to send the action to the server.
    */
@@ -86,7 +93,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       action match {
         case v : VolatileAction => // Do nothing here!
         case _ => { // Store the action
-          model = new Model(model.shapes, model.executed.+:(action), Seq())
+          model = new Model(model.shapes, model.executed.+:(action), Seq(), model.attributes)
         }
       }
 
@@ -143,7 +150,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
 
         // Execute the event and add it to the executed list
         model = action.execute(model)
-        model = new Model(model.shapes, model.executed.+:(action), undone)
+        model = new Model(model.shapes, model.executed.+:(action), undone, model.attributes)
 
         // Notify listeners
         notifyListeners(action, undo = false)
@@ -163,8 +170,8 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def shapes = model.shapes
 
-  def setAttributes(attributes : Attributes) = {
-    this.attributes = attributes
+  def setAttributes(newAttributes : Attributes) = {
+    model = model.copy(attributes = newAttributes)
     this
   }
 
@@ -174,11 +181,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
    * If no action have been executed, nothing happens.
    *
    */
-  def undo() { 
+  def undo() {
     model.executed.headOption match {
       case Some(action) => undo(action, remote = true)
       case None => Log.debug("ActionModel: No more actions to undo.")
-    } 
+    }
   }
 
   /**

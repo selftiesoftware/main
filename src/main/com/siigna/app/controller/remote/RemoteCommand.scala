@@ -25,8 +25,11 @@ package com.siigna.app.controller.remote
 import com.siigna.app.controller.remote.RemoteConstants._
 
 /**
- * A [[com.siigna.app.controller.command.Command]] that can be sent over the network to the Siigna Universe,
+ * A command that can be sent over the network to the Siigna Universe,
  * containing a Session which tells the server which user that sends the command and on what drawing.
+ * The RemoteCommand and its contents will be marshalled via the [[com.siigna.util.io.Marshal]] object and
+ * unmarshalled via the [[com.siigna.util.io.Unmarshal]] object, using the [[http://ubjson.org UBJSON]] (Universal
+ * Binary JSON) format.
  */
 trait RemoteCommand extends Serializable {
 
@@ -44,7 +47,6 @@ trait RemoteCommand extends Serializable {
  * @param value  A parameter to send with the request
  * @param session  A session to authenticate the request
  */
-@SerialVersionUID(-348100723)
 sealed case class Get(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
 
 /**
@@ -53,7 +55,6 @@ sealed case class Get(name : RemoteConstant, value : Any, session : Session) ext
  * @param message  The message from the server
  * @param session  A session to authenticate the request
  */
-@SerialVersionUID(-1573685469)
 sealed case class Error(code : Int, message : String, session : Session) extends RemoteCommand
 
 /**
@@ -62,6 +63,5 @@ sealed case class Error(code : Int, message : String, session : Session) extends
  * @param value  A parameter value to send with the request
  * @param session  A session to authenticate the request
  */
-@SerialVersionUID(-1044323852)
 sealed case class Set(name : RemoteConstant, value : Any, session : Session) extends RemoteCommand
 

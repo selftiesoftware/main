@@ -11,10 +11,10 @@
 
 package com.siigna.module
 
-import com.siigna.util.logging.Log
 import java.io.FileNotFoundException
 import java.net.URLClassLoader
 import com.siigna.app.Siigna
+import com.siigna.util.Log
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
@@ -57,9 +57,10 @@ object ModuleLoader {
   load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
   load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
 
-  //load(ModulePackage('base, "c:/siigna/siigna-modules/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/siigna/siigna-modules/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('porter, "c:/siigna/siigna-modules/out/artifacts", "porter.jar", true))
+  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+  //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
+
   //load(ModulePackage('base, "/home/jens/workspace/siigna/main/project/target/artifacts", "base.jar", true))
   //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/project/target/artifacts", "cad-suite.jar", true))
   //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/project/target/artifacts", "porter.jar", true))

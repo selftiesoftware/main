@@ -11,6 +11,8 @@
 
 package com
 
+import siigna.util.Log
+
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
@@ -30,7 +32,7 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
-  type ShapeSelector = com.siigna.app.model.shape.ShapeSelector
+  type ShapePart = com.siigna.app.model.shape.ShapePart
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape
@@ -76,9 +78,6 @@ package object siigna extends com.siigna.util.Implicits {
   // Collection
   type Attributes = com.siigna.util.collection.Attributes
   val Attributes = com.siigna.util.collection.Attributes
-
-  type DirectedGraph[V, A] = com.siigna.util.collection.DirectedGraph[V, A]
-  val DirectedGraph = com.siigna.util.collection.DirectedGraph
 
   // Events
   type Event = com.siigna.util.event.Event
@@ -160,8 +159,13 @@ package object siigna extends com.siigna.util.Implicits {
   type Vector2D = com.siigna.util.geom.Vector2D
   val Vector2D = com.siigna.util.geom.Vector2D
 
+  // I/O
+  val Dialogue  = com.siigna.util.io.Dialogue
+  val Marshal   = com.siigna.util.io.Marshal
+  val Unmarshal = com.siigna.util.io.Unmarshal
+
   // Log
-  val Log = com.siigna.util.logging.Log
+  val Log = com.siigna.util.Log
 
 
 }

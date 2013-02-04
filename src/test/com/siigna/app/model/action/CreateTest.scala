@@ -25,7 +25,7 @@ class CreateTest extends FunSpec with ShouldMatchers {
 
   val id = 123142
   val line = LineShape(Vector2D(0, 0), Vector2D(13, 14))
-  val model = new Model(Map(), Seq(), Seq())
+  val model = new Model()
 
   describe("CreateShape") {
     val action = CreateShape(id, line)
@@ -61,20 +61,20 @@ class CreateTest extends FunSpec with ShouldMatchers {
       evaluating { CreateShapes(Map()) } should produce[IllegalArgumentException]
 
       // One size
-      evaluating { action } should produce[IllegalArgumentException]
-      
+      action.shapes should equal(map)
+
       // More
       CreateShapes(twoMap).shapes should equal (twoMap)
     }
-    
+
     it("can be executed") {
       action.execute(model).shapes should equal (map)
     }
-    
+
     it("can be undone") {
       // Empty
-      action.execute(model).shapes.size should equal (0)
-      
+      action.execute(model).shapes.size should equal (1)
+
       // Match
       val multiAction = CreateShapes(twoMap)
       multiAction.undo(multiModel).shapes.size should equal (0)
@@ -86,7 +86,7 @@ class CreateTest extends FunSpec with ShouldMatchers {
 
     it("can create a single shape") {
       Create(line)
-      Drawing.shapes should equal(Map(0 -> line))
+      Drawing.shapes should equal(Map(-1 -> line))
     }
 
   }

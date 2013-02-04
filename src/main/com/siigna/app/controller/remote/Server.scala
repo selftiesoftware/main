@@ -12,12 +12,23 @@
 package com.siigna.app.controller.remote
 
 import actors.remote.RemoteActor._
+import com.siigna.util.Log
+import com.siigna.util.io.{Unmarshal, Marshal}
 import actors.remote.Node
-import com.siigna.util.logging.Log
 
 /**
- * An instance of a specific server located at the given host and the given port that can
- * send messages synchronously.
+ * <p>
+ *   An instance of a specific server located at the given host and the given port that can
+ *   send messages synchronously.
+ * </p>
+ *
+ * <p>
+ *   This server uses [[java.nio.channels.DatagramChannel]]s and [[java.nio.ByteBuffer]]s to maximize
+ *   performance on read/write operations. We use the [[http://ubjson.org UBJSON]] (Universal Binary JSON) format
+ *   to (un-)marshal data.
+ *   <br>
+ *   We use UDP since the Siigna server is RESTful, so we don't mind losing a package or two.
+ * </p>
  *
  * @param host  The URL of the host.
  * @param mode  The mode of the connection, can be in production or testing mode
@@ -47,20 +58,27 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
   def isConnected = _retries == 0
 
   /**
-   * A method that sends a remote command synchronously with an associated callback function
-   * with side effects. The method repeats the procedure until something is received.
-   * @param message  The message to send
+   * A method that sends a remote command, represented as a byte array, synchronously with an associated callback
+   * function with side effects. The method repeats the procedure until something is received.
+   * @param message  The message to send as a remote command
    * @param f  The callback function to execute when data is successfully retrieved
    * @throws UnknownException  If the data returned did not match expected type(s)
    */
   def apply(message : RemoteCommand, f : Any => Unit) {
     try {
       if (shouldExit) {
-        Log.info("Server: Connection closing", message.session)
+        Log.info("Server: Connection closing.")
       } else {
-        remote.!?(timeout, message) match {
-          case Some(data) => { // Call the callback function
-            f(data) // Parse the data
+        // Marshal and send the message
+        val output = Marshal(message).array
+
+        remote.!?(timeout, output) match {
+          case Some(data : Array[Byte]) => { // Call the callback function
+            // Parse the data
+            Unmarshal[RemoteCommand](data) match {
+              case Some(x) => f(x)
+              case x       => f(Error(401, "Failed to parse data to expected type. See log for details.", message.session))
+            }
 
             // We're now connected for sure
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")

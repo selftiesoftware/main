@@ -12,14 +12,14 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
-import com.siigna.util.logging.Log
 import actors.{Actor, TIMEOUT}
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
-import com.siigna.util.Serializer
 import actors.remote.RemoteActor
 import collection.mutable
+import com.siigna.util.Log
+import com.siigna.app.model.Model
 
 /**
  * Controls any remote connection(s).
@@ -46,11 +46,11 @@ protected[controller] object RemoteController extends Actor {
 
   // The remote server
   val remote = new Server("62.243.118.234", Mode.Production)
+  //val remote = new Server("localhost", Mode.Testing)
   //val remote = new Server("localhost", Mode.Production)
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
-  //SiignaDrawing.addAttribute("id",292L)
   /**
    * The acting part of the RemoteController.
    */
@@ -93,11 +93,8 @@ protected[controller] object RemoteController extends Actor {
             // Parse the local action to ensure all the ids are up to date
             val updatedAction = parseLocalAction(action, undo)
 
-            // Write to bytes
-            val data = Serializer.writeAction(updatedAction)
-
             // Dispatch the data
-            remote(Set(Action, data, session), handleSetAction)
+            remote(Set(Action, updatedAction, session), handleSetAction)
           }
 
           // Timeout
@@ -145,9 +142,8 @@ protected[controller] object RemoteController extends Actor {
 
           for (i <- actionIndices.last + 1 to id) { // Fetch actions one by one TODO: Implement Get(Actions, _, _)
             remote(Get(Action, i, session), _ match {
-              case Set(Action, array : Array[Byte], _) => {
+              case Set(Action, action : RemoteAction, _) => {
                 try {
-                  val action = Serializer.readAction(array)
 
                   action.undo match {
                     case true  => SiignaDrawing.undo(action.action, remote = false)
@@ -208,12 +204,10 @@ protected[controller] object RemoteController extends Actor {
         remote(Get(Drawing, null, session), handleGetDrawing)
       }
       case Error(code, message, _) => Log.error("Remote: Unknown error when loading drawing: [" + code + "]" + message)
-      case Set(Drawing, bytes : Array[Byte], _) => {
+      case Set(Drawing, model : Model, _) => {
 
         // Read the bytes
         try {
-          val model = Serializer.readDrawing(bytes)
-
           // Implement the model
           SiignaDrawing.execute(LoadDrawing(model), remote = false)
 

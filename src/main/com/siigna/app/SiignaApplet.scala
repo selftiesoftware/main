@@ -26,7 +26,6 @@ import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, K
 
 import java.applet.Applet
 import com.siigna.app.controller.Controller
-import com.siigna.util.logging.Log
 import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
 import model.Drawing
@@ -34,6 +33,7 @@ import model.server.User
 import view.siigna.SiignaRenderer
 import view.View
 import com.siigna.util.geom.Rectangle2D
+import com.siigna.util.Log
 
 /**
  * The entry-point of Siigna.

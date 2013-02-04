@@ -11,10 +11,8 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.{PartialShape, ShapeSelector, Shape}
+import com.siigna.app.model.shape.{PartialShape, ShapePart, Shape}
 import com.siigna.app.model.{Drawing, Model}
-import serialization.TransformShapePartsProxy
-import com.siigna.util.SerializableProxy
 
 /**
  * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
@@ -31,16 +29,6 @@ object Transform {
   }
 
   /**
-   * Transform one shape with the given id with the given function, returning a Shape.
-   * @param id  The id of the shape
-   * @param transformation  The transformation matrix applied on the shape
-   * @param f  The function that returns the new shape, given a transformation matrix. 
-   */
-  def apply(id : Int, transformation : TransformationMatrix, f : TransformationMatrix => Shape) {
-    Drawing execute TransformShape(id, transformation, Some(f))
-  }
-
-  /**
    * Transforms several shapes with the given TransformationMatrix.
    * @param ids  The ids of the shapes
    * @param transformation The transformation to apply
@@ -50,44 +38,41 @@ object Transform {
   }
 
   /**
-   * Transforms several shapes with the given TransformationMatrix and the given function.
-   * @param shapes  The ids of the shapes paired with the function to apply on each individual shape, given a matrix
+   * Transforms several shapes or shape-parts with the given TransformationMatrix. Due to erasure the method
+   * accepts types of Int -> Any, but if anything else than [[com.siigna.app.model.shape.Shape]]s or
+   * [[com.siigna.app.model.shape.ShapePart]]s are given, an exception will be thrown.
+   * @param xs  The ids of the shapes or shape parts paired with a matrix
    * @param transformation  The matrix to apply on the shapes
    */
-  def apply[T](shapes : Map[Int, T], transformation : TransformationMatrix)(implicit m : Manifest[T]) {
-    if (m <:< manifest[ShapeSelector]) { // Match shape selectors
-      Drawing execute TransformShapeParts(shapes.asInstanceOf[Map[Int, ShapeSelector]], transformation)
-    } else if (m <:< manifest[Shape]) { // Match shapes
+  def apply(xs : Map[Int, Any], transformation : TransformationMatrix) { if (xs.nonEmpty) {
+    // Try to treat them as shapes
+    try {
+      val shapes = xs.asInstanceOf[Map[Int, Shape]]
+      shapes.head._2.geometry // If this works we are certain to deal with shapes
       Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]].keys, transformation)
-    } // If no match, do nothing
-  }
+    } catch {
+      case _ : Throwable => {
+        Drawing execute TransformShapeParts(xs.asInstanceOf[Map[Int, ShapePart]], transformation)
+      }
+    }
+  } }
 }
 
 /**
  * Transforms a shape with the given [[com.siigna.util.geom.TransformationMatrix]].
  * @param id The id of the shape
  * @param transformation  The TransformationMatrix containing the transformation
- * @param f  The function to apply on the shape
  */
-@SerialVersionUID(292701996)
-case class TransformShape(id : Int, transformation : TransformationMatrix, f : Option[TransformationMatrix => Shape] = None) extends Action {
+case class TransformShape(id : Int, transformation : TransformationMatrix) extends Action {
 
-  def execute(model : Model) = if (f.isDefined) {
-    model add(id, f.get.apply(transformation))
-  } else {
-    model add(id, model.shapes(id).transform(transformation))
-  }
+  def execute(model : Model) = model add(id, model.shapes(id).transform(transformation))
 
   def ids = Traversable(id)
 
   // TODO: Implement and optimize
   // def merge(that : Action)
 
-  def undo(model : Model) = if (f.isDefined) {
-    model add (id, f.get.apply(transformation.inverse))
-  } else {
-    model add (id, model.shapes(id).transform(transformation))
-  }
+  def undo(model : Model) = model add (id, model.shapes(id).transform(transformation))
   
   def update(map : Map[Int, Int]) = copy(map.getOrElse(id, id))
 
@@ -95,14 +80,12 @@ case class TransformShape(id : Int, transformation : TransformationMatrix, f : O
 
 /**
  * Transforms parts of several shapes with the same [[com.siigna.util.geom.TransformationMatrix]]
- * by mapping their id to a [[com.siigna.app.model.shape.ShapeSelector]].
+ * by mapping their id to a [[com.siigna.app.model.shape.ShapePart]].
  *
  * @param shapes  The id paired with a selector that selects the desired shape part.
  * @param transformation  The transformation with which all shape-parts should be applied.
  */
-@SerialVersionUID(-1080215160)
-case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix)
-  extends SerializableProxy(() => new TransformShapePartsProxy(shapes, transformation)) with Action {
+case class TransformShapeParts(shapes : Map[Int, ShapePart], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
     model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
@@ -127,7 +110,6 @@ case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation 
  * @param ids  The ids of the shapes to transform.
  * @param transformation  The transformation matrix to apply.
  */
-@SerialVersionUID(478072287)
 case class TransformShapes(ids : Traversable[Int], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {

@@ -10,10 +10,8 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{ShapeSelector, Shape}
+import com.siigna.app.model.shape.{ShapePart, Shape}
 import com.siigna.app.model.{Drawing, Model, Selection}
-import serialization.{DeleteShapesProxy, DeleteShapePartsProxy}
-import com.siigna.util.SerializableProxy
 
 /**
  * Deletes shapes from the [[com.siigna.app.model.Drawing]]
@@ -24,11 +22,11 @@ object Delete {
     Drawing execute DeleteShape(id, Drawing(id))
   }
   
-  def apply(id : Int, part : ShapeSelector) {
-    apply(Map[Int, ShapeSelector](id -> part))
+  def apply(id : Int, part : ShapePart) {
+    apply(Map[Int, ShapePart](id -> part))
   }
   
-  def apply(shapes : Map[Int, ShapeSelector]) {
+  def apply(shapes : Map[Int, ShapePart]) {
     val oldShapes = shapes.map(t => t._1 -> Drawing(t._1))
     val newShapes = shapes.map(t => Drawing(t._1).delete(t._2)).flatten
     
@@ -54,7 +52,6 @@ object Delete {
 /**
  * Deletes a shape.
  */
-@SerialVersionUID(320024820)
 sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
   def execute(model : Model) = model remove id
@@ -68,12 +65,11 @@ sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 }
 
 /**
- * Deletes a ShapeSelector.
+ * Deletes a ShapePart.
  */
-@SerialVersionUID(-1303124189)
-sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector) extends Action {
+sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapePart) extends Action {
   
-  val parts = shape.delete(part); 
+  val parts = shape.delete(part)
   var partIds = Seq[Int]()
   
   def execute(model : Model) = {
@@ -109,9 +105,7 @@ sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapeSelector)
 /**
  * Deletes a part of a shape represented as a shape selector.
  */
-@SerialVersionUID(1143887988)
-case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) 
-  extends SerializableProxy(() => new DeleteShapePartsProxy(oldShapes, newShapes)) with Action {
+case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Shape]) extends Action {
   
   def execute(model : Model) = 
     model.remove(oldShapes.keys).add(newShapes)
@@ -130,9 +124,7 @@ case class DeleteShapeParts(oldShapes : Map[Int, Shape], newShapes : Map[Int, Sh
 /**
  * Deletes a number of shapes.
  */
-@SerialVersionUID(-113196732)
-case class DeleteShapes(shapes : Map[Int, Shape]) 
-  extends SerializableProxy(() => new DeleteShapesProxy(shapes)) with Action {
+case class DeleteShapes(shapes : Map[Int, Shape]) extends Action {
 
   def execute(model : Model) = model remove shapes.keys
 

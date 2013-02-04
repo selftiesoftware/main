@@ -17,5 +17,4 @@ package com.siigna.app.model.action
  * @param action  The action to send.
  * @param undo  A boolean flag indicating if this action was done (false) or undone (true).
  */
-@SerialVersionUID(2103194976)
 case class RemoteAction(action : Action, undo : Boolean = false)

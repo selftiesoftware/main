@@ -11,16 +11,14 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
-import com.siigna.util.SerializableProxy
 
 /**
  * <p>An action is an immutable representation of a state-change in the model and <b>the only way</b>
  * to alter shapes and groups in the [[com.siigna.app.model.Model]].</p>
  *
- *
  * @define actionFactory associated action
  * @define actionDescription
- * <p>Actions should not be called directly, but created through the corresponding $actionFactory. The
+ * <p>Action-classes should not be called directly, but created through the corresponding $actionFactory. The
  * $actionFactory object ensures the action is instantiated properly and sent to the [[com.siigna.app.model.Model]]
  * for execution.</p>
  * <p>The use of actions are then very simple. The $actionFactory provides a lot of syntactic sugar. As an example
