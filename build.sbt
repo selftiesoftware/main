@@ -6,11 +6,7 @@ organization := "com.siigna"
 
 scalaVersion := "2.10.0"
 
-//crossScalaVersions := Seq("2.10.0", "2.9.2")
-
-scalaSource in Compile <<= (baseDirectory in Compile)(_ / "src" / "main")
-
-scalaSource in Test <<= (baseDirectory in Compile)(_ / "src" / "test")
+crossScalaVersions := Seq("2.10.0", "2.9.2")
 
 mainClass in (run) := Some("com.siigna.app.SiignaApplication")
 
