@@ -35,9 +35,6 @@ import com.siigna.util.Log
  */
 class Controller extends EventController {
 
-  // Listen to the drawing
-  Drawing.addActionListener((a, b) => this.!(a, b))
-
   /**
    * <p>
    *   The running part of the controller handling [[com.siigna.app.model.action.Action]]s and
@@ -64,12 +61,6 @@ class Controller extends EventController {
     // Loop and react on incoming messages
     loop {
       react {
-
-        // Handle actions (execute, not undo)
-        case action : Action                   => RemoteController ! (action, false)
-
-        // Handle actions with an undo flag
-        case (action : Action, undo : Boolean) => RemoteController ! (action, undo)
 
         // Handle events
         case event : Event => {

@@ -20,6 +20,7 @@ import actors.remote.RemoteActor
 import collection.mutable
 import com.siigna.util.Log
 import com.siigna.app.model.Model
+import com.siigna.app.controller.remote.RemoteConstants.Drawing
 
 /**
  * Controls any remote connection(s).
@@ -27,6 +28,11 @@ import com.siigna.app.model.Model
  * re-established before pushing all the received events/requests in the given order.
  */
 protected[controller] object RemoteController extends Actor {
+
+  val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
+
+  // Listen to the drawing
+  SiignaDrawing.addRemoteListener((a, u) => this.!(a, u))
 
   // Set the class loader for the remote actor - important to avoid class not found exceptions on the receiving end.
   // See http://stackoverflow.com/questions/3542360/why-is-setting-the-classloader-necessary-with-scala-remoteactors
@@ -49,13 +55,12 @@ protected[controller] object RemoteController extends Actor {
   //val remote = new Server("localhost", Mode.Testing)
   //val remote = new Server("localhost", Mode.Production)
 
-  val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
-
   /**
    * The acting part of the RemoteController.
    */
   def act() {
     try {
+      SiignaDrawing.addAttribute("id", 47L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
