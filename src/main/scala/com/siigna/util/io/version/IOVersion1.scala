@@ -118,7 +118,9 @@ object IOVersion1 extends IOVersion {
       case ObjectType.DeleteShapePart  => in.readType[E, DeleteShapePart](new DeleteShapePart(in.readMember[Int]("id"), in.readMember[Shape]("shape"), in.readMember[ShapePart]("part")))
       case ObjectType.DeleteShapeParts => in.readType[E, DeleteShapeParts](new DeleteShapeParts(in.readMember[Map[Int, Shape]]("oldShapes"), in.readMember[Map[Int, Shape]]("newShapes")))
       case ObjectType.DeleteShapes     => in.readType[E, DeleteShapes](new DeleteShapes(in.readMember[Map[Int, Shape]]("shapes")))
+      case ObjectType.EmptyShapePart   => in.readType[E, EmptyShapePart.type](EmptyShapePart)
       case ObjectType.Error            => in.readType[E, remote.Error](remote.Error(in.readMember[Int]("code"), in.readMember[String]("message"), in.readMember[Session]("session")))
+      case ObjectType.FullShapePart    => in.readType[E, FullShapePart.type](FullShapePart)
       case ObjectType.Get              => in.readType[E, remote.Get](remote.Get(RemoteConstants(in.readMember[Int]("constant")), in.readMember[Any]("value"), in.readMember[Session]("session")))
       case ObjectType.GroupShape       => in.readType[E, GroupShape](new GroupShape(in.readMember[Seq[Shape]]("shapes"), in.readMember[Attributes]("attributes")))
       case ObjectType.GroupShapePart   => {
@@ -184,6 +186,7 @@ object IOVersion1 extends IOVersion {
       case a : Array[_] => 1 // One for the array of contents
       case a : Attributes => 1 // One for the actual map
       case c : Color => 1 // One for the color as an int
+      case EmptyShapePart | FullShapePart => 0 // No members for the empty/full shape parts needed
       case t : TransformationMatrix => 6 // A matrix has 6 double values underneath.. FYI
       case i : Iterable[Any] => 1 // One for the array of contents
       case _ => try {
@@ -350,6 +353,12 @@ object IOVersion1 extends IOVersion {
       case CircleShape.Part(b) => {
         out.writeByte(ObjectType.CircleShapePart)
         out.writeMember("part", b)
+      }
+      case EmptyShapePart => {
+        out.writeByte(ObjectType.EmptyShapePart)
+      }
+      case FullShapePart => {
+        out.writeByte(ObjectType.FullShapePart)
       }
       case GroupShape.Part(parts) => {
         out.writeByte(ObjectType.GroupShapePart)
