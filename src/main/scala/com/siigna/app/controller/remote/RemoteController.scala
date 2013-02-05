@@ -60,7 +60,6 @@ protected[controller] object RemoteController extends Actor {
    */
   def act() {
     try {
-      SiignaDrawing.addAttribute("id", 47L)
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
       // If we have a drawing we need to fetch it if we don't we need to reserve it
