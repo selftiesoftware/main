@@ -116,10 +116,25 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       out.writeObject(x)
       in.readObject[DeleteShapes] should equal(x)
     }
+    it ("can read and write an empty shape part") {
+      val x = EmptyShapePart
+      out.writeObject(x)
+      in.readObject[EmptyShapePart.type] should equal(x)
+    }
     it ("can read and write a remote Error") {
       val x = remote.Error(420, "Enhance your calm", session)
       out.writeObject(x)
       in.readObject[remote.Error] should equal(x)
+    }
+    it ("can read and write a full shape part") {
+      val x = FullShapePart
+      out.writeObject(x)
+      in.readObject[FullShapePart.type] should equal(x)
+    }
+    it ("can read and write a full shape part as a part of an action") {
+      val x = new TransformShapeParts(Map(0 -> FullShapePart), transformation)
+      out.writeObject(x)
+      in.readObject[TransformShapeParts] should equal(x)
     }
     it ("can read and write the remote Get") {
       val x = remote.Get(remote.RemoteConstants.Drawing, 14, session)
