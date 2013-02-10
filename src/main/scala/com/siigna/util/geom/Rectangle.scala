@@ -13,10 +13,10 @@ package com.siigna.util.geom
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
- * A rectangle given by two points. <b>Thus this rectangle cannot be rotated</b>.
- * TODO: Refactor with error-handling.
+ * A rectangle, defined as four line-segments in a multidimensional space. Can be compared to other rectangles
+ * by their areas.
  */
-trait Rectangle {
+trait Rectangle extends Ordered[Rectangle] {
 
   type T <: Rectangle
   type V <: Vector
@@ -30,6 +30,22 @@ trait Rectangle {
    * Calculate the circumference of the rectangle.
    */
   def circumference : Double
+
+  /**
+   * Compares two rectangles on the size of their area. If the difference is smaller than 0, but still larger than
+   * 0 (absolute), we return the nearest integer that is not null.
+   * @param that  The rectangle to compare.
+   * @return < 0 if this rectangle is smaller in area, 0 if they are equal (within floating point precision) or > 1
+   *         if this rectangle is larger than the given rectangle.
+   */
+  def compare(that: Rectangle) = {
+    val x = this.area - that.area
+    val r = x.toInt
+    // Make sure that small differences in the interval ]-1,1[ are included (floating point precision included)
+    if (r == 0 && x > 0 && x > Double.MinPositiveValue) 1
+    else if (r == 0 && x < 0 && x < -Double.MinPositiveValue) -1
+    else r
+  }
 
   /**
    * The height of the rectangle

@@ -15,9 +15,9 @@ import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
 import shape.Shape
 import com.siigna.app.Siigna
 
-
 /**
- * An interface that supplies
+ * An interface that supplies the model with spatial information and spatial queries to retrieve one or more shapes
+ * from their position.
  */
 trait SpatialModel[Key, Value <: Shape] {
 
@@ -26,14 +26,15 @@ trait SpatialModel[Key, Value <: Shape] {
   
   /**
    * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
-   * TODO: Implement spatial structure
    */
   //protected def rtree : PRTree
 
   /**
-   * Query for shapes inside the given boundary.
+   * Query for shapes that are inside or intersecting the given boundary.
+   * @param query  The query-rectangle or query-view defining the area for the shapes to be returned.
+   * @return  The shapes that are inside or intersects the query-rectangle, paired with their keys.
    */
-  def apply(query : SimpleRectangle2D) : Map[Key, Value] = {
+  def apply(query : Rectangle2D) : Map[Key, Value] = {
     shapes.filter((s : (Key, Value)) => {
       query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
     })

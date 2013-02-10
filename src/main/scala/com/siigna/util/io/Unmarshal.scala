@@ -65,7 +65,9 @@ object Unmarshal {
 
     // Read the "main" object
     try {
-      Some(in.readObject[T])
+      val x = in.readObject[T]
+      Log.success("Unmarshal: Successfully unmarshalled object " + x)
+      Some(x)
     } catch {
       case e : ClassCastException => Log.warning("Unmarshal: " + e.getMessage); None
       case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
@@ -97,7 +99,7 @@ object Unmarshal {
 
     // Return
     val input = new SiignaInputStream(bufferInput, inputVersion)
-    Log.debug(s"Unmarshal: Created input stream of version $version")
+    Log.success(s"Unmarshal: Created input stream of version $version")
     input
   }
 

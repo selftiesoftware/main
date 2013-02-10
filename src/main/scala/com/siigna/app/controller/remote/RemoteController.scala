@@ -56,9 +56,27 @@ protected[controller] object RemoteController extends Actor {
   //val remote = new Server("localhost", Mode.Production)
 
   /**
+   * Determines whether the controller should broadcast to the server.
+   * @return  True is Siigna is 'live', false otherwise.
+   */
+  protected def isLive = Siigna.get("isLive") match {
+    case Some(true) => true
+    case _ => false
+  }
+
+  /**
    * The acting part of the RemoteController.
    */
   def act() {
+    // Log if we are not live
+    if (!isLive) Log.info("Remote: Siigna is set to work offline. Waiting for the flag to turn green.")
+
+    // Wait until we are live
+    while (!isLive) Thread.sleep(timeout)
+
+    // Log if we are live
+    Log.info("Remote: Siigna is online: Initializing remote connection.")
+
     try {
       def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
 
@@ -87,6 +105,8 @@ protected[controller] object RemoteController extends Actor {
       }
 
       loop {
+        // Only react if we are live
+        while (!isLive) Thread.sleep(timeout)
 
         // Query for new actions
         remote(Get(ActionId, null, session), handleGetActionId)

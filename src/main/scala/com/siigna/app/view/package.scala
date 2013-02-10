@@ -8,6 +8,6 @@ package com.siigna.app
  * allow you to extend the functionality if you require a different setup than we provide. Both the
  * [[com.siigna.app.view.Graphics]] and [[com.siigna.app.view.Renderer]] traits provides interfaces that can be
  * implemented in different ways than we do - our take at implementing the default graphics mechanisms lies
- * in the [[com.siigna.app.view.siigna]] package.
+ * in the [[com.siigna.app.view.native]] package.
  */
 package object view

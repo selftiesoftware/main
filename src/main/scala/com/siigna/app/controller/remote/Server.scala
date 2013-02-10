@@ -23,11 +23,7 @@ import actors.remote.Node
  * </p>
  *
  * <p>
- *   This server uses [[java.nio.channels.DatagramChannel]]s and [[java.nio.ByteBuffer]]s to maximize
- *   performance on read/write operations. We use the [[http://ubjson.org UBJSON]] (Universal Binary JSON) format
- *   to (un-)marshal data.
- *   <br>
- *   We use UDP since the Siigna server is RESTful, so we don't mind losing a package or two.
+ *   We use the [[http://ubjson.org UBJSON]] (Universal Binary JSON) format to (un-)marshal data.
  * </p>
  *
  * @param host  The URL of the host.
@@ -126,7 +122,10 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
 }
 
 /**
- * The server mode in which the server operates. There are two modes: Production and Testing.
+ * The server mode in which the server operates. There are three modes: Production, Testing and Cleaning.
+ * Production is used on the live, public Siigna application.
+ * Testing is used for testing purposes.
+ * And cleaning is used in the Siigna backend.
  */
 object Mode extends Enumeration {
   type Mode = Value
