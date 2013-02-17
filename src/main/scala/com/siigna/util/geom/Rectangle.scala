@@ -22,6 +22,38 @@ trait Rectangle extends Ordered[Rectangle] {
   type V <: Vector
 
   /**
+   * Moves the rectangle with the coordinates given in the vector by subtracting the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to -(point).
+   */
+  def -(point : V) : T
+
+  /**
+   * Moves the rectangle with the coordinates given in the vector by adding the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to +(point).
+   */
+  def +(point : V) : T
+
+  /**
+   * Scales the coordinates of the rectangle with the coordinates given in the vector by multiplying the
+   * coordinate-values of the rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (rectangle.x * point.x, rectangle-y * point.y ...).
+   */
+  def *(point : V) : T
+
+  /**
+   * Scales the rectangle with the values given in the vector by dividing the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (rectangle.x / point.x, rectangle-y / point.y ...).
+   */
+  def /(point : V) : T
+
+  /**
    * Computes the area of the rectangle.
    */
   def area : Double
@@ -63,6 +95,12 @@ trait Rectangle extends Ordered[Rectangle] {
   def overlap(that : T) : Double
 
   /**
+   * Rounds the coordinates of the rectangle to the nearest whole numbers.
+   * @return  A rectangle with its coordinates rounded.
+   */
+  def round : T
+
+  /**
    * The width of the rectangle.
    * @return  A positive [[scala.Double]]
    */
@@ -74,6 +112,7 @@ trait Rectangle extends Ordered[Rectangle] {
  * A Rectangle in 2 dimensions.
  */
 trait Rectangle2D extends Rectangle with GeometryClosed2D {
+
 
   type T <: Rectangle2D
 
@@ -162,6 +201,21 @@ object Rectangle2D {
     new SimpleRectangle2D(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.max(v1.x, v2.x), math.max(v1.y, v2.y))
 
   /**
+   * Creates a [[com.siigna.util.geom.SimpleRectangle2D]] with a center and a width and a height. The rectangle is
+   * constructed by defining the top left point as (center.x - width / 2, center.y - height / 2) and the bottom
+   * right point as (center.x + width / 2, center.y + height / 2).
+   * @param center  The center-point of the rectangle
+   * @param width  The width of the rectangle
+   * @param height  The height of the rectangle.
+   * @return  An instance of a [[com.siigna.util.geom.SimpleRectangle2D]]
+   */
+  def apply(center : Vector2D, width : Double, height : Double) = {
+    val w = width * 0.5
+    val h = height * 0.5
+    new SimpleRectangle2D(center.x - w, center.y - h, center.x + w, center.y + h)
+  }
+
+  /**
    * Creates a [[com.siigna.util.geom.SimpleRectangle2D]] from the given points where the difference on the x axis
    * equals the width and the difference on the y axis equals the height.
    * @param xMin  The smallest x-coordinate
@@ -235,6 +289,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
   def onPeriphery(point: Vector2D): Boolean = false
 
+  def round = null
+
   /**
    * Examines whether a the given geometry is completely enclosed by this geometry.
    * @return true if the given geometry is inside, false otherwise
@@ -253,6 +309,37 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    */
   def expand(geom: Geometry2D): ComplexRectangle2D = null
 
+  /**
+   * Moves the rectangle with the coordinates given in the vector by subtracting the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (-point.x, -point.y).
+   */
+  def -(point: ComplexRectangle2D#V): ComplexRectangle2D = null
+
+  /**
+   * Moves the rectangle with the coordinates given in the vector by adding the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (point.x, point.y).
+   */
+  def +(point: ComplexRectangle2D#V): ComplexRectangle2D = null
+
+  /**
+   * Moves the rectangle with the coordinates given in the vector by multiplying the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (rectangle.x * point.x, rectangle-y * point.y).
+   */
+  def *(point: ComplexRectangle2D#V): ComplexRectangle2D = null
+
+  /**
+   * Moves the rectangle with the coordinates given in the vector by dividing the coordinate-values of the
+   * rectangle with the coordinate values from the vector.
+   * @param point  The point that illustrates the distance to move the rectangle.
+   * @return  A new rectangle moved by a distance corresponding to (rectangle.x / point.x, rectangle-y / point.y).
+   */
+  def /(point: ComplexRectangle2D#V): ComplexRectangle2D = null
 }
 
 /**
@@ -268,6 +355,11 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle2D {
 
   type T = SimpleRectangle2D
+
+  def -(point : Vector2D) = new SimpleRectangle2D(xMin - point.x, yMin - point.y, xMax - point.x, yMax - point.y)
+  def +(point : Vector2D) = new SimpleRectangle2D(xMin + point.x, yMin + point.y, xMax + point.x, yMax + point.y)
+  def *(point : Vector2D) = new SimpleRectangle2D(xMin * point.x, yMin * point.y, xMax * point.x, yMax * point.y)
+  def /(point : Vector2D) = new SimpleRectangle2D(xMin / point.x, yMin / point.y, xMax / point.x, yMax / point.y)
 
   /**
    * The lowest left corner of the rectangle.
@@ -487,6 +579,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       (xMax - xMin) * (yMax - yMin)
     } else 0 // No overlap
   }
+
+  def round = Rectangle2D(topLeft.round, bottomRight.round)
 
   def transform(t : TransformationMatrix) = {
     val p1 = topLeft.transform(t)

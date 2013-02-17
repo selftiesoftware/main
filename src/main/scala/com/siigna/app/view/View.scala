@@ -401,7 +401,7 @@ object View {
   /**
    * The screen as a rectangle, given in device coordinates.
    */
-  def screen : Rectangle2D = SimpleRectangle2D(0, 0, width, height)
+  def screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom

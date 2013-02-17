@@ -77,7 +77,7 @@ object Drawing extends ActionModel
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  def boundary : Rectangle2D = _boundary
+  def boundary : SimpleRectangle2D = _boundary
 
   /**
    * The boundary from the current content of the Model.
