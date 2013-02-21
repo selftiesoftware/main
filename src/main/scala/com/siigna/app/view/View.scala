@@ -284,7 +284,7 @@ object View {
       renderer.paint(graphics)
     } catch {
       case e : InterruptedException => Log.info("View: The view is shutting down while painting. Move along...")
-      case e : Throwable => Log.error("View: Unable to render drawing: " + e)
+      case e : Throwable => Log.error("View: Unable to render drawing: ", e)
     }
 
     // Fetch and draw the dynamic layer.
