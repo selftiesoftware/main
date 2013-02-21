@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, RenderingHints, Graphics2D}
 import com.siigna.app.Siigna
 import com.siigna.util.Implicits._
-import com.siigna.app.model.shape.{LineShape, PolylineShape}
+import com.siigna.app.model.shape.PolylineShape
 import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
 import concurrent.{Promise, future, promise}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -85,14 +85,6 @@ object SiignaRenderer extends Renderer {
 
   // The tile deltas for the two axis
   private var tileDeltaX = 0; private var tileDeltaY = 0
-
-  {
-    import com.siigna.app.model.action._
-    val shapes =
-      {for(s <- 0 until 100) yield LineShape(0, s * s, s * s, 0)} ++
-        {for(s <- 0 until 100) yield LineShape(100 * 100, s * s, s * s, 100 * 100)}
-    Create(shapes)
-  }
 
   /**
    * Executed when a pan operation have been done
