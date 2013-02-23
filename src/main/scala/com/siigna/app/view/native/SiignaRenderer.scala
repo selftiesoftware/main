@@ -1,16 +1,14 @@
 package com.siigna.app.view.native
 
-import com.siigna.app.view.{Graphics, View, Renderer}
-import com.siigna.app.model.Drawing
 import java.awt.image.BufferedImage
 import java.awt.{Color, RenderingHints, Graphics2D}
+
 import com.siigna.app.Siigna
-import com.siigna.util.Implicits._
+import com.siigna.app.model.Drawing
 import com.siigna.app.model.shape.PolylineShape
+import com.siigna.app.view.{Graphics, View, Renderer}
+import com.siigna.util.Implicits._
 import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
-import concurrent.{Promise, future, promise}
-import scala.concurrent.ExecutionContext.Implicits.global
-import com.siigna.util.Log
 
 /**
  * Siignas own implementation of the [[com.siigna.app.view.Renderer]] which draws a chess-checkered background
@@ -51,12 +49,6 @@ object SiignaRenderer extends Renderer {
   View.addResizeListener((screen) =>  if (View.renderer == this) onResize())
   View.addZoomListener((zoom) =>      if (View.renderer == this) clearTiles() )
 
-  // A background image that can be re-used to draw as background on the canvas.
-  private var cachedBackground : BufferedImage = renderBackground(View.screen)
-
-  // The tiles drawn as 3 * 3 squares over the model.
-  private lazy val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
-
   // Constants for the different tiles and their directions around a given center
   private val C  = 4; private val vC  = Vector2D( 0, 0)
   private val E  = 5; private val vE  = Vector2D( 1, 0)
@@ -67,6 +59,17 @@ object SiignaRenderer extends Renderer {
   private val NW = 0; private val vNW = Vector2D(-1,-1)
   private val N  = 1; private val vN  = Vector2D( 0,-1)
   private val NE = 2; private val vNE = Vector2D( 1,-1)
+
+  // A background image that can be re-used to draw as background on the canvas.
+  private var cachedBackground : BufferedImage = renderBackground(View.screen)
+
+  // The positions of the tiles, cached to avoid calculating at each paint-tick
+  private lazy val cachedTilePositions = Array(tile(vNW), tile(vN), tile(vNE),
+                                               tile(vW),  tile(vC), tile(vE),
+                                               tile(vSW), tile(vS), tile(vSE))
+
+  // The tiles drawn as 3 * 3 squares over the model.
+  private val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
 
   // A boolean value to indicate that the view is zoomed out enough to only need one single tile
   private var isSingleTile = true
@@ -79,9 +82,8 @@ object SiignaRenderer extends Renderer {
   // The pan at the time of rendering
   private var renderedPan : Vector2D = Vector2D(0, 0)
 
-  // The running rendering promise (if any) used to retrieve rendered tiles or cancel the rendering
-  // if a new operation occurs
-  private var renderedPromise : Option[Promise[Array[Option[BufferedImage]]]] = None
+  // The running rendering thread (if any) used to render tiles or cancel the rendering if the tiles shift
+  private var renderingThread : Option[Thread] = None
 
   // The tile deltas for the two axis
   private var tileDeltaX = 0; private var tileDeltaY = 0
@@ -157,6 +159,9 @@ object SiignaRenderer extends Renderer {
         renderEmptyTiles()
       }
     }
+
+    // Update the tile positions
+    updateTilePositions()
   }
 
   /**
@@ -182,14 +187,17 @@ object SiignaRenderer extends Renderer {
     // Reset the tile delta
     tileDeltaX = 0; tileDeltaY = 0
 
+    // Set the new delta
+    renderedDelta = if (isSingleTile) Drawing.boundary.topLeft.transform(View.drawingTransformation)
+    else View.pan - renderedPan
+
+    // Set the new tile deltas
+    updateTilePositions()
+
     // Render the center tile
     if (isSingleTile) {
       cachedTiles(C) = Some(renderModel(Drawing.boundary.transform(View.drawingTransformation)))
     } else {
-      // Set the new delta
-      renderedDelta = if (isSingleTile) Drawing.boundary.topLeft.transform(View.drawingTransformation)
-                      else View.pan - renderedPan
-
       // Clear the tiles
       cachedTiles.transform(_ => None)
 
@@ -199,13 +207,11 @@ object SiignaRenderer extends Renderer {
   }
 
   def paint(graphics : Graphics) {
-    // Draw the cached background
-    def drawTile(boundary : Rectangle2D, tile : BufferedImage) {
-      val x = boundary.topLeft.x.toInt
-      val y = boundary.bottomLeft.y.toInt
-      graphics.AWTGraphics drawImage(tile, x, y, null)
+    def drawTile(r : Rectangle2D, tile : BufferedImage) {
+      graphics.AWTGraphics drawImage(tile, r.bottomLeft.x.toInt, r.bottomLeft.y.toInt, null)
     }
 
+    // Draw the cached background
     graphics.AWTGraphics drawImage(cachedBackground, 0, 0, null)
 
     // Draw the paper as a rectangle with a margin to illustrate that the paper will have a margin when printed.
@@ -217,18 +223,18 @@ object SiignaRenderer extends Renderer {
       // Draw the single center tile if that encases the entire drawing
       cachedTiles(C).foreach(image => graphics.AWTGraphics drawImage(image, renderedDelta.x.toInt, renderedDelta.y.toInt, null))
     } else {
-      cachedTiles(C).foreach(image => drawTile(tile(vC), image))
+      cachedTiles(C).foreach(image => drawTile(cachedTilePositions(C), image))
 
       // Draw the tiles around if the zoom level is high enough
       val d = renderedDelta + tileDelta
-      if (d.x < 0)            cachedTiles(E).foreach(t => drawTile(tile(vE), t)) // East
-      if (d.x < 0 && d.y < 0) cachedTiles(SE).foreach(t => drawTile(tile(vSE), t)) // SE
-      if (d.y < 0)            cachedTiles(S).foreach(t => drawTile(tile(vS), t))  // South
-      if (d.x > 0 && d.y < 0) cachedTiles(SW).foreach(t => drawTile(tile(vSW), t)) // SW
-      if (d.x > 0)            cachedTiles(W).foreach(t => drawTile(tile(vW), t))  // West
-      if (d.x > 0 && d.y > 0) cachedTiles(NW).foreach(t => drawTile(tile(vNW), t)) // NW
-      if (d.y > 0)            cachedTiles(N).foreach(t => drawTile(tile(vN), t))  // North
-      if (d.x < 0 && d.y > 0) cachedTiles(NE).foreach(t => drawTile(tile(vNE), t)) // NE
+      if (d.x < 0)            cachedTiles(E).foreach(t => drawTile(cachedTilePositions(E), t))   // East
+      if (d.x < 0 && d.y < 0) cachedTiles(SE).foreach(t => drawTile(cachedTilePositions(SE), t)) // SE
+      if (d.y < 0)            cachedTiles(S).foreach(t => drawTile(cachedTilePositions(S), t))   // South
+      if (d.x > 0 && d.y < 0) cachedTiles(SW).foreach(t => drawTile(cachedTilePositions(SW), t)) // SW
+      if (d.x > 0)            cachedTiles(W).foreach(t => drawTile(cachedTilePositions(W), t))   // West
+      if (d.x > 0 && d.y > 0) cachedTiles(NW).foreach(t => drawTile(cachedTilePositions(NW), t)) // NW
+      if (d.y > 0)            cachedTiles(N).foreach(t => drawTile(cachedTilePositions(N), t))   // North
+      if (d.x < 0 && d.y > 0) cachedTiles(NE).foreach(t => drawTile(cachedTilePositions(NE), t)) // NE
     }
 
     // Draw the boundary shape
@@ -306,48 +312,50 @@ object SiignaRenderer extends Renderer {
    * Renders the empty tiles in the cached tiles asynchronously.
    */
   private def renderEmptyTiles() {
-    if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(tile(vC)))
+    try {
+      if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(cachedTilePositions(C)))
 
-    // Make sure the previous promise is done
-    renderedPromise.foreach{t =>
-      t.tryFailure(new InterruptedException("Stop it!"))
-    }
+      // Stop the previous thread
+      renderingThread.foreach(_.interrupt())
 
-    // Create a new promise
-    val p = promise[Array[Option[BufferedImage]]]()
+      // Create a new thread
+      val t = new Thread() {
+        override def run() {
+          try {
+            val temp = new Array[Option[BufferedImage]](9)
 
-    // Set the callbacks
-    p.future.onSuccess {
-      case temp : Array[Option[BufferedImage]] => {
-        for (i <- 0 until temp.size) {
-          if (cachedTiles(i).isEmpty && i != C) {
-            cachedTiles(i) = temp(i)
+            // First render the direct neighbours
+            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(tile(vE)))
+            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(tile(vS)))
+            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(tile(vW)))
+            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(tile(vN)))
+
+            // Render the diagonals
+            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(tile(vSE)))
+            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(tile(vSW)))
+            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(tile(vNW)))
+            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(tile(vNE)))
+
+            // Set the new tiles
+            for (i <- 0 until temp.size) {
+              if (cachedTiles(i).isEmpty && i != C && cachedTiles(i) != null) {
+                cachedTiles(i) = temp(i)
+              }
+            }
+          } catch {
+            case e : InterruptedException => // Do nothing
           }
         }
       }
-      case x => Log.warning("SiigneRenderer: Expected array from rendering thread, but got: " + x)
+
+      // Set the class variable
+      renderingThread = Some(t)
+
+      // Start the rendering!
+      t.start()
+    } catch {
+      case e : ClassNotFoundException => // Weird exception where Promise$DefaultPromise.class could not be found...
     }
-    p.future.onComplete { case _ => renderedPromise = None }
-
-    // Start the rendering!
-    p.completeWith(future {
-      val temp = new Array[Option[BufferedImage]](9)
-      // First render the direct neighbours
-      if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(tile(vE)))
-      if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(tile(vS)))
-      if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(tile(vW)))
-      if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(tile(vN)))
-
-      // Render the diagonals
-      if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(tile(vSE)))
-      if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(tile(vSW)))
-      if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(tile(vNW)))
-      if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(tile(vNE)))
-      temp
-    })
-
-    // Set the class variable
-    renderedPromise = Some(p)
   }
 
   // The current distance to the active tile center to the center of the view
@@ -357,5 +365,18 @@ object SiignaRenderer extends Renderer {
   private def tile(v : Vector2D) =
     (if (isSingleTile) Drawing.boundary.transform(View.drawingTransformation) else View.screen) +
       renderedDelta + Vector2D(View.screen.width * v.x, View.screen.height * v.y) + tileDelta
+
+  // Updates the tile positions
+  private def updateTilePositions() {
+    cachedTilePositions(C) = tile(vC)
+    cachedTilePositions(E) = tile(vE)
+    cachedTilePositions(S) = tile(vS)
+    cachedTilePositions(W) = tile(vW)
+    cachedTilePositions(N) = tile(vN)
+    cachedTilePositions(SE) = tile(vSE)
+    cachedTilePositions(SW) = tile(vSW)
+    cachedTilePositions(NW) = tile(vNW)
+    cachedTilePositions(NE) = tile(vNE)
+  }
 
 }
