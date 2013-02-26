@@ -104,14 +104,6 @@ object Unmarshal {
   }
 
   /**
-   * Attemps to read a well-known Siigna object from the given byte array.
-   * @param array  The array to read the object from.
-   * @tparam T  The type of the object to be retrieved.
-   * @return  Some[T] if the object could be read and successfully parsed, None otherwise
-   */
-  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = apply[T](ByteBuffer.wrap(array))
-
-  /**
    * Creates the correct version of a [[com.siigna.util.io.SiignaInputStream]] capable of reading binary data in the
    * UBJSON format, for the given input stream.
    * @param input  The input stream containing the data to be read.
