@@ -4,6 +4,7 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import version.IOVersion
 import java.nio.ByteBuffer
+import org.ubjson.io.ByteArrayInputStream
 
 /**
  * Tests the marshal object.
@@ -14,7 +15,7 @@ class UnmarshalSpec extends FunSpec with ShouldMatchers {
 
     it ("can read with the right version") {
       val a = Marshal(null)
-      val in = Unmarshal.getInputStream(ByteBuffer.wrap(a))
+      val in = Unmarshal.getInputStream(new ByteArrayInputStream(a))
       in.version should equal(IOVersion(IOVersion.Current))
     }
 
