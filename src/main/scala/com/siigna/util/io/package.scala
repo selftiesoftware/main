@@ -146,6 +146,8 @@ package object io {
     val PolylineShapePart  = 235.toByte
     val RectangleShapePart = 236.toByte
     val TextShapePart      = 237.toByte
+    val FullShapePart      = 238.toByte
+    val EmptyShapePart     = 239.toByte
   }
 
 }

@@ -49,6 +49,9 @@ import java.awt.{Color, Dimension}
  *    The color given to selected elements. Defaults to #7777FF in hex.
  *  defaultScreenSize
  *    The default size of the screen given as a [[java.awt.Dimension]]. Defaults to (600 x 400).
+ *  isLive
+ *    Whether or not Siigna should broadcast to the central server. If this is set to false the changes to the
+ *    model will not be stored! Defaults to false.
  *  printMargin
  *    The margin on pages when printing the content in Siigna, given in mm. Defaults to 13. 
  *  printFormatMin
@@ -86,6 +89,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("colorHover")            = "#22FFFF".color
   this("colorSelected")         = "#7777FF".color
   this("defaultScreenSize")     = new Dimension(600, 400)
+  this("isLive")                = true
   this("printMargin")           = 13.0
   this("printFormatMin")        = 210.0
   this("printFormatMax")        = 297.0

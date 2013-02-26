@@ -25,9 +25,6 @@ package com.siigna.app.model
 import action.{VolatileAction, Action}
 import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
-import com.siigna.app.view.View
-import com.siigna.app.controller.Controller
-import javax.management.relation.RelationNotFoundException
 import com.siigna.util.Log
 
 /**
@@ -49,7 +46,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def attributes_=(attr : Attributes) { setAttributes(attr) }
 
-
   /**
    * A stream of a negative integers used for local ids.
    */
@@ -66,12 +62,27 @@ trait ActionModel extends SelectableModel with HasAttributes {
   protected var model = new Model()
 
   /**
+   * A listener for remote actions.
+   */
+  protected var remoteListener : (Action, Boolean) => Unit = (_, _) => Unit
+
+  /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
    * @param listener  The function to be executed receiving an action that has been executed and a boolean
    *                  value indicating whether the action was undone (true) or executed (false; includes redo).
    */
   def addActionListener(listener : (Action, Boolean) => Unit) {
     listeners :+= listener
+  }
+
+  /**
+   * Adds a remote listener that will send actions to a remote sink whenever they are executed, undone or redone
+   * on the model.
+   * @param listener  The function to be executed receiving an action that has been executed and a boolean
+   *                  value indicating whether the action was undone (true) or executed (false; includes redo).
+   */
+  def addRemoteListener(listener : (Action, Boolean) => Unit) {
+    remoteListener = listener
   }
 
   /**
@@ -98,7 +109,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       }
 
       // Notify listeners
-      if (remote) notifyListeners(action, undo = false)
+      notifyListeners(action, undo = false, remote)
 
       Log.success("ActionModel: Successfully executed action: " + action)
     } catch {
@@ -130,9 +141,11 @@ trait ActionModel extends SelectableModel with HasAttributes {
    * Notifies the listeners that an action has been executed, undone or redone.
    * @param action  The action that has been executed or undone
    * @param undo  Whether the action has been undone (true) or executed (false).
+   * @param remote  Whether the action should go to the remote source as well.
    */
-  protected def notifyListeners(action : Action, undo : Boolean) {
+  protected def notifyListeners(action : Action, undo : Boolean, remote : Boolean) {
     listeners.foreach(_(action, undo))
+    if (remote) remoteListener(action, undo)
   }
 
   /**
@@ -153,7 +166,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
         model = new Model(model.shapes, model.executed.+:(action), undone, model.attributes)
 
         // Notify listeners
-        notifyListeners(action, undo = false)
+        notifyListeners(action, undo = false, remote = true)
 
         Log.success("ActionModel: Action successfully redone: " + action)
       } catch {
@@ -200,7 +213,7 @@ trait ActionModel extends SelectableModel with HasAttributes {
       model = action.undo(model)
 
       // Send the action to server with the undone flag set to true!
-      if (remote) notifyListeners(action, undo = true)
+      notifyListeners(action, undo = true, remote)
 
       Log.success("ActionModel: Action successfully undone: " + action)
     } catch {

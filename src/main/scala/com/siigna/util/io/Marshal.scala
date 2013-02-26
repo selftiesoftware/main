@@ -73,6 +73,8 @@ object Marshal {
     // Write the object itself
     f(out)
 
+    Log.debug("Unmarshal: Successfully wrote object " + f)
+
     // Flush and close
     out.flush()
     out.close()

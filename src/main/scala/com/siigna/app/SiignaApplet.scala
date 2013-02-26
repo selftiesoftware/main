@@ -30,7 +30,7 @@ import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
 import model.Drawing
 import model.server.User
-import view.siigna.SiignaRenderer
+import view.native.SiignaRenderer
 import view.View
 import com.siigna.util.geom.Rectangle2D
 import com.siigna.util.Log

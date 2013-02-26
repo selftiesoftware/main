@@ -234,6 +234,7 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   /**
    * Rounds the vector to whole numbers.
+   * @return  A vector whose coordinates have been rounded to the nearest whole number.
    */
   def round = Vector2D(scala.math.round(x), scala.math.round(y))
 
