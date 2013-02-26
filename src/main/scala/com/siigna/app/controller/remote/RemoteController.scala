@@ -51,6 +51,7 @@ protected[controller] object RemoteController extends Actor {
 
   val SiignaDrawing = com.siigna.app.model.Drawing // Use the right namespace
 
+  // SiignaDrawing.addAttribute("id",236L)
   /**
    * The acting part of the RemoteController.
    */
