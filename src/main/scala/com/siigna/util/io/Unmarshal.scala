@@ -58,22 +58,7 @@ object Unmarshal {
    * @throws IOException  If an I/O error occurred.
    * @throws IllegalArgumentException  If no type was specified.
    */
-  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = {
-    val expectedType = typeOf[T]
-    if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
-
-    val in = getInputStream(new ByteArrayInputStream(array))
-
-    // Read the "main" object
-    try {
-      val x = in.readObject[T]
-      Log.success("Unmarshal: Successfully unmarshalled object " + x)
-      Some(x)
-    } catch {
-      case e : ClassCastException => Log.warning("Unmarshal: " + e.getMessage); None
-      case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
-    }
-  }
+  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = apply[T](new ByteArrayInputStream(array))
 
   /**
    * <p>
@@ -87,11 +72,25 @@ object Unmarshal {
    * @throws IOException  If an I/O error occurred.
    * @throws IllegalArgumentException  If no type was specified.
    */
-  def apply[T : TypeTag](buffer : ByteBuffer) : Option[T] = {
+  def apply[T : TypeTag](buffer : ByteBuffer) : Option[T] = apply[T](new ByteBufferInputStream(buffer))
+
+  /**
+   * <p>
+   *   Attempts to read a well-known Siigna object from the given InputStream and cast it to the
+   *   given type T. If no type is given we cannot cast or return the type, so an exception will be cast.
+   * </p>
+   * @param input  The InputStream containing the data to be read.
+   * @tparam T  The expected type of the object to be read.
+   * @return  Some[T] if the object could be read and successfully parsed, None otherwise
+   * @throws UBJFormatException  If the formatting could not be understood.
+   * @throws IOException  If an I/O error occurred.
+   * @throws IllegalArgumentException  If no type was specified.
+   */
+  def apply[T : TypeTag](input : InputStream) : Option[T] = {
     val expectedType = typeOf[T]
     if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
 
-    val in = getInputStream(new ByteBufferInputStream(buffer))
+    val in = getInputStream(input)
 
     // Read the "main" object
     try {
