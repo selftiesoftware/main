@@ -1,10 +1,11 @@
 package com.siigna.util.io
 
 import java.nio.ByteBuffer
-import org.ubjson.io.{UBJInputStream, ByteBufferInputStream}
+import org.ubjson.io.{ByteArrayInputStream, UBJInputStream, ByteBufferInputStream}
 import version.IOVersion
 import com.siigna.util.Log
 import reflect.runtime.universe._
+import java.io.InputStream
 
 /**
  * <p>
@@ -47,6 +48,35 @@ object Unmarshal {
 
   /**
    * <p>
+   *   Attempts to read a well-known Siigna object from the given array of bytes and cast it to the
+   *   given type T. If no type is given we cannot cast or return the type, so an exception will be cast.
+   * </p>
+   * @param array  The array of bytes containing the data to be read.
+   * @tparam T  The expected type of the object to be read.
+   * @return  Some[T] if the object could be read and successfully parsed, None otherwise
+   * @throws UBJFormatException  If the formatting could not be understood.
+   * @throws IOException  If an I/O error occurred.
+   * @throws IllegalArgumentException  If no type was specified.
+   */
+  def apply[T : TypeTag](array : Array[Byte]) : Option[T] = {
+    val expectedType = typeOf[T]
+    if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
+
+    val in = getInputStream(new ByteArrayInputStream(array))
+
+    // Read the "main" object
+    try {
+      val x = in.readObject[T]
+      Log.success("Unmarshal: Successfully unmarshalled object " + x)
+      Some(x)
+    } catch {
+      case e : ClassCastException => Log.warning("Unmarshal: " + e.getMessage); None
+      case e : Throwable => Log.warning("Unmarshal: Error while unmarshalling: " + e); None
+    }
+  }
+
+  /**
+   * <p>
    *   Attempts to read a well-known Siigna object from the given [[java.nio.ByteBuffer]] and cast it to the
    *   given type T. If no type is given we cannot cast or return the type, so an exception will be cast.
    * </p>
@@ -61,7 +91,7 @@ object Unmarshal {
     val expectedType = typeOf[T]
     if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
 
-    val in = getInputStream(buffer)
+    val in = getInputStream(new ByteBufferInputStream(buffer))
 
     // Read the "main" object
     try {
@@ -84,23 +114,20 @@ object Unmarshal {
 
   /**
    * Creates the correct version of a [[com.siigna.util.io.SiignaInputStream]] capable of reading binary data in the
-   * UBJSON format, for the given byte buffer.
-   * @param buffer  The byte buffer containing the data to be read.
+   * UBJSON format, for the given input stream.
+   * @param input  The input stream containing the data to be read.
    * @return  A SiignaInputStream that can read data.
    */
-  def getInputStream(buffer : ByteBuffer) = {
-    val bufferInput = new ByteBufferInputStream(buffer)
-    val UBJInput    = new UBJInputStream(bufferInput)
+  def getInputStream(input : InputStream) = {
+    val UBJInput    = new UBJInputStream(input)
 
     // Read the version
-    assert(UBJInput.readString() == "version", "Could not identify version number")
+    assert(UBJInput.readString() == "version", "Unmarshal: Could not identify version number")
     val version = UBJInput.readByte
     val inputVersion = IOVersion(version)
 
     // Return
-    val input = new SiignaInputStream(bufferInput, inputVersion)
-    Log.success(s"Unmarshal: Created input stream of version $version")
-    input
+    new SiignaInputStream(input, inputVersion)
   }
 
 }
