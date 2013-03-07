@@ -1,6 +1,8 @@
 package com.siigna.util.http
 
 import java.net.{HttpURLConnection, URL}
+import java.io.{InputStreamReader, BufferedReader}
+import com.siigna.app.controller.remote.RemoteCommand
 
 //
 
@@ -23,20 +25,37 @@ class Connection(val url: String) {
     try{
       out.write(message)
       out.flush
+
+      if (con.getResponseCode == 200)
+        con.getInputStream
+      else
+        con.getErrorStream
+
     } finally {
       out.close
     }
-
-    if (con.getResponseCode == 200)
-      con.getInputStream
-    else
-      con.getErrorStream
   }
 
+}
 
+object Connection{
   def decode(stream: java.io.InputStream):Array[Byte] = {
 
-    var in = Array[Byte]()
+    try {
+
+      val reader = new BufferedReader(new InputStreamReader(stream))
+      val request = reader.readLine() // Read the request line
+      // val token = request.substring(6, request.size) // Cut off the initial 6 characters (do they mean anyting??)
+      //      raw      parsed   unmarshalled
+      println(com.siigna.util.io.Unmarshal[RemoteCommand](request.getBytes("UTF-8")))
+      request.getBytes("UTF-8")
+
+    } catch {
+      case e : Throwable => println("Fail: " + e)
+      new Array[Byte](0)
+    }
+  }
+ /*   var in = Array[Byte]()
 
     var data = stream.read(in).asInstanceOf[Byte]
 
@@ -46,6 +65,5 @@ class Connection(val url: String) {
     }
 
     return in
-  }
-
+  }                */
 }
