@@ -400,12 +400,12 @@ object PolylineShape {
    * @return  A PolylineShape connecting the given points with lines
    */
   def apply(points : Traversable[Vector2D]) : PolylineShape =
-    if (points.isEmpty) throw new IllegalArgumentException("Cannot create polyline from zero points.")
+    if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
     else {
       val lines = points.toSeq.map(p => new PolylineLineShape(p))
 
       // Close the shape, if requested
-      if (lines.size > 1 && points.head == points.last)
+      if (points.head == points.last)
         PolylineShapeClosed(points.head, lines.tail.take(lines.size - 2), Attributes())
       else
         PolylineShapeOpen(points.head, lines.tail, Attributes())

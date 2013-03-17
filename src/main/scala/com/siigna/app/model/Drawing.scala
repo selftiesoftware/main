@@ -61,6 +61,31 @@ object Drawing extends ActionModel
                   with SpatialModel[Int, Shape]
                   with MapProxy[Int, Shape] {
 
+  /**
+   * The openness of a drawing.
+   */
+  object Openness extends Enumeration {
+
+    type Openness = Value
+
+    /**
+     * A drawings is open and available for all.
+     */
+    val OPEN   = Value('o')
+
+    /**
+     * Private. A drawing cannot be seen, copied or edited by anyone.
+     */
+    val PRIVATE = Value('p')
+
+    /**
+     * A drawing cannot be edited, but can be copied to the other users accounts.
+     */
+    val COPY   = Value('c')
+
+    // val PRINT - TODO
+  }
+
   // Calculates the boundary of the model whenever it changes
   addActionListener((_, _) => _boundary = calculateBoundary())
 

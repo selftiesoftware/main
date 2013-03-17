@@ -45,6 +45,12 @@ import java.awt.{Color, Dimension}
  *    The background color for the dark squares in the background checkers-pattern. Defaults to #DADADA in hex.
  *  colorDraw
  *    The color every shapes are drawn with by default. Defaults to #000000 (black) in hex.
+ *  colorOpennessCopy
+ *    The color used to signal the openness level: Copy
+ *  colorOpennessOpen
+ *    The color used to signal the openness level: Open
+ *  colorOpennessPrint
+ *    The color used to signal the openness level: Print
  *  colorSelected
  *    The color given to selected elements. Defaults to #7777FF in hex.
  *  defaultScreenSize
@@ -87,6 +93,9 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("colorBackgroundDark")   = "#DADADA".color
   this("colorDraw")             = "#000000".color
   this("colorHover")            = "#22FFFF".color
+  this("colorOpennessCopy")     = new Color(0.25f, 0.85f, 0.25f, 0.20f)
+  this("colorOpennessOpen")     = new Color(0.85f, 0.85f, 0.25f, 0.20f)
+  this("colorOpennessPrivate")  = new Color(0.85f, 0.25f, 0.25f, 0.20f)
   this("colorSelected")         = "#7777FF".color
   this("defaultScreenSize")     = new Dimension(600, 400)
   this("isLive")                = true

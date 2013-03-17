@@ -297,7 +297,7 @@ object SiignaRenderer extends Renderer {
 
     // Create the transformation matrix to move the shapes to (0, 0) of the image
     val scale       = View.drawingTransformation.scaleFactor
-    val transformation = TransformationMatrix(Vector2D(-window.topLeft.x.round, window.topLeft.y.round) * scale, scale).flipY
+    val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
 
     g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 

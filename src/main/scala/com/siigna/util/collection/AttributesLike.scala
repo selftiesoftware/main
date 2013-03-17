@@ -52,6 +52,30 @@ trait AttributesLike {
   def boolean(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Boolean])
 
   /**
+   * Gets an attribute value as an optional Char. This means no exceptions
+   * are thrown. You can either use pattern matching or the getOrElse feature
+   * to provide a default value.
+   *
+   * <p>
+   * Examples:
+   * <pre>
+   *   // Using pattern matching.
+   *   attributes.char("Openness") match {
+   *     case Some(openness) => println("Openness: " + openness)
+   *     case None           => println("Open: maybe")
+   *   }
+   *
+   *   // Using default value.
+   *   println( attributes char "Openness" getOrElse false )
+   * </pre>
+   * </p>
+   *
+   * @param  attributeName  the name of attribute to look up.
+   * @return  an optional attribute Char value.
+   */
+  def char(attributeName : String) = getAsType(attributeName, _.asInstanceOf[Char])
+
+  /**
    * Gets an attribute value as an optional color. This means no exceptions
    * are thrown. You can either use pattern matching or the getOrElse feature
    * to provide a default value.
