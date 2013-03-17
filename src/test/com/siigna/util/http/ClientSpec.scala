@@ -4,7 +4,7 @@ import org.scalatest.{GivenWhenThen, BeforeAndAfter, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.controller.remote.{RemoteConstants, Get, Session, RemoteCommand}
 import com.siigna.app.model.server.User
-import com.siigna.util.io;
+import com.siigna.util.io
 
 class ClientSpec extends FunSpec with BeforeAndAfter with ShouldMatchers with GivenWhenThen{
 
@@ -14,6 +14,7 @@ class ClientSpec extends FunSpec with BeforeAndAfter with ShouldMatchers with Gi
   var session : Session = Session(0L, user)
 
   describe("Siigna Http Client"){
+
     it("Can open a connection to a server and send a message"){
       Given("A connection")
       val conn = new Connection("http://localhost:7788")
@@ -22,10 +23,12 @@ class ClientSpec extends FunSpec with BeforeAndAfter with ShouldMatchers with Gi
       val data = Get(RemoteConstants.Drawing, null, session)
       val marshalled = io.Marshal(data)
 
-      val resp = new Connection("http://localhost:7788").send(marshalled)
+      println(new String(marshalled))
+      val resp = conn.send(marshalled)
 
       println(new String(decode(resp)))
     }
+
   }
 
   def decode(stream: java.io.InputStream):Array[Byte] = {
@@ -39,7 +42,7 @@ class ClientSpec extends FunSpec with BeforeAndAfter with ShouldMatchers with Gi
       data = stream.read().asInstanceOf[Byte]
     }
 
-    return in
+    return in.reverse
   }
 
 }
