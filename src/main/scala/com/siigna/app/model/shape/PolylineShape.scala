@@ -204,7 +204,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         var firstPoint = false
         var parts = Seq[InnerPolylineShape]()
         var lastIndex = xs.head // Last known index
-        var isConsistent = true // Is the
+        var isConsistent = true // Is the selection consistent?
         xs foreach ( i => {
           // See if two adjacent elements are selected
           if ((xs(i) && xs(i + 1)) || (xs(i) && xs(i - 1))) {
@@ -228,7 +228,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         })
         // Examine whether the first point should be included and whether the result is coherent
         (firstPoint, isConsistent) match {
-          case (true, true)   => Some(copy(startPoint = startPoint, innerShapes = innerShapes))
+          case (true, true)   => Some(copy(startPoint = startPoint, innerShapes = parts))
           case (true, false)  => Some(GroupShape(shapes(startPoint, parts), attributes))
           case (false, true) if (parts.size > 1)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
           case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
