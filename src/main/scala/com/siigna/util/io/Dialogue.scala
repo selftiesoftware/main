@@ -8,7 +8,6 @@ import java.util
 import java.nio.charset.Charset
 import collection.JavaConversions
 import scala.Some
-import javax.swing.{UIManager, JFileChooser}
 import javax.swing.filechooser.FileNameExtensionFilter
 import java.io.{OutputStream, InputStream, IOException, File}
 
@@ -146,17 +145,6 @@ import java.io.{OutputStream, InputStream, IOException, File}
  */
 object Dialogue {
 
-  // Initialize look & feel
-  val t = new Thread() {
-    try {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
-    } catch {
-      case e : Throwable => Log.warning("Dialogue: Error when setting the Look and Feel. Reverting to default.")
-    }
-  }
-  t.setPriority(Thread.MIN_PRIORITY)
-  t.start()
-
   /**
    * Opens a JFileChooser and lets the user choose a file to read. If the dialogue is not interrupted and
    * the file matches the given filter (if any), the function f is called and the value Some[T] is returned.
@@ -171,37 +159,14 @@ object Dialogue {
    * @throws IllegalArgumentException  If the mode of the dialogue could not be recognized.
    */
   protected def openDialogue[T](f : File => T, read : Boolean, filters : Seq[FileNameExtensionFilter] = Nil) : Option[T] = {
-    // Makes sure the look and feel have been set.
-    t.join()
     try {
-      // Create a dialogue
-      val dialogue = new JFileChooser()
+      // Ask for a dialogue
+      val result = IOActor !? DialogueFunction(f, read, filters)
 
-      // Set the parameters
-      dialogue.setAcceptAllFileFilterUsed(false) // Do not accept files outside the filter range
-      dialogue.setDialogTitle("Siigna file chooser")
-      dialogue.setMultiSelectionEnabled(false)
-
-      // Set the filters
-      filters.foreach(dialogue.addChoosableFileFilter(_))
-
-      // Activate it
-      val result = if (read) dialogue.showOpenDialog(null) else dialogue.showSaveDialog(null)
-
-      if (result == JFileChooser.APPROVE_OPTION) {
-        val file = dialogue.getSelectedFile
-
-        // If the file does not end with the right extension, append the extension
-        val extensions = dialogue.getFileFilter.asInstanceOf[FileNameExtensionFilter].getExtensions
-        val newFile    = if (!extensions.exists(file.getName.endsWith(_))) {
-          new File(file.getAbsolutePath + "." + extensions.head)
-        } else file
-
-        val res : Any = IOActor !? IOAction(newFile, read, f)
-        Some(res.asInstanceOf[T])
-      } else {
-        Log.info("Dialogue: User aborted dialogue.")
-        None
+      try {
+        Some(result.asInstanceOf[T])
+      } catch {
+        case _ : Throwable => Log.warning(s"Dialogue: $result"); None
       }
     } catch {
       case e : Throwable if !e.isInstanceOf[IOException] => {
