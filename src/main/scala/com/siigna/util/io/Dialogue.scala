@@ -2,7 +2,7 @@ package com.siigna.util.io
 
 import io.Source
 import com.siigna.util.Log
-import java.nio.file.{StandardOpenOption, Files}
+import java.nio.file.{FileSystemException, StandardOpenOption, Files}
 import java.nio.channels.{WritableByteChannel, ReadableByteChannel}
 import java.util
 import java.nio.charset.Charset
@@ -169,7 +169,12 @@ object Dialogue {
         case _ : Throwable => Log.warning(s"Dialogue: $result"); None
       }
     } catch {
-      case e : Throwable if !e.isInstanceOf[IOException] => {
+      case e : IOException => {
+        val doing = if (read) "reading from" else "writing to"
+        Log.error(s"Dialogue: Error when $doing file: " + e)
+        None
+      }
+      case e : Throwable => {
         val doing = if (read) "retrieving" else "storing"
         Log.warning(s"Dialogue: Error when $doing data: $e.")
         None
