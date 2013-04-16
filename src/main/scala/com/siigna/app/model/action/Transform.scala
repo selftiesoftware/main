@@ -11,11 +11,45 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.{PartialShape, ShapePart, Shape}
+import com.siigna.app.model.shape.{PartialShape, Shape}
 import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.selection.ShapePart
 
 /**
- * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
+ * <p>
+ *   Transforms one or more [[com.siigna.app.model.shape.Shape]]s or [[ShapePart]]s
+ *   by a given [[com.siigna.util.geom.TransformationMatrix]].
+ * </p>
+ * <p>
+ *   The Transform object basically just informs the Drawing to execute an [[com.siigna.app.model.action.Action]]
+ *   that fits the type of the input data. But it exists to simplify the entry-point to shapes, their ids and
+ *   the undo/execute mechanisms of the [[com.siigna.app.model.Drawing]].
+ * </p>
+ *
+ * <h2>Examples</h2>
+ * {{{
+ *   // Get some sample shapes - in this case shapes close to (0, 0)
+ *   val shapes = Drawing( Vector2D(0, 0) )
+ *
+*    // Create a TranformationMatrix that rotates the shapes 20 degrees counter-clockwise from (0, 0)
+ *   val transformation = TransformationMatrix().rotate(20)
+ *
+ *   // Apply the transformation to the Drawing using the Transform object
+ *   Transform(shapes, transformation)
+ * }}}
+ * <p>
+ *   Besides extracting shapes (and ids) from the Drawing it is also possible to transform the current selection.
+ * </p>
+ * {{{
+ *   // Retrieve the current selection
+ *   val selection = Drawing.selection
+ *
+ *   // Create a TransformationMatrix that scales the shapes by a factor of 2
+ *   val transformation = TransformationMatrix().scale(2)
+ *
+ *   // Apply the transformation to the current selection
+ *   Transform(selection, transformation)
+ * }}}
  */
 object Transform {
 
@@ -40,7 +74,7 @@ object Transform {
   /**
    * Transforms several shapes or shape-parts with the given TransformationMatrix. Due to erasure the method
    * accepts types of Int -> Any, but if anything else than [[com.siigna.app.model.shape.Shape]]s or
-   * [[com.siigna.app.model.shape.ShapePart]]s are given, an exception will be thrown.
+   * [[ShapePart]]s are given, an exception will be thrown.
    * @param xs  The ids of the shapes or shape parts paired with a matrix
    * @param transformation  The matrix to apply on the shapes
    */
@@ -80,7 +114,7 @@ case class TransformShape(id : Int, transformation : TransformationMatrix) exten
 
 /**
  * Transforms parts of several shapes with the same [[com.siigna.util.geom.TransformationMatrix]]
- * by mapping their id to a [[com.siigna.app.model.shape.ShapePart]].
+ * by mapping their id to a [[ShapePart]].
  *
  * @param shapes  The id paired with a selector that selects the desired shape part.
  * @param transformation  The transformation with which all shape-parts should be applied.

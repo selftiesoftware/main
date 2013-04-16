@@ -11,7 +11,7 @@
 
 package com
 
-import siigna.util.Log
+import com.siigna.app.model.selection.{Selection, ShapePart}
 
 package object siigna extends com.siigna.util.Implicits {
 
@@ -27,12 +27,12 @@ package object siigna extends com.siigna.util.Implicits {
   // Model
   val Drawing = com.siigna.app.model.Drawing
 
-  type Selection = com.siigna.app.model.Selection
-  val Selection = com.siigna.app.model.Selection
+  type Selection = Selection
+  val Selection = _root_.Selection
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
-  type ShapePart = com.siigna.app.model.shape.ShapePart
+  type ShapePart = ShapePart
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape

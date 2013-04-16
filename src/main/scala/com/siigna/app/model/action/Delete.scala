@@ -10,8 +10,9 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{ShapePart, Shape}
-import com.siigna.app.model.{Drawing, Model, Selection}
+import com.siigna.app.model.shape.{Shape}
+import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.selection.{Selection, ShapePart}
 
 /**
  * Deletes shapes from the [[com.siigna.app.model.Drawing]]
@@ -42,10 +43,7 @@ object Delete {
     Drawing execute DeleteShapes(ids.map(i => i -> Drawing(i)).toMap)
   }
   
-  def apply(selection : Selection) {
-    Drawing deselect()
-    apply(selection.parts)
-  }
+  def apply(selection : Selection) { apply(selection.parts) }
   
 }
 

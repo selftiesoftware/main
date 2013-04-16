@@ -17,6 +17,7 @@ import com.siigna.app.model.action.CreateShapes
 import scala.collection.mutable
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.PolylineShape.{PolylineShapeOpen, PolylineShapeClosed}
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
 
 /**
  * Tests IO version 1.
@@ -117,9 +118,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[DeleteShapes] should equal(x)
     }
     it ("can read and write an empty shape part") {
-      val x = EmptyShapePart
+      val x = EmptyShapeSelector$
       out.writeObject(x)
-      in.readObject[EmptyShapePart.type] should equal(x)
+      in.readObject[EmptyShapeSelector$.type] should equal(x)
     }
     it ("can read and write a remote Error") {
       val x = remote.Error(420, "Enhance your calm", session)

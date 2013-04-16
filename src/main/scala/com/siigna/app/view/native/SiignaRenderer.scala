@@ -44,10 +44,10 @@ import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
 object SiignaRenderer extends Renderer {
 
   // Add listeners
-  Drawing.addActionListener((_, _) => if (View.renderer == this) clearTiles())
-  View.addPanListener(v =>            if (View.renderer == this) onPan(v))
-  View.addResizeListener((screen) =>  if (View.renderer == this) onResize())
-  View.addZoomListener((zoom) =>      if (View.renderer == this) clearTiles() )
+  Drawing.addActionListener((_, _) => if (isActive) clearTiles())
+  View.addPanListener(v =>            if (isActive) onPan(v))
+  View.addResizeListener((screen) =>  if (isActive) onResize())
+  View.addZoomListener((zoom) =>      if (isActive) clearTiles() )
 
   // Constants for the different tiles and their directions around a given center
   private val C  = 4; private val vC  = Vector2D( 0, 0)

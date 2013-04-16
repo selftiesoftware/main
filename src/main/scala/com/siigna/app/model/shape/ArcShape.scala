@@ -18,6 +18,8 @@ import com.siigna.app.Siigna
 import com.siigna._
 import app.model.shape.ArcShape.Part
 import scala.Some
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
+import com.siigna.ShapePart
 
 /**
  * This class draws an arc.
@@ -66,9 +68,9 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case _ => Seq(this)
   }
 
-  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapePart else EmptyShapePart
+  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapePart else EmptyShapeSelector$
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapePart else EmptyShapePart
+  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapePart else EmptyShapeSelector$
   
   def getShape(s : ShapePart) = s match {
     case FullShapePart => Some(this)
@@ -103,7 +105,7 @@ object ArcShape
 {
 
   /**
-   * A [[com.siigna.app.model.shape.ShapePart]] for ArcShapes.
+   * A [[ShapePart]] for ArcShapes.
    * Arcs can be selected in the following way:
    * <pre>
    *  1         :  a single handle - the handle with the lowest degree (from 3 o'clock counter clockwise)

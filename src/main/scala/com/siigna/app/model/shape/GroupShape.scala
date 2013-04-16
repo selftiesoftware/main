@@ -14,6 +14,7 @@ package com.siigna.app.model.shape
 import com.siigna.app.model.Model
 import com.siigna.util.collection.Attributes
 import collection.immutable.BitSet
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
 
 //import com.siigna.util.dxf.{DXFValue, DXFSection}
 import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D}
@@ -50,7 +51,7 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
 
     for (i <- 0 until shapes.size) {
       shapes(i).getPart(rect) match {
-        case EmptyShapePart =>
+        case EmptyShapeSelector$ =>
         case s : ShapePart => parts = parts + (i -> s)
       }
     }

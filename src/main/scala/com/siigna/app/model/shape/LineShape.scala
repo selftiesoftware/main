@@ -17,6 +17,7 @@ import com.siigna.app.Siigna
 import com.siigna._
 import app.model.shape.LineShape.Part
 import scala.Some
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$}
 
 /**
  * This class draws a line segment.
@@ -69,15 +70,15 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
         Part(part = true)
       } else if (cond2) {
         Part(part = false)
-      } else EmptyShapePart
-    } else EmptyShapePart
+      } else EmptyShapeSelector$
+    } else EmptyShapeSelector$
   }
 
   def getPart(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     if (distanceTo(p) > selectionDistance) {
       //If shape is not within selection distance of point, return Empty selector
-      EmptyShapePart
+      EmptyShapeSelector$
     } else {
       //If both points are within selection distance, select the whole shape:
       //TODO: In much later version: Make it possible to choose which point to select.

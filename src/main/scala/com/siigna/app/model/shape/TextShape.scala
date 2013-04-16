@@ -19,6 +19,7 @@ import com.siigna.util.geom._
 import com.siigna.app.Siigna
 import com.siigna.app.model.shape.TextShape.Part
 import com.siigna.app.view.View
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
 
 /**
  * This class represents a text-string.
@@ -88,7 +89,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     }
     else {
       Part(0.asInstanceOf[Byte])
-      EmptyShapePart
+      EmptyShapeSelector$
     }
   }
 
@@ -100,7 +101,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     }
     else {
       Part(0.asInstanceOf[Byte])
-      EmptyShapePart
+      EmptyShapeSelector$
     }
   }
 

@@ -15,6 +15,7 @@ import com.siigna.util.collection.Attributes
 import collection.mutable
 import com.siigna.app.model.shape.PolylineShape.Part
 import com.siigna.app.Siigna
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
 
 /**
  * <p>
@@ -131,7 +132,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         groups
       }
     }
-    case EmptyShapePart => Seq(this)
+    case EmptyShapeSelector$ => Seq(this)
   }
 
   def getPart(rect: SimpleRectangle2D) =
@@ -150,7 +151,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         }
       }
       Part(set)
-    } else EmptyShapePart
+    } else EmptyShapeSelector$
 
   def getPart(point: Vector2D) = {
     // Find the distance to all the points and get their index
@@ -167,7 +168,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
       // If no shapes are close, nothing is selected
       if (closeShapes.isEmpty) {
-        EmptyShapePart
+        EmptyShapeSelector$
       } else {
         // Otherwise we add the vertices of the close shapes
         val closeShapeVertices = mutable.BitSet()

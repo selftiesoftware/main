@@ -16,6 +16,7 @@ import org.scalatest.matchers.ShouldMatchers
 import com.siigna.util.geom.Vector2D
 import collection.mutable
 import com.siigna.app.Siigna
+import com.siigna.app.model.selection.EmptyShapeSelector$
 
 /**
  * Tests an open polyline shape
@@ -31,15 +32,15 @@ class PolylineShapeClosedSpec extends FunSpec with ShouldMatchers {
       PLClosed.getPart(Vector2D(0, 0)) should equal(PolylineShape.Part(mutable.BitSet(0)))
       PLClosed.getPart(Vector2D(0, 100)) should equal(PolylineShape.Part(mutable.BitSet(1)))
       PLClosed.getPart(Vector2D(100, 100)) should equal(PolylineShape.Part(mutable.BitSet(2)))
-      PLClosed.getPart(Vector2D(-100, -100)) should equal(EmptyShapePart)
-      PLClosed.getPart(Vector2D(50, -50)) should equal(EmptyShapePart)
+      PLClosed.getPart(Vector2D(-100, -100)) should equal(EmptyShapeSelector$)
+      PLClosed.getPart(Vector2D(50, -50)) should equal(EmptyShapeSelector$)
     }
 
     it ("can select line segments from a point") {
       PLClosed.getPart(Vector2D(0, 50)) should equal(PolylineShape.Part(mutable.BitSet(0, 1)))
       PLClosed.getPart(Vector2D(50, 100)) should equal(PolylineShape.Part(mutable.BitSet(1, 2)))
       PLClosed.getPart(Vector2D(50, 50)) should equal(PolylineShape.Part(mutable.BitSet(0, 2)))
-      PLClosed.getPart(Vector2D(50, 0)) should equal(EmptyShapePart)
+      PLClosed.getPart(Vector2D(50, 0)) should equal(EmptyShapeSelector$)
     }
 
     it ("can select two points from several candidates") {

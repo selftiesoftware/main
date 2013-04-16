@@ -12,24 +12,23 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
-import com.siigna.app.model.shape.{ShapePart, EmptyShapePart, Shape}
-import com.siigna.app.model.{Drawing, Selection, Model}
+import com.siigna.app.model.Drawing
+import com.siigna.app.model.selection.{Selection, ShapePart}
 
 /**
- * An object that provides shortcuts to select objects in the model. Selections are crucial
+ * An object that provides shortcuts to selecting objects in the model. Selections are crucial
  * to manipulating [[com.siigna.app.model.shape.Shape]]s, since they can provide dynamic
  * manipulation on everything ranging from subsets of a single shape to a large collection
  * of whole shapes.
  *
  * <br />
- * These selections are stored in the [[com.siigna.app.model.Selection]] class which is
- * stored in the [[com.siigna.app.model.MutableModel]]. Each time a model changes the selection
- * are destroyed.
+ * These selections are stored in the [[Selection]] class which is
+ * stored in the [[com.siigna.app.model.Model]]. Each time a model changes the selection
+ * are destroyed. This is done mainly to avoid inconsistent selections (if shapes are removed etc.).
  *
  * <br />
- * Selection does not duplicate the shapes, since this would take up way too much space, but
- * contains information about which parts of the shapes are selected (the
- * [[com.siigna.app.model.shape.ShapePart]]). If a user chooses to select only one point of
+ * Selection does not duplicate the shapes, but contains information about which parts of the shapes are selected
+ * (the [[ShapePart]]). If a user chooses to select only one point of
  * a larger shape for instance, the selection has to support this.
  *
  * @see Model
@@ -38,9 +37,10 @@ import com.siigna.app.model.{Drawing, Selection, Model}
  * @see Shape
  */
 object Select {
+
   /**
    * Selects one whole [[com.siigna.app.model.shape.Shape]].
-   * @param id  The ID of the shape to getPart.
+   * @param id  The ID of the shape to select.
    */
   def apply(id : Int) {
     Drawing select id
@@ -55,15 +55,7 @@ object Select {
   }
   //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
   def apply(r : SimpleRectangle2D, entireShape : Boolean) {
-      val filtered = if (!entireShape) {
-      Drawing(r).map(t => t._1 -> t._2.getPart(r)).collect{case (i : Int, p : ShapePart) => i -> p}
-      } else {
-        var parts = Map[Int, ShapePart]()
-        // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-        Drawing(r).foreach(t => if (r.intersects(t._2.geometry.boundary)) parts = parts + (t._1 -> t._2.getPart))
-        parts
-      }
-    Drawing.select(Selection(filtered))
+    Drawing.select(r, entireShape)
   }
 
   /**

@@ -16,6 +16,8 @@ import com.siigna.util.geom.{SimpleRectangle2D, Circle2D, TransformationMatrix, 
 import com.siigna.util.collection.{Attributes}
 import com.siigna.app.Siigna
 import com.siigna.app.model.shape.CircleShape.Part
+import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
+
 /**
  * This class represents a circle.
  *
@@ -60,11 +62,11 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       val contains = geometry.vertices.exists(p => rect.contains(p))
       if (contains) {
         FullShapePart
-      } else EmptyShapePart
+      } else EmptyShapeSelector$
     }
 
   def getPart(point: Vector2D) =
-    if (distanceTo(point) > Siigna.int("selectionDistance").getOrElse(5)) EmptyShapePart
+    if (distanceTo(point) > Siigna.int("selectionDistance").getOrElse(5)) EmptyShapeSelector$
     else {
       FullShapePart
     }
