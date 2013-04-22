@@ -102,8 +102,7 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
   def isDefined = size != 0
 
   /**
-   * Retrieves the whole shapes included in the selection, and not just the selected parts of them. If you are looking
-   * for the partial shapes (or the selected parts of the shapes), see [[com.siigna.app.model.Selection.selectedShapes]].
+   * Retrieves the whole shapes included in the selection, and not just the selected parts of them.
    * @return A map containing the ids and the shapes used in the current selection.
    */
   def shapes : Map[Int, Shape]
@@ -140,19 +139,19 @@ case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Sel
    */
   var attributes : Attributes = Attributes.empty
 
-  def add[A <: Shape](id: Int, shape: A, part: ShapePart[A]) : Selection = {
+  def add[A <: Shape](id: Int, part: ShapePart[A]) : Selection = {
     NonEmptySelection( selection +
       (id ->
         (selection.get(id) match {
-          case Some((_ : A, p : ShapePart[A])) => ShapePart[Shape](shape, p.add(part))
-          case _ => ShapePart[Shape](shape, part)
+          case Some(p : ShapePart[A]) => p.add(part.selector)
+          case _ => part
         })
       )
     )
   }
 
-  def add(parts: Map[Int, ShapePart[Shape]]) : Selection = {
-    def mergePart[A <: Shape](t : (Int, ShapePart[A])) : (Int, ShapePart[A]) = {
+  def add[A <: Shape](parts: Map[Int, ShapePart[A]]) : Selection = {
+    def mergePart(t : (Int, ShapePart[A])) : (Int, ShapePart[A]) = {
       (t._1 -> (selection.get(t._1) match {
         case Some((s : A, p : ShapePart[A])) => p.add(t._2.selector)
         case _ => t._2
@@ -201,7 +200,8 @@ case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Sel
 }
 
 /**
- * A [[com.siigna.app.model.selection.Selection]] that does not contain any shapes.
+ * A [[com.siigna.app.model.selection.Selection]] that does not contain any shapes. Used for optimization purposes
+ * to re-use references to (the empty) inner members.
  */
 case object EmptySelection extends Selection {
 

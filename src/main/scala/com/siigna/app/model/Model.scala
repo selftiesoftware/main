@@ -42,13 +42,13 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
   def build(coll : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action]) = new Model(coll, executed, undone, attributes)
 
   /**
-   * The current selection, if any, represented by a [[Selection]]. The Selection contains
-   * the references to the shapes that have been selected and information about how they were selected. It can also
-   * convert itself to one or more [[com.siigna.app.model.shape.Shape]]s for rendering.
+   * The current selection, if any, represented by a [[com.siigna.app.model.selection.Selection]]. The Selection
+   * contains the references to the shapes that have been selected and information about how they were selected. It
+   * can also convert itself to one or more [[com.siigna.app.model.shape.Shape]]s for rendering.
    *
    * The selection is placed in the Model to ensure that the selection is removed whenever the model changes.
    */
-  var selection : Selection = _root_.Selection.empty
+  var selection : Selection = Selection.empty
 
   /**
    * Replace the current attributes with the given set of attributes.

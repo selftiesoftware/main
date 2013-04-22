@@ -31,16 +31,7 @@ trait ShapePart[+T <: Shape] {
    * @param part  The part of the shape to include.
    * @return  A new ShapePart with the selector included.
    */
-  def add[U <: T](part : ShapeSelector[U]) : ShapePart[U]
-
-  /**
-   * Deletes the part of the shape in the current selection and return the resulting shape(s). If the old shape is
-   * split into two or more the result may be more than one shape. If removing the part means that the shape looses
-   * its  meaning the method returns an empty list.
-   * @return  A sequence of new [[com.siigna.app.model.shape.Shape]](s). If no meaningful shapes remain the sequence
-   *          is empty.
-   */
-  def delete : Seq[T]
+  def add(part : ShapeSelector[T]) : ShapePart[T]
 
   /**
    * Retrieves the part of the shape that have selected, represented as a shape. If the selection is empty or the
@@ -70,24 +61,37 @@ trait ShapePart[+T <: Shape] {
 
 }
 
-case class EmptyShapePart[-T <: Shape](shape : T) extends ShapePart[T] {
+/**
+ * A full selection of a shape. Used to optimize the selection process by simply referring to the entire shape as
+ * the selection. In other words all the selection-logic can be shaved away, so the part technically behaves as
+ * the entire shape.
+ * @param shape The shape to select a part of.
+ * @tparam T  The type of the shape that have been selected.
+ */
+case class FullShapePart[+T <: Shape](shape : T) extends ShapePart[T] {
 
-  def add[U <: T](selector : ShapeSelector[U]) = shape.getPart(selector)
+  /**
+   * Adding a selector to a full selection simply results in the same selection.
+   * @param selector  The selector to add.
+   * @return  A new ShapePart with the selector included.
+   */
+  def add(selector : ShapeSelector[T]) = this
 
-  def delete = Seq(shape)
+  /**
+   * In a FullShapePart the shape-part is equal to the entire shape.
+   * @return  The full shape described as Some(shape).
+   */
+  def part = Some(shape)
 
-  def part = None
+  /**
+   * Returns a [[com.siigna.app.model.selection.FullShapeSelector]] that represents the entire shape-selection.
+   * @return  A [[com.siigna.app.model.selection.FullShapeSelector]]
+   */
+  def selector = FullShapeSelector
 
-  def selector = EmptyShapeSelector
-
-  def vertices = Nil
-
-}
-
-case class FullShapePart[T <: Shape](shape : T) extends ShapePart[T] {
-
-  def add(selector : ShapeSelector[T])
-
+  /**
+   * Returns all the vertices of the shape.
+   */
   lazy val vertices = shape.geometry.vertices
 
 }

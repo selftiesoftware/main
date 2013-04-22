@@ -10,9 +10,10 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.shape.{Shape}
+import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.{Drawing, Model}
-import com.siigna.app.model.selection.{Selection, ShapePart}
+import com.siigna.app.model.selection.{ShapeSelector, Selection, ShapePart}
+import scala.reflect.runtime.universe._
 
 /**
  * Deletes shapes from the [[com.siigna.app.model.Drawing]]
@@ -23,13 +24,18 @@ object Delete {
     Drawing execute DeleteShape(id, Drawing(id))
   }
   
-  def apply(id : Int, part : ShapePart) {
-    apply(Map[Int, ShapePart](id -> part))
+  def apply[T <: Shape](id : Int, selector : ShapeSelector[T]) {
+    apply(Map[Int, ShapePart[T]](id -> selector))
   }
   
-  def apply(shapes : Map[Int, ShapePart]) {
+  def apply(shapes : Map[Int, ShapeSelector[Shape]]) {
     val oldShapes = shapes.map(t => t._1 -> Drawing(t._1))
-    val newShapes = shapes.map(t => Drawing(t._1).delete(t._2)).flatten
+    val newShapes = shapes.map(t => Drawing(t._1) -> t._2).collect(
+      new PartialFunction[(U, ShapeSelector[U]), Seq[Shape]] {
+        def apply[U <: Shape](t : (U, ShapeSelector[U])) = {
+          t._1.delete(t._2)
+        }
+      }).flatten
     
     // Does the deletion result in new shapes?
     if (newShapes.isEmpty) { // No - that's easy!
@@ -42,7 +48,7 @@ object Delete {
   def apply(ids : Traversable[Int]) {
     Drawing execute DeleteShapes(ids.map(i => i -> Drawing(i)).toMap)
   }
-  
+
   def apply(selection : Selection) { apply(selection.parts) }
   
 }

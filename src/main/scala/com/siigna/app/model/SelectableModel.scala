@@ -12,43 +12,41 @@
 package com.siigna.app.model
 
 import action.{Transform, AddAttributes}
-import com.siigna.app.model.shape.{Shape}
-import com.siigna.util.geom.{SimpleRectangle2D, Rectangle2D}
+import com.siigna.app.model.shape.Shape
 import scala.reflect.runtime.universe._
 import com.siigna.app.model.selection._
-import com.siigna.app.model.selection
-import com.siigna.app.model.Model
 import com.siigna.util.geom.SimpleRectangle2D
 
 /**
  * <p>
- *   A trait that interfaces with the [[selection.Selection]] of the model (or as we call it internally,
- *  the "dynamic" or "mutable" layer) that, if not empty, represents parts or subsets of one or more selected shapes.
+ *   A trait that interfaces with the [[com.siigna.app.model.selection.Selection]] of the model (or as we call it
+ *   internally, the "dynamic" or "mutable" layer) that, if not empty, represents parts or subsets of one or more
+ *   selected shapes.
  *</p>
  *
  * <p>
  *   The SelectableModel is a way to indirectly manipulate the underlying [[com.siigna.app.model.ImmutableModel]]
  *   through the temporary "dynamic layer" that can be changed and updated without any effect on the actual
- *   shapes, but with visual feedback to the user. This can be very useful (and gives enourmous performance benefits)
+ *   shapes, but with visual feedback to the user. This can be very useful (and gives enormous performance benefits)
  *   when you need to alter shapes many times before storing any final changes.
  * </p>
  *
  * <p>
  *   To create a selection the <code>select</code> method should be used. This method creates a selection of the given
- *   shapes and [[ShapePart]]s and adds it to the current selection, if any. The
+ *   shapes and [[com.siigna.app.model.selection.ShapePart]]s and adds it to the current selection, if any. The
  *   manipulations done by the user are not stored before it has been deselected via the method <code>deselect</code>.
  *   The method collects all the changes stored in the selection and applies them to the model.
  *   <br>
- *   FYI: The actual selection consists of a map of Ints and [[ShapePart]]s.
+ *   FYI: The actual selection consists of a map of Ints and [[com.siigna.app.model.selection.ShapePart]]s.
  * </p>
  *
  * <h2>Use cases</h2>
  * <p>
  *   If a users finds any shapes he/she would like to manipulate, they can be altered many times via the
- *   [[selection.Selection]], giving the user a chance to see the output of the transformations before
- *   storing them. The first example covers a simple way to retrieve shapes from the [[com.siigna.app.model.Drawing]],
- *   setting their attributes and moving them 100 units to the right. Afterwards we <code>deselect</code> the
- *   selection, to store the changes permanently.
+ *   [[com.siigna.app.model.selection.Selection]], giving the user a chance to see the output of the transformations
+ *   before storing them. The first example covers a simple way to retrieve shapes from the
+ *   [[com.siigna.app.model.Drawing]], setting their attributes and moving them 100 units to the right. Afterwards
+ *   we <code>deselect</code> the selection, to store the changes permanently.
  * </p>
  * {{{
  *   // Get some random shapes from the Drawing (this finds shapes close to (0, 0))
@@ -148,7 +146,7 @@ trait SelectableModel {
       executeChanges(selection)
 
       // Then create a new selection
-      selection = selection.add(shapes.map(s => s._1 -> ShapeSelection(s._2, FullShapePart)).toMap)
+      selection = selection.add(shapes.map(s => s._1 -> s._2.getPart(FullShapeSelector)).toMap[Int, ShapePart[Shape]])
     }
 
     selection
@@ -159,25 +157,25 @@ trait SelectableModel {
    * entire shape is selected, if the part is empty or no shape with the given id could be found in the model,
    * nothing happens.
    * @param id  The id of the shape
-   * @param part  The part of the shape to getPart
+   * @param selector  The selector of the shape describing how the shape should be selected.
    * @tparam T  The type of the shape to select.
    * @return  The new selection after the selection.
    */
   def select[T <: Shape : TypeTag](id : Int, selector : ShapeSelector[T]) : Selection = {
-    def selectType[U <: Shape : TypeTag](s : U) {
-      s match {
-        case x : U if (typeOf[U] =:= typeOf[T]) => {
+    def selectType[U <: Shape : TypeTag](shape : U) {
+      shape match {
+        case x if (typeOf[U] <:< typeOf[T]) => {
           // First execute the changes
           executeChanges(selection)
 
           // Then create a new selection
-          selection = selection.add[T](id, x.asInstanceOf[T], selector))
+          selection = selection.add(id, x.getPart(selector.asInstanceOf[ShapeSelector[x.T]]))
         }
         case _ =>
       }
     }
 
-    part match {
+    selector match {
       case EmptyShapeSelector =>
       case _ => Drawing.get(id).foreach(selectType(_))
     }
@@ -186,17 +184,15 @@ trait SelectableModel {
   }
 
   def select(rectangle : SimpleRectangle2D, entireShapes : Boolean = true) : Selection = {
-    val shapes : Map[Int, ShapeSelection[Shape]] = if (!entireShapes) {
-      model(rectangle).map(t => t._1 -> ShapeSelection(t._2, t._2.getPart(rectangle))).collect{
-        case (i : Int, t : (Shape, ShapePart)) => i -> t
-      }
+    val shapes = if (!entireShapes) {
+      model(rectangle).map(t => t._1 -> t._2.getPart(rectangle))
     } else {
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
       model(rectangle).collect {
-        case t if (rectangle.intersects(t._2.geometry.boundary)) => (t._1 -> ShapeSelection(t._2, t._2.getPart))
+        case t if (rectangle.intersects(t._2.geometry.boundary)) => (t._1 -> t._2.getPart(FullShapeSelector))
       }
     }
-    select(_root_.Selection(shapes))
+    select(Selection(shapes.toMap[Int, ShapePart[Shape]]))
     selection
   }
 
@@ -215,11 +211,12 @@ trait SelectableModel {
    * Select every shape in the Model.
    */
   def selectAll() {
-    selection = _root_.Selection(Drawing.map(i => i._1 -> ShapeSelection(i._2, FullShapePart)))
+    selection = Selection(Drawing.map(i => i._1 -> i._2.getPart(FullShapeSelector)).toMap[Int, ShapePart[Shape]])
   }
 
   /**
-   * The current selection represented by a [[selection.Selection]] where shapes can and can not be set.
+   * The current selection represented by a [[com.siigna.app.model.selection.Selection]] where shapes can and can not
+   * be set.
    * @return  Some[Selection] if a selection is active or None if nothing has been selected
    */
   def selection : Selection = model.selection

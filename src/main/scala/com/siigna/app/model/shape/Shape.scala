@@ -78,6 +78,16 @@ trait Shape extends HasAttributes {
   type T <: Shape
 
   /**
+   * Deletes the part of the shape in the current selection and return the resulting shape(s). If the old shape is
+   * split into two or more the result may be more than one shape. If removing the part means that the shape looses
+   * its  meaning the method returns an empty list.
+   * @param selector  The selector describing the parts of the shape to remove.
+   * @return  A sequence of new [[com.siigna.app.model.shape.Shape]](s). The returned shapes might not be of the same
+   *          type as the initial shape. If no meaningful shapes remain the sequence is empty.
+   */
+  def delete(selector : ShapeSelector[T]) : Seq[Shape]
+
+  /**
    * Calculates the closest distance to the shape from the given point.
    * @param point  The point to examine
    * @return  A double value indicating the distance from the given point to the closest point on this shape.
@@ -124,10 +134,9 @@ trait Shape extends HasAttributes {
    * is returned. A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
    * operations on specific parts of a shape.
    * @param selector  The selector with which to retrieve part of the current shape.
-   * @tparam U  The type of the ShapeSelector, which must be a subtype of the current shape.
    * @return  Some[PartialShape] if a part can be extracted, None otherwise.
    */
-  def getPart[U <: T](selector : ShapeSelector[U]) : ShapePart[U]
+  def getPart(selector : ShapeSelector[T]) : ShapePart[T]
 
   /**
    * Completely replace the attributes of the shape with the given attributes.
@@ -195,7 +204,7 @@ trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 
 
 /**
- * A shape that's closed, that is to say a shape that encases a closed space.
+ * A shape that's closed, that is, a shape that encases a closed space.
  */
 trait ClosedShape extends Shape {
 
