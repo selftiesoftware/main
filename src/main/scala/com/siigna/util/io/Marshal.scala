@@ -60,7 +60,7 @@ object Marshal {
    * @return  A byte array containing the objects written to it.
    */
   protected def marshal(f : (SiignaOutputStream) => Unit) : Array[Byte] = {
-    val bytes = new ByteArrayOutputStream(512)
+    val bytes = new ByteArrayOutputStream(64)
     val out = new SiignaOutputStream(bytes, IOVersion(IOVersion.Current))
     val version = IOVersion.Current
 
@@ -72,6 +72,8 @@ object Marshal {
 
     // Write the object itself
     f(out)
+
+    Log.debug("Unmarshal: Successfully wrote object " + f)
 
     // Flush and close
     out.flush()

@@ -40,7 +40,7 @@ case object EndPoints extends EventSnap {
   def snap(q : Vector2D, model : Traversable[Shape]) : Vector2D = {
     val point = q.transform(View.deviceTransformation)
     def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
-    def closestPoints(points : Seq[Vector2D]) = points.reduceLeft((p1, p2) => if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2)
+    def closestPoints(points : Seq[Vector2D]) = points.reduceLeft(closestTwo)
 
     if (!model.isEmpty) {
       val res = model.map(_ match {
@@ -53,7 +53,7 @@ case object EndPoints extends EventSnap {
         case _ => point
       })
       val closestPoint = res.reduceLeft(closestTwo)
-      if (closestPoint.distanceTo(point) * View.zoom <= 10) {
+      if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
         snapPoint = Some(closestPoint)
         closestPoint.transform(View.drawingTransformation)
       } else {

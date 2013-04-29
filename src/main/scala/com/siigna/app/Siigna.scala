@@ -10,12 +10,11 @@
  */
 package com.siigna.app
 
-import com.siigna.app.controller.Controller
 import com.siigna.app.model.server.User
 import model._
 import view._
 import com.siigna.util.geom._
-import java.awt.{Color, Cursor}
+import java.awt.Cursor
 import com.siigna.util.event.Track
 
 /**
@@ -38,12 +37,6 @@ import com.siigna.util.event.Track
  * the [[com.siigna.module.Module]]s.</p>
  */
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
-
-  /**
-   * The active color and line weight.
-   */
-  var activeColor = new Color(0.00f, 0.00f, 0.00f, 1.00f)
-  var activeLineWeight = 0.2
 
   /**
    * The active display, if any.

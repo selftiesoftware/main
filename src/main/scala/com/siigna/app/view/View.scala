@@ -18,6 +18,7 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.{Selection, Drawing}
 import com.siigna.util.Log
+import com.siigna.app.view.native.SiignaGraphics
 
 /**
  * <p>
@@ -61,6 +62,21 @@ import com.siigna.util.Log
  *  The former is handy whenever we need to put the shapes onto the screen (and we need to do that a lot) while the
  *  latter can be used for keeping something on a fixed position, regardless of the zoom.
  * </p>
+ *
+ * <h3>Overriding default behaviour</h3>
+ * <p>
+ *  The View uses a [[com.siigna.app.view.Renderer]] to render the context in a somewhat intelligent way using
+ *  caching. The native implementation can be found in [[com.siigna.app.view.native.SiignaRenderer]].
+ * </p>
+ * <p>
+ *  An implementation of [[com.siigna.app.view.Graphics]] is used to draw the actual shapes by the renderer. The
+ *  native implementation can be found in [[com.siigna.app.view.native.SiignaGraphics]].
+ * </p>
+ * <p>
+ *  If you have a smarter way of doing it either of the above, or simply have other needs, you can override both.
+ *  See the [[com.siigna.app.view.View#graphics]], [[com.siigna.app.view.View#renderer]] methods or
+ *  [[com.siigna.app.view.native]] package for a description.
+ * </p>
  */
 object View {
 
@@ -71,6 +87,12 @@ object View {
    * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
    */
   private var canvas : Option[Canvas] = None
+
+  /**
+   * A pan vector originating in the top-left corner of the screen. Private because the public pan has it's (0,0)
+   * in the center of the screen, which is much more intuitive.
+   */
+  private var _pan : Vector2D = Vector2D(0, 0)
 
   /**
    * The frames in the current second.
@@ -85,12 +107,18 @@ object View {
   var fpsSecond : Double = 0
 
   /**
-   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
-   * screen of the application/applet. A [[com.siigna.util.geom.Vector]] of (0, 0) thus means that the center of the
-   * view-port (drawing) is in (0, 0) of the screen (top left corner). A Vector of (width / 2, height / 2) means
-   * that the center of the view-port is in the center of the drawing.
+   * The default graphics implementation represented as a function that can be called whenever someone needs an
+   * instance of [[com.siigna.app.view.Graphics]]. If you wish to override the behaviour and insert a new Graphics
+   * implementation, set this variable like so:
+   * {{{
+   *   class MyOwnGraphics(val AWTGraphics : Graphics2D) extends Graphics { ... }
+   *   View.graphics = (AWTGraphics : Graphics2D) => new MyOwnGraphics(AWTGraphics)
+   * }}}
+   * The next time the View is asked to paing, the <code>MyOwnGraphics</code> class will be instantiated and returned.
+   * This happens at every paint-cycle, so there's no need to do anything more.
+   * @see [[com.siigna.app.view.View]]
    */
-  var pan : Vector2D = Vector2D(0, 0)
+  var graphics : (Graphics2D) => Graphics = (g : Graphics2D) => new SiignaGraphics(g)
 
   /**
    * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
@@ -102,6 +130,11 @@ object View {
    * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
    */
   var renderer : Renderer = null
+
+  /**
+   * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
+   */
+  private var listenersPan : Seq[Vector2D => Unit] = Nil
 
   /**
    * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
@@ -120,8 +153,16 @@ object View {
   var zoom : Double = 1
 
   /**
+   * Adds a pan listener that will be executed whenever the view is panning - that is whenever the user moves
+   * the view-port of the drawing.
+   * @param f  The function to execute after the pan operation have been made. The Vector2D signalling the distance
+   *           from Vector2D(0, 0) will be given as a parameter.
+   */
+  def addPanListener(f : (Vector2D) => Unit) { listenersPan :+= f }
+
+  /**
    * Adds a resize listener that will be executed whenever the view is being resized.
-   * @param f  The function to execute after the resize operation has been made. The screen-dimensions represented by
+   * @param f  The function to execute after the resize operation have been made. The screen-dimensions represented by
    *           a [[com.siigna.util.geom.Rectangle2D]] are given as a parameter to the callback-function.
    */
   def addResizeListener(f : (Rectangle2D) => Unit) { listenersResize :+= f }
@@ -213,7 +254,10 @@ object View {
    * create 'black-outs' (also known as double-buffering) which makes us
    * saaaad pandas.
    *
-   * For more, read: <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">R.J. Lorimer's entry about hardwareaccelation</a>.
+   * For more, read:
+   * <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">
+   *   R.J. Lorimer's entry about hardwareaccelation
+   * </a>.
    *
    * @param screenGraphics  The AWT screen graphics to output the graphics to.
    * @param model  The shapes to draw mapped with their id's. The id's are used to collect any shape parts from the
@@ -228,7 +272,7 @@ object View {
 
     // Retrieve graphics objects
     val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
-    val graphics = Graphics(graphics2D)
+    val graphics = View.graphics(graphics2D)
 
     // Setup anti-aliasing
     val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
@@ -239,8 +283,8 @@ object View {
       // Render and draw the renderer
       renderer.paint(graphics)
     } catch {
-      case e : InterruptedException => Log.info("View: The view is shuttin while painting. Move along...!")
-      case e : Throwable => Log.error("View: Unable to render drawing: " + e)
+      case e : InterruptedException => Log.info("View: The view is shutting down while painting. Move along...")
+      case e : Throwable => Log.error("View: Unable to render drawing: ", e)
     }
 
     // Fetch and draw the dynamic layer.
@@ -249,7 +293,7 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      selection.par.foreach(s => s.selectedShapes.foreach(e => {
+      selection.foreach(s => s.selectedShapes.foreach(e => {
         graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
       }))
 
@@ -276,11 +320,22 @@ object View {
   }
 
   /**
+   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
+   * screen of the application/applet. A [[com.siigna.util.geom.Vector]] of (0, 0) means that the center of the
+   * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
+   * that the center of the drawing is in the bottom right of the screen.
+   */
+  def pan : Vector2D = _pan + Vector2D(center.x, center.y)
+
+  /**
    * Pans the view by the given delta.
    * @param delta  How much the view should pan.
    */
   def pan(delta : Vector2D) {
-    if (Siigna.navigation) pan = pan + delta
+    if (Siigna.navigation) {
+      _pan = _pan + delta
+      listenersPan.foreach(_.apply(_pan))
+    }
   }
 
   /**
@@ -288,7 +343,10 @@ object View {
    * @param delta  How much the x-axis of the view should pan.
    */
   def panX(delta : Double) {
-    if (Siigna.navigation) pan = pan.copy(x = pan.x + delta)
+    if (Siigna.navigation) {
+      _pan = _pan.copy(x = _pan.x + delta)
+      listenersPan.foreach(_.apply(_pan))
+    }
   }
 
   /**
@@ -296,7 +354,10 @@ object View {
    * @param delta  How much the y-axis of the view should pan.
    */
   def panY(delta : Double) {
-    if (Siigna.navigation) pan = pan.copy(y = pan.y + delta)
+    if (Siigna.navigation) {
+      _pan = _pan.copy(y = _pan.y + delta)
+      listenersPan.foreach(_.apply(_pan))
+    }
   }
 
   /**
@@ -306,11 +367,6 @@ object View {
     if (canvas.isDefined) {
       // Resize the canvas
       canvas.get.setSize(width, height)
-
-      // Pan the view if the pan isn't set
-      if (View.pan == Vector2D(0, 0)) {
-        View.pan(View.screen.center)
-      }
 
       // Notify the listeners
       listenersResize.foreach(_(screen))
@@ -324,7 +380,6 @@ object View {
    */
   protected[app] def setCanvas(canvas : Canvas) {
     this.canvas = Some(canvas)
-    pan = Vector2D(canvas.getWidth / 2, canvas.getHeight / 2)
   }
 
   /**
@@ -346,7 +401,7 @@ object View {
   /**
    * The screen as a rectangle, given in device coordinates.
    */
-  def screen : Rectangle2D = SimpleRectangle2D(0, 0, width, height)
+  def screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, width, height)
 
   /**
    * Returns the TransformationMatrix for the current pan distance and zoom
@@ -384,10 +439,11 @@ object View {
       if ((zoom > 0.000001 || zoomDelta < 0)) {
         zoom *= zoomFactor
       }
-      pan = (pan - point) * zoomFactor + point
+      _pan = (pan - point) * zoomFactor + point - center
 
       // Notify the listeners
       listenersZoom.foreach(_(zoom))
+      listenersPan.foreach(_(_pan))
     }
   }
 }

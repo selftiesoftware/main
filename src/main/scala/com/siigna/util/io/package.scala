@@ -2,6 +2,9 @@ package com.siigna.util
 
 import java.io.File
 import actors.Actor
+import javax.swing.{UIManager, JFileChooser}
+import javax.swing.filechooser.FileNameExtensionFilter
+import java.security.{PrivilegedAction, AccessController}
 
 /**
  * The persistence package is capable of converting objects into byte arrays (marshaling), reading objects from
@@ -58,7 +61,39 @@ import actors.Actor
 package object io {
 
   // A private class to perform type-safe callback invocations
-  private[io] case class IOAction[T](file : File, read : Boolean, f : (File => T))
+  private[io] case class DialogueFunction[T](f : (File => T), read : Boolean, filters : Seq[FileNameExtensionFilter])
+
+  private var dialogue : Option[JFileChooser] = None
+
+  // Initialize the dialogue and the look and feel
+  private val t = new Thread() {
+    override def run() {
+      try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
+      } catch {
+        case e : Throwable => Log.warning("Dialogue: Error when setting the Look and Feel. Reverting to default.")
+      }
+
+      try {
+        AccessController.doPrivileged(new PrivilegedAction[Unit] {
+          def run() {
+            val newDialogue = new JFileChooser()
+
+            // Set the parameters
+            newDialogue.setAcceptAllFileFilterUsed(false) // Do not accept files outside the filter range
+            newDialogue.setDialogTitle("Siigna file chooser")
+            newDialogue.setMultiSelectionEnabled(false)
+
+            dialogue = Some(newDialogue)
+          }
+        })
+      } catch {
+        case e : Throwable => Log.warning(s"Dialogue: Error when creating dialogue instance: $e")
+      }
+    }
+  }
+  t.setPriority(Thread.MIN_PRIORITY)
+  t.start()
 
   // A private IO actor which is used to execute IO functionality on files.
   // Not pretty, but can't think of an alternative
@@ -66,10 +101,40 @@ package object io {
     def act() {
       loop {
         react {
-          case IOAction(file, read, f) => {
-            if (!read && !file.exists()) file.createNewFile()
-            if (read) file.setReadable(true) else file.setWritable(true)
-            reply(f(file))
+          case DialogueFunction(f, read, filters) => {
+            // Makes sure the look, feel and dialogue have been attempted to be set
+            t.join()
+
+            dialogue match {
+              case Some(d) => {
+                // Remove the old filters
+                d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
+
+                // Set the filters
+                filters.foreach(d.addChoosableFileFilter(_))
+
+                val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                  val selectedFile = d.getSelectedFile
+
+                  // If the file does not end with the right extension, append the extension
+                  val extensions = d.getFileFilter.asInstanceOf[FileNameExtensionFilter].getExtensions
+                  val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
+                    new File(selectedFile.getAbsolutePath + "." + extensions.head)
+                  } else selectedFile
+
+                  if (!read && !file.exists()) file.createNewFile()
+                  if (read) file.setReadable(true) else file.setWritable(true)
+
+                  // Reply back
+                  reply(f(file))
+                } else {
+                  reply("User aborted dialogue.")
+                }
+              }
+              case e => reply(e)
+            }
           }
         }
       }

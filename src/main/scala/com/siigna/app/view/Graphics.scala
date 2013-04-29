@@ -19,7 +19,7 @@ import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
 import com.siigna.util.event.Snap
-import siigna.SiignaGraphics
+import native.SiignaGraphics
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -53,7 +53,7 @@ import siigna.SiignaGraphics
  *     val siignaGraphics = Graphics(javaGraphics)
  *   }}}
  *   This behaviour can be overridden if you wish to use another graphics object to do your painting. Please refer
- *   to the companion object for details, or see the [[com.siigna.app.view.siigna.SiignaGraphics]] for an example
+ *   to the companion object for details, or see the [[com.siigna.app.view.native.SiignaGraphics]] for an example
  *   on an implementation.
  * </p>
  * @see [[com.siigna.util.geom.TransformationMatrix]].
@@ -180,34 +180,4 @@ trait Graphics {
   def setStrokeWidth(width : Double) {
     AWTGraphics setStroke(new BasicStroke(width.asInstanceOf[Float]))
   }
-}
-
-/**
- * A companion object to [[com.siigna.app.view.Graphics]] to ensure that the correct implementation of the
- * Graphics object is returned. If you with to override the default Graphics behaviour, call the
- */
-object Graphics {
-
-  /**
-   * The default graphics implementation represented as a function that can be called whenever someone needs an
-   * instance of [[com.siigna.app.view.Graphics]]. If you wish to override the behaviour and insert a new Graphics
-   * implementation, set this variable like so:
-   * {{{
-   *   class MyOwnGraphics(val AWTGraphics : Graphics2D) extends Graphics { ... }
-   *   Graphics.instance = (AWTGraphics : Graphics2D) => new MyOwnGraphics(AWTGraphics)
-   * }}}
-   * The next time <code>Graphics</code> is called with a AWT Grahpics object, the <code>MyOwnGraphics</code>
-   * class will be instantiated and returned. This happens at every paint-cycle, so there's no need to do anything
-   * more.
-   * @see [[com.siigna.app.view.View]]
-   */
-  var instance : (Graphics2D) => Graphics = (g : Graphics2D) => new SiignaGraphics(g)
-
-  /**
-   * Creates an instance of the underlying graphics implementation.
-   * @param graphics  A [[java.awt.Graphics2D]] object from Java, which the Siigna [[com.siigna.app.view.Graphics]]
-   *                  uses to draw upon.
-   */
-  def apply(graphics : Graphics2D) : Graphics = instance(graphics)
-
 }

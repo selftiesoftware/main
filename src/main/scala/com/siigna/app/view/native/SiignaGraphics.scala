@@ -1,4 +1,4 @@
-package com.siigna.app.view.siigna
+package com.siigna.app.view.native
 
 import com.siigna.app.view.Graphics
 import java.awt.Graphics2D
