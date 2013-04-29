@@ -188,12 +188,23 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     bindTo360(angle - startAngle) <= this.angle
   }
 
-  def intersects(geometry : Geometry2D) = throw new UnsupportedOperationException("Not implemented")
+  def intersects(geom : Geometry2D) = geom match {
 
-  /**
+    case circle : Circle2D => circle.intersects(this)
+    case collection : CollectionGeometry2D => collection.intersects(this)
+    case segment : Segment2D => segment.intersects(this)
+
+    //TODO: matches on the boundary of the arc, which is not correct.
+    case rectangle : SimpleRectangle2D => {
+      !(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
+    }
+    case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
+
+    /**
    * Returns a list of points, defined as the intersection(s) between the
    * arc and another arc.
    */
+  }
   def intersections(geometry : Geometry2D) : Set[Vector2D] = geometry match {
     case arc : Arc2D => {
       val circleIntersections = Circle(center, radius).intersections(Circle(arc.center, arc.radius))
