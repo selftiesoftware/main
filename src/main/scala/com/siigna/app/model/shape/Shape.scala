@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.geom._
-import com.siigna.app.model.selection.{ShapeSelector, ShapePart}
+import com.siigna.app.model.selection.ShapeSelector
 
 /**
  * A Shape that can be drawn and transformed.
@@ -85,7 +85,7 @@ trait Shape extends HasAttributes {
    * @return  A sequence of new [[com.siigna.app.model.shape.Shape]](s). The returned shapes might not be of the same
    *          type as the initial shape. If no meaningful shapes remain the sequence is empty.
    */
-  def delete(selector : ShapeSelector[T]) : Seq[Shape]
+  def delete(selector : ShapeSelector) : Seq[Shape]
 
   /**
    * Calculates the closest distance to the shape from the given point.
@@ -114,29 +114,51 @@ trait Shape extends HasAttributes {
   def geometry : Geometry2D
 
   /**
-   * Gets part of the shape by a single point. The part of the shape that is closest to that point will be selected.
-   * @param point  The point to base the selection on.
-   * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.selection.ShapePart]].
-   */
-  def getPart(point : Vector2D) : ShapePart[T]
-
-  /**
-   * Gets part of the shape by a rectangle. If the rectangle encloses the entire shape then return everything, but if
-   * only a single point is enclosed (for example) then return that point and that point only. If nothing is
-   * enclosed, then return None. This comes in handy when a selection-box sweeps across the model.
-   * @param rect  The rectangle to base the selection on.
-   * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.selection.ShapePart]].
-   */
-  def getPart(rect : SimpleRectangle2D) : ShapePart[T]
-
-  /**
    * Retrieves a part of the shape from the given selector. If no meaningful part can be extracted, an empty part
    * is returned. A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
    * operations on specific parts of a shape.
    * @param selector  The selector with which to retrieve part of the current shape.
    * @return  Some[PartialShape] if a part can be extracted, None otherwise.
    */
-  def getPart(selector : ShapeSelector[T]) : ShapePart[T]
+  def getPart(selector : ShapeSelector) : Option[PartialShape]
+
+  /**
+   * Gets a [[com.siigna.app.model.selection.ShapeSelector]] that can be used to retrieve a sub-part of this shape
+   * that is closest to the given point. If the entire shape is close, we return a
+   * [[com.siigna.app.model.selection.FullShapeSelector]]. If nothing is close we return a
+   * [[com.siigna.app.model.selection.EmptyShapeSelector]].
+   * @param point  The point to base the selection on.
+   * @return  A [[com.siigna.app.model.selection.ShapeSelector]].
+   */
+  def getSelector(point : Vector2D) : ShapeSelector
+
+  /**
+   * Gets a [[com.siigna.app.model.selection.ShapeSelector]] that can be used to retrieve a sub-part of this shape
+   * that is contained within the given rectangle, <code>rect</code>. If the rectangle encloses the entire shape then
+   * return everything, but if only a single point is enclosed (for example) then return that point and that point
+   * only. If nothing is enclosed, then we return the [[com.siigna.app.model.selection.EmptyShapeSelector]]. This
+   * comes in handy when a selection-box sweeps across the model.
+   * @param rect  The rectangle to base the selection on.
+   * @return  A [[com.siigna.app.model.selection.ShapeSelector]].
+   */
+  def getSelector(rect : SimpleRectangle2D) : ShapeSelector
+
+  /**
+   * Retrieves a sub-selection as a shape.
+   * <b>Note:</b> The type of the shape can change from the current shape. Since all shapes cannot split into
+   * several shapes, some are transformed to group-shapes and so forth.
+   * @param selector  The selector to base the selection on.
+   * @return  Some if a shape could be extracted by the operation, None otherwise.
+   */
+  def getShape(selector : ShapeSelector) : Option[Shape]
+
+  /**
+   * Retrieves the points that are included in the selection described by the given
+   * [[com.siigna.app.model.selection.ShapeSelector]].
+   * @param selector  The selector, i. e. the combination of the shape to be retrieved in points.
+   * @return  A sequence of points. Can be empty.
+   */
+  def getVertices(selector : ShapeSelector) : Seq[Vector2D]
 
   /**
    * Completely replace the attributes of the shape with the given attributes.

@@ -11,9 +11,7 @@
 
 package com.siigna.app.model
 
-import action.{Transform, AddAttributes}
-import com.siigna.app.model.shape.Shape
-import scala.reflect.runtime.universe._
+import com.siigna.app.model.action.{TransformShapeParts, Action, AddAttributes}
 import com.siigna.app.model.selection._
 import com.siigna.util.geom.SimpleRectangle2D
 
@@ -33,11 +31,9 @@ import com.siigna.util.geom.SimpleRectangle2D
  *
  * <p>
  *   To create a selection the <code>select</code> method should be used. This method creates a selection of the given
- *   shapes and [[com.siigna.app.model.selection.ShapePart]]s and adds it to the current selection, if any. The
+ *   shapes and [[com.siigna.app.model.selection.ShapeSelector]]s and adds it to the current selection, if any. The
  *   manipulations done by the user are not stored before it has been deselected via the method <code>deselect</code>.
  *   The method collects all the changes stored in the selection and applies them to the model.
- *   <br>
- *   FYI: The actual selection consists of a map of Ints and [[com.siigna.app.model.selection.ShapePart]]s.
  * </p>
  *
  * <h2>Use cases</h2>
@@ -64,7 +60,7 @@ import com.siigna.util.geom.SimpleRectangle2D
  * }}}
  *
  * @see [[com.siigna.app.model.Drawing]], [[com.siigna.app.model.Model]], [[com.siigna.app.model.selection.Selection]],
- *     [[com.siigna.app.model.selection.ShapePart]]
+ *     [[com.siigna.app.model.selection.ShapeSelector]]
  */
 trait SelectableModel {
 
@@ -93,32 +89,40 @@ trait SelectableModel {
    * @return  The new (empty) selection.
    */
   def deselect() = {
-    executeChanges(selection)
+    val action = getChanges(selection)
     selection = Selection.empty
+    action.foreach(a => Drawing execute a)
     selection
   }
 
   /**
-   * Executes the changes stored in the given selection as [[com.siigna.app.model.action.Action]]s, if any changes
+   * Retrieves the changes made upon the given selection as [[com.siigna.app.model.action.Action]]s, if any changes
    * are found.
    * @param selection The [[com.siigna.app.model.selection.Selection]] containing changes to be executed.
-   * @return  A Map of the previous selected ids, paired with the shapes and parts.
+   * @return  Some[Action] if any changes were found, None otherwise
    */
-  private def executeChanges(selection : Selection) : Selection = {
+  private def getChanges(selection : Selection) : Option[Action] = {
     selection match {
       case s : NonEmptySelection => {
-        val a = s.attributes
-        val t = s.transformation
+        // Find the resulting transformation, if any
+        val transform = if (!s.transformation.isEmpty) {
+          Some(TransformShapeParts(selection.map(t => t._1 -> t._2._2), s.transformation))
+        } else None
 
-        // Transform the selection
-        Transform(s, t)
+        // Find the resulting attributes, if any
+        val attributes = if (!s.attributes.isEmpty) {
+          Some(new AddAttributes(selection.map(t => t._1 -> t._2._1.attributes), s.attributes))
+        } else None
 
-        // Assign the attributes from the selection
-        AddAttributes(s.keys, a)
+        (transform, attributes) match {
+          case (Some(t), Some(a)) => Some(t merge a)
+          case (Some(t), None) => Some(t)
+          case (None, Some(a)) => Some(a)
+          case _ => None
+        }
       }
-      case _ =>
+      case _ => None
     }
-    selection
   }
 
   /**
@@ -142,11 +146,14 @@ trait SelectableModel {
     val shapes = ids.map(i => i -> Drawing(i))
 
     if (!shapes.isEmpty) {
-      // First execute the changes
-      executeChanges(selection)
+      // First retrieve the changes
+      val action = getChanges(selection)
 
       // Then create a new selection
-      selection = selection.add(shapes.map(s => s._1 -> s._2.getPart(FullShapeSelector)).toMap[Int, ShapePart[Shape]])
+      selection = selection.add(shapes.map(s => s._1 -> (s._2 -> FullShapeSelector)).toMap)
+
+      // .. And lastly execute the changes
+      action.foreach(a => Drawing execute a)
     }
 
     selection
@@ -158,41 +165,28 @@ trait SelectableModel {
    * nothing happens.
    * @param id  The id of the shape
    * @param selector  The selector of the shape describing how the shape should be selected.
-   * @tparam T  The type of the shape to select.
    * @return  The new selection after the selection.
    */
-  def select[T <: Shape : TypeTag](id : Int, selector : ShapeSelector[T]) : Selection = {
-    def selectType[U <: Shape : TypeTag](shape : U) {
-      shape match {
-        case x if (typeOf[U] <:< typeOf[T]) => {
-          // First execute the changes
-          executeChanges(selection)
-
-          // Then create a new selection
-          selection = selection.add(id, x.getPart(selector.asInstanceOf[ShapeSelector[x.T]]))
-        }
-        case _ =>
-      }
+  def select(id : Int, selector : ShapeSelector) : Selection = {
+    Drawing.get(id) match {
+      case Some(s) => selection = selection.add(id, s -> selector)
+      case _ =>
     }
-
-    selector match {
-      case EmptyShapeSelector =>
-      case _ => Drawing.get(id).foreach(selectType(_))
-    }
-
     selection
   }
 
   def select(rectangle : SimpleRectangle2D, entireShapes : Boolean = true) : Selection = {
     val shapes = if (!entireShapes) {
-      model(rectangle).map(t => t._1 -> t._2.getPart(rectangle))
+      model(rectangle).map(t => t._1 -> (t._2 -> t._2.getSelector(rectangle)))
     } else {
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
       model(rectangle).collect {
-        case t if (rectangle.intersects(t._2.geometry.boundary)) => (t._1 -> t._2.getPart(FullShapeSelector))
+        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
+          (t._1 -> (t._2 -> FullShapeSelector))
+        }
       }
     }
-    select(Selection(shapes.toMap[Int, ShapePart[Shape]]))
+    select(Selection(shapes))
     selection
   }
 
@@ -211,7 +205,7 @@ trait SelectableModel {
    * Select every shape in the Model.
    */
   def selectAll() {
-    selection = Selection(Drawing.map(i => i._1 -> i._2.getPart(FullShapeSelector)).toMap[Int, ShapePart[Shape]])
+    selection = Selection(Drawing.map(i => i._1 -> (i._2 -> FullShapeSelector)))
   }
 
   /**

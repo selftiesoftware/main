@@ -3,26 +3,23 @@ package com.siigna.util.io
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSpec, BeforeAndAfter}
 import org.ubjson.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import version.IOVersion1
-import com.siigna.app.model.action._
+import version.IOVersion2
 import com.siigna.app.controller.remote
-import remote.{RemoteConstants, Session}
 import java.awt.Color
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.server.User
-import com.siigna.app.model.action.CreateShape
-import com.siigna.app.model.action.CreateShapes
-import scala.collection.mutable
+import com.siigna.app.model.action._
 import com.siigna.app.model.Model
+import com.siigna.app.model.selection._
+import scala.collection.immutable.BitSet
 import com.siigna.app.model.shape.PolylineShape.{PolylineShapeOpen, PolylineShapeClosed}
-import com.siigna.app.model.selection.{FullShapePart, EmptyShapeSelector$, ShapePart}
 
 /**
- * Tests IO version 1.
+ * Tests IO version 2.
  */
-class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
+class IOVersion2Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   var arr : ByteArrayOutputStream = null
   var out : SiignaOutputStream = null
@@ -30,22 +27,23 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   before {
     arr = new ByteArrayOutputStream()
-    out = new SiignaOutputStream(arr, IOVersion1)
-    in = new SiignaInputStream(new ByteArrayInputStream(arr.getArray), IOVersion1)
+    out = new SiignaOutputStream(arr, IOVersion2)
+    in = new SiignaInputStream(new ByteArrayInputStream(arr.getArray), IOVersion2)
   }
 
-  describe("IO version 1") {
+  describe("IO version 2") {
 
     def user = User(16739213L, "John the Doe Doe", "WithADoePassWord")
     def attributes = Attributes("Color" -> new Color(132, 141, 255, 42), "LineWeight" -> 1.75)
-    def session = Session(876321L, user)
+    def session = remote.Session(876321L, user)
     def shape = PolylineShape(Vector2D(0, 0), Vector2D(10, 16), Vector2D(-1123.3218, 10238), Vector2D(0, 0))
     def shapes = Map[Int, Shape](13 -> LineShape(0, 0, 10, 10), -1 -> shape)
-    def shapeParts = Map[Int, ShapePart](13 -> LineShape.Part(part = true), -1 -> PolylineShape.Part(mutable.BitSet(1, 3, 5)))
+    def shapeParts = Map[Int, ShapeSelector](13 -> ShapeSelector(1), -1 -> ShapeSelector(BitSet(1, 3, 5)))
+    def shapeSelector = ShapeSelector(BitSet(1, 3, 5, 2763, 12312))
     val transformation = TransformationMatrix(Vector2D(12931.3123, -123782.7653), -1273623.1234)
     def vector = Vector2D(-13213.123, 18301.239199)
 
-    it ("can read and write AddAttributes") {
+    it ("can read AddAttributes") {
       val a = new AddAttributes(Map(0 -> attributes), attributes)
       out.writeObject(a)
       in.readObject[AddAttributes] should equal(a)
@@ -56,9 +54,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[ArcShape] should equal(a)
     }
     it ("can read and write ArcShapePart") {
-      val a = ArcShape.Part(4.toByte)
+      val a = ShapeSelector(4)
       out.writeObject(a)
-      in.readObject[ArcShape.Part] should equal(a)
+      in.readObject[ShapeSelector] should equal(a)
     }
     it ("can read and write a Traversable") {
       val a = Traversable[Byte](13, 14, 15, 0, 14)
@@ -76,9 +74,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[CircleShape] should equal(c)
     }
     it ("can read and write CircleShape part") {
-      val a = CircleShape.Part(4.toByte)
+      val a = ShapeSelector(4)
       out.writeObject(a)
-      in.readObject[CircleShape.Part] should equal(a)
+      in.readObject[ShapeSelector] should equal(a)
     }
     it ("can read and write Color") {
       val c = new Color(108, 132, 234, 42)
@@ -101,7 +99,7 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[DeleteShape] should equal(x)
     }
     it ("can read and write DeleteShapePart") {
-      val x = new DeleteShapePart(14, shape, PolylineShape.Part(mutable.BitSet(1,3)))
+      val x = new DeleteShapePart(14, shape, ShapeSelector(BitSet(1,3)))
       out.writeObject(x)
       in.readObject[DeleteShapePart] should equal(x)
     }
@@ -118,9 +116,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[DeleteShapes] should equal(x)
     }
     it ("can read and write an empty shape part") {
-      val x = EmptyShapeSelector$
+      val x = EmptyShapeSelector
       out.writeObject(x)
-      in.readObject[EmptyShapeSelector$.type] should equal(x)
+      in.readObject[EmptyShapeSelector.type] should equal(x)
     }
     it ("can read and write a remote Error") {
       val x = remote.Error(420, "Enhance your calm", session)
@@ -128,12 +126,12 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[remote.Error] should equal(x)
     }
     it ("can read and write a full shape part") {
-      val x = FullShapePart
+      val x = FullShapeSelector
       out.writeObject(x)
-      in.readObject[FullShapePart.type] should equal(x)
+      in.readObject[FullShapeSelector.type] should equal(x)
     }
     it ("can read and write a full shape part as a part of an action") {
-      val x = new TransformShapeParts(Map(0 -> FullShapePart), transformation)
+      val x = new TransformShapeParts(Map(0 -> FullShapeSelector), transformation)
       out.writeObject(x)
       in.readObject[TransformShapeParts] should equal(x)
     }
@@ -147,10 +145,10 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       out.writeObject(x)
       in.readObject[GroupShape] should equal(x)
     }
-    it ("can read and write a GroupShape part") {
-      val x = GroupShape.Part(shapeParts)
+    it ("can read and write a GroupShape Selector") {
+      val x = shapeSelector
       out.writeObject(x)
-      in.readObject[GroupShape.Part] should equal(x)
+      in.readObject[ShapeSelector] should equal(x)
     }
     it ("can read and write an Traversable") {
       val x = Traversable(1, 2, 5000)
@@ -163,9 +161,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[LineShape] should equal(x)
     }
     it ("can read and write a LineShape part") {
-      val x = LineShape.Part(part = false)
+      val x = ShapeSelector(1)
       out.writeObject(x)
-      in.readObject[LineShape.Part] should equal(x)
+      in.readObject[ShapeSelector] should equal(x)
     }
     it ("can read and write a Map") {
       val m = Map("Color" -> Color.red)
@@ -202,9 +200,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[PolylineShapeOpen] should equal(x)
     }
     it ("can read and write PolylineShape part") {
-      val x = PolylineShape.Part(mutable.BitSet(13, 131, 1826, 1373672, 978637))
+      val x = ShapeSelector(BitSet(13, 131, 1826, 1373672, 978637))
       out.writeObject(x)
-      in.readObject[PolylineShape.Part] should equal(x)
+      in.readObject[ShapeSelector] should equal(x)
     }
     it ("can read and write a Range") {
       val x = Range(1, 10)
@@ -222,14 +220,14 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[SequenceAction] should equal(x)
     }
     it ("can read and write a Session") {
-      val a = Session(14L, User(60L, "DinMor", "Hej Verden"))
+      val a = remote.Session(14L, User(60L, "DinMor", "Hej Verden"))
       out.writeObject(a)
-      in.readObject[Session] should equal(a)
+      in.readObject[remote.Session] should equal(a)
     }
     it ("can read and write a remote Set") {
-      val set = remote.Set(RemoteConstants.Action,
+      val set = remote.Set(remote.RemoteConstants.Action,
         new RemoteAction(new CreateShape(13, LineShape(0, 0, 10, 10)), false),
-        Session(14L, User(60L, "DinMor", "Hej Verden")))
+        remote.Session(14L, User(60L, "DinMor", "Hej Verden")))
       out.writeObject(set)
       in.readObject[remote.Set] should equal(set)
     }
@@ -244,9 +242,9 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       in.readObject[TextShape] should equal(x)
     }
     it ("can read and write a TextShape part") {
-      val x = TextShape.Part(131.toByte)
+      val x = ShapeSelector(131)
       out.writeObject(x)
-      in.readObject[TextShape.Part] should equal(x)
+      in.readObject[ShapeSelector] should equal(x)
     }
     it ("can read and write a TransformationMatrix") {
       val x = transformation
@@ -261,7 +259,7 @@ class IOVersion1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
     it ("can read and write TransformShapeParts") {
       val x = new TransformShapeParts(shapeParts, transformation)
       out.writeObject(x)
-      //in.readObject[TransformShapeParts] should equal(x)
+      in.readObject[TransformShapeParts] should equal(x)
     }
     it ("can read and write TransformShapes") {
       val x = new TransformShapes(shapes.keys, transformation)

@@ -21,13 +21,18 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, 
 
 /**
  * <p>
- *   A Selection is a wrapper for one or more [[com.siigna.app.model.selection.ShapePart]](s). It is used to
- *   describe which shapes have been selected (id) and how they have been selected
- *   (via [[com.siigna.app.model.selection.ShapePart]]).
- *   It is also used to dynamically manipulate the shapes via [[com.siigna.util.collection.Attributes]] or transform
- *   them via a [[com.siigna.util.geom.TransformationMatrix]] for later application to the corresponding shape(parts)
- *   in the [[com.siigna.app.model.Model]]. This is particularly useful if a user only wants to manipulate parts of
- *   one or more shapes and not the entire shapes, or if a user wishes to do several changes before deciding on the
+ *   A Selection is a wrapper for one or more [[com.siigna.app.model.shape.Shape]](s) and
+ *   [[com.siigna.app.model.selection.ShapeSelector]](s). It is used to describe which shapes have been selected and
+ *   how they have been selected. The shapes are represented by their id and the shape itself (used to initialize
+ *   [[com.siigna.app.model.action.Action]]s for latter application to the [[com.siigna.app.model.Model]]), while the
+ *   selection is represented by a [[com.siigna.app.model.selection.ShapeSelector]], which describes how the shape
+ *   was selected.
+ * </p>
+ * <p>
+ *   The Selection is also used to dynamically manipulate the shapes via [[com.siigna.util.collection.Attributes]] or
+ *   transform them via a [[com.siigna.util.geom.TransformationMatrix]] for later application to the corresponding
+ *   shapes in the [[com.siigna.app.model.Model]]. This is particularly useful if a user only wants to manipulate parts
+ *   of one or more shapes and not the entire shapes, or if a user wishes to do several changes before deciding on the
  *   final result to save into the [[com.siigna.app.model.Drawing]].
  * </p>
  *
@@ -47,30 +52,27 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, 
  * </p>
  *
  * @see [[com.siigna.app.model.SelectableModel]]
- * @see [[com.siigna.app.model.selection.ShapePart]]
- * @see [[com.siigna.app.model.selection.ShapePart]]
+ * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
-trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with Externalizable {
+trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)] with Externalizable {
 
   type T = Selection
 
   /**
    * Adds a single shape along with its part to the selection.
    * @param id  The id of the shape in the [[com.siigna.app.model.Model]].
-   * @param part  The part to select from the shape.
-   * @tparam  T  The type of the shape to add.
+   * @param selector  The part to select from the shape.
    * @return  The resulting selection from the merge.
    */
-  def add[T <: Shape](id : Int, part : ShapePart[T]) : Selection
+  def add(id : Int, selector : (Shape, ShapeSelector)) : Selection
 
   /**
    * Adds a number of shapes to the selection.
    * @param parts  The parts to add consisting of the shape ids paired with the shape to select and the part to select
    *               from that given shape.
-   * @tparam  T  The type of the shapes in the collection.
    * @return  The new selection after the merge.
    */
-  def add[T <: Shape](parts : Map[Int, ShapePart[T]]) : Selection
+  def add(parts : Map[Int, (Shape, ShapeSelector)]) : Selection
 
   /**
    * The boundary of the underlying ImmutableShapes.
@@ -79,7 +81,7 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
   def boundary : Rectangle2D
 
   /**
-   * Calculates the distance from the vector and to the underlying [[com.siigna.app.model.selection.ShapePart]]s in
+   * Calculates the distance from the vector and to the underlying [[com.siigna.app.model.shape.Shape]]s in
    * scale 1. This is equivalent to calling <code>distanceTo(point, 1)</code>.
    * @param point  The point to calculate the distance to.
    * @return  The length from the closest point of this shape to the point, in the given scale.
@@ -87,7 +89,7 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
   def distanceTo(point : Vector2D) : Double = distanceTo(point, 1)
 
   /**
-   * Calculates the distance from the vector and to the underlying [[com.siigna.app.model.selection.ShapePart]]s in the
+   * Calculates the distance from the vector and to the underlying [[com.siigna.app.model.shape.Shape]]s in the
    * given scale.
    * @param point  The point to calculate the distance to.
    * @param scale  The scale in which we are calculating.
@@ -102,6 +104,14 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
   def isDefined = size != 0
 
   /**
+   * Retrieves the active parts of the selected shapes in the current [[com.siigna.app.model.selection.Selection]].
+   * Useful if you need to draw the active parts only, for instance.
+   * @return  A collection of sub-parts of active shapes. The shapes that does not have a meaningful selection are
+   *          left out.
+   */
+  def parts : Traversable[Shape]
+
+  /**
    * Retrieves the whole shapes included in the selection, and not just the selected parts of them.
    * @return A map containing the ids and the shapes used in the current selection.
    */
@@ -112,7 +122,7 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
    * @param transformation  The TransformationMatrix to apply to the parts.
    * @return  The Selection with the transformation applied.
    */
-  def transform(transformation: TransformationMatrix) : T
+  def transform(transformation: TransformationMatrix) : Selection
 
   /**
    * The vertices of the selection, i.e. the selected points, described by a number of
@@ -129,9 +139,9 @@ trait Selection extends HasAttributes with MapProxy[Int, ShapePart[Shape]] with 
 /**
  * A [[com.siigna.app.model.selection.Selection]] which is not empty, that is, contains more than 0 shapes.
  * @param selection  The ids of the wrapped shape(s) paired with the [[com.siigna.app.model.shape.Shape]] itself and
- *               the [[com.siigna.app.model.selection.ShapePart]] to select.
+ *               the [[com.siigna.app.model.selection.ShapeSelector]] that describes the selection.
  */
-case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Selection {
+case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) extends Selection {
 
   /**
    * The attributes to be applied on the selection when deselected. Initially empty.
@@ -139,21 +149,21 @@ case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Sel
    */
   var attributes : Attributes = Attributes.empty
 
-  def add[A <: Shape](id: Int, part: ShapePart[A]) : Selection = {
+  def add(id: Int, part: (Shape, ShapeSelector)) : Selection = {
     NonEmptySelection( selection +
       (id ->
         (selection.get(id) match {
-          case Some(p : ShapePart[A]) => p.add(part.selector)
+          case Some(p : (Shape, ShapeSelector)) => p._1 -> (p._2 ++ part._2)
           case _ => part
         })
       )
     )
   }
 
-  def add[A <: Shape](parts: Map[Int, ShapePart[A]]) : Selection = {
-    def mergePart(t : (Int, ShapePart[A])) : (Int, ShapePart[A]) = {
+  def add(parts: Map[Int, (Shape, ShapeSelector)]) : Selection = {
+    def mergePart(t : (Int, (Shape, ShapeSelector))) : (Int, (Shape, ShapeSelector)) = {
       (t._1 -> (selection.get(t._1) match {
-        case Some((s : A, p : ShapePart[A])) => p.add(t._2.selector)
+        case Some(s) => s._1 -> (s._2 ++ t._2._2)
         case _ => t._2
       }))
     }
@@ -168,11 +178,11 @@ case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Sel
 
   def self = selection
 
-  def selectedShapes = {
-    shapes.values.map(_.setAttributes(attributes).transform(transformation))
+  def parts = {
+    selection.map(t => t._2._1.getShape(t._2._2)).flatten.map(_.setAttributes(attributes).transform(transformation))
   }
 
-  def shapes : Map[Int, Shape] = selection.map(t => t._1 -> t._2.shape.addAttributes(attributes).transform(transformation)).toMap
+  def shapes : Map[Int, Shape] = selection.map(t => t._1 -> t._2._1.addAttributes(attributes).transform(transformation)).toMap
 
   def setAttributes(attributes: Attributes) = { this.attributes ++= attributes; this}
 
@@ -195,7 +205,7 @@ case class NonEmptySelection(selection : Map[Int, ShapePart[Shape]]) extends Sel
     this
   }
 
-  def vertices = selection.values.map(t => t.vertices).flatten
+  def vertices = selection.values.map(t => t._1.geometry.vertices).flatten
 
 }
 
@@ -207,19 +217,21 @@ case object EmptySelection extends Selection {
 
   val attributes = Attributes.empty
 
-  def add[T <: Shape](id: Int, part : ShapePart[T]) : Selection = NonEmptySelection(Map(id -> part))
+  def add(id: Int, part : (Shape, ShapeSelector)) : Selection = NonEmptySelection(Map(id -> part))
 
-  def add[T <: Shape](parts: Map[Int, ShapePart[T]]): Selection = NonEmptySelection(parts)
+  def add(parts: Map[Int, (Shape, ShapeSelector)]): Selection = NonEmptySelection(parts)
 
   def boundary = SimpleRectangle2D(0, 0, 0, 0)
 
-  val selectedShapes = Nil
+  def parts = Nil
 
-  val self = Map.empty[Int, ShapePart[Shape]]
+  def selectedShapes = Nil
 
-  val shapes = Map.empty[Int, Shape]
+  def self = Map.empty[Int, (Shape, ShapeSelector)]
 
-  val vertices = Traversable.empty
+  def shapes = Map.empty[Int, Shape]
+
+  def vertices = Traversable.empty
 
   def distanceTo(point: Vector2D, scale: Double) : Double = Double.MaxValue
 
@@ -244,10 +256,10 @@ object Selection {
    * Creates a [[com.siigna.app.model.selection.Selection]] containing the given parts. If no parts exist, we return an
    * [[com.siigna.app.model.selection.EmptySelection]] otherwise a [[com.siigna.app.model.selection.NonEmptySelection]].
    * @param parts  The parts to insert into the selection, that is the id of the [[com.siigna.app.model.shape.Shape]]s
-   *               paired with the shape itself and the [[com.siigna.app.model.selection.ShapePart]] to select from that
-   *               given shape.
+   *               paired with the shape itself and the [[com.siigna.app.model.selection.ShapeSelector]] to select from
+   *               that given shape.
    * @return  A [[com.siigna.app.model.selection.Selection]] that can either be full or empty.
    */
-  def apply(parts : Map[Int, ShapePart[Shape]]) = if (parts.isEmpty) EmptySelection else new NonEmptySelection(parts)
+  def apply(parts : Map[Int, (Shape, ShapeSelector)]) = if (parts.isEmpty) EmptySelection else new NonEmptySelection(parts)
 
 }

@@ -12,31 +12,34 @@ package com.siigna.app.model.action
 
 import com.siigna.app.model.shape.Shape
 import com.siigna.app.model.{Drawing, Model}
-import com.siigna.app.model.selection.{ShapeSelector, Selection, ShapePart}
-import scala.reflect.runtime.universe._
+import com.siigna.app.model.selection.{ShapeSelector, Selection}
 
 /**
- * Deletes shapes from the [[com.siigna.app.model.Drawing]]
+ * An object that contains methods for deleting shapes from the [[com.siigna.app.model.Drawing]].
  */
 object Delete {
-  
+
+  /**
+   * Removes the [[com.siigna.app.model.shape.Shape]] with the given id from the [[com.siigna.app.model.Drawing]].
+   * @param id  The unique identifier (id) of the shape to delete.
+   */
   def apply(id : Int) {
     Drawing execute DeleteShape(id, Drawing(id))
   }
-  
-  def apply[T <: Shape](id : Int, selector : ShapeSelector[T]) {
-    apply(Map[Int, ShapePart[T]](id -> selector))
+
+  /**
+   * Removes a part (represented by the [[com.siigna.app.model.selection.ShapeSelector]]) of the
+   * [[com.siigna.app.model.shape.Shape]] with the given id in the [[com.siigna.app.model.Drawing]].
+   * @param id  The unique identifier (id) of the shape in the model.
+   * @param selector  The part of the shape to delete.
+   */
+  def apply(id : Int, selector : ShapeSelector) {
+    apply(Map(id -> selector))
   }
   
-  def apply(shapes : Map[Int, ShapeSelector[Shape]]) {
+  def apply(shapes : Map[Int, ShapeSelector]) {
     val oldShapes = shapes.map(t => t._1 -> Drawing(t._1))
-    val newShapes = shapes.map(t => Drawing(t._1) -> t._2).collect(
-      new PartialFunction[(U, ShapeSelector[U]), Seq[Shape]] {
-        def apply[U <: Shape](t : (U, ShapeSelector[U])) = {
-          t._1.delete(t._2)
-        }
-      }).flatten
-    
+    val newShapes = shapes.map(t => Drawing(t._1).delete(t._2)).flatten
     // Does the deletion result in new shapes?
     if (newShapes.isEmpty) { // No - that's easy!
       Drawing execute DeleteShapes(oldShapes)
@@ -49,12 +52,18 @@ object Delete {
     Drawing execute DeleteShapes(ids.map(i => i -> Drawing(i)).toMap)
   }
 
-  def apply(selection : Selection) { apply(selection.parts) }
+  def apply(selection : Selection) {
+    if (!selection.isEmpty) {
+      Drawing execute DeleteShapeParts(selection.shapes, Drawing.getIds(selection.values.map(t => t._1.delete(t._2)).flatten))
+    }
+  }
   
 }
 
 /**
- * Deletes a shape.
+ * Deletes a shape with the given id.
+ * @param id  The unique identifier (id) of the shape to delete.
+ * @param shape  The shape that have been deleted, used to re-create it in case the user regrets the deletion.
  */
 sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 
@@ -69,11 +78,14 @@ sealed case class DeleteShape(id : Int, shape : Shape) extends Action {
 }
 
 /**
- * Deletes a ShapePart.
+ * Deletes a part of a shape with a givnen unique identifier (id).
+ * @param id  The id of the shape to delete.
+ * @param shape  The shape to delete a part of, used to re-create it in case the user regrets.
+ * @param selector  The part of the shape to delete.
  */
-sealed case class DeleteShapePart(id : Int, shape : Shape, part : ShapePart) extends Action {
+sealed case class DeleteShapePart(id : Int, shape : Shape, selector : ShapeSelector) extends Action {
   
-  val parts = shape.delete(part)
+  val parts = shape.delete(selector)
   var partIds = Seq[Int]()
   
   def execute(model : Model) = {

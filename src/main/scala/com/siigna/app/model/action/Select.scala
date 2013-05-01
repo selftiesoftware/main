@@ -13,7 +13,6 @@ package com.siigna.app.model.action
 
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 import com.siigna.app.model.Drawing
-import com.siigna.app.model.selection.{Selection, ShapePart}
 
 /**
  * An object that provides shortcuts to selecting objects in the model. Selections are crucial
@@ -22,13 +21,13 @@ import com.siigna.app.model.selection.{Selection, ShapePart}
  * of whole shapes.
  *
  * <br />
- * These selections are stored in the [[Selection]] class which is
+ * These selections are stored in the [[com.siigna.app.model.selection.Selection]] class which is
  * stored in the [[com.siigna.app.model.Model]]. Each time a model changes the selection
  * are destroyed. This is done mainly to avoid inconsistent selections (if shapes are removed etc.).
  *
  * <br />
  * Selection does not duplicate the shapes, but contains information about which parts of the shapes are selected
- * (the [[ShapePart]]). If a user chooses to select only one point of
+ * (the [[com.siigna.app.model.selection.ShapeSelector]]). If a user chooses to select only one point of
  * a larger shape for instance, the selection has to support this.
  *
  * @see Model
@@ -47,11 +46,11 @@ object Select {
   }
   
   def apply(id : Int, point : Vector2D) {
-    Drawing.select(id, Drawing(id).getPart(point))
+    Drawing.select(id, Drawing(id).getSelector(point))
   }
   
   def apply(id : Int, r : SimpleRectangle2D) {
-    Drawing.select(id, Drawing(id).getPart(r))
+    Drawing.select(id, Drawing(id).getSelector(r))
   }
   //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
   def apply(r : SimpleRectangle2D, entireShape : Boolean) {

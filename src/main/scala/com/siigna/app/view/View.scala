@@ -18,7 +18,6 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.SiignaGraphics
-import com.siigna.app.model.selection.Selection
 
 /**
  * <p>
@@ -250,8 +249,8 @@ object View {
    *   method, meaning the current class responsible for rendering shapes in a cached and efficient manor (hopefully).
    * </p>
    * <p>
-   *   Afterwards we move on to draw any [[Selection]]s made by the user. They are all given the
-   *   color defined in the <code>colorSelected</code> value in [[com.siigna.app.Siigna]].
+   *   Afterwards we move on to draw any [[com.siigna.app.model.selection.Selection]]s made by the user. They are all
+   *   given the color defined in the <code>colorSelected</code> value in [[com.siigna.app.Siigna]].
    * </p>
    * <p>
    *   Lastly we paint the given [[com.siigna.app.view.Interface]] and through it, the modules. An Interface
@@ -294,8 +293,8 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      Drawing.selection.selectedShapes.foreach(e => {
-        graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
+      Drawing.selection.shapes.foreach(e => {
+        graphics.draw(e._2.transform(transformation).setAttribute("Color" -> color))
       })
 
       // Draw vertices

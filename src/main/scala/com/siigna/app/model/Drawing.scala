@@ -41,7 +41,7 @@ import com.siigna.app.model.selection.Selection
  *
  * <h3>Selection</h3>
  * <p>
- *  Drawing also has a [[Selection]]. This represents the way any number or
+ *  Drawing also has a [[com.siigna.app.model.selection.Selection]]. This represents the way any number or
  *  [[com.siigna.app.model.shape.Shape]]s have been selected. So besides <i>which</i>
  *  [[com.siigna.app.model.shape.Shape]] has been selected, we also need to know <i>how</i> they were selected.
  *  If no selection is present, the selection is None.

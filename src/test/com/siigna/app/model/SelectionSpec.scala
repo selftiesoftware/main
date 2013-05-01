@@ -14,12 +14,11 @@ package com.siigna.app.model
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSpec
 import com.siigna._
-import com.siigna.app.model.selection.FullShapePart
-import com.siigna.app.model.selection
+import com.siigna.app.model.selection.{NonEmptySelection, FullShapeSelector}
 
 /**
- * Test the [[selection.Selection]], [[NonEmptySelection]] and
- * [[com.siigna.app.model.EmptySelection]].
+ * Test the [[com.siigna.app.model.selection.Selection]], [[com.siigna.app.model.selection.NonEmptySelection]] and
+ * [[com.siigna.app.model.selection.EmptySelection]].
  */
 class SelectionSpec extends FunSpec with ShouldMatchers {
 
@@ -43,7 +42,7 @@ class SelectionSpec extends FunSpec with ShouldMatchers {
   describe("A non empty selection") {
 
     val shape = LineShape(0, 0, 10, 10)
-    val selection = NonEmptySelection(Map(1 -> (shape, FullShapePart)))
+    val selection = NonEmptySelection(Map(1 -> (shape, FullShapeSelector)))
 
     it ("is not empty") {
       selection.isEmpty should equal(false)

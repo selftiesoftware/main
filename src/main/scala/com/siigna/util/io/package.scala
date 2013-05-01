@@ -202,7 +202,7 @@ package object io {
     val PolylineLineShape = 220.toByte
     val PolylineArcShape  = 221.toByte
 
-    // Shape parts
+    // Shape parts (deprecated)
     val ArcShapePart       = 230.toByte
     val CircleShapePart    = 231.toByte
     val GroupShapePart     = 232.toByte
@@ -213,6 +213,11 @@ package object io {
     val TextShapePart      = 237.toByte
     val FullShapePart      = 238.toByte
     val EmptyShapePart     = 239.toByte
+
+    // Shape selectors
+    val EmptyShapeSelector  = 240.toByte
+    val FullShapeSelector   = 241.toByte
+    val BitSetShapeSelector = 242.toByte
   }
 
 }
