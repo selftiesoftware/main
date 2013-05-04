@@ -186,7 +186,7 @@ trait SelectableModel {
         }
       }
     }
-    select(Selection(shapes))
+    selection.add(shapes)
     selection
   }
 
@@ -198,14 +198,16 @@ trait SelectableModel {
    */
   def select(selection : Selection) : Selection = {
     this.selection = selection.add(selection)
-    selection
+    this.selection
   }
 
   /**
-   * Select every shape in the Model.
+   * Select every [[com.siigna.app.model.shape.Shape]] in the [[com.siigna.app.model.Drawing]].
+   * @return  The new selection, containing all the shapes in the model.
    */
-  def selectAll() {
+  def selectAll() = {
     selection = Selection(Drawing.map(i => i._1 -> (i._2 -> FullShapeSelector)))
+    selection
   }
 
   /**

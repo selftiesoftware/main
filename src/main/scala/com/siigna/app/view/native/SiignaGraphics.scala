@@ -71,7 +71,7 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
           // TODO: What about the attributes from the collection-shapes?!
           case s : PolylineShape    => {
             // Examine the raster attribute
-            val raster = attributes color "raster"
+            val raster = attributes color "Raster"
 
             // Draw the raster if it's defined
             if (raster.isDefined) {

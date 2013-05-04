@@ -262,4 +262,12 @@ object Selection {
    */
   def apply(parts : Map[Int, (Shape, ShapeSelector)]) = if (parts.isEmpty) EmptySelection else new NonEmptySelection(parts)
 
+  /**
+   * Creates a [[com.siigna.app.model.selection.Selection]] containing the given part.
+   * @param part  The single part to select, describing the id of the shape to select, the shape itself and the
+   *              part of the shape to select via a [[com.siigna.app.model.selection.ShapeSelector]].
+   * @return A [[com.siigna.app.model.selection.Selection]] containing the selection.
+   */
+  def apply(part : (Int, (Shape, ShapeSelector))) = NonEmptySelection(Map(part))
+
 }

@@ -13,6 +13,8 @@ package com.siigna.app.model.action
 
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 import com.siigna.app.model.Drawing
+import com.siigna.app.model.selection.{EmptyShapeSelector, Selection}
+import com.siigna.app.model.shape.Shape
 
 /**
  * An object that provides shortcuts to selecting objects in the model. Selections are crucial
@@ -46,11 +48,13 @@ object Select {
   }
   
   def apply(id : Int, point : Vector2D) {
-    Drawing.select(id, Drawing(id).getSelector(point))
+    val shape = Drawing(id)
+    Drawing select Selection(id -> (shape -> shape.getSelector(point)))
   }
   
   def apply(id : Int, r : SimpleRectangle2D) {
-    Drawing.select(id, Drawing(id).getSelector(r))
+    val shape = Drawing(id)
+    Drawing select Selection(id -> (shape -> shape.getSelector(r)))
   }
   //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
   def apply(r : SimpleRectangle2D, entireShape : Boolean) {
@@ -71,6 +75,36 @@ object Select {
    */
   def apply(ids : Traversable[Int]) {
     Drawing select ids
+  }
+
+  /**
+   * Selects the parts of the given shapes that is close to the given point. If no selection could be made (the
+   * given point did not result in any meaningful selections), nothing happens.
+   * @param ids  The ids of the shapes to select a point in.
+   * @param point  The point to match in the given shapes.
+   */
+  def apply(ids : Traversable[Int], point : Vector2D) {
+    val shapes = ids.map(id => {
+      val shape = Drawing(id)
+      id -> (shape -> shape.getSelector(point))
+    }).toMap.filter(p => p._2._2 != EmptyShapeSelector)
+    // Only select something if the map is not empty
+    if (!shapes.isEmpty) {
+      Drawing select Selection(shapes)
+    }
+  }
+
+  /**
+   * Selects the parts of the given shapes that is close to the given points. If no selection could be made the
+   * given point did not result in any meaningful selections), nothing happens.
+   * @param shapes  The shapes to select one or more parts of.
+   * @param point  The point to match in the given shapes.
+   */
+  def apply(shapes : Map[Int, Shape], point : Vector2D) {
+    val selection = shapes.map(t => t._1 -> (t._2 -> t._2.getSelector(point))).filter(_._2._2 != EmptyShapeSelector)
+    if (!selection.isEmpty) {
+      Drawing select Selection(selection)
+    }
   }
 
 }
