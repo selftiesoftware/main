@@ -253,21 +253,34 @@ object Selection {
   val empty = EmptySelection
 
   /**
-   * Creates a [[com.siigna.app.model.selection.Selection]] containing the given parts. If no parts exist, we return an
+   * Creates a [[com.siigna.app.model.selection.Selection]] containing the given parts. If no parts exist, or the
+   * selection described by the [[com.siigna.app.model.selection.ShapeSelector]] is empty, we return an
    * [[com.siigna.app.model.selection.EmptySelection]] otherwise a [[com.siigna.app.model.selection.NonEmptySelection]].
    * @param parts  The parts to insert into the selection, that is the id of the [[com.siigna.app.model.shape.Shape]]s
    *               paired with the shape itself and the [[com.siigna.app.model.selection.ShapeSelector]] to select from
    *               that given shape.
    * @return  A [[com.siigna.app.model.selection.Selection]] that can either be full or empty.
    */
-  def apply(parts : Map[Int, (Shape, ShapeSelector)]) = if (parts.isEmpty) EmptySelection else new NonEmptySelection(parts)
+  def apply(parts : Map[Int, (Shape, ShapeSelector)]) = {
+    val filtered = parts.filter(t => t._2._2 != EmptyShapeSelector)
+    if (filtered.isEmpty) {
+      EmptySelection
+    } else {
+      new NonEmptySelection(filtered)
+    }
+  }
 
   /**
-   * Creates a [[com.siigna.app.model.selection.Selection]] containing the given part.
+   * Creates a [[com.siigna.app.model.selection.Selection]] containing the given part. If the
+   * [[com.siigna.app.model.selection.ShapeSelector]] describing the selection is empty, we do not select anything.
    * @param part  The single part to select, describing the id of the shape to select, the shape itself and the
    *              part of the shape to select via a [[com.siigna.app.model.selection.ShapeSelector]].
    * @return A [[com.siigna.app.model.selection.Selection]] containing the selection.
    */
-  def apply(part : (Int, (Shape, ShapeSelector))) = NonEmptySelection(Map(part))
+  def apply(part : (Int, (Shape, ShapeSelector))) = {
+    if (part._2._2 != EmptyShapeSelector) {
+      NonEmptySelection(Map(part))
+    } else EmptySelection
+  }
 
 }

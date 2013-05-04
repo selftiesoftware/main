@@ -186,7 +186,7 @@ trait SelectableModel {
         }
       }
     }
-    selection.add(shapes)
+    selection = selection.add(shapes)
     selection
   }
 
