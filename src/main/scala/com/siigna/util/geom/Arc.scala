@@ -190,7 +190,6 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
   def intersects(geom : Geometry2D) = geom match {
 
-    case circle : Circle2D => circle.intersects(this)
     case collection : CollectionGeometry2D => collection.intersects(this)
 
     case segment : Segment2D => {
