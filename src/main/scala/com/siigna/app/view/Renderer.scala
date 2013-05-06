@@ -28,6 +28,14 @@ package com.siigna.app.view
 trait Renderer {
 
   /**
+   * Examines whether this [[com.siigna.app.view.Renderer]] is active, meaning that it is being used by the
+   * [[com.siigna.app.view.View]]. This could be useful for determining if the renderer should continue to cache
+   * information whenever external calls, such as callbacks from listeners, arrive.
+   * @return  A boolean indicating if the renderer is current in use (true) or not (false).
+   */
+  def isActive : Boolean = View.renderer.exists(_ == this)
+
+  /**
    * Renders the rendered contents of the renderer (...). This method is not called <code>render</code> to illustrate
    * the fact that this method does not generate an image, only transfers the information from the renderer to the
    * given graphics object. Note that the method does not have any shapes or [[com.siigna.app.model.Drawing]] as

@@ -12,9 +12,9 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
-import collection.mutable
-import com.siigna.app.model.shape.PolylineShape.Part
+import collection.immutable.BitSet
 import com.siigna.app.Siigna
+import com.siigna.app.model.selection.{BitSetShapeSelector, FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
 /**
  * <p>
@@ -47,43 +47,6 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
   type T = PolylineShape
 
-  def apply(part : ShapePart) = part match {
-    case FullShapePart => Some(new PartialShape(this, transform))
-    case Part(xs) => {
-      // The selected parts, needed for drawing
-      var selected = Seq[BasicShape]()
-
-      // Create a function that transforms the selected parts of the polyline
-      val transformInner = (t : TransformationMatrix) => {
-        val arr      = new Array[InnerPolylineShape](innerShapes.size)
-        for (i <- 0 until innerShapes.size) {
-          arr(i) = if (xs contains (i + 1)) {
-            selected = selected :+ shapes(i)
-            innerShapes(i).transform(t)
-          } else innerShapes(i)
-        }
-
-        // Make sure there are no duplicate points
-        arr.distinct
-      }
-
-      // Create a shape used for drawing
-      val drawShape = GroupShape(selected)
-
-      Some(new PartialShape(drawShape, (t : TransformationMatrix) =>
-        copy(
-          // Test if the start point is included (binary position 1)
-          if (xs(0)) { startPoint.transform(t) } else { startPoint },
-          // Transform the inner shapes that are a part of the selection
-          transformInner(t),
-          // Forward the attributes as is
-          attributes
-        )
-      ))
-    }
-    case _ => None
-  }
-
   /**
    * Copies a type T < PolylineShape into another type T with the given parameter(s) changes, keeping
    * the same attributes as this object.
@@ -94,9 +57,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    */
   protected def copy(startPoint : Vector2D = startPoint, innerShapes : Seq[InnerPolylineShape] = innerShapes, attributes : Attributes = attributes) : T
 
-  def delete(part : ShapePart) = part match {
-    case FullShapePart => Nil
-    case Part(xs) => {
+  def delete(part : ShapeSelector) = part match {
+    case FullShapeSelector => Nil
+    case BitSetShapeSelector(xs) => {
 
       if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
         Nil
@@ -131,28 +94,65 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         groups
       }
     }
-    case EmptyShapePart => Seq(this)
+    case EmptyShapeSelector => Seq(this)
   }
 
-  def getPart(rect: SimpleRectangle2D) =
+  def getPart(part : ShapeSelector) = part match {
+    case FullShapeSelector => Some(new PartialShape(this, transform))
+    case BitSetShapeSelector(xs) => {
+      // The selected parts, needed for drawing
+      var selected = Seq[BasicShape]()
+
+      // Create a function that transforms the selected parts of the polyline
+      val transformInner = (t : TransformationMatrix) => {
+        val arr      = new Array[InnerPolylineShape](innerShapes.size)
+        for (i <- 0 until innerShapes.size) {
+          arr(i) = if (xs contains (i + 1)) {
+            selected = selected :+ shapes(i)
+            innerShapes(i).transform(t)
+          } else innerShapes(i)
+        }
+
+        // Make sure there are no duplicate points
+        arr.distinct
+      }
+
+      // Create a shape used for drawing
+      val drawShape = GroupShape(selected)
+
+      Some(new PartialShape(drawShape, (t : TransformationMatrix) =>
+        copy(
+          // Test if the start point is included (binary position 1)
+          if (xs(0)) { startPoint.transform(t) } else { startPoint },
+          // Transform the inner shapes that are a part of the selection
+          transformInner(t),
+          // Forward the attributes as is
+          attributes
+        )
+      ))
+    }
+    case _ => None
+  }
+
+  def getSelector(rect: SimpleRectangle2D) =
     if (rect.contains(geometry.boundary)) {
-      FullShapePart
+      FullShapeSelector
     } else if (rect.intersects(geometry.boundary)) {
-      val set = mutable.BitSet()
+      var set = BitSet()
       // Add the start point if it is inside the rectangle
       if (rect.contains(startPoint)) {
-        set add 0
+        set += 0
       }
       // Iterate inner shapes
       for (i <- 0 until innerShapes.size) {
         if (rect.contains(innerShapes(i).point)) {
-          set add (i + 1) // Add one since we already included the startPoint (at index 0)
+          set += (i + 1) // Add one since we already included the startPoint (at index 0)
         }
       }
-      Part(set)
-    } else EmptyShapePart
+      BitSetShapeSelector(set)
+    } else EmptyShapeSelector
 
-  def getPart(point: Vector2D) = {
+  def getSelector(point: Vector2D) = {
     // Find the distance to all the points and get their index
     val points = innerShapes.par.map(_.point.distanceTo(point)).+:(startPoint.distanceTo(point)).zipWithIndex
     // Find the points that are within the selection distance
@@ -160,17 +160,17 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
     // If only one point is close, then we return a single index (point)
     if (closeVertices.size == 1) {
-      Part(mutable.BitSet(closeVertices.head))
+      BitSetShapeSelector(BitSet(closeVertices.head))
     } else {
       // If there are zero or several close points, we should check for selection of segments
       val closeShapes = shapes.zipWithIndex.par.map(t => t._1.distanceTo(point) -> t._2).filter(_._1 <= Siigna.selectionDistance)
 
       // If no shapes are close, nothing is selected
       if (closeShapes.isEmpty) {
-        EmptyShapePart
+        EmptyShapeSelector
       } else {
         // Otherwise we add the vertices of the close shapes
-        val closeShapeVertices = mutable.BitSet()
+        var closeShapeVertices = BitSet()
         val isClosed = isInstanceOf[PolylineShape.PolylineShapeClosed]
 
         // Fetch the shapes
@@ -181,24 +181,24 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         }
 
         xs.foreach( t => {
-          closeShapeVertices add t._2
+          closeShapeVertices += t._2
 
           // Make sure not to duplicate points in a closed polylineShape
-          closeShapeVertices add (
+          closeShapeVertices += (
             if (isClosed && t._2 == innerShapes.size) 0
             else t._2 + 1
           )
         })
 
         // Lastly we return
-        Part(closeShapeVertices)
+        BitSetShapeSelector(closeShapeVertices)
       }
     }
   }
 
-  def getShape(s : ShapePart) = s match {
-    case FullShapePart => Some(this)
-    case Part(xs) => {
+  def getShape(s : ShapeSelector) = s match {
+    case FullShapeSelector => Some(this)
+    case BitSetShapeSelector(xs) => {
       if (xs.size < 2) None
       else {
         var firstPoint = false
@@ -259,9 +259,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     case _ => None
   }
 
-  def getVertices(selector: ShapePart) = selector match {
-    case FullShapePart => geometry.vertices
-    case Part(xs) => {
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector => geometry.vertices
+    case BitSetShapeSelector(xs) => {
       var inner = Seq[Vector2D]()
 
       // Add startPoint
@@ -398,15 +398,6 @@ object PolylineShape {
     override def toString() = "PolylineShapeOpen[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
   }
-
-  /**
-   * A PolylineSelector is a BitSet where each boolean represents one part of the Polyline.
-   *
-   * @param xs The BitSet indicating which parts of a PolylineShape has been selected.
-   * @see BitSet
-   * @see CollectionShape
-   */
-  case class Part(xs : mutable.BitSet) extends ShapePart
 
   /**
    * Creates a PolylineShape connecting the given points with lines. If the first and last point are the same the

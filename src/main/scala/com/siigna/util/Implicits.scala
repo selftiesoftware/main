@@ -15,8 +15,7 @@ import java.awt.Color
 import com.siigna.util.event.Event
 
 /**
- * Contains several implicit definitions which are collected in a single object
- * to easen the implementation.
+ * Contains several implicit definitions.
  * See <a href="http://scala.sygneca.com/patterns/pimp-my-library" title="Pimp my library">Pimp my library</a>
  * on <a href="http://scala.sygneca.com/" title="Scala wiki">Scala Wiki</a>.
  */

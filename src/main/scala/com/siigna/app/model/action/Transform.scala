@@ -11,11 +11,45 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.geom.TransformationMatrix
-import com.siigna.app.model.shape.{PartialShape, ShapePart, Shape}
+import com.siigna.app.model.shape.{PartialShape, Shape}
 import com.siigna.app.model.{Drawing, Model}
+import com.siigna.app.model.selection.ShapeSelector
 
 /**
- * Transforms one or more shape by a given [[com.siigna.util.geom.TransformationMatrix]].
+ * <p>
+ *   Transforms one or more [[com.siigna.app.model.shape.Shape]]s or [[com.siigna.app.model.selection.ShapeSelector]]s
+ *   by a given [[com.siigna.util.geom.TransformationMatrix]].
+ * </p>
+ * <p>
+ *   The Transform object basically just informs the Drawing to execute an [[com.siigna.app.model.action.Action]]
+ *   that fits the type of the input data. But it exists to simplify the entry-point to shapes, their ids and
+ *   the undo/execute mechanisms of the [[com.siigna.app.model.Drawing]].
+ * </p>
+ *
+ * <h2>Examples</h2>
+ * {{{
+ *   // Get some sample shapes - in this case shapes close to (0, 0)
+ *   val shapes = Drawing( Vector2D(0, 0) )
+ *
+*    // Create a TranformationMatrix that rotates the shapes 20 degrees counter-clockwise from (0, 0)
+ *   val transformation = TransformationMatrix().rotate(20)
+ *
+ *   // Apply the transformation to the Drawing using the Transform object
+ *   Transform(shapes, transformation)
+ * }}}
+ * <p>
+ *   Besides extracting shapes (and ids) from the Drawing it is also possible to transform the current selection.
+ * </p>
+ * {{{
+ *   // Retrieve the current selection
+ *   val selection = Drawing.selection
+ *
+ *   // Create a TransformationMatrix that scales the shapes by a factor of 2
+ *   val transformation = TransformationMatrix().scale(2)
+ *
+ *   // Apply the transformation to the current selection
+ *   Transform(selection, transformation)
+ * }}}
  */
 object Transform {
 
@@ -40,7 +74,7 @@ object Transform {
   /**
    * Transforms several shapes or shape-parts with the given TransformationMatrix. Due to erasure the method
    * accepts types of Int -> Any, but if anything else than [[com.siigna.app.model.shape.Shape]]s or
-   * [[com.siigna.app.model.shape.ShapePart]]s are given, an exception will be thrown.
+   * [[com.siigna.app.model.selection.ShapeSelector]]s are given, an exception will be thrown.
    * @param xs  The ids of the shapes or shape parts paired with a matrix
    * @param transformation  The matrix to apply on the shapes
    */
@@ -49,10 +83,10 @@ object Transform {
     try {
       val shapes = xs.asInstanceOf[Map[Int, Shape]]
       shapes.head._2.geometry // If this works we are certain to deal with shapes
-      Drawing execute TransformShapes(shapes.asInstanceOf[Map[Int, Shape]].keys, transformation)
+      Drawing execute TransformShapes(shapes.keys, transformation)
     } catch {
       case _ : Throwable => {
-        Drawing execute TransformShapeParts(xs.asInstanceOf[Map[Int, ShapePart]], transformation)
+        Drawing execute TransformShapeParts(xs.asInstanceOf[Map[Int, ShapeSelector]], transformation)
       }
     }
   } }
@@ -80,15 +114,15 @@ case class TransformShape(id : Int, transformation : TransformationMatrix) exten
 
 /**
  * Transforms parts of several shapes with the same [[com.siigna.util.geom.TransformationMatrix]]
- * by mapping their id to a [[com.siigna.app.model.shape.ShapePart]].
+ * by mapping their id to a [[com.siigna.app.model.selection.ShapeSelector]].
  *
  * @param shapes  The id paired with a selector that selects the desired shape part.
  * @param transformation  The transformation with which all shape-parts should be applied.
  */
-case class TransformShapeParts(shapes : Map[Int, ShapePart], transformation : TransformationMatrix) extends Action {
+case class TransformShapeParts(shapes : Map[Int, ShapeSelector], transformation : TransformationMatrix) extends Action {
 
   def execute(model : Model) = {
-    model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
+    model add shapes.map(e => (e._1 -> model.shapes(e._1).getPart(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation)}
   }
 
   def ids = shapes.keys
@@ -97,7 +131,7 @@ case class TransformShapeParts(shapes : Map[Int, ShapePart], transformation : Tr
   //def merge(that : Action) = SequenceAction(this, that)
 
   def undo(model : Model) = {
-    model add shapes.map(e => (e._1 -> model.shapes(e._1).apply(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
+    model add shapes.map(e => (e._1 -> model.shapes(e._1).getPart(e._2))).collect{case (i : Int, Some(p : PartialShape)) => i -> p(transformation.inverse)}
   }
   
   def update(map : Map[Int, Int]) = copy(shapes.map(t => map.getOrElse(t._1, t._1) -> t._2))
