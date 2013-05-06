@@ -205,7 +205,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
     this
   }
 
-  def vertices = selection.values.map(t => t._1.geometry.vertices).flatten
+  def vertices = selection.values.map(t => t._1.getVertices(t._2)).flatten
 
 }
 
