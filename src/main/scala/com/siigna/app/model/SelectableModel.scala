@@ -197,7 +197,7 @@ trait SelectableModel {
    * @return  The new active selection.
    */
   def select(selection : Selection) : Selection = {
-    this.selection = selection.add(selection)
+    this.selection = this.selection.add(selection)
     this.selection
   }
 

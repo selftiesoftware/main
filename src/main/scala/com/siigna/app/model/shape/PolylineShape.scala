@@ -122,7 +122,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
       Some(new PartialShape(drawShape, (t : TransformationMatrix) =>
         copy(
-          // Test if the start point is included (binary position 1)
+          // Test if the start point is included (binary position 0)
           if (xs(0)) { startPoint.transform(t) } else { startPoint },
           // Transform the inner shapes that are a part of the selection
           transformInner(t),
