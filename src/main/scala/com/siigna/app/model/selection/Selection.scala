@@ -250,7 +250,7 @@ object Selection {
   /**
    * An empty selection containing no shapes or parts.
    */
-  val empty = EmptySelection
+  val empty : Selection = EmptySelection
 
   /**
    * Creates a [[com.siigna.app.model.selection.Selection]] containing the given parts. If no parts exist, or the
@@ -261,7 +261,7 @@ object Selection {
    *               that given shape.
    * @return  A [[com.siigna.app.model.selection.Selection]] that can either be full or empty.
    */
-  def apply(parts : Map[Int, (Shape, ShapeSelector)]) = {
+  def apply(parts : Map[Int, (Shape, ShapeSelector)]) : Selection = {
     val filtered = parts.filter(t => t._2._2 != EmptyShapeSelector)
     if (filtered.isEmpty) {
       EmptySelection
