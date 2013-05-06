@@ -67,6 +67,15 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
               drawSegment(s.p1, s.p2)
           }
 
+          case s : RectangleShape => {
+            val r = s.geometry
+            drawSegment(r.topLeft, r.topRight)
+            drawSegment(r.topRight, r.bottomRight)
+            drawSegment(r.bottomRight, r.bottomLeft)
+            drawSegment(r.bottomLeft, r.topLeft)
+
+          }
+
           /** COLLECTION SHAPES **/
           // TODO: What about the attributes from the collection-shapes?!
           case s : PolylineShape    => {

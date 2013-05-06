@@ -238,7 +238,7 @@ object Rectangle2D {
  */
 case class ComplexRectangle2D(override val center : Vector2D, width : Double, height : Double, rotation : Double) extends Rectangle2D {
 
-  throw new NotImplementedException()
+  //throw new NotImplementedException()
 
   type T = ComplexRectangle2D
 
@@ -270,22 +270,42 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
    * The lowest left corner of the rectangle.
    */
-  def bottomLeft: Vector2D = null
+  def bottomLeft : Vector2D = {
+    //find the vector from the center to the corner of the rectangle prior to rotation.
+    val bl = Vector2D(center.x-width/2, center.y-width/2)
+    //rotate the centerVector
+    bl.rotate(center,rotation)
+  }
 
   /**
    * The lowest right corner of the rectangle.
    */
-  def bottomRight: Vector2D = null
+  def bottomRight = {
+    //find the vector from the center to the corner of the rectangle prior to rotation.
+    val br = Vector2D(center.x+width/2, center.y-width/2)
+    //rotate the centerVector
+    br.rotate(center,rotation)
+  }
 
   /**
    * The upper left corner of the rectangle.
    */
-  def topLeft: Vector2D = null
+  def topLeft = {
+    //find the vector from the center to the corner of the rectangle prior to rotation.
+    val tl = Vector2D(center.x-width/2, center.y+width/2)
+    //rotate the centerVector
+    tl.rotate(center,rotation)
+  }
 
   /**
    * The upper right corner of the rectangle.
    */
-  def topRight: Vector2D = null
+  def topRight = {
+    //find the vector from the center to the corner of the rectangle prior to rotation.
+    val tr = Vector2D(center.x+width/2, center.y+width/2)
+    //rotate the centerVector
+    tr.rotate(center,rotation)
+  }
 
   def onPeriphery(point: Vector2D): Boolean = false
 
@@ -465,6 +485,17 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     case rectangle : SimpleRectangle2D =>
       (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
         bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
+
+    //TODO: wrong!
+    case rectangle : ComplexRectangle2D => {
+      val left = rectangle.center - Vector2D(width/2,0)
+      val right = rectangle.center + Vector2D(width/2,0)
+      val bottom = rectangle.center - Vector2D(height/2,0)
+      val top = rectangle.center + Vector2D(height/2,0)
+
+      (bottomLeft.x <= left.x && right.x <= topRight.x &&
+        bottomLeft.y <= bottom.y && top.y <= topRight.y)
+    }
 
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
   }
