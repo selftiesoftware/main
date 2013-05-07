@@ -15,9 +15,8 @@ package com.siigna.app.model.selection
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSpec
-import scala.collection.immutable.BitSet
 import com.siigna.app.model.shape.{Shape, PolylineShape, CircleShape, LineShape}
-import com.siigna.util.geom.{TransformationMatrix, Rectangle2D, Vector2D}
+import com.siigna.util.geom.{TransformationMatrix, Vector2D}
 import com.siigna.util.collection.Attributes
 
 /**
@@ -30,8 +29,8 @@ class SelectionSpec extends FunSpec with ShouldMatchers {
   val selector = ShapeSelector(1, 2)
 
   def nonEmpty = NonEmptySelection(
-    Map(1 -> (LineShape(0, 0, 10, 10) -> FullShapeSelector),
-        2 -> (circle -> ShapeSelector(0, 1)))
+    Map[Int, (Shape, ShapeSelector)](1 -> (LineShape(0, 0, 10, 10) -> FullShapeSelector),
+                                     2 -> (circle -> ShapeSelector(0, 1)))
   )
 
   describe("A NonEmptySelection") {
@@ -110,6 +109,60 @@ class SelectionSpec extends FunSpec with ShouldMatchers {
       n.shapes should equal (y)
     }
 
+  }
+
+  describe("An EmptySelection") {
+
+    val empty = EmptySelection
+    val circle = CircleShape(Vector2D(0, 0), 10)
+    val polyline = PolylineShape(Vector2D(0, 0), Vector2D(-10, 15), Vector2D(200, 16))
+    val selector = ShapeSelector(1, 2)
+    val selection = Map(1 -> (LineShape(0, 0, 10, 10) -> FullShapeSelector), 2 -> (circle -> ShapeSelector(0, 1)))
+
+    it ("can add another shape") {
+      empty.add(3, (polyline -> selector)) should equal (
+        NonEmptySelection(Map(3 -> (polyline -> selector)))
+      )
+    }
+
+    it ("can add a number of shapes") {
+      empty.add(selection) should equal (NonEmptySelection(selection))
+    }
+
+    it ("can extract its parts") {
+      empty.parts should equal(Nil)
+    }
+
+    it ("can remove a shape") {
+      empty.remove(1) should equal(empty)
+    }
+
+    it ("can remove a number of shapes") {
+      empty.remove(Seq(1, 2)) should equal (empty)
+    }
+
+    it ("can remove a part of a shape") {
+      empty.remove(2, ShapeSelector(1)) should equal (empty)
+    }
+
+    it ("can remove a number of parts from a number of shapes") {
+      val m = Map(2 -> selector, 3 -> FullShapeSelector)
+      empty.remove(m) should equal (empty)
+    }
+
+    it ("can not be transformed") {
+      val t = TransformationMatrix().rotate(12.653)
+      empty.transform(t).transformation should equal (TransformationMatrix())
+    }
+
+    it ("can not change its attributes") {
+      val a = Attributes("Test" -> "37aæøå")
+      empty.setAttributes(a).attributes should equal (Attributes())
+    }
+
+    it ("can return its shapes") {
+      empty.shapes should equal (Map.empty)
+    }
   }
 
 }

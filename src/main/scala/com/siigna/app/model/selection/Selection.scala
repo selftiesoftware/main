@@ -159,6 +159,14 @@ trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)]
   def transform(transformation: TransformationMatrix) : Selection
 
   /**
+   * The [[com.siigna.util.geom.TransformationMatrix]] representing the changes made so far to the shapes in the
+   * selection.
+   * @return A TransformationMatrix describing some geometric transformation. If no changes have been made the
+   *         matrix will have no effect once applied (a unit matrix).
+   */
+  def transformation : TransformationMatrix
+
+  /**
    * The vertices of the selection, i.e. the selected points, described by a number of
    * [[com.siigna.util.geom.Vector2D]]s.
    * @return A number of vertices.
@@ -247,7 +255,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
 
   def setAttributes(attributes: Attributes) = { this.attributes ++= attributes; this}
 
-  override def toString() = s"Selection($transformation, $attributes)[$self]"
+  override def toString() = s"NonEmptySelection($transformation, $attributes)[$self]"
 
   /**
    * The transformation applied to the selection so far, that will be applied on the [[com.siigna.app.model.Drawing]]
@@ -276,13 +284,15 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
  */
 case object EmptySelection extends Selection {
 
-  val attributes = Attributes.empty
+  def attributes = Attributes.empty
 
   def add(id: Int, part : (Shape, ShapeSelector)) : Selection = NonEmptySelection(Map(id -> part))
 
   def add(parts: Map[Int, (Shape, ShapeSelector)]): Selection = NonEmptySelection(parts)
 
   def boundary = SimpleRectangle2D(0, 0, 0, 0)
+
+  def distanceTo(point: Vector2D, scale: Double) : Double = Double.MaxValue
 
   def parts = Nil
 
@@ -300,15 +310,15 @@ case object EmptySelection extends Selection {
 
   def shapes = Map.empty[Int, Shape]
 
-  def vertices = Traversable.empty
-
-  def distanceTo(point: Vector2D, scale: Double) : Double = Double.MaxValue
-
   def setAttributes(attributes: Attributes) = this
 
   override def toString() = "Empty Selection"
 
   def transform(transformation : TransformationMatrix) = this
+
+  def transformation = TransformationMatrix()
+
+  def vertices = Traversable.empty
 }
 
 /**
