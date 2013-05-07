@@ -112,6 +112,40 @@ trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)]
   def parts : Traversable[Shape]
 
   /**
+   * Remove a single [[com.siigna.app.model.shape.Shape]] from the selection. If the shape does not exist in the
+   * selection, nothing happens.
+   * @param id  The id of the shape to remove from the selection.
+   * @return  The new selection without the shape.
+   */
+  def remove(id : Int) : Selection
+
+  /**
+   * Removes a number of [[com.siigna.app.model.shape.Shape]]s from the selection. If some or all of the shapes does
+   * not exist in the selection, nothing happens.
+   * @param ids  The ids of the shapes to remove from the selection.
+   * @return  The new selection without the shapes.
+   */
+  def remove(ids : Traversable[Int]) : Selection
+
+  /**
+   * Remove a the given [[com.siigna.app.model.selection.ShapeSelector]] of the [[com.siigna.app.model.shape.Shape]]
+   * with the given id from the selection. If the shape does not exist in the selection, nothing happens.
+   * @param id  The id of the shape to remove from the selection.
+   * @return  The new selection without the shape.
+   */
+  def remove(id : Int, selector : ShapeSelector) : Selection
+
+  /**
+   * Removes the [[com.siigna.app.model.selection.ShapeSelector]]s from the [[com.siigna.app.model.shape.Shape]]s
+   * with the given id from the selection. If any of the removal operations results in empty selections, the shapes
+   * are completely removed from the selection. If one or more of the shapes are not present in the selection, nothing
+   * happens.
+   * @param parts  The ids of the shapes mapped with the selector to remove from that given shape.
+   * @return  A new seletion with the parts removed.
+   */
+  def remove(parts : Map[Int, ShapeSelector]) : Selection
+
+  /**
    * Retrieves the whole shapes included in the selection, and not just the selected parts of them.
    * @return A map containing the ids and the shapes used in the current selection.
    */
@@ -182,6 +216,33 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
     selection.map(t => t._2._1.getShape(t._2._2)).flatten.map(_.setAttributes(attributes).transform(transformation))
   }
 
+  def remove(id : Int) : Selection = Selection(selection - id)
+
+  def remove(ids : Traversable[Int]) : Selection = Selection(selection -- ids)
+
+  def remove(id : Int, selector : ShapeSelector) : Selection = {
+    selection.get(id) match {
+      case Some(t) => NonEmptySelection(
+        (t._2 -- selector) match {
+          case EmptyShapeSelector => selection - id
+          case s => selection.updated(id, t._1 -> s)
+        })
+      case None => this
+    }
+  }
+
+  def remove(parts : Map[Int, ShapeSelector]) : Selection = {
+    Selection(parts.foldLeft(selection)((s, t) => {
+      s.get(t._1) match {
+        case Some(that) => (that._2 -- t._2) match {
+          case EmptyShapeSelector => s - t._1
+          case e => s.updated(t._1, that._1 -> e)
+        }
+        case None => s
+      }
+    }))
+  }
+
   def shapes : Map[Int, Shape] = selection.map(t => t._1 -> t._2._1.addAttributes(attributes).transform(transformation)).toMap
 
   def setAttributes(attributes: Attributes) = { this.attributes ++= attributes; this}
@@ -224,6 +285,14 @@ case object EmptySelection extends Selection {
   def boundary = SimpleRectangle2D(0, 0, 0, 0)
 
   def parts = Nil
+
+  def remove(id : Int) : Selection = this
+
+  def remove(ids : Traversable[Int]) : Selection = this
+
+  def remove(id : Int, selector : ShapeSelector) : Selection = this
+
+  def remove(parts : Map[Int, ShapeSelector]) : Selection = this
 
   def selectedShapes = Nil
 
