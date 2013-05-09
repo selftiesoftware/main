@@ -58,14 +58,14 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
   }
   test("Can tell if an Arc2D and a segment2D intersect") {
 
-    val p1 = Vector2D(9, 2)
-    val p2 = Vector2D(10, 0)
-    val p3 = Vector2D(0, -10)
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
     val arc = Arc2D(p1, p2, p3)
-    val l1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
+    val l1 = Segment2D(Vector2D(0,40),Vector2D(10,45))
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
 
-    arc.intersects(l1) should equal (true)
+    arc.intersects(l1) should equal (false)
     arc.intersects(l2) should equal (true)  //should equal false when the segment evaluation in arc is done.
   }
 }

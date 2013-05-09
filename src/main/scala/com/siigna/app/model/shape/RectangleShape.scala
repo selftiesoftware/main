@@ -35,6 +35,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def setAttributes(attributes: Attributes): RectangleShape#T = throw new UnsupportedOperationException("Not yet implemented")
 
-  def transform(transformation: TransformationMatrix): RectangleShape#T = this
+  def transform(t : TransformationMatrix) =
+    RectangleShape(center transform(t), width * t.scaleFactor, height * t.scaleFactor, rotation, attributes)
 
 }

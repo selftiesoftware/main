@@ -194,18 +194,19 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
     case segment : Segment2D => {
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
-      val delta = segment.p2 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+      val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
 
       //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center? TODO: CHECK THIS
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD (or the determinant.. TODO: try this if error)
-      val intersectValue = math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(-this.radius,2)))
+      val intersectValue = math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))
 
       println("parallelVector: "+parallelVectorD)
       println("delta: "+delta)
 
       println("A: "+ math.pow((parallelVectorD * delta),2))
       println("B: "+ math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(-this.radius,2)))
-      //intersectValue < 0    no intersection
+     println(intersectValue)
+     //intersectValue < 0    no intersection
       //intersectValue = 0    line tangent (one intersection)
       //intersectValue > 0    two intersections
 

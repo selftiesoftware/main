@@ -155,6 +155,18 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
 
   def circumference = height * 2 + width * 2
 
+  def distanceTo(geom : Geometry2D) = geom match {
+    /**
+     * Calculates the distance from a simple rectangle to a point.
+     */
+    case point : Vector2D =>
+      Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
+        _ distanceTo(point)
+      ).reduceLeft( (a, b) => if (a < b) a else b)
+
+    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
+  }
+
   /**
    * Expands the rectangle to contain the given geometry.
    * @param geom  The geometry to include.
@@ -251,11 +263,6 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    * Transform the geometry with a given matrix.
    */
   def transform(transformation: TransformationMatrix): ComplexRectangle2D#T = null
-
-  /**
-   * Determines the distance from the geometry to an arc.
-   */
-  def distanceTo(geometry: Geometry2D): Double = 0.0
 
   /**
    * Determine whether the geometry is overlapping (intersecting) the given geometry.
@@ -486,7 +493,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
         bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
 
-    //TODO: wrong!
+    //TODO: wrong! - needs to take into account that the rectangle may be rotated.
     case rectangle : ComplexRectangle2D => {
       val left = rectangle.center - Vector2D(width/2,0)
       val right = rectangle.center + Vector2D(width/2,0)
@@ -498,18 +505,6 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     }
 
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
-  }
-
-  def distanceTo(geom : Geometry2D) = geom match {
-    /**
-     * Calculates the distance to a point.
-     */
-    case point : Vector2D =>
-      Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
-        _ distanceTo(point)
-      ).reduceLeft( (a, b) => if (a < b) a else b)
-
-    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
   }
 
   def expand(geom : Geometry2D) : SimpleRectangle2D = geom match {
@@ -578,6 +573,10 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      */
     case that : SimpleRectangle2D =>
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
+
+    //TODO: WRONG IMPLEMENTATION, NEEDS UPDATING
+    case that : ComplexRectangle2D =>
+      !(xMin > that.center.x+height/2 || xMax < that.center.x-height/2 || yMin > that.center.y+height/2 || yMax < that.center.y-height/2)
 
     case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
   }
