@@ -195,12 +195,10 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case segment : Segment2D => {
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
-
-      //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center? TODO: CHECK THIS
+      //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
       //the result is rounded to five decimals.
-      val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000
-      //println(intersectValue)
+      val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
       //intersectValue < 0    no intersection
       //intersectValue = 0    line tangent (one intersection)
       //intersectValue > 0    two intersections
@@ -208,6 +206,15 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //TODO: this intersectValue is for infinite lines. For a finite line segment,
       //t should be found as the formal roots of equation (6) in the document "Intersection of Linear and Circular Components in 2D"
       //If 0<t<1 the segment and circle intersects.
+
+      val tPositive = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tNegative = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+
+      val intersection1 = segment.p1 + parallelVectorD * tPositive
+      val intersection2 = segment.p1 + parallelVectorD * tNegative
+
+      println("tpos: "+ tPositive)
+      println("tneg: "+ tNegative)
 
       //TODO: The algebraic condition for the circle point P to be on the arc (7) needs to be implemented.
 
@@ -237,6 +244,25 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
           (insideArcDegrees(angle1) && arc.insideArcDegrees(angle2))
         })
       }
+    }
+    case segment : Segment2D => {
+      val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
+      val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+      val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
+      //find the roots; that is the value t to be inserted into the
+      val tPositive = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tNegative = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val intersection1 = if(tPositive >= 0 && tPositive <= 1) Set(segment.p1 + parallelVectorD * tPositive) else Set()
+      val intersection2 = if(tNegative >= 0 && tNegative <= 1) Set(segment.p1 + parallelVectorD * tNegative) else Set()
+
+      println("tPositive: "+tPositive)
+      println("tNegative: "+tNegative)
+
+      println("IV: "+intersectValue)
+      if(intersectValue > 0) intersection1+intersection2
+      //TODO: tangent situations does not generate the correct vector.
+      else if(intersectValue == 0) Set(Vector2D(0,0))
+      else Set()
     }
     case _ => throw new UnsupportedOperationException("Not implemented")
   }
