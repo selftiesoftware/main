@@ -47,8 +47,8 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p2 = Vector2D(1, 0)
     val p3 = Vector2D(0, -1)
     val p4 = Vector2D(math.cos(math.Pi / 4), math.sin(math.Pi / 4))
-    val p5 = Vector2D(1, 0)
-    val p6 = Vector2D(p4.x, -p4.y)
+    //val p5 = Vector2D(1, 0)
+    //val p6 = Vector2D(p4.x, -p4.y)
 
     val arc1 = Arc2D(p1, p2, p3)
     arc1 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
@@ -56,6 +56,17 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val arc2 = Arc2D(p3, p2, p1)
     arc2 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
   }
+
+  test("Can calculate the start and end points of an arc") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+    val arc = Arc2D(p1, p2, p3)
+
+    arc.startPoint should equal (p3)
+    arc.endPoint should equal (p1)
+  }
+
   test("Can tell if an Arc2D and a segment2D intersect -OK") {
     val p1 = Vector2D(-10, 0)
     val p2 = Vector2D(0, 10)
@@ -65,11 +76,15 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
     val l3 = Segment2D(Vector2D(-20,10),Vector2D(20,10))
     val l4 = Segment2D(Vector2D(-20,20),Vector2D(0,0))
+    val l5 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
+    val l6 = Segment2D(Vector2D(20,5),Vector2D(-20,5))
 
     arc.intersects(l1) should equal (false)
     arc.intersects(l2) should equal (true) //should have one intersection only.
     arc.intersects(l3) should equal (true) //line segment tangent to the arc.
     arc.intersects(l4) should equal (true) //should have one intersection only.
+    arc.intersects(l5) should equal (false) //should not have an intersection.
+    arc.intersects(l6) should equal (true) //should have two intersections.
   }
   test("Can calculate intersections between an Arc2D and a segment2D -OK") {
     val p1 = Vector2D(-10, 0)
@@ -80,10 +95,13 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
     val l3 = Segment2D(Vector2D(-20,10),Vector2D(20,10))
     val l4 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
+    val l5 = Segment2D(Vector2D(20,5),Vector2D(-20,5))
+
     arc.intersections(l1) should equal (Set())
-    arc.intersections(l2) should equal (Set(Vector2D(7.071067811865465,7.071067811865465), Vector2D(-7.071067811865472,-7.071067811865472))) //TODO: should have one intersection only.
+    arc.intersections(l2) should equal (Set(Vector2D(7.071067811865465,7.071067811865465))) //one intersection only.
     arc.intersections(l3) should equal (Set(Vector2D(0,0)))//TODO: tangent situations not evaluated correctly
-    arc.intersections(l4) should equal (Set(Vector2D(-7.071067811865472,-7.071067811865472))) //a segment which ends inside the arc should have one point of intersection only
+    arc.intersections(l4) should equal (Set()) //a segment which crosses the circle outside the arc and ends inside the arc should have zero intersections
+    arc.intersections(l5) should equal (Set(Vector2D(-8.660254037844378,5.0), Vector2D(8.660254037844382,5.0)))
   }
 
 }

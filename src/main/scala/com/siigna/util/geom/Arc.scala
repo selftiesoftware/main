@@ -10,6 +10,8 @@
  */
 package com.siigna.util.geom
 
+import com.siigna.app.model.action.CreateShape
+
 /**
  * A mathematical representation of a circle-piece, that is a not-full circle.
  * 
@@ -75,7 +77,6 @@ object Arc {
    * Creates a 2D Arc.
    */
   def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = Arc2D(start, middle, end)
-
 }
 
 /**
@@ -102,7 +103,12 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   /**
    * The point where the arc ends.
    */
-  lazy val endPoint = Vector2D(math.cos(endAngle) * radius, math.sin(endAngle) * radius) + center
+  //TODO: check precision
+  lazy val endPoint =  {
+    val x = Math.round((math.cos(endAngle.toRadians)*radius + center.x)*10000.0)/10000.0
+    val y = Math.round((math.sin(endAngle.toRadians)*radius + center.y)*10000.0)/10000.0
+    Vector2D(x,y)
+  }
 
   /**
    * Calculates the length of the arc, that is the distance the circumference spans.
@@ -195,6 +201,8 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case segment : Segment2D => {
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+      val a = this.endPoint
+      val b = this.startPoint
       //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
       //the result is rounded to five decimals.
@@ -205,14 +213,22 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
       val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
       val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val int1 = segment.p1 + parallelVectorD * tP
+      val int2 = segment.p1 + parallelVectorD * tN
 
-      //TODO: The algebraic condition for the circle point P to be on the arc (7) needs to be implemented.
+      val ortVector = (b - a).normal
+
+      //evaluate if the intersections are on the arc (onArc should be >= 0)
+      val int1OnArc = (int1 - a) * ortVector
+      val int2OnArc = (int2 - a) * ortVector
+      val tPonArc = if(int1OnArc >= 0) true else false
+      val tNonArc = if(int2OnArc >= 0) true else false
 
       //if both tP and tN are outside the range 0-1, there are no intersections:
       if( tP < 0 && tP > 1 && tN < 0 && tN > 1 ) false
 
-      //if on of tP of tN are in range 0-1, there is an intersection:
-      else if(tP >= 0 && tP <= 1 || tN >= 0 && tN <= 1) true
+      //if one of tP of tN are in range 0-1, there is an intersection - if the respective intersection is on the arc segment:
+      else if((tP >= 0 && tP <= 1 && tPonArc == true) || (tN >= 0 && tN <= 1 && tNonArc == true)) true
 
       //if intersectValue is zero, the segment is tangent to the arc (one intersection)
       else if(intersectValue == 0) true
@@ -248,32 +264,44 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case segment : Segment2D => {
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+      val a = this.endPoint
+      val b = this.startPoint
       val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
       //find the roots; that is the value t to be inserted into the
       val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
       val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
       val int1 = segment.p1 + parallelVectorD * tP
       val int2 = segment.p1 + parallelVectorD * tN
+      val ortVector = (b - a).normal
 
-      //check if the segment is intersecting the arc, not just the circle...
+      //evaluate if the intersections are on the arc (onArc should be >= 0)
+      val int1OnArc = (int1 - a) * ortVector
+      val int2OnArc = (int2 - a) * ortVector
+      val tPonArc = if(int1OnArc >= 0) true else false
+      val tNonArc = if(int2OnArc >= 0) true else false
 
-      println("tPositive: "+tP)
-      println("tNegative: "+tN)
+      //two intersections: two roots, both in range 0-1 and on the arc.
+      if(intersectValue > 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) Set(int1,int2)
 
-      println("IV: "+intersectValue)
-      //if there are two intersections, and they are both within 0 < t < 1, return them both:
-      if(intersectValue > 0 && tP >= 0 && tP <= 1 && tN >= 0 && tN <=1 ) Set(int1,int2)
-
-      //if only the first root is in range (one intersection), return it:
-      else if(tP >= 0 && tP <= 1 && tN < 0 || tN > 1) Set(int1)
-      else if(tN >= 0 && tN <= 1 && tP < 0 || tP > 1) Set(int2)
+      //one intersection: if tP is in range and tP is on the arc while tN is not  - or the other way around.
+      else if(tP >= 0 && tP <= 1 && tPonArc == true) Set(int1)
+      else if(tN >= 0 && tN <= 1 && tNonArc == true) Set(int2)
 
       //TODO: tangent situations does not generate the correct vector, as both roots yield NaN?? The intersection needs to be calculated.
       else if (intersectValue == 0) Set(Vector2D(0,0))
 
-
-      //if intersectValue is negative, there are no intersections
+      //zero intersections: if intersectValue < 0
       else Set()
+
+
+
+
+      //if only ONE intersection is found (the line does not cross the full circle, check if this intersection lies on the arc. If so, return it:
+      //else if((tP >= 0 && tP <= 1 && tPonArc == true) && tN < 0 || tN > 1) Set(int1)
+      //else if((tN >= 0 && tN <= 1 && tNonArc == true) && tP < 0 || tP > 1) Set(int2)
+
+
+
     }
     case _ => throw new UnsupportedOperationException("Not implemented")
   }
@@ -282,7 +310,9 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)
 
   // TODO: Add middlepoint
-  lazy val vertices = Seq(startPoint, endPoint)
+  lazy val vertices = {
+    Seq(startPoint, endPoint)
+  }
 
 }
 
@@ -301,7 +331,6 @@ object Arc2D {
     if (start == middle && start == end && middle == end) {
       throw new IllegalArgumentException("Unable to create arc if two points coincide.")
     }
-
     // Locate the center where the normal-vectors of the lines from start to middle and end to middle intersects
     // First find the two middle points
     val m1 = (middle + start)/2
@@ -312,7 +341,6 @@ object Arc2D {
 
     // Locate the intersections
     val intersections = Line2D(m1, p1).intersections(Line2D(m2, p2))
-
     if (intersections.size != 1) {
       throw new UnsupportedOperationException("Unable to calculate the center of the arc.")
     } else {
