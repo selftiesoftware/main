@@ -15,7 +15,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSuite, FlatSpec}
 
 /**
- * Test an arc.
+ * Test a circle.
  */
 class Circle2DSpec  extends FunSuite with ShouldMatchers {
 
@@ -39,7 +39,7 @@ class Circle2DSpec  extends FunSuite with ShouldMatchers {
     val l4 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
     circle.intersections(l1) should equal (Set())
     circle.intersections(l2) should equal (Set(Vector2D(-7.0710678118654755,-7.0710678118654755), Vector2D(7.0710678118654755,7.0710678118654755)))
-    circle.intersections(l3) should equal (Set(Vector2D(0,10)))//TODO: tangent situations not evaluated correctly
+    circle.intersections(l3) should equal (Set(Vector2D(0,10)))//TODO: tangent intersection vector coordinates are not calculated yet
     circle.intersections(l4) should equal (Set(Vector2D(-7.0710678118654755,-7.0710678118654755))) //a segment which ends inside the circle should have one point of intersection only
   }
 
