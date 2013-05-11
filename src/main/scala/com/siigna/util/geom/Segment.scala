@@ -108,6 +108,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   def intersects(geom : Geometry2D) = geom match {
 
     case arc : Arc2D => arc.intersects(this)
+    case circle : Circle2D => circle.intersects(this)
     /**
      * Determines whether two line segments intersect.
      */
@@ -148,8 +149,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
    * Returns a list of points where a the Line Segment intersects with a given geometry.
    */
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    // TODO: Do this properly
-    case arc : Arc2D => intersections(Circle(arc.center, arc.radius)).filter(p => arc.insideArcDegrees((p - arc.center).angle))
+
+    case arc : Arc2D => arc.intersections(this)
     /**
      * Returns a list of points, defined as the intersection(s) between the
      * segment and the circle.
@@ -168,7 +169,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
         else
           Set(-(f * g) / (f * f))
 
-      // Filter out the points, that isn't on the line-segment.
+      // Filter out the points outside the line-segment.
       t.map(x => f * x + p1).filter( point =>
         ((p2 - p1) * (point - p1) >= 0 &&
           (p1 - p2) * (point - p2) >= 0)

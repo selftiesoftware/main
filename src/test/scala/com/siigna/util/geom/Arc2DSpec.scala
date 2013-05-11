@@ -80,10 +80,10 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
     val l3 = Segment2D(Vector2D(-20,10),Vector2D(20,10))
     val l4 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
-    //arc.intersections(l1) should equal (Set())
-    //arc.intersections(l2) should equal (Set(Vector2D(7.071067811865465,7.071067811865465), Vector2D(-7.071067811865472,-7.071067811865472)))
-    //arc.intersections(l3) should equal (Set(Vector2D(0,0)))//TODO: tangent situations not evaluated correctly
-    arc.intersections(l4) should equal (Set())//TODO: a segment which ends inside the arc should have one point of intersection only
+    arc.intersections(l1) should equal (Set())
+    arc.intersections(l2) should equal (Set(Vector2D(7.071067811865465,7.071067811865465), Vector2D(-7.071067811865472,-7.071067811865472))) //TODO: should have one intersection only.
+    arc.intersections(l3) should equal (Set(Vector2D(0,0)))//TODO: tangent situations not evaluated correctly
+    arc.intersections(l4) should equal (Set(Vector2D(-7.071067811865472,-7.071067811865472))) //a segment which ends inside the arc should have one point of intersection only
   }
 
 }

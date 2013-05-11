@@ -203,22 +203,22 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //intersectValue = 0    line tangent (one intersection)
       //intersectValue > 0    two intersections
 
-      //TODO: this intersectValue is for infinite lines. For a finite line segment,
-      //t should be found as the formal roots of equation (6) in the document "Intersection of Linear and Circular Components in 2D"
-      //If 0<t<1 the segment and circle intersects.
-
-      val tPositive = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-      val tNegative = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-
-      val intersection1 = segment.p1 + parallelVectorD * tPositive
-      val intersection2 = segment.p1 + parallelVectorD * tNegative
-
-      println("tpos: "+ tPositive)
-      println("tneg: "+ tNegative)
+      val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
 
       //TODO: The algebraic condition for the circle point P to be on the arc (7) needs to be implemented.
 
-      if(intersectValue >= 0)true else false //return statement
+      //if both tP and tN are outside the range 0-1, there are no intersections:
+      if( tP < 0 && tP > 1 && tN < 0 && tN > 1 ) false
+
+      //if on of tP of tN are in range 0-1, there is an intersection:
+      else if(tP >= 0 && tP <= 1 || tN >= 0 && tN <= 1) true
+
+      //if intersectValue is zero, the segment is tangent to the arc (one intersection)
+      else if(intersectValue == 0) true
+
+      //if none of these conditions are true, there are no intersections.
+      else false
     }
 
     //TODO: matches on the boundary of the arc, which is not correct.
@@ -250,18 +250,29 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
       val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
       //find the roots; that is the value t to be inserted into the
-      val tPositive = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-      val tNegative = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-      val intersection1 = if(tPositive >= 0 && tPositive <= 1) Set(segment.p1 + parallelVectorD * tPositive) else Set()
-      val intersection2 = if(tNegative >= 0 && tNegative <= 1) Set(segment.p1 + parallelVectorD * tNegative) else Set()
+      val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val int1 = segment.p1 + parallelVectorD * tP
+      val int2 = segment.p1 + parallelVectorD * tN
 
-      println("tPositive: "+tPositive)
-      println("tNegative: "+tNegative)
+      //check if the segment is intersecting the arc, not just the circle...
+
+      println("tPositive: "+tP)
+      println("tNegative: "+tN)
 
       println("IV: "+intersectValue)
-      if(intersectValue > 0) intersection1+intersection2
-      //TODO: tangent situations does not generate the correct vector.
-      else if(intersectValue == 0) Set(Vector2D(0,0))
+      //if there are two intersections, and they are both within 0 < t < 1, return them both:
+      if(intersectValue > 0 && tP >= 0 && tP <= 1 && tN >= 0 && tN <=1 ) Set(int1,int2)
+
+      //if only the first root is in range (one intersection), return it:
+      else if(tP >= 0 && tP <= 1 && tN < 0 || tN > 1) Set(int1)
+      else if(tN >= 0 && tN <= 1 && tP < 0 || tP > 1) Set(int2)
+
+      //TODO: tangent situations does not generate the correct vector, as both roots yield NaN?? The intersection needs to be calculated.
+      else if (intersectValue == 0) Set(Vector2D(0,0))
+
+
+      //if intersectValue is negative, there are no intersections
       else Set()
     }
     case _ => throw new UnsupportedOperationException("Not implemented")

@@ -119,6 +119,35 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
         } else true
       }
     }
+
+    case segment : Segment2D => {
+      val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
+      val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+      //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center
+      //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
+      //the result is rounded to five decimals.
+
+      val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
+      //intersectValue < 0    no intersection
+      //intersectValue = 0    line tangent (one intersection)
+      //intersectValue > 0    two intersections
+
+      val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(this.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(this.radius,2)))) / math.pow(parallelVectorD.length,2)
+
+      //if both tP and tN are outside the range 0-1, there are no intersections:
+      if( tP < 0 && tP > 1 && tN < 0 && tN > 1 ) false
+
+      //if on of tP of tN are in range 0-1, there is an intersection:
+      else if(tP >= 0 && tP <= 1 || tN >= 0 && tN <= 1) true
+
+      //if intersectValue is zero, the segment is tangent to the arc (one intersection)
+      else if(intersectValue == 0) true
+
+      //if none of these conditions are true, there are no intersections.
+      else false
+    }
+
     case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
   }
 
