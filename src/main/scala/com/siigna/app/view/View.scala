@@ -15,8 +15,7 @@ import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
 import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
-import com.siigna.app.model.shape.Shape
-import com.siigna.app.model.{Selection, Drawing}
+import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.SiignaGraphics
 
@@ -25,7 +24,7 @@ import com.siigna.app.view.native.SiignaGraphics
  *   This is the view part of the
  *  <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
  *   The view is responsible for painting the appropriate content (in this case the [[com.siigna.app.model.Drawing]])
- *   and transforming the content to the correct zoom scale and pan vector.
+ *   by transforming the content to the correct zoom scale and pan vector and rendering it on the screen.
  * </p>
  *
  * <h3>Zoom and pan</h3>
@@ -44,7 +43,7 @@ import com.siigna.app.view.native.SiignaGraphics
  *   need to draw the shapes. This is where [[com.siigna.util.geom.TransformationMatrix]] comes in. This matrix is
  *   capable of containing <a href="http://en.wikipedia.org/wiki/Transformation_matrix">all lineary transformations</a>.
  *   In other words we can express every possible N-dimensional transformation in such a matrix. So instead of
- *   applying two operations we get one... And some other stuff.
+ *   applying two operations we can reduce it to one.
  * </p>
  *
  * <h3>Device and Drawing coordinates</h3>
@@ -52,7 +51,7 @@ import com.siigna.app.view.native.SiignaGraphics
  *  As written in the <a href="http://docs.oracle.com/javase/tutorial/2d/overview/coordinate.html">Java Tutorial</a>
  *  there are two different coordinate systems to think of when something is drawn: The coordinate system of the screen
  *  or printer that the image has to be projected upon - we call that the device coordinate system - and that of
- *  the [[com.siigna.app.model.shape.Shape]]s (which normally origins at (0, 0)), which we have dubbed the drawing
+ *  the [[com.siigna.app.model.shape.Shape]]s (normally originating at (0, 0)) - which we have dubbed the drawing
  *  coordinate system. The device coordinates use (0, 0) as the upper left corner and then displays
  *  <code>width * height</code> pixels, equal to the resolution of the device. The drawing coordinates does not fit
  *  into this coordinate-space on their own, so we have to transform them. For that purpose we have two
@@ -62,21 +61,28 @@ import com.siigna.app.view.native.SiignaGraphics
  *  The former is handy whenever we need to put the shapes onto the screen (and we need to do that a lot) while the
  *  latter can be used for keeping something on a fixed position, regardless of the zoom.
  * </p>
+ * <p>
+ *  Please refer to the [[com.siigna.util.geom.TransformationMatrix]] for use cases and examples.
+ * </p>
  *
- * <h3>Overriding default behaviour</h3>
+ * <h3>Custom rendering</h3>
  * <p>
- *  The View uses a [[com.siigna.app.view.Renderer]] to render the context in a somewhat intelligent way using
- *  caching. The native implementation can be found in [[com.siigna.app.view.native.SiignaRenderer]].
+ *   The View uses a [[com.siigna.app.view.Renderer]] to render the content in a more-or-less intelligent way (depending
+ *   on the needs) using caching. The native implementation can be found in
+ *   [[com.siigna.app.view.native.SiignaRenderer]].
  * </p>
  * <p>
- *  An implementation of [[com.siigna.app.view.Graphics]] is used to draw the actual shapes by the renderer. The
- *  native implementation can be found in [[com.siigna.app.view.native.SiignaGraphics]].
+ *   An implementation of [[com.siigna.app.view.Graphics]] is used to draw the actual shapes by the renderer. The
+ *   native implementation can be found in [[com.siigna.app.view.native.SiignaGraphics]].
  * </p>
  * <p>
- *  If you have a smarter way of doing it either of the above, or simply have other needs, you can override both.
- *  See the [[com.siigna.app.view.View#graphics]], [[com.siigna.app.view.View#renderer]] methods or
- *  [[com.siigna.app.view.native]] package for a description.
+ *   If you have a smarter way of doing either of the above, or simply have other needs, you can override both.
+ *   See the [[com.siigna.app.view.View#graphics]], [[com.siigna.app.view.View#renderer]] methods or
+ *   [[com.siigna.app.view.native]] package for a description.
  * </p>
+ *
+ * @see [[com.siigna.app.model.Drawing]], [[com.siigna.app.controller.Controller]],
+ *     [[com.siigna.util.geom.TransformationMatrix]]
  */
 object View {
 
@@ -95,16 +101,21 @@ object View {
   private var _pan : Vector2D = Vector2D(0, 0)
 
   /**
-   * The frames in the current second.
-   * @todo Use these!
+   * The time it takes to draw one frame.
    */
-  var fpsCurrent : Double = 0
+  private var fpsTimeToDraw : Double = 0
 
   /**
-   * The second the fps is counting in.
-   * @todo Use these!
+   * The time it took to draw the last frame.
    */
-  var fpsSecond : Double = 0
+  private var fpsTimeToDrawLast : Double = 0
+
+  /**
+   * The number of frames drawn per second. Useful for debugging purposes or to see how stressed the computer is.
+   *
+   * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
+   */
+  def fps : Double = 60 / (fpsTimeToDraw * 0.9 + fpsTimeToDrawLast * 0.1)
 
   /**
    * The default graphics implementation represented as a function that can be called whenever someone needs an
@@ -121,15 +132,9 @@ object View {
   var graphics : (Graphics2D) => Graphics = (g : Graphics2D) => new SiignaGraphics(g)
 
   /**
-   * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
-   * the [[com.siigna.app.model.Drawing]] or the standard chess-checkered background differently. For example like so:
-   * {{{
-   *   object MyOwnRenderer extends Renderer { ... }
-   *   View.renderer = MyOwnRenderer
-   * }}}
-   * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
+   * The private renderer instance
    */
-  var renderer : Renderer = null
+  private var _renderer : Option[Renderer] = None
 
   /**
    * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
@@ -237,36 +242,32 @@ object View {
 
   /**
    * <p>
-   *   Draws the classical chess-checkered pattern, cleans the drawing area with a white rectangle and draw
-   *   the given [[com.siigna.app.model.shape.Shape]]s, [[com.siigna.app.view.Interface]] and
-   *   [[com.siigna.app.model.Selection]].
+   *   This method paints the View by placing graphical information on the given <code>screenGraphics</code> parameter.
+   * </p>
+   * <p>
+   *   The method first draws the active [[com.siigna.app.view.Renderer]], as defined in the <code>renderer</code>
+   *   method, meaning the current class responsible for rendering shapes in a cached and efficient manor (hopefully).
+   * </p>
+   * <p>
+   *   Afterwards we move on to draw any [[com.siigna.app.model.selection.Selection]]s made by the user. They are all
+   *   given the color defined in the <code>colorSelected</code> value in [[com.siigna.app.Siigna]].
+   * </p>
+   * <p>
+   *   Lastly we paint the given [[com.siigna.app.view.Interface]] and through it, the modules. An Interface
+   *   defines the paint-chain for the plugged in (active) modules, starting by painting the first module, receiving
+   *   events from the [[com.siigna.app.controller.Controller]].
    * </p>
    *
-   * This function uses a hack that eliminates all flickering caused by
-   * double-buffering (http://java.sun.com/products/jfc/tsc/articles/painting/).
-   * Instead of server everything on the views Graphics-object immediately it
-   * uses a buffer image represented as the var (<code>bufferedGraphics</code>)
-   * when iterating through the DOM. When the image has been drawn, it then
-   * returns the image with the graphical informations. This is done in
-   * order to avoid the software from server several times on the view at
-   * the same time (which is done when iterating through the DOM), and then
-   * potentially clearing paint-methods that are in the making. This can
-   * create 'black-outs' (also known as double-buffering) which makes us
-   * saaaad pandas.
-   *
-   * For more, read:
-   * <a href="http://www.javalobby.org/forums/thread.jspa?threadID=16840&tstart=0">
-   *   R.J. Lorimer's entry about hardwareaccelation
-   * </a>.
-   *
    * @param screenGraphics  The AWT screen graphics to output the graphics to.
-   * @param model  The shapes to draw mapped with their id's. The id's are used to collect any shape parts from the
-   *               selection, if needed.
-   * @param selection  The selection to draw, if any.
    * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
    *                   Don't worry about this if you don't know what it is. Defaults to None.
+   * @see [[com.siigna.app.view.Renderer]], [[com.siigna.app.view.Graphics]], [[com.siigna.app.view.Interface]],
+   *     [[com.siigna.app.controller.Controller]]
    */
-  def paint(screenGraphics : AWTGraphics, model : Map[Int, Shape], selection : Option[Selection] = None, interface : Option[Interface] = None) {
+  def paint(screenGraphics : AWTGraphics, interface : Option[Interface] = None) {
+    // Start the fps counter
+    val fpsStart = System.currentTimeMillis()
+
     // Create a new transformation-matrix
     val transformation : TransformationMatrix = drawingTransformation
 
@@ -280,11 +281,10 @@ object View {
     graphics2D setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     try {
-      // Render and draw the renderer
-      renderer.paint(graphics)
+      // Paint the renderer
+      if (renderer.isDefined) renderer.get.paint(graphics)
     } catch {
-      case e : InterruptedException => Log.info("View: The view is shutting down while painting. Move along...")
-      case e : Throwable => Log.error("View: Unable to render drawing: ", e)
+      case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
 
     // Fetch and draw the dynamic layer.
@@ -293,16 +293,14 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      selection.foreach(s => s.selectedShapes.foreach(e => {
-        graphics.draw(e.transform(transformation).setAttribute("Color" -> color))
-      }))
+      Drawing.selection.parts.foreach(s => {
+        graphics.draw(s.transform(transformation).setAttribute("Color" -> color))
+      })
 
       // Draw vertices
-      selection.par.foreach(_.foreach(i => {
-        model.get(i._1).foreach(_.getVertices(i._2).foreach(p => {
-          graphics.draw(transformation.transform(p), color)
-        }))
-      }))
+      Drawing.selection.vertices.foreach(p => {
+        graphics.draw(transformation.transform(p), color)
+      })
     } catch {
       case e : Exception => Log.error("View: Unable to draw the dynamic Model: ", e)
     }
@@ -317,6 +315,10 @@ object View {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
       case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
     }
+
+    // Update the fps counter
+    fpsTimeToDrawLast = fpsTimeToDraw
+    fpsTimeToDraw = System.currentTimeMillis() - fpsStart
   }
 
   /**
@@ -358,6 +360,30 @@ object View {
       _pan = _pan.copy(y = _pan.y + delta)
       listenersPan.foreach(_.apply(_pan))
     }
+  }
+
+  /**
+   * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
+   * the [[com.siigna.app.model.Drawing]] or the standard chess-checkered background differently. For example like so:
+   * {{{
+   *   object MyOwnRenderer extends Renderer { ... }
+   *   View.renderer = MyOwnRenderer
+   * }}}
+   * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
+   * <br>
+   * Starts undefined, because the graphical settings needs to initialize.
+   */
+  def renderer = _renderer
+
+  /**
+   * Removes the current [[com.siigna.app.view.Renderer]] and replaces it with the given. This is useful if you
+   * wish to define alternate routines for caching and/or rendering the application.
+   * @param renderer  The renderer to use. Cannot be null.
+   * @throws IllegalArgumentException  If the renderer is null.
+   */
+  def renderer_=(renderer : Renderer) {
+    require(renderer != null)
+    _renderer = Some(renderer)
   }
 
   /**

@@ -11,11 +11,11 @@
 
 package com.siigna.app.model.shape
 
-//import com.siigna.util.dxf.DXFSection
 import com.siigna.util.geom.{SimpleRectangle2D, Circle2D, TransformationMatrix, Vector2D}
-import com.siigna.util.collection.{Attributes}
+import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
-import com.siigna.app.model.shape.CircleShape.Part
+import com.siigna.app.model.selection.{BitSetShapeSelector, FullShapeSelector, EmptyShapeSelector, ShapeSelector}
+
 /**
  * This class represents a circle.
  *
@@ -31,21 +31,9 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   type T = CircleShape
 
   val geometry = Circle2D(center, radius)
-  
-  def apply(part : ShapePart) = part match {
-    //case CircleShape.Part(xs) => {
-      //Some(new PartialShape((t : TransformationMatrix) => LineShape(
-      //  if(xs)  center.transform(t) else center,
-      //  if(!xs) p2.transform(t)
-      //  else p2,
-      //  attributes)))
-    //}
-    case FullShapePart => Some(new PartialShape(this, transform))
-    case _ => None
-  }
 
-  def delete(part: ShapePart) = part match {
-    case Part(_) | FullShapePart => Nil
+  def delete(part: ShapeSelector) = part match {
+    case BitSetShapeSelector(_) | FullShapeSelector => Nil
     case _ => Seq(this)
   }
 
@@ -54,28 +42,40 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
    */
   def distanceToHandlesFrom(point : Vector2D) = geometry.vertices.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
-  def getPart(rect: SimpleRectangle2D) =
-    if (rect.contains(geometry)) FullShapePart
-    else {
-      val contains = geometry.vertices.exists(p => rect.contains(p))
-      if (contains) {
-        FullShapePart
-      } else EmptyShapePart
-    }
-
-  def getPart(point: Vector2D) =
-    if (distanceTo(point) > Siigna.int("selectionDistance").getOrElse(5)) EmptyShapePart
-    else {
-      FullShapePart
-    }
-  
-  def getShape(s : ShapePart) = s match {
-    case FullShapePart => Some(this)
+  def getPart(part : ShapeSelector) = part match {
+    //case CircleShape.Part(xs) => {
+    //Some(new PartialShape((t : TransformationMatrix) => LineShape(
+    //  if(xs)  center.transform(t) else center,
+    //  if(!xs) p2.transform(t)
+    //  else p2,
+    //  attributes)))
+    //}
+    case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
-  def getVertices(selector: ShapePart) = selector match {
-    case FullShapePart => geometry.vertices
+  def getSelector(rect: SimpleRectangle2D) =
+    if (rect.contains(geometry)) FullShapeSelector
+    else {
+      val contains = geometry.vertices.exists(p => rect.contains(p))
+      if (contains) {
+        FullShapeSelector
+      } else EmptyShapeSelector
+    }
+
+  def getSelector(point: Vector2D) =
+    if (distanceTo(point) > Siigna.int("selectionDistance").getOrElse(5)) EmptyShapeSelector
+    else {
+      FullShapeSelector
+    }
+
+  def getShape(s : ShapeSelector) = s match {
+    case FullShapeSelector => Some(this)
+    case _ => None
+  }
+
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector => geometry.vertices
     //case PartialSelector(1) => Seq(center)
     case _ => Seq()
   }
@@ -91,13 +91,6 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
  * A companion object for [[com.siigna.app.model.shape.CircleShape]].
  */
 object CircleShape {
-
-  /**
-   * The shape part for CircleShapes.
-   * @param  part The part of the circle as a byte.
-   */
-  // TODO: Implement this
-  sealed case class Part(part : Byte) extends ShapePart
 
   def apply(center : Vector2D, p : Vector2D) = new CircleShape(center, (center - p).length, Attributes())
   def apply(center : Vector2D, radius : Double) = new CircleShape(center, radius, Attributes())

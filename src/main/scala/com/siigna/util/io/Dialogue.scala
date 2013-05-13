@@ -2,7 +2,7 @@ package com.siigna.util.io
 
 import io.Source
 import com.siigna.util.Log
-import java.nio.file.{FileSystemException, StandardOpenOption, Files}
+import java.nio.file.{StandardOpenOption, Files}
 import java.nio.channels.{WritableByteChannel, ReadableByteChannel}
 import java.util
 import java.nio.charset.Charset
@@ -27,11 +27,24 @@ import java.io.{OutputStream, InputStream, IOException, File}
  *   So: Please use this object for I/O in sandboxed environments.
  * </p>
  *
+ * <h2>Using FileFilters</h2>
+ * Before using the methods below, we need to specify which to which file-formats we can write to or read from,
+ * and which extension we accept. We have made it mandatory to use those filters for write operations to maintain
+ * complete control over which extensions the user chooses to write to. This is done via the
+ * [[javax.swing.filechooser.FileNameExtensionFilter]], which can be used like so:
+ *
+ * {{{
+ *   val pdfFilter  = new FileNameExtensionFilter("PDF files, "pdf")
+ *   val textFilter = new FileNameExtensionFilter("Text files", "txt", "nfo", "npp")
+ * }}}
+ *
+ * <b>Note:</b> The FileFilters are mandatory for write operations, but can also be used to read-operations.
+ *
  * <h2>Reading to a file</h2>
  * <h4>Read a small text file</h4>
  * If you have a small text-file you can easily read it into a string like so:
  * {{{
- *   Dialogue.readText() match {
+ *   Dialogue.readText(textFilter) match {
  *     case Some(text) => // Success! The text is stored in 'text' value
  *     case _ => // Failure to retrieve the text
  *   }
@@ -93,23 +106,24 @@ import java.io.{OutputStream, InputStream, IOException, File}
  * }}}
  *
  * <h2>Writing to file</h2>
- * All the <code>write*</code> methods returns a boolean which is true on success and false on failure.
+ * All the <code>write*</code> methods returns a boolean which is true on success and false on failure. For all write
+ * methods at least one FileFilter is mandatory (see above).
  * <h4>Writing a string</h4>
  * To write a string you simply call the writeText method:
  * {{{
- *   Dialogue.writeText("Hej Verden!")
+ *   Dialogue.writeText("Hej Verden!", Seq(textFilter))
  * }}}
  * <h4>Writing lines</h4>
  * If you wish to write a number of lines you are probably looking for the writeLines method:
  * {{{
  *   val lines = Seq("Hej", "Verden", "!")
- *   Dialogue.writeLines(lines)
+ *   Dialogue.writeLines(lines, Seq(textFilter))
  * }}}
  * <h4>Writing byte arrays</h4>
  * To write byte arrays that is convenient enough to be kept in memory you can use the writeBytes method
  * {{{
  *   val bytes = Array[Byte](...)
- *   Dialogue.writeBytes(bytes)
+ *   Dialogue.writeBytes(byte, Seq(pdfFilter))
  * }}}
  * <h4>Writing to a channel or output stream</h4>
  * If you have special needs or if your data is just too large to be handled in strings or byte arrays you can
@@ -119,21 +133,34 @@ import java.io.{OutputStream, InputStream, IOException, File}
  *
  * Using the <code>writeOutputStream</code> could look like this:
  * {{{
- *   Dialogue.writeOutputStream(out => {
+ *   // First define the output mapping
+ *   val writePdf  = (out : OutputStream) => {
  *     val bytes = Array[Byte](...)
  *     out.write(bytes)
- *   })
+ *   }
+ *   // Link the file-filter(s) with the output function(s)
+ *   val exporters = Map(pdfFilter -> writePdf)
+ *
+ *   // Call the dialogue with the exporters
+ *   Dialogue.writeOutputStream(exporters)
  * }}}
  *
  * Using the <code>writeChannel</code> could look like this:
  * {{{
- *   Dialogue.writeChannel(channel => {
+ *   // First define the output mapping
+ *   val writePdfChannel = (channel : WritableOutputChannel) => {
  *     val buffer = ByteBuffer.allocate(2048) // First allocate some space to a byte buffer
  *     buffer.putString("Hi there")           // Then feed in data.
  *     ...
  *     channel.write(buffer)                  // Write the buffer to the file
  *     // Repeat if you wish
- *   })
+ *   }
+ *
+ *   // Link the file-filter(s) with one or more output-function
+ *   val exporters = Map(pdfFilter -> writePdfChannel)
+ *
+ *   // Call the dialogue with the exporters
+ *   Dialogue.writeChannel(exporters)
  * }}}
  * In this way you can write small chunks at the time.
  *
@@ -146,22 +173,50 @@ import java.io.{OutputStream, InputStream, IOException, File}
 object Dialogue {
 
   /**
-   * Opens a JFileChooser and lets the user choose a file to read. If the dialogue is not interrupted and
-   * the file matches the given filter (if any), the function f is called and the value Some[T] is returned.
-   * @param f  A callback function to extract data - if everything goes well.
-   * @param read  The mode of the file dialogue, set as either read/load (true) or write/save (false)
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * Opens a JFileChooser for reading operations and lets the user choose a file to read. If the dialogue is not
+   * interrupted and the file matches the given file extensions (if any), the function f is called and the value
+   * Some[T] is returned.
+   * @param f  The function to perform on the file to retrieve the data.
+   * @param filters  The extension-name filter of the files to read from. Can be empty.
    * @tparam T  The return type of the method
-   * @return  Some[File] if the user correctly selected a file that matched the filter (if any). If the file did
-   *          not match or the user pressed cancel we return None.
+   * @return  Some[T] if the user correctly selected a file that matched the filter (if any). If the file did
+   *          not match, the user pressed cancel or an error occurred we return None.
    * @throws IOException  If an I/O error occurred when trying to read/write
-   * @throws IllegalArgumentException  If the mode of the dialogue could not be recognized.
+   * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogue[T](f : File => T, read : Boolean, filters : Seq[FileNameExtensionFilter] = Nil) : Option[T] = {
+  protected def openDialogueRead[T](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
+    openDialogue[T](DialogueFunctionRead(f, filters))
+  }
+
+  /**
+   * Opens a JFileChooser for writing operations and lets the user choose a file to write to. If the dialogue is not
+   * interrupted and the file matches the given file extensions (if any), the function f is called and the value
+   * Some[T] is returned.
+   * @param parsers  The extension-name filter of the files to write to mapped to a function that does
+   *                 something with that file. Cannot be empty.
+   * @tparam T  The type of the data to retrieve.
+   * @return  Some[T] if the user correctly selected a file that matched the filter (if any). If the file did
+   *          not match, the user pressed cancel or an error occurred we return None.
+   * @throws IOException  If an I/O error occurred when trying to read/write
+   * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
+   */
+  protected def openDialogueWrite[T](parsers : Map[FileNameExtensionFilter, File => T]) : Option[T] = {
+    // Make sure we have at least one file filter
+    require(!parsers.isEmpty, "Needs at least one parser to operate on, none were given.")
+    openDialogue[T](DialogueFunctionWrite(parsers))
+  }
+
+  /**
+   * Opens a dialogue with a given dialogue function.
+   * @param function The function to perform on the File.
+   * @tparam T  The type of data to return.
+   * @return Some[T] if the data was successfully returned and parsed to type T, None otherwise.
+   */
+  protected def openDialogue[T](function : DialogueFunction) : Option[T] = {
+    // Continue to open the dialogue
     try {
       // Ask for a dialogue
-      val result = IOActor !? DialogueFunction(f, read, filters)
+      val result = IOActor !? function
 
       try {
         Some(result.asInstanceOf[T])
@@ -170,13 +225,11 @@ object Dialogue {
       }
     } catch {
       case e : IOException => {
-        val doing = if (read) "reading from" else "writing to"
-        Log.error(s"Dialogue: Error when $doing file: " + e)
+        Log.error(s"Dialogue: I/O error: " + e)
         None
       }
       case e : Throwable => {
-        val doing = if (read) "retrieving" else "storing"
-        Log.warning(s"Dialogue: Error when $doing data: $e.")
+        Log.warning(s"Dialogue: Unknown error: $e.")
         None
       }
     }
@@ -186,70 +239,76 @@ object Dialogue {
    * Attempts to read a file as an array of bytes. This is useful for small files that can fit in memory.
    * This can be efficiently coupled with the [[com.siigna.util.io.Unmarshal]] object of Siigna to read the item
    * from the retrieved byte-array. See above for examples.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[Array[Byte] ] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
   def readBytes(filters : FileNameExtensionFilter*) : Option[Array[Byte]] =
-    openDialogue(f => Files.readAllBytes(f.toPath), read = true, filters)
+    openDialogueRead(f => Files.readAllBytes(f.toPath), filters)
 
   /**
    * Attempts to read a file as a byte channel. This is useful when dealing with large binary files that can be parsed
    * to chunks. See above for examples.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[ReadableByteChannel] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
   def readByteChannel(filters : FileNameExtensionFilter*) : Option[ReadableByteChannel] =
-    openDialogue(f => Files.newByteChannel(f.toPath, util.EnumSet.of(StandardOpenOption.READ)), read = true, filters)
+    openDialogueRead(f => Files.newByteChannel(f.toPath, util.EnumSet.of(StandardOpenOption.READ)), filters)
 
   /**
    * Attempts get the input channel of a file. This is useful when dealing with larger binary or textual
    * files. See above for examples.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[InputStream] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
   def readInputStream(filters : FileNameExtensionFilter*) : Option[InputStream] =
-    openDialogue(f => Files.newInputStream(f.toPath, StandardOpenOption.READ), read = true, filters)
+    openDialogueRead(file => Files.newInputStream(file.toPath, StandardOpenOption.READ), filters)
 
   /**
    * Attempts to read a file to a number of lines. This is useful when dealing with larger textual files which
    * might be too big to be efficiently handled in one take. See above for examples.
    * @param encoding  An optional parameter to specify the encoding of the read-operation. Defaults to UTF-8.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[Iterator[String] ] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
-  def readLines(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter] = Nil) : Option[Iterator[String]] =
+  def readLines(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter]) : Option[Iterator[String]] =
     readSource(encoding, filters).map(_.getLines())
 
   /**
    * Attempts to read a file to a scala [[scala.io.Source]]. This is useful if you want an iterable representation
    * of the data and more options for reading a file then we are able to provide here.
    * @param encoding  An optional parameter to specify the encoding of the read-operation. Defaults to UTF-8.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[Source] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
   def readSource(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter] = Nil) : Option[Source] =
-    openDialogue(f => Source.fromFile(f, encoding), read = true, filters)
+    openDialogueRead(file => Source.fromFile(file, encoding), filters)
 
   /**
    * Attempts to read a file into a string. This is useful when dealing with small textual files that can be
    * handled in memory. See above for examples.
    * @param encoding  An optional parameter to specify the encoding of the read-operation. Defaults to UTF-8.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  Some[String] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
-  def readText(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter] = Nil) : Option[String] =
+  def readText(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter]) : Option[String] =
     readSource(encoding, filters).map(_.getLines().mkString("\n"))
 
   /**
@@ -262,28 +321,31 @@ object Dialogue {
    * @param bytes  The bytes to write to file.
    * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
    *                truncates all the content of the file away before writing.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeBytes(bytes : Array[Byte], filters : Seq[FileNameExtensionFilter] = Nil,
+  def writeBytes(bytes : Array[Byte], filters : Seq[FileNameExtensionFilter],
                  option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogue(f => Files.write(f.toPath, bytes, option), read = false, filters).isDefined
+    openDialogueWrite(filters.map(t =>
+      t -> ((file : File) => Files.write(file.toPath, bytes, option))).toMap).isDefined
   }
 
   /**
    * Provides a [[java.nio.channels.WritableByteChannel]] that can be used to write any content to disc. The
    * parameter callback is a callback function that will be called with a byte channel when available.
-   * @param callback  A function that takes a byte channel that can be used to store any number of data into the
-   *                  file the user have chosen.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param extensions  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away
+   *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
+   *                   paired with the functions that takes a byte channel that can be used to store any number of
+   *                   data into the file the user have chosen.
    * @param option  The option with which to open the file. Defaults to StandardOpenOption.WRITE.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeChannel(callback : WritableByteChannel => Unit, filters : Seq[FileNameExtensionFilter] = Nil,
+  def writeChannel(extensions : Map[FileNameExtensionFilter, WritableByteChannel => Unit],
                    option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogue(f => callback(Files.newByteChannel(f.toPath, option)), read = false, filters).isDefined
+    openDialogueWrite(extensions.map(t =>
+      t._1 -> ((f : File) => t._2(Files.newByteChannel(f.toPath, option))))).isDefined
   }
 
   /**
@@ -294,8 +356,9 @@ object Dialogue {
    * behaviour, you should set the parameter.
    *
    * @param lines  The lines to write to the file chosen by the user.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
    *                choose a file with a certain file-ending, for instance.
    * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
@@ -304,25 +367,26 @@ object Dialogue {
    */
   def writeLines(lines : Iterable[String], filters : Seq[FileNameExtensionFilter] = Nil, encoding : String = "UTF-8",
                  option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogue(f => {
+    openDialogueWrite(filters.map(t => t -> ((f : File) => {
       val iterable = JavaConversions.asJavaIterable(lines)
       Files.write(f.toPath, iterable, Charset.forName(encoding), option)
-    }, read = false, filters).isDefined
+    })).toMap).isDefined
   }
 
   /**
    * Provides a [[java.io.OutputStream]] that can be used to write any content to disc. The
    * parameter callback is a callback function that will be called with a output stream, when available.
-   * @param callback  A function that takes a byte channel that can be used to store any number of data into the
-   *                  file the user have chosen.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param extensions  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away
+   *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
+   *                   mapped with functions to export
    * @param option  The option with which to open the file. Defaults to StandardOpenOption.WRITE.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeOutputStream(callback : OutputStream => Unit, filters : Seq[FileNameExtensionFilter] = Nil,
+  def writeOutputStream(extensions : Map[FileNameExtensionFilter, OutputStream => Unit],
                         option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogue(f => callback(Files.newOutputStream(f.toPath, option)), read = false, filters).isDefined
+    openDialogueWrite(extensions.map(t => t._1 -> ((f : File) => {
+      t._2(Files.newOutputStream(f.toPath, option))
+      })).toMap).isDefined
   }
 
   /**
@@ -333,8 +397,9 @@ object Dialogue {
    * behaviour, you should set the parameter.
    *
    * @param text  The text write to the file chosen by the user.
-   * @param filters  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away unwanted files, or
-   *                 help the user choose a file with a certain file-ending, for instance.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
    * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
    *                truncates all the content of the file away before writing.
