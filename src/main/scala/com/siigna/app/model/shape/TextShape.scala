@@ -17,7 +17,8 @@ import java.awt.font._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom._
 import com.siigna.app.Siigna
-import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
+import com.siigna.app.model.shape.TextShape.Part
+import com.siigna.app.view.View
 
 /**
  * This class represents a text-string.
@@ -48,18 +49,21 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
+  def apply(part : ShapePart) = Some(new PartialShape(this, transform))
+
   def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
   def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
 
-  def delete(part: ShapeSelector) = part match {
-    case FullShapeSelector => Nil
+  def delete(part: ShapePart) = part match {
+    case FullShapePart => Nil
     case _ => Seq(this)
   }
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)
 
   def font                = new Font("Lucida Sans Typewriter", Font.PLAIN, (fontSize * scale * GlobalFontScale) toInt)
+
 
   /**
    * Defines the layout of the shape.
@@ -77,35 +81,32 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-
-  def getPart(part : ShapeSelector) = Some(new PartialShape(this, transform))
-
-  def getSelector(rect: SimpleRectangle2D) = {
+  def getPart(rect: SimpleRectangle2D) = {
     if (rect.intersects(geometry)) {
-     ShapeSelector(1)
-      FullShapeSelector
+      Part(1.asInstanceOf[Byte])
+      FullShapePart
     }
     else {
-     ShapeSelector(0)
-      EmptyShapeSelector
+      Part(0.asInstanceOf[Byte])
+      EmptyShapePart
     }
   }
 
-  def getSelector(point: Vector2D) = {
+  def getPart(point: Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     if (distanceTo(point) < selectionDistance) {
-     ShapeSelector(1)
-      FullShapeSelector
+      Part(1.asInstanceOf[Byte])
+      FullShapePart
     }
     else {
-     ShapeSelector(0)
-      EmptyShapeSelector
+      Part(0.asInstanceOf[Byte])
+      EmptyShapePart
     }
   }
 
-  def getShape(s : ShapeSelector) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+  def getShape(s : ShapePart) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
 
-  def getVertices(selector: ShapeSelector) = throw new UnsupportedOperationException("Not yet implemented")
+  def getVertices(selector: ShapePart) = throw new UnsupportedOperationException("Not yet implemented")
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
@@ -121,9 +122,12 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 object TextShape
 {
 
+  sealed case class Part(part : Byte) extends ShapePart
+
   def apply(text : String, position : Vector2D)                    = new TextShape(text, position, 1.0, Attributes())
   def apply(text : String, position : Vector2D, attr : Attributes) = new TextShape(text, position, 1.0, attr)
   def apply(text : String, position : Vector2D, scale : Double)    = new TextShape(text, position, scale, Attributes())
+
 
 
 }

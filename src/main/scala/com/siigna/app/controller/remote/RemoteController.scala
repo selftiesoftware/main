@@ -51,9 +51,9 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  //val remote = new Server("62.243.118.234", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Production)
   //val remote = new Server("localhost", Mode.Testing)
-  val remote = new Server("localhost", Mode.Production)
+  //val remote = new Server("localhost", Mode.Production)
 
   /**
    * Determines whether the controller should broadcast to the server.
@@ -310,8 +310,7 @@ protected[controller] object RemoteController extends Actor {
    * Attempts to fetch the session for the current client.
    * @return A session if possible.
    */
-  def session : Session = {
+  def session : Session =
     Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
-  }
 
 }

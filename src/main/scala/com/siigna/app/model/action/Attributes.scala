@@ -12,8 +12,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.collection.Attributes
-import com.siigna.app.model.{selection, Drawing, Model}
-import com.siigna.app.model.selection.Selection
+import com.siigna.app.model.{Drawing, Model}
 
 /**
  * Adds the given attributes to the shapes, replacing the ones with the same key, but leaving the ones already
@@ -41,28 +40,27 @@ case class AddAttributes(shapes : Map[Int, Attributes], attributes : Attributes)
 object AddAttributes {
 
   /**
-   * Executes the AddAttributes [[com.siigna.app.model.action.Action]] which adds one single attribute with the given
-   * value to the shapes with the given ids.
+   * Creates an instance of AddAttributes which adds one single attribute to the given value.
+   * This method finds the default values for the old values for the attributes, defined in the parameter
+   * <code>shapes</code> from the current Drawing.
    * @param ids  The ids of the shapes to set the attribute on
    * @param name  The name of the attribute to set
    * @param value  The value of the attribute to set
+   * @return  An instance of AddAttributes
    */
-  def apply(ids : Traversable[Int], name : String, value : Any) {
-    Drawing execute new AddAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, Attributes(name -> value))
-  }
+  def apply(ids : Traversable[Int], name : String, value : Any) : AddAttributes =
+    new AddAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, Attributes(name -> value))
 
   /**
    * Creates an instance of AddAttributes which adds several attributes of the shapes with the given ids.
    * This method finds the default values for the old values for the attributes, defined in the parameter
-   * <code>shapes</code> from the current Drawing. If the given attributes are empty, nothing happens.
+   * <code>shapes</code> from the current Drawing.
    * @param ids  The ids of the shapes to set the attribute on.
    * @param attributes  The attributes to set.
+   * @return  An instance of AddAttributes.
    */
-  def apply(ids : Traversable[Int], attributes : Attributes) {
-    if (!attributes.isEmpty) {
-      Drawing execute new AddAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, attributes)
-    }
-  }
+  def apply(ids : Traversable[Int], attributes : Attributes) : AddAttributes =
+    new AddAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, attributes)
 
 }
 
@@ -93,55 +91,26 @@ case class SetAttributes(shapes : Map[Int, Attributes], attributes : Attributes)
 object SetAttributes {
 
   /**
-   * Executes a SetAttributes [[com.siigna.app.model.action.Action]] on the [[com.siigna.app.model.Drawing]] which
-   * sets one single attribute to the given value in the given shapes. This method finds the default values for the
-   * old values for the attributes, defined in the parameter <code>shapes</code> from the current Drawing.
+   * Creates an instance of SetAttributes which sets one single attribute to the given value.
+   * This method finds the default values for the old values for the attributes, defined in the parameter
+   * <code>shapes</code> from the current Drawing.
    * @param ids  The ids of the shapes to set the attribute on
    * @param name  The name of the attribute to set
    * @param value  The value of the attribute to set
+   * @return  An instance of SetAttributes
    */
-  def apply(ids : Traversable[Int], name : String, value : Any) {
-    Drawing execute new SetAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, Attributes(name -> value))
-  }
+  def apply(ids : Traversable[Int], name : String, value : Any) : SetAttributes =
+    new SetAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, Attributes(name -> value))
 
   /**
-   * Executes an instance of the SetAttributes [[com.siigna.app.model.action.Action]] which sets several attributes
-   * of the shapes with the given ids. This method finds the default values for the old values for the attributes,
-   * defined in the parameter <code>shapes</code> from the current Drawing. If the given attributes are empty,
-   * nothing happens
+   * Creates an instance of SetAttributes which sets several attributes of the shapes with the given ids.
+   * This method finds the default values for the old values for the attributes, defined in the parameter
+   * <code>shapes</code> from the current Drawing.
    * @param ids  The ids of the shapes to set the attribute on.
    * @param attributes  The attributes to set.
    * @return  An instance of SetAttributes.
    */
-  def apply(ids : Traversable[Int], attributes : Attributes) {
-    if (!attributes.isEmpty) {
-      Drawing execute new SetAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, attributes)
-    }
-  }
-
-
-
-  /**
-   * Sets the given [[com.siigna.util.collection.Attributes]] of the given selection by overriding the existing
-   * attributes. If you wish to concatenate or add one or more attributes instead, please refer to the
-   * [[com.siigna.app.model.action.AddAttributes]] [[com.siigna.app.model.action.Action]].
-   * @param selection  The [[selection.Selection]] to give the attributes to.
-   * @param attributes  The [[com.siigna.util.collection.Attributes]] to give to the current selection.
-   */
-  def apply(selection : Selection, attributes : Attributes) {
-    selection.setAttributes(attributes)
-  }
-
-  /**
-   * Sets the given [[com.siigna.util.collection.Attributes]] of the given selection (if not empty) by overriding
-   * the existing attributes. If you wish to concatenate or add one or more attributes instead, please refer to the
-   * [[com.siigna.app.model.action.AddAttributes]] [[com.siigna.app.model.action.Action]]. If the selection is empty,
-   * nothing happens.
-   * @param selection  The [[Selection]] to give the attributes to, if any.
-   * @param attributes  The [[com.siigna.util.collection.Attributes]] to give to the current selection.
-   */
-  def apply(selection : Option[Selection], attributes : Attributes) {
-    selection.foreach(apply(_, attributes))
-  }
+  def apply(ids : Traversable[Int], attributes : Attributes) : SetAttributes =
+    new SetAttributes(ids.map(i => i -> Drawing(i).attributes).toMap, attributes)
 
 }

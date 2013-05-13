@@ -127,7 +127,7 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    if(Snap.snapEnabled) snap.foreach(_.paint(graphics, transformation))
+    if(Snap.snapEnabled == true) snap.foreach(_.paint(graphics, transformation))
   }
 
   /**
@@ -178,7 +178,7 @@ class EventParser {
         var newEvent = track.parse(events, model, trackModel)
 
         // Parse the snap
-        if(Snap.snapEnabled) {
+        if(Snap.snapEnabled == true) {
           snap foreach {a => newEvent = a.parse(newEvent, model)}
         }
 

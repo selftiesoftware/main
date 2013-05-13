@@ -22,6 +22,8 @@ package com.siigna.app
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
+import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
+
 import java.applet.Applet
 import com.siigna.app.controller.Controller
 import java.lang.Thread
@@ -30,6 +32,7 @@ import model.Drawing
 import model.server.User
 import view.native.SiignaRenderer
 import view.View
+import com.siigna.util.geom.Rectangle2D
 import com.siigna.util.Log
 
 /**
@@ -80,15 +83,6 @@ class SiignaApplet extends Applet {
 
     // Start by reading the applet parameters
     try {
-      // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-      val drawingId = getParameter("drawingId")
-
-      if (drawingId != null) try {
-        val id = drawingId.toLong
-        Drawing.setAttribute("id", id)
-        Log.success("Applet: Found drawing: " + id)
-      }
-
       // Get the active user, if a log in was performed at www.siigna.com
       val userName = getParameter("contributorName")
 
@@ -96,6 +90,15 @@ class SiignaApplet extends Applet {
         // TODO: Refine this
         Siigna.user = User(0, userName, util.Random.nextString(20))
         Log.success("Applet: Found user: " + userName)
+      }
+
+      // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
+      val drawingId = getParameter("drawingId")
+
+      if (drawingId != null) try {
+        val id = drawingId.toLong
+        Drawing.setAttribute("id", id)
+        Log.success("Applet: Found drawing: " + id)
       }
     } catch { case _ : Throwable => Log.info("Applet: No user or drawind-id found.")}
 
@@ -161,8 +164,12 @@ class SiignaApplet extends Applet {
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
 
+          // Get the model
+          val mbr   = Rectangle2D(View.boundary.topLeft, View.boundary.bottomRight).transform(View.drawingTransformation.inverse)
+          val model = Drawing(mbr)
+
           // Paint the view
-          View.paint(graphics, Some(Siigna))
+          View.paint(graphics, model,Drawing.selection, Some(Siigna))
 
           // Dispose of the graphics
           graphics.dispose()

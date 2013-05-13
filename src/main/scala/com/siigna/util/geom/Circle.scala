@@ -66,16 +66,11 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
   }
 
   def intersects(geom : Geometry2D) = geom match {
-
-    case arc : Arc2D => arc.intersects(this)
-
-
     /**
      * Examines whether a circle and another circle intersects.
      *
      * Source: http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
      */
-
     case circle : Circle2D => {
       val d = (center - circle.center).length
       if (d > radius + circle.radius) { // If d > r0 + r1 then there are no solutions, the circles are separate.

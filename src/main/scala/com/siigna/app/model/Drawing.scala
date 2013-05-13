@@ -15,7 +15,6 @@ import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D}
-import com.siigna.app.model.selection.Selection
 
 /**
  * <p>
@@ -41,7 +40,7 @@ import com.siigna.app.model.selection.Selection
  *
  * <h3>Selection</h3>
  * <p>
- *  Drawing also has a [[com.siigna.app.model.selection.Selection]]. This represents the way any number or
+ *  Drawing also has a [[com.siigna.app.model.Selection]]. This represents the way any number or
  *  [[com.siigna.app.model.shape.Shape]]s have been selected. So besides <i>which</i>
  *  [[com.siigna.app.model.shape.Shape]] has been selected, we also need to know <i>how</i> they were selected.
  *  If no selection is present, the selection is None.
@@ -160,6 +159,12 @@ object Drawing extends ActionModel
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
    */
   //def rtree = model.rtree
+
+  /**
+   * The current selection represented by a an Option of [[com.siigna.app.model.Selection]].
+   * @return  Some[Selection] if a selection is active or None if nothing has been selected
+   */
+  def selection : Option[Selection] = model.selection
 
   //------------- Required by the MapProxy trait -------------//
   def self = model.shapes

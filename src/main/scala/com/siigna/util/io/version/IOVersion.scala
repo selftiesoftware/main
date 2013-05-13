@@ -48,12 +48,12 @@ object IOVersion {
 
   // Version one
   val One   = 1.asInstanceOf[Byte]
-  val Two   = 2.asInstanceOf[Byte]
+//val Two   = 2.asInstanceOf[Byte]
 //val Three = 3.asInstanceOf[Byte]
 //And so on...
 
   // The current working version
-  val Current = Two
+  val Current = One
 
   /**
    * Attempts to retrieve the I/O implementation for the given version number.
@@ -61,7 +61,6 @@ object IOVersion {
    */
   def apply(version : Int) : IOVersion = version match {
     case 1 => IOVersion1
-    case 2 => IOVersion2
     case _ => throw new IllegalArgumentException("IOVersion: Could not find an implementation for version: " + version)
   }
 

@@ -14,7 +14,6 @@ package com.siigna.app.model
 import action.Action
 import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
-import com.siigna.app.model.selection.Selection
 
 /**
  * An immutable model containing shapes with uniquely (and globally for this specific drawing) identifiable keys.
@@ -25,6 +24,7 @@ import com.siigna.app.model.selection.Selection
  */
 sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action], attributes : Attributes)
        extends ImmutableModel[Int, Shape]
+          with MutableModel
           with SpatialModel[Int, Shape]
           with ModelBuilder[Int, Shape]
           with HasAttributes{
@@ -40,15 +40,6 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
   def build(coll : Map[Int, Shape]) = new Model(coll, executed, undone, attributes)
 
   def build(coll : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action]) = new Model(coll, executed, undone, attributes)
-
-  /**
-   * The current selection, if any, represented by a [[com.siigna.app.model.selection.Selection]]. The Selection
-   * contains the references to the shapes that have been selected and information about how they were selected. It
-   * can also convert itself to one or more [[com.siigna.app.model.shape.Shape]]s for rendering.
-   *
-   * The selection is placed in the Model to ensure that the selection is removed whenever the model changes.
-   */
-  var selection : Selection = Selection.empty
 
   /**
    * Replace the current attributes with the given set of attributes.

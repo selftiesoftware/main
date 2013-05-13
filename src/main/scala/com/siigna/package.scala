@@ -11,6 +11,8 @@
 
 package com
 
+import siigna.util.Log
+
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
@@ -25,17 +27,12 @@ package object siigna extends com.siigna.util.Implicits {
   // Model
   val Drawing = com.siigna.app.model.Drawing
 
-  // Selection
-  val BitSetShapeSelector = com.siigna.app.model.selection.BitSetShapeSelector
-  val EmptyShapeSelector  = com.siigna.app.model.selection.EmptyShapeSelector
-  val FullShapeSelector   = com.siigna.app.model.selection.FullShapeSelector
-  type Selection          = com.siigna.app.model.selection.Selection
-  val Selection           = com.siigna.app.model.selection.Selection
-  val ShapeSelector       = com.siigna.app.model.selection.ShapeSelector
-  type ShapeSelector      = com.siigna.app.model.selection.ShapeSelector
+  type Selection = com.siigna.app.model.Selection
+  val Selection = com.siigna.app.model.Selection
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
+  type ShapePart = com.siigna.app.model.shape.ShapePart
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape
@@ -169,5 +166,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Log
   val Log = com.siigna.util.Log
+
 
 }

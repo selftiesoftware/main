@@ -35,13 +35,13 @@ class RichColorString(string : String) {
   def color =
   {
     val value = string.trim
-    if (value.startsWith("#") && value.size == 7) {
+    if (value.startsWith("#") && value.size == 7)
       try {
         new Color(Integer parseInt(value substring(1), 16))
       } catch {
         case ex : Throwable => throw new IllegalArgumentException("Expected a color, but got: " + value, ex)
       }
-    } else
+    else
       throw new IllegalArgumentException("Expected a color, but got: " + value)
   }
 

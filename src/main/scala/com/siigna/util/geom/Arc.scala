@@ -188,50 +188,12 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     bindTo360(angle - startAngle) <= this.angle
   }
 
-  def intersects(geom : Geometry2D) = geom match {
+  def intersects(geometry : Geometry2D) = throw new UnsupportedOperationException("Not implemented")
 
-    case collection : CollectionGeometry2D => collection.intersects(this)
-
-    case segment : Segment2D => {
-      val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
-      val delta = segment.p2 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
-
-      //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center? TODO: CHECK THIS
-      //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD (or the determinant.. TODO: try this if error)
-      val intersectValue = math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(-this.radius,2)))
-
-      println("parallelVector: "+parallelVectorD)
-      println("delta: "+delta)
-
-      println("A: "+ math.pow((parallelVectorD * delta),2))
-      println("B: "+ math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(-this.radius,2)))
-      //intersectValue < 0    no intersection
-      //intersectValue = 0    line tangent (one intersection)
-      //intersectValue > 0    two intersections
-
-      //TODO: this intersectValue is for infinite lines. For a finite line segment,
-      //t should be found as the formal roots of equation (6) in the document "Intersection of Linear and Circular Components in 2D"
-      //If 0<t<1 the segment and circle intersects.
-
-      //TODO: The algebraic condition for the circle point P to be on the arc (7) needs to be implemented.
-
-      println("intersection values: "+intersectValue)
-
-      //return statement
-      if(intersectValue >= 0)true else false
-    }
-
-    //TODO: matches on the boundary of the arc, which is not correct.
-    case rectangle : SimpleRectangle2D => {
-      !(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
-    }
-    case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
-
-    /**
+  /**
    * Returns a list of points, defined as the intersection(s) between the
    * arc and another arc.
    */
-  }
   def intersections(geometry : Geometry2D) : Set[Vector2D] = geometry match {
     case arc : Arc2D => {
       val circleIntersections = Circle(center, radius).intersections(Circle(arc.center, arc.radius))
@@ -261,7 +223,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
  */
 object Arc2D {
 
-  //import java.lang.Double.NaN
+  import java.lang.Double.NaN
 
   /**
    * Locates a center point from three points on a periphery.

@@ -19,7 +19,7 @@ import org.scalatest.{FunSuite, FlatSpec}
  */
 class Arc2DSpec  extends FunSuite with ShouldMatchers {
 
-  test("Find a center point in an arc given three points on the periphery. -OK") {
+  test("The ability to find a center point in an arc given three points on the periphery.") {
     val p1 = Vector2D(-5, 0)
     val p2 = Vector2D(0, 5)
     val p3 = Vector2D(5, 0)
@@ -27,7 +27,7 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     Arc2D.findCenterPoint(p1, p2, p3) should equal (Vector2D(0, 0))
   }
 
-  test("Calculate the angle-span of an arc from two given angles -OK") {
+  test("The ability to calculate the angle-span of an arc from two given angles") {
     val a1 = 90
     val a2 = 270
     val a3 = 45
@@ -42,7 +42,7 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     Arc2D.findArcSpan(a5, a3) should equal (1d)
   }
 
-  test("Create an arc from three points on the periphery -OK") {
+  test("Can create an arc from three points on the periphery") {
     val p1 = Vector2D(0, 1)
     val p2 = Vector2D(1, 0)
     val p3 = Vector2D(0, -1)
@@ -55,17 +55,6 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     
     val arc2 = Arc2D(p3, p2, p1)
     arc2 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
-  }
-  test("Can tell if an Arc2D and a segment2D intersect") {
 
-    val p1 = Vector2D(9, 2)
-    val p2 = Vector2D(10, 0)
-    val p3 = Vector2D(0, -10)
-    val arc = Arc2D(p1, p2, p3)
-    val l1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
-    val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
-
-    arc.intersects(l1) should equal (true)
-    arc.intersects(l2) should equal (true)  //should equal false when the segment evaluation in arc is done.
   }
 }
