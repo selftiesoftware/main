@@ -261,6 +261,13 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
         })
       }
     }
+
+    case collection : CollectionGeometry2D => {
+      val intersections = collection.geometries.map(segment => segment.intersections(this)).flatten
+      println("I: "+intersections)
+      Set()
+    }
+    //TODO: calculate tangent and endpoint intersections (eg.: arc p1 == segment p1)
     case segment : Segment2D => {
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
@@ -281,26 +288,19 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       val tNonArc = if(int2OnArc >= 0) true else false
 
       //two intersections: two roots, both in range 0-1 and on the arc.
-      if(intersectValue > 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) Set(int1,int2)
+      if(intersectValue >= 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) Set(int1,int2)
 
       //one intersection: if tP is in range and tP is on the arc while tN is not  - or the other way around.
       else if(tP >= 0 && tP <= 1 && tPonArc == true) Set(int1)
       else if(tN >= 0 && tN <= 1 && tNonArc == true) Set(int2)
 
       //TODO: tangent situations does not generate the correct vector, as both roots yield NaN?? The intersection needs to be calculated.
-      else if (intersectValue == 0) Set(Vector2D(0,0))
-
+      else if (intersectValue == 0) {
+        val p = segment.closestPoint(this.center)
+        Set(p)
+      }
       //zero intersections: if intersectValue < 0
       else Set()
-
-
-
-
-      //if only ONE intersection is found (the line does not cross the full circle, check if this intersection lies on the arc. If so, return it:
-      //else if((tP >= 0 && tP <= 1 && tPonArc == true) && tN < 0 || tN > 1) Set(int1)
-      //else if((tN >= 0 && tN <= 1 && tNonArc == true) && tP < 0 || tP > 1) Set(int2)
-
-
 
     }
     case _ => throw new UnsupportedOperationException("Not implemented")

@@ -51,7 +51,6 @@ case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2
   //def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
     case collection : CollectionGeometry2D => {
-      println("GET INTERSECTIONS HERE")
       Set()
     }
 
@@ -59,7 +58,7 @@ case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2
       var intersections : Set[Vector2D] = Set()
       val segments = this.geometries
       segments.foreach(s => if(!segment.intersections(s).isEmpty) {
-        println("INTERSECTIONS: "+segment.intersections(s))
+        intersections = segment.intersections(s)
       })
       intersections
     }
