@@ -184,6 +184,36 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
     case collection : CollectionGeometry2D => collection.intersections(this)
 
+    //find the intersection between two line segments
+    case segment : Segment2D => {
+      val x1 = this.p1.x
+      val y1 = this.p1.y
+      val x2 = this.p2.x
+      val y2 = this.p2.y
+      val x3 = segment.p1.x
+      val y3 = segment.p1.y
+      val x4 = segment.p2.x
+      val y4 = segment.p2.y
+
+      val bx = x2 - x1
+      val by = y2 - y1
+      val dx = x4 - x3
+      val dy = y4 - y3
+      val dot = bx * dy - by * dx
+
+      if(dot == 0) Set[Vector2D]()
+      else {
+        val cx = x3 - x1
+        val cy = y3 - y1
+        val t = (cx * dy - cy * dx) / dot
+        val u = (cx * by - cy * bx) / dot
+
+        if((t >= 0 && t <= 1) && (u >= 0 && u <= 1) ) {
+          Set(Vector2D(x1+t*bx, y1+t*by))
+        }
+        else Set[Vector2D]()
+      }
+    }
     case g => throw new UnsupportedOperationException("Segment: intersections not yet implemented with " + g)
   }
 
