@@ -109,6 +109,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
     case arc : Arc2D => arc.intersects(this)
     case circle : Circle2D => circle.intersects(this)
+    case collection : CollectionGeometry2D => collection.intersects(this)
     /**
      * Determines whether two line segments intersect.
      */
@@ -136,8 +137,13 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       val uNotDivided = Vector2D.determinant(B, D - C)
       val vNotDivided = Vector2D.determinant(A, D - C)
 
+      //if both segments are equal, no intersections should be returned
+      if(p1 == line.p1 && p2 == line.p2) false
+      //if both segments have just one coinciding endpoint, they intersect:
+      else if((p1 == line.p1 && p2 != line.p2)||(p2 == line.p2 && p1 != line.p1)||(p2 == line.p1 && p1 != line.p2)||(p1 == line.p2 && p2 != line.p1)) true
+
       // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
-      (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
+      else (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
     }
     case r : SimpleRectangle2D => {
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
@@ -175,6 +181,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
           (p1 - p2) * (point - p2) >= 0)
       )
     }
+
+    case collection : CollectionGeometry2D => collection.intersections(this)
 
     case g => throw new UnsupportedOperationException("Segment: intersections not yet implemented with " + g)
   }

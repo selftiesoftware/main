@@ -27,7 +27,30 @@ case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2
 
   def distanceTo(s : Geometry2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
 
-  def intersects(s : Geometry2D) = geometries.exists(_.intersects(s))
+  //def intersects(s : Geometry2D) = geometries.exists(_.intersects(s))
+  def intersects(geom : Geometry2D) = geom match {
+
+    case collection : CollectionGeometry2D => {
+      var hasIntersection = false
+      collection.geometries.foreach(s => if(s.intersects(this)) hasIntersection = true )
+      if(collection == this) hasIntersection = false //coinciding collections should are not considered to intersect.
+      hasIntersection
+    }
+
+    case line : Segment2D => {
+      var hasIntersection = false
+      val segments = this.geometries
+
+      segments.foreach(s => {
+        //println("Segments being evaluated: "+s)
+        //println("S: "+line.intersects(s))
+        if(line.intersects(s) == true) hasIntersection = true
+      })
+      hasIntersection
+    }
+    case g => geometries.exists(_.intersects(g))
+    //case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
+  }
 
   def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
 
