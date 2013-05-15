@@ -108,7 +108,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   def intersects(geom : Geometry2D) = geom match {
 
     case arc : Arc2D => arc.intersects(this)
-    //case segment : Segment2D => line.intersects(this)
+    case collection : CollectionGeometry2D => collection.intersects(this)
 
     /**
      * Determines whether two line segments intersect.
