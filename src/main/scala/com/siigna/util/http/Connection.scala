@@ -55,6 +55,7 @@ object Connection{
       new Array[Byte](0)
     }
   }
+}
  /*   var in = Array[Byte]()
 
     var data = stream.read(in).asInstanceOf[Byte]
@@ -66,4 +67,4 @@ object Connection{
 
     return in
   }                */
-}
+

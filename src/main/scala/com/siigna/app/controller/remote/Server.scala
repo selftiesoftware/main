@@ -11,10 +11,136 @@
 
 package com.siigna.app.controller.remote
 
-import actors.remote.RemoteActor._
 import com.siigna.util.Log
 import com.siigna.util.io.{Unmarshal, Marshal}
-import actors.remote.Node
+import actors.Actor
+import com.siigna.app.controller.remote.RemoteConstants._
+import com.siigna.communication.http.Client
+import com.siigna.app.model.action.RemoteAction
+import com.siigna.app.model.Model
+
+
+class RestEndpoint(client:Client) extends Actor{
+
+  def respond(r: RemoteCommand) {
+    sender ! com.siigna.util.io.Marshal(r)
+  }
+
+  def handle(r: RemoteCommand) {
+    r match {
+
+
+      case Get(DrawingId,v,s) => {
+
+        client.getDrawingId(s) match {
+          case id: Long => respond(Set(DrawingId,id,s))
+          case e => {
+            println("Fail")
+            println(e)
+          }
+        }
+
+      }
+
+      case Get(Drawing,v:Long,s) => {
+        // Specific drawing is what we are after
+        val res = client.getDrawing(v,s)
+        res match {
+          case Some(m: Model) => respond(Set(Drawing,m,s))
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => //Fail
+        }
+      }
+
+      case Get(Drawing,v,s) => {
+        // A new drawing is what we are after
+        client.getDrawing(s) match {
+          case Some(m: Model) => respond(Set(Drawing,m,s))
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => //Fail
+        }
+      }
+
+      case Get(ShapeId,v:Int,s) => {
+
+        client.getShapeIds(v,s) match {
+          case Some(range: Range) => respond(Set(ShapeId,range,s))
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => // Fail
+        }
+      }
+
+      case Set(Action,v:RemoteAction,s) => {
+
+        client.setAction(v,s) match {
+          case aid: Int =>  Set(ActionId,aid,s)
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => // Fail
+        }
+
+      }
+
+      case Get(Action,v:Int,s) => {
+        client.getAction(v,s) match {
+          case Some(r: RemoteAction) => Set(Action,r,s)
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => //Fail
+        }
+      }
+
+      case Get(ActionId,v,s) => {
+
+        client.getActionId(s) match {
+          case id: Int => respond(Set(ActionId,id,s))
+          case e => {
+            println("Fail")
+            println(e)
+          }
+          case _ => // Fail
+        }
+      }
+      case e => {
+        println("Out")
+        println(e)
+      }
+      case _ => // No comprehendo
+
+    }
+
+  }
+
+  def act {
+    loop {
+      react{
+        case in: Array[Byte] => {
+          com.siigna.util.io.Unmarshal[RemoteCommand](in) match {
+
+            case Some(r) => handle(r)
+
+            case None =>  //Fail
+
+          }
+        }
+      }
+    }
+  }
+
+}
 
 /**
  * <p>
@@ -34,7 +160,9 @@ import actors.remote.Node
 class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
 
   // The remote server
-  private val remote = select(Node(host, mode.id), 'siigna)
+  private val client = new Client("http://localhost:7788")
+  private val remote = new RestEndpoint(client) //select(Node(host, mode.id), 'siigna// )
+  remote.start()
 
   /**
    * An int that shows how many retries have been made AND is used to signal connectivity.
@@ -80,7 +208,7 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
             _retries = 0 // Reset retries
           }
-          case _ => { // Timeout
+          case e => { // Timeout
             // Increment retries
             if (_retries < 0) {
               _retries = 0
@@ -132,4 +260,5 @@ object Mode extends Enumeration {
   val Production = Value(20004)
   val Testing    = Value(20005)
   val Cleaning   = Value(20006)
+  val http       = Value(7788)
 }
