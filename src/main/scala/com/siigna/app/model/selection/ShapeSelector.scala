@@ -36,6 +36,14 @@ trait ShapeSelector extends ((Int) => Boolean) {
    */
   def --(that : ShapeSelector) : ShapeSelector
 
+  /**
+   * Examines whether the given shape-selector is a sub-set of this shape-selector. That is, if the points
+   * described by the other selector is already included in this selector.
+   * @param that  The other [[com.siigna.app.model.selection.ShapeSelector]] to examine.
+   * @return  True if all the point the given shape-selector is describing is included in this current selector.
+   */
+  def contains(that : ShapeSelector) : Boolean
+
 }
 
 /**
@@ -131,6 +139,10 @@ case class BitSetShapeSelector(bits : BitSet) extends ShapeSelector with SetProx
       }
     }
   }
+  def contains(that : ShapeSelector) = that match {
+    case BitSetShapeSelector(xs) => !xs.exists(i => !bits(i))
+    case _ => false
+  }
 }
 
 /**
@@ -141,6 +153,7 @@ case object EmptyShapeSelector extends ShapeSelector {
   def apply(i : Int) = false
   def ++(that: ShapeSelector): ShapeSelector = that
   def --(that: ShapeSelector): ShapeSelector = this
+  def contains(that : ShapeSelector) = false
 }
 
 /**
@@ -154,4 +167,5 @@ case object FullShapeSelector extends ShapeSelector {
     case FullShapeSelector | BitSetShapeSelector(_) => EmptyShapeSelector
     case _ => this
   }
+  def contains(that : ShapeSelector) = true
 }

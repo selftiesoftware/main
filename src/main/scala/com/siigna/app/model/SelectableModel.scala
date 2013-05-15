@@ -81,17 +81,84 @@ trait SelectableModel {
   }
 
   /**
-   * Deselects the [[com.siigna.app.model.selection.Selection]] in the Model by setting the selection to None, and
-   * applies the changes executed on the selection since it was selected.
+   * Deselects the entire [[com.siigna.app.model.selection.Selection]] in the Model by setting the selection to None,
+   * and applies the changes executed on the selection since it was selected.
    * <br>
    * This is import to remember so the changes from the selection can be made into
    * [[com.siigna.app.model.action.Action]]s that can be saved in the [[com.siigna.app.model.Model]].
    * @return  The new (empty) selection.
    */
-  def deselect() = {
+  def deselect() : Selection = {
     val action = getChanges(selection)
     selection = Selection.empty
-    action.foreach(a => Drawing execute a)
+    action.foreach(Drawing execute _)
+    selection
+  }
+
+  /**
+   * Deselects the [[com.siigna.app.model.shape.Shape]] with the given id by removing it from the current selection.
+   * If the shape does not exist in the selection, nothing happens. The remaining selection - along with the changes
+   * made to it so far - persists.
+   * @param id  The id of the shape.
+   * @return  The new selection with the shape removed if it existed in the selection, otherwise the same selection.
+   */
+  def deselect(id : Int) : Selection = {
+    selection = selection.remove(id)
+    selection
+  }
+
+  /**
+   * Deselects the [[com.siigna.app.model.shape.Shape]]s with the given ids by removing them from the current selection.
+   * If one or more shapes does not exist in the selection, they are not removed. The remaining selection - along with
+   * the changes made to it so far - persists.
+   * @param ids The id of the shapes to remove from the selection.
+   * @return  The new selection with the shapes removed if they existed in the selection.
+   */
+  def deselect(ids : Traversable[Int]) : Selection = {
+    selection = selection.remove(ids)
+    selection
+  }
+
+  /**
+   * Removes a sub-part of a [[com.siigna.app.model.shape.Shape]] with the given id by subtracting the sub-part
+   * (represented by a [[com.siigna.app.model.selection.ShapeSelector]]) from the current selection. If the shape
+   * does not feature in the selection or the subtraction results in an empty selector (a
+   * [[com.siigna.app.model.selection.EmptyShapeSelector]]), the entire shape is removed from the selection.
+   * @param id  The id of the shape to remove the part from.
+   * @param selector  The selector to remove from the shape.
+   * @return  A new [[com.siigna.app.model.selection.Selection]] with the part of the shape removed.
+   */
+  def deselect(id : Int, selector : ShapeSelector) : Selection = {
+    selection = selection.remove(id, selector)
+    selection
+  }
+
+  /**
+   * Removes a sub-part of each [[com.siigna.app.model.shape.Shape]] with the given ids by subtracting the sub-part
+   * (represented by a [[com.siigna.app.model.selection.ShapeSelector]]) paired with the id from the current selection.
+   * If the shape does not feature in the selection or the subtraction results in an empty selector (a
+   * [[com.siigna.app.model.selection.EmptyShapeSelector]]), the entire shape is removed from the selection.
+   * @param parts  The ids of the shapes to subtract parts from, paired with the part to subtract.
+   * @return  A new [[com.siigna.app.model.selection.Selection]] with the parts of the shapes removed.
+   */
+  def deselect(parts : Map[Int, ShapeSelector]) : Selection = {
+    selection = selection.remove(parts)
+    selection
+  }
+
+  def deselect(rectangle : SimpleRectangle2D, entireShapes : Boolean) : Selection = {
+    val shapes = if (!entireShapes) {
+      model(rectangle).map(t => t._1 -> t._2.getSelector(rectangle))
+    } else {
+      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
+      model(rectangle).collect {
+        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
+          (t._1 -> FullShapeSelector)
+        }
+      }
+    }
+
+    selection = selection.remove(shapes)
     selection
   }
 
@@ -101,7 +168,7 @@ trait SelectableModel {
    * @param selection The [[com.siigna.app.model.selection.Selection]] containing changes to be executed.
    * @return  Some[Action] if any changes were found, None otherwise
    */
-  private def getChanges(selection : Selection) : Option[Action] = {
+  def getChanges(selection : Selection) : Option[Action] = {
     selection match {
       case s : NonEmptySelection => {
         // Find the resulting transformation, if any
@@ -131,7 +198,7 @@ trait SelectableModel {
    * @throws  NoSuchElementException  If the shape with the given ID did not exist in the [[com.siigna.app.model.Model]].
    * @return  The new selection with the added shape.
    */
-  def select(id : Int) {
+  def select(id : Int) : Selection = {
     select(id, FullShapeSelector)
     selection
   }
@@ -142,7 +209,7 @@ trait SelectableModel {
    * @throws NoSuchElementException If one or more of the ids could not be found in the [[com.siigna.app.model.Model]].
    * @return  The new selection with the added shapes.
    */
-  def select(ids : Traversable[Int]) {
+  def select(ids : Traversable[Int]) : Selection = {
     val shapes = ids.map(i => i -> Drawing(i))
 
     if (!shapes.isEmpty) {
@@ -175,21 +242,6 @@ trait SelectableModel {
     selection
   }
 
-  def select(rectangle : SimpleRectangle2D, entireShapes : Boolean = true) : Selection = {
-    val shapes = if (!entireShapes) {
-      model(rectangle).map(t => t._1 -> (t._2 -> t._2.getSelector(rectangle)))
-    } else {
-      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-      model(rectangle).collect {
-        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
-          (t._1 -> (t._2 -> FullShapeSelector))
-        }
-      }
-    }
-    selection = selection.add(shapes)
-    selection
-  }
-
   /**
    * Add the given selection to the current selection by merging the already selected shape-parts with the given
    * shape-parts.
@@ -206,7 +258,7 @@ trait SelectableModel {
    * @return  The new selection, containing all the shapes in the model.
    */
   def selectAll() = {
-    selection = Selection(Drawing.map(i => i._1 -> (i._2 -> FullShapeSelector)))
+    selection = Selection(model.shapes.map(i => i._1 -> (i._2 -> FullShapeSelector)))
     selection
   }
 
@@ -222,6 +274,100 @@ trait SelectableModel {
    * the changes made to the previous selection.
    * @param selection  The new selection to use.
    */
-  def selection_=(selection : Selection) { model.selection = selection }
+  def selection_=(selection : Selection) : Selection = { model.selection = selection; selection }
+
+  /**
+   * Toggles the [[com.siigna.app.model.shape.Shape]] with the given id in the current selection by removing it if it
+   * is fully selected, or adding it to the selection if it is not already selected.
+   * @param id  The id of the shape.
+   * @return  The new selection either with the shape added or removed, depending on its appearance in
+   *          the previous selection.
+   */
+  def toggleSelect(id : Int) : Selection = {
+    selection = selection.get(id) match {
+      case Some((_, FullShapeSelector)) => selection.remove(id)
+      case _ => selection.add(id, Drawing(id) -> FullShapeSelector)
+    }
+    selection
+  }
+
+  /**
+   * Toggles the selector of the given [[com.siigna.app.model.shape.Shape]]
+   * in the current selection by removing the entire shape if it is fully selected, removing the part if it is
+   * selected partially, or adding it to the selection if it is not already selected.
+   * @param id  The id of the shape.
+   * @param selector  The selector describing the part of the shape to toggle.
+   * @return  The new selection either with the shape added or removed, depending on its appearance in
+   *          the previous selection. If the shape already existed in the previous selection and the subtraction of
+   *          the selector results in an [[com.siigna.app.model.selection.EmptyShapeSelector]], the shape is
+   *          completely removed from the selection.
+   */
+  def toggleSelect(id : Int, selector : ShapeSelector) : Selection = {
+    selection = selection.get(id) match {
+      // Completely remove the selection if all the points already are toggled
+      case Some((_, s : BitSetShapeSelector)) if (s.contains(selector)) => selection.remove(id, selector)
+      // Otherwise we need to toggle the points if no neighbors exist
+      case Some((_, s : BitSetShapeSelector)) => {
+        selector match {
+          case BitSetShapeSelector(bits) => {
+            val xs = bits.foldLeft(s.bits)((xs, i) => {
+              // Add the index if the id has any neighbors
+              if (xs(i - 1) || xs(i + 1)) xs + i
+              // Remove the index if no neighbors were found
+              else xs - i
+            })
+            selection = Selection(selection.updated(id, selection(id)._1 -> ShapeSelector(xs)))
+            selection
+          }
+          case EmptyShapeSelector => selection
+          case _ => selection.remove(id)
+        }
+      }
+      // Simple cases:
+      case Some((_, FullShapeSelector)) => selection.remove(id)
+      case Some((shape, x)) => selection.add(id, shape -> (x ++ selector))
+      case _ => selection.add(id, Drawing(id) -> selector)
+    }
+    selection
+  }
+
+  /**
+   * Toggles the [[com.siigna.app.model.shape.Shape]]s with the given ids in the current selection by removing them
+   * if they already are selected, or adding them to the selection if they are not.
+   * @param ids  The ids of the shape.
+   * @return  The new selection either with the shapes added or removed, depending on their appearance in
+   *          the previous selection.
+   */
+  def toggleSelect(ids : Traversable[Int]) : Selection = {
+    // Find the ids that are included in the selection already, and those that are not
+    val (included, excluded) = ids.partition(i => selection.contains(i))
+    val mapped = excluded.toSeq.map(id => id -> (Drawing(id) -> FullShapeSelector)).toMap
+    // Then remove the shapes that are in the selection, and add the ones that are not
+    selection = selection.remove(included).add(mapped)
+    selection
+  }
+
+  /**
+   * Toggles the [[com.siigna.app.model.selection.ShapeSelector]]s of the given [[com.siigna.app.model.shape.Shape]]s
+   * in the current selection by removing the parts from the shapes if they already have been selected, or
+   * adding them to the selection if they are not already selected.
+   * @param parts  The ids of the shapes mapped to the part to toggle from the selection.
+   * @return  The new selection either with the shape-selectors added or removed, depending on its appearance in
+   *          the previous selection. If a shape already existed in the previous selection and the subtraction of
+   *          the selector results in an [[com.siigna.app.model.selection.EmptyShapeSelector]], the shape is
+   *          completely removed from the selection.
+   */
+  def toggleSelect(parts : Map[Int, ShapeSelector]) : Selection = {
+    /*// Find the parts that are included in the selection already, and those that are not
+    val (included, excluded) = parts.partition(t => selection.contains(t._1))
+    // Remove the included selectors and add the excluded
+    selection = selection.remove(included).add(excluded.map(t => t._1 -> (Drawing(t._1) -> t._2)))
+    selection
+    */
+    // TODO: Optimize
+    parts.foreach(t => toggleSelect(t._1, t._2))
+    selection
+  }
+
 
 }

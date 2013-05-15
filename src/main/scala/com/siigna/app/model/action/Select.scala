@@ -11,10 +11,12 @@
 
 package com.siigna.app.model.action
 
-import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
+import com.siigna.util.geom.Vector2D
 import com.siigna.app.model.Drawing
-import com.siigna.app.model.selection.{EmptyShapeSelector, Selection}
+import com.siigna.app.model.selection._
 import com.siigna.app.model.shape.Shape
+import com.siigna.util.geom.SimpleRectangle2D
+import scala.Some
 
 /**
  * An object that provides shortcuts to selecting objects in the model. Selections are crucial
@@ -56,10 +58,6 @@ object Select {
     val shape = Drawing(id)
     Drawing select Selection(id -> (shape -> shape.getSelector(r)))
   }
-  //def apply(r : SimpleRectangle2D, enclosed : Boolean = true) {
-  def apply(r : SimpleRectangle2D, entireShape : Boolean) {
-    Drawing.select(r, entireShape)
-  }
 
   /**
    * Selects several [[com.siigna.app.model.shape.Shape]]s.
@@ -95,6 +93,43 @@ object Select {
   }
 
   /**
+   * Selects a part of a shape based on its id. If the ShapePart is a FullShapePart then the
+   * entire shape is selected, if the part is empty or no shape with the given id could be found in the model,
+   * nothing happens.
+   * @param id  The id of the shape
+   * @param selector  The selector of the shape describing how the shape should be selected.
+   * @return  The new selection after the selection.
+   */
+  def apply(id : Int, selector : ShapeSelector) : Selection = {
+    Drawing.get(id) match {
+      case Some(s) => Drawing.selection = Drawing.selection.add(id, s -> selector)
+      case _ => Drawing.selection
+    }
+  }
+
+  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean = true) : Selection = {
+    val shapes = if (!entireShapes) {
+      Drawing(rectangle).map(t => t._1 -> (t._2 -> t._2.getSelector(rectangle)))
+    } else {
+      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
+      Drawing(rectangle).collect {
+        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
+          (t._1 -> (t._2 -> FullShapeSelector))
+        }
+      }
+    }
+    Drawing.selection = Drawing.selection.add(shapes)
+  }
+
+  /**
+   * Select every [[com.siigna.app.model.shape.Shape]] in the [[com.siigna.app.model.Drawing]].
+   * @return  The new selection, containing all the shapes in the model.
+   */
+  def all() = {
+    Drawing.select(Selection(Drawing.shapes.map(i => i._1 -> (i._2 -> FullShapeSelector))))
+  }
+
+  /**
    * Selects the parts of the given shapes that is close to the given points. If no selection could be made the
    * given point did not result in any meaningful selections), nothing happens.
    * @param shapes  The shapes to select one or more parts of.
@@ -105,6 +140,42 @@ object Select {
     if (!selection.isEmpty) {
       Drawing select Selection(selection)
     }
+  }
+
+  def toggle(point : Vector2D) {
+    val shapes = Drawing(point)
+    val selection = shapes.map(t => t._1 -> t._2.getSelector(point))
+    if (!selection.isEmpty) {
+      Drawing.toggleSelect(selection)
+    }
+  }
+
+  /**
+   * Toggles the [[com.siigna.app.model.selection.ShapeSelector]]s found of [[com.siigna.app.model.shape.Shape]]s
+   * found in the [[com.siigna.app.model.Drawing]] by the given [[com.siigna.util.geom.SimpleRectangle2D]].
+   * We toggles them by removing the parts from the shapes if they already have been selected, or
+   * adding them to the selection if they are not already selected.
+   * @param rectangle The rectangle used to search for shapes in the model.
+   * @param entireShapes  A boolean value signalling if the entire shape should be selected if some of it touches
+   *                      the rectangle (true) or just the points included in the rectangle.
+   * @return  The new selection either with the shape-selectors added or removed, depending on its appearance in
+   *          the previous selection. If a shape already existed in the previous selection and the subtraction of
+   *          the selector results in an [[com.siigna.app.model.selection.EmptyShapeSelector]], the shape is
+   *          completely removed from the selection.
+   */
+  def toggle(rectangle : SimpleRectangle2D, entireShapes : Boolean) = {
+    val shapes = if (!entireShapes) {
+      Drawing(rectangle).map(t => t._1 -> t._2.getSelector(rectangle))
+    } else {
+      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
+      Drawing(rectangle).collect {
+        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
+          (t._1 -> FullShapeSelector)
+        }
+      }
+    }
+
+    Drawing.toggleSelect(shapes)
   }
 
 }
