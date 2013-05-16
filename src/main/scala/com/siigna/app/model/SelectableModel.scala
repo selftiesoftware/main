@@ -14,6 +14,7 @@ package com.siigna.app.model
 import com.siigna.app.model.action.{TransformShapeParts, Action, AddAttributes}
 import com.siigna.app.model.selection._
 import com.siigna.util.geom.SimpleRectangle2D
+import com.siigna.app.model.shape.PolylineShape.PolylineShapeClosed
 
 /**
  * <p>
@@ -307,12 +308,18 @@ trait SelectableModel {
       // Completely remove the selection if all the points already are toggled
       case Some((_, s : BitSetShapeSelector)) if (s.contains(selector)) => selection.remove(id, selector)
       // Otherwise we need to toggle the points if no neighbors exist
-      case Some((_, s : BitSetShapeSelector)) => {
+      case Some((shape, s : BitSetShapeSelector)) => {
+        // If it's a closed polyline we need to treat it specially
+        val isClosedPolyline = shape match {
+          case _ : PolylineShapeClosed => true
+          case _ => false
+        }
+
         selector match {
           case BitSetShapeSelector(bits) => {
             val xs = bits.foldLeft(s.bits)((xs, i) => {
               // Add the index if the id has any neighbors
-              if (xs(i - 1) || xs(i + 1)) xs + i
+              if (xs(i - 1) || xs(i + 1) || (isClosedPolyline && (i == xs.last || i == xs.head))) xs + i
               // Remove the index if no neighbors were found
               else xs - i
             })
