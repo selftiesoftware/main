@@ -264,19 +264,21 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
     case collection : CollectionGeometry2D => {
       val intersections = collection.geometries.map(segment => segment.intersections(this)).flatten
-      println("I: "+intersections)
-      Set()
+      intersections.toSet
     }
     //TODO: calculate tangent and endpoint intersections (eg.: arc p1 == segment p1)
     case segment : Segment2D => {
+      println("evaluating segment "+segment)
       val parallelVectorD = segment.p2 - segment.p1  //normalized vector (p2 moved)
       val delta = segment.p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
       val a = this.endPoint
       val b = this.startPoint
       val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
       //find the roots; that is the value t to be inserted into the
-      val tP = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-      val tN = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+
+      //TODO: works - but returns NaN in cases where the segment is tangent and ends in the intersection point??:
+      val tP = (-parallelVectorD * delta + (math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2))))) / math.pow(parallelVectorD.length,2)
+      val tN = (-parallelVectorD * delta - (math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2))))) / math.pow(parallelVectorD.length,2)
       val int1 = segment.p1 + parallelVectorD * tP
       val int2 = segment.p1 + parallelVectorD * tN
       val ortVector = (b - a).normal
@@ -284,19 +286,34 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //evaluate if the intersections are on the arc (onArc should be >= 0)
       val int1OnArc = (int1 - a) * ortVector
       val int2OnArc = (int2 - a) * ortVector
+
       val tPonArc = if(int1OnArc >= 0) true else false
       val tNonArc = if(int2OnArc >= 0) true else false
 
       //two intersections: two roots, both in range 0-1 and on the arc.
-      if(intersectValue >= 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) Set(int1,int2)
+      if(intersectValue >= 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) {
+        println("two ARC INTs i segment: +"+Set(int1,int2))
+        Set(int1,int2)
+      }
+
+      //find cases where a segment endpoint is on the arc
 
       //one intersection: if tP is in range and tP is on the arc while tN is not  - or the other way around.
-      else if(tP >= 0 && tP <= 1 && tPonArc == true) Set(int1)
-      else if(tN >= 0 && tN <= 1 && tNonArc == true) Set(int2)
+      else if(tP >= 0 && tP <= 1 && tPonArc == true) {
+        println("one ARC INT i segment: +"+Set(int1))
 
-      //TODO: tangent situations does not generate the correct vector, as both roots yield NaN?? The intersection needs to be calculated.
-      else if (intersectValue == 0) {
+        Set(int1)
+      }
+      else if(tN >= 0 && tN <= 1 && tNonArc == true){
+        println("one ARC INT i segment: +"+Set(int2))
+        Set(int2)
+      }
+
+      //get tangent intersections
+      else if (intersectValue == 0 && segment.distanceTo(this.center) == this.radius) {
         val p = segment.closestPoint(this.center)
+        println("tangent ARC INT i segment: +"+Set(p))
+
         Set(p)
       }
       //zero intersections: if intersectValue < 0
