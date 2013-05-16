@@ -31,7 +31,7 @@ class CollectionGeometry2DSpec extends FunSpec with ShouldMatchers {
     }
 
   }
-  test("Can tell if a CollectionGeometry and a a Segment2D intersect") {
+  it("Can tell if a CollectionGeometry and a a Segment2D intersect") {
 
     val p1 = Vector2D(-20,  0)
     val p2 = Vector2D(10,  20)

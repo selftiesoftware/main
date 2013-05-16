@@ -82,7 +82,7 @@ class RestEndpoint(client:Client) extends Actor{
       case Set(Action,v:RemoteAction,s) => {
 
         client.setAction(v,s) match {
-          case aid: Int =>  Set(ActionId,aid,s)
+          case aid: Int => respond(Set(ActionId,aid,s))
           case e => {
             println("Fail")
             println(e)
@@ -94,7 +94,7 @@ class RestEndpoint(client:Client) extends Actor{
 
       case Get(Action,v:Int,s) => {
         client.getAction(v,s) match {
-          case Some(r: RemoteAction) => Set(Action,r,s)
+          case Some(r: RemoteAction) => respond(Set(Action,r,s))
           case e => {
             println("Fail")
             println(e)

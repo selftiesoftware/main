@@ -8,7 +8,7 @@
  * Noncommercial — You may not use this work for commercial purposes.
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
-/*
+
 package com.siigna.app.controller.remote
 
 import org.scalatest.FunSpec
@@ -16,7 +16,11 @@ import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
 import com.siigna.app.model.action.{CreateShape, RemoteAction}
-import com.siigna.app.model.shape.LineShape
+import com.siigna.util.io
+import com.siigna.app.model.Model
+import com.siigna.app.model.shape.CircleShape
+import com.siigna.util.geom.Vector2D
+import com.siigna.util.collection.Attributes
 
 /**
  * Tests the remote actor.
@@ -24,7 +28,7 @@ import com.siigna.app.model.shape.LineShape
 class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
   // Set all members accessible in RemoteController
-  val sink = new Server("62.243.118.234", Mode.Production)
+  val sink = new Server("http://localhost:7788", Mode.http)
   var session : Session = null
 
   sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),
@@ -59,10 +63,18 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
     it ("can get a drawing") {
       sink(Get(RC.Drawing, session.drawing, session), r => {
-        val set = r.asInstanceOf[Set]
-        val bytes = set.value.asInstanceOf[Array[Byte]]
-        val remote = Serializer.readDrawing(bytes)
-        remote.model.shapes.size should equal (0)
+        r match {
+
+          case set:Set => {
+
+            set.value match {
+
+              case m:Model => m.shapes.size should equal (0)
+              case _ => assert(false)
+            }
+          }
+        }
+
       })
     }
 
@@ -79,16 +91,15 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("can set an action") {
-      // TODO: Find a better solution in coming scalatest versions
+      val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
+
       if (range != null) {
-        val action = RemoteAction(CreateShape(range.head, LineShape(0, 0, 10, 10)))
-        sink(Set(RC.Action, action, session), r => {
+        sink(Set(RC.Action, dummyAction, session), r => {
           val set = r.asInstanceOf[Set]
-          set.value.isInstanceOf[Int] should be (right = true)
+          assert(set.value.isInstanceOf[Int])
         })
       }
     }
 
   }
-
-}  */
+}
