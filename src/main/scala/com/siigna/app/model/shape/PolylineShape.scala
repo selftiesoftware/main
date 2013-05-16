@@ -204,33 +204,53 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         var firstPoint = false
         var parts = Seq[InnerPolylineShape]()
         var lastIndex = xs.head // Last known index
-        var isConsistent = true // Is the
+        var isConsistent = true // Is the selection consistent?
+
+        // Circular selection: Selection spanning between the first and last point of the PL
+        var isUsingTail = false // Are we currently adding points to the circular tail?
+        var circularTail = Seq[InnerPolylineShape]() // The circular "tail" or points we need to append to the selection at the end
+        // Is the selection circular? (selects first and last point)
+        val isCircular = xs(0) && xs(innerShapes.size) && isInstanceOf[PolylineShape.PolylineShapeClosed]
+
+        // Iterate the parts
         xs foreach ( i => {
+          // Is the current point equal to the previous + 1?
+          val isSuccessor = i == xs.head || lastIndex == i - 1
+
+          // Examine if the first and last point have been selected
+          if (i == 0 && isCircular) {
+            parts :+= PolylineLineShape(startPoint)
+          } else if ((!isSuccessor && isCircular) || isUsingTail) {
+            circularTail :+= innerShapes(i - 1)
+            isUsingTail = true
           // See if two adjacent elements are selected
-          if ((xs(i) && xs(i + 1)) || (xs(i) && xs(i - 1))) {
+          } else if (xs(i + 1) || xs(i - 1)) {
             // Includes shapes if they are not already there
-            def includeElement(s : Int) {
-              val shape = innerShapes(s - 1) // Minus 1 since start point is included in xs (at position 0)
-              parts :+= shape
+            if (i != 0) {
+              parts :+= innerShapes(i - 1)
+            // Include the start point if s is the head element
+            } else if (!isCircular) {
+              firstPoint = true
             }
-            // Include the start point if i is the head element
-            if (i == 0) { firstPoint = true }
-            else        { includeElement(i) }
           }
 
           // If two indices are not next to one another, the polyline is not consistent
-          if (lastIndex < (i - 1)) {
+          if (!isSuccessor && !isCircular) {
             isConsistent = false
           }
 
           // Set the isFirstSet variable depending on whether the previous part is included
           lastIndex = i
         })
+
+        // Add the circular "tail", if any
+        if (isCircular) parts = circularTail ++ parts
+
         // Examine whether the first point should be included and whether the result is coherent
         (firstPoint, isConsistent) match {
-          case (true, true)   => Some(copy(startPoint = startPoint, innerShapes = innerShapes))
-          case (true, false)  => Some(GroupShape(shapes(startPoint, parts), attributes))
-          case (false, true) if (parts.size > 1)  => Some(copy(startPoint = parts.head.point, innerShapes = parts.tail))
+          case (true, true)   => Some(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes))
+          case (true, false)  => Some(GroupShape(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes)))
+          case (false, true) if (parts.size > 1)  => Some(PolylineShape.PolylineShapeOpen(parts.head.point, parts.tail, attributes))
           case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
           case _ => None
         }
@@ -341,6 +361,8 @@ object PolylineShape {
 
     def setAttributes(attr : Attributes) = copy(attributes = attr)
 
+    override def toString() = "PolylineShapeClosed[" + startPoint + "," + innerShapes + ", " + attributes + "]"
+
   }
 
   /**
@@ -372,6 +394,8 @@ object PolylineShape {
     }
 
     def setAttributes(attr : Attributes) = copy(attributes = attr)
+
+    override def toString() = "PolylineShapeOpen[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
   }
 

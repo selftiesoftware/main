@@ -212,6 +212,9 @@ trait ActionModel extends SelectableModel with HasAttributes {
       // Undo it
       model = action.undo(model)
 
+      // Move the executed action from the executed list to the undone list
+      model = model.copy(executed = model.executed.tail, undone = model.undone.+:(model.executed.head))
+
       // Send the action to server with the undone flag set to true!
       notifyListeners(action, undo = true, remote)
 

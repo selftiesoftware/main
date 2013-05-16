@@ -179,6 +179,12 @@ trait Module {
   final def child = _child
 
   /**
+   * Examines if the current module is forwarding to another module.
+   * @return  True if the current module is forwarding (have a 'child' module), false otherwise.
+   */
+  def isForwarding : Boolean = _child.isDefined
+
+  /**
    * The current mouse position interpreted by the module. This coordinate takes snap and track
    * into account and is thus not (always) the same as the mouse position seen on the screen.
    * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the cursor
