@@ -73,12 +73,21 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p2 = Vector2D(0, 10)
     val p3 = Vector2D(10, 0)
     val arc = Arc2D(p1, p2, p3)
+
+    val p4 = Vector2D(-14.142135624,0)
+    val p5 = Vector2D(0, 14.142135624)
+    val p6 = Vector2D(14.142135624,0)
+    val arc2 = Arc2D(p4, p5, p6)
+
     val l1 = Segment2D(Vector2D(0,40),Vector2D(10,45))
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
     val l3 = Segment2D(Vector2D(-20,10),Vector2D(20,10))
     val l4 = Segment2D(Vector2D(-20,20),Vector2D(0,0))
     val l5 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
     val l6 = Segment2D(Vector2D(20,5),Vector2D(-20,5))
+    val l7 = Segment2D(Vector2D(14.142135624,0),Vector2D(7.07107,7.07107))
+    val l8 = Segment2D(Vector2D(20,0),Vector2D(10,10))
+    val l9 = Segment2D(Vector2D(0,0),Vector2D(20,0))
 
     arc.intersects(l1) should equal (false)
     arc.intersects(l2) should equal (true) //should have one intersection only.
@@ -86,25 +95,39 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     arc.intersects(l4) should equal (true) //should have one intersection only.
     arc.intersects(l5) should equal (false) //should not have an intersection.
     arc.intersects(l6) should equal (true) //should have two intersections.
+    arc.intersects(l7) should equal (true) //should have one intersection.
+
+    arc2.intersects(l8) should equal (true) //should have one intersection.
+    arc2.intersects(l9) should equal (true) //should have one intersection.
   }
   test("Can calculate intersections between an Arc2D and a segment2D") {
     val p1 = Vector2D(-10, 0)
     val p2 = Vector2D(0, 10)
     val p3 = Vector2D(10, 0)
     val arc = Arc2D(p1, p2, p3)
+
+    val p4 = Vector2D(-14.142135624,0)
+    val p5 = Vector2D(0, 14.142135624)
+    val p6 = Vector2D(14.142135624,0)
+    val arc2 = Arc2D(p4, p5, p6)
+
     val l1 = Segment2D(Vector2D(0,40),Vector2D(10,45))
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
     val l3 = Segment2D(Vector2D(-20,10),Vector2D(20,10))
     val l4 = Segment2D(Vector2D(-20,-20),Vector2D(0,0))
     val l5 = Segment2D(Vector2D(20,5),Vector2D(-20,5))
     val l6 = Segment2D(Vector2D(-10,0),Vector2D(-20,0))
+    val l7 = Segment2D(Vector2D(14.142135624,0),Vector2D(7.071067811865475,7.071067811865475))
+    val l8 = Segment2D(Vector2D(10,20),Vector2D(0,14.142135624))
 
     arc.intersections(l1) should equal (Set())
-    arc.intersections(l2) should equal (Set(Vector2D(7.071067811865465,7.071067811865465))) //one intersection only.
+    arc.intersections(l2) should equal (Set(Vector2D(7.0712,7.0712))) //one intersection only.
     arc.intersections(l3) should equal (Set(Vector2D(0,10)))//TODO: check that the tangent is on the arc
     arc.intersections(l4) should equal (Set()) //a segment which crosses the circle outside the arc and ends inside the arc should have zero intersections
-    arc.intersections(l5) should equal (Set(Vector2D(-8.660254037844378,5.0), Vector2D(8.660254037844382,5.0)))
+    arc.intersections(l5) should equal (Set(Vector2D(-8.6604,5.0), Vector2D(8.6604,5.0)))
     arc.intersections(l6) should equal (Set(Vector2D(-10,0)))
+    arc.intersections(l7) should equal (Set(Vector2D(7.07107,7.07107)))
+    arc2.intersections(l8) should equal (Set(Vector2D(0.0,14.14214)))
 
   }
   test("Can calculate intersections between an Arc2D and a collectionGeom2D") {
@@ -113,9 +136,9 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p3 = Vector2D(0, 10)
     val arc = Arc2D(p1, p2, p3)
 
-    val p9 = Vector2D(-14.1421,0)
-    val p10 = Vector2D(0, 14.1421)
-    val p11 = Vector2D(14.1421,0)
+    val p9 = Vector2D(-14.142135624,0)
+    val p10 = Vector2D(0, 14.142135624)
+    val p11 = Vector2D(14.142135624,0)
     val arc2 = Arc2D(p9, p10, p11)
 
     //c1
@@ -123,7 +146,7 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p5 = Vector2D(20,0)
     val p6 = Vector2D(10,10)
     val p7 = Vector2D(10,20)
-    val p8 = Vector2D(0,14.1421)
+    val p8 = Vector2D(0,14.142135624)
 
     //c2
     val p12 = Vector2D(-10,-30)
@@ -135,8 +158,8 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val c2 = CollectionGeometry2D(ArrayBuffer(Segment2D(p12,p13),Segment2D(p13,p14)))
 
     arc.intersections(c1) should equal (Set(Vector2D(10.0,0.0)))
-    arc2.intersections(c1) should equal (Set(Vector2D(14.1421,0.0)))
-    arc2.intersections(c2) should equal (Set(Vector2D(-10.0,9.999949620373094), Vector2D(-4.9387736955637225,13.25169826075163)))
+    arc2.intersections(c1) should equal (Set(Vector2D(14.1422,0.0), Vector2D(10.0001,9.9999), Vector2D(10.0,10.0), Vector2D(0.0,14.14214)))
+    arc2.intersections(c2) should equal (Set(Vector2D(-10.0,10.0), Vector2D(-4.9387,13.2516)))
   }
 
 

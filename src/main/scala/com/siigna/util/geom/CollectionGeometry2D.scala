@@ -50,6 +50,7 @@ case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2
 
   //def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
+    //TODO make this!!
     case collection : CollectionGeometry2D => {
       Set()
     }
