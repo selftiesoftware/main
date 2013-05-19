@@ -72,6 +72,8 @@ import java.awt.{Color, Dimension}
  *  trackGuideColor
  *    The color to paint the track guides - the horizontal and vertical helper-lines when the user is "tasting"
  *    a point. Defaults to #00FFFF in hex.
+ *  version
+ *    The version string of the current running instance of Siigna.
  *  zoomSpeed
  *    The speed with which the client zooms, given in percentages. Defaults to 0.5.
  * }}}
@@ -105,6 +107,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("selectionDistance")     = 12.0
   this("trackDistance")         = 4.0
   this("trackGuideColor")       = "#00FFFF".color
+  this("version")               = "beta - Xenophanes"
   this("zoomSpeed")             = 0.5
   
   /**
