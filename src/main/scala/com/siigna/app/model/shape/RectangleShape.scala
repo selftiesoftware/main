@@ -19,27 +19,45 @@ import com.siigna.util.geom.ComplexRectangle2D
 import scala.Some
 import collection.immutable.BitSet
 
-case class RectangleShape(center : Vector2D, width : Double, height : Double, rotation : Double, val attributes : Attributes) extends ClosedShape {
+case class RectangleShape(center : Vector2D, width : Double, height : Double, rotation : Double, attributes : Attributes) extends ClosedShape {
 
   type T = RectangleShape
 
   val geometry = ComplexRectangle2D(center,width,height,rotation)
 
-  //def delete(selector: _root_.com.siigna.app.model.selection.ShapeSelector): scala.Seq[_root_.com.siigna.app.model.shape.Shape] = throw new UnsupportedOperationException("Not yet implemented")
+  val p1 = geometry.bottomLeft //BitSet 3
+  val p2 = geometry.topRight  //BitSet 2
+  val p3 = geometry.bottomRight //BitSet 1
+  val p4 = geometry.topLeft //BitSet 0
 
   def delete(part : ShapeSelector) = part match {
     case BitSetShapeSelector(_) | FullShapeSelector => Nil
     case _ => Seq(this)
   }
 
-  def getPart(selector: ShapeSelector): Option[PartialShape] = throw new UnsupportedOperationException("Not yet implemented")
+  def getPart(part : ShapeSelector) = part match {
+    case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      LineShape(p1.transform(t), p4, attributes)
+      LineShape(p1.transform(t), p2, attributes)
+    }))
+    case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      LineShape(p1, p2.transform(t), attributes)
+      LineShape(p3, p2.transform(t), attributes)
+    }))
+    case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      LineShape(p2, p3.transform(t), attributes)
+      LineShape(p4, p3.transform(t), attributes)
+    }))
+    case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      LineShape(p3, p4.transform(t), attributes)
+      LineShape(p1, p4.transform(t), attributes)
+    }))
+    case FullShapeSelector => Some(new PartialShape(this, transform))
+    case _ => None
+  }
 
   def getSelector(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
-    val p1 = geometry.bottomLeft //BitSet 3
-    val p2 = geometry.topRight  //BitSet 2
-    val p3 = geometry.bottomRight //BitSet 1
-    val p4 = geometry.topLeft //BitSet 0
 
     //find out if a point in the rectangle is close. if so, return true and the point's bit value
     def isCloseToPoint(s : Segment2D, b : BitSet) : (Boolean, BitSet) = {
@@ -87,17 +105,11 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
         val segment = isCloseToSegment._2.get
         val segmentBitSet = isCloseToSegment._3
         //ok, the point is close to a segment. IF one of the endpoints are close, return its bit value:
-        if(isCloseToPoint(segment, segmentBitSet)._1 == true) {
-          BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
-        }
-
+        if(isCloseToPoint(segment, segmentBitSet)._1 == true) BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
         //if no point is close, return the bitset of the segment:
         else BitSetShapeSelector(isCloseToSegment._3)
       //if no point is close, return the segment:
       } else {
-        //If shape is within selection distance of selection point, but none of the line's endpoints are,
-        //The segment closest to the point should be selected
-        //BitSetShapeSelector(isCloseToSegment._3.get)
         EmptyShapeSelector
       }
     }
@@ -106,10 +118,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   //TODO: is this right?
   def getSelector(r : SimpleRectangle2D) : ShapeSelector = {
     if (r.intersects(boundary)) {
-      val p1 = r.bottomLeft
-      val p2 = r.bottomRight
-      val p3 = r.topLeft
-      val p4 = r.topRight
       val cond1 = r.contains(p1)
       val cond2 = r.contains(p2)
       val cond3 = r.contains(p3)
@@ -131,10 +139,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   //TODO: is this right? and when is a complex rectangle ever used to make a selection??
   def getSelector(r : ComplexRectangle2D) : ShapeSelector = {
     if (r.intersects(boundary)) {
-      val p1 = r.bottomLeft
-      val p2 = r.bottomRight
-      val p3 = r.topLeft
-      val p4 = r.topRight
       val cond1 = r.contains(p1)
       val cond2 = r.contains(p2)
       val cond3 = r.contains(p3)
@@ -153,21 +157,13 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     } else EmptyShapeSelector
   }
 
-  //def getShape(selector: ShapeSelector): Option[Shape] =
-  //throw new UnsupportedOperationException("Not yet implemented")
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
     case _ => None
   }
 
-
-
   //TODO: expand to allow for all combinations of selections of the four vertices.
   def getVertices(selector: ShapeSelector) = {
-    val p1 = this.geometry.bottomLeft
-    val p2 = this.geometry.bottomRight
-    val p3 = this.geometry.topLeft
-    val p4 = this.geometry.topRight
 
     selector match {
       case FullShapeSelector => geometry.vertices
@@ -178,8 +174,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       case _ => Seq()
     }
   }
-
-  //def setAttributes(attributes: Attributes): RectangleShape#T = throw new UnsupportedOperationException("Not yet implemented")
 
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
