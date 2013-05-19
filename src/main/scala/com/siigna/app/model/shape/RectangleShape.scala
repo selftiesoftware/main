@@ -25,18 +25,21 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   val geometry = ComplexRectangle2D(center,width,height,rotation)
 
-  def delete(selector: _root_.com.siigna.app.model.selection.ShapeSelector): scala.Seq[_root_.com.siigna.app.model.shape.Shape] = throw new UnsupportedOperationException("Not yet implemented")
+  //def delete(selector: _root_.com.siigna.app.model.selection.ShapeSelector): scala.Seq[_root_.com.siigna.app.model.shape.Shape] = throw new UnsupportedOperationException("Not yet implemented")
+
+  def delete(part : ShapeSelector) = part match {
+    case BitSetShapeSelector(_) | FullShapeSelector => Nil
+    case _ => Seq(this)
+  }
 
   def getPart(selector: ShapeSelector): Option[PartialShape] = throw new UnsupportedOperationException("Not yet implemented")
 
-  //def getSelector(point: Vector2D): ShapeSelector = throw new UnsupportedOperationException("Not yet implemented")
   def getSelector(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     val p1 = geometry.bottomLeft //BitSet 3
     val p2 = geometry.topRight  //BitSet 2
     val p3 = geometry.bottomRight //BitSet 1
     val p4 = geometry.topLeft //BitSet 0
-
 
     //find out if a point in the rectangle is close. if so, return true and the point's bit value
     def isCloseToPoint(s : Segment2D, b : BitSet) : (Boolean, BitSet) = {
@@ -85,7 +88,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
         val segmentBitSet = isCloseToSegment._3
         //ok, the point is close to a segment. IF one of the endpoints are close, return its bit value:
         if(isCloseToPoint(segment, segmentBitSet)._1 == true) {
-          println("point bit: "+BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2))
           BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
         }
 
@@ -100,9 +102,34 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       }
     }
   }
+  //needed for box selections?
+  //TODO: is this right?
+  def getSelector(r : SimpleRectangle2D) : ShapeSelector = {
+    if (r.intersects(boundary)) {
+      val p1 = r.bottomLeft
+      val p2 = r.bottomRight
+      val p3 = r.topLeft
+      val p4 = r.topRight
+      val cond1 = r.contains(p1)
+      val cond2 = r.contains(p2)
+      val cond3 = r.contains(p3)
+      val cond4 = r.contains(p4)
+      if (cond1 && cond2 && cond3 && cond4) {
+        FullShapeSelector
+      } else if (cond1) {
+        ShapeSelector(0)
+      } else if (cond2) {
+        ShapeSelector(1)
+      } else if (cond3) {
+        ShapeSelector(2)
+      } else if (cond4) {
+        ShapeSelector(3)
+      } else EmptyShapeSelector
+    } else EmptyShapeSelector
+  }
 
-  def getSelector(rect: SimpleRectangle2D): ShapeSelector = throw new UnsupportedOperationException("Not yet implemented")
-  def getSelector(r : ComplexRectangle2D) = {
+  //TODO: is this right? and when is a complex rectangle ever used to make a selection??
+  def getSelector(r : ComplexRectangle2D) : ShapeSelector = {
     if (r.intersects(boundary)) {
       val p1 = r.bottomLeft
       val p2 = r.bottomRight
@@ -135,9 +162,26 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
 
 
-  def getVertices(selector: ShapeSelector): Seq[Vector2D] = throw new UnsupportedOperationException("Not yet implemented")
+  //TODO: expand to allow for all combinations of selections of the four vertices.
+  def getVertices(selector: ShapeSelector) = {
+    val p1 = this.geometry.bottomLeft
+    val p2 = this.geometry.bottomRight
+    val p3 = this.geometry.topLeft
+    val p4 = this.geometry.topRight
 
-  def setAttributes(attributes: Attributes): RectangleShape#T = throw new UnsupportedOperationException("Not yet implemented")
+    selector match {
+      case FullShapeSelector => geometry.vertices
+      case ShapeSelector(0) => Seq(p1)
+      case ShapeSelector(1) => Seq(p2)
+      case ShapeSelector(2) => Seq(p3)
+      case ShapeSelector(3) => Seq(p4)
+      case _ => Seq()
+    }
+  }
+
+  //def setAttributes(attributes: Attributes): RectangleShape#T = throw new UnsupportedOperationException("Not yet implemented")
+
+  def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
   def transform(t : TransformationMatrix) =
     RectangleShape(center transform(t), width * t.scaleFactor, height * t.scaleFactor, rotation, attributes)
