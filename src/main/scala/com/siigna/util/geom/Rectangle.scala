@@ -151,7 +151,23 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
   /**
    * The boundary of the rectangle. In this case returns itself.
    */
-  def boundary = this
+  //def boundary = this
+  //TODO: take into account rotated rectangles
+  //def boundary = Rectangle2D(this.bottomLeft, this.topRight)
+
+  def boundary = {
+    val vertices = Seq(this.bottomLeft,bottomRight,topRight,topLeft)
+    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
+    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
+
+    val xMax = vertices.map(_.x).reduceLeft(max)
+    val xMin = vertices.map(_.x).reduceLeft(min)
+    val yMax = vertices.map(_.y).reduceLeft(max)
+    val yMin = vertices.map(_.y).reduceLeft(min)
+
+    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
+  }
+
 
   def circumference = height * 2 + width * 2
 
@@ -267,7 +283,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
    * Determine whether the geometry is overlapping (intersecting) the given geometry.
    */
-  def intersects(geometry: Geometry2D): Boolean = false
+  def intersects(geometry: Geometry2D): Boolean = geometry.intersects(this)
 
   /**
    * Returns the intersections between this and the given geometry, if any.

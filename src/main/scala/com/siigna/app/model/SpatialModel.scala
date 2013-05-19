@@ -58,7 +58,7 @@ trait SpatialModel[Key, Value <: Shape] {
   def mbr : Rectangle2D =
     if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
     else if (shapes.size == 1) shapes.head._2.geometry.boundary
-    else { //TODO: PERFORMANCE DEPLEATING OPERATION!
+    else { //TODO: PERFORMANCE DEPLETING OPERATION!
       shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : Rectangle2D, b : (Key, Value)) => {
         a.expand(b._2.geometry.boundary)
       })

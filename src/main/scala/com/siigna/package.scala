@@ -54,6 +54,9 @@ package object siigna extends com.siigna.util.Implicits {
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
   val PolylineShape = com.siigna.app.model.shape.PolylineShape
 
+  type RectangleShape = com.siigna.app.model.shape.RectangleShape
+  val RectangleShape = com.siigna.app.model.shape.RectangleShape
+
   type TextShape = com.siigna.app.model.shape.TextShape
   val TextShape = com.siigna.app.model.shape.TextShape
 
