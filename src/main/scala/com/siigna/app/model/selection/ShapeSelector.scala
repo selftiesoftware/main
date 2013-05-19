@@ -36,6 +36,14 @@ trait ShapeSelector extends ((Int) => Boolean) {
    */
   def --(that : ShapeSelector) : ShapeSelector
 
+  /**
+   * Examines whether the given shape-selector is a sub-set of this shape-selector. That is, if the points
+   * described by the other selector is already included in this selector.
+   * @param that  The other [[com.siigna.app.model.selection.ShapeSelector]] to examine.
+   * @return  True if all the point the given shape-selector is describing is included in this current selector.
+   */
+  def contains(that : ShapeSelector) : Boolean
+
 }
 
 /**
@@ -51,12 +59,13 @@ object ShapeSelector {
   def apply() = EmptyShapeSelector
 
   /**
-   * Creates a ShapeSelector selecting the given points, represented by their indexes as defined in the
+   * Creates a ShapeSelector selecting the given vertices of the shape, represented by their indexes as defined in the
    * [[com.siigna.app.model.shape.Shape]].
-   * @param xs  The points to add to the selector.
-   * @return  A [[com.siigna.app.model.selection.BitSetShapeSelector]] that describes the selection of the given points.
+   * @param xs  The indices to add to the selector.
+   * @return  A [[com.siigna.app.model.selection.BitSetShapeSelector]] that describes the selection of the given points
+   *          or, if the number of points given equals 0, we return an EmptyShapeSelector.
    */
-  def apply(xs : Int*) = BitSetShapeSelector(BitSet(xs:_*))
+  def apply(xs : Int*) : ShapeSelector = if (xs.isEmpty) EmptyShapeSelector else BitSetShapeSelector(BitSet(xs:_*))
 
   /**
    * Creates a ShapeSelector selecting all the vertices given in the set ´<code>set</code>´.
@@ -64,20 +73,20 @@ object ShapeSelector {
    * @return A [[com.siigna.app.model.selection.BitSetShapeSelector]] that describes the selected points from the given
    *         BitSet.
    */
-  def apply(set : BitSet) = BitSetShapeSelector(set)
+  def apply(set : BitSet) : BitSetShapeSelector = BitSetShapeSelector(set)
 
   /**
    * Gives a selector that describes an empty selection of a [[com.siigna.app.model.shape.Shape]]. I. e. a selection
    * that contains nothing of a shape.
    * @return  An [[com.siigna.app.model.selection.EmptyShapeSelector]].
    */
-  def empty = EmptyShapeSelector
+  def empty : EmptyShapeSelector.type = EmptyShapeSelector
 
   /**
    * Gives a selector that describes a fully selected [[com.siigna.app.model.shape.Shape]].
    * @return  A [[com.siigna.app.model.selection.FullShapeSelector]].
    */
-  def full = FullShapeSelector
+  def full : FullShapeSelector.type = FullShapeSelector
 
   /**
    * A extractor to match the contents on [[com.siigna.app.model.selection.ShapeSelector]]s, in particular
@@ -120,6 +129,7 @@ case class BitSetShapeSelector(bits : BitSet) extends ShapeSelector with SetProx
   }
   def --(that: ShapeSelector): ShapeSelector = that match {
     case EmptyShapeSelector => this
+    case FullShapeSelector  => EmptyShapeSelector
     case BitSetShapeSelector(xs) => {
       val ys = bits -- xs
       if (ys.isEmpty) {
@@ -128,6 +138,10 @@ case class BitSetShapeSelector(bits : BitSet) extends ShapeSelector with SetProx
         BitSetShapeSelector(ys)
       }
     }
+  }
+  def contains(that : ShapeSelector) = that match {
+    case BitSetShapeSelector(xs) => !xs.exists(i => !bits(i))
+    case _ => false
   }
 }
 
@@ -139,6 +153,7 @@ case object EmptyShapeSelector extends ShapeSelector {
   def apply(i : Int) = false
   def ++(that: ShapeSelector): ShapeSelector = that
   def --(that: ShapeSelector): ShapeSelector = this
+  def contains(that : ShapeSelector) = false
 }
 
 /**
@@ -152,4 +167,5 @@ case object FullShapeSelector extends ShapeSelector {
     case FullShapeSelector | BitSetShapeSelector(_) => EmptyShapeSelector
     case _ => this
   }
+  def contains(that : ShapeSelector) = true
 }

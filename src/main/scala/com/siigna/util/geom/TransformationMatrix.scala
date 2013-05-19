@@ -307,7 +307,7 @@ object TransformationMatrix {
   /**
    * Creates a transformation matrix that doesn't move, scale or rotate anything.
    * @return  An empty [[com.siigna.util.geom.TransformationMatrix]] which, when applied, does nothing. Also known
-   *          as a unix matrix.
+   *          as a unit matrix.
    */
   def apply() : TransformationMatrix = empty
 
@@ -332,7 +332,7 @@ object TransformationMatrix {
   /**
    * Retrieves a transformation matrix that doesn't move, scale or rotate anything.
    * @return  An empty [[com.siigna.util.geom.TransformationMatrix]] which, when applied, does nothing. Also known
-   *          as a unix matrix.
+   *          as a unit matrix.
    */
   val empty = new TransformationMatrix()
 

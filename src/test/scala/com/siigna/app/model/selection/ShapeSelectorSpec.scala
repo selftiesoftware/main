@@ -18,7 +18,7 @@ import org.scalatest.FunSpec
 import scala.collection.immutable.BitSet
 
 /**
- * Test the model
+ * Test the ShapeSelectors
  */
 class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
 
@@ -26,6 +26,13 @@ class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
 
     val t = BitSetShapeSelector(BitSet(1))
     val f = BitSetShapeSelector(BitSet(2))
+
+    it ("can detect the presence of a bit") {
+      t(1) should equal(true)
+      t(2) should equal(false)
+      f(1) should equal(false)
+      f(2) should equal(true)
+    }
 
     it ("can add another empty selector") {
       (t ++ EmptyShapeSelector) should equal(t)
@@ -38,6 +45,119 @@ class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
     it ("can add another non-empty selector") {
       (t ++ f) should equal(BitSetShapeSelector(BitSet(1, 2)))
       (f ++ t) should equal(BitSetShapeSelector(BitSet(1, 2)))
+    }
+
+    it ("can se that another empty selector is not contained") {
+      t.contains(EmptyShapeSelector) should equal (false)
+    }
+
+    it ("can se that another full selector is not contained") {
+      t.contains(FullShapeSelector) should equal (false)
+    }
+
+    it ("can check if another non-empty selector is contained within") {
+      t.contains(f) should equal(false)
+      t.contains(t) should equal(true)
+      BitSetShapeSelector(BitSet(0, 1, 2, 3)).contains(BitSetShapeSelector(BitSet(0, 1))) should equal(true)
+      BitSetShapeSelector(BitSet(0, 1)).contains(BitSetShapeSelector(BitSet(0, 1, 2, 3))) should equal(false)
+    }
+
+    it ("can remove another empty selector") {
+      (t -- EmptyShapeSelector) should equal (t)
+    }
+
+    it ("can remove another full selector") {
+      (t -- FullShapeSelector) should equal(EmptyShapeSelector)
+    }
+
+    it ("can remove another non-empty selector") {
+      (t -- f) should equal(t)
+      (t -- t) should equal(EmptyShapeSelector)
+    }
+
+  }
+
+  describe("An EmptyShapeSelector") {
+
+    val empty = EmptyShapeSelector
+    val full = FullShapeSelector
+    val nonEmpty = BitSetShapeSelector(BitSet(0, 2))
+
+    it("does not have any elements") {
+      empty(0) should equal(false)
+      empty(12) should equal(false)
+    }
+
+    it ("can add another empty selector") {
+      (empty ++ empty) should equal (empty)
+    }
+
+    it ("can add another full selector") {
+      (empty ++ full) should equal (full)
+    }
+
+    it ("can add another non-empty selector") {
+      (empty ++ nonEmpty) should equal (nonEmpty)
+    }
+
+    it ("can see that nothing is contained in it") {
+      empty.contains(empty) should equal (false)
+      empty.contains(full) should equal (false)
+      empty.contains(nonEmpty) should equal (false)
+    }
+
+    it ("can remove an empty selector") {
+      (empty -- empty) should equal(empty)
+    }
+
+    it ("can remove a full selector") {
+      (empty -- full) should equal(empty)
+    }
+
+    it ("can remove a non-empty selector") {
+      (empty -- nonEmpty) should equal (empty)
+    }
+  }
+
+  describe("A FullShapeSelector") {
+
+    val empty = EmptyShapeSelector
+    val full = FullShapeSelector
+    val nonEmpty = BitSetShapeSelector(BitSet(0, 2))
+
+    it("contains all elements") {
+      full(0) should equal(true)
+      full(12) should equal(true)
+    }
+
+    it ("can add another empty selector") {
+      (full ++ empty) should equal (full)
+    }
+
+    it ("can add another full selector") {
+      (full ++ full) should equal (full)
+    }
+
+    it ("can add another non-empty selector") {
+      (full ++ nonEmpty) should equal (full)
+    }
+
+    it ("can see that all selectors are contained in it") {
+      full.contains(full) should equal(true)
+      full.contains(empty) should equal(true)
+      full.contains(nonEmpty) should equal(true)
+    }
+
+    it ("can remove an empty selector") {
+      (full -- empty) should equal(full)
+    }
+
+    it ("can remove a full selector") {
+      (full -- full) should equal(empty)
+    }
+
+    it ("can remove a non-empty selector") {
+      (full -- nonEmpty) should equal (empty)
     }
 
   }

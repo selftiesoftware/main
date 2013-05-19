@@ -35,7 +35,7 @@ object Log {
   val INFO    = 4
   val DEBUG   = 8
   val SUCCESS = 16
-  val ALL     = ERROR + WARNING + INFO
+  val ALL     = ERROR + WARNING + INFO + DEBUG + SUCCESS
   
   /**
    * The debug-level.
