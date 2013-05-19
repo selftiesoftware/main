@@ -13,7 +13,7 @@ package com.siigna.app.model.shape
 
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, TransformationMatrix, ComplexRectangle2D}
 import com.siigna.util.collection.Attributes
-import com.siigna.app.model.selection.ShapeSelector
+import com.siigna.app.model.selection._
 
 case class RectangleShape(center : Vector2D, width : Double, height : Double, rotation : Double, val attributes : Attributes) extends ClosedShape {
 
@@ -29,7 +29,14 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def getSelector(rect: SimpleRectangle2D): ShapeSelector = throw new UnsupportedOperationException("Not yet implemented")
 
-  def getShape(selector: ShapeSelector): Option[Shape] = throw new UnsupportedOperationException("Not yet implemented")
+  //def getShape(selector: ShapeSelector): Option[Shape] =
+  //throw new UnsupportedOperationException("Not yet implemented")
+  def getShape(s : ShapeSelector) = s match {
+    case FullShapeSelector => Some(this)
+    case _ => None
+  }
+
+
 
   def getVertices(selector: ShapeSelector): Seq[Vector2D] = throw new UnsupportedOperationException("Not yet implemented")
 
