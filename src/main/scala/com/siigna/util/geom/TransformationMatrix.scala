@@ -161,17 +161,28 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
    * this transformation.
+   * the scale is explicitly defined to fix a bug in the order of transformation,
+   * where rotation operations errously modifies scaling as well.
    */
   def rotate(degrees : Double) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi)))
+    TransformationMatrix(operation(x => {
+      x.rotate(degrees / 180 * scala.math.Pi)
+      x.setToScale(t.getScaleX, t.getScaleY)
+    }
+  ))
 
   /**
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
+   * the scale is explicitly defined to fix a bug in the order of transformation,
+   * where rotation operations errously modifies scaling as well.
    */
   def rotate(degrees : Double, point : Vector2D) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
-
+    TransformationMatrix(operation(x => {
+      x.rotate(degrees / 180 * scala.math.Pi, point.x, point.y)
+      x.setToScale(t.getScaleX, t.getScaleY)
+    }
+  ))
   /**
    * Calculates the rotation for this transformation-matrix from the translated origin. Given in degrees,
    * counter clockwise.

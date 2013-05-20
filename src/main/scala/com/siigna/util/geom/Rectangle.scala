@@ -293,42 +293,28 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
    * The lowest left corner of the rectangle.
    */
-  def bottomLeft : Vector2D = {
-    //find the vector from the center to the corner of the rectangle prior to rotation.
-    val bl = Vector2D(center.x-width/2, center.y-height/2)
-    //rotate the centerVector
-    bl.rotate(center,rotation)
-  }
+  def bottomLeft : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
 
   /**
    * The lowest right corner of the rectangle.
    */
-  def bottomRight = {
-    //find the vector from the center to the corner of the rectangle prior to rotation.
-    val br = Vector2D(center.x+width/2, center.y-height/2)
-    //rotate the centerVector
-    br.rotate(center,rotation)
-  }
+  def bottomRight = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
 
   /**
    * The upper left corner of the rectangle.
    */
+  //TODO: rotation is negative to become clockwise. Is that correct?
   def topLeft = {
-    //find the vector from the center to the corner of the rectangle prior to rotation.
-    val tl = Vector2D(center.x-width/2, center.y+height/2)
-    //rotate the centerVector
-    tl.rotate(center,rotation)
+    val t = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
+    println("TL in geom:_ "+t)
+    t
   }
+
 
   /**
    * The upper right corner of the rectangle.
    */
-  def topRight = {
-    //find the vector from the center to the corner of the rectangle prior to rotation.
-    val tr = Vector2D(center.x+width/2, center.y+height/2)
-    //rotate the centerVector
-    tr.rotate(center,rotation)
-  }
+  def topRight = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
 
   def onPeriphery(point: Vector2D): Boolean = false
 

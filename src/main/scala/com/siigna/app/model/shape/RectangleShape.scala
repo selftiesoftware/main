@@ -23,8 +23,8 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   type T = RectangleShape
 
+  //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry = ComplexRectangle2D(center,width,height,rotation)
-
   val p1 = geometry.bottomLeft //BitSet 3
   val p2 = geometry.topRight  //BitSet 2
   val p3 = geometry.bottomRight //BitSet 1
@@ -156,17 +156,24 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       } else EmptyShapeSelector
     } else EmptyShapeSelector
   }
-
+  //select all segments of the rectangle (shown as blue lines)
   def getShape(s : ShapeSelector) = s match {
-    case FullShapeSelector => Some(this)
+    case FullShapeSelector => {
+      Some(this)
+    }
     case _ => None
   }
+
 
   //TODO: expand to allow for all combinations of selections of the four vertices.
   def getVertices(selector: ShapeSelector) = {
 
     selector match {
-      case FullShapeSelector => geometry.vertices
+      case FullShapeSelector => {
+        println("topLeft correct? " +this.geometry.topLeft)
+        this.geometry.vertices
+        //Seq(Vector2D(0,0),Vector2D(10,10),Vector2D(11,11))
+      }
       case ShapeSelector(0) => Seq(p1)
       case ShapeSelector(1) => Seq(p2)
       case ShapeSelector(2) => Seq(p3)
@@ -177,7 +184,9 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
-  def transform(t : TransformationMatrix) =
+  //TODO: this transformation is wrong!
+  def transform(t : TransformationMatrix) = {
+    println("scalefactor: "+t.scaleFactor)
     RectangleShape(center transform(t), width * t.scaleFactor, height * t.scaleFactor, rotation, attributes)
-
+  }
 }

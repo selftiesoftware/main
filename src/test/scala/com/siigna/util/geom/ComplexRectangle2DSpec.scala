@@ -13,6 +13,8 @@ package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSuite, FlatSpec}
+import com.siigna.app.model.shape.RectangleShape
+import com.siigna.util.collection.Attributes
 
 class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
 
@@ -20,9 +22,9 @@ class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
     val c1 = Vector2D(0,0)
     val c2 = Vector2D(10,10)
     val width1 = 100
-    val width2 = 1
+    val width2 = 50
     val height1 = 100
-    val height2 = 1000
+    val height2 = 100
     val rotation = 0
     val rotation2 = 30
 
@@ -35,14 +37,19 @@ class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
     r1.bottomRight should equal (Vector2D(50,-50))
     r1.bottomLeft should equal (Vector2D(-50,-50))
 
-    r2.topLeft should equal (Vector2D(9.50, 510))
-    r2.topRight should equal (Vector2D(10.50, 510))
-    r2.bottomRight should equal (Vector2D(10.50,-490))
-    r2.bottomLeft should equal (Vector2D(9.50,-490))
+    r2.topLeft should equal (Vector2D(-15, 60))
+    r2.topRight should equal (Vector2D(35, 60))
+    r2.bottomRight should equal (Vector2D(35,-40))
+    r2.bottomLeft should equal (Vector2D(-15,-40))
 
-    r3.topLeft should equal (Vector2D(-240.4330127018922,442.76270189221935))
-    r3.topRight should equal (Vector2D(-239.56698729810776,443.26270189221935))
-    r3.bottomRight should equal (Vector2D(260.4330127018922,-422.76270189221935))
-    r3.bottomLeft should equal (Vector2D(259.56698729810773,-423.26270189221935))
+    //test if rotated rectangles return the correct corner points
+    r3.topLeft should equal (Vector2D(-36.65063509461097,40.80127018922194))
+    r3.topRight should equal (Vector2D(56.65063509461096,40.80127018922193))
+    r3.bottomRight should equal (Vector2D(6.650635094610973,-45.80127018922193))
+    r3.bottomLeft should equal (Vector2D(-36.65063509461096,-20.80127018922194))
+
+    val rShape = RectangleShape(c2,width2,height2,rotation2, Attributes())
+
+    rShape.geometry.topLeft should equal (Vector2D(13.34936490538903,65.80127018922194))
   }
 }
