@@ -24,19 +24,25 @@ class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
     val height1 = 100
     val height2 = 1000
     val rotation = 0
+    val rotation2 = 30
 
     val r1 = ComplexRectangle2D(c1,width1,height1,rotation)
     val r2 = ComplexRectangle2D(c2,width2,height2,rotation)
+    val r3 = ComplexRectangle2D(c2,width2,height2,rotation2) //rotated rectangle
 
     r1.topLeft should equal (Vector2D(-50, 50))
     r1.topRight should equal (Vector2D(50, 50))
     r1.bottomRight should equal (Vector2D(50,-50))
     r1.bottomLeft should equal (Vector2D(-50,-50))
 
-    r2.topLeft should equal (Vector2D(4.50, 505))
-    r2.topRight should equal (Vector2D(5.50, 505))
-    r2.bottomRight should equal (Vector2D(5.50,-495))
-    r2.bottomLeft should equal (Vector2D(4.50,-495))
+    r2.topLeft should equal (Vector2D(9.50, 510))
+    r2.topRight should equal (Vector2D(10.50, 510))
+    r2.bottomRight should equal (Vector2D(10.50,-490))
+    r2.bottomLeft should equal (Vector2D(9.50,-490))
 
+    r3.topLeft should equal (Vector2D(-240.4330127018922,442.76270189221935))
+    r3.topRight should equal (Vector2D(-239.56698729810776,443.26270189221935))
+    r3.bottomRight should equal (Vector2D(260.4330127018922,-422.76270189221935))
+    r3.bottomLeft should equal (Vector2D(259.56698729810773,-423.26270189221935))
   }
 }

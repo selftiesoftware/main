@@ -295,7 +295,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    */
   def bottomLeft : Vector2D = {
     //find the vector from the center to the corner of the rectangle prior to rotation.
-    val bl = Vector2D(center.x-width/2, center.y-width/2)
+    val bl = Vector2D(center.x-width/2, center.y-height/2)
     //rotate the centerVector
     bl.rotate(center,rotation)
   }
@@ -305,7 +305,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    */
   def bottomRight = {
     //find the vector from the center to the corner of the rectangle prior to rotation.
-    val br = Vector2D(center.x+width/2, center.y-width/2)
+    val br = Vector2D(center.x+width/2, center.y-height/2)
     //rotate the centerVector
     br.rotate(center,rotation)
   }
@@ -315,7 +315,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    */
   def topLeft = {
     //find the vector from the center to the corner of the rectangle prior to rotation.
-    val tl = Vector2D(center.x-width/2, center.y+width/2)
+    val tl = Vector2D(center.x-width/2, center.y+height/2)
     //rotate the centerVector
     tl.rotate(center,rotation)
   }
@@ -325,7 +325,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    */
   def topRight = {
     //find the vector from the center to the corner of the rectangle prior to rotation.
-    val tr = Vector2D(center.x+width/2, center.y+width/2)
+    val tr = Vector2D(center.x+width/2, center.y+height/2)
     //rotate the centerVector
     tr.rotate(center,rotation)
   }
