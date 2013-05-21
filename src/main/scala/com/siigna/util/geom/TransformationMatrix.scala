@@ -154,17 +154,23 @@ case class TransformationMatrix(t : AffineTransform) {
   def isFlippedY = (t.getScaleY < 0)
 
   /**
+   * Returns the origin of the TransformationMatrix as a Vector.
+   */
+  def getTranslate = Vector2D(t.getTranslateX, t.getTranslateY)
+
+  /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
    * this transformation.
    */
-  def rotate(degrees : Double) : TransformationMatrix = rotate(degrees, translation)
+  def rotate(degrees : Double) =
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi)))
 
   /**
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
    */
-  def rotate(degrees : Double, point : Vector2D) : TransformationMatrix =
-    TransformationMatrix(operation(_ rotate(math.toRadians(degrees), point.x, point.y)))
+  def rotate(degrees : Double, point : Vector2D) =
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
 
   /**
    * Calculates the rotation for this transformation-matrix from the translated origin. Given in degrees,
@@ -220,6 +226,11 @@ case class TransformationMatrix(t : AffineTransform) {
     Math.sqrt(a(0) * a(0) + a(1) * a(1))
   }
 
+  /**
+   * Returns the scale (zoom) factor of <i>the x-axis</i> of this transformation. If you are looking for
+   * the scale-factor of the y-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleY]].
+   * @return  A Double representing the scaling operation on the x-axis.
+   */
   def scaleX = scale
 
   /**
@@ -278,12 +289,6 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param delta  The translation of the y-axis
    */
   def translateY(delta : Double) = TransformationMatrix(operation(_ translate(0, delta)))
-
-  /**
-   * Returns the origin of the TransformationMatrix as a Vector.
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing how much the matrix translates.
-   */
-  def translation = Vector2D(t.getTranslateX, t.getTranslateY)
   
   /**
    * Performs an operation on the affine transformation which is wrapped by this

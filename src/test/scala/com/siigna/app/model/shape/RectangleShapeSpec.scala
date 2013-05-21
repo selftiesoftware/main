@@ -11,7 +11,7 @@
 
 package com.siigna.app.model.shape
 
-/*import org.scalatest.path.FunSpec
+import org.scalatest.path.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
@@ -21,6 +21,16 @@ import com.siigna.util.collection.Attributes
  */
 class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
+  describe("A RectangleShape") {
+
+    it("can be rotated") {
+      val s = RectangleShape(Vector2D(0,0),100,100,0, Attributes())
+      val t = TransformationMatrix(Vector2D(0,0),1).rotate(90)
+      s.transform(t) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
+    }
+  }
+}
+  /*
   describe("A RectangleShape") {
 
     it("can be created from two points") {
@@ -44,7 +54,8 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
     }
 
   }
+   }
+  */
 
 
-}
-       */
+

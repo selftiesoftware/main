@@ -13,6 +13,7 @@ package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSpec
+import com.siigna.app.model.shape.LineShape
 
 /**
  * A test class for the Transformation Matrix.
@@ -64,10 +65,24 @@ class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
   describe("A non-empty TransformationMatrix") {
 
     it ("can concatenate itself with other matrices") {
-      val t1 = TransformationMatrix()
       val t2 = TransformationMatrix(Vector2D(10, 10), 1000)
 
-      t1.concatenate(t2) should equal (t2)
+      t.concatenate(t2) should equal (t2)
+    }
+
+    it ("can rotate a transformationMatrix without altering the scale factor") {
+
+      //test if rotation alters scale
+      t.rotate(0).scaleFactor should equal (1.0)
+      t.rotate(90).scaleFactor should equal (1.0)
+      t.getTranslate should equal (Vector2D(0, 0))
+    }
+
+    it ("can rotate a vector without altering the scale factor or origin") {
+      val l = LineShape(Vector2D(0,0),Vector2D(10,5))
+      println(l.transform(t.rotate(90)))
+      //test if rotation alters scale and origin point
+
     }
 
   }

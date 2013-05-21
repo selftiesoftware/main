@@ -23,8 +23,8 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   type T = RectangleShape
 
+  //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry = ComplexRectangle2D(center,width,height,rotation)
-
   val p1 = geometry.bottomLeft //BitSet 3
   val p2 = geometry.topRight  //BitSet 2
   val p3 = geometry.bottomRight //BitSet 1
@@ -156,7 +156,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       } else EmptyShapeSelector
     } else EmptyShapeSelector
   }
-
+  //select all segments of the rectangle (shown as blue lines)
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
     case _ => None
