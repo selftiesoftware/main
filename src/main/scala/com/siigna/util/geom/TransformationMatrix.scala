@@ -161,24 +161,27 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
    * this transformation.
-   * the scale is explicitly defined to fix a bug in the order of transformation,
+   * the translation and scale is explicitly defined to fix a bug in the order of transformation,
    * where rotation operations errously modifies scaling as well.
    */
-  def rotate(degrees : Double) =
-    TransformationMatrix(operation(x => {
-      x.rotate(degrees / 180 * scala.math.Pi)
-      x.setToScale(t.getScaleX, t.getScaleY)
-    }
-  ))
+  def rotate(degrees : Double) : TransformationMatrix = {
 
+    TransformationMatrix(operation(x => {
+      x.translate(getTranslate.x,getTranslate.y)
+      x.setToScale(t.getScaleX, t.getScaleY)
+      x.rotate(degrees / 180 * scala.math.Pi)
+    }
+    ))
+  }
   /**
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
-   * the scale is explicitly defined to fix a bug in the order of transformation,
+   * the translation and scale is explicitly defined to fix a bug in the order of transformation,
    * where rotation operations errously modifies scaling as well.
    */
   def rotate(degrees : Double, point : Vector2D) =
     TransformationMatrix(operation(x => {
+      x.translate(getTranslate.x,getTranslate.y)
       x.rotate(degrees / 180 * scala.math.Pi, point.x, point.y)
       x.setToScale(t.getScaleX, t.getScaleY)
     }
@@ -199,9 +202,10 @@ case class TransformationMatrix(t : AffineTransform) {
    * Scales a transformation by a factor and concatenates it with this
    * transformation.
    */
-  def scale(factor : Double) =
+  def scale(factor : Double) = {
+    println("scalematrix: "+TransformationMatrix(operation(_ scale(factor, factor))))
     TransformationMatrix(operation(_ scale(factor, factor)))
-
+  }
   /**
    * Scales a transformation by a factor on the first dimension and a factor on the second dimension.
    * Before and after applying the transformation we translate the matrix to the given point so the
@@ -212,9 +216,9 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param point  The base point for the scale transformation
    * @return  A new scaled TransformationMatrix
    */
-  def scale(xFactor : Double, yFactor : Double, point : Vector2D) =
+  def scale(xFactor : Double, yFactor : Double, point : Vector2D) = {
     TransformationMatrix(operation(_ scale(xFactor, yFactor), point))
-
+  }
   /**
    * Scales a transformation by a factor, but translates it before and after so the scale operation
    * is based in the given coordinates.
@@ -222,13 +226,12 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param point  The base point of the scale
    * @return  A new scale TransformationMatrix
    */
-  def scale(factor : Double, point : Vector2D) =
+  def scale(factor : Double, point : Vector2D) = {
     TransformationMatrix(operation(a => {
-      a.translate(point.x, point.y)
+      //a.translate(point.x, point.y)
       a.scale(factor, factor)
-      a.translate(-point.x, -point.y)
     }))
-
+  }
   /**
    * Returns the scale (zoom) factor of this transformation.
    */
@@ -290,6 +293,7 @@ case class TransformationMatrix(t : AffineTransform) {
   protected def operation(op : AffineTransform => Unit) = {
     val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
     op(newAffineTransform)
+    //println("newAffineTranforrm: "+newAffineTransform)
     newAffineTransform
   }
 
@@ -330,6 +334,11 @@ object TransformationMatrix {
    */
   def apply(pan : Vector2D, zoom : Double) : TransformationMatrix =
     new TransformationMatrix() translate(pan) scale(zoom)
+
+  def apply(pan : Vector2D, zoom : Double, rotation: Double) : TransformationMatrix = {
+    println("T: "+(new TransformationMatrix() translate(pan) rotate(90) scale(zoom)))
+    new TransformationMatrix() translate(pan) scale(zoom) rotate(rotation)
+  }
 
   /**
    * Creates a transformation matrix which moves by the given pan vector.
