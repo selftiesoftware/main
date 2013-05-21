@@ -14,7 +14,6 @@ package com.siigna.util.geom
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSpec
 import com.siigna.app.model.shape.LineShape
-import java.awt.geom.AffineTransform
 
 /**
  * A test class for the Transformation Matrix.
@@ -22,10 +21,28 @@ import java.awt.geom.AffineTransform
 class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
 
   val t = TransformationMatrix()
-  //val u = TransformationMatrix(Vector2D(math.Pi, math.E), 12.2)
-  //val v = Vector2D(1, 1)
-  /*
+  val u = TransformationMatrix(Vector2D(math.Pi, math.E), 12.2)
+  val v = Vector2D(1, 1)
+
   describe("An empty TransformationMatrix") {
+
+    it ("can rotate around a center of (0, 0)") {
+      val x = t.rotate(90)
+      x.rotation should equal (90)
+      x.scale should equal (1)
+      x.translation should equal (Vector2D(0, 0))
+
+      val y = t.rotate(1)
+      y.rotation should equal(1)
+      y.scale should equal(1)
+      y.translation should equal(Vector2D(0, 0))
+
+      val m = Vector2D(100, -542.765)
+      val z = t.rotate(180).translate(m)
+      z.rotation should equal(180)
+      z.scale should equal (1)
+      z.translation should equal (m * -1)
+    }
 
     it ("can concatenate itself with other empty matrices") {
       t.concatenate(t) should equal(t)
@@ -44,39 +61,28 @@ class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
       t.flipY.transform(v) should equal (Vector2D(1, -1))
     }
   }
-  */
+
   describe("A non-empty TransformationMatrix") {
 
-    val newTransform = new TransformationMatrix()
-
-    newTransform.concatenate(TransformationMatrix(AffineTransform.getTranslateInstance(0,0)))
-    newTransform.concatenate(TransformationMatrix(AffineTransform.getRotateInstance(90)))
-    newTransform.concatenate(TransformationMatrix(AffineTransform.getScaleInstance(1,1)))
-
-    println("newT: "+newTransform)
-
-    //def tR(r : Double) = TransformationMatrix(Vector2D(0,0),1.0,r)
-
     it ("can concatenate itself with other matrices") {
-      //val t2 = TransformationMatrix(Vector2D(10, 10), 1000)
+      val t2 = TransformationMatrix(Vector2D(10, 10), 1000)
 
-      //t.concatenate(t2) should equal (t2)
+      t.concatenate(t2) should equal (t2)
     }
 
     it ("can rotate a transformationMatrix without altering the scale factor") {
 
       //test if rotation alters scale
-      //t.rotate(0).scaleFactor should equal (1.0)
-      //tR(90).scaleFactor should equal (1.0)
-      //t.getTranslate should equal (Vector2D(0, 0))
+      t.rotate(0).scaleFactor should equal (1.0)
+      t.rotate(90).scaleFactor should equal (1.0)
+      t.getTranslate should equal (Vector2D(0, 0))
     }
 
     it ("can rotate a vector without altering the scale factor or origin") {
       val l = LineShape(Vector2D(0,0),Vector2D(10,5))
-
+      println(l.transform(t.rotate(90)))
       //test if rotation alters scale and origin point
-      val lRotated = l.transform(TransformationMatrix(Vector2D(0,0),1.0,90))
-      println("l rotated: "+lRotated)
+
     }
 
   }

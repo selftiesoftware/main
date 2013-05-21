@@ -178,7 +178,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
     case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
   }
 
-  def transform(t : TransformationMatrix) = new Circle2D(t.transform(center), radius * t.scaleFactor)
+  def transform(t : TransformationMatrix) = new Circle2D(t.transform(center), radius * t.scale)
 
   /**
    * Displays a set of vectors as the center along with

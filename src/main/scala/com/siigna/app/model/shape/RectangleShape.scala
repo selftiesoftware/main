@@ -158,22 +158,15 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   }
   //select all segments of the rectangle (shown as blue lines)
   def getShape(s : ShapeSelector) = s match {
-    case FullShapeSelector => {
-      Some(this)
-    }
+    case FullShapeSelector => Some(this)
     case _ => None
   }
-
 
   //TODO: expand to allow for all combinations of selections of the four vertices.
   def getVertices(selector: ShapeSelector) = {
 
     selector match {
-      case FullShapeSelector => {
-        println("topLeft correct? " +this.geometry.topLeft)
-        this.geometry.vertices
-        //Seq(Vector2D(0,0),Vector2D(10,10),Vector2D(11,11))
-      }
+      case FullShapeSelector => geometry.vertices
       case ShapeSelector(0) => Seq(p1)
       case ShapeSelector(1) => Seq(p2)
       case ShapeSelector(2) => Seq(p3)
@@ -184,9 +177,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
-  //TODO: this transformation is wrong!
-  def transform(t : TransformationMatrix) = {
-    println("scalefactor: "+t.scaleFactor)
-    RectangleShape(center transform(t), width * t.scaleFactor, height * t.scaleFactor, rotation, attributes)
-  }
+  def transform(t : TransformationMatrix) =
+    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation, attributes)
+
 }

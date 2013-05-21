@@ -82,7 +82,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def transform(t : TransformationMatrix) =
       ArcShape(t.transform(center),
-               radius * t.scaleFactor,
+               radius * t.scale,
                startAngle, angle,
                attributes)
 

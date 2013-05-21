@@ -161,51 +161,33 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
    * this transformation.
-   * the translation and scale is explicitly defined to fix a bug in the order of transformation,
-   * where rotation operations errously modifies scaling as well.
    */
-  def rotate(degrees : Double) : TransformationMatrix = {
+  def rotate(degrees : Double) =
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi)))
 
-    TransformationMatrix(operation(x => {
-      x.translate(getTranslate.x,getTranslate.y)
-      x.setToScale(t.getScaleX, t.getScaleY)
-      x.rotate(degrees / 180 * scala.math.Pi)
-    }
-    ))
-  }
   /**
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
-   * the translation and scale is explicitly defined to fix a bug in the order of transformation,
-   * where rotation operations errously modifies scaling as well.
    */
   def rotate(degrees : Double, point : Vector2D) =
-    TransformationMatrix(operation(x => {
-      x.translate(getTranslate.x,getTranslate.y)
-      x.rotate(degrees / 180 * scala.math.Pi, point.x, point.y)
-      x.setToScale(t.getScaleX, t.getScaleY)
-    }
-  ))
+    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
+
   /**
    * Calculates the rotation for this transformation-matrix from the translated origin. Given in degrees,
    * counter clockwise.
+   * Thanks to: <a href="https://groups.google.com/forum/?fromgroups#!topic/uw.cs.cs349/gpaYRPQggvc">
+   *   https://groups.google.com/forum/?fromgroups#!topic/uw.cs.cs349/gpaYRPQggvc
+   * </a>
    * @return  A Double from 0 to 360.
    */
-  def rotation = {
-    val v = Vector2D(1, 0)             // The vector
-    val t = translate(-getTranslate) // Extract translation
-    val p = v.transform(t)           // Transform the vector
-    math.atan2(p.y, p.x)
-  }
+  def rotation = math.toDegrees(Math.atan2(t.getShearY, t.getScaleY))
 
   /**
    * Scales a transformation by a factor and concatenates it with this
    * transformation.
    */
-  def scale(factor : Double) = {
-    println("scalematrix: "+TransformationMatrix(operation(_ scale(factor, factor))))
-    TransformationMatrix(operation(_ scale(factor, factor)))
-  }
+  def scale(factor : Double) = TransformationMatrix(operation(_ scale(factor, factor)))
+
   /**
    * Scales a transformation by a factor on the first dimension and a factor on the second dimension.
    * Before and after applying the transformation we translate the matrix to the given point so the
@@ -216,9 +198,9 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param point  The base point for the scale transformation
    * @return  A new scaled TransformationMatrix
    */
-  def scale(xFactor : Double, yFactor : Double, point : Vector2D) = {
+  def scale(xFactor : Double, yFactor : Double, point : Vector2D) =
     TransformationMatrix(operation(_ scale(xFactor, yFactor), point))
-  }
+
   /**
    * Scales a transformation by a factor, but translates it before and after so the scale operation
    * is based in the given coordinates.
@@ -226,23 +208,46 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param point  The base point of the scale
    * @return  A new scale TransformationMatrix
    */
-  def scale(factor : Double, point : Vector2D) = {
+  def scale(factor : Double, point : Vector2D) =
     TransformationMatrix(operation(a => {
-      //a.translate(point.x, point.y)
+      a.translate(point.x, point.y)
       a.scale(factor, factor)
+      a.translate(-point.x, -point.y)
     }))
-  }
+
   /**
-   * Returns the scale (zoom) factor of this transformation.
+   * Returns the scale (zoom) factor of <i>the x-axis</i> of this transformation. If you are looking for
+   * the scale-factor of the y-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleY]].
+   * @return  A Double representing the scaling operation on the x-axis.
    */
-  def scaleFactor = t.getScaleX
+  def scale : Double = {
+    val a = new Array[Double](4)
+    t.getMatrix(a)
+    Math.sqrt(a(0) * a(0) + a(1) * a(1))
+  }
+
+  /**
+   * Returns the scale (zoom) factor of <i>the x-axis</i> of this transformation. If you are looking for
+   * the scale-factor of the y-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleY]].
+   * @return  A Double representing the scaling operation on the x-axis.
+   */
+  def scaleX = scale
+
+  /**
+   * Returns the scale (zoom) factor of <i>of the y-axis</i> of this transformation. If you are looking for the
+   * scale-factor of the x-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleX]].
+   * @return  A Double representing the scaling operation on the y-axis.
+   */
+  def scaleY = {
+    val a = new Array[Double](4)
+    t.getMatrix(a)
+    Math.sqrt(a(2) * a(2) + a(3) * a(3))
+  }
 
   /**
    * Prints the affine transform.
    */
-  override def toString = {
-    t.toString
-  }
+  override def toString = s"TransformationMatrix($translation, Scale: $scale, Rotation: $rotation)"
 
   /**
    * Transforms a vector with this transformation.
@@ -284,7 +289,7 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param delta  The translation of the y-axis
    */
   def translateY(delta : Double) = TransformationMatrix(operation(_ translate(0, delta)))
-  
+
   /**
    * Performs an operation on the affine transformation which is wrapped by this
    * transformation.
@@ -293,7 +298,6 @@ case class TransformationMatrix(t : AffineTransform) {
   protected def operation(op : AffineTransform => Unit) = {
     val newAffineTransform = t.clone.asInstanceOf[AffineTransform]
     op(newAffineTransform)
-    //println("newAffineTranforrm: "+newAffineTransform)
     newAffineTransform
   }
 
@@ -334,11 +338,6 @@ object TransformationMatrix {
    */
   def apply(pan : Vector2D, zoom : Double) : TransformationMatrix =
     new TransformationMatrix() translate(pan) scale(zoom)
-
-  def apply(pan : Vector2D, zoom : Double, rotation: Double) : TransformationMatrix = {
-    println("T: "+(new TransformationMatrix() translate(pan) rotate(90) scale(zoom)))
-    new TransformationMatrix() translate(pan) scale(zoom) rotate(rotation)
-  }
 
   /**
    * Creates a transformation matrix which moves by the given pan vector.
