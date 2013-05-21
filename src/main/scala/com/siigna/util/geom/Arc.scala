@@ -358,7 +358,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   }
 
   def transform(t : TransformationMatrix) =
-    new Arc2D(t.transform(center), radius * t.scaleFactor, startAngle, angle)
+    new Arc2D(t.transform(center), radius * t.scale, startAngle, angle)
 
   // TODO: Add middlepoint
   lazy val vertices = {

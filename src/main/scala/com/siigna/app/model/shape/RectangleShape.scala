@@ -178,6 +178,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
   def transform(t : TransformationMatrix) =
-    RectangleShape(center transform(t), width * t.scaleFactor, height * t.scaleFactor, rotation, attributes)
+    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation, attributes)
 
 }

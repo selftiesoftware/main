@@ -25,6 +25,24 @@ class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
 
   describe("An empty TransformationMatrix") {
 
+    it ("can rotate around a center of (0, 0)") {
+      val x = t.rotate(90)
+      x.rotation should equal (90)
+      x.scale should equal (1)
+      x.translation should equal (Vector2D(0, 0))
+
+      val y = t.rotate(1)
+      y.rotation should equal(1)
+      y.scale should equal(1)
+      y.translation should equal(Vector2D(0, 0))
+
+      val m = Vector2D(100, -542.765)
+      val z = t.rotate(180).translate(m)
+      z.rotation should equal(180)
+      z.scale should equal (1)
+      z.translation should equal (m * -1)
+    }
+
     it ("can concatenate itself with other empty matrices") {
       t.concatenate(t) should equal(t)
     }

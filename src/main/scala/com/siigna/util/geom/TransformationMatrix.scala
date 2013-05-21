@@ -154,42 +154,33 @@ case class TransformationMatrix(t : AffineTransform) {
   def isFlippedY = (t.getScaleY < 0)
 
   /**
-   * Returns the origin of the TransformationMatrix as a Vector.
-   */
-  def getTranslate = Vector2D(t.getTranslateX, t.getTranslateY)
-
-  /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with
    * this transformation.
    */
-  def rotate(degrees : Double) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi)))
+  def rotate(degrees : Double) : TransformationMatrix = rotate(degrees, translation)
 
   /**
    * Creates a rotation in degrees around a point and concatenates it with
    * this transformation.
    */
-  def rotate(degrees : Double, point : Vector2D) =
-    TransformationMatrix(operation(_ rotate(degrees / 180 * scala.math.Pi, point.x, point.y)))
+  def rotate(degrees : Double, point : Vector2D) : TransformationMatrix =
+    TransformationMatrix(operation(_ rotate(math.toRadians(degrees), point.x, point.y)))
 
   /**
    * Calculates the rotation for this transformation-matrix from the translated origin. Given in degrees,
    * counter clockwise.
+   * Thanks to: <a href="https://groups.google.com/forum/?fromgroups#!topic/uw.cs.cs349/gpaYRPQggvc">
+   *   https://groups.google.com/forum/?fromgroups#!topic/uw.cs.cs349/gpaYRPQggvc
+   * </a>
    * @return  A Double from 0 to 360.
    */
-  def rotation = {
-    val v = Vector2D(1, 0)             // The vector
-    val t = translate(-getTranslate) // Extract translation
-    val p = v.transform(t)           // Transform the vector
-    math.atan2(p.y, p.x)
-  }
+  def rotation = math.toDegrees(Math.atan2(t.getShearY, t.getScaleY))
 
   /**
    * Scales a transformation by a factor and concatenates it with this
    * transformation.
    */
-  def scale(factor : Double) =
-    TransformationMatrix(operation(_ scale(factor, factor)))
+  def scale(factor : Double) = TransformationMatrix(operation(_ scale(factor, factor)))
 
   /**
    * Scales a transformation by a factor on the first dimension and a factor on the second dimension.
@@ -219,16 +210,33 @@ case class TransformationMatrix(t : AffineTransform) {
     }))
 
   /**
-   * Returns the scale (zoom) factor of this transformation.
+   * Returns the scale (zoom) factor of <i>the x-axis</i> of this transformation. If you are looking for
+   * the scale-factor of the y-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleY]].
+   * @return  A Double representing the scaling operation on the x-axis.
    */
-  def scaleFactor = t.getScaleX
+  def scale : Double = {
+    val a = new Array[Double](4)
+    t.getMatrix(a)
+    Math.sqrt(a(0) * a(0) + a(1) * a(1))
+  }
+
+  def scaleX = scale
+
+  /**
+   * Returns the scale (zoom) factor of <i>of the y-axis</i> of this transformation. If you are looking for the
+   * scale-factor of the x-axis, please refer to [[com.siigna.util.geom.TransformationMatrix#scaleX]].
+   * @return  A Double representing the scaling operation on the y-axis.
+   */
+  def scaleY = {
+    val a = new Array[Double](4)
+    t.getMatrix(a)
+    Math.sqrt(a(2) * a(2) + a(3) * a(3))
+  }
 
   /**
    * Prints the affine transform.
    */
-  override def toString = {
-    t.toString
-  }
+  override def toString = s"TransformationMatrix($translation, Scale: $scale, Rotation: $rotation)"
 
   /**
    * Transforms a vector with this transformation.
@@ -270,6 +278,12 @@ case class TransformationMatrix(t : AffineTransform) {
    * @param delta  The translation of the y-axis
    */
   def translateY(delta : Double) = TransformationMatrix(operation(_ translate(0, delta)))
+
+  /**
+   * Returns the origin of the TransformationMatrix as a Vector.
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing how much the matrix translates.
+   */
+  def translation = Vector2D(t.getTranslateX, t.getTranslateY)
   
   /**
    * Performs an operation on the affine transformation which is wrapped by this
