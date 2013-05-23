@@ -62,6 +62,11 @@ class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
       BitSetShapeSelector(BitSet(0, 1)).contains(BitSetShapeSelector(BitSet(0, 1, 2, 3))) should equal(false)
     }
 
+    it ("can determine whether it is empty") {
+      t.isEmpty should equal (false)
+      BitSetShapeSelector(BitSet()).isEmpty should equal (true)
+    }
+
     it ("can remove another empty selector") {
       (t -- EmptyShapeSelector) should equal (t)
     }
@@ -106,6 +111,10 @@ class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
       empty.contains(nonEmpty) should equal (false)
     }
 
+    it ("can determine whether it is empty") {
+      empty.isEmpty should equal(true)
+    }
+
     it ("can remove an empty selector") {
       (empty -- empty) should equal(empty)
     }
@@ -146,6 +155,10 @@ class ShapeSelectorSpec extends FunSpec with ShouldMatchers {
       full.contains(full) should equal(true)
       full.contains(empty) should equal(true)
       full.contains(nonEmpty) should equal(true)
+    }
+
+    it ("can determine whether it is empty") {
+      full.isEmpty should equal(false)
     }
 
     it ("can remove an empty selector") {

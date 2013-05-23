@@ -17,10 +17,12 @@ package object siigna extends com.siigna.util.Implicits {
   // Actions
   type Action = com.siigna.app.model.action.Action
 
-  val Create = com.siigna.app.model.action.Create
-  val Delete = com.siigna.app.model.action.Delete
-  val Select = com.siigna.app.model.action.Select
-  val Transform = com.siigna.app.model.action.Transform
+  val Create       = com.siigna.app.model.action.Create
+  val Delete       = com.siigna.app.model.action.Delete
+  val Deselect     = com.siigna.app.model.action.Deselect
+  val Select       = com.siigna.app.model.action.Select
+  val SelectToggle = com.siigna.app.model.action.SelectToggle
+  val Transform    = com.siigna.app.model.action.Transform
 
   // Model
   val Drawing = com.siigna.app.model.Drawing

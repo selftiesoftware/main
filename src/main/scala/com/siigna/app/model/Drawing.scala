@@ -58,7 +58,7 @@ import com.siigna.app.model.selection.Selection
  *  It is possible to set a print margin. See more in the [[com.siigna.app.Siigna]] object.
  * </p>
  */
-object Drawing extends ActionModel
+object Drawing extends SelectableModel
                   with SpatialModel[Int, Shape]
                   with MapProxy[Int, Shape] {
 
