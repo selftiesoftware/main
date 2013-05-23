@@ -15,7 +15,6 @@ package com.siigna.app.model.selection
 
 import com.siigna.util.geom.SimpleRectangle2D
 import com.siigna.app.model.Drawing
-import com.siigna.app.model.selection.FullShapeSelector
 
 /**
  * An object that provides shortcuts to deselecting items in the [[com.siigna.app.model.Model]].

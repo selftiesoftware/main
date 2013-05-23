@@ -15,7 +15,7 @@ package com.siigna.util.geom
  * A geometry designed for polylines
  */
 @SerialVersionUID(-209654418)
-case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D {
+case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
 
@@ -27,7 +27,22 @@ case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2
 
   def distanceTo(s : Geometry2D) = geometries.map(_.distanceTo(s)).reduceLeft((a, b) => if (a <= b) a else b)
 
-  def intersects(s : Geometry2D) = geometries.exists(_.intersects(s))
+  //def intersects(s : Geometry2D) = geometries.exists(_.intersects(s))
+  def intersects(geom : Geometry2D) = geom match {
+    case line : Segment2D => {
+      var hasIntersection = false
+      val segments = this.geometries
+
+      segments.foreach(s => {
+        println("Segments being evaluated: "+s)
+        println("S: "+line.intersects(s))
+        if (line.intersects(s)) hasIntersection = true
+      })
+      hasIntersection
+    }
+    case g => geometries.exists(_.intersects(g))
+    //case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
+  }
 
   def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
 

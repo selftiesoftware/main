@@ -106,6 +106,10 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
    * Determines whether this segment intersects with a given geometry.
    */
   def intersects(geom : Geometry2D) = geom match {
+
+    case arc : Arc2D => arc.intersects(this)
+    case collection : CollectionGeometry2D => collection.intersects(this)
+
     /**
      * Determines whether two line segments intersect.
      */
@@ -122,7 +126,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       // The intersection is defined by solving (u,v) in the linear system:
       //   A*u - B*v = D - C
       // Calculate the determinant:
-      //   det = | A  -B | = | B  A |
+      //   det = | A - B | = | B  A |
       // If det = 0 there are no solutions (the lines are parallel). Now we find
       // the solutions:
       //   u = | (D - C)  -B | / det = | B  (D - C) | / det
