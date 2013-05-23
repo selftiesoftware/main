@@ -156,7 +156,7 @@ case class TransformationMatrix(t : AffineTransform) {
   /**
    * Returns the origin of the TransformationMatrix as a Vector.
    */
-  def getTranslate = Vector2D(t.getTranslateX, t.getTranslateY)
+  def translation = Vector2D(t.getTranslateX, t.getTranslateY)
 
   /**
    * Creates a rotation in degrees around (0, 0) and concatenates it with

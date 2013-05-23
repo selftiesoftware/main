@@ -73,9 +73,9 @@ class TransformationMatrixSpec extends FunSpec with ShouldMatchers {
     it ("can rotate a transformationMatrix without altering the scale factor") {
 
       //test if rotation alters scale
-      t.rotate(0).scaleFactor should equal (1.0)
-      t.rotate(90).scaleFactor should equal (1.0)
-      t.getTranslate should equal (Vector2D(0, 0))
+      t.rotate(0).scale should equal (1.0)
+      t.rotate(90).scale should equal (1.0)
+      t.translation should equal (Vector2D(0, 0))
     }
 
     it ("can rotate a vector without altering the scale factor or origin") {
