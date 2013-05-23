@@ -11,17 +11,15 @@
 
 package com
 
+import com.siigna.app.model.selection.{SelectToggle, Select, Deselect}
+
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
   // Actions
   type Action = com.siigna.app.model.action.Action
-
   val Create       = com.siigna.app.model.action.Create
   val Delete       = com.siigna.app.model.action.Delete
-  val Deselect     = com.siigna.app.model.action.Deselect
-  val Select       = com.siigna.app.model.action.Select
-  val SelectToggle = com.siigna.app.model.action.SelectToggle
   val Transform    = com.siigna.app.model.action.Transform
 
   // Model
@@ -29,10 +27,13 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Selection
   val BitSetShapeSelector = com.siigna.app.model.selection.BitSetShapeSelector
+  val Deselect            = com.siigna.app.model.selection.Deselect
   val EmptyShapeSelector  = com.siigna.app.model.selection.EmptyShapeSelector
   val FullShapeSelector   = com.siigna.app.model.selection.FullShapeSelector
+  val Select              = com.siigna.app.model.selection.Select
   type Selection          = com.siigna.app.model.selection.Selection
   val Selection           = com.siigna.app.model.selection.Selection
+  val SelectToggle        = com.siigna.app.model.selection.SelectToggle
   val ShapeSelector       = com.siigna.app.model.selection.ShapeSelector
   type ShapeSelector      = com.siigna.app.model.selection.ShapeSelector
 

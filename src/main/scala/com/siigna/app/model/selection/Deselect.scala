@@ -11,7 +11,7 @@
  *
  */
 
-package com.siigna.app.model.action
+package com.siigna.app.model.selection
 
 import com.siigna.util.geom.SimpleRectangle2D
 import com.siigna.app.model.Drawing

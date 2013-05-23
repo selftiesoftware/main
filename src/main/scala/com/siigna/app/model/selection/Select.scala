@@ -9,7 +9,7 @@
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-package com.siigna.app.model.action
+package com.siigna.app.model.selection
 
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.model.Drawing
@@ -27,26 +27,24 @@ import com.siigna.app.Siigna
  *   ranging from subsets of a single shape to a large collection of whole shapes.
  * </p>
  *
+ * @define selectHelper
  * <p>
  *   The selections are stored in the [[com.siigna.app.model.selection.Selection]] class which is
  *   stored in the [[com.siigna.app.model.Model]]. Each time a model changes the selection
  *   are cleared. This is done mainly to avoid inconsistent selections (if shapes are removed etc.).
  * </p>
- *
  * <p>
  *   A Selection does not duplicate the shapes, but instead stores the information about which parts of the shapes are
  *   selected (the [[com.siigna.app.model.selection.ShapeSelector]]). If a user chooses to select only one point of
  *   a larger shape for instance, the selection has to support this.
  * </p>
- *
  * <p>
  *   Like all objects in the <code>com.siigna.app.model.action</code> package, the
- *   [[com.siigna.app.model.action.Select]], [[com.siigna.app.model.action.Deselect]] and
- *   [[com.siigna.app.model.action.SelectToggle]] helpers basically just forwards calls to the
+ *   [[com.siigna.app.model.selection.Select]], [[com.siigna.app.model.selection.Deselect]] and
+ *   [[com.siigna.app.model.selection.SelectToggle]] helpers basically just forwards calls to the
  *   [[com.siigna.app.model.SelectableModel]] (with a few changes), to hide the complexity of the underlying
  *   implementation to the user.
  * </p>
- *
  * <h2>Selection examples</h2>
  * <h4>Select shapes close to a point</h4>
  * <p>
@@ -73,8 +71,8 @@ import com.siigna.app.Siigna
  * </p>
  * <p>
  *   It is also possible to toggle the selection (that is select that parts that are not selected and deselect the
- *   parts that are selected) via the [[com.siigna.app.model.action.SelectToggle]] object. Similarly you can
- *   deselect shapes via the [[com.siigna.app.model.action.Deselect]] object.
+ *   parts that are selected) via the [[com.siigna.app.model.selection.SelectToggle]] object. Similarly you can
+ *   deselect shapes via the [[com.siigna.app.model.selection.Deselect]] object.
  * </p>
  *
  * <h2>Advanced examples</h2>
@@ -90,8 +88,8 @@ import com.siigna.app.Siigna
  *   [[com.siigna.app.model.Drawing]].
  * </p>
  *
- * @see [[com.siigna.app.model.action.SelectToggle]]
- * @see [[com.siigna.app.model.action.Deselect]]
+ * @see [[com.siigna.app.model.selection.SelectToggle]]
+ * @see [[com.siigna.app.model.selection.Deselect]]
  * @see [[com.siigna.app.model.Model]]
  * @see [[com.siigna.app.model.SpatialModel]]
  * @see [[com.siigna.app.model.SelectableModel]]

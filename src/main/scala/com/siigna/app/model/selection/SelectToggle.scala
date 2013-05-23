@@ -11,18 +11,33 @@
  *
  */
 
-package com.siigna.app.model.action
+package com.siigna.app.model.selection
 
-import com.siigna.app.model.selection._
-import com.siigna.app.model.shape.PolylineShape.PolylineShapeClosed
 import scala.Some
 import com.siigna.app.model.shape.PolylineShape.PolylineShapeClosed
-import com.siigna.app.model.selection.BitSetShapeSelector
 import com.siigna.app.model.Drawing
-import com.siigna.util.geom.{SimpleRectangle2D, Rectangle2D, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 
 /**
+ * <p>
+ *   An object that provides shortcuts to toggle-selecting objects in the [[com.siigna.app.model.Model]]. Selections
+ *   are a great tool to manipulate [[com.siigna.app.model.shape.Shape]]s, since they can provide dynamic
+ *   manipulation without altering the model before the user deselcts the changes. A Selection works on everything
+ *   ranging from subsets of a single shape to a large collection of whole shapes.
+ * </p>
  *
+ * $selectHelper
+ *
+ * <h4>A note on toggle-selection</h4>
+ * <p>
+ *   Toggling a selection means adding the parts of the selection that have not already been selected, while removing
+ *   the parts that already are. There are some special cases though. Imagine having a
+ *   [[com.siigna.app.model.shape.PolylineShape]] with three vertices and thus coherent line-segments. Lets say the
+ *   first line-segment is already selected and the user wants to toggle-select the second part, the naive choice
+ *   would be to add the last point of the polyline, but remove the middle point, since it already is selected. This
+ *   is not very intuitive though, so whenever we encounter a selection that spans several points, we examine if
+ *   any neighbour-points are active. If so we actually do not remove the active points to prevent this inconsistency.
+ * </p>
  */
 object SelectToggle {
 
@@ -127,7 +142,7 @@ object SelectToggle {
   }
   /**
    * Toggles the [[com.siigna.app.model.shape.Shape]]s found close to the given [[com.siigna.util.geom.Vector2D]] by
-   * the rules specified in the documentation for [[com.siigna.app.model.action.SelectToggle]]. Basically we
+   * the rules specified in the documentation for [[SelectToggle]]. Basically we
    * we toggle the selections by removing the parts from the shapes if they already have been selected, or adding them
    * to the selection if they are not already selected.
    * @param point  The point (Vector2D) to use to find shapes closer than [[com.siigna.app.Siigna#selectionDistance]]
@@ -141,7 +156,7 @@ object SelectToggle {
 
   /**
    * Toggles the [[com.siigna.app.model.shape.Shape]]s inside the given [[com.siigna.util.geom.SimpleRectangle2D]] by
-   * the rules specified in the documentation for [[com.siigna.app.model.action.SelectToggle]]. Basically we
+   * the rules specified in the documentation for [[SelectToggle]]. Basically we
    * we toggle the selections by removing the parts from the shapes if they already have been selected, or adding them
    * to the selection if they are not already selected.
    * @param rectangle  The rectangle to use as bounding box for the shapes in the [[com.siigna.app.model.Model]], all
