@@ -154,7 +154,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
   def getSelector(point: Vector2D) = {
     // Find the distance to all the points and get their index
-    val points = innerShapes.par.map(_.point.distanceTo(point)).+:(startPoint.distanceTo(point)).zipWithIndex
+    val points = innerShapes.map(_.point.distanceTo(point)).+:(startPoint.distanceTo(point)).zipWithIndex
     // Find the points that are within the selection distance
     val closeVertices = points.filter(t => t._1 <= Siigna.selectionDistance).map(_._2)
 
@@ -163,7 +163,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       BitSetShapeSelector(BitSet(closeVertices.head))
     } else {
       // If there are zero or several close points, we should check for selection of segments
-      val closeShapes = shapes.zipWithIndex.par.map(t => t._1.distanceTo(point) -> t._2).filter(_._1 <= Siigna.selectionDistance)
+      val closeShapes = shapes.zipWithIndex.map(t => t._1.distanceTo(point) -> t._2).filter(_._1 <= Siigna.selectionDistance)
 
       // If no shapes are close, nothing is selected
       if (closeShapes.isEmpty) {
