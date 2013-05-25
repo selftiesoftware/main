@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model
@@ -58,11 +66,16 @@ import com.siigna.util.Log
  *
  *   // Move the selection 100 units to the right
  *   Drawing.selection.transform( TransformationMatrix( Vector2D(100, 0) ) )
- *
  * }}}
  *
- * @see [[com.siigna.app.model.Drawing]], [[com.siigna.app.model.Model]], [[com.siigna.app.model.selection.Selection]],
- *     [[com.siigna.app.model.selection.ShapeSelector]]
+ * @see [[com.siigna.app.model.selection.SelectToggle]]
+ * @see [[com.siigna.app.model.selection.Deselect]]
+ * @see [[com.siigna.app.model.Model]]
+ * @see [[com.siigna.app.model.SpatialModel]]
+ * @see [[com.siigna.app.model.SelectableModel]]
+ * @see [[com.siigna.app.model.shape.Shape]]
+ * @see [[com.siigna.app.model.selection.Selection]]
+ * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
 trait SelectableModel extends ActionModel {
 
