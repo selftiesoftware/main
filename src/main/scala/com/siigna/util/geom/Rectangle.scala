@@ -156,7 +156,32 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
    */
   def borderTop = Segment2D(topLeft, topRight)
 
+  def boundary = {
+    val vertices = Seq(this.bottomLeft,bottomRight,topRight,topLeft)
+    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
+    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
+
+    val xMax = vertices.map(_.x).reduceLeft(max)
+    val xMin = vertices.map(_.x).reduceLeft(min)
+    val yMax = vertices.map(_.y).reduceLeft(max)
+    val yMin = vertices.map(_.y).reduceLeft(min)
+
+    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
+  }
+
   def circumference = height * 2 + width * 2
+
+  def distanceTo(geom : Geometry2D) = geom match {
+    /**
+     * Calculates the distance from a simple rectangle to a point.
+     */
+    case point : Vector2D =>
+      Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
+        _ distanceTo(point)
+      ).reduceLeft( (a, b) => if (a < b) a else b)
+
+    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
+  }
 
   /**
    * Expands the rectangle to contain the given geometry.
@@ -241,11 +266,9 @@ object Rectangle2D {
  */
 case class ComplexRectangle2D(override val center : Vector2D, width : Double, height : Double, rotation : Double) extends Rectangle2D {
 
-  throw new NotImplementedException()
+  //throw new NotImplementedException()
 
   type T = ComplexRectangle2D
-
-  def boundary = null
 
   /**
    * Calculates the closest point on the geometry from a given vector.
@@ -258,14 +281,9 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   def transform(transformation: TransformationMatrix): ComplexRectangle2D#T = null
 
   /**
-   * Determines the distance from the geometry to an arc.
-   */
-  def distanceTo(geometry: Geometry2D): Double = 0.0
-
-  /**
    * Determine whether the geometry is overlapping (intersecting) the given geometry.
    */
-  def intersects(geometry: Geometry2D): Boolean = false
+  def intersects(geometry: Geometry2D): Boolean = geometry.intersects(this)
 
   /**
    * Returns the intersections between this and the given geometry, if any.
@@ -275,22 +293,28 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
    * The lowest left corner of the rectangle.
    */
-  def bottomLeft: Vector2D = null
+  def bottomLeft : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
 
   /**
    * The lowest right corner of the rectangle.
    */
-  def bottomRight: Vector2D = null
+  def bottomRight = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
 
   /**
    * The upper left corner of the rectangle.
    */
-  def topLeft: Vector2D = null
+  //TODO: rotation is negative to become clockwise. Is that correct?
+  def topLeft = {
+    val t = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
+    println("TL in geom:_ "+t)
+    t
+  }
+
 
   /**
    * The upper right corner of the rectangle.
    */
-  def topRight: Vector2D = null
+  def topRight = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
 
   def onPeriphery(point: Vector2D): Boolean = false
 
@@ -391,8 +415,6 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    */
   override val center = (topLeft + bottomRight) / 2
 
-  def boundary = this
-
   def closestPoint(point : Vector2D) = point
 
   def contains(geom : Geometry2D) : Boolean = geom match {
@@ -473,19 +495,18 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
         bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
 
+    //TODO: wrong! - needs to take into account that the rectangle may be rotated.
+    case rectangle : ComplexRectangle2D => {
+      val left = rectangle.center - Vector2D(width/2,0)
+      val right = rectangle.center + Vector2D(width/2,0)
+      val bottom = rectangle.center - Vector2D(height/2,0)
+      val top = rectangle.center + Vector2D(height/2,0)
+
+      (bottomLeft.x <= left.x && right.x <= topRight.x &&
+        bottomLeft.y <= bottom.y && top.y <= topRight.y)
+    }
+
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
-  }
-
-  def distanceTo(geom : Geometry2D) = geom match {
-    /**
-     * Calculates the distance to a point.
-     */
-    case point : Vector2D =>
-      Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
-        _ distanceTo(point)
-      ).reduceLeft( (a, b) => if (a < b) a else b)
-
-    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
   }
 
   def expand(geom : Geometry2D) : SimpleRectangle2D = geom match {
@@ -554,6 +575,10 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      */
     case that : SimpleRectangle2D =>
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
+
+    //TODO: WRONG IMPLEMENTATION, NEEDS UPDATING
+    case that : ComplexRectangle2D =>
+      !(xMin > that.center.x+height/2 || xMax < that.center.x-height/2 || yMin > that.center.y+height/2 || yMax < that.center.y-height/2)
 
     case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
   }

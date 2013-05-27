@@ -116,6 +116,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
   def intersects(geom : Geometry2D) = geom match {
 
     case arc : Arc2D => arc.intersects(this)
+
+    case circle : Circle2D => circle.intersects(this)
     case collection : CollectionGeometry2D => collection.intersects(this)
 
     /**
@@ -145,8 +147,13 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       val uNotDivided = Vector2D.determinant(B, D - C)
       val vNotDivided = Vector2D.determinant(A, D - C)
 
+      //if both segments are equal, no intersections should be returned
+      if(p1 == line.p1 && p2 == line.p2) false
+      //if both segments have just one coinciding endpoint, they intersect:
+      else if((p1 == line.p1 && p2 != line.p2)||(p2 == line.p2 && p1 != line.p1)||(p2 == line.p1 && p1 != line.p2)||(p1 == line.p2 && p2 != line.p1)) true
+
       // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
-      (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
+      else (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
     }
     case r : SimpleRectangle2D => {
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
@@ -158,8 +165,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
    * Returns a list of points where a the Line Segment intersects with a given geometry.
    */
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    // TODO: Do this properly
-    case arc : Arc2D => intersections(Circle(arc.center, arc.radius)).filter(p => arc.insideArcDegrees((p - arc.center).angle))
+
+    case arc : Arc2D => arc.intersections(this)
     /**
      * Returns a list of points, defined as the intersection(s) between the
      * segment and the circle.
@@ -178,13 +185,45 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
         else
           Set(-(f * g) / (f * f))
 
-      // Filter out the points, that isn't on the line-segment.
+      // Filter out the points outside the line-segment.
       t.map(x => f * x + p1).filter( point =>
         ((p2 - p1) * (point - p1) >= 0 &&
           (p1 - p2) * (point - p2) >= 0)
       )
     }
 
+    case collection : CollectionGeometry2D => collection.intersections(this)
+
+    //find the intersection between two line segments
+    case segment : Segment2D => {
+      val x1 = this.p1.x
+      val y1 = this.p1.y
+      val x2 = this.p2.x
+      val y2 = this.p2.y
+      val x3 = segment.p1.x
+      val y3 = segment.p1.y
+      val x4 = segment.p2.x
+      val y4 = segment.p2.y
+
+      val bx = x2 - x1
+      val by = y2 - y1
+      val dx = x4 - x3
+      val dy = y4 - y3
+      val dot = bx * dy - by * dx
+
+      if(dot == 0) Set[Vector2D]()
+      else {
+        val cx = x3 - x1
+        val cy = y3 - y1
+        val t = (cx * dy - cy * dx) / dot
+        val u = (cx * by - cy * bx) / dot
+
+        if((t >= 0 && t <= 1) && (u >= 0 && u <= 1) ) {
+          Set(Vector2D(x1+t*bx, y1+t*by))
+        }
+        else Set[Vector2D]()
+      }
+    }
     case g => throw new UnsupportedOperationException("Segment: intersections not yet implemented with " + g)
   }
 

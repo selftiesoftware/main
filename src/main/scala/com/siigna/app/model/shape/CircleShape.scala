@@ -91,7 +91,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   def setAttributes(attributes : Attributes) = new CircleShape(center, radius, attributes)
 
   def transform(t : TransformationMatrix) =
-    CircleShape(center transform(t), radius * t.scaleFactor, attributes)
+    CircleShape(center transform(t), radius * t.scale, attributes)
   
 }
 

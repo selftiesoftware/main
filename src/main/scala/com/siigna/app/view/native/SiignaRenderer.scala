@@ -315,7 +315,7 @@ object SiignaRenderer extends Renderer {
     val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
 
     // Create the transformation matrix to move the shapes to (0, 0) of the image
-    val scale       = View.drawingTransformation.scaleFactor
+    val scale       = View.drawingTransformation.scale
     val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
 
     g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)

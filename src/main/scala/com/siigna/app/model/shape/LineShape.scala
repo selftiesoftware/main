@@ -122,7 +122,6 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
               p2 transform(transformation),
               attributes)
   }
-  
 }
 
 /**
