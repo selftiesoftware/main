@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 package com.siigna.util.geom
 
@@ -148,11 +156,6 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
    */
   def borderTop = Segment2D(topLeft, topRight)
 
-  /**
-   * The boundary of the rectangle. In this case returns itself.
-   */
-  def boundary = this
-
   def circumference = height * 2 + width * 2
 
   /**
@@ -241,6 +244,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   throw new NotImplementedException()
 
   type T = ComplexRectangle2D
+
+  def boundary = null
 
   /**
    * Calculates the closest point on the geometry from a given vector.
@@ -385,6 +390,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    * The center of the rectangle.
    */
   override val center = (topLeft + bottomRight) / 2
+
+  def boundary = this
 
   def closestPoint(point : Vector2D) = point
 

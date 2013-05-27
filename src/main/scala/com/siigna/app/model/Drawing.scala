@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model
@@ -14,8 +22,17 @@ package com.siigna.app.model
 import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D}
-import com.siigna.app.model.selection.Selection
+import com.siigna.util.geom.SimpleRectangle2D
+
+/**
+ * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
+ * their ids, that can be traversed like a map.
+ *
+ * Used in the [[com.siigna.app.model.Drawing]] object.
+ */
+trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+  def self = model.shapes
+}
 
 /**
  * <p>
@@ -58,9 +75,7 @@ import com.siigna.app.model.selection.Selection
  *  It is possible to set a print margin. See more in the [[com.siigna.app.Siigna]] object.
  * </p>
  */
-object Drawing extends SelectableModel
-                  with SpatialModel[Int, Shape]
-                  with MapProxy[Int, Shape] {
+object Drawing extends Drawing {
 
   /**
    * The openness of a drawing.
@@ -114,7 +129,7 @@ object Drawing extends SelectableModel
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   protected def calculateBoundary() = {
-    val newBoundary  = model.mbr
+    val newBoundary  = mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
     //val proportion   = 1.41421356
@@ -160,8 +175,5 @@ object Drawing extends SelectableModel
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
    */
   //def rtree = model.rtree
-
-  //------------- Required by the MapProxy trait -------------//
-  def self = model.shapes
 
 }
