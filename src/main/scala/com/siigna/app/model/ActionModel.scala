@@ -30,7 +30,7 @@ import com.siigna.util.Log
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends SelectableModel with HasAttributes {
+trait ActionModel extends HasAttributes {
 
   type T = ActionModel
 
@@ -94,9 +94,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def execute(action : Action, remote : Boolean = true) {
     try {
-      // Deselect any selections made
-      deselect()
-
       // Execute in the model
       model = action.execute(model)
 
@@ -158,9 +155,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
       val undone = model.undone.tail
 
       try {
-        // Deselect any selections made
-        deselect()
-
         // Execute the event and add it to the executed list
         model = action.execute(model)
         model = new Model(model.shapes, model.executed.+:(action), undone, model.attributes)
@@ -206,9 +200,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def undo(action : Action, remote : Boolean = false) {
     try {
-      // Deselect any selections made
-      deselect()
-
       // Undo it
       model = action.undo(model)
 

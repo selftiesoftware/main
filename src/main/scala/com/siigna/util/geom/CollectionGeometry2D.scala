@@ -15,7 +15,7 @@ package com.siigna.util.geom
  * A geometry designed for polylines
  */
 @SerialVersionUID(-209654418)
-case class  CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D {
+case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
 

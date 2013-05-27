@@ -33,25 +33,8 @@ class CollectionGeometry2DSpec extends FunSuite with ShouldMatchers {
 
       G(Segment2D(-10, -10, 0, 0), Segment2D(10, 10, 0, 0)).boundary should equal(SimpleRectangle2D(-10, -10, 10, 10))
     }
+  } */
 
-  }
-  */
-  test("Can tell if a CollectionGeometry and a a Segment2D intersect") {
-
-    val p1 = Vector2D(-20,  0)
-    val p2 = Vector2D(10,  20)
-    val p3 = Vector2D(20,  10)
-
-    val c = CollectionGeometry2D(ArrayBuffer(Segment2D(p1,p2),Segment2D(p2,p3)))
-
-    val s1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
-    val s2 = Segment2D(Vector2D(-30,20),Vector2D(-30,-20))
-    val s3 = Segment2D(Vector2D(-20,0),Vector2D(-30,-20))
-
-    c.intersects(s1) should equal (true)
-    c.intersects(s2) should equal (false)
-    c.intersects(s3) should equal (true) //when the ends of a segment and collectionGeom coincide, there should be one point of intersection
-  }
   test("Can tell if a CollectionGeometry and a CollectionGeometry intersect") {
 
     val p1 = Vector2D(-20,  0)
@@ -74,5 +57,24 @@ class CollectionGeometry2DSpec extends FunSuite with ShouldMatchers {
     c1.intersects(c1) should equal (false)  // Two identical collectionShapes should not intersect
     c1.intersects(c2) should equal (true)
     c1.intersects(c3) should equal (false)
+
+    test("Can tell if a CollectionGeometry and a a Segment2D intersect") {
+
+      val p1 = Vector2D(-20,  0)
+      val p2 = Vector2D(10,  20)
+      val p3 = Vector2D(20,  10)
+
+      val c = CollectionGeometry2D(Seq(p1,p2,p3))
+      val s1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
+      val s2 = Segment2D(Vector2D(-30,20),Vector2D(-30,-20))
+      val s3 = Segment2D(Vector2D(-20,0),Vector2D(-30,-20))
+
+
+      c.intersects(s1) should equal (true)
+      c.intersects(s2) should equal (false)
+      c.intersects(s3) should equal (true) //one point of intersection
+      c.intersects(c) should equal (false)  // TODO: should two identical collectionShapes intersect? - NO..?
+    }
+
   }
 }

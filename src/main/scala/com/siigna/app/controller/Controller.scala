@@ -27,7 +27,7 @@ import com.siigna.util.Log
  * </p>
  *
  * <p>
- *  The Controller is implemented as its own actor, since to separate the view and control-threads. Since
+ *  The Controller is implemented as its own actor, to separate the view and control-threads. Since
  *  [[com.siigna.module.Module]]s are designed to be made by third-parties, we can not ensure their quality, so
  *  we might encounter some unexpected thread blocking. If that happens the modules are screwed but the rest of the
  *  application carries on. Hurray!

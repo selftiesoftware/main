@@ -61,11 +61,6 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   var user : User = User(0L, "Anonymous", "")
 
   /**
-   * The version of Siigna.
-   */
-  val version = "beta - Xenophanes"
-
-  /**
    * Clears the display. NOT the interface. The interface can only be cleared by
    * terminating the module. ModuleInterfaces can be <code>reset()</code> though.
    */

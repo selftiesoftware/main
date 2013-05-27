@@ -44,6 +44,13 @@ trait ShapeSelector extends ((Int) => Boolean) {
    */
   def contains(that : ShapeSelector) : Boolean
 
+  /**
+   * Determines if the [[com.siigna.app.model.selection.ShapeSelector]] is empty, i. e. the selector describes an
+   * empty selection.
+   * @return  True if no indices have been selected in the selector, false otherwise.
+   */
+  def isEmpty : Boolean
+
 }
 
 /**
@@ -143,6 +150,7 @@ case class BitSetShapeSelector(bits : BitSet) extends ShapeSelector with SetProx
     case BitSetShapeSelector(xs) => !xs.exists(i => !bits(i))
     case _ => false
   }
+  override val toString = s"BitSetShapeSelector($bits)"
 }
 
 /**
@@ -154,6 +162,8 @@ case object EmptyShapeSelector extends ShapeSelector {
   def ++(that: ShapeSelector): ShapeSelector = that
   def --(that: ShapeSelector): ShapeSelector = this
   def contains(that : ShapeSelector) = false
+  def isEmpty = true
+  override val toString = "EmptyShapeSelector"
 }
 
 /**
@@ -167,5 +177,7 @@ case object FullShapeSelector extends ShapeSelector {
     case FullShapeSelector | BitSetShapeSelector(_) => EmptyShapeSelector
     case _ => this
   }
+  def isEmpty = false
   def contains(that : ShapeSelector) = true
+  override val toString = "FullShapeSelector"
 }

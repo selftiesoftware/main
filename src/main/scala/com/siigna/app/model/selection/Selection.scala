@@ -192,7 +192,8 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
   var attributes : Attributes = Attributes.empty
 
   def add(id: Int, part: (Shape, ShapeSelector)) : Selection = {
-    NonEmptySelection( selection +
+    if (part._2.isEmpty) this
+    else NonEmptySelection( selection +
       (id ->
         (selection.get(id) match {
           case Some(p : (Shape, ShapeSelector)) => p._1 -> (p._2 ++ part._2)
@@ -255,7 +256,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
 
   def setAttributes(attributes: Attributes) = { this.attributes ++= attributes; this}
 
-  override def toString() = s"NonEmptySelection($transformation, $attributes)[$self]"
+  override def toString() = s"NonEmptySelection[$self]($transformation, $attributes)"
 
   /**
    * The transformation applied to the selection so far, that will be applied on the [[com.siigna.app.model.Drawing]]
@@ -330,6 +331,12 @@ object Selection {
    * An empty selection containing no shapes or parts.
    */
   val empty : Selection = EmptySelection
+
+  /**
+   * Creates an [[com.siigna.app.model.selection.EmptySelection]] containing no selections.
+   * @return  An [[com.siigna.app.model.selection.EmptySelection]].
+   */
+  def apply() = empty
 
   /**
    * Creates a [[com.siigna.app.model.selection.Selection]] containing the given parts. If no parts exist, or the
