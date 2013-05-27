@@ -18,7 +18,7 @@
  */
 package com.siigna.util.event
 
-import com.siigna.module.{Module}
+import com.siigna.module.Module
 
 /**
  * Events the modules can use to signal to each other.
@@ -43,10 +43,10 @@ final case class Message[T](message : T) extends ModuleEvent { val symbol = 'Mes
 final case class End[T](message: T) extends ModuleEvent { val symbol = 'ModuleEnd }
 
 /**
- * An event that signals a [[com.siigna.module.Module]] to end. This object
- * must be used inside a module to have any effect.
+ * A companion object to the [[com.siigna.util.event.End]] module event.
  */
 case object End extends ModuleEvent {
+
   val symbol = 'ModuleEnd
 
   /**

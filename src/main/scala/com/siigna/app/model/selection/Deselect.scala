@@ -120,13 +120,20 @@ import com.siigna.app.model.Drawing
 object Deselect {
 
   /**
+   * Deselects the entire [[com.siigna.app.model.Drawing]].
+   */
+  def apply() {
+    Drawing.deselect()
+  }
+
+  /**
    * Searches for the [[com.siigna.app.model.shape.Shape]]s in the [[com.siigna.app.model.Drawing]] that is inside the
    * rectangle and selects them. If the <code>entireShapes</code> flag is enabled we select entire shapes even
    * though only a part of them touches the rectangle. If it is disabled we select
    * @param rectangle
    * @param entireShapes
    */
-  def deselect(rectangle : SimpleRectangle2D, entireShapes : Boolean) {
+  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean) {
     val shapes = if (!entireShapes) {
       Drawing(rectangle).map(t => t._1 -> t._2.getSelector(rectangle))
     } else {
