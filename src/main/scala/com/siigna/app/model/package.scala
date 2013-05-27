@@ -16,35 +16,25 @@
  *
  * Read more at http://siigna.com and https://github.com/siigna/main
  */
-package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
+package com.siigna.app
 
-/**
- * A SequenceAction can execute a sequence of actions.
- */
-case class SequenceAction(actions : Seq[Action]) extends Action {
-
-  def execute(model : Model) : Model = actions.foldLeft(model)((m, action) => action.execute(m))
-  
-  def ids = actions.flatMap(_.ids)
-
-  override def merge(that : Action) = that match {
-    case SequenceAction(acts : Seq[Action]) => SequenceAction(actions ++ acts)
-    case _ => SequenceAction(actions :+ that)
-  }
-
-  def undo(model : Model) : Model = actions.foldLeft(model)((m, action) => action.undo(m))
-  
-  def update(map : Map[Int, Int]) = copy(actions.map(_.update(map)))
-
-}
+import com.siigna.app.model.shape.Shape
+import scala.collection.immutable.MapProxy
 
 /**
- * Factory object to [[com.siigna.app.model.action.SequenceAction]].
+ * The model package contains the model-structure in the model-view-controller pattern. It is here all the information
+ * about [[com.siigna.app.model.shape.Shape]]s, [[com.siigna.app.model.action.Action]]s,
+ * [[com.siigna.app.model.selection.Selection]]s and the active [[com.siigna.app.model.Drawing]] itself is stored.
  */
-object SequenceAction {
+package object model {
 
-  def apply(action1 : Action, action2 : Action) = new SequenceAction(Seq(action1, action2))
+  /**
+   * A reference to the currently active model. Defaults to [[com.siigna.app.model.Drawing]]. This can be used
+   * to override defaults behaviour in for instance the helper-objects in the [[com.siigna.app.model.selection]]
+   * package.
+   * @return  The [[com.siigna.app.model.Drawing]] object, representing the active drawing.
+   */
+  implicit def drawing : Drawing = Drawing
 
 }

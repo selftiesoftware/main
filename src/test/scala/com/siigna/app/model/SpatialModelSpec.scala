@@ -25,11 +25,7 @@ class SpatialModelSpec extends FunSpec with ShouldMatchers {
   describe ("Spatial Model") {
 
     it ("can calculate the minimum-bounding rectangle") {
-      val l1 = LineShape(0, 0, 10, 10)
-      new Model(Map(0 -> l1), Nil, Nil, Attributes()).mbr should equal(SimpleRectangle2D(0, 0, 10, 10))
 
-      val l2 = LineShape(-10, -10, 0, 10)
-      new Model(Map(0 -> l2), Nil, Nil, Attributes()).mbr should equal(SimpleRectangle2D(-10, -10, 0, 10))
     }
 
   }
