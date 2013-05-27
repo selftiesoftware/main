@@ -121,7 +121,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
   def transform(transformation : TransformationMatrix) = {
     TextShape(text,
               position.transform(transformation),
-              scale * transformation.scaleFactor,
+              scale * transformation.scale,
               attributes)
   }
 }

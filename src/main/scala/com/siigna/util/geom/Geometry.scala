@@ -114,6 +114,16 @@ trait Geometry2D extends Geometry {
    */
   def intersections(geometry : Geometry2D) : Set[Vector2D]
 
+  /**
+   * rotate by a center point and a counterclockwise rotation.
+   * @param center
+   * @param rotation
+  */
+
+  def rotate(center : Vector2D, rotation : Double) : T = {
+    transform(TransformationMatrix().rotate(rotation,center))
+  }
+
 }
 
 /**
@@ -156,5 +166,4 @@ trait GeometryClosed2D extends GeometryClosed with Geometry2D {
    * @return true if the given geometry is inside, false otherwise
    */
   def contains(geometry : Geometry2D) : Boolean
-
 }
