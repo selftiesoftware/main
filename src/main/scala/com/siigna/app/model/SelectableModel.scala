@@ -77,7 +77,7 @@ import com.siigna.util.Log
  * @see [[com.siigna.app.model.selection.Selection]]
  * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
-trait SelectableModel extends ActionModel {
+trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
 
   /**
    * Deletes the current selection without applying the changes to the [[com.siigna.app.model.Model]]. This can

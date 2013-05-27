@@ -150,15 +150,14 @@ object SelectToggle {
    * Toggles the [[com.siigna.app.model.shape.Shape]] with the given id in the current selection by removing it if it
    * is fully selected, or adding it to the selection if it is not already selected.
    * @param id  The id of the shape.
-   * @return  The new selection either with the shape added or removed, depending on its appearance in
-   *          the previous selection.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to perform the selection upon.
    */
-  def apply(id : Int) {
-    Drawing.selection = Drawing.selection.get(id) match {
-      case Some((_, FullShapeSelector)) => Drawing.selection.remove(id)
-      case _ => Drawing.get(id) match {
-        case Some(s) => Drawing.selection.add(id, s -> FullShapeSelector)
-        case _ => Drawing.selection
+  def apply(id : Int)(implicit drawing : Drawing) {
+    drawing.selection = drawing.selection.get(id) match {
+      case Some((_, FullShapeSelector)) => drawing.selection.remove(id)
+      case _ => drawing.get(id) match {
+        case Some(s) => drawing.selection.add(id, s -> FullShapeSelector)
+        case _ => drawing.selection
       }
     }
   }
@@ -172,11 +171,12 @@ object SelectToggle {
    * completely removed from the selection.
    * @param id  The id of the shape.
    * @param selector  The selector describing the part of the shape to toggle.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to operate on.
    */
-  def apply(id : Int, selector : ShapeSelector) {
-    val s : Selection = Drawing.selection.get(id) match {
+  def apply(id : Int, selector : ShapeSelector)(implicit drawing : Drawing) {
+    drawing.selection = drawing.selection.get(id) match {
       // Completely remove the selection if all the points already are toggled
-      case Some((_, s : BitSetShapeSelector)) if (s.contains(selector)) => Drawing.selection.remove(id, selector)
+      case Some((_, s : BitSetShapeSelector)) if (s.contains(selector)) => drawing.selection.remove(id, selector)
       // Otherwise we need to toggle the points if no neighbors exist
       case Some((shape, s : BitSetShapeSelector)) => {
         selector match {
@@ -188,24 +188,22 @@ object SelectToggle {
             }
 
             val xs = bits.foldLeft(s.bits)((xs, i) => {
-              // Add the index if the id has any neighbors
-              if (xs(i - 1) || xs(i + 1) || (isClosedPolyline && (i == xs.last || i == xs.head))) xs + i
+              // Add the index if the id has any neighbors or if it does not exist already
+              if ((xs(i - 1) || xs(i + 1) || (isClosedPolyline && (i == xs.last || i == xs.head))) || !xs(i)) xs + i
               // Remove the index if no neighbors were found
               else xs - i
             })
-            Selection(Drawing.selection.updated(id, Drawing.selection(id)._1 -> ShapeSelector(xs)))
+            Selection(drawing.selection.updated(id, drawing.selection(id)._1 -> ShapeSelector(xs)))
           }
-          case EmptyShapeSelector => Drawing.selection
-          case _ => Drawing.selection.remove(id)
+          case EmptyShapeSelector => drawing.selection
+          case _ => drawing.selection.remove(id)
         }
       }
       // Simple cases:
-      case Some((_, FullShapeSelector)) => Drawing.selection.remove(id)
-      case Some((shape, x)) => Drawing.selection.add(id, shape -> (x ++ selector))
-      case _ => Drawing.selection.add(id, Drawing(id) -> selector)
+      case Some((_, FullShapeSelector)) => drawing.selection.remove(id)
+      case Some((shape, x)) => drawing.selection.add(id, shape -> (x ++ selector))
+      case _ => drawing.selection.add(id, drawing(id) -> selector)
     }
-
-    Drawing.selection = s
   }
 
 
@@ -214,15 +212,14 @@ object SelectToggle {
    * Toggles the [[com.siigna.app.model.shape.Shape]]s with the given ids in the current selection by removing them
    * if they already are selected, or adding them to the selection if they are not.
    * @param ids  The ids of the shape.
-   * @return  The new selection either with the shapes added or removed, depending on their appearance in
-   *          the previous selection.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to perform the selection upon.
    */
-  def apply(ids : Traversable[Int]) {
+  def apply(ids : Traversable[Int])(implicit drawing : Drawing) {
     // Find the ids that are included in the selection already, and those that are not
-    val (included, excluded) = ids.partition(i => Drawing.selection.contains(i))
-    val mapped = excluded.toSeq.map(id => id -> (Drawing(id) -> FullShapeSelector)).toMap
+    val (included, excluded) = ids.partition(i => drawing.selection.contains(i))
+    val mapped = excluded.toSeq.map(id => id -> (drawing(id) -> FullShapeSelector)).toMap
     // Then remove the shapes that are in the selection, and add the ones that are not
-    Drawing.selection = Drawing.selection.remove(included).add(mapped)
+    drawing.selection = drawing.selection.remove(included).add(mapped)
   }
 
   /**
@@ -230,16 +227,13 @@ object SelectToggle {
    * in the current selection by removing the parts from the shapes if they already have been selected, or
    * adding them to the selection if they are not already selected.
    * @param parts  The ids of the shapes mapped to the part to toggle from the selection.
-   * @return  The new selection either with the shape-selectors added or removed, depending on its appearance in
-   *          the previous selection. If a shape already existed in the previous selection and the subtraction of
-   *          the selector results in an [[com.siigna.app.model.selection.EmptyShapeSelector]], the shape is
-   *          completely removed from the selection.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to perform the selection upon.
    */
-  def apply(parts : Map[Int, ShapeSelector]) {
+  def apply(parts : Map[Int, ShapeSelector])(implicit drawing : Drawing) {
     /*// Find the parts that are included in the selection already, and those that are not
     val (included, excluded) = parts.partition(t => selection.contains(t._1))
     // Remove the included selectors and add the excluded
-    selection = selection.remove(included).add(excluded.map(t => t._1 -> (Drawing(t._1) -> t._2)))
+    selection = selection.remove(included).add(excluded.map(t => t._1 -> (drawing(t._1) -> t._2)))
     selection
     */
     // TODO: Optimize
@@ -247,14 +241,15 @@ object SelectToggle {
   }
   /**
    * Toggles the [[com.siigna.app.model.shape.Shape]]s found close to the given [[com.siigna.util.geom.Vector2D]] by
-   * the rules specified in the documentation for [[SelectToggle]]. Basically we
+   * the rules specified in the documentation for [[com.siigna.app.model.selection.SelectToggle]]. Basically we
    * we toggle the selections by removing the parts from the shapes if they already have been selected, or adding them
    * to the selection if they are not already selected.
    * @param point  The point (Vector2D) to use to find shapes closer than [[com.siigna.app.Siigna#selectionDistance]]
    *               to the given point.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to perform the selection upon.
    */
-  def apply(point : Vector2D) {
-    val shapes = Drawing(point)
+  def apply(point : Vector2D)(implicit drawing : Drawing) {
+    val shapes = drawing(point)
     val selection = shapes.map(t => t._1 -> t._2.getSelector(point))
     if (!selection.isEmpty) apply(selection)
   }
@@ -268,13 +263,14 @@ object SelectToggle {
    *                   shapes inside it are included.
    * @param entireShapes  If set to true we toggle-select entire shapes as soon as they touch the rectangle, if
    *                      false we only select the parts that are inside the rectangle.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to perform the selection upon.
    */
-  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean = false) {
+  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean = false)(implicit drawing : Drawing) {
     val shapes = if (!entireShapes) {
-      Drawing(rectangle).map(t => t._1 -> t._2.getSelector(rectangle))
+      drawing(rectangle).map(t => t._1 -> t._2.getSelector(rectangle))
     } else {
       // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
-      Drawing(rectangle).collect {
+      drawing(rectangle).collect {
         case t if (rectangle.intersects(t._2.geometry.boundary)) => {
           (t._1 -> FullShapeSelector)
         }

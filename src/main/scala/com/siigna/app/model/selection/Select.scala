@@ -148,10 +148,7 @@ object Select {
    * @param id  The id of the shape to select.
    */
   def apply(id : Int) {
-    Drawing.get(id) match {
-      case Some(s) => Drawing.select(id, s)
-      case _ =>
-    }
+    Drawing.select(id)
   }
 
   /**
@@ -221,7 +218,7 @@ object Select {
    * Selects several [[com.siigna.app.model.shape.Shape]]s by their ids.
    * @param ids  The ids of the shapes to select.
    */
-  def apply(ids : Int*) { apply(ids:_*) }
+  def apply(ids : Int*) { apply(ids) }
 
   /**
    * Selects several [[com.siigna.app.model.shape.Shape]]s by their ids.
@@ -268,7 +265,7 @@ object Select {
    * @param entireShapes  If set to true we select entire shapes as soon as they touch the rectangle, if
    *                      false we only select the parts that are inside the rectangle.
    */
-  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean = false) {
+  def apply(rectangle : SimpleRectangle2D, entireShapes : Boolean = false)  {
     val shapes = if (!entireShapes) {
       Drawing(rectangle).map(t => t._1 -> (t._2 -> t._2.getSelector(rectangle)))
     } else {

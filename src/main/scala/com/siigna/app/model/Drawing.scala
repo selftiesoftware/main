@@ -22,8 +22,17 @@ package com.siigna.app.model
 import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
-import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D}
-import com.siigna.app.model.selection.Selection
+import com.siigna.util.geom.SimpleRectangle2D
+
+/**
+ * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
+ * their ids, that can be traversed like a map.
+ *
+ * Used in the [[com.siigna.app.model.Drawing]] object.
+ */
+trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+  def self = model.shapes
+}
 
 /**
  * <p>
@@ -66,9 +75,7 @@ import com.siigna.app.model.selection.Selection
  *  It is possible to set a print margin. See more in the [[com.siigna.app.Siigna]] object.
  * </p>
  */
-object Drawing extends SelectableModel
-                  with SpatialModel[Int, Shape]
-                  with MapProxy[Int, Shape] {
+object Drawing extends Drawing {
 
   /**
    * The openness of a drawing.
@@ -122,7 +129,7 @@ object Drawing extends SelectableModel
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   protected def calculateBoundary() = {
-    val newBoundary  = model.mbr
+    val newBoundary  = mbr
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
     //val proportion   = 1.41421356
@@ -168,8 +175,5 @@ object Drawing extends SelectableModel
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
    */
   //def rtree = model.rtree
-
-  //------------- Required by the MapProxy trait -------------//
-  def self = model.shapes
 
 }

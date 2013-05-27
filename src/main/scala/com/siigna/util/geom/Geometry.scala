@@ -92,7 +92,7 @@ trait Geometry2D extends Geometry {
   /**
    * The boundary of the shape.
    */
-  def boundary : Rectangle2D
+  def boundary : SimpleRectangle2D
 
   /**
    * The center of the shape.

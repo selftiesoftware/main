@@ -156,11 +156,6 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
    */
   def borderTop = Segment2D(topLeft, topRight)
 
-  /**
-   * The boundary of the rectangle. In this case returns itself.
-   */
-  def boundary = this
-
   def circumference = height * 2 + width * 2
 
   /**
@@ -249,6 +244,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   throw new NotImplementedException()
 
   type T = ComplexRectangle2D
+
+  def boundary = null
 
   /**
    * Calculates the closest point on the geometry from a given vector.
@@ -393,6 +390,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    * The center of the rectangle.
    */
   override val center = (topLeft + bottomRight) / 2
+
+  def boundary = this
 
   def closestPoint(point : Vector2D) = point
 

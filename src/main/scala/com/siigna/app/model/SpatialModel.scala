@@ -50,24 +50,26 @@ trait SpatialModel[Key, Value <: Shape] {
 
   /**
    * Query for shapes close to the given point by a given radius.
-   * @param query  The point to query.
-   * @param radius  (Optional) The radius added to the selection distance
+   * @param point  The point to query.
+   * @param radius  (Optional) The radius added to the selection distance. Defaults to
+   *                [[com.siigna.app.Siigna#selectionDistance]].
+   * @return  A Map of the shapes and their ids found within a distance from the given point <code><=</code> than the
+   *          given radius.
    */
-
-  def apply(query : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
-    shapes.filter(_._2.geometry.distanceTo(query) <= radius)
+  def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
+    shapes.filter(_._2.geometry.distanceTo(point) <= radius)
   }
 
   /**
    * The minimum bounding rectangle for the model, i. e. the smallest rectangle including all the 
    * elements in the model.
-   * @return  The minimum-bounding rectangle
+   * @return  The minimum-bounding rectangle containing all the shapes in the model.
    */
-  def mbr : Rectangle2D =
+  def mbr : SimpleRectangle2D =
     if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
     else if (shapes.size == 1) shapes.head._2.geometry.boundary
     else { //TODO: PERFORMANCE DEPLEATING OPERATION!
-      shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : Rectangle2D, b : (Key, Value)) => {
+      shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : SimpleRectangle2D, b : (Key, Value)) => {
         a.expand(b._2.geometry.boundary)
       })
     }

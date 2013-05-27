@@ -30,8 +30,9 @@ package object siigna extends com.siigna.util.Implicits {
   val Delete       = com.siigna.app.model.action.Delete
   val Transform    = com.siigna.app.model.action.Transform
 
-  // Model
-  val Drawing = com.siigna.app.model.Drawing
+  // Drawing
+  val Drawing  = com.siigna.app.model.Drawing
+  type Drawing = com.siigna.app.model.Drawing
 
   // Selection
   val BitSetShapeSelector = com.siigna.app.model.selection.BitSetShapeSelector
