@@ -118,6 +118,15 @@ trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)]
   def parts : Traversable[Shape]
 
   /**
+   * Retrieves the selection as a number of [[com.siigna.app.model.shape.PartialShape]]s that can be transformed
+   * and drawn on the canvas. The method is useful to display the current transformations and attributes assigned
+   * to the shapes.
+   * @return  A number of [[com.siigna.app.model.shape.PartialShape]]s, describing the changes made to the selected
+   *          parts of the [[com.siigna.app.model.shape.Shape]]s and nothing else.
+   */
+  def parts(transformation : TransformationMatrix) : Traversable[Shape]
+
+  /**
    * Remove a single [[com.siigna.app.model.shape.Shape]] from the selection. If the shape does not exist in the
    * selection, nothing happens.
    * @param id  The id of the shape to remove from the selection.
@@ -228,7 +237,14 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
   def self = selection
 
   def parts = {
-    selection.map(t => t._2._1.getShape(t._2._2)).flatten.map(_.setAttributes(attributes).transform(transformation))
+    selection.map(t => t._2._1.getShape(t._2._2)).collect {
+      case Some(s) => s.setAttributes(attributes).transform(transformation)
+    }
+  }
+
+  def parts(m : TransformationMatrix) = {
+    // First we transform the selection, then we transform the shape with the given global matrix
+    selection.values.map(t => t._1.getPart(t._2)).flatten.map(_(transformation).transform(m).addAttributes(attributes))
   }
 
   def remove(id : Int) : Selection = Selection(selection - id)
@@ -302,6 +318,8 @@ case object EmptySelection extends Selection {
   def distanceTo(point: Vector2D, scale: Double) : Double = Double.MaxValue
 
   def parts = Nil
+
+  def parts(t : TransformationMatrix) = Nil
 
   def remove(id : Int) : Selection = this
 
