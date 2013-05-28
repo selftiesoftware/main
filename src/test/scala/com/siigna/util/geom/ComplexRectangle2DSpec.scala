@@ -12,13 +12,14 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{FunSuite, FlatSpec}
+import org.scalatest.FunSpec
 import com.siigna.app.model.shape.RectangleShape
 import com.siigna.util.collection.Attributes
 
-class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
+class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
 
-  test("Can create a complex rectangle") {
+  describe("A ComplexRectangle2D") {
+
     val c1 = Vector2D(0,0)
     val c2 = Vector2D(10,10)
     val width1 = 100
@@ -31,25 +32,57 @@ class ComplexRectangle2DSpec extends FunSuite with ShouldMatchers {
     val r1 = ComplexRectangle2D(c1,width1,height1,rotation)
     val r2 = ComplexRectangle2D(c2,width2,height2,rotation)
     val r3 = ComplexRectangle2D(c2,width2,height2,rotation2) //rotated rectangle
+    val r4 = ComplexRectangle2D(c1, width1, height1, 180)
 
-    r1.topLeft should equal (Vector2D(-50, 50))
-    r1.topRight should equal (Vector2D(50, 50))
-    r1.bottomRight should equal (Vector2D(50,-50))
-    r1.bottomLeft should equal (Vector2D(-50,-50))
+    it("Can create an instance") {
+      r1.p1 should equal (Vector2D(-50, 50))
+      r1.p0 should equal (Vector2D(50, 50))
+      r1.p3 should equal (Vector2D(50,-50))
+      r1.p2 should equal (Vector2D(-50,-50))
 
-    r2.topLeft should equal (Vector2D(-15, 60))
-    r2.topRight should equal (Vector2D(35, 60))
-    r2.bottomRight should equal (Vector2D(35,-40))
-    r2.bottomLeft should equal (Vector2D(-15,-40))
+      r2.p1 should equal (Vector2D(-15, 60))
+      r2.p0 should equal (Vector2D(35, 60))
+      r2.p2 should equal (Vector2D(35,-40))
+      r2.p3 should equal (Vector2D(-15,-40))
 
-    //test if rotated rectangles return the correct corner points
-    r3.topLeft should equal (Vector2D(-36.65063509461097,40.80127018922194))
-    r3.topRight should equal (Vector2D(56.65063509461096,40.80127018922193))
-    r3.bottomRight should equal (Vector2D(6.650635094610973,-45.80127018922193))
-    r3.bottomLeft should equal (Vector2D(-36.65063509461096,-20.80127018922194))
+      //test if rotated rectangles return the correct corner points
+      r3.p1 should equal (Vector2D(-36.65063509461097,40.80127018922194))
+      r3.p0 should equal (Vector2D(56.65063509461096,40.80127018922193))
+      r3.p2 should equal (Vector2D(6.650635094610973,-45.80127018922193))
+      r3.p3 should equal (Vector2D(-36.65063509461096,-20.80127018922194))
 
-    val rShape = RectangleShape(c2,width2,height2,rotation2, Attributes())
+      val rShape = RectangleShape(c2,width2,height2,rotation2, Attributes())
+      rShape.geometry.p1 should equal (Vector2D(13.34936490538903,65.80127018922194))
+    }
 
-    rShape.geometry.topLeft should equal (Vector2D(13.34936490538903,65.80127018922194))
+    it ("can calculate p0") {
+      r1.p0 should equal(Vector2D(50, 50))
+      r2.p0 should equal(Vector2D(35, 60))
+      r3.p0 should equal(Vector2D(40.8013,56.6506))
+      r4.p0 should equal(Vector2D(-50, -50))
+    }
+
+    it ("can calculate p1") {
+      r1.p1 should equal(Vector2D(-50, 50))
+      r2.p1 should equal(Vector2D(-15, 60))
+      r3.p1 should equal(Vector2D(-45.8013,6.65064))
+      r4.p1 should equal(Vector2D(50, -50))
+    }
+
+    it ("can calculate p2") {
+      r1.p2 should equal(Vector2D(-50, -50))
+      r2.p2 should equal(Vector2D(-15, 60))
+      r3.p2 should equal(Vector2D(-20.8013,-36.6506))
+      r4.p2 should equal(Vector2D(50, 50))
+    }
+
+    it ("can calculate p3") {
+      r1.p3 should equal(Vector2D(50, -50))
+      r2.p3 should equal(Vector2D(60, -40))
+      r3.p3 should equal(Vector2D(65.8013,13.3494))
+      r4.p3 should equal(Vector2D(-50, 50))
+    }
+
   }
+
 }

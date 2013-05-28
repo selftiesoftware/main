@@ -126,49 +126,6 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
 
   def area = width * height
 
-  /**
-   * The lowest left corner of the rectangle.
-   */
-  def bottomLeft  : Vector2D
-
-  /**
-   * The lowest right corner of the rectangle.
-   */
-  def bottomRight : Vector2D
-
-  /**
-   * Returns the line spanning from the bottom left corner to the bottom right.
-   */
-  def borderBottom = Segment2D(bottomLeft, bottomRight)
-
-  /**
-   * Returns the line spanning from the top left corner to the bottom left.
-   */
-  def borderLeft = Segment2D(topLeft, bottomLeft)
-
-  /**
-   * Returns the line spanning from the top right corner to the bottom right.
-   */
-  def borderRight = Segment2D(topRight, bottomRight)
-
-  /**
-   * Returns the line spanning from the top left corner to the rop right.
-   */
-  def borderTop = Segment2D(topLeft, topRight)
-
-  def boundary = {
-    val vertices = Seq(this.bottomLeft,bottomRight,topRight,topLeft)
-    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
-    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
-
-    val xMax = vertices.map(_.x).reduceLeft(max)
-    val xMin = vertices.map(_.x).reduceLeft(min)
-    val yMax = vertices.map(_.y).reduceLeft(max)
-    val yMin = vertices.map(_.y).reduceLeft(min)
-
-    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
-  }
-
   def circumference = height * 2 + width * 2
 
   def distanceTo(geom : Geometry2D) = geom match {
@@ -196,18 +153,6 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
   def height : Double
 
   def onPeriphery(point : Vector2D) : Boolean
-
-  /**
-   * The upper left corner of the rectangle.
-   */
-  def topLeft     : Vector2D
-
-  /**
-   * The upper right corner of the rectangle.
-   */
-  def topRight    : Vector2D
-
-  lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def width : Double
 
@@ -271,6 +216,39 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   type T = ComplexRectangle2D
 
   /**
+   * The first vertex on the rectangle (top right in a rectangle with 0 rotation).
+   */
+  lazy val p0 = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
+
+  /**
+   * The second vertex on the rectangle (top left in a rectangle with 0 rotation).
+   */
+  lazy val p1 = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
+
+  /**
+    * The third vertex on the rectangle (bottom left in a rectangle with 0 rotation).
+   */
+  lazy val p2 : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
+
+  /**
+    * The fourth vertex on the rectangle (bottom right in a rectangle with 0 rotation).
+   */
+  lazy val p3 = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
+
+  def boundary = {
+    val vertices = Seq(p0,p1,p2,p3)
+    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
+    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
+
+    val xMax = vertices.map(_.x).reduceLeft(max)
+    val xMin = vertices.map(_.x).reduceLeft(min)
+    val yMax = vertices.map(_.y).reduceLeft(max)
+    val yMin = vertices.map(_.y).reduceLeft(min)
+
+    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
+  }
+
+  /**
    * Calculates the closest point on the geometry from a given vector.
    */
   def closestPoint(vector: ComplexRectangle2D#V): ComplexRectangle2D#V = null
@@ -289,32 +267,6 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    * Returns the intersections between this and the given geometry, if any.
    */
   def intersections(geometry: Geometry2D): Set[Vector2D] = null
-
-  /**
-   * The lowest left corner of the rectangle.
-   */
-  def bottomLeft : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
-
-  /**
-   * The lowest right corner of the rectangle.
-   */
-  def bottomRight = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
-
-  /**
-   * The upper left corner of the rectangle.
-   */
-  //TODO: rotation is negative to become clockwise. Is that correct?
-  def topLeft = {
-    val t = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
-    println("TL in geom:_ "+t)
-    t
-  }
-
-
-  /**
-   * The upper right corner of the rectangle.
-   */
-  def topRight = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
 
   def onPeriphery(point: Vector2D): Boolean = false
 
@@ -369,6 +321,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
    * @return  A new rectangle moved by a distance corresponding to (rectangle.x / point.x, rectangle-y / point.y).
    */
   def /(point: ComplexRectangle2D#V): ComplexRectangle2D = null
+
+  def vertices = Seq(p0, p1, p2, p3)
 }
 
 /**
@@ -399,6 +353,28 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    * The lowest right corner of the rectangle.
    */
   def bottomRight = Vector2D(xMax, yMin)
+
+  /**
+   * Returns the line spanning from the bottom left corner to the bottom right.
+   */
+  def borderBottom = Segment2D(bottomLeft, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the bottom left.
+   */
+  def borderLeft = Segment2D(topLeft, bottomLeft)
+
+  /**
+   * Returns the line spanning from the top right corner to the bottom right.
+   */
+  def borderRight = Segment2D(topRight, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the rop right.
+   */
+  def borderTop = Segment2D(topLeft, topRight)
+
+  def boundary = this
 
   /**
    * The upper left corner of the rectangle.
@@ -620,6 +596,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
 
     SimpleRectangle2D(p1.x, p1.y, p2.x, p2.y)
   }
+
+  lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def width = (xMax - xMin).abs
 

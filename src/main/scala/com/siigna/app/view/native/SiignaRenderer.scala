@@ -27,7 +27,7 @@ import com.siigna.app.model.Drawing
 import com.siigna.app.model.shape.PolylineShape
 import com.siigna.app.view.{Graphics, View, Renderer}
 import com.siigna.util.Implicits._
-import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D, TransformationMatrix, Rectangle2D}
 
 /**
  * Siignas own implementation of the [[com.siigna.app.view.Renderer]] which draws a chess-checkered background
@@ -226,7 +226,7 @@ object SiignaRenderer extends Renderer {
   }
 
   def paint(graphics : Graphics) {
-    def drawTile(r : Rectangle2D, tile : BufferedImage) {
+    def drawTile(r : SimpleRectangle2D, tile : BufferedImage) {
       graphics.AWTGraphics drawImage(tile, r.bottomLeft.x.toInt, r.bottomLeft.y.toInt, null)
     }
 
@@ -301,7 +301,7 @@ object SiignaRenderer extends Renderer {
    * @return  An image with the same proportions of the given area with the shapes from that area drawn on it.
    * @throws  IllegalArgumentException  if the width or height of the given screen are zero
    */
-  private def renderModel(screen : Rectangle2D) = {
+  private def renderModel(screen : SimpleRectangle2D) = {
     // Create an image with dimensions equal to the width and height of the area
     val image = new BufferedImage(screen.width.toInt, screen.height.toInt, BufferedImage.TYPE_4BYTE_ABGR)
     val g = image.getGraphics.asInstanceOf[Graphics2D]

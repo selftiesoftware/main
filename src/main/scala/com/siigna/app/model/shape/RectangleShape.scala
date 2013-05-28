@@ -25,10 +25,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry = ComplexRectangle2D(center,width,height,rotation)
-  val p1 = geometry.bottomLeft //BitSet 3
-  val p2 = geometry.topRight  //BitSet 2
-  val p3 = geometry.bottomRight //BitSet 1
-  val p4 = geometry.topLeft //BitSet 0
+  val p0 = geometry.p0 //BitSet 3
+  val p1 = geometry.p1 //BitSet 2
+  val p2 = geometry.p2 //BitSet 1
+  val p3 = geometry.p3 //BitSet 0
 
   def delete(part : ShapeSelector) = part match {
     case BitSetShapeSelector(_) | FullShapeSelector => Nil
@@ -37,20 +37,20 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def getPart(part : ShapeSelector) = part match {
     case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p1.transform(t), p4, attributes)
-      LineShape(p1.transform(t), p2, attributes)
+      LineShape(p0.transform(t), p3, attributes)
+      LineShape(p0.transform(t), p1, attributes)
     }))
     case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      LineShape(p0, p1.transform(t), attributes)
+      LineShape(p2, p1.transform(t), attributes)
+    }))
+    case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
       LineShape(p1, p2.transform(t), attributes)
       LineShape(p3, p2.transform(t), attributes)
     }))
-    case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p2, p3.transform(t), attributes)
-      LineShape(p4, p3.transform(t), attributes)
-    }))
     case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p3, p4.transform(t), attributes)
-      LineShape(p1, p4.transform(t), attributes)
+      LineShape(p2, p3.transform(t), attributes)
+      LineShape(p0, p3.transform(t), attributes)
     }))
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => None
@@ -80,7 +80,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
     //find out if a segment of the rectangle is close. if so, return true, the segment, and the segment's bit value
     def isCloseToSegment : (Boolean, Option[Segment2D], BitSet) = {
-      val l = List(Segment2D(p1,p2),Segment2D(p2,p3),Segment2D(p3,p4), Segment2D(p4,p1))
+      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p3,p0))
       var closeSegment : Option[Segment2D] = None
       var hasCloseSegment = false
       var bit = BitSet()
@@ -118,10 +118,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   //TODO: is this right?
   def getSelector(r : SimpleRectangle2D) : ShapeSelector = {
     if (r.intersects(boundary)) {
-      val cond1 = r.contains(p1)
-      val cond2 = r.contains(p2)
-      val cond3 = r.contains(p3)
-      val cond4 = r.contains(p4)
+      val cond1 = r.contains(p0)
+      val cond2 = r.contains(p1)
+      val cond3 = r.contains(p2)
+      val cond4 = r.contains(p3)
       if (cond1 && cond2 && cond3 && cond4) {
         FullShapeSelector
       } else if (cond1) {
@@ -139,10 +139,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   //TODO: is this right? and when is a complex rectangle ever used to make a selection??
   def getSelector(r : ComplexRectangle2D) : ShapeSelector = {
     if (r.intersects(boundary)) {
-      val cond1 = r.contains(p1)
-      val cond2 = r.contains(p2)
-      val cond3 = r.contains(p3)
-      val cond4 = r.contains(p4)
+      val cond1 = r.contains(p0)
+      val cond2 = r.contains(p1)
+      val cond3 = r.contains(p2)
+      val cond4 = r.contains(p3)
       if (cond1 && cond2 && cond3 && cond4) {
         FullShapeSelector
       } else if (cond1) {
@@ -167,10 +167,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
     selector match {
       case FullShapeSelector => geometry.vertices
-      case ShapeSelector(0) => Seq(p1)
-      case ShapeSelector(1) => Seq(p2)
-      case ShapeSelector(2) => Seq(p3)
-      case ShapeSelector(3) => Seq(p4)
+      case ShapeSelector(0) => Seq(p0)
+      case ShapeSelector(1) => Seq(p1)
+      case ShapeSelector(2) => Seq(p2)
+      case ShapeSelector(3) => Seq(p3)
       case _ => Seq()
     }
   }
