@@ -25,10 +25,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry = ComplexRectangle2D(center,width,height,rotation)
-  val p0 = geometry.p0 //BitSet 3
-  val p1 = geometry.p1 //BitSet 2
-  val p2 = geometry.p2 //BitSet 1
-  val p3 = geometry.p3 //BitSet 0
+  val p0 = geometry.p0 //BitSet 0
+  val p1 = geometry.p1 //BitSet 1
+  val p2 = geometry.p2 //BitSet 2
+  val p3 = geometry.p3 //BitSet 3
 
   def delete(part : ShapeSelector) = part match {
     case BitSetShapeSelector(_) | FullShapeSelector => Nil
@@ -37,20 +37,24 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def getPart(part : ShapeSelector) = part match {
     case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p0.transform(t), p3, attributes)
-      LineShape(p0.transform(t), p1, attributes)
+      println("sel shape part 3")
+      LineShape(p2, p3.transform(t), attributes)
+      LineShape(p0, p3.transform(t), attributes)
     }))
     case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      println("sel shape part 1")
       LineShape(p0, p1.transform(t), attributes)
       LineShape(p2, p1.transform(t), attributes)
     }))
     case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
+      println("sel shape part 2")
       LineShape(p1, p2.transform(t), attributes)
       LineShape(p3, p2.transform(t), attributes)
     }))
     case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p2, p3.transform(t), attributes)
-      LineShape(p0, p3.transform(t), attributes)
+      println("sel shape part 0")
+      LineShape(p3, p0.transform(t), attributes)
+      LineShape(p1, p0.transform(t), attributes)
     }))
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => None
