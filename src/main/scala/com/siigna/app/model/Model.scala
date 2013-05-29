@@ -33,6 +33,7 @@ import com.siigna.app.model.selection.Selection
  */
 sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action], attributes : Attributes)
        extends ImmutableModel[Int, Shape]
+          with SpatialModel[Int, Shape]
           with ModelBuilder[Int, Shape]
           with HasAttributes{
 
