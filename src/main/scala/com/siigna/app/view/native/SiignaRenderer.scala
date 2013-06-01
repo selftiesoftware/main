@@ -78,12 +78,12 @@ trait SiignaRenderer extends Renderer {
   protected val NE = 2; protected val vNE = Vector2D( 1,-1)
 
   // A background image that can be re-used to draw as background on the canvas.
-  protected var cachedBackground : BufferedImage = renderBackground(view.screen)
+  protected var cachedBackground : Option[BufferedImage] = None
 
   // The positions of the tiles, cached to avoid calculating at each paint-tick
   protected lazy val cachedTilePositions = Array(tile(vNW), tile(vN), tile(vNE),
-                                               tile(vW),  tile(vC), tile(vE),
-                                               tile(vSW), tile(vS), tile(vSE))
+                                                 tile(vW),  tile(vC), tile(vE),
+                                                 tile(vSW), tile(vS), tile(vSE))
 
   // The tiles drawn as 3 * 3 squares over the model.
   protected val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
@@ -151,7 +151,7 @@ trait SiignaRenderer extends Renderer {
     }
 
     // Draw the cached background
-    graphics.AWTGraphics drawImage(cachedBackground, 0, 0, null)
+    cachedBackground.foreach(i => graphics.AWTGraphics drawImage(i, 0, 0, null))
 
     // Draw the paper as a rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics.AWTGraphics.setBackground(Siigna.color("colorBackground").getOrElse(Color.white))
@@ -230,6 +230,12 @@ trait SiignaRenderer extends Renderer {
     val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
     val g = image.getGraphics.asInstanceOf[Graphics2D]
     val graphics = view.graphics(g)
+
+    // Draw the background
+    g setBackground (Siigna.color("colorBackground").getOrElse(Color.white))
+    g clearRect (1, 1, width - 2, height - 2)
+    g setColor Color.lightGray
+    g drawRect (0, 0, width - 1, height - 1)
 
     // Create a 'window' of the drawing, as seen through the screen
     val window = screen.transform(view.deviceTransformation)
@@ -420,7 +426,7 @@ object SiignaRenderer extends SiignaRenderer {
 
   // On resize
   view.addResizeListener((screen) => if (isActive) {
-    cachedBackground = renderBackground(view.screen)
+    cachedBackground = Some(renderBackground(view.screen))
     clearTiles()
   })
 

@@ -152,12 +152,6 @@ class SiignaApplet extends Applet {
     // Get the strategy
     val strategy = canvas.getBufferStrategy
 
-    // Add the Siigna renderer
-    // This have to be done here to avoid ExceptionInInitializer error
-    // - adding the code in View will mess up the initialization-order, causing the calls to the View to happen
-    // before the View has been initialized
-    View.renderer = SiignaRenderer
-
     // Run, run, run
     while(!shouldExit) {
 

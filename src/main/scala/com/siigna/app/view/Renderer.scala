@@ -52,7 +52,7 @@ trait Renderer {
    * information whenever external calls, such as callbacks from listeners, arrive.
    * @return  A boolean indicating if the renderer is current in use (true) or not (false).
    */
-  def isActive : Boolean = View.renderer.exists(_ == this)
+  def isActive : Boolean = View.renderer == this
 
   /**
    * Renders the rendered contents of the renderer (...). This method is not called <code>render</code> to illustrate

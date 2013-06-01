@@ -25,7 +25,9 @@ import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
-import com.siigna.app.view.native.SiignaGraphics
+import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
+import com.siigna.app.model.shape.TextShape
+import com.siigna.util.collection.Attributes
 
 /**
  * A view in Siigna describing various information related to the visual interface, including a method to paint
@@ -39,11 +41,6 @@ trait View {
 
   // The most recent mouse position
   protected var _mousePosition = Vector2D(0, 0)
-
-  /**
-   * The protected renderer instance
-   */
-  protected var _renderer : Option[Renderer] = None
 
   /**
    * A pan vector originating in the top-left corner of the screen. Private because the public pan has it's (0,0)
@@ -80,6 +77,16 @@ trait View {
    * Zoom listeners to be called whenever the view changes zoom.
    */
   protected var listenersZoom : Seq[(Double) => Unit] = Nil
+
+  /**
+   * The protected renderer instance
+   */
+  protected var _renderer : Renderer = SiignaRenderer
+
+  /**
+   * A flag whether to show the fps or not.
+   */
+  var showFps = false
 
   /**
    * The zoom-level of the View. Starts in 1. The smaller the zoom is the smaller the shapes will be scales, which
@@ -135,7 +142,7 @@ trait View {
    *
    * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
    */
-  def fps : Double = 60 / (fpsTimeToDraw * 0.9 + fpsTimeToDrawLast * 0.1)
+  def fps : Double = fpsTimeToDraw * 0.1 + fpsTimeToDrawLast * 0.9
 
   /**
    * The default graphics implementation represented as a function that can be called whenever someone needs an
@@ -257,11 +264,10 @@ trait View {
    *   object MyOwnRenderer extends Renderer { ... }
    *   View.renderer = MyOwnRenderer
    * }}}
-   * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
+   * All following calls to the <code>paint</code> will use your renderer. Paint will be called for you, don't worry.
    * <br>
-   * Starts undefined, because the graphical settings needs to initialize.
    */
-  def renderer : Option[Renderer] = _renderer
+  def renderer : Renderer = _renderer
 
   /**
    * Removes the current [[com.siigna.app.view.Renderer]] and replaces it with the given. This is useful if you
@@ -271,7 +277,7 @@ trait View {
    */
   def renderer_=(renderer : Renderer) {
     require(renderer != null)
-    _renderer = Some(renderer)
+    _renderer = renderer
   }
 
   /**
@@ -435,7 +441,7 @@ object View extends View {
 
     try {
       // Paint the renderer
-      if (renderer.isDefined) renderer.get.paint(graphics)
+      renderer.paint(graphics)
     } catch {
       case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
@@ -467,6 +473,11 @@ object View extends View {
     } catch {
       case e : NoSuchElementException => Log.warning("View: No such element exception while painting the modules. This can be caused by a (premature) reset of the module variables.")
       case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
+    }
+
+    if (showFps) {
+      graphics draw TextShape("FPS: " + fps.round, screen.bottomRight - Vector2D(20, -20), 10, Attributes("TextAlignment" -> Vector2D(1, 0)))
+
     }
 
     // Update the fps counter
