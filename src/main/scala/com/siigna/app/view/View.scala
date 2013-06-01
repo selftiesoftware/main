@@ -33,6 +33,7 @@ import com.siigna.app.view.native.SiignaGraphics
  * [[com.siigna.app.view.View]] object for more information.
  *
  * Used in the [[com.siigna.app.view.View$]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.view.View$]]
  */
 trait View {
 

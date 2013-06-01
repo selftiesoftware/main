@@ -28,7 +28,8 @@ import com.siigna.util.geom.SimpleRectangle2D
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
  * their ids, that can be traversed like a map.
  *
- * Used in the [[com.siigna.app.model.Drawing]] object which can be used throughout the application (modules included).
+ * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.model.Drawing$]]
  */
 trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
 
