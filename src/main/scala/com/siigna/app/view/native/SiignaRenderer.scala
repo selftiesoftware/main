@@ -30,9 +30,12 @@ import com.siigna.util.Implicits._
 import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
 
 /**
- * Siignas own implementation of the [[com.siigna.app.view.Renderer]] which draws a chess-checkered background
- * and the shapes using caching tecniques. The SiignaRenderer uses the colors and attributes defined in the
- * [[com.siigna.app.SiignaAttributes]] (accessible via the [[com.siigna.app.Siigna]] object).
+ * <p>
+ *   Siignas own implementation of the [[com.siigna.app.view.Renderer]] which draws a chess-checkered background,
+ *   a white canvas for the [[com.siigna.app.model.Drawing]] and the shapes using caching tecniques. The SiignaRenderer
+ *   uses the colors and attributes defined in the [[com.siigna.app.SiignaAttributes]] (accessible via the
+ *   [[com.siigna.app.Siigna]] object).
+ * </p>
  *
  * <p>
  *   This renderer uses tiles to cache the content of the current view in images. Instead of painting the view
@@ -43,9 +46,10 @@ import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
  *
  * <p>
  *   The tiles are arranged so the center tile covers the entire view at the time of rendering. If the user pans the
- *   view one or more of the other tiles will be rendered to cover the "gap" left by the pan. If the user pans more
- *   than the width of the view / 2 - that is, the center-point of the view is moved to another tile - we "move" the
- *   center to a new tile. Thus, the center can "move" and maintain a constant of 9 tiles to render the entire view.
+ *   view, one or more of the other tiles will be rendered to cover the "gap" left by the pan. If the user pans more
+ *   than the width of the view divided by 2 - that is, the center-point of the view is moved to another tile - we
+ *   "move" the center to a new tile. Thus, the center-tile can "move" and maintain a constant of 9 tiles to render
+ *   the entire view.
  * </p>
  * {{{
  *
@@ -60,145 +64,61 @@ import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
  * }}}
  *
  */
-object SiignaRenderer extends Renderer {
-
-  // Add listeners
-  Drawing.addActionListener((_, _) => if (isActive) clearTiles())
-  View.addPanListener(v =>            if (isActive) onPan(v))
-  View.addResizeListener((screen) =>  if (isActive) onResize())
-  View.addZoomListener((zoom) =>      if (isActive) clearTiles() )
+trait SiignaRenderer extends Renderer {
 
   // Constants for the different tiles and their directions around a given center
-  private val C  = 4; private val vC  = Vector2D( 0, 0)
-  private val E  = 5; private val vE  = Vector2D( 1, 0)
-  private val SE = 8; private val vSE = Vector2D( 1, 1)
-  private val S  = 7; private val vS  = Vector2D( 0, 1)
-  private val SW = 6; private val vSW = Vector2D(-1, 1)
-  private val W  = 3; private val vW  = Vector2D(-1, 0)
-  private val NW = 0; private val vNW = Vector2D(-1,-1)
-  private val N  = 1; private val vN  = Vector2D( 0,-1)
-  private val NE = 2; private val vNE = Vector2D( 1,-1)
+  protected val C  = 4; protected val vC  = Vector2D( 0, 0)
+  protected val E  = 5; protected val vE  = Vector2D( 1, 0)
+  protected val SE = 8; protected val vSE = Vector2D( 1, 1)
+  protected val S  = 7; protected val vS  = Vector2D( 0, 1)
+  protected val SW = 6; protected val vSW = Vector2D(-1, 1)
+  protected val W  = 3; protected val vW  = Vector2D(-1, 0)
+  protected val NW = 0; protected val vNW = Vector2D(-1,-1)
+  protected val N  = 1; protected val vN  = Vector2D( 0,-1)
+  protected val NE = 2; protected val vNE = Vector2D( 1,-1)
 
   // A background image that can be re-used to draw as background on the canvas.
-  private var cachedBackground : BufferedImage = renderBackground(View.screen)
+  protected var cachedBackground : BufferedImage = renderBackground(View.screen)
 
   // The positions of the tiles, cached to avoid calculating at each paint-tick
-  private lazy val cachedTilePositions = Array(tile(vNW), tile(vN), tile(vNE),
+  protected lazy val cachedTilePositions = Array(tile(vNW), tile(vN), tile(vNE),
                                                tile(vW),  tile(vC), tile(vE),
                                                tile(vSW), tile(vS), tile(vSE))
 
   // The tiles drawn as 3 * 3 squares over the model.
-  private val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
+  protected val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
 
   // A boolean value to indicate that the view is zoomed out enough to only need one single tile
-  private var isSingleTile = true
+  protected var isSingleTile = true
 
   // The distance to the top left corner of the image to render, from the top left corner of the screen
   // Two scenarios: Model < Screen   - The model should be placed at the top left corner of the drawing
   //                Model >= Screen  - The model should be placed at the top left corner of the screen
-  private var renderedDelta : Vector2D = Vector2D(0, 0)
+  protected var renderedDelta : Vector2D = Vector2D(0, 0)
 
   // The pan at the time of rendering
-  private var renderedPan : Vector2D = Vector2D(0, 0)
+  protected var renderedPan : Vector2D = Vector2D(0, 0)
 
   // The running rendering thread (if any) used to render tiles or cancel the rendering if the tiles shift
-  private var renderingThread : Option[Thread] = None
+  protected var renderingThread : Option[Thread] = None
 
   // The tile deltas for the two axis
-  private var tileDeltaX = 0; private var tileDeltaY = 0
+  protected var tileDeltaX = 0; protected var tileDeltaY = 0
 
   /**
-   * Executed when a pan operation have been done
-   * @param pan  The new pan vector
+   * The drawing to retrieve the shapes and the boundary from.
+   * @return  An instance of a [[com.siigna.app.model.Drawing]]
    */
-  private def onPan(pan : Vector2D) {
-    // Set the new delta
-    renderedDelta = if (isSingleTile) Drawing.boundary.topLeft.transform(View.drawingTransformation)
-                    else View.pan - renderedPan
-
-    // Re-arrange the tiles for a new center, if necessary
-    if (!isSingleTile) {
-      // The panning of the screen, relative to the center
-      val pan = View.center - renderedDelta - tileDelta
-
-      // Is the center tile still in focus?
-      if (!View.screen.contains(pan)) {
-
-        // Set the new center
-        if (pan.x > View.width) { // ----> (Right)
-          tileDeltaX += 1
-          cachedTiles(NW) = cachedTiles(N)
-          cachedTiles(W)  = cachedTiles(C)
-          cachedTiles(SW) = cachedTiles(S)
-          cachedTiles(N)  = cachedTiles(NE)
-          cachedTiles(C)  = cachedTiles(E)
-          cachedTiles(S)  = cachedTiles(SE)
-          cachedTiles(NE) = None
-          cachedTiles(E)  = None
-          cachedTiles(SE) = None
-        }
-        if (pan.x < View.width) { // <---- (Left)
-          tileDeltaX -= 1
-          cachedTiles(NE) = cachedTiles(N)
-          cachedTiles(E)  = cachedTiles(C)
-          cachedTiles(SE) = cachedTiles(S)
-          cachedTiles(N)  = cachedTiles(NW)
-          cachedTiles(C)  = cachedTiles(W)
-          cachedTiles(S)  = cachedTiles(SW)
-          cachedTiles(NW) = None
-          cachedTiles(W)  = None
-          cachedTiles(SW) = None
-        }
-        if (pan.y > View.height) { // Down
-          tileDeltaY += 1
-          cachedTiles(NW) = cachedTiles(W)
-          cachedTiles(N)  = cachedTiles(C)
-          cachedTiles(NE) = cachedTiles(E)
-          cachedTiles(W)  = cachedTiles(SW)
-          cachedTiles(C)  = cachedTiles(S)
-          cachedTiles(E)  = cachedTiles(SE)
-          cachedTiles(SW) = None
-          cachedTiles(S)  = None
-          cachedTiles(SE) = None
-        }
-        if (pan.y < 0) { // Up
-          tileDeltaY -= 1
-          cachedTiles(SW) = cachedTiles(W)
-          cachedTiles(S)  = cachedTiles(C)
-          cachedTiles(SE) = cachedTiles(E)
-          cachedTiles(W)  = cachedTiles(NW)
-          cachedTiles(C)  = cachedTiles(N)
-          cachedTiles(E)  = cachedTiles(NE)
-          cachedTiles(NW) = None
-          cachedTiles(N)  = None
-          cachedTiles(NE) = None
-        }
-
-        // Render any new tiles that needs content
-        renderEmptyTiles()
-      }
-    }
-
-    // Update the tile positions
-    updateTilePositions()
-  }
-
-  /**
-   * Executed when a resize operation is performed.
-   */
-  private def onResize() {
-    cachedBackground = renderBackground(View.screen)
-    clearTiles()
-  }
+  protected def drawing : Drawing
 
   /**
    * Executed when a zoom operation have been performed.
    */
-  private def clearTiles() {
-    val drawing = Drawing.boundary.transform(View.drawingTransformation)
+  protected def clearTiles() {
+    val boundary = drawing.boundary.transform(View.drawingTransformation)
 
     // Set the isSingleTile value
-    isSingleTile = View.screen.width > drawing.width && View.screen.height > drawing.height
+    isSingleTile = View.screen.width > boundary.width && View.screen.height > boundary.height
 
     // Set the new render screen and pan
     renderedPan  = View.pan
@@ -207,7 +127,7 @@ object SiignaRenderer extends Renderer {
     tileDeltaX = 0; tileDeltaY = 0
 
     // Set the new delta
-    renderedDelta = if (isSingleTile) Drawing.boundary.topLeft.transform(View.drawingTransformation)
+    renderedDelta = if (isSingleTile) drawing.boundary.topLeft.transform(View.drawingTransformation)
     else View.pan - renderedPan
 
     // Set the new tile deltas
@@ -215,7 +135,7 @@ object SiignaRenderer extends Renderer {
 
     // Render the center tile
     if (isSingleTile) {
-      cachedTiles(C) = Some(renderModel(Drawing.boundary.transform(View.drawingTransformation)))
+      cachedTiles(C) = Some(renderModel(drawing.boundary.transform(View.drawingTransformation)))
     } else {
       // Clear the tiles
       cachedTiles.transform(_ => None)
@@ -235,8 +155,8 @@ object SiignaRenderer extends Renderer {
 
     // Draw the paper as a rectangle with a margin to illustrate that the paper will have a margin when printed.
     graphics.AWTGraphics.setBackground(Siigna.color("colorBackground").getOrElse(Color.white))
-    graphics.AWTGraphics.clearRect(View.boundary.xMin.toInt, View.boundary.yMin.toInt - View.boundary.height.toInt,
-                         View.boundary.width.toInt, View.boundary.height.toInt)
+    graphics.AWTGraphics.clearRect(view.screen.xMin.toInt, view.screen.yMin.toInt - view.screen.height.toInt,
+                         view.screen.width.toInt, view.screen.height.toInt)
 
     if (isSingleTile) {
       // Draw the single center tile if that encases the entire drawing
@@ -257,7 +177,7 @@ object SiignaRenderer extends Renderer {
     }
 
     // Draw the boundary shape
-    graphics draw PolylineShape.apply(View.boundary).setAttribute("Color" -> "#AAAAAA".color)
+    graphics draw PolylineShape.apply(view.screen).setAttribute("Color" -> "#AAAAAA".color)
   }
 
   /**
@@ -282,8 +202,8 @@ object SiignaRenderer extends Renderer {
 
     // Draw a chess-board pattern
     var evenRow = false
-    while (x < View.width) {
-      while (y < View.height) {
+    while (x < view.width) {
+      while (y < view.height) {
         g.fillRect(x, y, size, size)
         y += size << 1
       }
@@ -301,24 +221,27 @@ object SiignaRenderer extends Renderer {
    * @return  An image with the same proportions of the given area with the shapes from that area drawn on it.
    * @throws  IllegalArgumentException  if the width or height of the given screen are zero
    */
-  private def renderModel(screen : Rectangle2D) = {
+  protected def renderModel(screen : Rectangle2D) = {
+    // Create a width and height of at least 1
+    val width  = if (screen.width > 0) screen.width.toInt else 1
+    val height = if (screen.height > 0) screen.height.toInt else 1
+
     // Create an image with dimensions equal to the width and height of the area
-    val image = new BufferedImage(screen.width.toInt, screen.height.toInt, BufferedImage.TYPE_4BYTE_ABGR)
+    val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
     val g = image.getGraphics.asInstanceOf[Graphics2D]
-    val graphics = View.graphics(g)
+    val graphics = view.graphics(g)
 
     // Create a 'window' of the drawing, as seen through the screen
-    val window = screen.transform(View.deviceTransformation)
+    val window = screen.transform(view.deviceTransformation)
 
     // Setup anti-aliasing
     val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
     val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
+    g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     // Create the transformation matrix to move the shapes to (0, 0) of the image
-    val scale       = View.drawingTransformation.scale
+    val scale       = view.drawingTransformation.scale
     val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
-
-    g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     //apply the graphics class to the model with g - (adds the changes to the image)
     Drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
@@ -330,8 +253,10 @@ object SiignaRenderer extends Renderer {
   /**
    * Renders the empty tiles in the cached tiles asynchronously.
    */
-  private def renderEmptyTiles() {
+  protected def renderEmptyTiles() {
     try {
+      // Update the tile positions
+
       if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(cachedTilePositions(C)))
 
       // Stop the previous thread
@@ -344,16 +269,16 @@ object SiignaRenderer extends Renderer {
             val temp = new Array[Option[BufferedImage]](9)
 
             // First render the direct neighbours
-            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(tile(vE)))
-            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(tile(vS)))
-            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(tile(vW)))
-            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(tile(vN)))
+            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(cachedTilePositions(E)))
+            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(cachedTilePositions(S)))
+            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(cachedTilePositions(W)))
+            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(cachedTilePositions(N)))
 
             // Render the diagonals
-            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(tile(vSE)))
-            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(tile(vSW)))
-            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(tile(vNW)))
-            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(tile(vNE)))
+            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(cachedTilePositions(SE)))
+            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(cachedTilePositions(SW)))
+            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(cachedTilePositions(NW)))
+            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(cachedTilePositions(NE)))
 
             // Set the new tiles
             for (i <- 0 until temp.size) {
@@ -378,15 +303,79 @@ object SiignaRenderer extends Renderer {
   }
 
   // The current distance to the active tile center to the center of the view
-  private def tileDelta = Vector2D(tileDeltaX * View.width, tileDeltaY * View.height)
+  protected def tileDelta = Vector2D(tileDeltaX * view.width, tileDeltaY * view.height)
 
   // Retrieve the rendered tile in the direction given by the tile-vector v
-  private def tile(v : Vector2D) =
-    (if (isSingleTile) Drawing.boundary.transform(View.drawingTransformation) else View.screen) +
-      renderedDelta + Vector2D(View.screen.width * v.x, View.screen.height * v.y) + tileDelta
+  protected def tile(v : Vector2D) =
+    (if (isSingleTile) drawing.boundary.transform(view.drawingTransformation) else view.screen) +
+      renderedDelta + Vector2D(view.screen.width * v.x, view.screen.height * v.y) + tileDelta
 
   // Updates the tile positions
-  private def updateTilePositions() {
+  protected def updateTilePositions() {
+    // Set the new delta
+    renderedDelta = if (isSingleTile) drawing.boundary.topLeft.transform(view.drawingTransformation)
+                    else view.pan - renderedPan
+
+    // Re-arrange the tiles for a new center, if necessary
+    if (!isSingleTile) {
+      // The panning of the screen, relative to the center
+      val pan = view.center - renderedDelta - tileDelta
+
+      // Is the center tile still in focus?
+      if (!view.screen.contains(pan)) {
+
+        // Set the new center
+        if (pan.x > view.width) { // ----> (Right)
+          tileDeltaX += 1
+          cachedTiles(NW) = cachedTiles(N)
+          cachedTiles(W)  = cachedTiles(C)
+          cachedTiles(SW) = cachedTiles(S)
+          cachedTiles(N)  = cachedTiles(NE)
+          cachedTiles(C)  = cachedTiles(E)
+          cachedTiles(S)  = cachedTiles(SE)
+          cachedTiles(NE) = None
+          cachedTiles(E)  = None
+          cachedTiles(SE) = None
+        }
+        if (pan.x < view.width) { // <---- (Left)
+          tileDeltaX -= 1
+          cachedTiles(NE) = cachedTiles(N)
+          cachedTiles(E)  = cachedTiles(C)
+          cachedTiles(SE) = cachedTiles(S)
+          cachedTiles(N)  = cachedTiles(NW)
+          cachedTiles(C)  = cachedTiles(W)
+          cachedTiles(S)  = cachedTiles(SW)
+          cachedTiles(NW) = None
+          cachedTiles(W)  = None
+          cachedTiles(SW) = None
+        }
+        if (pan.y > view.height) { // Down
+          tileDeltaY += 1
+          cachedTiles(NW) = cachedTiles(W)
+          cachedTiles(N)  = cachedTiles(C)
+          cachedTiles(NE) = cachedTiles(E)
+          cachedTiles(W)  = cachedTiles(SW)
+          cachedTiles(C)  = cachedTiles(S)
+          cachedTiles(E)  = cachedTiles(SE)
+          cachedTiles(SW) = None
+          cachedTiles(S)  = None
+          cachedTiles(SE) = None
+        }
+        if (pan.y < 0) { // Up
+          tileDeltaY -= 1
+          cachedTiles(SW) = cachedTiles(W)
+          cachedTiles(S)  = cachedTiles(C)
+          cachedTiles(SE) = cachedTiles(E)
+          cachedTiles(W)  = cachedTiles(NW)
+          cachedTiles(C)  = cachedTiles(N)
+          cachedTiles(E)  = cachedTiles(NE)
+          cachedTiles(NW) = None
+          cachedTiles(N)  = None
+          cachedTiles(NE) = None
+        }
+      }
+    }
+
     cachedTilePositions(C) = tile(vC)
     cachedTilePositions(E) = tile(vE)
     cachedTilePositions(S) = tile(vS)
@@ -398,4 +387,44 @@ object SiignaRenderer extends Renderer {
     cachedTilePositions(NE) = tile(vNE)
   }
 
+  /**
+   * The view to base the rendering upon
+   * @return  An instance of a [[com.siigna.app.view.View]]
+   */
+  def view : View
+
+}
+
+/**
+ * A static instance of the [[com.siigna.app.view.native.SiignaRenderer]]. The division of the trait and object
+ * have been made for testing purposes.
+ */
+object SiignaRenderer extends SiignaRenderer {
+
+  def drawing = Drawing
+  def view    = View
+
+  //---  Listeners ---//
+
+  // On action executed
+  drawing.addActionListener((_, _) => if (isActive) clearTiles())
+
+  // On pan
+  view.addPanListener(v => if (isActive) {
+    // Update the tile positions
+    updateTilePositions()
+
+    // Render any new tiles that needs content
+    renderEmptyTiles()
+  })
+
+  // On resize
+  view.addResizeListener((screen) => if (isActive) {
+    cachedBackground = renderBackground(view.screen)
+    clearTiles()
+  })
+
+  // On Zoom
+  view.addZoomListener((zoom) =>      if (isActive) clearTiles() )
+  
 }
