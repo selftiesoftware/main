@@ -78,7 +78,7 @@ trait SiignaRenderer extends Renderer {
   protected val NE = 2; protected val vNE = Vector2D( 1,-1)
 
   // A background image that can be re-used to draw as background on the canvas.
-  protected var cachedBackground : BufferedImage = renderBackground(View.screen)
+  protected var cachedBackground : BufferedImage = renderBackground(view.screen)
 
   // The positions of the tiles, cached to avoid calculating at each paint-tick
   protected lazy val cachedTilePositions = Array(tile(vNW), tile(vN), tile(vNE),
@@ -115,27 +115,27 @@ trait SiignaRenderer extends Renderer {
    * Executed when a zoom operation have been performed.
    */
   protected def clearTiles() {
-    val boundary = drawing.boundary.transform(View.drawingTransformation)
+    val boundary = drawing.boundary.transform(view.drawingTransformation)
 
     // Set the isSingleTile value
-    isSingleTile = View.screen.width > boundary.width && View.screen.height > boundary.height
+    isSingleTile = view.screen.width > boundary.width && view.screen.height > boundary.height
 
     // Set the new render screen and pan
-    renderedPan  = View.pan
+    renderedPan  = view.pan
 
     // Reset the tile delta
     tileDeltaX = 0; tileDeltaY = 0
 
     // Set the new delta
-    renderedDelta = if (isSingleTile) drawing.boundary.topLeft.transform(View.drawingTransformation)
-    else View.pan - renderedPan
+    renderedDelta = if (isSingleTile) drawing.boundary.topLeft.transform(view.drawingTransformation)
+    else view.pan - renderedPan
 
     // Set the new tile deltas
     updateTilePositions()
 
     // Render the center tile
     if (isSingleTile) {
-      cachedTiles(C) = Some(renderModel(drawing.boundary.transform(View.drawingTransformation)))
+      cachedTiles(C) = Some(renderModel(drawing.boundary.transform(view.drawingTransformation)))
     } else {
       // Clear the tiles
       cachedTiles.transform(_ => None)
@@ -244,7 +244,7 @@ trait SiignaRenderer extends Renderer {
     val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
 
     //apply the graphics class to the model with g - (adds the changes to the image)
-    Drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
+    drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
 
     // Return the image
     image
