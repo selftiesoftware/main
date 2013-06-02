@@ -64,9 +64,10 @@ object SiignaRenderer extends Renderer {
 
   // Add listeners
   Drawing.addActionListener((_, _) => if (isActive) clearTiles())
+  Drawing.addSelectionListener((_) => if (isActive) clearTiles())
   View.addPanListener(v =>            if (isActive) onPan(v))
   View.addResizeListener((screen) =>  if (isActive) onResize())
-  View.addZoomListener((zoom) =>      if (isActive) clearTiles() )
+  View.addZoomListener((zoom) =>      if (isActive) clearTiles())
 
   // Constants for the different tiles and their directions around a given center
   private val C  = 4; private val vC  = Vector2D( 0, 0)
@@ -321,7 +322,9 @@ object SiignaRenderer extends Renderer {
     g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     //apply the graphics class to the model with g - (adds the changes to the image)
-    Drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
+    Drawing(window).foreach(t => if (!Drawing.selection.contains(t._1)) {
+      graphics.draw(t._2.transform(transformation))
+    })
 
     // Return the image
     image
@@ -357,7 +360,7 @@ object SiignaRenderer extends Renderer {
 
             // Set the new tiles
             for (i <- 0 until temp.size) {
-              if (cachedTiles(i).isEmpty && i != C && cachedTiles(i) != null) {
+              if (cachedTiles(i) != null && cachedTiles(i).isEmpty && i != C) {
                 cachedTiles(i) = temp(i)
               }
             }

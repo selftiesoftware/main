@@ -24,6 +24,7 @@ import scala.collection.immutable.MapProxy
 import com.siigna.app.model.shape.Shape
 import java.io.{ObjectInput, NotSerializableException, ObjectOutput, Externalizable}
 import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, Rectangle2D}
+import com.siigna.app.model.SpatialModel
 
 /**
  * <p>
@@ -60,7 +61,10 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, 
  * @see [[com.siigna.app.model.SelectableModel]]
  * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
-trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)] with Externalizable {
+trait Selection extends HasAttributes
+                   with SpatialModel[Int, Shape]
+                   with MapProxy[Int, (Shape, ShapeSelector)]
+                   with Externalizable {
 
   type T = Selection
 
@@ -275,9 +279,16 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
     }))
   }
 
-  def shapes : Map[Int, Shape] = selection.map(t => t._1 -> t._2._1.addAttributes(attributes).transform(transformation)).toMap
+  def shapes : Map[Int, Shape] = {
+    selection.map(t => t._1 -> t._2._1.getPart(t._2._2)).collect {
+      case (id, Some(part)) => id -> part(transformation).addAttributes(attributes)
+    }.toMap
+  }
 
-  def setAttributes(attributes: Attributes) = { this.attributes ++= attributes; this}
+  def setAttributes(attributes: Attributes) = {
+    this.attributes ++= attributes
+    this
+  }
 
   override def toString() = s"NonEmptySelection[$self]($transformation, $attributes)"
 
@@ -298,7 +309,11 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
     this
   }
 
-  def vertices = selection.values.map(t => t._1.getVertices(t._2)).flatten
+  def vertices = {
+    selection.values.map(t => t._2 -> t._1.getPart(t._2)).collect {
+      case (selector, Some(shape)) => selector -> shape(transformation)
+    }.map(t => t._2.getVertices(t._1)).flatten
+  }
 
 }
 

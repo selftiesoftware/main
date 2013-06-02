@@ -80,6 +80,17 @@ import com.siigna.util.Log
 trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
 
   /**
+   * The listernes associated with the selection. They will be notified whenever the selection changes.
+   */
+  protected var _listenersSelection : List[(Selection) => Unit] = Nil
+
+  /**
+   * Adds a listener to the [[com.siigna.app.model.SelectableModel]] that will be notified whenever the selection
+   * changes.
+   */
+  def addSelectionListener(listener : (Selection) => Unit) = _listenersSelection :+= listener
+
+  /**
    * Deletes the current selection without applying the changes to the [[com.siigna.app.model.Model]]. This can
    * be used if the user regrets the changes and wishes to annul the selection instead of saving it. Synonym to
    * setting the selection to [[com.siigna.app.model.selection.Selection.empty]] or simply executing an action
@@ -87,7 +98,7 @@ trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
    * @return  The [[com.siigna.app.model.SelectableModel]] containing the empty
    *          [[com.siigna.app.model.selection.Selection]].
    */
-  def clearSelection() : SelectableModel  = {
+  def clearSelection() : SelectableModel = {
     selection = Selection.empty
   }
 
@@ -292,11 +303,20 @@ trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
     // Set the selection
     model.selection = selection
 
-    // .. And lastly execute the changes (if any)
+    // Execute the changes (if any)
     action.foreach(execute(_))
+
+    // Notify the listeners
+    _listenersSelection.foreach(_(this.selection))
 
     this
   }
+
+  /**
+   * The shapes currently in the model.
+   * @return A Map containing shapes.
+   */
+  def shapes = model.shapes ++ selection.shapes
 
 
 }
