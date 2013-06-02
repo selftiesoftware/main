@@ -182,6 +182,11 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
   def transform(t : TransformationMatrix) =
-    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation, attributes)
+    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation + t.rotation, attributes)
+}
 
+object RectangleShape {
+  def apply(center : Vector2D, width : Double, height : Double, rotation : Double) : RectangleShape = new RectangleShape(center, width, height, rotation,Attributes())
+  def apply(p1 : Vector2D, p2 : Vector2D) : RectangleShape = new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0,Attributes())
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : RectangleShape = apply(Vector2D(x1,y1),Vector2D(x2,y2))
 }

@@ -30,6 +30,9 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       s.transform(t) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
     }
     */
+
+    /*
+
     it("can be selected by a point") {
       val pTR = Vector2D(20,20)
       val pTL = Vector2D(-20,20)
@@ -46,11 +49,12 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val selector4 = r.getSelector(pBL)
 
       /*
-       0   1
+
+       1   0
        *   *
 
        *   *
-       3   2
+       2   3
 
        */
 
@@ -75,32 +79,20 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val selector3 = r.getSelector(pBR)
       val selector4 = r.getSelector(pBL)
 
-      /*
-       0   1
-       *   *
-
-       *   *
-       3   2
-
-       */
-
       selector1 should equal (ShapeSelector(0)) //SHOULD BE 2 IF CW ROTATION
       selector2 should equal (ShapeSelector(3))
       selector3 should equal (ShapeSelector(1)) //SHOULD BE TWO (CCW) OR 3 (CW)
       selector4 should equal (ShapeSelector(2))
     }
 
-  }
-}
-  /*
-  describe("A RectangleShape") {
+    */
 
-    it("can be created from two points") {
-      new RectangleShape(Vector2D(0, 0), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0, 0), Vector2D(100, 100)))
+    it("can be created without attributes") {
+      new RectangleShape(Vector2D(0, 0), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0,0),100,100,0))
     }
 
     it("can be created from 4 coordinates") {
-      new RectangleShape(Vector2D(0, 0), 100, 100, 0, Attributes()) should equal (RectangleShape(0, 0, 100, 100))
+      new RectangleShape(Vector2D(50, 50), 100, 100, 0, Attributes()) should equal (RectangleShape(0, 0, 100, 100))
     }
 
     it("can be moved") {
@@ -111,13 +103,11 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
     it("can be rotated") {
       val s = RectangleShape(0, 0, 100, 100)
-      val t = TransformationMatrix(Vector2D(0, 0), 1).rotate(90)
+      val t = TransformationMatrix(Vector2D(50, 50), 1).rotate(90)
       s.transform(t) should equal(new RectangleShape(Vector2D(50, 50), 100, 100, 90, Attributes()))
     }
-
   }
-   }
-  */
+}
 
 
 
