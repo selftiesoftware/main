@@ -167,7 +167,8 @@ trait Selection extends HasAttributes with MapProxy[Int, (Shape, ShapeSelector)]
   def shapes : Map[Int, Shape]
 
   /**
-   * Transforms the selected shape-parts by replacing the previously stored transformation with the new.
+   * Transforms the selected shape-parts by concatenating the given matrix with the already stored matrix. This
+   * allows for several different transformations on the selection in sequence.
    * @param transformation  The TransformationMatrix to apply to the parts.
    * @return  The Selection with the transformation applied.
    */
@@ -293,7 +294,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
    * @return  The Selection with the transformation applied.
    */
   def transform(transformation: TransformationMatrix) = {
-    this.transformation = transformation
+    this.transformation = this.transformation.concatenate(transformation)
     this
   }
 
