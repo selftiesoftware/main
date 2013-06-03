@@ -89,7 +89,8 @@ trait SiignaRenderer extends Renderer {
   protected val cachedTiles = Array.fill[Option[BufferedImage]](9)(None)
 
   // A boolean value to indicate that the view is zoomed out enough to only need one single tile
-  protected var isSingleTile = true
+  protected def isSingleTile = view.screen.width >= drawing.boundary.transform(view.drawingTransformation).width &&
+                               view.screen.height >= drawing.boundary.transform(view.drawingTransformation).height
 
   // The distance to the top left corner of the image to render, from the top left corner of the screen
   // Two scenarios: Model < Screen   - The model should be placed at the top left corner of the drawing
@@ -115,11 +116,6 @@ trait SiignaRenderer extends Renderer {
    * Executed when a zoom operation have been performed.
    */
   protected def clearTiles() {
-    val boundary = drawing.boundary.transform(view.drawingTransformation)
-
-    // Set the isSingleTile value
-    isSingleTile = view.screen.width > boundary.width && view.screen.height > boundary.height
-
     // Set the new render screen and pan
     renderedPan  = view.pan
 
@@ -264,8 +260,12 @@ trait SiignaRenderer extends Renderer {
   protected def renderEmptyTiles() {
     try {
       // Update the tile positions
+      updateTilePositions()
 
-      if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(cachedTilePositions(C)))
+      // Store the tiles to avoid shared memory
+      val staticTiles = cachedTilePositions.toSeq
+
+      if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(staticTiles(C)))
 
       // Stop the previous thread
       renderingThread.foreach(_.interrupt())
@@ -277,16 +277,16 @@ trait SiignaRenderer extends Renderer {
             val temp = new Array[Option[BufferedImage]](9)
 
             // First render the direct neighbours
-            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(cachedTilePositions(E)))
-            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(cachedTilePositions(S)))
-            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(cachedTilePositions(W)))
-            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(cachedTilePositions(N)))
+            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(staticTiles(E)))
+            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(staticTiles(S)))
+            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(staticTiles(W)))
+            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(staticTiles(N)))
 
             // Render the diagonals
-            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(cachedTilePositions(SE)))
-            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(cachedTilePositions(SW)))
-            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(cachedTilePositions(NW)))
-            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(cachedTilePositions(NE)))
+            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(staticTiles(SE)))
+            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(staticTiles(SW)))
+            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(staticTiles(NW)))
+            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(staticTiles(NE)))
 
             // Set the new tiles
             for (i <- 0 until temp.size) {
@@ -313,7 +313,7 @@ trait SiignaRenderer extends Renderer {
   // The current distance to the active tile center to the center of the view
   protected def tileDelta = Vector2D(tileDeltaX * view.width, tileDeltaY * view.height)
 
-  // Retrieve the rendered tile in the direction given by the tile-vector v
+  // Retrieve the rendered tile in drawing coordinates, translated in the direction given by the tile-vector v
   protected def tile(v : Vector2D) =
     (if (isSingleTile) drawing.boundary.transform(view.drawingTransformation) else view.screen) +
       renderedDelta + Vector2D(view.screen.width * v.x, view.screen.height * v.y) + tileDelta

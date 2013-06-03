@@ -19,7 +19,7 @@
 
 package com.siigna.app.view.native
 
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfter, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 import com.siigna.app.view.{Interface, View}
@@ -29,28 +29,56 @@ import java.awt.Graphics
 /**
  * Tests the [[com.siigna.app.view.native.SiignaRenderer]]
  */
-class SiignaRendererSpec extends FunSpec with ShouldMatchers with SiignaRenderer {
+class SiignaRendererSpec extends FunSpec with ShouldMatchers with SiignaRenderer with BeforeAndAfter {
 
-  var drawing = new Drawing {
-    def boundary = SimpleRectangle2D(0, 0, 100, 100)
-  }
+  var drawing : Drawing { def boundary_=(s : SimpleRectangle2D) } = null
 
-  val view = new View {
-    _screen = SimpleRectangle2D(0, 0, 10, 10)
-    def paint(screenGraphics: Graphics, drawing: Drawing, interface: Option[Interface]) {}
+  var view : View { def setScreen(s : SimpleRectangle2D) } = null
+
+  before {
+    drawing = new Drawing {
+      var _boundary = SimpleRectangle2D(0, 0, 100, 100)
+      def boundary = _boundary
+      def boundary_=(s : SimpleRectangle2D) { _boundary = s }
+    }
+    view = new View {
+      _screen = SimpleRectangle2D(0, 0, 10, 10)
+      def paint(screenGraphics: Graphics, drawing: Drawing, interface: Option[Interface]) {}
+      def setScreen(s : SimpleRectangle2D) {_screen = s}
+    }
   }
 
   describe ("The Siigna Renderer") {
 
-    it ("can calculate the correct positions of the tiles") {
+    it ("can know whether the drawing can be seen entirely in the view") {
+      isSingleTile should equal(false)
+      drawing.boundary = SimpleRectangle2D(4, 4, 6, 6)
+      isSingleTile should equal(true)
+      drawing.boundary = SimpleRectangle2D(0, 0, 10, 10)
+      isSingleTile should equal(true)
+      drawing.boundary = SimpleRectangle2D(-1, -1, 11, 11)
+      isSingleTile should equal(false)
+    }
+
+    it ("can calculate the tiles") {
       renderedDelta should equal (Vector2D(0, 0))
       renderedPan should equal (Vector2D(0, 0))
       tileDeltaX should equal(0)
       tileDeltaY should equal(0)
+      tileDelta should equal(Vector2D(0, 0))
 
-
+      tile(vC)  should equal (SimpleRectangle2D(  0,  0, 10, 10))
+      tile(vNE) should equal (SimpleRectangle2D( 10,-10, 20,  0))
+      tile(vN)  should equal (SimpleRectangle2D(  0,-10, 10,  0))
+      tile(vNW) should equal (SimpleRectangle2D(-10,-10,  0,  0))
+      tile(vW)  should equal (SimpleRectangle2D(-10,  0,  0, 10))
+      tile(vSE) should equal (SimpleRectangle2D( 10, 10, 20, 20))
+      tile(vS)  should equal (SimpleRectangle2D(  0, 10, 10, 20))
+      tile(vSW) should equal (SimpleRectangle2D(-10, 10,  0, 20))
+      tile(vE)  should equal (SimpleRectangle2D( 10,  0, 20, 10))
     }
 
   }
+
 
 }
