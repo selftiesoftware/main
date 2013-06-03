@@ -250,7 +250,9 @@ trait SiignaRenderer extends Renderer {
     val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
 
     //apply the graphics class to the model with g - (adds the changes to the image)
-    drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
+    Drawing(window).foreach(t => if (!Drawing.selection.contains(t._1)) {
+      graphics.draw(t._2.transform(transformation))
+    })
 
     // Return the image
     image
@@ -288,7 +290,7 @@ trait SiignaRenderer extends Renderer {
 
             // Set the new tiles
             for (i <- 0 until temp.size) {
-              if (cachedTiles(i).isEmpty && i != C && cachedTiles(i) != null) {
+              if (cachedTiles(i) != null && cachedTiles(i).isEmpty && i != C) {
                 cachedTiles(i) = temp(i)
               }
             }
@@ -414,6 +416,9 @@ object SiignaRenderer extends SiignaRenderer {
 
   // On action executed
   drawing.addActionListener((_, _) => if (isActive) clearTiles())
+
+  // Whenever the selection changes
+  Drawing.addSelectionListener((_) => if (isActive) clearTiles())
 
   // On pan
   view.addPanListener(v => if (isActive) {

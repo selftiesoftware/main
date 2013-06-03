@@ -179,12 +179,6 @@ trait ActionModel extends HasAttributes {
     }
   }
 
-  /**
-   * The shapes currently in the model.
-   * @return A Map containing shapes.
-   */
-  def shapes = model.shapes
-
   def setAttributes(newAttributes : Attributes) = {
     model = model.copy(attributes = newAttributes)
     this
