@@ -122,13 +122,6 @@ trait SiignaRenderer extends Renderer {
     // Reset the tile delta
     tileDeltaX = 0; tileDeltaY = 0
 
-    // Set the new delta
-    renderedDelta = if (isSingleTile) drawing.boundary.topLeft.transform(view.drawingTransformation)
-    else view.pan - renderedPan
-
-    // Set the new tile deltas
-    updateTilePositions()
-
     // Render the center tile
     if (isSingleTile) {
       cachedTiles(C) = Some(renderModel(drawing.boundary.transform(view.drawingTransformation)))
@@ -258,56 +251,52 @@ trait SiignaRenderer extends Renderer {
    * Renders the empty tiles in the cached tiles asynchronously.
    */
   protected def renderEmptyTiles() {
-    try {
-      // Update the tile positions
-      updateTilePositions()
+    // Update the tile positions
+    updateTilePositions()
 
-      // Store the tiles to avoid shared memory
-      val staticTiles = cachedTilePositions.toSeq
+    // Store the tiles to avoid shared memory
+    val staticTiles = cachedTilePositions.toSeq
 
-      if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(staticTiles(C)))
+    if (cachedTiles(C).isEmpty) cachedTiles(C) = Some(renderModel(staticTiles(C)))
 
-      // Stop the previous thread
-      renderingThread.foreach(_.interrupt())
+    // Stop the previous thread
+    renderingThread.foreach(_.interrupt())
 
-      // Create a new thread
-      val t = new Thread() {
-        override def run() {
-          try {
-            val temp = new Array[Option[BufferedImage]](9)
+    // Create a new thread
+    val t = new Thread() {
+      override def run() {
+        try {
+          val temp = new Array[Option[BufferedImage]](9)
 
-            // First render the direct neighbours
-            if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(staticTiles(E)))
-            if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(staticTiles(S)))
-            if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(staticTiles(W)))
-            if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(staticTiles(N)))
+          // First render the direct neighbours
+          if (cachedTiles(E).isEmpty) temp(E) = Some(renderModel(staticTiles(E)))
+          if (cachedTiles(S).isEmpty) temp(S) = Some(renderModel(staticTiles(S)))
+          if (cachedTiles(W).isEmpty) temp(W) = Some(renderModel(staticTiles(W)))
+          if (cachedTiles(N).isEmpty) temp(N) = Some(renderModel(staticTiles(N)))
 
-            // Render the diagonals
-            if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(staticTiles(SE)))
-            if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(staticTiles(SW)))
-            if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(staticTiles(NW)))
-            if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(staticTiles(NE)))
+          // Render the diagonals
+          if (cachedTiles(SE).isEmpty) temp(SE) = Some(renderModel(staticTiles(SE)))
+          if (cachedTiles(SW).isEmpty) temp(SW) = Some(renderModel(staticTiles(SW)))
+          if (cachedTiles(NW).isEmpty) temp(NW) = Some(renderModel(staticTiles(NW)))
+          if (cachedTiles(NE).isEmpty) temp(NE) = Some(renderModel(staticTiles(NE)))
 
-            // Set the new tiles
-            for (i <- 0 until temp.size) {
-              if (cachedTiles(i) != null && cachedTiles(i).isEmpty && i != C) {
-                cachedTiles(i) = temp(i)
-              }
+          // Set the new tiles
+          for (i <- 0 until temp.size) {
+            if (cachedTiles(i) != null && cachedTiles(i).isEmpty && i != C) {
+              cachedTiles(i) = temp(i)
             }
-          } catch {
-            case e : InterruptedException => // Do nothing
           }
+        } catch {
+          case e : InterruptedException => // Do nothing
         }
       }
-
-      // Set the class variable
-      renderingThread = Some(t)
-
-      // Start the rendering!
-      t.start()
-    } catch {
-      case e : ClassNotFoundException => // Weird exception where Promise$DefaultPromise.class could not be found...
     }
+
+    // Set the class variable
+    renderingThread = Some(t)
+
+    // Start the rendering!
+    t.start()
   }
 
   // The current distance to the active tile center to the center of the view
@@ -384,6 +373,7 @@ trait SiignaRenderer extends Renderer {
       }
     }
 
+    // Set the new tile position
     cachedTilePositions(C) = tile(vC)
     cachedTilePositions(E) = tile(vE)
     cachedTilePositions(S) = tile(vS)
