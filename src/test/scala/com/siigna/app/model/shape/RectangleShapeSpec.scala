@@ -29,9 +29,6 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val t = TransformationMatrix(Vector2D(0,0),1).rotate(90)
       s.transform(t) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
     }
-    */
-
-    /*
 
     it("can be selected by a point") {
       val pTR = Vector2D(20,20)
@@ -45,8 +42,8 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
       val selector1 = r.getSelector(pTR)
       val selector2 = r.getSelector(pTL)
-      val selector3 = r.getSelector(pBR)
-      val selector4 = r.getSelector(pBL)
+      val selector3 = r.getSelector(pBL)
+      val selector4 = r.getSelector(pBR)
 
       /*
 
@@ -57,18 +54,27 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
        2   3
 
        */
-
-      selector1 should equal (ShapeSelector(1))
-      selector2 should equal (ShapeSelector(0))
+      selector1 should equal (ShapeSelector(0))
+      selector2 should equal (ShapeSelector(1))
       selector3 should equal (ShapeSelector(2))
       selector4 should equal (ShapeSelector(3))
     }
 
+    /* ROTATED 90 DEG. CLOCKWISE
+
+    2   1
+    *   *
+
+    *   *
+    3   0
+
+    */
+
     it("can part select a rotated rectangle") {
       val pTR = Vector2D(20,20)
       val pTL = Vector2D(-20,20)
-      val pBR = Vector2D(20,-20)
       val pBL = Vector2D(-20,-20)
+      val pBR = Vector2D(20,-20)
       val w = 40.0
       val h = 40.0
       val center = Vector2D(0,0)
@@ -76,23 +82,27 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
       val selector1 = r.getSelector(pTR)
       val selector2 = r.getSelector(pTL)
-      val selector3 = r.getSelector(pBR)
-      val selector4 = r.getSelector(pBL)
+      val selector3 = r.getSelector(pBL)
+      val selector4 = r.getSelector(pBR)
 
-      selector1 should equal (ShapeSelector(0)) //SHOULD BE 2 IF CW ROTATION
-      selector2 should equal (ShapeSelector(3))
-      selector3 should equal (ShapeSelector(1)) //SHOULD BE TWO (CCW) OR 3 (CW)
-      selector4 should equal (ShapeSelector(2))
+      selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
+      selector2 should equal (ShapeSelector(2))
+      selector3 should equal (ShapeSelector(3))
+      selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
     }
 
-    */
+
 
     it("can be created without attributes") {
       new RectangleShape(Vector2D(0, 0), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0,0),100,100,0))
     }
 
-    it("can be created from 4 coordinates") {
+    it("can be created from four coordinates") {
       new RectangleShape(Vector2D(50, 50), 100, 100, 0, Attributes()) should equal (RectangleShape(0, 0, 100, 100))
+    }
+
+    it("can be created from two vectors") {
+      new RectangleShape(Vector2D(50, 50), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0, 0), Vector2D(100, 100)))
     }
 
     it("can be moved") {
@@ -100,12 +110,36 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val t = TransformationMatrix(Vector2D(10, 10), 1)
       s.transform(t) should equal (RectangleShape(10, 10, 110, 110))
     }
+    */
+    it("can draw the segments of a rotated rectangle") {
+      val w = 40.0
+      val h = 40.0
+      val center = Vector2D(0,0)
+      val r = RectangleShape(center, w,h, 45, Attributes())
 
-    it("can be rotated") {
-      val s = RectangleShape(0, 0, 100, 100)
-      val t = TransformationMatrix(Vector2D(50, 50), 1).rotate(90)
-      s.transform(t) should equal(new RectangleShape(Vector2D(50, 50), 100, 100, 90, Attributes()))
+      val pTop = Vector2D(-14,14)
+      //val pTL = Vector2D(-20,20)
+      //val pBL = Vector2D(-20,-20)
+      //val pBR = Vector2D(20,-20)
+
+      val selector1 = r.getSelector(pTop)
+      //val selector2 = r.getSelector(pTL)
+      //val selector3 = r.getSelector(pBL)
+      //val selector4 = r.getSelector(pBR)
+
+
+      val segment1 = r.getPart(selector1)
+      //val segment2 =
+      //val segment3 =
+      //val segment4 =
+
+      println("segment1: "+segment1)
+      //selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
+      //selector2 should equal (ShapeSelector(2))
+      //selector3 should equal (ShapeSelector(3))
+      //selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
     }
+
   }
 }
 

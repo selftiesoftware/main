@@ -37,7 +37,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def getPart(part : ShapeSelector) = part match {
     case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 3")
+      println("sel shape part 0")
       LineShape(p2, p3.transform(t), attributes)
       LineShape(p0, p3.transform(t), attributes)
     }))
@@ -52,17 +52,20 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       LineShape(p3, p2.transform(t), attributes)
     }))
     case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 0")
+      println("sel shape part 3")
       LineShape(p3, p0.transform(t), attributes)
       LineShape(p1, p0.transform(t), attributes)
     }))
     case FullShapeSelector => Some(new PartialShape(this, transform))
-    case _ => None
+    case _ => {
+      println("part: "+part)
+      None
+    }
   }
 
+  //TODO: allow returning selected segments, not just points.
   def getSelector(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
-
     //find out if a point in the rectangle is close. if so, return true and the point's bit value
     def isCloseToPoint(s : Segment2D, b : BitSet) : (Boolean, BitSet) = {
       val points = List(s.p1, s.p2)
@@ -84,7 +87,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
     //find out if a segment of the rectangle is close. if so, return true, the segment, and the segment's bit value
     def isCloseToSegment : (Boolean, Option[Segment2D], BitSet) = {
-      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p3,p0))
+      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p0,p3))
       var closeSegment : Option[Segment2D] = None
       var hasCloseSegment = false
       var bit = BitSet()
@@ -97,7 +100,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       }
       (hasCloseSegment, closeSegment, bit)
     }
-
     //if the distance to the rectangle is more than the selection distance:
     if (geometry.distanceTo(p) > selectionDistance) {
       //If shape is not within selection distance of point, return Empty selector
@@ -109,9 +111,14 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
         val segment = isCloseToSegment._2.get
         val segmentBitSet = isCloseToSegment._3
         //ok, the point is close to a segment. IF one of the endpoints are close, return its bit value:
-        if(isCloseToPoint(segment, segmentBitSet)._1 == true) BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
+        if(isCloseToPoint(segment, segmentBitSet)._1 == true) {
+          BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
+        }
         //if no point is close, return the bitset of the segment:
-        else BitSetShapeSelector(isCloseToSegment._3)
+        else {
+          println("return segment here!")
+          BitSetShapeSelector(isCloseToSegment._3)
+        }
       //if no point is close, return the segment:
       } else {
         EmptyShapeSelector
@@ -160,7 +167,9 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       } else EmptyShapeSelector
     } else EmptyShapeSelector
   }
+
   //select all segments of the rectangle (shown as blue lines)
+  //TODO: add part shapex
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
     case _ => None
