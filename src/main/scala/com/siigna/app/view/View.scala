@@ -43,15 +43,10 @@ trait View {
   protected var _mousePosition = Vector2D(0, 0)
 
   /**
-   * A pan vector originating in the top-left corner of the screen. Private because the public pan has it's (0,0)
+   * A pan vector originating in the top-left corner of the screen. Protected because the public pan has it's (0,0)
    * in the center of the screen, which is much more intuitive.
    */
   protected var _pan : Vector2D = Vector2D(0, 0)
-
-  /**
-   * The screen describing the dimensions of the canvas the view can draw upon.
-   */
-  protected var _screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, 1, 1)
 
   /**
    * The time it takes to draw one frame.
@@ -218,11 +213,11 @@ trait View {
 
   /**
    * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
-   * screen of the application/applet. A [[com.siigna.util.geom.Vector]] of (0, 0) means that the center of the
+   * screen of the application/applet. A [[com.siigna.util.geom.Vector2D]] of (0, 0) means that the center of the
    * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
    * that the center of the drawing is in the bottom right of the screen.
    */
-  def pan : Vector2D = _pan + Vector2D(center.x, center.y)
+  def pan : Vector2D = Vector2D(center.x + _pan.x, center.y + _pan.y)
 
   /**
    * Pans the view by the given delta.
@@ -281,17 +276,6 @@ trait View {
   }
 
   /**
-   * Resize the view to the given boundary.
-   */
-  protected[app] def resize(width : Int, height : Int) {
-    // Resize the canvas
-    screen = SimpleRectangle2D(0, 0, width, height)
-
-    // Notify the listeners
-    listenersResize.foreach(_(screen))
-  }
-
-  /**
    * Sets the mouse position of Siigna. Only accessible by the app package.
    * @param v  The position of the mouse.
    */
@@ -305,13 +289,7 @@ trait View {
    * thus have a negative y-axis where up is down and vice verse.
    * @return  A [[com.siigna.util.geom.SimpleRectangle2D]] from upper left corner (0, 0) to bottom right (width, height)
    */
-  def screen : SimpleRectangle2D = _screen
-
-  /**
-   * Sets the current screen to the given rectangle.
-   * @param rectangle  The [[com.siigna.util.geom.SimpleRectangle2D]] describing the dimensions of the canvas.
-   */
-  protected def screen_=(rectangle : SimpleRectangle2D) { _screen = rectangle }
+  def screen : SimpleRectangle2D
 
   /**
    * Returns the width of the view in screen-coordinates.
@@ -420,6 +398,19 @@ trait View {
  */
 object View extends View {
 
+  /**
+   * The screen describing the dimensions of the canvas the view can draw upon.
+   */
+  protected var _screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, 1, 1)
+
+  def screen : SimpleRectangle2D = _screen
+
+  /**
+   * Sets the current screen to the given rectangle.
+   * @param rectangle  The [[com.siigna.util.geom.SimpleRectangle2D]] describing the dimensions of the canvas.
+   */
+  protected def screen_=(rectangle : SimpleRectangle2D) { _screen = rectangle }
+
   // The canvas of the View
   private var _canvas : Option[Canvas] = None
 
@@ -441,7 +432,7 @@ object View extends View {
 
     try {
       // Paint the renderer
-      renderer.paint(graphics)
+      renderer.paint(graphics, drawing, this)
     } catch {
       case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
@@ -483,6 +474,17 @@ object View extends View {
     // Update the fps counter
     fpsTimeToDrawLast = fpsTimeToDraw
     fpsTimeToDraw = System.currentTimeMillis() - fpsStart
+  }
+
+  /**
+   * Resize the view to the given boundary.
+   */
+  protected[app] def resize(width : Int, height : Int) {
+    // Resize the canvas
+    screen = SimpleRectangle2D(0, 0, width, height)
+
+    // Notify the listeners
+    listenersResize.foreach(_(screen))
   }
 
   /**
