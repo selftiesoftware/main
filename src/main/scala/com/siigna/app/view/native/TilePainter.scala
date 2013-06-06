@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * <p>
  *   A TilePainter works asynchronously via the scala 2.10 future-API. Each time a TilePainter is created it tries to
  *   render its [[com.siigna.app.view.native.Tile]]s in the background. As soon as the painter is ready for use any
- *   callbacks defined via the [[com.siigna.app.view.native.TilePainter.onReady]] will be called.
+ *   callbacks defined via the [[com.siigna.app.view.native.TilePainter.onComplete]] will be called.
  * </p>
  *
  * <p>
@@ -60,7 +60,7 @@ sealed trait TilePainter {
    * @param func  The callback function.
    * @tparam U  The return-type of function `func`
    */
-  def onReady[U](func : Try[TilePainter] => U)
+  def onComplete[U](func : Try[TilePainter] => U)
 
   /**
    * Draws the painter with the given [[com.siigna.app.view.Graphics]], [[com.siigna.app.model.Drawing]] and
@@ -81,23 +81,19 @@ sealed trait TilePainter {
 class SingleTilePainter(view : View, drawing : Drawing) extends TilePainter {
 
   protected val centerTile = new Tile(drawing, view, drawing.boundary.transform(view.drawingTransformation))
-  protected val topLeft = drawing.boundary.transform(view.drawingTransformation).topLeft
 
-  def interrupt: Boolean = centerTile.image.tryFailure(new InterruptedException)
+  def interrupt: Boolean = centerTile.interrupt()
 
-  def onReady[U](func: (Try[TilePainter]) => U) {
-    centerTile.image.future.onComplete(_ match {
-      case Success(_) => func(Success(this))
-      case Failure(t) => func(Failure[TilePainter](t))
-    })
+  def onComplete[U](func : Try[TilePainter] => U) {
+    centerTile.onComplete{ t => Success(t.map(_ => this)) }
   }
 
   def paint(graphics : Graphics, pan : Vector2D) {
-    if (centerTile.image.isCompleted) {
-      centerTile.image.future.foreach( image =>
-        graphics.AWTGraphics.drawImage(image, (topLeft.x + pan.x).round.toInt, (topLeft.y + pan.y).round.toInt, null)
-      )
-    }
+    val x = pan.x.round.toInt
+    val y = pan.y.round.toInt
+    centerTile.image.foreach( image =>
+      graphics.AWTGraphics.drawImage(image, x, y, null)
+    )
   }
 }
 
@@ -136,8 +132,8 @@ class MultiTilePainter(view : View, drawing : Drawing) extends TilePainter {
 
   def interrupt: Boolean = false
 
-  def onReady[U](func: (Try[TilePainter]) => U) {
-
+  def onComplete[U](func : Try[TilePainter] => U) {
+    // TODO
   }
 
   def paint(graphics : Graphics, pan : Vector2D) {

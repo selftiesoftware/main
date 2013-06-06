@@ -123,7 +123,7 @@ trait View {
    * drawing-coordinates <i>to</i> device-coordinates.
    * @return  A [[com.siigna.util.geom.TransformationMatrix]]
    */
-  def drawingTransformation = TransformationMatrix(pan, zoom).flipY
+  def drawingTransformation = TransformationMatrix(pan + center, zoom).flipY
 
   /**
    * Returns the center of Siigna in device-coordinates (see documentation for the [[com.siigna.app.view.View]]),
@@ -217,7 +217,7 @@ trait View {
    * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
    * that the center of the drawing is in the bottom right of the screen.
    */
-  def pan : Vector2D = Vector2D(center.x + _pan.x, center.y + _pan.y)
+  def pan : Vector2D = Vector2D(_pan.x, _pan.y)
 
   /**
    * Pans the view by the given delta.
@@ -321,7 +321,7 @@ trait View {
       if ((zoom > 0.000001 || zoomDelta < 0)) {
         zoom *= zoomFactor
       }
-      _pan = (pan - point) * zoomFactor + point - center
+      _pan = ((pan - point + center) * zoomFactor) + point - center
 
       // Notify the listeners
       listenersZoom.foreach(_(zoom))

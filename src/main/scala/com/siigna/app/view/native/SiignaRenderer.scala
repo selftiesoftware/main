@@ -28,6 +28,7 @@ import com.siigna.util.Implicits._
 import com.siigna.util.geom.{SimpleRectangle2D, Rectangle2D}
 import scala.concurrent.{future, promise, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Success
 
 /**
  * <p>
@@ -46,8 +47,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
  */
 trait SiignaRenderer extends Renderer {
 
-  // The background-image of the screen
+  // The background-image promise that paints the background of the screen
   private var background : Promise[BufferedImage] = promise[BufferedImage]()
+
+  // The image itself for synchronous access
+  private var backgroundImage : Option[BufferedImage] = None
 
   /**
    * The active [[com.siigna.app.view.native.TilePainter]] capable of actually painting the model.
@@ -67,10 +71,19 @@ trait SiignaRenderer extends Renderer {
   // Simply forwards the painting to the active painter
   def paint(graphics : Graphics, drawing : Drawing, view : View) {
     // Draw the background (if any)
-    background.future.foreach(image=> graphics.AWTGraphics.drawImage(image, 0, 0, null))
+    backgroundImage.foreach(image => graphics.AWTGraphics.drawImage(image, 0, 0, null))
+
+    // Draw a white background for the drawing-area
+    val boundary = drawing.boundary.transform(View.drawingTransformation)
+    graphics.AWTGraphics.setColor(Siigna.color("colorBackground").getOrElse(java.awt.Color.white))
+    graphics.AWTGraphics.clearRect(boundary.xMin.toInt, boundary.yMin.toInt,
+                                   boundary.width.toInt, boundary.height.toInt)
+    graphics.AWTGraphics.setColor(Siigna.color("colorBackgroundBorder").getOrElse(java.awt.Color.gray))
+    graphics.drawRectangle(boundary.bottomLeft, boundary.topRight)
 
     // Draw the painter
-    painter.foreach(_.paint(graphics, view.pan))
+    val pan = boundary.bottomLeft
+    painter.foreach(_.paint(graphics, pan))
   }
 
   /**
@@ -140,9 +153,12 @@ object SiignaRenderer extends SiignaRenderer {
   val drawing = Drawing
   val view = View
 
+  drawing.addActionListener((_, _) => if (isActive) updatePainter())
+  drawing.addSelectionListener(_   => if (isActive) updatePainter())
+
   // Adds a zoom-listener and resize-listener so we can tell if we are still within one tile
-  View.addZoomListener((zoom) => if (isActive) (updatePainter()) )
-  View.addResizeListener((screen) => if (isActive) {
+  view.addZoomListener((zoom) => if (isActive) (updatePainter()) )
+  view.addResizeListener((screen) => if (isActive) {
     // Update the painter
     updatePainter()
 
@@ -156,6 +172,12 @@ object SiignaRenderer extends SiignaRenderer {
     background = p completeWith future {
       renderBackground(screen)
     }
+
+    // Store the background when done
+    background.future.onComplete(_ match {
+      case Success(i) => backgroundImage = Some(i)
+      case _ =>
+    })
   } )
 
 }

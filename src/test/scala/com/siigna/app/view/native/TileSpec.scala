@@ -46,7 +46,7 @@ class TileSpec extends FunSpec with ShouldMatchers {
     val tile = new Tile(drawing, view, view.screen)
 
     it ("can be created with a drawing, view and rectangle") {
-      tile.image.future.foreach { image =>
+      tile.image.foreach { image =>
         image.getWidth should equal (2)
         image.getHeight should equal (3)
       }
