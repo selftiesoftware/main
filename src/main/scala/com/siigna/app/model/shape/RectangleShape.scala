@@ -24,11 +24,11 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   type T = RectangleShape
 
   //rotation needs to be negative to make for clockwise rotation of the rectangle
-  val geometry = ComplexRectangle2D(center,width,height,rotation)
-  val p0 = geometry.p0 //BitSet 3
-  val p1 = geometry.p1 //BitSet 2
-  val p2 = geometry.p2 //BitSet 1
-  val p3 = geometry.p3 //BitSet 0
+  val geometry : ComplexRectangle2D = ComplexRectangle2D(center,width,height,rotation)
+  val p0 = geometry.p0 //BitSet 0
+  val p1 = geometry.p1 //BitSet 1
+  val p2 = geometry.p2 //BitSet 2
+  val p3 = geometry.p3 //BitSet 3
 
   def delete(part : ShapeSelector) = part match {
     case BitSetShapeSelector(_) | FullShapeSelector => Nil
@@ -36,29 +36,12 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   }
 
   def getPart(part : ShapeSelector) = part match {
-    case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p0.transform(t), p3, attributes)
-      LineShape(p0.transform(t), p1, attributes)
-    }))
-    case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p0, p1.transform(t), attributes)
-      LineShape(p2, p1.transform(t), attributes)
-    }))
-    case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p1, p2.transform(t), attributes)
-      LineShape(p3, p2.transform(t), attributes)
-    }))
-    case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      LineShape(p2, p3.transform(t), attributes)
-      LineShape(p0, p3.transform(t), attributes)
-    }))
-    case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => None
   }
 
+  //TODO: allow returning selected segments, not just points.
   def getSelector(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
-
     //find out if a point in the rectangle is close. if so, return true and the point's bit value
     def isCloseToPoint(s : Segment2D, b : BitSet) : (Boolean, BitSet) = {
       val points = List(s.p1, s.p2)
@@ -80,7 +63,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
     //find out if a segment of the rectangle is close. if so, return true, the segment, and the segment's bit value
     def isCloseToSegment : (Boolean, Option[Segment2D], BitSet) = {
-      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p3,p0))
+      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p0,p3))
       var closeSegment : Option[Segment2D] = None
       var hasCloseSegment = false
       var bit = BitSet()
@@ -93,7 +76,6 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       }
       (hasCloseSegment, closeSegment, bit)
     }
-
     //if the distance to the rectangle is more than the selection distance:
     if (geometry.distanceTo(p) > selectionDistance) {
       //If shape is not within selection distance of point, return Empty selector
@@ -105,9 +87,14 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
         val segment = isCloseToSegment._2.get
         val segmentBitSet = isCloseToSegment._3
         //ok, the point is close to a segment. IF one of the endpoints are close, return its bit value:
-        if(isCloseToPoint(segment, segmentBitSet)._1 == true) BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
+        if(isCloseToPoint(segment, segmentBitSet)._1 == true) {
+          BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
+        }
         //if no point is close, return the bitset of the segment:
-        else BitSetShapeSelector(isCloseToSegment._3)
+        else {
+          println("return segment here!")
+          BitSetShapeSelector(isCloseToSegment._3)
+        }
       //if no point is close, return the segment:
       } else {
         EmptyShapeSelector
@@ -156,7 +143,9 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       } else EmptyShapeSelector
     } else EmptyShapeSelector
   }
+
   //select all segments of the rectangle (shown as blue lines)
+  //TODO: add part shapex
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
     case _ => None
@@ -178,6 +167,11 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
   def transform(t : TransformationMatrix) =
-    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation, attributes)
+    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation + t.rotation, attributes)
+}
 
+object RectangleShape {
+  def apply(center : Vector2D, width : Double, height : Double, rotation : Double) : RectangleShape = new RectangleShape(center, width, height, rotation,Attributes())
+  def apply(p1 : Vector2D, p2 : Vector2D) : RectangleShape = new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0,Attributes())
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : RectangleShape = apply(Vector2D(x1,y1),Vector2D(x2,y2))
 }
