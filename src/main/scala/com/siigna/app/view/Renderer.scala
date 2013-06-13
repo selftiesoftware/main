@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
+ */
+
 package com.siigna.app.view
 
 /**
@@ -26,6 +45,14 @@ package com.siigna.app.view
  * @todo Introduce interfaces for selections and displays.
  */
 trait Renderer {
+
+  /**
+   * Examines whether this [[com.siigna.app.view.Renderer]] is active, meaning that it is being used by the
+   * [[com.siigna.app.view.View]]. This could be useful for determining if the renderer should continue to cache
+   * information whenever external calls, such as callbacks from listeners, arrive.
+   * @return  A boolean indicating if the renderer is current in use (true) or not (false).
+   */
+  def isActive : Boolean = View.renderer.exists(_ == this)
 
   /**
    * Renders the rendered contents of the renderer (...). This method is not called <code>render</code> to illustrate

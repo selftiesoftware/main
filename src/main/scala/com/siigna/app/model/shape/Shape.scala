@@ -1,35 +1,48 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model.shape
 
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.geom._
+import com.siigna.app.model.selection.ShapeSelector
 
 /**
- * A Shape that (basically) can be drawn and transformed.
- * <br />
- * Shapes are what Siigna is made of. Every action performed by the user on the server is executed upon shapes,
- * and the "database of Siigna" - the [[com.siigna.app.model.Model]] - consists of Shapes, that are taken and used
- * by the [[com.siigna.app.view.View]] the create the visible parts of Siigna, to let the users see what they're editing.
- * <br />
- * Every Shape has a set of [[com.siigna.util.collection.Attributes]] that describes their behaviour. Most shapes have
- * a Color-attribute that modifies the color of the shape when drawn, and a [[com.siigna.app.model.shape.LineShape]]
- * for instance can have a LineWidth attribute which determines how thick the line are.
- * <br />
- * Beneath every shape lies a geometric representation of the shape in a 2-dimensional euclidean space. The
- * [[com.siigna.util.geom.Geometry2D]] is used to determine various geometric properties such as intersections,
- * length, center-point(s) and so forth.
+ * A Shape that can be drawn and transformed.
  *
- * <br />
+ * <p>
+ *   Shapes are what Siigna is made of. Every action performed by the user and on the server is executed upon shapes,
+ *   and the "database of Siigna" - the [[com.siigna.app.model.Model]] - consists of Shapes, that are taken and used
+ *   by the [[com.siigna.app.view.View]] to create the visible parts of Siigna, so the users can see what they're doing.
+ * </p>
+ * <p>
+ *   Every Shape has a set of [[com.siigna.util.collection.Attributes]] that describes their behaviour. Most shapes have
+ *   a Color-attribute that modifies the color of the shape when drawn, and a [[com.siigna.app.model.shape.LineShape]]
+ *   for instance can have a LineWidth attribute which determines how thick the line are.
+ * </p>
+ * <p>
+ *   Beneath every shape lies a geometric representation of the shape in a 2-dimensional euclidean space. The
+ *   [[com.siigna.util.geom.Geometry2D]] is used to determine various geometric properties such as intersections,
+ *   length, center-points and so forth.
+ * </p>
+ *
+ * <p>
  * The shape hierarchy looks like this:
  * <pre>
  *
@@ -63,19 +76,24 @@ import com.siigna.util.geom._
  *                 |
  *                 +--- TextShape
  * </pre>
+ * </p>
+ *
+ * @see [[com.siigna.app.model.Model]], [[com.siigna.app.view.View]], [[com.siigna.util.geom.Geometry]],
+ *     [[com.siigna.util.geom.Geometry2D]]
  */
 trait Shape extends HasAttributes {
 
   type T <: Shape
 
   /**
-   * Retrieves a part of the shape from the given selector, if a meaningful part can be extracted.
-   * A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
-   * operations on specific parts of a shape.
-   * @param selector  The selector with which to retrieve part of the current shape.
-   * @return  Some[PartialShape] if a part can be extracted, None otherwise.
+   * Deletes the part of the shape in the current selection and return the resulting shape(s). If the old shape is
+   * split into two or more the result may be more than one shape. If removing the part means that the shape looses
+   * its  meaning the method returns an empty list.
+   * @param selector  The selector describing the parts of the shape to remove.
+   * @return  A sequence of new [[com.siigna.app.model.shape.Shape]](s). The returned shapes might not be of the same
+   *          type as the initial shape. If no meaningful shapes remain the sequence is empty.
    */
-  def apply(selector : ShapePart) : Option[PartialShape]
+  def delete(selector : ShapeSelector) : Seq[Shape]
 
   /**
    * Calculates the closest distance to the shape from the given point.
@@ -99,38 +117,39 @@ trait Shape extends HasAttributes {
   lazy val boundary : Rectangle2D = geometry.boundary
 
   /**
-   * Deletes a part of the shape. If removing the part means that the shape looses its meaning the method returns an
-   * empty list. If, however, removing the part means splitting the shape up in several shapes, the method returns
-   * several shapes that should be created when the part is removed.
-   */
-  def delete(part : ShapePart) : Seq[T]
-
-  /**
    * The basic geometric object for the shape.
    */
   def geometry : Geometry2D
 
   /**
-   * Returns the entire shape, so it can be manipulated dynamically.
-   * @return  A [[com.siigna.app.model.shape.FullShapePart]].
+   * Retrieves a part of the shape from the given selector. If no meaningful part can be extracted, an empty part
+   * is returned. A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
+   * operations on specific parts of a shape.
+   * @param selector  The selector with which to retrieve part of the current shape.
+   * @return  Some[PartialShape] if a part can be extracted, None otherwise.
    */
-  def getPart = FullShapePart
+  def getPart(selector : ShapeSelector) : Option[PartialShape]
 
   /**
-   * Gets part of the shape by a rectangle. If the rectangle encloses the entire shape then return everything, but if
-   * only a single point is enclosed (for example) then return that point and that point only. If nothing is
-   * enclosed, then return None. This comes in handy when a selection-box sweeps across the model.
-   * @param rect  The rectangle to base the selection on.
-   * @return  The shape (or parts of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapePart]].
-   */
-  def getPart(rect : SimpleRectangle2D) : ShapePart
-
-  /**
-   * Gets part of the shape by a single point. The part of the shape that is closest to that point will be selected.
+   * Gets a [[com.siigna.app.model.selection.ShapeSelector]] that can be used to retrieve a sub-part of this shape
+   * that is closest to the given point. If the entire shape is close, we return a
+   * [[com.siigna.app.model.selection.FullShapeSelector]]. If nothing is close we return a
+   * [[com.siigna.app.model.selection.EmptyShapeSelector]].
    * @param point  The point to base the selection on.
-   * @return  The shape (or a part of it - or nothing at all) wrapped in a [[com.siigna.app.model.shape.ShapePart]].
+   * @return  A [[com.siigna.app.model.selection.ShapeSelector]].
    */
-  def getPart(point : Vector2D) : ShapePart
+  def getSelector(point : Vector2D) : ShapeSelector
+
+  /**
+   * Gets a [[com.siigna.app.model.selection.ShapeSelector]] that can be used to retrieve a sub-part of this shape
+   * that is contained within the given rectangle, <code>rect</code>. If the rectangle encloses the entire shape then
+   * return everything, but if only a single point is enclosed (for example) then return that point and that point
+   * only. If nothing is enclosed, then we return the [[com.siigna.app.model.selection.EmptyShapeSelector]]. This
+   * comes in handy when a selection-box sweeps across the model.
+   * @param rect  The rectangle to base the selection on.
+   * @return  A [[com.siigna.app.model.selection.ShapeSelector]].
+   */
+  def getSelector(rect : SimpleRectangle2D) : ShapeSelector
 
   /**
    * Retrieves a sub-selection as a shape.
@@ -139,14 +158,15 @@ trait Shape extends HasAttributes {
    * @param selector  The selector to base the selection on.
    * @return  Some if a shape could be extracted by the operation, None otherwise.
    */
-  def getShape(selector : ShapePart) : Option[Shape]
+  def getShape(selector : ShapeSelector) : Option[Shape]
 
   /**
-   * Retrives the affected points from the given ShapePart
+   * Retrieves the points that are included in the selection described by the given
+   * [[com.siigna.app.model.selection.ShapeSelector]].
    * @param selector  The selector, i. e. the combination of the shape to be retrieved in points.
    * @return  A sequence of points. Can be empty.
    */
-  def getVertices(selector : ShapePart) : Seq[Vector2D]
+  def getVertices(selector : ShapeSelector) : Seq[Vector2D]
 
   /**
    * Completely replace the attributes of the shape with the given attributes.
@@ -214,7 +234,7 @@ trait CollectionShape[G <: Shape] extends Shape with Iterable[G] {
 
 
 /**
- * A shape that's closed, that is to say a shape that encases a closed space.
+ * A shape that's closed, that is, a shape that encases a closed space.
  */
 trait ClosedShape extends Shape {
 

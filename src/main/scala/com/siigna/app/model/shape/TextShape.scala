@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model.shape
@@ -17,8 +25,7 @@ import java.awt.font._
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom._
 import com.siigna.app.Siigna
-import com.siigna.app.model.shape.TextShape.Part
-import com.siigna.app.view.View
+import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
 /**
  * This class represents a text-string.
@@ -49,21 +56,18 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
-  def apply(part : ShapePart) = Some(new PartialShape(this, transform))
-
   def boundaryPosition    = Vector2D(layout.getBounds.getX, layout.getBounds.getY)
 
   def boundarySize        = Vector2D(layout.getBounds.getWidth, layout.getBounds.getHeight)
 
-  def delete(part: ShapePart) = part match {
-    case FullShapePart => Nil
+  def delete(part: ShapeSelector) = part match {
+    case FullShapeSelector => Nil
     case _ => Seq(this)
   }
 
   def fontSize            = attributes double("FontSize") getOrElse(12.0)
 
   def font                = new Font("Lucida Sans Typewriter", Font.PLAIN, (fontSize * scale * GlobalFontScale) toInt)
-
 
   /**
    * Defines the layout of the shape.
@@ -81,32 +85,35 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     new TextLayout(text, font, new FontRenderContext(transformation.t, true, true))
   }
 
-  def getPart(rect: SimpleRectangle2D) = {
+
+  def getPart(part : ShapeSelector) = Some(new PartialShape(this, transform))
+
+  def getSelector(rect: SimpleRectangle2D) = {
     if (rect.intersects(geometry)) {
-      Part(1.asInstanceOf[Byte])
-      FullShapePart
+     ShapeSelector(1)
+      FullShapeSelector
     }
     else {
-      Part(0.asInstanceOf[Byte])
-      EmptyShapePart
+     ShapeSelector(0)
+      EmptyShapeSelector
     }
   }
 
-  def getPart(point: Vector2D) = {
+  def getSelector(point: Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     if (distanceTo(point) < selectionDistance) {
-      Part(1.asInstanceOf[Byte])
-      FullShapePart
+     ShapeSelector(1)
+      FullShapeSelector
     }
     else {
-      Part(0.asInstanceOf[Byte])
-      EmptyShapePart
+     ShapeSelector(0)
+      EmptyShapeSelector
     }
   }
 
-  def getShape(s : ShapePart) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+  def getShape(s : ShapeSelector) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
 
-  def getVertices(selector: ShapePart) = throw new UnsupportedOperationException("Not yet implemented")
+  def getVertices(selector: ShapeSelector) = throw new UnsupportedOperationException("Not yet implemented")
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
@@ -114,7 +121,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
   def transform(transformation : TransformationMatrix) = {
     TextShape(text,
               position.transform(transformation),
-              scale * transformation.scaleFactor,
+              scale * transformation.scale,
               attributes)
   }
 }
@@ -122,12 +129,9 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 object TextShape
 {
 
-  sealed case class Part(part : Byte) extends ShapePart
-
   def apply(text : String, position : Vector2D)                    = new TextShape(text, position, 1.0, Attributes())
   def apply(text : String, position : Vector2D, attr : Attributes) = new TextShape(text, position, 1.0, attr)
   def apply(text : String, position : Vector2D, scale : Double)    = new TextShape(text, position, scale, Attributes())
-
 
 
 }

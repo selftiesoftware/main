@@ -1,23 +1,28 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model.shape
 
-//import com.siigna.util.dxf.DXFSection
-import com.siigna.util.geom.{SimpleRectangle2D, Arc2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, Arc2D}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
-import com.siigna._
-import app.model.shape.ArcShape.Part
-import scala.Some
+import com.siigna.app.model.selection._
 
 /**
  * This class draws an arc.
@@ -42,47 +47,42 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   val geometry = Arc2D(center, radius, startAngle, angle)
 
-  def apply(part : ShapePart) = part match {
-    case FullShapePart => Some(new PartialShape(this, transform))
-    case Part(x : Byte) => {
-      // Calculate the mathematical arc as a function to a given transformation matrix
-      val arc = (t : TransformationMatrix) => x match {
-        case 1 => Arc2D(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint)
-        case 2 => Arc2D(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint)
-        case 3 => Arc2D(geometry.startPoint.transform(t), geometry.midPoint.transform(t), geometry.endPoint)
-        case 4 => Arc2D(geometry.startPoint, geometry.midPoint, geometry.endPoint.transform(t))
-        case 5 => Arc2D(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint.transform(t))
-        case 6 => Arc2D(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint.transform(t))
-        case _ => geometry
-      }
-      // return the partial shape
-      Some(new PartialShape(this, (t : TransformationMatrix) => ArcShape(arc(t))))
-    }
-    case _ => None
-  }
-
-  def delete(part: ShapePart) = part match {
-    case Part(_) | FullShapePart => Nil
+  def delete(part: ShapeSelector) = part match {
+    case BitSetShapeSelector(_) | FullShapeSelector => Nil
     case _ => Seq(this)
   }
 
-  def getPart(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapePart else EmptyShapePart
+  def getPart(part : ShapeSelector) = {
+    val t : Option[TransformationMatrix => Shape] = part match {
+      case FullShapeSelector => Some(transform)
+      case ShapeSelector(0)    => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint))
+      case ShapeSelector(1)    => Some(t => ArcShape(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint))
+      case ShapeSelector(0, 1) => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint.transform(t), geometry.endPoint))
+      case ShapeSelector(2)    => Some(t => ArcShape(geometry.startPoint, geometry.midPoint, geometry.endPoint.transform(t)))
+      case ShapeSelector(0, 2) => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint.transform(t)))
+      case ShapeSelector(1, 2) => Some(t => ArcShape(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint.transform(t)))
+      case _ => None
+    }
+    t.map((f : TransformationMatrix => Shape) => new PartialShape(this, f))
+  }
 
-  def getPart(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapePart else EmptyShapePart
+  def getSelector(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapeSelector else EmptyShapeSelector
+
+  def getSelector(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapeSelector else EmptyShapeSelector
   
-  def getShape(s : ShapePart) = s match {
-    case FullShapePart => Some(this)
+  def getShape(s : ShapeSelector) = s match {
+    case FullShapeSelector => Some(this)
     case _ => None
   }
 
-  def getVertices(selector: ShapePart) = selector match {
-    case FullShapePart        => geometry.vertices
-    case Part(1) => Seq(geometry.startPoint)
-    case Part(2) => Seq(geometry.midPoint)
-    case Part(3) => Seq(geometry.startPoint + geometry.midPoint)
-    case Part(4) => Seq(geometry.endPoint)
-    case Part(5) => Seq(geometry.startPoint + geometry.endPoint)
-    case Part(6) => Seq(geometry.midPoint + geometry.endPoint)
+  def getVertices(selector: ShapeSelector) = selector match {
+    case FullShapeSelector   => geometry.vertices
+    case ShapeSelector(0)    => Seq(geometry.startPoint)
+    case ShapeSelector(1)    => Seq(geometry.midPoint)
+    case ShapeSelector(0, 1) => Seq(geometry.startPoint + geometry.midPoint)
+    case ShapeSelector(2)    => Seq(geometry.endPoint)
+    case ShapeSelector(0, 2) => Seq(geometry.startPoint + geometry.endPoint)
+    case ShapeSelector(1, 2) => Seq(geometry.midPoint + geometry.endPoint)
     case _ => Seq()
   }
 
@@ -90,7 +90,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def transform(t : TransformationMatrix) =
       ArcShape(t.transform(center),
-               radius * t.scaleFactor,
+               radius * t.scale,
                startAngle, angle,
                attributes)
 
@@ -101,20 +101,6 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
  */
 object ArcShape
 {
-
-  /**
-   * A [[com.siigna.app.model.shape.ShapePart]] for ArcShapes.
-   * Arcs can be selected in the following way:
-   * <pre>
-   *  1         :  a single handle - the handle with the lowest degree (from 3 o'clock counter clockwise)
-   *  2         :  a single handle - the second handle
-   *  4         :  a single handle - the third (and last) handle (with the highest degree)
-   *  1 + 2 = 3 :  both the first and second handle combined
-   *  1 + 4 = 5 :  both the first and last handle
-   *  2 + 4 = 6 :  both the second and last handle
-   * @param byte  The handles to select
-   */
-  sealed case class Part(byte : Byte) extends ShapePart
 
   /**
    * Creates an arc from three given points by calculating the center and setting the right radius and angles.

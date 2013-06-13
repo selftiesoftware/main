@@ -1,38 +1,53 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com
 
-import siigna.util.Log
+import com.siigna.app.model.selection.{SelectToggle, Select, Deselect}
 
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
   // Actions
   type Action = com.siigna.app.model.action.Action
+  val Create       = com.siigna.app.model.action.Create
+  val Delete       = com.siigna.app.model.action.Delete
+  val Transform    = com.siigna.app.model.action.Transform
 
-  val Create = com.siigna.app.model.action.Create
-  val Delete = com.siigna.app.model.action.Delete
-  val Select = com.siigna.app.model.action.Select
-  val Transform = com.siigna.app.model.action.Transform
+  // Drawing
+  val Drawing  = com.siigna.app.model.Drawing
+  type Drawing = com.siigna.app.model.Drawing
 
-  // Model
-  val Drawing = com.siigna.app.model.Drawing
-
-  type Selection = com.siigna.app.model.Selection
-  val Selection = com.siigna.app.model.Selection
+  // Selection
+  val BitSetShapeSelector = com.siigna.app.model.selection.BitSetShapeSelector
+  val Deselect            = com.siigna.app.model.selection.Deselect
+  val EmptyShapeSelector  = com.siigna.app.model.selection.EmptyShapeSelector
+  val FullShapeSelector   = com.siigna.app.model.selection.FullShapeSelector
+  val Select              = com.siigna.app.model.selection.Select
+  type Selection          = com.siigna.app.model.selection.Selection
+  val Selection           = com.siigna.app.model.selection.Selection
+  val SelectToggle        = com.siigna.app.model.selection.SelectToggle
+  val ShapeSelector       = com.siigna.app.model.selection.ShapeSelector
+  type ShapeSelector      = com.siigna.app.model.selection.ShapeSelector
 
   // Shapes
   type Shape = com.siigna.app.model.shape.Shape
-  type ShapePart = com.siigna.app.model.shape.ShapePart
 
   type ArcShape = com.siigna.app.model.shape.ArcShape
   lazy val ArcShape = com.siigna.app.model.shape.ArcShape
@@ -50,6 +65,9 @@ package object siigna extends com.siigna.util.Implicits {
 
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
   val PolylineShape = com.siigna.app.model.shape.PolylineShape
+
+  type RectangleShape = com.siigna.app.model.shape.RectangleShape
+  val RectangleShape = com.siigna.app.model.shape.RectangleShape
 
   type TextShape = com.siigna.app.model.shape.TextShape
   val TextShape = com.siigna.app.model.shape.TextShape
@@ -114,8 +132,6 @@ package object siigna extends com.siigna.util.Implicits {
   val MouseDrag = com.siigna.util.event.MouseDrag
   type MouseEnter = com.siigna.util.event.MouseEnter
   val MouseEnter = com.siigna.util.event.MouseEnter
-  type MouseDouble = com.siigna.util.event.MouseDouble
-  val MouseDouble = com.siigna.util.event.MouseDouble
   type MouseExit = com.siigna.util.event.MouseExit
   val MouseExit = com.siigna.util.event.MouseExit
   type MouseMove = com.siigna.util.event.MouseMove
@@ -166,6 +182,5 @@ package object siigna extends com.siigna.util.Implicits {
 
   // Log
   val Log = com.siigna.util.Log
-
 
 }

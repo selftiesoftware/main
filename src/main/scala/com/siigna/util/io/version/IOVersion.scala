@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
+ */
+
 package com.siigna.util.io.version
 
 import com.siigna.util.io.{SiignaOutputStream, SiignaInputStream}
@@ -48,12 +67,12 @@ object IOVersion {
 
   // Version one
   val One   = 1.asInstanceOf[Byte]
-//val Two   = 2.asInstanceOf[Byte]
+  val Two   = 2.asInstanceOf[Byte]
 //val Three = 3.asInstanceOf[Byte]
 //And so on...
 
   // The current working version
-  val Current = One
+  val Current = Two
 
   /**
    * Attempts to retrieve the I/O implementation for the given version number.
@@ -61,6 +80,7 @@ object IOVersion {
    */
   def apply(version : Int) : IOVersion = version match {
     case 1 => IOVersion1
+    case 2 => IOVersion2
     case _ => throw new IllegalArgumentException("IOVersion: Could not find an implementation for version: " + version)
   }
 

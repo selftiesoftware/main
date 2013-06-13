@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
+ */
+
 package com.siigna.app.view.native
 
 import com.siigna.app.view.Graphics
@@ -67,11 +86,20 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
               drawSegment(s.p1, s.p2)
           }
 
+          case s : RectangleShape => {
+            val r = s.geometry
+            drawSegment(r.topLeft, r.topRight)
+            drawSegment(r.topRight, r.bottomRight)
+            drawSegment(r.bottomRight, r.bottomLeft)
+            drawSegment(r.bottomLeft, r.topLeft)
+
+          }
+
           /** COLLECTION SHAPES **/
           // TODO: What about the attributes from the collection-shapes?!
           case s : PolylineShape    => {
             // Examine the raster attribute
-            val raster = attributes color "raster"
+            val raster = attributes color "Raster"
 
             // Draw the raster if it's defined
             if (raster.isDefined) {

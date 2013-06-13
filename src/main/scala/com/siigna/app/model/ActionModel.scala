@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app.model
@@ -30,7 +38,7 @@ import com.siigna.util.Log
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends SelectableModel with HasAttributes {
+trait ActionModel extends HasAttributes {
 
   type T = ActionModel
 
@@ -94,9 +102,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def execute(action : Action, remote : Boolean = true) {
     try {
-      // Deselect any selections made
-      deselect()
-
       // Execute in the model
       model = action.execute(model)
 
@@ -158,9 +163,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
       val undone = model.undone.tail
 
       try {
-        // Deselect any selections made
-        deselect()
-
         // Execute the event and add it to the executed list
         model = action.execute(model)
         model = new Model(model.shapes, model.executed.+:(action), undone, model.attributes)
@@ -176,12 +178,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
       Log.debug("ActionModel: No more actions to redo.")
     }
   }
-
-  /**
-   * The shapes currently in the model.
-   * @return A Map containing shapes.
-   */
-  def shapes = model.shapes
 
   def setAttributes(newAttributes : Attributes) = {
     model = model.copy(attributes = newAttributes)
@@ -206,9 +202,6 @@ trait ActionModel extends SelectableModel with HasAttributes {
    */
   def undo(action : Action, remote : Boolean = false) {
     try {
-      // Deselect any selections made
-      deselect()
-
       // Undo it
       model = action.undo(model)
 

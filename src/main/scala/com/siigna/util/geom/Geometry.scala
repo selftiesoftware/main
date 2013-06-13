@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.util.geom
@@ -84,7 +92,7 @@ trait Geometry2D extends Geometry {
   /**
    * The boundary of the shape.
    */
-  def boundary : Rectangle2D
+  def boundary : SimpleRectangle2D
 
   /**
    * The center of the shape.
@@ -105,6 +113,16 @@ trait Geometry2D extends Geometry {
    * Returns the intersections between this and the given geometry, if any.
    */
   def intersections(geometry : Geometry2D) : Set[Vector2D]
+
+  /**
+   * rotate by a center point and a counterclockwise rotation.
+   * @param center
+   * @param rotation
+  */
+
+  def rotate(center : Vector2D, rotation : Double) : T = {
+    transform(TransformationMatrix().rotate(rotation,center))
+  }
 
 }
 
@@ -148,5 +166,4 @@ trait GeometryClosed2D extends GeometryClosed with Geometry2D {
    * @return true if the given geometry is inside, false otherwise
    */
   def contains(geometry : Geometry2D) : Boolean
-
 }

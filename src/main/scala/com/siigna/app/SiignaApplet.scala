@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app
@@ -22,8 +30,6 @@ package com.siigna.app
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-import java.awt.event.{MouseWheelListener, MouseMotionListener, MouseListener, KeyListener, KeyEvent => AWTKeyEvent, MouseEvent => AWTMouseEvent, MouseWheelEvent}
-
 import java.applet.Applet
 import com.siigna.app.controller.Controller
 import java.lang.Thread
@@ -32,7 +38,6 @@ import model.Drawing
 import model.server.User
 import view.native.SiignaRenderer
 import view.View
-import com.siigna.util.geom.Rectangle2D
 import com.siigna.util.Log
 
 /**
@@ -83,15 +88,6 @@ class SiignaApplet extends Applet {
 
     // Start by reading the applet parameters
     try {
-      // Get the active user, if a log in was performed at www.siigna.com
-      val userName = getParameter("contributorName")
-
-      if (userName != null) {
-        // TODO: Refine this
-        Siigna.user = User(0, userName, util.Random.nextString(20))
-        Log.success("Applet: Found user: " + userName)
-      }
-
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
       val drawingId = getParameter("drawingId")
 
@@ -99,6 +95,15 @@ class SiignaApplet extends Applet {
         val id = drawingId.toLong
         Drawing.setAttribute("id", id)
         Log.success("Applet: Found drawing: " + id)
+      }
+
+      // Get the active user, if a log in was performed at www.siigna.com
+      val userName = getParameter("contributorName")
+
+      if (userName != null) {
+        // TODO: Refine this
+        Siigna.user = User(0, userName, util.Random.nextString(20))
+        Log.success("Applet: Found user: " + userName)
       }
     } catch { case _ : Throwable => Log.info("Applet: No user or drawind-id found.")}
 
@@ -164,12 +169,8 @@ class SiignaApplet extends Applet {
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
 
-          // Get the model
-          val mbr   = Rectangle2D(View.boundary.topLeft, View.boundary.bottomRight).transform(View.drawingTransformation.inverse)
-          val model = Drawing(mbr)
-
           // Paint the view
-          View.paint(graphics, model,Drawing.selection, Some(Siigna))
+          View.paint(graphics, Some(Siigna))
 
           // Dispose of the graphics
           graphics.dispose()

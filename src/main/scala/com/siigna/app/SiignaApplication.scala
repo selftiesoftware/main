@@ -1,12 +1,20 @@
 /*
- * Copyright (c) 2008-2013. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
  *
  * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
 package com.siigna.app
@@ -26,19 +34,9 @@ import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowLis
 import java.awt.{BorderLayout, Dimension, Frame}
 
 /**
- * This object represents the main class of the Siigna application, when run on
- * the desktop.
- *
- * <p>
- * This object must not be called the same as any Scala class. If you do the
- * Scala compiler does some strange things and you might loose the right
- * definition of the main method (remember "public static void" from Java). You
- * can also not use the object to extend Frame. All methods in an object are
- * static, so the Scala compiler will re-define all methods found in Frame as
- * static, which is not the right way to extend a class. This could create some
- * weird bugs, and finally ProGuard chucks on the class files. Just keep the
- * way it's made right now, or know what you do.
- * </p>
+ * This object represents the main class of the Siigna application, when run in
+ * a desktop-environment. The object uses the [[com.siigna.app.ApplicationWindow]] class to initialize as
+ * an actual java.awt.Frame.
  */
 object SiignaApplication
 {
@@ -57,7 +55,8 @@ object SiignaApplication
 }
 
 /**
- * This is the window, when you run Siigna as a desktop application.
+ * This is the parent Frame (window), when running Siigna as a desktop application. The class embeds the
+ * [[com.siigna.app.SiignaApplet]] in the Frame to re-use the code from the Applet class.
  */
 class ApplicationWindow extends Frame
 {
@@ -73,7 +72,7 @@ class ApplicationWindow extends Frame
   add(applet, BorderLayout.CENTER)
 
   // Set the title of the application
-  setTitle("Siigna")
+  setTitle("Siigna " + Siigna.string("version").getOrElse("unknown"))
 
   // Setup event handlers for when the window is closed.
   // We dispose the window, which in the end terminates
@@ -103,9 +102,8 @@ class ApplicationWindow extends Frame
 
   // Set preferred size
   setPreferredSize(
-    try {
-      Siigna.get("defaultScreenSize").asInstanceOf[Dimension]
-    } catch {
+    Siigna.get("defaultScreenSize") match {
+      case Some(d : Dimension) => d
       case _ => new Dimension(600, 400)
     }
   )

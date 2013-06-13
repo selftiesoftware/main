@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
+ */
+
 package com.siigna.app.view.native
 
 import java.awt.image.BufferedImage
@@ -44,10 +63,11 @@ import com.siigna.util.geom.{Vector2D, TransformationMatrix, Rectangle2D}
 object SiignaRenderer extends Renderer {
 
   // Add listeners
-  Drawing.addActionListener((_, _) => if (View.renderer == this) clearTiles())
-  View.addPanListener(v =>            if (View.renderer == this) onPan(v))
-  View.addResizeListener((screen) =>  if (View.renderer == this) onResize())
-  View.addZoomListener((zoom) =>      if (View.renderer == this) clearTiles() )
+  Drawing.addActionListener((_, _) => if (isActive) clearTiles())
+  Drawing.addSelectionListener((_) => if (isActive) clearTiles())
+  View.addPanListener(v =>            if (isActive) onPan(v))
+  View.addResizeListener((screen) =>  if (isActive) onResize())
+  View.addZoomListener((zoom) =>      if (isActive) clearTiles())
 
   // Constants for the different tiles and their directions around a given center
   private val C  = 4; private val vC  = Vector2D( 0, 0)
@@ -296,13 +316,15 @@ object SiignaRenderer extends Renderer {
     val hints = if (antiAliasing) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF
 
     // Create the transformation matrix to move the shapes to (0, 0) of the image
-    val scale       = View.drawingTransformation.scaleFactor
+    val scale       = View.drawingTransformation.scale
     val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
 
     g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
     //apply the graphics class to the model with g - (adds the changes to the image)
-    Drawing(window).foreach(t => graphics.draw(t._2.transform(transformation)))
+    Drawing(window).foreach(t => if (!Drawing.selection.contains(t._1)) {
+      graphics.draw(t._2.transform(transformation))
+    })
 
     // Return the image
     image
@@ -338,7 +360,7 @@ object SiignaRenderer extends Renderer {
 
             // Set the new tiles
             for (i <- 0 until temp.size) {
-              if (cachedTiles(i).isEmpty && i != C && cachedTiles(i) != null) {
+              if (cachedTiles(i) != null && cachedTiles(i).isEmpty && i != C) {
                 cachedTiles(i) = temp(i)
               }
             }

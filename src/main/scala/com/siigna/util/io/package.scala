@@ -1,9 +1,28 @@
+/*
+ * Copyright (c) 2008-2013, Selftie Software. Siigna is released under the
+ * creative common license by-nc-sa. You are free
+ *   to Share — to copy, distribute and transmit the work,
+ *   to Remix — to adapt the work
+ *
+ * Under the following conditions:
+ *   Attribution —   You must attribute the work to http://siigna.com in
+ *                    the manner specified by the author or licensor (but
+ *                    not in any way that suggests that they endorse you
+ *                    or your use of the work).
+ *   Noncommercial — You may not use this work for commercial purposes.
+ *   Share Alike   — If you alter, transform, or build upon this work, you
+ *                    may distribute the resulting work only under the
+ *                    same or similar license to this one.
+ *
+ * Read more at http://siigna.com and https://github.com/siigna/main
+ */
+
 package com.siigna.util
 
 import java.io.File
 import actors.Actor
 import javax.swing.{UIManager, JFileChooser}
-import javax.swing.filechooser.FileNameExtensionFilter
+import javax.swing.filechooser.{FileFilter, FileNameExtensionFilter}
 import java.security.{PrivilegedAction, AccessController}
 
 /**
@@ -56,12 +75,15 @@ import java.security.{PrivilegedAction, AccessController}
  * </p>
  *
  * <h2>Storing to and reading contents from disc</h2>
- *
+ * Since Siigna is often used in mobile environments, disc I/O works through a simple [[com.siigna.util.io.Dialogue]].
+ * Please see the [[com.siigna.util.io.Dialogue]] for further documentations and instructions.
  */
 package object io {
 
   // A private class to perform type-safe callback invocations
-  private[io] case class DialogueFunction[T](f : (File => T), read : Boolean, filters : Seq[FileNameExtensionFilter])
+  private[io] trait DialogueFunction
+  private[io] case class DialogueFunctionRead(f : File => Any, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
+  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, File => Any]) extends DialogueFunction
 
   private var dialogue : Option[JFileChooser] = None
 
@@ -98,42 +120,72 @@ package object io {
   // A private IO actor which is used to execute IO functionality on files.
   // Not pretty, but can't think of an alternative
   private[io] val IOActor = new Actor() {
+    // Initializes a dialogue
+    private def initializeDialogue(fileFilters : Traversable[FileFilter], read : Boolean) : Either[String, JFileChooser] = {
+      // Makes sure the look, feel and dialogue have been attempted to be set
+      t.join()
+
+      dialogue match {
+        case Some(d) => {
+        // Remove the old filters
+        d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
+
+        // Set the filters
+        fileFilters.foreach(d.addChoosableFileFilter(_))
+
+        // Open the dialogue
+        val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
+
+        // Return the file if the dialogue was not aborted.
+        if (result == JFileChooser.APPROVE_OPTION) {
+          Right(d)
+        } else {
+          Left("User aborted dialogue.")
+        }
+      }
+        case e => Left("Could not load dialogue.")
+      }
+    }
     def act() {
       loop {
         react {
-          case DialogueFunction(f, read, filters) => {
-            // Makes sure the look, feel and dialogue have been attempted to be set
-            t.join()
+          // Write dialogue
+          case DialogueFunctionWrite(callbacks) => {
+            initializeDialogue(callbacks.keys, read = false) match {
+              case Left(m) => reply(m)
+              case Right(d) => {
+                // Get the selected file from the dialogue
+                val selectedFile = d.getSelectedFile
 
-            dialogue match {
-              case Some(d) => {
-                // Remove the old filters
-                d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
+                // If the file does not end with the right extension, append the extension
+                val filter = d.getFileFilter.asInstanceOf[FileNameExtensionFilter]
+                val extensions = filter.getExtensions
+                val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
+                  new File(selectedFile.getAbsolutePath + "." + extensions.head)
+                } else selectedFile
 
-                // Set the filters
-                filters.foreach(d.addChoosableFileFilter(_))
+                // Make sure the file exists and give it the right permissions
+                if (!file.exists()) file.createNewFile()
+                file.setWritable(true)
 
-                val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                  val selectedFile = d.getSelectedFile
-
-                  // If the file does not end with the right extension, append the extension
-                  val extensions = d.getFileFilter.asInstanceOf[FileNameExtensionFilter].getExtensions
-                  val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
-                    new File(selectedFile.getAbsolutePath + "." + extensions.head)
-                  } else selectedFile
-
-                  if (!read && !file.exists()) file.createNewFile()
-                  if (read) file.setReadable(true) else file.setWritable(true)
-
-                  // Reply back
-                  reply(f(file))
-                } else {
-                  reply("User aborted dialogue.")
-                }
+                // Return the function applied on the file
+                reply(callbacks(filter).apply(file))
               }
-              case e => reply(e)
+            }
+          }
+          // Read dialogue
+          case DialogueFunctionRead(f, callbacks) => {
+            initializeDialogue(callbacks, read = true) match {
+              case Left(m)  => reply(m)
+              case Right(d) => {
+                val file = d.getSelectedFile
+
+                // Give the file the right permissions
+                file.setReadable(true)
+
+                // Reply back
+                reply(f(file))
+              }
             }
           }
         }
@@ -202,7 +254,7 @@ package object io {
     val PolylineLineShape = 220.toByte
     val PolylineArcShape  = 221.toByte
 
-    // Shape parts
+    // Shape parts (deprecated)
     val ArcShapePart       = 230.toByte
     val CircleShapePart    = 231.toByte
     val GroupShapePart     = 232.toByte
@@ -213,6 +265,11 @@ package object io {
     val TextShapePart      = 237.toByte
     val FullShapePart      = 238.toByte
     val EmptyShapePart     = 239.toByte
+
+    // Shape selectors
+    val EmptyShapeSelector  = 240.toByte
+    val FullShapeSelector   = 241.toByte
+    val BitSetShapeSelector = 242.toByte
   }
 
 }
