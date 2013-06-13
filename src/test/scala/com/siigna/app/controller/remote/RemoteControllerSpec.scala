@@ -28,7 +28,7 @@ import com.siigna.util.collection.Attributes
 class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
   // Set all members accessible in RemoteController
-  val sink = new Server("http://localhost:7788", Mode.http)
+  val sink = new Server("http://62.243.118.234:20005", Mode.http)
   var session : Session = null
 
   sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),
