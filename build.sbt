@@ -24,5 +24,5 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-library" % "2.10.0",
   "org.scala-lang" % "scala-reflect" % "2.10.0",
   "org.scalatest" %% "scalatest" % "1.9.1" % "test",
-  "com.siigna" %% "communication" % "nightly"
+  "com.siigna" %% "siigna-communication" % "nightly"
 )
