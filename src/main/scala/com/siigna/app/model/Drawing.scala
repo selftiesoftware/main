@@ -134,15 +134,14 @@ object Drawing extends Drawing {
     val center       = newBoundary.center
     //val proportion   = 1.41421356
 
-    // Saves the format, as the format with the margin subtracted
+    // Fetches the values for the format
     val printMargin = Siigna.double("printMargin").getOrElse(13.0)
-    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0) - printMargin
-    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0) - printMargin
-
+    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
+    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
     // If the format is too small for the least proportion, then up the size
     // one format.
     // TODO: Optimize!
-    //TODO: prevent margin from multuttiplying as well. It should be fixed regardless of paper scale.
+
     val list = List[Double](2, 2.5, 2)
     var take = 0 // which element to "take" from the above list
     while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
@@ -151,7 +150,9 @@ object Drawing extends Drawing {
       aFormatMax *= factor
       take = if (take < 2) take + 1 else 0
     }
-
+    //reduces the "paper" with the print margins.
+    aFormatMin-=printMargin
+    aFormatMax-=printMargin
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
@@ -169,7 +170,7 @@ object Drawing extends Drawing {
    * Uses toInt since it always rounds down to an integer.
    */
   def boundaryScale : Int =
-    math.ceil((scala.math.max(boundary.width, boundary.height) / (Siigna.double("printFormatMax").getOrElse(297.0)).toInt)).toInt
+    math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.
