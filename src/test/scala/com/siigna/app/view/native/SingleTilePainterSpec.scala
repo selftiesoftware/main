@@ -48,8 +48,8 @@ class SingleTilePainterSpec extends SingleTilePainter(
 
       centerTile.window should equal(SimpleRectangle2D(-1, -1, 1, 1))
       centerTile.image foreach { image =>
-        image.getWidth should equal (1)
-        image.getHeight should equal (1)
+        image.getWidth should equal (2)
+        image.getHeight should equal (2)
       }
     }
 

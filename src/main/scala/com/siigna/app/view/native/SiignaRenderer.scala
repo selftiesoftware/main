@@ -80,16 +80,6 @@ trait SiignaRenderer extends Renderer {
 
     // Draw the painter
     painter.foreach(_.paint(graphics))
-
-    painter.foreach(_ match {
-      case s : MultiTilePainter => {
-        (s.grid.rowNorth ++ s.grid.rowCenter ++ s.grid.rowSouth)
-           .foreach(t => {
-          graphics.draw(com.siigna.app.model.shape.PolylineShape(t.window).transform(view.drawingTransformation))
-        })
-      }
-      case s : SingleTilePainter =>
-    })
   }
 
   /**
@@ -132,6 +122,9 @@ trait SiignaRenderer extends Renderer {
    * [[com.siigna.app.view.native.Tile]].
    */
   private def updatePainter() {
+    // Clear out the old painter to make it look nicer...
+    painter = None
+
     // Set the new painter when done
     TilePainter(drawing, view).onComplete(_ match {
       case Success(x) => painter = Some(x)

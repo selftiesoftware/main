@@ -137,7 +137,7 @@ trait View {
    *
    * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
    */
-  def fps : Double = fpsTimeToDraw * 0.1 + fpsTimeToDrawLast * 0.9
+  def fps : Double = 100 / (fpsTimeToDraw * 0.1 + fpsTimeToDrawLast * 0.7)
 
   /**
    * The default graphics implementation represented as a function that can be called whenever someone needs an
@@ -467,8 +467,7 @@ object View extends View {
     }
 
     if (showFps) {
-      graphics draw TextShape("FPS: " + fps.round, screen.bottomRight - Vector2D(20, -20), 10, Attributes("TextAlignment" -> Vector2D(1, 0)))
-
+      graphics draw TextShape("FPS: " + fps.round, screen.bottomRight - Vector2D(80, -20), 10)
     }
 
     // Update the fps counter

@@ -37,17 +37,17 @@ class TileGridSpec extends FunSpec with ShouldMatchers {
 
     g.window should equal (c)
 
-    g.rowNorth(0).window should equal  (c + Vector2D(-1,  1))
-    g.rowNorth(1).window should equal  (c + Vector2D( 0,  1))
-    g.rowNorth(2).window should equal  (c + Vector2D( 1,  1)) // North row
+    g.rowNorth(0).window should equal  (c + Vector2D(-1, -1))
+    g.rowNorth(1).window should equal  (c + Vector2D( 0, -1))
+    g.rowNorth(2).window should equal  (c + Vector2D( 1, -1)) // North row
 
     g.rowCenter(0).window should equal (c + Vector2D(-1,  0))
     g.rowCenter(1).window should equal (c + Vector2D( 0,  0))
     g.rowCenter(2).window should equal (c + Vector2D( 1,  0)) // Center row
 
-    g.rowSouth(0).window should equal  (c + Vector2D(-1, -1)) // South row
-    g.rowSouth(1).window should equal  (c + Vector2D( 0, -1))
-    g.rowSouth(2).window should equal  (c + Vector2D( 1, -1))
+    g.rowSouth(0).window should equal  (c + Vector2D(-1,  1)) // South row
+    g.rowSouth(1).window should equal  (c + Vector2D( 0,  1))
+    g.rowSouth(2).window should equal  (c + Vector2D( 1,  1))
   }
 
   describe("A TileGrid") {
@@ -63,7 +63,7 @@ class TileGridSpec extends FunSpec with ShouldMatchers {
 
     it ("can be moved north") {
       val g = grid.move(TileGrid.North)(d, v)
-      testGrid(g, Vector2D(0, -1))
+      testGrid(g, Vector2D(0,  1))
     }
 
     it ("can be moved west") {
@@ -73,7 +73,7 @@ class TileGridSpec extends FunSpec with ShouldMatchers {
 
     it ("can be moved south") {
       val g = grid.move(TileGrid.South)(d, v)
-      testGrid(g, Vector2D(0, 1))
+      testGrid(g, Vector2D(0, -1))
     }
 
     it ("can calculate the right direction to move the grid to") {
@@ -82,8 +82,8 @@ class TileGridSpec extends FunSpec with ShouldMatchers {
       grid.direction(1.0, 1.0) should equal (None)
 
       grid.direction( 1.5,    0).get should equal(TileGrid.East)
-      grid.direction(   0, -1.5).get should equal(TileGrid.North)
-      grid.direction(   0,  1.5).get should equal(TileGrid.South)
+      grid.direction(   0, -1.5).get should equal(TileGrid.South)
+      grid.direction(   0,  1.5).get should equal(TileGrid.North)
       grid.direction(-1.5,    0).get should equal(TileGrid.West)
     }
 

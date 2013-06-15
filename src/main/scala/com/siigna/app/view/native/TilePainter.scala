@@ -136,15 +136,7 @@ object TilePainter {
     if (isSingleTile(boundary, view.screen))
       new SingleTilePainter(drawing, view)
     else
-      new MultiTilePainter(drawing, view, {
-        val r = view.screen.transform(view.deviceTransformation)
-        // The stored tiles
-        TileGrid(r, view.screen,
-          List(-1, 0, 1).map(i => r + Vector2D(i * r.width, -r.height)).map(new Tile(drawing, _, view.zoom, view.graphics)),
-          List(-1, 0, 1).map(i => r + Vector2D(i * r.width,         0)).map(new Tile(drawing, _, view.zoom, view.graphics)),
-          List(-1, 0, 1).map(i => r + Vector2D(i * r.width,  r.height)).map(new Tile(drawing, _, view.zoom, view.graphics))
-        )
-      }, view.center)
+      new MultiTilePainter(drawing, view, TileGrid(drawing, view), view.center)
   }
 
 }
@@ -232,8 +224,11 @@ class MultiTilePainter(protected val drawing : Drawing, protected val view : Vie
   def paint(graphics : Graphics) {
     (grid.rowNorth ++ grid.rowCenter ++ grid.rowSouth).foreach(tile => {
       tile.image.foreach { image =>
-        val anchor = tile.window.topLeft.transform(view.drawingTransformation)
-        graphics.AWTGraphics.drawImage(image, anchor.x.toInt, anchor.y.toInt, null)
+        val window = tile.window.transform(view.drawingTransformation)
+        if (view.screen.intersects(window)) { // Only draw if the tile is actually visible
+          val anchor = window.bottomLeft
+          graphics.AWTGraphics.drawImage(image, anchor.x.toInt, anchor.y.toInt, null)
+        }
       }
     })
   }

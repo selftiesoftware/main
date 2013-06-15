@@ -62,9 +62,9 @@ case class TileGrid(window : SimpleRectangle2D, screen : SimpleRectangle2D,
       case TileGrid.East  => {
         val w = window + Vector2D(window.width, 0)
         new TileGrid(w, screen + Vector2D(screen.width, 0),
-          rowNorth .tail :+ new Tile(drawing, w + Vector2D( w.width, w.height), view.zoom, view.graphics),
+          rowNorth .tail :+ new Tile(drawing, w + Vector2D( w.width,-w.height), view.zoom, view.graphics),
           rowCenter.tail :+ new Tile(drawing, w + Vector2D( w.width,        0), view.zoom, view.graphics),
-          rowSouth .tail :+ new Tile(drawing, w + Vector2D( w.width,-w.height), view.zoom, view.graphics)
+          rowSouth .tail :+ new Tile(drawing, w + Vector2D( w.width, w.height), view.zoom, view.graphics)
         )
       }
       case TileGrid.North => {
@@ -78,13 +78,13 @@ case class TileGrid(window : SimpleRectangle2D, screen : SimpleRectangle2D,
       case TileGrid.West  => {
         val w = window - Vector2D(window.width, 0)
         new TileGrid(w, screen - Vector2D(screen.width, 0),
-          new Tile(drawing, w - Vector2D(w.width,-w.height), view.zoom, view.graphics) :: rowNorth .take(2),
+          new Tile(drawing, w - Vector2D(w.width, w.height), view.zoom, view.graphics) :: rowNorth .take(2),
           new Tile(drawing, w - Vector2D(w.width,        0), view.zoom, view.graphics) :: rowCenter.take(2),
-          new Tile(drawing, w - Vector2D(w.width, w.height), view.zoom, view.graphics) :: rowSouth .take(2)
+          new Tile(drawing, w - Vector2D(w.width,-w.height), view.zoom, view.graphics) :: rowSouth .take(2)
         )
       }
       case TileGrid.South => {
-        val w = window + Vector2D(0, -window.height)
+        val w = window - Vector2D(0, window.height)
         new TileGrid(w, screen - Vector2D(0, screen.height),
           List(-1, 0, 1).map(i => w + Vector2D(i * w.width, -w.height)).map(new Tile(drawing, _, view.zoom, view.graphics)),
           rowNorth,
@@ -106,5 +106,21 @@ object TileGrid extends Enumeration {
    */
   type Direction = Value
   val East, North, West, South = Value
+
+  /**
+   * Creates a new tile-grid from the given drawing and view.
+   * @param drawing  The Drawing to receive shapes from
+   * @param view  The View to get informations on transformation and pan
+   * @return  A TileGrid capable of rendering the drawing in tiles.
+   */
+  def apply(drawing : Drawing, view : View) : TileGrid = {
+    val r = view.screen.transform(view.deviceTransformation)
+    // The stored tiles
+    TileGrid(view.screen.transform(view.deviceTransformation), view.screen,
+      List(-1, 0, 1).map(i => r + Vector2D(i * r.width, -r.height)).map(new Tile(drawing, _, view.zoom, view.graphics)),
+      List(-1, 0, 1).map(i => r + Vector2D(i * r.width,         0)).map(new Tile(drawing, _, view.zoom, view.graphics)),
+      List(-1, 0, 1).map(i => r + Vector2D(i * r.width,  r.height)).map(new Tile(drawing, _, view.zoom, view.graphics))
+    )
+  }
 
 }

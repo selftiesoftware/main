@@ -72,9 +72,6 @@ case class Tile(drawing : Drawing, window : SimpleRectangle2D, scale : Double, f
         graphics.draw(t._2.transform(transformation))
       })
 
-      graphics.AWTGraphics.setColor(java.awt.Color.black)
-      graphics.AWTGraphics.drawLine(0, 0, width, height)
-
       // Return the image
       image
     }

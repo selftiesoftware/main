@@ -34,14 +34,7 @@ object MultiTilePainterSpec {
     def paint(screenGraphics: Graphics, drawing: Drawing, interface: Option[Interface]) {}
     def screen: SimpleRectangle2D = SimpleRectangle2D(0, 0, 1, 1)
   }
-  def g = {
-    val r = v.screen.transform(v.deviceTransformation)
-    TileGrid(r, v.screen,
-      List(-1, 0, 1).map(i => r + Vector2D(i * r.width,  r.height)).map(new Tile(d, _, v.zoom, v.graphics)),
-      List(-1, 0, 1).map(i => r + Vector2D(i * r.width,         0)).map(new Tile(d, _, v.zoom, v.graphics)),
-      List(-1, 0, 1).map(i => r + Vector2D(i * r.width, -r.height)).map(new Tile(d, _, v.zoom, v.graphics))
-    )
-  }
+  def g = TileGrid(d, v)
 }
 
 /**
@@ -56,17 +49,17 @@ class MultiTilePainterSpec
 
     g.window should equal (c)
 
-    g.rowNorth(0).window should equal  (c + Vector2D(-1,  1))
-    g.rowNorth(1).window should equal  (c + Vector2D( 0,  1))
-    g.rowNorth(2).window should equal  (c + Vector2D( 1,  1)) // North row
+    g.rowNorth(0).window should equal  (c + Vector2D(-1, -1))
+    g.rowNorth(1).window should equal  (c + Vector2D( 0, -1))
+    g.rowNorth(2).window should equal  (c + Vector2D( 1, -1)) // North row
 
     g.rowCenter(0).window should equal (c + Vector2D(-1,  0))
     g.rowCenter(1).window should equal (c + Vector2D( 0,  0))
     g.rowCenter(2).window should equal (c + Vector2D( 1,  0)) // Center row
 
-    g.rowSouth(0).window should equal  (c + Vector2D(-1, -1)) // South row
-    g.rowSouth(1).window should equal  (c + Vector2D( 0, -1))
-    g.rowSouth(2).window should equal  (c + Vector2D( 1, -1))
+    g.rowSouth(0).window should equal  (c + Vector2D(-1,  1)) // South row
+    g.rowSouth(1).window should equal  (c + Vector2D( 0,  1))
+    g.rowSouth(2).window should equal  (c + Vector2D( 1,  1))
   }
 
   describe ("A MultiTilePainter") {
@@ -78,13 +71,13 @@ class MultiTilePainterSpec
     it("can move the grid according to a pan") {
 
       val m1 = pan(Vector2D(2, 0)).asInstanceOf[MultiTilePainter]
-      testGrid(m1.grid, Vector2D(1, 0))
+      testGrid(m1.grid, Vector2D(-1, 0))
 
-      val m2 = m1.pan(Vector2D(-2, 0)).asInstanceOf[MultiTilePainter]
+      val m2 = m1.pan(Vector2D(-3, 0)).asInstanceOf[MultiTilePainter]
       testGrid(m2.grid, Vector2D(0, 0))
 
       val m3 = m2.pan(Vector2D(0, 2)).asInstanceOf[MultiTilePainter]
-      testGrid(m3.grid, Vector2D(0, -1))
+      testGrid(m3.grid, Vector2D(0, 1))
 
       val m4 = m3.pan(Vector2D(0, -2)).asInstanceOf[MultiTilePainter]
       testGrid(m4.grid, Vector2D(0, 0))
@@ -96,7 +89,7 @@ class MultiTilePainterSpec
 
       val m1 = new MultiTilePainter(drawing, view, grid, Vector2D(0, 0))
       m1.pan(Vector2D(0.5, 0))
-      m1.gridPan should equal ((0.5, 0))
+      m1.gridPan should equal ((-0.5, 0))
 
       val m2 = new MultiTilePainter(drawing, view, grid, Vector2D(0, 0))
       m2.pan(Vector2D(0, -0.5))
