@@ -36,7 +36,6 @@ import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
 import model.Drawing
 import model.server.User
-import view.native.SiignaRenderer
 import view.View
 import com.siigna.util.Log
 
@@ -86,6 +85,8 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
+    //Siigna("isLive") = false
+
     // Start by reading the applet parameters
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
@@ -117,7 +118,6 @@ class SiignaApplet extends Applet {
     canvas.requestFocus()
     View.setCanvas(canvas)
     canvas.setSize(getSize)
-
 
     // Misc initialization
     setVisible(true); setFocusable(true); requestFocus()
@@ -151,12 +151,6 @@ class SiignaApplet extends Applet {
     // Get the strategy
     val strategy = canvas.getBufferStrategy
 
-    // Add the Siigna renderer
-    // This have to be done here to avoid ExceptionInInitializer error
-    // - adding the code in View will mess up the initialization-order, causing the calls to the View to happen
-    // before the View has been initialized
-    View.renderer = SiignaRenderer
-
     // Run, run, run
     while(!shouldExit) {
 
@@ -170,7 +164,7 @@ class SiignaApplet extends Applet {
           val graphics = strategy.getDrawGraphics
 
           // Paint the view
-          View.paint(graphics, Some(Siigna))
+          View.paint(graphics, Drawing, Some(Siigna))
 
           // Dispose of the graphics
           graphics.dispose()

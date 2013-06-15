@@ -28,9 +28,21 @@ import com.siigna.util.geom.SimpleRectangle2D
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
  * their ids, that can be traversed like a map.
  *
- * Used in the [[com.siigna.app.model.Drawing]] object.
+ * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.model.Drawing$]]
  */
 trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+
+  /**
+   * The boundary from the current content of the Model.
+   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
+   * This is done in order to make sure that the print viewed on page is the
+   * actual print you get.
+   *
+   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
+   */
+  def boundary : SimpleRectangle2D
+
   def self = model.shapes
 }
 
@@ -42,7 +54,7 @@ trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
  * <p>
  *   This is the model part of the
  *   <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
- *   The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the current active drawing.
+ *   The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the currently active drawing.
  * </p>
  *
  * <h3>Manipulating the Drawing through actions</h3>
@@ -110,14 +122,6 @@ object Drawing extends Drawing {
   // The private boundary instance
   private var _boundary = calculateBoundary()
 
-  /**
-   * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
-   * This is done in order to make sure that the print viewed on page is the
-   * actual print you get.
-   *
-   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
-   */
   def boundary : SimpleRectangle2D = _boundary
 
   /**
