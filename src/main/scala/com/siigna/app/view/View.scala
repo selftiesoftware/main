@@ -93,7 +93,7 @@ trait View {
    * Adds a pan listener that will be executed whenever the view is panning - that is whenever the user moves
    * the view-port of the drawing.
    * @param f  The function to execute after the pan operation have been made. The Vector2D signalling the distance
-   *           from Vector2D(0, 0) will be given as a parameter.
+   *           from the previous pan-point will be given as a parameter.
    */
   def addPanListener(f : (Vector2D) => Unit) { listenersPan :+= f }
 
@@ -226,7 +226,7 @@ trait View {
   def pan(delta : Vector2D) {
     if (Siigna.navigation) {
       _pan = _pan + delta
-      listenersPan.foreach(_.apply(_pan))
+      listenersPan.foreach(_.apply(delta))
     }
   }
 
@@ -237,7 +237,7 @@ trait View {
   def panX(delta : Double) {
     if (Siigna.navigation) {
       _pan = _pan.copy(x = _pan.x + delta)
-      listenersPan.foreach(_.apply(_pan))
+      listenersPan.foreach(_.apply(Vector2D(delta, _pan.y)))
     }
   }
 
@@ -248,7 +248,7 @@ trait View {
   def panY(delta : Double) {
     if (Siigna.navigation) {
       _pan = _pan.copy(y = _pan.y + delta)
-      listenersPan.foreach(_.apply(_pan))
+      listenersPan.foreach(_.apply(Vector2D(_pan.x, delta)))
     }
   }
 
@@ -321,11 +321,11 @@ trait View {
       if ((zoom > 0.000001 || zoomDelta < 0)) {
         zoom *= zoomFactor
       }
+      val oldPan = _pan
       _pan = ((pan - point + center) * zoomFactor) + point - center
 
       // Notify the listeners
       listenersZoom.foreach(_(zoom))
-      listenersPan.foreach(_(_pan))
     }
   }
 

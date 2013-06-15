@@ -25,10 +25,11 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.Drawing
 import com.siigna.app.view.{Graphics, View, Renderer}
 import com.siigna.util.Implicits._
-import com.siigna.util.geom.{SimpleRectangle2D, Rectangle2D}
+import com.siigna.util.geom.{Rectangle2D}
 import scala.concurrent.{future, promise, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
+import scala.util.{Failure, Success}
+import com.siigna.util.Log
 
 /**
  * <p>
@@ -64,10 +65,6 @@ trait SiignaRenderer extends Renderer {
    */
   protected def drawing : Drawing
 
-  // A boolean value to indicate that the view is zoomed out enough to only need one single tile
-  protected def isSingleTile(drawing : SimpleRectangle2D, view : SimpleRectangle2D) =
-    view.width >= drawing.width && view.height >= drawing.height
-
   // Simply forwards the painting to the active painter
   def paint(graphics : Graphics, drawing : Drawing, view : View) {
     // Draw the background (if any)
@@ -82,8 +79,17 @@ trait SiignaRenderer extends Renderer {
     graphics.drawRectangle(boundary.bottomLeft, boundary.topRight)
 
     // Draw the painter
-    val pan = boundary.bottomLeft
-    painter.foreach(_.paint(graphics, pan))
+    painter.foreach(_.paint(graphics))
+
+    painter.foreach(_ match {
+      case s : MultiTilePainter => {
+        (s.grid.rowNorth ++ s.grid.rowCenter ++ s.grid.rowSouth)
+           .foreach(t => {
+          graphics.draw(com.siigna.app.model.shape.PolylineShape(t.window).transform(view.drawingTransformation))
+        })
+      }
+      case s : SingleTilePainter =>
+    })
   }
 
   /**
@@ -126,13 +132,11 @@ trait SiignaRenderer extends Renderer {
    * [[com.siigna.app.view.native.Tile]].
    */
   private def updatePainter() {
-    val boundary = drawing.boundary.transform(view.drawingTransformation)
-    painter = Some(
-      if (isSingleTile(boundary, view.screen))
-        new SingleTilePainter(view, drawing)
-      else
-        new MultiTilePainter(view, drawing)
-    )
+    // Set the new painter when done
+    TilePainter(drawing, view).onComplete(_ match {
+      case Success(x) => painter = Some(x)
+      case Failure(e) => Log.info("SiignaRenderer: Error when rendering tiles: " + e)
+    })
   }
 
   /**
@@ -157,7 +161,7 @@ object SiignaRenderer extends SiignaRenderer {
   drawing.addSelectionListener(_   => if (isActive) updatePainter())
 
   // Adds a zoom-listener and resize-listener so we can tell if we are still within one tile
-  view.addZoomListener((zoom) => if (isActive) (updatePainter()) )
+  view.addZoomListener((zoom) => if (isActive) updatePainter() )
   view.addResizeListener((screen) => if (isActive) {
     // Update the painter
     updatePainter()
@@ -179,5 +183,10 @@ object SiignaRenderer extends SiignaRenderer {
       case _ =>
     })
   } )
+
+  // Add a pan listener to check if the multi-tile painter has been moved too much
+  view.addPanListener(p => if (isActive) {
+    painter = painter.map(_.pan(p))
+  })
 
 }

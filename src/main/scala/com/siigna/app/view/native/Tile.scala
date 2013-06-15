@@ -26,16 +26,17 @@ import ExecutionContext.Implicits.global
 import java.awt.{RenderingHints, Graphics2D}
 import com.siigna.app.Siigna
 import com.siigna.app.model.Drawing
-import com.siigna.app.view.View
+import com.siigna.app.view.Graphics
 import scala.util.Try
 
 /**
  * A tile represents a part of the drawing that can be rendered.
  * @param drawing  The drawing to retrieve data from.
- * @param view  The view to fetch zoom, pan and [[com.siigna.util.geom.TransformationMatrix]]'es from.
- * @param screen  The part of the screen this tile should render, in screen-coordinates.
+ * @param window  The dimensions of this tile in drawing-coordinates.
+ * @param scale  The scale to adjust the shapes to.
+ *
  */
-class Tile(drawing : Drawing, view : View, screen : SimpleRectangle2D) {
+case class Tile(drawing : Drawing, window : SimpleRectangle2D, scale : Double, func : Graphics2D => Graphics) {
 
   /**
    * The image retrieved after calculation, for synchronous access.
@@ -51,13 +52,13 @@ class Tile(drawing : Drawing, view : View, screen : SimpleRectangle2D) {
   protected val _promise : Promise[BufferedImage] = promise[BufferedImage]() completeWith{
     val f = future {
       // Create a width and height of at least 1
-      val width  = if (screen.width > 0) screen.width.toInt else 1
-      val height = if (screen.height > 0) screen.height.toInt else 1
+      val width  = if (window.width * scale > 0) (window.width * scale).toInt else 1
+      val height = if (window.height * scale > 0) (window.height * scale).toInt else 1
 
       // Create an image with dimensions equal to the width and height of the area
       val image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
       val g = image.getGraphics.asInstanceOf[Graphics2D]
-      val graphics = view.graphics(g)
+      val graphics : Graphics = func(g)
 
       // Setup anti-aliasing
       val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
@@ -65,13 +66,14 @@ class Tile(drawing : Drawing, view : View, screen : SimpleRectangle2D) {
       g setRenderingHint(RenderingHints.KEY_ANTIALIASING, hints)
 
       // Create the transformation matrix to move the shapes to (0, 0) of the image
-      val scale       = view.drawingTransformation.scale
-
       val transformation = TransformationMatrix((Vector2D(-window.topLeft.x, window.topLeft.y) * scale).round, scale).flipY
       //apply the graphics class to the model with g - (adds the changes to the image)
       drawing(window).foreach(t => if (!Drawing.selection.contains(t._1)) {
         graphics.draw(t._2.transform(transformation))
       })
+
+      graphics.AWTGraphics.setColor(java.awt.Color.black)
+      graphics.AWTGraphics.drawLine(0, 0, width, height)
 
       // Return the image
       image
@@ -79,12 +81,6 @@ class Tile(drawing : Drawing, view : View, screen : SimpleRectangle2D) {
     f.onComplete(t => _image = t.map(Some.apply).getOrElse(None))
     f
   }
-
-  /**
-   * Calculates the 'window' of the tile, as seen through the screen. That is, the dimensions of this tile
-   * in drawing-coordinates
-   */
-  lazy val window = screen.transform(view.deviceTransformation)
 
   /**
    * Retrieves the image of the tile synchronously. Useful for painting, since this cannot be done asynchronously.

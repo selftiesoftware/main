@@ -21,9 +21,9 @@ package com.siigna.app.view.native
 
 import com.siigna.app.view.{View, Graphics}
 import com.siigna.app.model.Drawing
-import com.siigna.util.geom.Vector2D
-import scala.util.{Failure, Success, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
+import scala.util.{Success, Try}
+import scala.collection.SeqProxy
 
 /**
  * <p>
@@ -45,7 +45,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
  *   user pans, instead of re-painting the entire drawing.
  * </p>
  */
-sealed trait TilePainter {
+trait TilePainter {
+
+  protected var _panX : Double = 0
+  protected var _panY : Double = 0
+
+  /**
+   * The [[com.siigna.app.model.Drawing]] to extract shapes and boundaries from.
+   * @return  An instance of a [[com.siigna.app.model.Drawing]]
+   */
+  protected def drawing : Drawing
 
   /**
    * Interrupts the painter and all its threads running in the background. Efficient for cancelling any renderings
@@ -66,35 +75,109 @@ sealed trait TilePainter {
    * Draws the painter with the given [[com.siigna.app.view.Graphics]], [[com.siigna.app.model.Drawing]] and
    * [[com.siigna.app.view.View]].
    * @param graphics  The graphics to draw the
-   * @param pan  The amount the user have panned in the current zoom-level.
    */
-  def paint(graphics : Graphics, pan : Vector2D)
+  def paint(graphics : Graphics)
+
+  /**
+   * Pans the [[com.siigna.app.view.native.TilePainter]] to allow caching of the exact tile positions.
+   * @param vector  The amount the view have been panned .
+   */
+  def pan(vector : Vector2D) : TilePainter = {
+    _panX += vector.x
+    _panY += vector.y
+
+    update()
+  }
+
+  /**
+   * Updates the [[com.siigna.app.view.native.TilePainter]] and returns an instance that fits the current situation.
+   * @return  A [[com.siigna.app.view.native.TilePainter]] capable of drawing the current view.
+   */
+  protected def update() : TilePainter
+
+  /**
+   * The amount of panning on the x-axis as an int.
+   * @return  An integer describing the pan on the x-axis.
+   */
+  def panX = _panX
+
+  /**
+   * The amount of panning on the y-axis as an int.
+   * @return  An integer describing the pan on the y-axis.
+   */
+  def panY = _panY
+
+  /**
+   * The view to retrieve panning information and screen-coordinates from.
+   * @return  An instance of a [[com.siigna.app.view.View]].
+   */
+  protected def view : View
+
+}
+
+/**
+ * Companion object to the [[com.siigna.app.view.native.TilePainter]]. Provides simple constructors to create
+ * instances of the [[com.siigna.app.view.native.SingleTilePainter]] or [[com.siigna.app.view.native.MultiTilePainter]].
+ */
+object TilePainter {
+
+  // A boolean value to indicate that the view is zoomed out enough to only need one single tile
+  protected def isSingleTile(drawing : SimpleRectangle2D, view : SimpleRectangle2D) =
+    view.width >= drawing.width && view.height >= drawing.height
+
+  /**
+   * Creates a new TilePainter using the given [[com.siigna.app.model.Drawing]] and [[com.siigna.app.view.View]].
+   * @param drawing  The drawing to retrieve shapes from.
+   * @param view  The view to get screen-dimensions, panning and zoom information from.
+   * @return  An instance of a [[com.siigna.app.view.native.TilePainter]].
+   */
+  def apply(drawing : Drawing, view : View) : TilePainter = {
+    val boundary = drawing.boundary.transform(view.drawingTransformation)
+    if (isSingleTile(boundary, view.screen))
+      new SingleTilePainter(drawing, view)
+    else
+      new MultiTilePainter(drawing, view, {
+        val r = view.screen.transform(view.deviceTransformation)
+        // The stored tiles
+        TileGrid(r, view.screen,
+          List(-1, 0, 1).map(i => r + Vector2D(i * r.width, -r.height)).map(new Tile(drawing, _, view.zoom, view.graphics)),
+          List(-1, 0, 1).map(i => r + Vector2D(i * r.width,         0)).map(new Tile(drawing, _, view.zoom, view.graphics)),
+          List(-1, 0, 1).map(i => r + Vector2D(i * r.width,  r.height)).map(new Tile(drawing, _, view.zoom, view.graphics))
+        )
+      }, view.center)
+  }
 
 }
 
 /**
  * A [[com.siigna.app.view.native.TilePainter]] painting the [[com.siigna.app.model.Drawing]] in one tile always.
+ * @param view  The view to retrieve information on screen size, transformations etc.
  * @param drawing  The drawing to extract [[com.siigna.app.model.shape.Shape]]s to draw and boundaries to determine
  *                 which areas to clear.
- * @param view  The view to retrieve information on screen size, transformations etc.
  */
-class SingleTilePainter(view : View, drawing : Drawing) extends TilePainter {
+class SingleTilePainter(protected val drawing : Drawing, protected val view : View) extends TilePainter {
 
-  protected val centerTile = new Tile(drawing, view, drawing.boundary.transform(view.drawingTransformation))
+  val centerTile = new Tile(drawing, drawing.boundary, view.zoom, view.graphics)
+  protected val topLeft = drawing.boundary.topLeft.transform(view.drawingTransformation)
+  protected val topLeftX = topLeft.x.round.toInt
+  protected val topLeftY = topLeft.y.round.toInt
 
   def interrupt: Boolean = centerTile.interrupt()
 
   def onComplete[U](func : Try[TilePainter] => U) {
-    centerTile.onComplete{ t => Success(t.map(_ => this)) }
+    centerTile.onComplete{ t => {
+      func(t.map(_ => this))
+    } }
   }
 
-  def paint(graphics : Graphics, pan : Vector2D) {
-    val x = pan.x.round.toInt
-    val y = pan.y.round.toInt
+  def paint(graphics : Graphics) {
     centerTile.image.foreach( image =>
-      graphics.AWTGraphics.drawImage(image, x, y, null)
+      graphics.AWTGraphics.drawImage(image, (panX + topLeftX).toInt, (panY + topLeftY).toInt, null)
     )
   }
+
+  protected def update() = this
+
 }
 
 /**
@@ -121,27 +204,50 @@ class SingleTilePainter(view : View, drawing : Drawing) extends TilePainter {
  *
  * }}}
  *
+ * @param view  The view to retrieve information on screen size, transformations etc.
  * @param drawing  The drawing to extract [[com.siigna.app.model.shape.Shape]]s to draw and boundaries to determine
  *                 which areas to clear.
- * @param view  The view to retrieve information on screen size, transformations etc.
  */
-class MultiTilePainter(view : View, drawing : Drawing) extends TilePainter {
+class MultiTilePainter(protected val drawing : Drawing, protected val view : View, val grid : TileGrid, startPan : Vector2D) extends TilePainter {
 
-  // The tile deltas for the two axis
-  protected var tileDeltaX = 0; protected var tileDeltaY = 0
+  /**
+   * Calculates the current pan for the grid.
+   * @return  A x- and y-coordinate describing the pan on both axis.
+   */
+  def gridPan : (Double, Double) = {
+    // Examine if the pan has changed and requires the tiles to be moved
+    (startPan.x - panX, startPan.y + panY)
+  }
 
-  def interrupt: Boolean = false
+  def interrupt: Boolean = {
+    grid.rowNorth.forall(_.interrupt())
+    grid.rowCenter.forall(_.interrupt())
+    grid.rowSouth.forall(_.interrupt())
+  }
 
   def onComplete[U](func : Try[TilePainter] => U) {
-    // TODO
+    grid.rowCenter(1).onComplete( t => func(t.map(_ => this)) )
   }
 
-  def paint(graphics : Graphics, pan : Vector2D) {
-
+  def paint(graphics : Graphics) {
+    (grid.rowNorth ++ grid.rowCenter ++ grid.rowSouth).foreach(tile => {
+      tile.image.foreach { image =>
+        val anchor = tile.window.topLeft.transform(view.drawingTransformation)
+        graphics.AWTGraphics.drawImage(image, anchor.x.toInt, anchor.y.toInt, null)
+      }
+    })
   }
 
-  protected def updateTiles(drawing : Drawing, view : View) {
+  protected def update() = {
+    val (x, y) = gridPan
+    grid.direction(x, y).map(d => {
+      // Interrupt the current painter
+      interrupt
 
+      // Return a new painter with the moved grid
+      new MultiTilePainter(drawing, view, grid.move(d)(drawing, view), Vector2D(x, y))
+    }).getOrElse(this)
   }
 
 }
+

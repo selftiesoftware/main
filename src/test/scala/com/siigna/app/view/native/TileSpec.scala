@@ -43,7 +43,7 @@ class TileSpec extends FunSpec with ShouldMatchers {
       def screen: SimpleRectangle2D = SimpleRectangle2D(4, 4, 6, 7)
     }
 
-    val tile = new Tile(drawing, view, view.screen)
+    val tile = new Tile(drawing, view.screen.transform(view.deviceTransformation), view.zoom, view.graphics)
 
     it ("can be created with a drawing, view and rectangle") {
       tile.image.foreach { image =>
@@ -52,11 +52,8 @@ class TileSpec extends FunSpec with ShouldMatchers {
       }
     }
 
-    it ("can calculate a window of the drawing") {
-      // The center of the screen - the screen-coordinates (flipped = a negative y-axis)
-      val centerX = 5.0
-      val centerY = 5.5
-      tile.window should equal (SimpleRectangle2D(4 - centerX, 4 - centerY, 6 - centerX, 7 - centerY))
+    it ("can calculate a window of the screen in drawing coordinates") {
+      tile.window should equal (view.screen.transform(view.deviceTransformation))
     }
 
   }
