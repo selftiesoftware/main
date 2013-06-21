@@ -21,14 +21,14 @@ package com.siigna.util.io
 
 import io.Source
 import com.siigna.util.Log
-import java.nio.file.{StandardOpenOption, Files}
-import java.nio.channels.{WritableByteChannel, ReadableByteChannel}
+import java.nio.file.{OpenOption, StandardOpenOption, Files}
+import java.nio.channels.{FileChannel, ReadableByteChannel}
 import java.util
 import java.nio.charset.Charset
-import collection.JavaConversions
-import scala.Some
 import javax.swing.filechooser.FileNameExtensionFilter
-import java.io.{OutputStream, InputStream, IOException, File}
+import java.nio.ByteBuffer
+import java.io._
+import scala.reflect.runtime.universe._
 
 /**
  * <h2>Dialogue</h2>
@@ -191,6 +191,10 @@ import java.io.{OutputStream, InputStream, IOException, File}
  */
 object Dialogue {
 
+  // A mirror used to reflect on classes at runtime
+  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
+  protected lazy val mirror = runtimeMirror(getClass.getClassLoader)
+
   /**
    * Opens a JFileChooser for reading operations and lets the user choose a file to read. If the dialogue is not
    * interrupted and the file matches the given file extensions (if any), the function f is called and the value
@@ -203,7 +207,7 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueRead[T](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
+  protected def openDialogueRead[T : TypeTag](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
     openDialogue[T](DialogueFunctionRead(f, filters))
   }
 
@@ -219,10 +223,14 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueWrite[T](parsers : Map[FileNameExtensionFilter, File => T]) : Option[T] = {
+  protected def openDialogueWrite[T : TypeTag](parsers : Map[FileNameExtensionFilter, FileChannel => T], options : Set[OpenOption]) : Option[T] = {
     // Make sure we have at least one file filter
     require(!parsers.isEmpty, "Needs at least one parser to operate on, none were given.")
-    openDialogue[T](DialogueFunctionWrite(parsers))
+    openDialogue[T](
+      DialogueFunctionWrite(parsers,
+        if (options.isEmpty) Set(StandardOpenOption.TRUNCATE_EXISTING) else options
+      )
+    )
   }
 
   /**
@@ -231,25 +239,16 @@ object Dialogue {
    * @tparam T  The type of data to return.
    * @return Some[T] if the data was successfully returned and parsed to type T, None otherwise.
    */
-  protected def openDialogue[T](function : DialogueFunction) : Option[T] = {
+  protected def openDialogue[T : TypeTag](function : DialogueFunction) : Option[T] = {
     // Continue to open the dialogue
-    try {
-      // Ask for a dialogue
-      val result = IOActor !? function
-
-      try {
-        Some(result.asInstanceOf[T])
-      } catch {
-        case _ : Throwable => Log.warning(s"Dialogue: $result"); None
-      }
-    } catch {
-      case e : IOException => {
-        Log.error(s"Dialogue: I/O error: " + e)
-        None
-      }
-      case e : Throwable => {
-        Log.warning(s"Dialogue: Unknown error: $e.")
-        None
+    val result = IOActor !? function
+    result match {
+      case i : InterruptedException => None
+      case e => {
+        mirror.reflect(result).symbol.toType match {
+          case x if x <:< typeOf[T] => Some(e.asInstanceOf[T])
+          case _ => Log.warning("Dialogue: " + e); None
+        }
       }
     }
   }
@@ -288,8 +287,9 @@ object Dialogue {
    * @return  Some[InputStream] if the user correctly selected a file and we have sufficient permissions to read it
    *          None otherwise.
    */
-  def readInputStream(filters : FileNameExtensionFilter*) : Option[InputStream] =
+  def readInputStream(filters : FileNameExtensionFilter*) : Option[InputStream] = {
     openDialogueRead(file => Files.newInputStream(file.toPath, StandardOpenOption.READ), filters)
+  }
 
   /**
    * Attempts to read a file to a number of lines. This is useful when dealing with larger textual files which
@@ -338,17 +338,17 @@ object Dialogue {
    * which is set to truncate all the existing content before reading, as default. If you wish to change that
    * behaviour, you should set the parameter.
    * @param bytes  The bytes to write to file.
-   * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
-   *                truncates all the content of the file away before writing.
+   * @param options  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
+   *                 truncates all the content of the file away before writing.
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
   def writeBytes(bytes : Array[Byte], filters : Seq[FileNameExtensionFilter],
-                 option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
+                 options : StandardOpenOption*) : Boolean = {
     openDialogueWrite(filters.map(t =>
-      t -> ((file : File) => Files.write(file.toPath, bytes, option))).toMap).isDefined
+      t -> ((channel : FileChannel) => channel.write(ByteBuffer.wrap(bytes)))).toMap, options.toSet).isDefined
   }
 
   /**
@@ -358,13 +358,13 @@ object Dialogue {
    *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
    *                   paired with the functions that takes a byte channel that can be used to store any number of
    *                   data into the file the user have chosen.
-   * @param option  The option with which to open the file. Defaults to StandardOpenOption.WRITE.
+   * @param options  Zero or more options with which to open the file. Defaults to StandardOpenOption.TRUNCATE_EXISTING
+   *                 which truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeChannel(extensions : Map[FileNameExtensionFilter, WritableByteChannel => Unit],
-                   option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogueWrite(extensions.map(t =>
-      t._1 -> ((f : File) => t._2(Files.newByteChannel(f.toPath, option))))).isDefined
+  def writeChannel(extensions : Map[FileNameExtensionFilter, FileChannel => Unit],
+                   options : OpenOption*) : Boolean = {
+    openDialogueWrite(extensions, options.toSet).isDefined
   }
 
   /**
@@ -380,16 +380,16 @@ object Dialogue {
    *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
    *                choose a file with a certain file-ending, for instance.
-   * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
+   * @param options  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
    *                truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeLines(lines : Iterable[String], filters : Seq[FileNameExtensionFilter] = Nil, encoding : String = "UTF-8",
-                 option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogueWrite(filters.map(t => t -> ((f : File) => {
-      val iterable = JavaConversions.asJavaIterable(lines)
-      Files.write(f.toPath, iterable, Charset.forName(encoding), option)
-    })).toMap).isDefined
+  def writeLines(lines : Iterable[String], filters : Seq[FileNameExtensionFilter] = Nil,
+                 encoding : String = "UTF-8", options : Set[OpenOption] = Set()) : Boolean = {
+    openDialogueWrite(filters.map(t => t -> ((channel : FileChannel) => {
+      val bytes = ByteBuffer.wrap(lines.mkString("\n").getBytes(Charset.forName(encoding)))
+      channel.write(bytes)
+    })).toMap, options.toSet).isDefined
   }
 
   /**
@@ -398,14 +398,17 @@ object Dialogue {
    * @param extensions  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away
    *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
    *                   mapped with functions to export
-   * @param option  The option with which to open the file. Defaults to StandardOpenOption.WRITE.
+   * @param options  The option with which to open the file. Defaults to StandardOpenOption.TRUNCATE_EXISTING
+   *                 which truncates all the content of the file away before writing..
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
   def writeOutputStream(extensions : Map[FileNameExtensionFilter, OutputStream => Unit],
-                        option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    openDialogueWrite(extensions.map(t => t._1 -> ((f : File) => {
-      t._2(Files.newOutputStream(f.toPath, option))
-      })).toMap).isDefined
+                        options : OpenOption*) : Boolean = {
+    openDialogueWrite(extensions.map(t => t._1 -> ((channel : FileChannel) => {
+      val bytes = new ByteArrayOutputStream()
+      t._2(bytes)
+      channel.write(ByteBuffer.wrap(bytes.toByteArray))
+    })).toMap, options.toSet).isDefined
   }
 
   /**
@@ -420,13 +423,13 @@ object Dialogue {
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
-   * @param option  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
+   * @param options  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
    *                truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
   def writeText(text : String, filters : Seq[FileNameExtensionFilter] = Nil, encoding : String = "UTF-8",
-                option : StandardOpenOption = StandardOpenOption.TRUNCATE_EXISTING) : Boolean = {
-    writeLines(Seq(text), filters, encoding, option)
+                options : Set[OpenOption] = Set()) : Boolean = {
+    writeLines(Seq(text), filters, encoding, options)
   }
 
 }

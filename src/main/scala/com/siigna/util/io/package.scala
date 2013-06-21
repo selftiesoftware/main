@@ -19,12 +19,14 @@
 
 package com.siigna.util
 
-import java.io.{IOException, RandomAccessFile, File}
+import java.io.File
 import actors.Actor
 import javax.swing.{UIManager, JFileChooser}
 import javax.swing.filechooser.{FileFilter, FileNameExtensionFilter}
 import java.security.{PrivilegedAction, AccessController}
-import java.nio.channels.OverlappingFileLockException
+import java.nio.channels.{OverlappingFileLockException, FileChannel}
+import java.nio.file.{StandardOpenOption, OpenOption}
+import scala.collection.JavaConversions
 
 /**
  * The persistence package is capable of converting objects into byte arrays (marshaling), reading objects from
@@ -84,7 +86,7 @@ package object io {
   // A private class to perform type-safe callback invocations
   private[io] trait DialogueFunction
   private[io] case class DialogueFunctionRead(f : File => Any, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
-  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, File => Any]) extends DialogueFunction
+  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, FileChannel => Any], options : Set[OpenOption]) extends DialogueFunction
 
   private var dialogue : Option[JFileChooser] = None
 
@@ -151,36 +153,35 @@ package object io {
       loop {
         react {
           // Write dialogue
-          case DialogueFunctionWrite(callbacks) => {
+          case DialogueFunctionWrite(callbacks, options) => {
             initializeDialogue(callbacks.keys, read = false) match {
-              case Left(m) => reply(m)
+              case Left(m) => reply(new InterruptedException(m))
               case Right(d) => {
+                // Get the selected file from the dialogue
+                val selectedFile = d.getSelectedFile
+
+                // If the file does not end with the right extension, append the extension
+                val filter = d.getFileFilter.asInstanceOf[FileNameExtensionFilter]
+                val extensions = filter.getExtensions
+                val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
+                  new File(selectedFile.getAbsolutePath + "." + extensions.head)
+                } else selectedFile
+
+                // Make sure the file exists and give it the right permissions
+                if (!file.exists()) file.createNewFile()
+
+                // Make sure we can write to the file
                 try {
-                  // Get the selected file from the dialogue
-                  val selectedFile = d.getSelectedFile
-
-                  // If the file does not end with the right extension, append the extension
-                  val filter = d.getFileFilter.asInstanceOf[FileNameExtensionFilter]
-                  val extensions = filter.getExtensions
-                  val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
-                    new File(selectedFile.getAbsolutePath + "." + extensions.head)
-                  } else selectedFile
-
-                  // Make sure the file exists and give it the right permissions
-                  if (!file.exists()) file.createNewFile()
-                  file.setWritable(true)
-
-                  // Make sure we can write to the file
                   // Thanks to http://stackoverflow.com/questions/128038/how-can-i-lock-a-file-using-java-if-possible
                   // #Fixes trello http://goo.gl/b2S6Y
-                  val channel = new RandomAccessFile(file, "rw").getChannel
+                  val channel = FileChannel.open(file.toPath,
+                                                 JavaConversions.setAsJavaSet(options + StandardOpenOption.WRITE))
 
                   // Try to get a lock on the file
                   val lock = channel.lock()
-                  channel.tryLock()
 
                   // Get the result of the write operation
-                  val result = callbacks(filter).apply(file)
+                  val result = callbacks(filter).apply(channel)
 
                   // Release the lock and close the file
                   lock.release()
@@ -189,8 +190,7 @@ package object io {
                   // Return the function applied on the file
                   reply(result)
                 } catch {
-                  case l : OverlappingFileLockException => reply("Cannot write to tile: Used by another process.")
-                  case e : IOException => reply("IOException while writing to file: " + e.getMessage)
+                  case _ : OverlappingFileLockException => reply("File already in use")
                 }
               }
             }
@@ -198,7 +198,7 @@ package object io {
           // Read dialogue
           case DialogueFunctionRead(f, callbacks) => {
             initializeDialogue(callbacks, read = true) match {
-              case Left(m)  => reply(m)
+              case Left(m)  => reply(new InterruptedException(m))
               case Right(d) => {
                 val file = d.getSelectedFile
 
