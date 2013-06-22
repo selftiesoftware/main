@@ -23,7 +23,7 @@ import com.siigna.app.model.selection.ShapeSelector
 class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
   describe("A RectangleShape") {
-    /*
+
     it("can be rotated") {
       val s = RectangleShape(Vector2D(0,0),100,100,0, Attributes())
       val t = TransformationMatrix(Vector2D(0,0),1).rotate(90)
@@ -110,36 +110,52 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val t = TransformationMatrix(Vector2D(10, 10), 1)
       s.transform(t) should equal (RectangleShape(10, 10, 110, 110))
     }
-    */
-    it("can draw the segments of a rotated rectangle") {
+
+    it("can select the segments of a rectangle") {
       val w = 40.0
       val h = 40.0
       val center = Vector2D(0,0)
+      val r = RectangleShape(center, w,h, 0, Attributes())
+
+      //val pTop = Vector2D(-14,14)
+      val pTop = Vector2D(0,20)
+      val pLeft = Vector2D(-20,0)
+      val pBottom = Vector2D(0,-20)
+      val pRight = Vector2D(20,0)
+
+      val selector1 = r.getSelector(pTop)
+      val selector2 = r.getSelector(pLeft)
+      val selector3 = r.getSelector(pBottom)
+      val selector4 = r.getSelector(pRight)
+
+      selector1 should equal (ShapeSelector(0, 1)) //SHOULD BE 2 IF CW ROTATION
+      selector2 should equal (ShapeSelector(1, 2))
+      selector3 should equal (ShapeSelector(2, 3))
+      selector4 should equal (ShapeSelector(3, 0)) //SHOULD BE TWO (CCW) OR 3 (CW)
+    }
+
+    it("can select the segments of a rotated rectangle") {
+      val w = 40.0
+      val h = 40.0
+      val center = Vector2D(0,0)
+      //rotated CCW
       val r = RectangleShape(center, w,h, 45, Attributes())
 
       val pTop = Vector2D(-14,14)
-      //val pTL = Vector2D(-20,20)
-      //val pBL = Vector2D(-20,-20)
-      //val pBR = Vector2D(20,-20)
+      val pLeft = Vector2D(-14,-14)
+      val pBottom = Vector2D(14,-14)
+      val pRight = Vector2D(14,14)
 
       val selector1 = r.getSelector(pTop)
-      //val selector2 = r.getSelector(pTL)
-      //val selector3 = r.getSelector(pBL)
-      //val selector4 = r.getSelector(pBR)
+      val selector2 = r.getSelector(pLeft)
+      val selector3 = r.getSelector(pBottom)
+      val selector4 = r.getSelector(pRight)
 
-
-      val segment1 = r.getPart(selector1)
-      //val segment2 =
-      //val segment3 =
-      //val segment4 =
-
-      println("segment1: "+segment1)
-      //selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
-      //selector2 should equal (ShapeSelector(2))
-      //selector3 should equal (ShapeSelector(3))
-      //selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
+      selector1 should equal (ShapeSelector(0, 1)) //SHOULD BE 2 IF CW ROTATION
+      selector2 should equal (ShapeSelector(1, 2))
+      selector3 should equal (ShapeSelector(2, 3))
+      selector4 should equal (ShapeSelector(3, 0)) //SHOULD BE TWO (CCW) OR 3 (CW)
     }
-
   }
 }
 

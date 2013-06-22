@@ -23,6 +23,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   type T = RectangleShape
 
+  //TODO: tegner rotation forkert.
+  //TEGNER SHAPEN I SIIGNA GRAPHICS - tag de fire punkter og tegn streger mellem dem
+  //fejlen findes ikke i rotations værdi men hvordan punkterne udregnes i geom
+
   //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry = ComplexRectangle2D(center,width,height,rotation)
   val p0 = geometry.p0 //BitSet 0
@@ -36,34 +40,12 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   }
 
   def getPart(part : ShapeSelector) = part match {
-    case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 0")
-      LineShape(p2, p3.transform(t), attributes)
-      LineShape(p0, p3.transform(t), attributes)
-    }))
-    case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 1")
-      LineShape(p0, p1.transform(t), attributes)
-      LineShape(p2, p1.transform(t), attributes)
-    }))
-    case ShapeSelector(2) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 2")
-      LineShape(p1, p2.transform(t), attributes)
-      LineShape(p3, p2.transform(t), attributes)
-    }))
-    case ShapeSelector(3) => Some(new PartialShape(this, (t : TransformationMatrix) => {
-      println("sel shape part 3")
-      LineShape(p3, p0.transform(t), attributes)
-      LineShape(p1, p0.transform(t), attributes)
-    }))
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => {
-      println("part: "+part)
       None
     }
   }
 
-  //TODO: allow returning selected segments, not just points.
   def getSelector(p : Vector2D) = {
     val selectionDistance = Siigna.selectionDistance
     //find out if a point in the rectangle is close. if so, return true and the point's bit value
@@ -115,14 +97,9 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
           BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
         }
         //if no point is close, return the bitset of the segment:
-        else {
-          println("return segment here!")
-          BitSetShapeSelector(isCloseToSegment._3)
-        }
+        else BitSetShapeSelector(isCloseToSegment._3)
       //if no point is close, return the segment:
-      } else {
-        EmptyShapeSelector
-      }
+      } else EmptyShapeSelector
     }
   }
   //needed for box selections?
