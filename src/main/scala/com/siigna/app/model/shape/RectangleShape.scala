@@ -35,7 +35,34 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case _ => Seq(this)
   }
 
+  /**
+   * Creates a [[com.siigna.app.model.shape.PartialShape]] where only the two selected points are transformed.
+   * @param x  The first selected point
+   * @param y  The second selected point
+   * @param isWidth  A boolean value indicating whether it is the width (true) or  height (false) that should be
+   *                 manipulated.
+   * @return A Some[PartialShape] that only transforms the two selected points.
+   */
+  protected def twoPointPartialShape(x : Vector2D, y : Vector2D, isWidth : Boolean) =
+    Some(new PartialShape(this, (f : TransformationMatrix) => {
+      val line = Line(x, y)
+      val translation = f.translation + line.center
+      val closestPoint = line.closestPoint(translation)
+      val delta = translation - closestPoint
+      new RectangleShape(center + delta / 2,
+        if (isWidth) (p0 - p1).length else width,
+        if (isWidth) height else (p3 - p0).length,
+        rotation + f.rotation, attributes)
+    }))
+
   def getPart(part : ShapeSelector) : Option[PartialShape] = part match {
+    case FullShapeSelector => Some(new PartialShape(this, transform))
+    case x : BitSetShapeSelector if x.size >= 3 => Some(new PartialShape(this, transform))
+    case ShapeSelector(0, 1) => twoPointPartialShape(p0, p1, isWidth = false)
+    case ShapeSelector(0, 3) => twoPointPartialShape(p0, p3, isWidth = true)
+    case ShapeSelector(1, 2) => twoPointPartialShape(p1, p2, isWidth = true)
+    case ShapeSelector(2, 3) => twoPointPartialShape(p2, p3, isWidth = false)
+    case ShapeSelector(0, 2) | ShapeSelector(1, 3) => None
     case _ => None
   }
 
@@ -170,8 +197,17 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation + t.rotation, attributes)
 }
 
+/**
+ * Companion object to [[com.siigna.app.model.shape.RectangleShape]]
+ */
 object RectangleShape {
-  def apply(center : Vector2D, width : Double, height : Double, rotation : Double) : RectangleShape = new RectangleShape(center, width, height, rotation,Attributes())
-  def apply(p1 : Vector2D, p2 : Vector2D) : RectangleShape = new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0,Attributes())
-  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : RectangleShape = apply(Vector2D(x1,y1),Vector2D(x2,y2))
+
+  def apply(center : Vector2D, width : Double, height : Double, rotation : Double) : RectangleShape =
+    new RectangleShape(center, width, height, rotation,Attributes())
+
+  def apply(p1 : Vector2D, p2 : Vector2D) : RectangleShape =
+    new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0,Attributes())
+
+  def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : RectangleShape =
+    apply(Vector2D(x1,y1),Vector2D(x2,y2))
 }
