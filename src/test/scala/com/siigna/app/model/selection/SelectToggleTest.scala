@@ -24,7 +24,7 @@ import org.scalatest.{BeforeAndAfter, FunSpec}
 import com.siigna.app.model.{Model, Drawing}
 import com.siigna.app.model.shape.{PolylineShape, LineShape}
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.Vector2D
+import com.siigna.util.geom.{SimpleRectangle2D, Vector2D}
 
 /**
  * Test the Select class.
@@ -38,6 +38,7 @@ class SelectToggleTest extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   before {
     drawing = new Drawing {
+      val boundary = SimpleRectangle2D(0, 0, 0, 0)
       model = new Model(Map(
         -1 -> line,
         -2 -> openPL,

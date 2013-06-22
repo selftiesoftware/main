@@ -88,6 +88,7 @@ trait EventController extends Actor {
     event match {
       case KeyDown(Key.Plus, ModifierKeys.Control) => View.zoom(View.center, -5); None // Zoom in
       case KeyDown(Key.Minus, ModifierKeys.Control) => View.zoom(View.center, 5); None // Zoom out
+      case KeyDown(119, _) => View.showFps = !View.showFps; None // Zoom out
       case KeyDown(Key.ArrowDown, ModifierKeys.Control) => View.panY(-1); None
       case KeyDown(Key.ArrowLeft, ModifierKeys.Control) => View.panX(-1); None
       case KeyDown(Key.ArrowRight, ModifierKeys.Control) => View.panX(1); None
@@ -202,7 +203,7 @@ trait EventController extends Actor {
     canvas.addMouseWheelListener(new MouseWheelListener {
       override def mouseWheelMoved(e : MouseWheelEvent) {
         // getPreciseWheelRotation is only available in 1.7
-        val scroll = try {e.getPreciseWheelRotation} catch { case _ => e.getUnitsToScroll}
+        val scroll = try {e.getPreciseWheelRotation} catch { case _ : Throwable => e.getUnitsToScroll}
         dispatch(parseMouseEvent(e, MouseWheel(scroll)))
       }
     })

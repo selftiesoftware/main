@@ -18,9 +18,6 @@
  */
 package com.siigna.app.model.action
 
-import com.siigna.app.model.Model
-import com.siigna.app.model.shape.{GroupShape, Shape}
-import com.siigna.util.Log
 
 /**
  * Groups objects or merges objects into existing groups.

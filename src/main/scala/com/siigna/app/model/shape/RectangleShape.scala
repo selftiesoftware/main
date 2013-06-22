@@ -35,7 +35,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case _ => Seq(this)
   }
 
-  def getPart(part : ShapeSelector) = part match {
+  def getPart(part : ShapeSelector) : Option[PartialShape] = part match {
     case _ => None
   }
 

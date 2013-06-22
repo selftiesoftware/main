@@ -19,6 +19,8 @@
 
 package com.siigna.app.view
 
+import com.siigna.app.model.Drawing
+
 /**
  * A renderer can render different stuff for Siigna like shapes, backgrounds etc. and draw them whenever the
  * [[com.siigna.app.view.View]] asks it to. The only method to implement is called paint and is called whenever the
@@ -39,10 +41,10 @@ package com.siigna.app.view
  *
  * <p>
  *   To implement the Renderer we really encourage you to use the listeners available in the
- *   [[com.siigna.app.view.View]] to receive updates on zoom and resize. This is particularly efficient for caching
- *   purposes (hint, hint)...
+ *   [[com.siigna.app.view.View]] to receive updates on zoom and resize, and the ones available in the
+ *   [[com.siigna.app.model.Drawing]] to get notifications from actions and selections. This is particularly efficient
+ *   for caching purposes (hint, hint)...
  * </p>
- * @todo Introduce interfaces for selections and displays.
  */
 trait Renderer {
 
@@ -52,7 +54,7 @@ trait Renderer {
    * information whenever external calls, such as callbacks from listeners, arrive.
    * @return  A boolean indicating if the renderer is current in use (true) or not (false).
    */
-  def isActive : Boolean = View.renderer.exists(_ == this)
+  def isActive : Boolean = View.renderer == this
 
   /**
    * Renders the rendered contents of the renderer (...). This method is not called <code>render</code> to illustrate
@@ -61,7 +63,10 @@ trait Renderer {
    * a parameter, since this should already have been defined and drawn in the <code>renderModel</code> method,
    * independently of the paint method.
    * @param graphics  The [[com.siigna.app.view.Graphics]] object to draw on the underlying screen.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to get the [[com.siigna.app.model.shape.Shape]]s
+   *                 [[com.siigna.app.model.selection.Selection]]s to draw.
+   * @param view  The [[com.siigna.app.view.View]] containing information about panning, zooming etc.
    */
-  def paint(graphics : Graphics)
+  def paint(graphics : Graphics, drawing : Drawing, view : View)
 
 }

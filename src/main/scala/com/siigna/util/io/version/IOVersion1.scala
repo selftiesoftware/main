@@ -40,10 +40,6 @@ import scala.collection.immutable.BitSet
  */
 object IOVersion1 extends IOVersion {
 
-  // A mirror used to reflect on classes at runtime
-  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
-  protected lazy val mirror = runtimeMirror(getClass.getClassLoader)
-
   /**
    * Attempts to retrieve the type parameters for the given type. Useful for extracting types from classes with
    * type parameters like Array[Int] => Int
@@ -67,7 +63,7 @@ object IOVersion1 extends IOVersion {
    * @throws ClassCastException  If the element could not be correctly verified to be a subtype of E
    */
   protected def verifyType(elem : Any, expected : Type) {
-    val actual = mirror.reflect(elem).symbol.toType
+    val actual = com.siigna.util.io.mirror.reflect(elem).symbol.toType
     actual match {
       case x if x <:< expected =>   // We're good!
       case x if (x =:= typeOf[java.lang.Byte]    && expected =:= typeOf[Byte])    => // We're also good
