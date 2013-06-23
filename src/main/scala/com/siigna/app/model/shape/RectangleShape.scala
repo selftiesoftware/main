@@ -42,6 +42,17 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def getPart(part : ShapeSelector) = part match {
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case _ => {
+
+      /*
+ 1   0
+ *   *
+
+ *   *
+ 2   3
+ */
+
+
+
       None
     }
   }
