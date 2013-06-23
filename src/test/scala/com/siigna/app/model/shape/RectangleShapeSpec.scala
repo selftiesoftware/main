@@ -151,7 +151,7 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       r.getPart(empty) should equal(None)
     }
 
-    /*it ("can transform a single point of the rectangle from a given selector") {
+    it ("can transform a single point of the rectangle from a given selector") {
       val s0  = ShapeSelector(0)
       val s1  = ShapeSelector(1)
       val s2  = ShapeSelector(2)
@@ -161,13 +161,13 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       x0.geometry.p0 should equal (Vector2D(100, 100))
       x0.geometry.p1 should equal (Vector2D(-50, 100))
       x0.geometry.p2 should equal (Vector2D(-50, -50))
-      x0.geometry.p3 should equal (Vector2D(100, 50))
+      x0.geometry.p3 should equal (Vector2D(100, -50))
 
       val x1 = r.getPart(s1).get.apply(t).asInstanceOf[RectangleShape]
       x1.geometry.p0 should equal (Vector2D( 50, 100))
       x1.geometry.p1 should equal (Vector2D(  0, 100))
       x1.geometry.p2 should equal (Vector2D(  0, -50))
-      x1.geometry.p3 should equal (Vector2D( 50,   0))
+      x1.geometry.p3 should equal (Vector2D( 50, -50))
 
       val x2 = r.getPart(s2).get.apply(t).asInstanceOf[RectangleShape]
       x2.geometry.p0 should equal (Vector2D( 50,  50))
@@ -180,7 +180,7 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       x3.geometry.p1 should equal (Vector2D(-50,  50))
       x3.geometry.p2 should equal (Vector2D(-50,   0))
       x3.geometry.p3 should equal (Vector2D(100,   0))
-    }*/
+    }
 
     it ("can transform two points from a given selection") {
       val s01 = ShapeSelector(0, 1)

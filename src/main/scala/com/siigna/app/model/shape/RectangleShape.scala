@@ -36,6 +36,39 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   }
 
   /**
+   * Creates a [[com.siigna.app.model.shape.PartialShape]] where the selected point and the two adjacent points are transformed.
+   * @param x  The adjacent point CCW
+   * @param y  The selected point
+   * @param z  The adjacent point CW
+   * @return A Some[PartialShape] that transforms three points.
+   */
+  protected def onePointPartialShape(x : Vector2D, y: Vector2D, z: Vector2D) =
+    Some(new PartialShape(this, (f : TransformationMatrix) => {
+
+      //evaluate the first line to be moved
+      val line1 = Line(z, y)
+      val translation1 = f.translation + line1.center
+      val closestPoint1 = line1.closestPoint(translation1)
+      val deltaX = translation1.x - closestPoint1.x
+      val movedLine1 = line1.transform(f)
+
+      //evaluate the second line to be moved
+      val line2 = Line(x, y)
+      val translation2 = f.translation + line2.center
+      val closestPoint2 = line2.closestPoint(translation2)
+      val deltaY = translation2.y - closestPoint2.y
+      val movedLine2 = line2.transform(f)
+
+      //find the center for the new rectangle
+      val movedCenter = this.center + Vector2D(deltaX, deltaY) / 2
+
+      new RectangleShape(movedCenter,
+          movedCenter.distanceTo(movedLine1) * 2,
+          movedCenter.distanceTo(movedLine2) * 2,
+        rotation + f.rotation, attributes)
+    }))
+
+  /**
    * Creates a [[com.siigna.app.model.shape.PartialShape]] where only the two selected points are transformed.
    * @param x  The first selected point
    * @param y  The second selected point
@@ -52,7 +85,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
       val movedLine = line.transform(f)
       val movedCenter = this.center + delta / 2
 
-      new RectangleShape(center + delta / 2,
+      new RectangleShape(movedCenter,
         if (isWidth) movedCenter.distanceTo(movedLine) * 2 else width,
         if (isWidth) height else movedCenter.distanceTo(movedLine) * 2,
         rotation + f.rotation, attributes)
@@ -61,6 +94,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def getPart(part : ShapeSelector) : Option[PartialShape] = part match {
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case x : BitSetShapeSelector if x.size >= 3 => Some(new PartialShape(this, transform))
+    case ShapeSelector(0) => onePointPartialShape(p1, p0, p3)
+    case ShapeSelector(1) => onePointPartialShape(p0, p1, p2)
+    case ShapeSelector(2) => onePointPartialShape(p3, p2, p1)
+    case ShapeSelector(3) => onePointPartialShape(p2, p3, p0)
     case ShapeSelector(0, 1) => twoPointPartialShape(p0, p1, isWidth = false)
     case ShapeSelector(0, 3) => twoPointPartialShape(p0, p3, isWidth = true)
     case ShapeSelector(1, 2) => twoPointPartialShape(p1, p2, isWidth = true)
