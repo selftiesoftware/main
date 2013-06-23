@@ -24,6 +24,10 @@ import actors.Actor
 import javax.swing.{UIManager, JFileChooser}
 import javax.swing.filechooser.{FileFilter, FileNameExtensionFilter}
 import java.security.{PrivilegedAction, AccessController}
+import java.nio.channels.{OverlappingFileLockException, FileChannel}
+import java.nio.file.{StandardOpenOption, OpenOption}
+import scala.collection.JavaConversions
+import scala.reflect.runtime.universe._
 
 /**
  * The persistence package is capable of converting objects into byte arrays (marshaling), reading objects from
@@ -83,9 +87,13 @@ package object io {
   // A private class to perform type-safe callback invocations
   private[io] trait DialogueFunction
   private[io] case class DialogueFunctionRead(f : File => Any, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
-  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, File => Any]) extends DialogueFunction
+  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, FileChannel => Any], options : Set[OpenOption]) extends DialogueFunction
 
   private var dialogue : Option[JFileChooser] = None
+
+  // A mirror used to reflect on classes at runtime
+  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
+  protected[io] val mirror = runtimeMirror(getClass.getClassLoader)
 
   // Initialize the dialogue and the look and feel
   private val t = new Thread() {
@@ -127,22 +135,22 @@ package object io {
 
       dialogue match {
         case Some(d) => {
-        // Remove the old filters
-        d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
+          // Remove the old filters
+          d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
 
-        // Set the filters
-        fileFilters.foreach(d.addChoosableFileFilter(_))
+          // Set the filters
+          fileFilters.foreach(d.addChoosableFileFilter(_))
 
-        // Open the dialogue
-        val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
+          // Open the dialogue
+          val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
 
-        // Return the file if the dialogue was not aborted.
-        if (result == JFileChooser.APPROVE_OPTION) {
-          Right(d)
-        } else {
-          Left("User aborted dialogue.")
+          // Return the file if the dialogue was not aborted.
+          if (result == JFileChooser.APPROVE_OPTION) {
+            Right(d)
+          } else {
+            Left("User aborted dialogue.")
+          }
         }
-      }
         case e => Left("Could not load dialogue.")
       }
     }
@@ -150,9 +158,9 @@ package object io {
       loop {
         react {
           // Write dialogue
-          case DialogueFunctionWrite(callbacks) => {
+          case DialogueFunctionWrite(callbacks, options) => {
             initializeDialogue(callbacks.keys, read = false) match {
-              case Left(m) => reply(m)
+              case Left(m) => reply(new InterruptedException(m))
               case Right(d) => {
                 // Get the selected file from the dialogue
                 val selectedFile = d.getSelectedFile
@@ -166,17 +174,36 @@ package object io {
 
                 // Make sure the file exists and give it the right permissions
                 if (!file.exists()) file.createNewFile()
-                file.setWritable(true)
 
-                // Return the function applied on the file
-                reply(callbacks(filter).apply(file))
+                // Make sure we can write to the file
+                try {
+                  // Thanks to http://stackoverflow.com/questions/128038/how-can-i-lock-a-file-using-java-if-possible
+                  // #Fixes trello http://goo.gl/b2S6Y
+                  val channel = FileChannel.open(file.toPath,
+                                                 JavaConversions.setAsJavaSet(options + StandardOpenOption.WRITE))
+
+                  // Try to get a lock on the file
+                  val lock = channel.lock()
+
+                  // Get the result of the write operation
+                  val result = callbacks(filter).apply(channel)
+
+                  // Release the lock and close the file
+                  lock.release()
+                  channel.close()
+
+                  // Return the function applied on the file
+                  reply(result)
+                } catch {
+                  case _ : OverlappingFileLockException => reply("File already in use")
+                }
               }
             }
           }
           // Read dialogue
           case DialogueFunctionRead(f, callbacks) => {
             initializeDialogue(callbacks, read = true) match {
-              case Left(m)  => reply(m)
+              case Left(m)  => reply(new InterruptedException(m))
               case Right(d) => {
                 val file = d.getSelectedFile
 

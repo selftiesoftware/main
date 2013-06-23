@@ -33,7 +33,6 @@ import com.siigna.app.model.selection.{BitSetShapeSelector, FullShapeSelector, E
  *  - StrokeWidth  Double  The width of the line-stroke used to draw.
  * </pre>
  */
-@SerialVersionUID(-746797736)
 case class CircleShape(center : Vector2D, radius : Double, attributes : Attributes) extends ClosedShape {
 
   type T = CircleShape
@@ -48,7 +47,7 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
   /**
    * The distance to the closest handle from a given point.
    */
-  def distanceToHandlesFrom(point : Vector2D) = geometry.vertices.map(_ distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
+  def distanceToHandles(point : Vector2D) = geometry.vertices.map(_.distanceTo(point)).reduceLeft((a, b) => if(a < b) a else b)
 
   def getPart(part : ShapeSelector) = part match {
     //case CircleShape.Part(xs) => {
