@@ -54,7 +54,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   /**
    * The active ModuleInterface.
    */
-  private var interface : Option[ModuleInterface] = None
+  private var _interface : Option[ModuleInterface] = None
 
   /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
@@ -94,8 +94,21 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
    * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
    * get painted.
+   * @return Some[ModuleInterface] if an interface has been set, None otherwise.
    */
-  def getInterface = interface
+  def interface : Option[ModuleInterface] = _interface
+
+  /**
+   * Sets the currently active [[com.siigna.app.view.ModuleInterface]].
+   * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
+   * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
+   * get painted.
+   */
+  def interface_=(interface : ModuleInterface) {
+    this._interface = Some(interface)
+
+    setCursor(interface.getCursor)
+  }
 
   /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
@@ -110,7 +123,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
     // Paint the interface
-    if (interface.isDefined) interface.get.paint(graphics, transformation)
+    if (_interface.isDefined) _interface.get.paint(graphics, transformation)
 
     // Paint the tracking - if needed
     Track.paint(graphics, transformation)
@@ -146,18 +159,6 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    */
   def setCursor(cursor : Cursor) {
     View setCursor cursor
-  }
-
-  /**
-   * Sets the currently active [[com.siigna.app.view.ModuleInterface]].
-   * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
-   * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
-   * get painted.
-   */
-  def setInterface(interface : ModuleInterface) {
-    this.interface = Some(interface)
-
-    setCursor(interface.getCursor)
   }
 
 }

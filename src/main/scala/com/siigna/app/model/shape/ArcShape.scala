@@ -40,7 +40,6 @@ import com.siigna.app.model.selection._
  *
  * TODO: Refactor so shape-parts include handles
  */
-@SerialVersionUID(1561246469)
 case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, angle : Double, attributes : Attributes) extends BasicShape {
 
   type T = ArcShape

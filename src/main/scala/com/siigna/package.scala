@@ -19,8 +19,6 @@
 
 package com
 
-import com.siigna.app.model.selection.{SelectToggle, Select, Deselect}
-
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
@@ -138,7 +136,6 @@ package object siigna extends com.siigna.util.Implicits {
   type MouseWheel = com.siigna.util.event.MouseWheel
   val MouseWheel = com.siigna.util.event.MouseWheel
 
-  val Snap = com.siigna.util.event.Snap
   val Track = com.siigna.util.event.Track
 
   // Geometry

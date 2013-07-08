@@ -36,7 +36,6 @@ import com.siigna.app.model.selection._
  * </pre>
  * TODO: Update useable attributes.
  */
-@SerialVersionUID(-477646412)
 case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) extends BasicShape {
 
   type T = LineShape

@@ -25,6 +25,7 @@ import com.siigna.app.view.{View, Graphics}
 import com.siigna.util.geom.{Vector2D, TransformationMatrix}
 import com.siigna.app.model.Drawing
 import com.siigna.app.model.shape.Shape
+import com.siigna.app.Siigna
 
 /**
  * <p>
@@ -126,7 +127,8 @@ class EventParser {
   def isSnapping(snapper : EventSnap) = snap.exists(_ == snapper)
 
   /**
-   * Examines whether the EventParser is tracking or not.
+   * Examines whether the EventParser is currently tracking anything.
+   * @return  True if the tracker is currently active.
    */
   def isTracking = track.isTracking
 
@@ -135,7 +137,7 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    if(Snap.snapEnabled) snap.foreach(_.paint(graphics, transformation))
+    if(Siigna.isSnapEnabled) snap.foreach(_.paint(graphics, transformation))
   }
 
   /**
@@ -186,7 +188,7 @@ class EventParser {
         var newEvent = track.parse(events, model, trackModel)
 
         // Parse the snap
-        if(Snap.snapEnabled) {
+        if (Siigna.isSnapEnabled) {
           snap foreach {a => newEvent = a.parse(newEvent, model)}
         }
 

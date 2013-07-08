@@ -50,7 +50,6 @@ import com.siigna.app.model.selection.{BitSetShapeSelector, FullShapeSelector, E
  *                         in the PolylineShape.
  * </pre></p>
  */
-@SerialVersionUID(1147278759)
 trait PolylineShape extends CollectionShape[BasicShape] {
 
   type T = PolylineShape
@@ -347,8 +346,7 @@ object PolylineShape {
    * @param attributes  The attributes to give the PolylineShape
    */
   // TODO extend ClosedShape
-  @SerialVersionUID(1672443115)
-  case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+    case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) =
@@ -383,8 +381,7 @@ object PolylineShape {
    *                     [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
    * @param attributes  The attributes to give the PolylineShape
    */
-  @SerialVersionUID(1916049058)
-  case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+    case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =

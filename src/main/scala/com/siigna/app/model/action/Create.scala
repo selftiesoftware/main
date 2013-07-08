@@ -99,7 +99,6 @@ case class CreateShape(id : Int, shape : Shape) extends CreateAction {
  * @define actionFactory [[com.siigna.app.model.action.Create]]
  * $actionDescription
  */
-@SerialVersionUID(-1426451986)
 case class CreateShapes(shapes : Map[Int, Shape]) extends CreateAction {
 
   require(shapes.size > 0, "Cannot initialize CreateShapes with zero shapes.")

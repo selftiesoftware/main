@@ -41,7 +41,6 @@ object Segment {
  * The mathematical class for a line segment, defined as a line with a start
  * point (p1) and a end point (p2). The segment has a finite length.
  */
-@SerialVersionUID(-852679043)
 case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with Segment {
 
   type T = Segment2D

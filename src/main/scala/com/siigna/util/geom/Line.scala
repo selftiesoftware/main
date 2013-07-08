@@ -39,7 +39,6 @@ object Line {
  * A mathematically representation of a line with infinite length.
  * TODO: Can this be represented as a equation?
  */
-@SerialVersionUID(1415950217)
 case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
   type T = Line2D

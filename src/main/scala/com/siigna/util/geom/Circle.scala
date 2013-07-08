@@ -47,7 +47,6 @@ object Circle {
 /**
  * A circle. Represented by a center and a radius.
  */
-@SerialVersionUID(62708094)
 case class Circle2D(override val center : Vector2D, radius : Double) extends Circle with GeometryClosed2D {
 
   type T = Circle2D

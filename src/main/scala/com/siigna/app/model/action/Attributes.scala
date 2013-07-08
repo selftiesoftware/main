@@ -20,7 +20,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.util.collection.Attributes
-import com.siigna.app.model.{selection, Drawing, Model}
+import com.siigna.app.model.{Drawing, Model}
 import com.siigna.app.model.selection.Selection
 
 /**
@@ -80,7 +80,6 @@ object AddAttributes {
  * @param shapes  The ids of the shapes to set the attribute on, mapped to the corresponding old attribute values.
  * @param attributes  The attributes to set.
  */
-@SerialVersionUID(-1003577121)
 case class SetAttributes(shapes : Map[Int, Attributes], attributes : Attributes) extends Action {
 
   def execute(model: Model) = model.add(ids.map(i => i -> model.shapes(i).setAttributes(attributes)).toMap)

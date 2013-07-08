@@ -26,5 +26,4 @@ package com.siigna.app.model.server
  * @param name  The name of the user.
  * @param token  A password token to authenticate the user.
  */
-@SerialVersionUID(-505180571)
 case class User(id: Long, name : String, token: String)

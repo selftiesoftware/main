@@ -26,8 +26,6 @@ import com.siigna.app.model.shape._
 import com.siigna.util.geom._
 import com.siigna.util.Implicits._
 import com.siigna.app.Siigna
-import com.siigna.util.event.Snap
-import native.SiignaGraphics
 
 /**
  * A wrapper class for the Graphics class from AWT.
@@ -101,7 +99,7 @@ trait Graphics {
    */
   def draw(point : Vector2D, color : Color = new Color(50, 50, 50, 100)) {
     setColor(color)
-    if(Snap.snapEnabled) drawCircle(point, 4, fill = true)
+    drawCircle(point, 4, fill = true)
   }
 
   /**
@@ -111,8 +109,9 @@ trait Graphics {
   def drawArc(center : Vector2D, radius : Double, startAngle : Double, arcAngle : Double) {
     // We're using Arc2D.Double instead of the function 'drawArc', since Arc2D.Double is using
     // doubles (weird enough) and are thus more precise.
-    val arc2d = new JavaArc.Double(center.x - radius, center.y - radius, radius * 2, radius * 2, startAngle, arcAngle, JavaArc.OPEN)
-    AWTGraphics draw(arc2d)
+    val arc2d = new JavaArc.Double(center.x - radius, center.y - radius, radius * 2, radius * 2,
+                                   startAngle, arcAngle, JavaArc.OPEN)
+    AWTGraphics draw arc2d
   }
 
   /**
@@ -120,9 +119,11 @@ trait Graphics {
    */
   def drawCircle(center : Vector2D, radius : Double, fill : Boolean = false) {
     if (fill) {
-      AWTGraphics fillArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
+      AWTGraphics fillArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt,
+                          radius.toInt * 2, radius.toInt * 2, 0, 360)
     } else {
-      AWTGraphics drawArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt, radius.toInt * 2, radius.toInt * 2, 0, 360)
+      AWTGraphics drawArc(center.x.toInt - radius.toInt, center.y.toInt - radius.toInt,
+                          radius.toInt * 2, radius.toInt * 2, 0, 360)
     }
   }
 
@@ -186,6 +187,6 @@ trait Graphics {
    * @param  width  the pen width to use.
    */
   def setStrokeWidth(width : Double) {
-    AWTGraphics setStroke(new BasicStroke(width.asInstanceOf[Float]))
+    AWTGraphics setStroke new BasicStroke(width.asInstanceOf[Float])
   }
 }

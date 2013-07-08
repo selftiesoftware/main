@@ -157,7 +157,6 @@ object Vector {
 /**
  * A vector class utility.
  */
-@SerialVersionUID(1206628808)
 case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   type T = Vector2D

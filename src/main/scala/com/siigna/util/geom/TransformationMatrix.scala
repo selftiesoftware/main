@@ -102,7 +102,6 @@ import java.awt.geom.{AffineTransform, Point2D}
  * @param t  The transformation matrix derived from AWT.
  * @see [[com.siigna.app.view.View]], [[com.siigna.app.view.Graphics]], [[com.siigna.util.event.MouseEvent]]
  */
-@SerialVersionUID(-1812748115)
 case class TransformationMatrix(t : AffineTransform) {
 
   def this() = this(new AffineTransform)
