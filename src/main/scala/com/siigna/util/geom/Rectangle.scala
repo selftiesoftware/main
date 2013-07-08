@@ -18,8 +18,6 @@
  */
 package com.siigna.util.geom
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
-
 /**
  * A rectangle, defined as four line-segments in a multidimensional space. Can be compared to other rectangles
  * by their areas.
@@ -258,120 +256,6 @@ object Rectangle2D {
 }
 
 /**
- * A rectangle that can be rotated.
- * @param center  The center of the rectangle
- * @param width  The width of the rectangle.
- * @param height  The height of the rectangle.
- * @param rotation  The rotation of the rectangle.
- */
-case class ComplexRectangle2D(override val center : Vector2D, width : Double, height : Double, rotation : Double) extends Rectangle2D {
-
-  //throw new NotImplementedException()
-
-  type T = ComplexRectangle2D
-
-  /**
-   * Calculates the closest point on the geometry from a given vector.
-   */
-  def closestPoint(vector: ComplexRectangle2D#V): ComplexRectangle2D#V = null
-
-  /**
-   * Transform the geometry with a given matrix.
-   */
-  def transform(transformation: TransformationMatrix): ComplexRectangle2D#T = null
-
-  /**
-   * Determine whether the geometry is overlapping (intersecting) the given geometry.
-   */
-  def intersects(geometry: Geometry2D): Boolean = geometry.intersects(this)
-
-  /**
-   * Returns the intersections between this and the given geometry, if any.
-   */
-  def intersections(geometry: Geometry2D): Set[Vector2D] = null
-
-  /**
-   * The lowest left corner of the rectangle.
-   */
-  def bottomLeft : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
-
-  /**
-   * The lowest right corner of the rectangle.
-   */
-  def bottomRight = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
-
-  /**
-   * The upper left corner of the rectangle.
-   */
-  //TODO: rotation is negative to become clockwise. Is that correct?
-  def topLeft = {
-    val t = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
-    println("TL in geom:_ "+t)
-    t
-  }
-
-
-  /**
-   * The upper right corner of the rectangle.
-   */
-  def topRight = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
-
-  def onPeriphery(point: Vector2D): Boolean = false
-
-  def round = null
-
-  /**
-   * Examines whether a the given geometry is completely enclosed by this geometry.
-   * @return true if the given geometry is inside, false otherwise
-   */
-  def contains(geometry: Geometry2D): Boolean = false
-
-  /**
-   * Calculate the overlap between this and another rectangle. If two rectangles do not overlap the area is 0.
-   */
-  def overlap(that: ComplexRectangle2D): Double = 0.0
-
-  /**
-   * Expands the rectangle to contain the given geometry.
-   * @param geom  The geometry to include.
-   * @return  A new and enlarged [[com.siigna.util.geom.Rectangle2D]].
-   */
-  def expand(geom: Geometry2D): ComplexRectangle2D = null
-
-  /**
-   * Moves the rectangle with the coordinates given in the vector by subtracting the coordinate-values of the
-   * rectangle with the coordinate values from the vector.
-   * @param point  The point that illustrates the distance to move the rectangle.
-   * @return  A new rectangle moved by a distance corresponding to (-point.x, -point.y).
-   */
-  def -(point: ComplexRectangle2D#V): ComplexRectangle2D = null
-
-  /**
-   * Moves the rectangle with the coordinates given in the vector by adding the coordinate-values of the
-   * rectangle with the coordinate values from the vector.
-   * @param point  The point that illustrates the distance to move the rectangle.
-   * @return  A new rectangle moved by a distance corresponding to (point.x, point.y).
-   */
-  def +(point: ComplexRectangle2D#V): ComplexRectangle2D = null
-
-  /**
-   * Moves the rectangle with the coordinates given in the vector by multiplying the coordinate-values of the
-   * rectangle with the coordinate values from the vector.
-   * @param point  The point that illustrates the distance to move the rectangle.
-   * @return  A new rectangle moved by a distance corresponding to (rectangle.x * point.x, rectangle-y * point.y).
-   */
-  def *(point: ComplexRectangle2D#V): ComplexRectangle2D = null
-
-  /**
-   * Moves the rectangle with the coordinates given in the vector by dividing the coordinate-values of the
-   * rectangle with the coordinate values from the vector.
-   * @param point  The point that illustrates the distance to move the rectangle.
-   * @return  A new rectangle moved by a distance corresponding to (rectangle.x / point.x, rectangle-y / point.y).
-   */
-  def /(point: ComplexRectangle2D#V): ComplexRectangle2D = null
-}
-
-/**
  * A simple rectangle given by two points. Contrary to a [[com.siigna.util.geom.ComplexRectangle2D]] a simple rectangle
  * cannot be rotated.
  *
@@ -380,7 +264,6 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
  * @param xMax  The largest x-value
  * @param yMax  The largest y-value
  */
-@SerialVersionUID(-1453115647)
 case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle2D {
 
   type T = SimpleRectangle2D
@@ -484,27 +367,16 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * of a rectangle.
      */
     case point : Vector2D =>
-      (bottomLeft.x <= point.x && point.x <= topRight.x &&
-        bottomLeft.y <= point.y && point.y <= topRight.y)
+      bottomLeft.x <= point.x && point.x <= topRight.x &&
+        bottomLeft.y <= point.y && point.y <= topRight.y
 
     /**
      * Examines whether a given rectangle is within (or on top of) the four boundaries
      * of this rectangle.
      */
     case rectangle : SimpleRectangle2D =>
-      (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
-        bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
-
-    //TODO: wrong! - needs to take into account that the rectangle may be rotated.
-    case rectangle : ComplexRectangle2D => {
-      val left = rectangle.center - Vector2D(width/2,0)
-      val right = rectangle.center + Vector2D(width/2,0)
-      val bottom = rectangle.center - Vector2D(height/2,0)
-      val top = rectangle.center + Vector2D(height/2,0)
-
-      (bottomLeft.x <= left.x && right.x <= topRight.x &&
-        bottomLeft.y <= bottom.y && top.y <= topRight.y)
-    }
+      bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
+        bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y
 
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
   }
@@ -575,10 +447,6 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      */
     case that : SimpleRectangle2D =>
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
-
-    //TODO: WRONG IMPLEMENTATION, NEEDS UPDATING
-    case that : ComplexRectangle2D =>
-      !(xMin > that.center.x+height/2 || xMax < that.center.x-height/2 || yMin > that.center.y+height/2 || yMax < that.center.y-height/2)
 
     case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
   }

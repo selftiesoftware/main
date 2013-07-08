@@ -49,7 +49,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   val points = Iterable(position)
 
-  def alignment           = attributes.vector2D("TextAlignment") getOrElse (Vector2D(0, 0))
+  def alignment           = attributes.vector2D("TextAlignment") getOrElse Vector2D(0, 0)
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
