@@ -59,7 +59,8 @@ protected[controller] object RemoteController extends Actor {
   var timeout = 10000
 
   // The remote server
-  val remote = new Server("62.243.118.234", Mode.Production)
+  //val remote = new Server("62.243.118.234", Mode.Production)
+  val remote = new Server("62.243.118.234", Mode.Testing)
   //val remote = new Server("localhost", Mode.Testing)
   //val remote = new Server("localhost", Mode.http)
 

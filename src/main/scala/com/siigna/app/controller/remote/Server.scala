@@ -168,7 +168,8 @@ class RestEndpoint(client:Client) extends Actor{
 class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
 
   // The remote server
-  private val client = new Client("http://62.243.118.234:20005")
+  //private val client = new Client("http://62.243.118.234:20005")
+  private val client = new Client("http://"+host+":"+mode.id)
   private val remote = new RestEndpoint(client) //select(Node(host, mode.id), 'siigna// )
   remote.start()
 
