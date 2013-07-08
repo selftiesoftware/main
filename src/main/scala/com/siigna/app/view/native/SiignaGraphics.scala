@@ -49,50 +49,18 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
           case s : ArcShape         => {
             setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
             drawArc(s.geometry.center, s.geometry.radius, s.geometry.startAngle, s.geometry.angle)
-            // Something utterly wrong here...
-            //draw(s.start.transform(TransformationMatrix(Vector(0, 0), 1).flipY(s.geometry.center)))
-            //draw(s.middle.transform(TransformationMatrix(Vector(0, 0), 1).flipY(s.geometry.center)))
-            //draw(s.end.transform(TransformationMatrix(Vector(0, 0), 1).flipY(s.geometry.center)))
           }
           case s : CircleShape      => {
             setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
             drawCircle(s.center, s.radius)
             //draw(s.center)
           }
-          /*case s : EllipseShape     => {
-            setColor(attributes color("Color") getOrElse(if (selected) colorSelected else colorDraw))
-            setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
-            drawEllipse(s.center, s.a, s.b)
-          }*/
-          /*case s : ImageShape       => {
-            val color = attributes color("Color") getOrElse(colorBackground)
-            val x = s.p1.x.toInt
-            val y = s.p1.y.toInt
-            val height = scala.math.abs(s.p2.y - s.p1.y).toInt
-            val width  = scala.math.abs(s.p2.x - s.p1.x).toInt
-
-            // The image is flipped around the X-axis, to compensate for the original
-            // negative y-coordinate in java.
-            g drawImage(s.toImage,
-                        x, y + height, x + width,        y, // The coordinates of the destination-rectangle
-                        0, 0,          s.width,   s.height, // The coordinates of the source-rectangle
-                        color, null)
-          }*/
           case s : LineShape        => {
             setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
             if (attributes.boolean("Infinite").getOrElse(false))
               drawLine(s.p1, s.p2)
             else
               drawSegment(s.p1, s.p2)
-          }
-
-          case s : RectangleShape => {
-            val r = s.geometry
-            drawSegment(r.topLeft, r.topRight)
-            drawSegment(r.topRight, r.bottomRight)
-            drawSegment(r.bottomRight, r.bottomLeft)
-            drawSegment(r.bottomLeft, r.topLeft)
-
           }
 
           /** COLLECTION SHAPES **/
@@ -120,7 +88,7 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
 
           }
           case s : TextShape        => {
-            val adjustToScale = attributes boolean("AdjustToScale") getOrElse(false)
+            val adjustToScale = attributes boolean "AdjustToScale" getOrElse false
             val shape : TextShape = if (adjustToScale) {
               s.copy(scale = s.scale * Drawing.boundaryScale)
             } else s
