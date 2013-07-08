@@ -28,9 +28,21 @@ import com.siigna.util.geom.SimpleRectangle2D
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
  * their ids, that can be traversed like a map.
  *
- * Used in the [[com.siigna.app.model.Drawing]] object.
+ * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.model.Drawing$]]
  */
 trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+
+  /**
+   * The boundary from the current content of the Model.
+   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
+   * This is done in order to make sure that the print viewed on page is the
+   * actual print you get.
+   *
+   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
+   */
+  def boundary : SimpleRectangle2D
+
   def self = model.shapes
 }
 
@@ -42,7 +54,7 @@ trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
  * <p>
  *   This is the model part of the
  *   <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
- *   The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the current active drawing.
+ *   The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the currently active drawing.
  * </p>
  *
  * <h3>Manipulating the Drawing through actions</h3>
@@ -110,14 +122,6 @@ object Drawing extends Drawing {
   // The private boundary instance
   private var _boundary = calculateBoundary()
 
-  /**
-   * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
-   * This is done in order to make sure that the print viewed on page is the
-   * actual print you get.
-   *
-   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
-   */
   def boundary : SimpleRectangle2D = _boundary
 
   /**
@@ -134,15 +138,14 @@ object Drawing extends Drawing {
     val center       = newBoundary.center
     //val proportion   = 1.41421356
 
-    // Saves the format, as the format with the margin subtracted
+    // Fetches the values for the format
     val printMargin = Siigna.double("printMargin").getOrElse(13.0)
-    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0) - printMargin
-    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0) - printMargin
-
+    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
+    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
     // If the format is too small for the least proportion, then up the size
     // one format.
     // TODO: Optimize!
-    //TODO: prevent margin from multuttiplying as well. It should be fixed regardless of paper scale.
+
     val list = List[Double](2, 2.5, 2)
     var take = 0 // which element to "take" from the above list
     while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
@@ -151,7 +154,9 @@ object Drawing extends Drawing {
       aFormatMax *= factor
       take = if (take < 2) take + 1 else 0
     }
-
+    //reduces the "paper" with the print margins.
+    aFormatMin-=printMargin
+    aFormatMax-=printMargin
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
@@ -169,7 +174,7 @@ object Drawing extends Drawing {
    * Uses toInt since it always rounds down to an integer.
    */
   def boundaryScale : Int =
-    math.ceil((scala.math.max(boundary.width, boundary.height) / (Siigna.double("printFormatMax").getOrElse(297.0)).toInt)).toInt
+    math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
 
   /**
    * The [[com.siigna.util.rtree.PRTree]] used by the model.

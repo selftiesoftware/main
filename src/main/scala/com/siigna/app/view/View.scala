@@ -25,7 +25,311 @@ import com.siigna.util.geom._
 import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
-import com.siigna.app.view.native.SiignaGraphics
+import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
+import com.siigna.app.model.shape.TextShape
+import com.siigna.util.collection.Attributes
+
+/**
+ * A view in Siigna describing various information related to the visual interface, including a method to paint
+ * the [[com.siigna.app.model.Model]] using [[com.siigna.app.view.Renderer]]s. Please refer to the
+ * [[com.siigna.app.view.View]] object for more information.
+ *
+ * Used in the [[com.siigna.app.view.View$]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.view.View$]]
+ */
+trait View {
+
+  // The most recent mouse position
+  protected var _mousePosition = Vector2D(0, 0)
+
+  /**
+   * A pan vector originating in the top-left corner of the screen. Protected because the public pan has it's (0,0)
+   * in the center of the screen, which is much more intuitive.
+   */
+  protected var _pan : Vector2D = Vector2D(0, 0)
+
+  /**
+   * The time it takes to draw one frame.
+   */
+  protected var fpsTimeToDraw : Double = 0
+
+  /**
+   * The time it took to draw the last frame.
+   */
+  protected var fpsTimeToDrawLast : Double = 0
+
+  /**
+   * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
+   */
+  protected var listenersPan : Seq[Vector2D => Unit] = Nil
+
+  /**
+   * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
+   */
+  protected var listenersResize : Seq[(Rectangle2D) => Unit] = Nil
+
+  /**
+   * Zoom listeners to be called whenever the view changes zoom.
+   */
+  protected var listenersZoom : Seq[(Double) => Unit] = Nil
+
+  /**
+   * The protected renderer instance
+   */
+  protected var _renderer : Renderer = SiignaRenderer
+
+  /**
+   * A flag whether to show the fps or not.
+   */
+  var showFps = false
+
+  /**
+   * The zoom-level of the View. Starts in 1. The smaller the zoom is the smaller the shapes will be scales, which
+   * is equivalent to zooming out. That bigger the zoom is the larger the shapes will be, similar to zooming in.
+   */
+  var zoom : Double = 1
+
+  /**
+   * Adds a pan listener that will be executed whenever the view is panning - that is whenever the user moves
+   * the view-port of the drawing.
+   * @param f  The function to execute after the pan operation have been made. The Vector2D signalling the distance
+   *           from the previous pan-point will be given as a parameter.
+   */
+  def addPanListener(f : (Vector2D) => Unit) { listenersPan :+= f }
+
+  /**
+   * Adds a resize listener that will be executed whenever the view is being resized.
+   * @param f  The function to execute after the resize operation have been made. The screen-dimensions represented by
+   *           a [[com.siigna.util.geom.Rectangle2D]] are given as a parameter to the callback-function.
+   */
+  def addResizeListener(f : (Rectangle2D) => Unit) { listenersResize :+= f }
+
+  /**
+   * Adds a listener that will be executed whenever the user zooms. The function to be called
+   * will receive a parameter with the current zoom.
+   * @param f  The function to be executed, taking the zoom-level after the zoom operation as a parameter.
+   */
+  def addZoomListener(f : (Double) => Unit) { listenersZoom :+= f }
+
+  /**
+   * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
+   * device-coordinates <i>to</i> drawing-coordinates.
+   * @return  A [[com.siigna.util.geom.TransformationMatrix]]
+   */
+  def deviceTransformation = drawingTransformation.inverse
+
+  /**
+   * The drawing [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
+   * drawing-coordinates <i>to</i> device-coordinates.
+   * @return  A [[com.siigna.util.geom.TransformationMatrix]]
+   */
+  def drawingTransformation = TransformationMatrix(pan + center, zoom).flipY
+
+  /**
+   * Returns the center of Siigna in device-coordinates (see documentation for the [[com.siigna.app.view.View]]),
+   * relative from the top left corner of the screen.
+   * @return A [[com.siigna.util.geom.Vector2D]] where x = screen-width/2 and y = screen-height/2
+   */
+  def center = screen.center
+
+  /**
+   * The number of frames drawn per second. Useful for debugging purposes or to see how stressed the computer is.
+   *
+   * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
+   */
+  def fps : Double = 100 / (fpsTimeToDraw * 0.1 + fpsTimeToDrawLast * 0.7)
+
+  /**
+   * The default graphics implementation represented as a function that can be called whenever someone needs an
+   * instance of [[com.siigna.app.view.Graphics]]. If you wish to override the behaviour and insert a new Graphics
+   * implementation, set this variable like so:
+   * {{{
+   *   class MyOwnGraphics(val AWTGraphics : Graphics2D) extends Graphics { ... }
+   *   View.graphics = (AWTGraphics : Graphics2D) => new MyOwnGraphics(AWTGraphics)
+   * }}}
+   * The next time the View is asked to paing, the <code>MyOwnGraphics</code> class will be instantiated and returned.
+   * This happens at every paint-cycle, so there's no need to do anything more.
+   * @see [[com.siigna.app.view.View]]
+   */
+  var graphics : (Graphics2D) => Graphics = (g : Graphics2D) => new SiignaGraphics(g)
+
+  /**
+   * Returns the height of the view in screen-coordinates.
+   * @return  A positive integer. If the screen have not yet been set we return 1.
+   */
+  def height : Int =  screen.height.toInt
+
+  /**
+   * Finds the mouse position for the mouse in device coordinates, that is the coordinate system where the upper
+   * left corner of the entire Siigna drawing surface (on your computer screen) is (0, 0) and the bottom right
+   * corner of the drawing surface is (width, height). If you would like to know where the mouse is positioned on
+   * the drawing use <code>mousePositionDrawing</code> or simple transform it yourself:
+   * {{{
+   *   // Find the mouse position
+   *   val position = View.mousePosition
+   *
+   *   // Transform it FROM the the screen device coordinates and TO the drawing coordinates
+   *   position.transform(View.deviceTransformation)
+   * }}}
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the screen.
+   */
+  def mousePositionScreen = _mousePosition
+
+  /**
+   * Finds the coordinates of the mouse on the drawing. That means that we translate the mouse coordinates from the
+   * device coordinates into drawing coordinated (see the <code>mousePosition</code> method and description
+   * for the [[com.siigna.app.view.View]].
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current posiiton on the mouse on the drawing.
+   */
+  def mousePositionDrawing = _mousePosition.transform(deviceTransformation)
+
+  /**
+   * <p>
+   *   This method paints the View by placing graphical information on the given <code>screenGraphics</code> parameter.
+   * </p>
+   * <p>
+   *   The method first draws the active [[com.siigna.app.view.Renderer]], as defined in the <code>renderer</code>
+   *   method, meaning the current class responsible for rendering shapes in a cached and efficient manor (hopefully).
+   * </p>
+   * <p>
+   *   Afterwards we move on to draw any [[com.siigna.app.model.selection.Selection]]s made by the user. They are all
+   *   given the color defined in the <code>colorSelected</code> value in [[com.siigna.app.Siigna]].
+   * </p>
+   * <p>
+   *   Lastly we paint the given [[com.siigna.app.view.Interface]] and through it, the modules. An Interface
+   *   defines the paint-chain for the plugged in (active) modules, starting by painting the first module, receiving
+   *   events from the [[com.siigna.app.controller.Controller]].
+   * </p>
+   *
+   * @param screenGraphics  The AWT screen graphics to output the graphics to.
+   * @param drawing  The [[com.siigna.app.model.Drawing]] to draw by giving it to active
+   *                 [[com.siigna.app.view.Renderer]] and drawing the result on screen.
+   * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
+   *                   Don't worry about this if you don't know what it is. Defaults to None.
+   * @see [[com.siigna.app.view.Renderer]], [[com.siigna.app.view.Graphics]], [[com.siigna.app.view.Interface]],
+   *     [[com.siigna.app.controller.Controller]]
+   */
+  def paint(screenGraphics : AWTGraphics, drawing : Drawing, interface : Option[Interface] = None)
+
+  /**
+   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
+   * screen of the application/applet. A [[com.siigna.util.geom.Vector2D]] of (0, 0) means that the center of the
+   * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
+   * that the center of the drawing is in the bottom right of the screen.
+   */
+  def pan : Vector2D = Vector2D(_pan.x, _pan.y)
+
+  /**
+   * Pans the view by the given delta.
+   * @param delta  How much the view should pan.
+   */
+  def pan(delta : Vector2D) {
+    if (Siigna.navigation) {
+      _pan = _pan + delta
+      listenersPan.foreach(_.apply(delta))
+    }
+  }
+
+  /**
+   * Pans the x-axis of view by the given delta.
+   * @param delta  How much the x-axis of the view should pan.
+   */
+  def panX(delta : Double) {
+    if (Siigna.navigation) {
+      _pan = _pan.copy(x = _pan.x + delta)
+      listenersPan.foreach(_.apply(Vector2D(delta, _pan.y)))
+    }
+  }
+
+  /**
+   * Pans the y-axis of view by the given delta.
+   * @param delta  How much the y-axis of the view should pan.
+   */
+  def panY(delta : Double) {
+    if (Siigna.navigation) {
+      _pan = _pan.copy(y = _pan.y + delta)
+      listenersPan.foreach(_.apply(Vector2D(_pan.x, delta)))
+    }
+  }
+
+  /**
+   * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
+   * the [[com.siigna.app.model.Drawing]] or the standard chess-checkered background differently. For example like so:
+   * {{{
+   *   object MyOwnRenderer extends Renderer { ... }
+   *   View.renderer = MyOwnRenderer
+   * }}}
+   * All following calls to the <code>paint</code> will use your renderer. Paint will be called for you, don't worry.
+   * <br>
+   */
+  def renderer : Renderer = _renderer
+
+  /**
+   * Removes the current [[com.siigna.app.view.Renderer]] and replaces it with the given. This is useful if you
+   * wish to define alternate routines for caching and/or rendering the application.
+   * @param renderer  The renderer to use. Cannot be null.
+   * @throws IllegalArgumentException  If the renderer is null.
+   */
+  def renderer_=(renderer : Renderer) {
+    require(renderer != null)
+    _renderer = renderer
+  }
+
+  /**
+   * Sets the mouse position of Siigna. Only accessible by the app package.
+   * @param v  The position of the mouse.
+   */
+  protected[app] def setMousePosition(v : Vector2D) {
+    _mousePosition = v
+  }
+
+  /**
+   * The screen as a [[com.siigna.util.geom.SimpleRectangle2D]], given in device coordinates meaning that the
+   * upper left corner is (0, 0) and the lower right is (width, height). Note: The coordinate system of the screen
+   * thus have a negative y-axis where up is down and vice verse.
+   * @return  A [[com.siigna.util.geom.SimpleRectangle2D]] from upper left corner (0, 0) to bottom right (width, height)
+   */
+  def screen : SimpleRectangle2D
+
+  /**
+   * Returns the width of the view in screen-coordinates.
+   * @return  A positive integer. If the screen have not yet been set we return 1.
+   */
+  def width : Int = screen.width.toInt
+
+  /**
+   * Carries out a zoom action by zooming with the given delta and then panning
+   * the view relative to the current zoom-factor.
+   * The zoom-function are disabled if:
+   * <ol>
+   *   <li>The navigation-flag are set to false.</li>
+   *   <li>The zoom level are below 0.00001 or above 50</li>
+   * </ol>
+   * Also, if the delta is cropped at (+/-)10, to avoid touch-pad bugs with huge deltas etc.
+   *
+   * The zoom is, by the way logarithmic (base 2), since linear zooming gives some very brutal zoom-steps.
+   *
+   * @param point  The center for the zoom-operation
+   * @param delta  The amount of zoomSpeed-units to zoom
+   * @see [[com.siigna.app.SiignaAttributes]]
+   */
+  def zoom(point : Vector2D, delta : Double) {
+    //TODO: Test this!
+    val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
+    if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
+      val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
+      if ((zoom > 0.000001 || zoomDelta < 0)) {
+        zoom *= zoomFactor
+      }
+      val oldPan = _pan
+      _pan = ((pan - point + center) * zoomFactor) + point - center
+
+      // Notify the listeners
+      listenersZoom.foreach(_(zoom))
+    }
+  }
+
+}
 
 /**
  * <p>
@@ -92,187 +396,25 @@ import com.siigna.app.view.native.SiignaGraphics
  * @see [[com.siigna.app.model.Drawing]], [[com.siigna.app.controller.Controller]],
  *     [[com.siigna.util.geom.TransformationMatrix]]
  */
-object View {
-
-  // The most recent mouse position
-  private var _mousePosition = Vector2D(0, 0)
+object View extends View {
 
   /**
-   * The [[java.awt.Canvas]] of the view. None before it has been set through the <code>setCanvas()</code> method.
+   * The screen describing the dimensions of the canvas the view can draw upon.
    */
-  private var canvas : Option[Canvas] = None
+  protected var _screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, 1, 1)
+
+  def screen : SimpleRectangle2D = _screen
 
   /**
-   * A pan vector originating in the top-left corner of the screen. Private because the public pan has it's (0,0)
-   * in the center of the screen, which is much more intuitive.
+   * Sets the current screen to the given rectangle.
+   * @param rectangle  The [[com.siigna.util.geom.SimpleRectangle2D]] describing the dimensions of the canvas.
    */
-  private var _pan : Vector2D = Vector2D(0, 0)
+  protected def screen_=(rectangle : SimpleRectangle2D) { _screen = rectangle }
 
-  /**
-   * The time it takes to draw one frame.
-   */
-  private var fpsTimeToDraw : Double = 0
+  // The canvas of the View
+  private var _canvas : Option[Canvas] = None
 
-  /**
-   * The time it took to draw the last frame.
-   */
-  private var fpsTimeToDrawLast : Double = 0
-
-  /**
-   * The number of frames drawn per second. Useful for debugging purposes or to see how stressed the computer is.
-   *
-   * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
-   */
-  def fps : Double = 60 / (fpsTimeToDraw * 0.9 + fpsTimeToDrawLast * 0.1)
-
-  /**
-   * The default graphics implementation represented as a function that can be called whenever someone needs an
-   * instance of [[com.siigna.app.view.Graphics]]. If you wish to override the behaviour and insert a new Graphics
-   * implementation, set this variable like so:
-   * {{{
-   *   class MyOwnGraphics(val AWTGraphics : Graphics2D) extends Graphics { ... }
-   *   View.graphics = (AWTGraphics : Graphics2D) => new MyOwnGraphics(AWTGraphics)
-   * }}}
-   * The next time the View is asked to paing, the <code>MyOwnGraphics</code> class will be instantiated and returned.
-   * This happens at every paint-cycle, so there's no need to do anything more.
-   * @see [[com.siigna.app.view.View]]
-   */
-  var graphics : (Graphics2D) => Graphics = (g : Graphics2D) => new SiignaGraphics(g)
-
-  /**
-   * The private renderer instance
-   */
-  private var _renderer : Option[Renderer] = None
-
-  /**
-   * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
-   */
-  private var listenersPan : Seq[Vector2D => Unit] = Nil
-
-  /**
-   * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
-   */
-  private var listenersResize : Seq[(Rectangle2D) => Unit] = Nil
-
-  /**
-   * Zoom listeners to be called whenever the view changes zoom.
-   */
-  private var listenersZoom : Seq[(Double) => Unit] = Nil
-
-  /**
-   * The zoom-level of the View. Starts in 1. The smaller the zoom is the smaller the shapes will be scales, which
-   * is equivalent to zooming out. That bigger the zoom is the larger the shapes will be, similar to zooming in.
-   */
-  var zoom : Double = 1
-
-  /**
-   * Adds a pan listener that will be executed whenever the view is panning - that is whenever the user moves
-   * the view-port of the drawing.
-   * @param f  The function to execute after the pan operation have been made. The Vector2D signalling the distance
-   *           from Vector2D(0, 0) will be given as a parameter.
-   */
-  def addPanListener(f : (Vector2D) => Unit) { listenersPan :+= f }
-
-  /**
-   * Adds a resize listener that will be executed whenever the view is being resized.
-   * @param f  The function to execute after the resize operation have been made. The screen-dimensions represented by
-   *           a [[com.siigna.util.geom.Rectangle2D]] are given as a parameter to the callback-function.
-   */
-  def addResizeListener(f : (Rectangle2D) => Unit) { listenersResize :+= f }
-
-  /**
-   * Adds a listener that will be executed whenever the user zooms. The function to be called
-   * will receive a parameter with the current zoom.
-   * @param f  The function to be executed, taking the zoom-level after the zoom operation as a parameter.
-   */
-  def addZoomListener(f : (Double) => Unit) { listenersZoom :+= f }
-
-  /**
-   * Define the boundary by grabbing the boundary of the model and snapping it to the current view and transformation.
-   * */
-  def boundary = {
-    val offScreenBoundary = Drawing.boundary.transform(drawingTransformation)
-    val topLeft           = Vector2D(offScreenBoundary.topLeft.x,offScreenBoundary.topLeft.y)
-    val bottomRight       = Vector2D(offScreenBoundary.bottomRight.x,offScreenBoundary.bottomRight.y)
-    Rectangle2D(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
-  }
-
-  /**
-   * Returns the center of Siigna in device-coordinates (see documentation for the [[com.siigna.app.view.View]]),
-   * relative from the top left corner of the screen.
-   * @return A [[com.siigna.util.geom.Vector2D]] where x = screen-width/2 and y = screen-height/2
-   */
-  def center = screen.center
-
-  /**
-   * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
-   * device-coordinates <i>to</i> drawing-coordinates.
-   * @return  A [[com.siigna.util.geom.TransformationMatrix]]
-   */
-  def deviceTransformation = drawingTransformation.inverse
-
-  /**
-   * The drawing [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
-   * drawing-coordinates <i>to</i> device-coordinates.
-   * @return  A [[com.siigna.util.geom.TransformationMatrix]]
-   */
-  def drawingTransformation = TransformationMatrix(pan, zoom).flipY
-
-  /**
-   * Finds the mouse position for the mouse in device coordinates, that is the coordinate system where the upper
-   * left corner of the entire Siigna drawing surface (on your computer screen) is (0, 0) and the bottom right
-   * corner of the drawing surface is (width, height). If you would like to know where the mouse is positioned on
-   * the drawing use <code>mousePositionDrawing</code> or simple transform it yourself:
-   * {{{
-   *   // Find the mouse position
-   *   val position = View.mousePosition
-   *
-   *   // Transform it FROM the the screen device coordinates and TO the drawing coordinates
-   *   position.transform(View.deviceTransformation)
-   * }}}
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current position of the mouse on the screen.
-   */
-  def mousePositionScreen = _mousePosition
-
-  /**
-   * Finds the coordinates of the mouse on the drawing. That means that we translate the mouse coordinates from the
-   * device coordinates into drawing coordinated (see the <code>mousePosition</code> method and description
-   * for the [[com.siigna.app.view.View]].
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing the current posiiton on the mouse on the drawing.
-   */
-  def mousePositionDrawing = _mousePosition.transform(deviceTransformation)
-
-  /**
-   * Returns the height of the view.
-   * @return  A positive integer
-   */
-  def height = if (canvas.isDefined) canvas.get.getHeight else 0
-
-  /**
-   * <p>
-   *   This method paints the View by placing graphical information on the given <code>screenGraphics</code> parameter.
-   * </p>
-   * <p>
-   *   The method first draws the active [[com.siigna.app.view.Renderer]], as defined in the <code>renderer</code>
-   *   method, meaning the current class responsible for rendering shapes in a cached and efficient manor (hopefully).
-   * </p>
-   * <p>
-   *   Afterwards we move on to draw any [[com.siigna.app.model.selection.Selection]]s made by the user. They are all
-   *   given the color defined in the <code>colorSelected</code> value in [[com.siigna.app.Siigna]].
-   * </p>
-   * <p>
-   *   Lastly we paint the given [[com.siigna.app.view.Interface]] and through it, the modules. An Interface
-   *   defines the paint-chain for the plugged in (active) modules, starting by painting the first module, receiving
-   *   events from the [[com.siigna.app.controller.Controller]].
-   * </p>
-   *
-   * @param screenGraphics  The AWT screen graphics to output the graphics to.
-   * @param interface  The interface to draw (along with any [[com.siigna.module.Module]]s, if any.
-   *                   Don't worry about this if you don't know what it is. Defaults to None.
-   * @see [[com.siigna.app.view.Renderer]], [[com.siigna.app.view.Graphics]], [[com.siigna.app.view.Interface]],
-   *     [[com.siigna.app.controller.Controller]]
-   */
-  def paint(screenGraphics : AWTGraphics, interface : Option[Interface] = None) {
+  def paint(screenGraphics : AWTGraphics, drawing : Drawing, interface : Option[Interface] = None) {
     // Start the fps counter
     val fpsStart = System.currentTimeMillis()
 
@@ -281,7 +423,7 @@ object View {
 
     // Retrieve graphics objects
     val graphics2D = screenGraphics.asInstanceOf[Graphics2D]
-    val graphics = View.graphics(graphics2D)
+    val graphics = this.graphics(graphics2D)
 
     // Setup anti-aliasing
     val antiAliasing = Siigna.boolean("antiAliasing").getOrElse(true)
@@ -290,7 +432,7 @@ object View {
 
     try {
       // Paint the renderer
-      if (renderer.isDefined) renderer.get.paint(graphics)
+      renderer.paint(graphics, drawing, this)
     } catch {
       case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
@@ -301,12 +443,12 @@ object View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      Drawing.selection.parts(transformation).foreach(s => {
+      drawing.selection.parts(transformation).foreach(s => {
         graphics.draw(s.setAttribute("Color" -> color))
       })
 
       // Draw vertices
-      Drawing.selection.vertices.foreach(p => {
+      drawing.selection.vertices.foreach(p => {
         graphics.draw(transformation.transform(p), color)
       })
     } catch {
@@ -324,87 +466,24 @@ object View {
       case e : Throwable => Log.error("View: Unknown error while painting the modules.", e)
     }
 
+    if (showFps) {
+      graphics draw TextShape("FPS: " + fps.round, screen.bottomRight - Vector2D(80, -20), 10)
+    }
+
     // Update the fps counter
     fpsTimeToDrawLast = fpsTimeToDraw
     fpsTimeToDraw = System.currentTimeMillis() - fpsStart
   }
 
   /**
-   * The pan for the View, i. e. the location of the user "camera" on a 2-dimensional plane, relative to the
-   * screen of the application/applet. A [[com.siigna.util.geom.Vector]] of (0, 0) means that the center of the
-   * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
-   * that the center of the drawing is in the bottom right of the screen.
-   */
-  def pan : Vector2D = _pan + Vector2D(center.x, center.y)
-
-  /**
-   * Pans the view by the given delta.
-   * @param delta  How much the view should pan.
-   */
-  def pan(delta : Vector2D) {
-    if (Siigna.navigation) {
-      _pan = _pan + delta
-      listenersPan.foreach(_.apply(_pan))
-    }
-  }
-
-  /**
-   * Pans the x-axis of view by the given delta.
-   * @param delta  How much the x-axis of the view should pan.
-   */
-  def panX(delta : Double) {
-    if (Siigna.navigation) {
-      _pan = _pan.copy(x = _pan.x + delta)
-      listenersPan.foreach(_.apply(_pan))
-    }
-  }
-
-  /**
-   * Pans the y-axis of view by the given delta.
-   * @param delta  How much the y-axis of the view should pan.
-   */
-  def panY(delta : Double) {
-    if (Siigna.navigation) {
-      _pan = _pan.copy(y = _pan.y + delta)
-      listenersPan.foreach(_.apply(_pan))
-    }
-  }
-
-  /**
-   * A [[com.siigna.app.view.Renderer]] to render content for the view. This can be changed if you wish to display
-   * the [[com.siigna.app.model.Drawing]] or the standard chess-checkered background differently. For example like so:
-   * {{{
-   *   object MyOwnRenderer extends Renderer { ... }
-   *   View.renderer = MyOwnRenderer
-   * }}}
-   * All following calls to the <code>paint</code> (it will be called for you, don't worry) will use your renderer.
-   * <br>
-   * Starts undefined, because the graphical settings needs to initialize.
-   */
-  def renderer = _renderer
-
-  /**
-   * Removes the current [[com.siigna.app.view.Renderer]] and replaces it with the given. This is useful if you
-   * wish to define alternate routines for caching and/or rendering the application.
-   * @param renderer  The renderer to use. Cannot be null.
-   * @throws IllegalArgumentException  If the renderer is null.
-   */
-  def renderer_=(renderer : Renderer) {
-    require(renderer != null)
-    _renderer = Some(renderer)
-  }
-
-  /**
    * Resize the view to the given boundary.
    */
   protected[app] def resize(width : Int, height : Int) {
-    if (canvas.isDefined) {
-      // Resize the canvas
-      canvas.get.setSize(width, height)
+    // Resize the canvas
+    screen = SimpleRectangle2D(0, 0, width, height)
 
-      // Notify the listeners
-      listenersResize.foreach(_(screen))
-    }
+    // Notify the listeners
+    listenersResize.foreach(_(screen))
   }
 
   /**
@@ -413,7 +492,7 @@ object View {
    * @param canvas  The underlying canvas of the View object.
    */
   protected[app] def setCanvas(canvas : Canvas) {
-    this.canvas = Some(canvas)
+    this._canvas = Some(canvas)
   }
 
   /**
@@ -421,63 +500,7 @@ object View {
    * @param cursor  The new cursor
    */
   def setCursor(cursor : Cursor) {
-    if (canvas.isDefined) canvas.get.setCursor(cursor)
+    if (_canvas.isDefined) _canvas.get.setCursor(cursor)
   }
 
-  /**
-   * Sets the mouse position of Siigna. Only accessible by the app package.
-   * @param v  The position of the mouse.
-   */
-  protected[app] def setMousePosition(v : Vector2D) {
-    _mousePosition = v
-  }
-
-  /**
-   * The screen as a rectangle, given in device coordinates.
-   */
-  def screen : SimpleRectangle2D = SimpleRectangle2D(0, 0, width, height)
-
-  /**
-   * Returns the TransformationMatrix for the current pan distance and zoom
-   * level of the view, translated to a given point.
-   */
-  def transformationTo(point : Vector2D) : TransformationMatrix = drawingTransformation.translate(point)
-
-  /**
-   * Returns the width of the view.
-   * @return  A positive integer
-   */
-  def width = if (canvas.isDefined) canvas.get.getWidth else 0
-
-  /**
-   * Carries out a zoom action by zooming with the given delta and then panning
-   * the view relative to the current zoom-factor.
-   * The zoom-function are disabled if:
-   * <ol>
-   *   <li>The navigation-flag are set to false.</li>
-   *   <li>The zoom level are below 0.00001 or above 50</li>
-   * </ol>
-   * Also, if the delta is cropped at (+/-)10, to avoid touch-pad bugs with huge deltas etc.
-   *
-   * The zoom is, by the way logarithmic (base 2), since linear zooming gives some very brutal zoom-steps.
-   *
-   * @param point  The center for the zoom-operation
-   * @param delta  The amount of zoomSpeed-units to zoom
-   * @see [[com.siigna.app.SiignaAttributes]]
-   */
-  def zoom(point : Vector2D, delta : Double) {
-    //TODO: Test this!
-    val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
-    if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
-      val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
-      if ((zoom > 0.000001 || zoomDelta < 0)) {
-        zoom *= zoomFactor
-      }
-      _pan = (pan - point) * zoomFactor + point - center
-
-      // Notify the listeners
-      listenersZoom.foreach(_(zoom))
-      listenersPan.foreach(_(_pan))
-    }
-  }
 }

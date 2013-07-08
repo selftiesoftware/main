@@ -63,9 +63,13 @@ import java.awt.{Color, Dimension}
  *    The color given to selected elements. Defaults to #7777FF in hex.
  *  defaultScreenSize
  *    The default size of the screen given as a [[java.awt.Dimension]]. Defaults to (600 x 400).
+ *  fontGlobalFamily
+ *    The default font for all text. Defaults to "Lucida Sans Typewriter".
+ *  fontGlobalScale
+ *    The global scale of fonts, defaults to 1. Can be set if you want to scale every text in the drawing.
  *  isLive
  *    Whether or not Siigna should broadcast to the central server. If this is set to false the changes to the
- *    model will not be stored! Defaults to false.
+ *    drawing will not be stored! Defaults to false.
  *  printMargin
  *    The margin on pages when printing the content in Siigna, given in mm. Defaults to 13. 
  *  printFormatMin
@@ -99,6 +103,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("antiAliasing")          = true
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color
+  this("colorBackgroundBorder") = "#99A199".color
   this("colorBackgroundLight")  = "#E9E9E9".color
   this("colorBackgroundDark")   = "#DADADA".color
   this("colorDraw")             = "#000000".color

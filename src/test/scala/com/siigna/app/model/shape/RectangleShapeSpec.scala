@@ -92,6 +92,7 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
     it("can be created from two points") {
     //  new RectangleShape(RectangleShape(Vector2D(0, 0), Vector2D(100, 100))) should equal (Vector2D(0, 0), 100, 100, 0, Attributes())
+    //RectangleShape(Vector2D(0, 0), Vector2D(100, 100)) should equal (Vector2D(0, 0), 100, 100, 0, Attributes())
     }
     /*
     it("can be created from 4 coordinates") {

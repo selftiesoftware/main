@@ -41,12 +41,9 @@ import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, Sh
  *
  * TODO: Redo this! Completely.
  */
-@SerialVersionUID(2047324825)
 case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends Shape {
 
   type T = TextShape
-
-  final val GlobalFontScale = 0.1
 
   val geometry = Rectangle2D(boundaryPosition, boundaryPosition + boundarySize).transform(TransformationMatrix(position,1))
 
@@ -65,9 +62,11 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     case _ => Seq(this)
   }
 
-  def fontSize            = attributes double("FontSize") getOrElse(12.0)
+  def fontSize            = attributes double "FontSize" getOrElse 1.0
 
-  def font                = new Font("Lucida Sans Typewriter", Font.PLAIN, (fontSize * scale * GlobalFontScale) toInt)
+  def font                = new Font(
+    attributes string "FontFamily" getOrElse(Siigna string "fontFamily" getOrElse "Lucida Sans Typewriter"), Font.PLAIN,
+    (fontSize * scale * Siigna.double("globalFontScale").getOrElse(1.0)) toInt)
 
   /**
    * Defines the layout of the shape.
