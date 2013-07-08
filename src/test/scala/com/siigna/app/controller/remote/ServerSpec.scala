@@ -12,7 +12,7 @@
 package com.siigna.app.controller.remote
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSpec}
+import org.scalatest.{BeforeAndAfter, FunSpec}
 import com.siigna.app.Siigna
 import org.scalatest.exceptions.TestFailedException
 
@@ -29,7 +29,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   before {
     badSink  = new Server("localhost", Mode.Production, 1)
-    goodSink = new Server("62.243.118.234", Mode.Production)
+    goodSink = new Server("http://localhost:7788",Mode.http)//new Server("62.243.118.234", Mode.Production)
   }
 
   after {
