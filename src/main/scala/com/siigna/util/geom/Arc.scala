@@ -129,7 +129,6 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
    */
   lazy val midPoint = {
     val middleAngle = endAngle - startAngle
-    val a = if (insideArcDegrees(middleAngle)) middleAngle else (middleAngle + 180) % 360
     Vector2D(epsilon(math.cos(middleAngle)) * epsilon(radius), epsilon(math.sin(middleAngle)) * epsilon(radius)) + center
   }
 
@@ -225,7 +224,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
       //the result is rounded to four decimals to reduce tolerances.
-      val intersectValue = math.round(epsilon((math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2))))) * 1000) /1000
+      val intersectValue = math.round(epsilon(math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2)))) * 1000) /1000
       /*
       println("pStart and pEnd: "+ this.startPoint + " " + this.endPoint)
       println("parallelVector * delta: "+ParVXDelta)
@@ -256,7 +255,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       if( tP < 0 && tP > 1 && tN < 0 && tN > 1 ) false
 
       //if one of tP of tN are in range 0-1, there is an intersection - if the respective intersection is on the arc segment:
-      else if((tP >= 0 && tP <= 1 && tPonArc == true) || (tN >= 0 && tN <= 1 && tNonArc == true)) true
+      else if ((tP >= 0 && tP <= 1 && tPonArc) || (tN >= 0 && tN <= 1 && tNonArc)) true
 
       //if intersectValue is zero, the segment is tangent to the arc (one intersection)
       else if(intersectValue == 0) {
@@ -287,7 +286,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
         circleIntersections.filter(p => {
           val angle1 = (p - center).angle
           val angle2 = (p - arc.center).angle
-          (insideArcDegrees(angle1) && arc.insideArcDegrees(angle2))
+          insideArcDegrees(angle1) && arc.insideArcDegrees(angle2)
         })
       }
     }
@@ -311,25 +310,13 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       val deltaLength = epsilon(delta.length)
 
       //note: rounded to reduce tolerances
-      val intersectValue = math.round(epsilon((math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2))))) * 1000) /1000
+      val intersectValue = math.round(epsilon(math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2)))) * 1000) /1000
       //find the roots; that is the value t to be inserted into the
 
-      val tPraw = (-parallelVectorD * delta + (math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2))))) / math.pow(parallelVectorD.length,2)
-      val tNraw = (-parallelVectorD * delta - (math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2))))) / math.pow(parallelVectorD.length,2)
-     val tP = if(!tPraw.isNaN) epsilon(tPraw) else Double.NaN
-     val tN = if(!tPraw.isNaN) epsilon(tNraw) else Double.NaN
-
-      /*
-      println("tPraw: "+ tPraw)
-      println("tNraw: "+ tNraw)
-      println("tP: "+ tP)
-      println("tN: "+ tN)
-      println("parallelVector * delta: "+ParVXDelta)
-      println("parallelVector length: "+ParVLength)
-      println("delta length: "+deltaLength)
-      println("arc radius pow 2: "+math.pow(this.radius,2))
-      println("arc radius: "+this.radius)
-      */
+      val tPraw = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tNraw = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+      val tP = if(!tPraw.isNaN) epsilon(tPraw) else Double.NaN
+      val tN = if(!tPraw.isNaN) epsilon(tNraw) else Double.NaN
 
       val int1 = p1 + parallelVectorD * tP
       val int2 = p1 + parallelVectorD * tN
@@ -343,13 +330,13 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       val tNonArc = if(int2OnArc >= 0) true else false
 
       //two intersections: two roots, both in range 0-1 and on the arc.
-      if(intersectValue >= 0 && (tP >= 0 && tPonArc == true && tP <= 1) && (tN >= 0 && tNonArc == true && tN <=1)) {
+      if(intersectValue >= 0 && (tP >= 0 && tPonArc && tP <= 1) && (tN >= 0 && tNonArc && tN <=1)) {
         Set(Vector2D(epsilon(int1.x),epsilon(int1.y)), Vector2D(epsilon(int2.x),epsilon(int2.y)))
       }
 
       //one intersection: if tP is in range and tP is on the arc while tN is not  - or the other way around.
-      else if(tP >= 0 && tP <= 1 && tPonArc == true) Set(Vector2D(epsilon(int1.x),epsilon(int1.y)))
-      else if(tN >= 0 && tN <= 1 && tNonArc == true) Set(Vector2D(epsilon(int2.x),epsilon(int2.y)))
+      else if(tP >= 0 && tP <= 1 && tPonArc) Set(Vector2D(epsilon(int1.x),epsilon(int1.y)))
+      else if(tN >= 0 && tN <= 1 && tNonArc) Set(Vector2D(epsilon(int2.x),epsilon(int2.y)))
 
       //get tangent intersections
       else if (intersectValue == 0 && segment.distanceTo(this.center) == this.radius) {
@@ -378,33 +365,6 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
  */
 object Arc2D {
 
-  //import java.lang.Double.NaN
-
-  /**
-   * Locates a center point from three points on a periphery.
-   */
-  def findCenterPoint(start : Vector2D, middle : Vector2D, end : Vector2D) : Vector2D = {
-    // If two of the points are the same, we cannot properly locate the center
-    if (start == middle && start == end && middle == end) {
-      throw new IllegalArgumentException("Unable to create arc if two points coincide.")
-    }
-    // Locate the center where the normal-vectors of the lines from start to middle and end to middle intersects
-    // First find the two middle points
-    val m1 = (middle + start)/2
-    val m2 = (end + middle)/2
-    // Then find the normal vectors
-    val p1 = m1 + (middle - start).normal
-    val p2 = m2 + (end - middle).normal
-
-    // Locate the intersections
-    val intersections = Line2D(m1, p1).intersections(Line2D(m2, p2))
-    if (intersections.size != 1) {
-      throw new UnsupportedOperationException("Unable to calculate the center of the arc.")
-    } else {
-      intersections.head
-    }
-  }
-
   /**
    * Calculates the entire angle-span of an arc from a start and end angle (CCW).
    */
@@ -421,7 +381,7 @@ object Arc2D {
    */
   def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = {
     // Calculate center and radius
-    val center = findCenterPoint(start, middle, end)
+    val center = Circle2D.findCenterPoint(start, middle, end)
     val radius = (start - center).length
     // The start angle of the points, NOT the arc
     val startAngle = (start - center).angle
@@ -440,18 +400,6 @@ object Arc2D {
     } else {
       new Arc2D(center, radius, startAngle, angle)
     }
-
-    /*
-    val middleAngle = (middle - center).angle
-    // If the middle angle is inside the interval between start and end angle...
-    // TODO: Not quite working.
-    if (startAngle <= middleAngle && middleAngle <= angle + startAngle) {
-      new Arc2D(center, radius, startAngle, angle)
-    } else {
-      // Otherwise swap the end and start angle and find the CCW angle from end -> start
-      new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
-    }
-    */
   }
 
 }

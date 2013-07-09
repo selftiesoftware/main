@@ -57,7 +57,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
 
   def contains(arc : Arc2D) = false
   def contains(geometry : Geometry2D) = geometry match {
-    case circle : Circle2D => (radius >= circle.radius && (center - circle.center).length < (radius - circle.radius).abs)
+    case circle : Circle2D => radius >= circle.radius && (center - circle.center).length < (radius - circle.radius).abs
     case point : Vector2D => (point - center).length < radius
     case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
   }
@@ -134,7 +134,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
       //the result is rounded to five decimals.
 
-      val intersectValue = math.round((math.pow((parallelVectorD * delta),2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
+      val intersectValue = math.round((math.pow(parallelVectorD * delta, 2) - (math.pow(parallelVectorD.length,2) * (math.pow(delta.length,2) - math.pow(this.radius,2)))) * 100000)/100000.toDouble
       //intersectValue < 0    no intersection
       //intersectValue = 0    line tangent (one intersection)
       //intersectValue > 0    two intersections
@@ -159,7 +159,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    case circle : Circle2D if (intersects(circle)) => {
+    case circle : Circle2D if intersects(circle) => {
       // Calculate various constants
       val d = (center - circle.center).length
       val a = (radius * radius - circle.radius * circle.radius + d * d) / (2 * d) //a = (r02 - r12 + d2 ) / (2 d)
@@ -180,6 +180,8 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
         Set(firstSolution, secondSolution)
       }
     }
+    case circle : Circle2D => Set.empty[Vector2D]
+
     case line : Line2D => line.intersections(this)
     case line : Segment2D => line.intersections(this)
     case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
@@ -191,7 +193,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
    * Displays a set of vectors as the center along with
    * four vectors which is set on the East, South, West and North side of the circumference.
    */
-  lazy val vertices = Seq(center, center + Vector2D(radius, 0), center - Vector2D(0, radius), center - Vector2D(radius, 0), center + Vector2D(0, radius))
+  lazy val vertices = Seq(center, center + Vector2D(radius, 0), center + Vector2D(0, radius), center - Vector2D(radius, 0), center - Vector2D(0, radius))
 
 }
 
@@ -201,5 +203,30 @@ object Circle2D {
    * Creates a 2D circle.
    */
   def apply(center : Vector2D, point : Vector2D) = new Circle2D(center, (point - center).length)
+
+  /**
+   * Locates a center point from three points on a periphery.
+   */
+  def findCenterPoint(p1 : Vector2D, p2 : Vector2D, p3 : Vector2D) : Vector2D = {
+    // If two of the points are the same, we cannot properly locate the center
+    if (p1 == p2 && p1 == p3 && p2 == p3) {
+      throw new IllegalArgumentException("Unable to create arc if two points coincide.")
+    }
+    // Locate the center where the normal-vectors of the lines from start to middle and end to middle intersects
+    // First find the two middle points
+    val m1 = (p2 + p1)/2
+    val m2 = (p3 + p2)/2
+    // Then find the normal vectors
+    val n1 = m1 + (p2 - p1).normal
+    val n2 = m2 + (p3 - p2).normal
+
+    // Locate the intersections
+    val intersections = Line2D(m1, n1).intersections(Line2D(m2, n2))
+    if (intersections.size != 1) {
+      throw new UnsupportedOperationException("Unable to calculate the center of the circle.")
+    } else {
+      intersections.head
+    }
+  }
 
 }

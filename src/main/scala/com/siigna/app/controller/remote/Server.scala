@@ -58,7 +58,6 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => //Fail
         }
       }
 
@@ -70,7 +69,6 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => //Fail
         }
       }
 
@@ -82,7 +80,6 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => // Fail
         }
       }
 
@@ -94,7 +91,6 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => // Fail
         }
 
       }
@@ -106,7 +102,6 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => //Fail
         }
       }
 
@@ -118,14 +113,12 @@ class RestEndpoint(client: Client) extends Actor{
             println("Fail")
             println(e)
           }
-          case _ => // Fail
         }
       }
       case e => {
         println("Out")
         println(e)
       }
-      case _ => // No comprehendo
 
     }
 
@@ -139,7 +132,7 @@ class RestEndpoint(client: Client) extends Actor{
 
             case Some(r) => handle(r)
 
-            case None =>  //Fail
+            case _ =>  //Fail
 
           }
         }

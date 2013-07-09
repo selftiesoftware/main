@@ -12,14 +12,23 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{FunSuite, FlatSpec}
+import org.scalatest.FunSuite
 
 /**
  * Test a circle.
  */
 class Circle2DSpec  extends FunSuite with ShouldMatchers {
 
-  test("Can tell if an Circle2D and a segment2D intersect -OK") {
+
+  test("Find a center point in an arc given three points on the periphery.") {
+    val p1 = Vector2D(-5, 0)
+    val p2 = Vector2D(0, 5)
+    val p3 = Vector2D(5, 0)
+
+    Circle2D.findCenterPoint(p1, p2, p3) should equal (Vector2D(0, 0))
+  }
+
+  test("Can tell if an Circle2D and a segment2D intersect") {
     val circle = Circle2D(Vector2D(0,0),10)
     val l1 = Segment2D(Vector2D(0,40),Vector2D(10,45))
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
@@ -31,7 +40,7 @@ class Circle2DSpec  extends FunSuite with ShouldMatchers {
     circle.intersects(l3) should equal (true) //line segment tangent to the arc.
     circle.intersects(l4) should equal (true) //should have one intersection only.
   }
-  test("Can calculate intersections between an Circle2D and a segment2D -OK") {
+  test("Can calculate intersections between an Circle2D and a segment2D") {
     val circle = Circle2D(Vector2D(0,0),10)
     val l1 = Segment2D(Vector2D(0,40),Vector2D(10,45))
     val l2 = Segment2D(Vector2D(-20,-20),Vector2D(20,20))
