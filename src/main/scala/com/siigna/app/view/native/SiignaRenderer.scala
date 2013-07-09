@@ -163,7 +163,7 @@ object SiignaRenderer extends SiignaRenderer {
     try {
       background.tryFailure(new InterruptedException)
     } catch {
-      case IllegalStateException => // Can happen when cancelling
+      case _ : IllegalStateException => // Can happen when cancelling
     }
 
     // Create a new promise
