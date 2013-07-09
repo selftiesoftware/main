@@ -168,7 +168,7 @@ object ModuleLoader {
           val c = loader.loadClass("com.siigna.module.ModuleInit")
           val m = classToModule(c)
           _initModule = Some(m)
-          Siigna.setInterface(m.interface)
+          Siigna.interface = m.interface
           Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
         } catch {
           // No module found
