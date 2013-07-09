@@ -25,7 +25,7 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.Drawing
 import com.siigna.app.view.{Graphics, View, Renderer}
 import com.siigna.util.Implicits._
-import com.siigna.util.geom.{Rectangle2D}
+import com.siigna.util.geom.Rectangle2D
 import scala.concurrent.{future, promise, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -160,7 +160,11 @@ object SiignaRenderer extends SiignaRenderer {
     updatePainter()
 
     // Interrupt the old promise (if it is not already done)
-    background.tryFailure(new InterruptedException)
+    try {
+      background.tryFailure(new InterruptedException)
+    } catch {
+      case IllegalStateException => // Can happen when cancelling
+    }
 
     // Create a new promise
     val p = promise[BufferedImage]()
