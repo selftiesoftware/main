@@ -23,12 +23,11 @@ import com.siigna.util.Log
 import com.siigna.util.io.{Unmarshal, Marshal}
 import actors.Actor
 import com.siigna.app.controller.remote.RemoteConstants._
-import com.siigna.communication.http.Client
 import com.siigna.app.model.action.RemoteAction
 import com.siigna.app.model.Model
 
 
-class RestEndpoint(client:Client) extends Actor{
+class RestEndpoint(client: Client) extends Actor{
 
   def respond(r: RemoteCommand) {
     sender ! com.siigna.util.io.Marshal(r)
