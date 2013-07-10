@@ -45,7 +45,7 @@ import com.siigna.util.Log
  * </p>
  * <p>
  *   Last but not least modules needs to be able to parse events before they enter the module since
- *   [[com.siigna.util.event.Snap]] or [[com.siigna.util.event.Track]] might be enabled.
+ *   [[com.siigna.util.event.EventSnap]] or [[com.siigna.util.event.Track]] might be enabled.
  *   <a href="#eventParser">Read more below</a>.
  * </p>
  * <p>
@@ -245,7 +245,7 @@ trait Module {
     try {
       // Retrieve the function from the map and apply them if they exist
       stateMap.get(state) match {
-        case Some(f) if (f.isDefinedAt(events)) => {
+        case Some(f) if f.isDefinedAt(events) => {
           f(events) match {
             // Forward to a module
             case s : Start[_] => {
@@ -268,13 +268,23 @@ trait Module {
               moduleEvent = parseChild(s :: events)
             }
             // Set the state
-            case s : Symbol if (stateMap.contains(s)) => state = s
+            case s : Symbol if stateMap.contains(s) => {
+              Log.debug(s"Module $toString: Setting state from $state to $s")
+              state = s
+            }
             // If module returns a ModuleEvent (e. g. End), return it immediately
-            case e : ModuleEvent => moduleEvent = Some(e)
-            case e => // Function return value does not match: Do nothing
+            case e : ModuleEvent => {
+              Log.debug(s"Module $toString: Received ModuleEvent $e")
+              moduleEvent = Some(e)
+            }
+            case e : Unit => // Function return value does not match: Do nothing
+            case e        => // Function return value does not match: Do nothing
+              if (e != Unit) Log.debug(s"Module $toString: Received unknown input: $e. Ignoring.")
           }
         }
-        case e => // No state defined: Do nothing
+        case e => { // No state defined: Do nothing
+          Log.debug(s"Module $toString: Cannot set to state: $e.")
+        }
       }
     } catch {
       case e : Exception => {
@@ -303,7 +313,7 @@ trait Module {
       interface.unchain()
 
       Log.debug("Module '" + toString + "': Ended module " + name +
-        (if (message != null) " with message [" + message + "]." else ".") )
+        (if (message != null) " with message '" + message + "]'." else ".") )
     }
 
     // Catch escape events
