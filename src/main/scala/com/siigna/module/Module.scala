@@ -313,7 +313,7 @@ trait Module {
       interface.unchain()
 
       Log.debug("Module '" + toString + "': Ended module " + name +
-        (if (message != null) " with message '" + message + "]'." else ".") )
+        (if (message != null) " with message '" + message + "'." else ".") )
     }
 
     // Catch escape events
