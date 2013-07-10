@@ -39,7 +39,7 @@ import com.siigna.app.controller.remote.RemoteConstants._
  * unmarshalled via the [[com.siigna.util.io.Unmarshal]] object, using the [[http://ubjson.org UBJSON]] (Universal
  * Binary JSON) format.
  */
-trait RemoteCommand extends Serializable {
+trait RemoteCommand {
 
   /**
    * The session who are sending this command.
