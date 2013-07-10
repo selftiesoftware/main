@@ -283,7 +283,7 @@ trait Module {
           }
         }
         case e => { // No state defined: Do nothing
-          Log.debug(s"Module $toString: Cannot set to state: $e.")
+          Log.debug(s"Module $toString: StateMap not defined for state $state with event: $e.")
         }
       }
     } catch {
