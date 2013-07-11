@@ -19,6 +19,7 @@
 
 package com.siigna.app.model
 
+import org.khelekore.prtree.PRTree
 import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
 import shape.Shape
 import com.siigna.app.Siigna
@@ -33,7 +34,7 @@ trait SpatialModel[Key, Value <: Shape] {
   def shapes : Map[Key, Value]
   
   /**
-   * The [[com.siigna.util.rtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
+   * The [[org.khelekore.prtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
    */
   //protected def rtree : PRTree
 
