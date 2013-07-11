@@ -87,7 +87,7 @@ class CircleShapeSpec extends FunSpec with ShouldMatchers {
       c.getPart(ShapeSelector(1)).get.apply(t2) should equal (CircleShape(Vector2D(5, 0), 25))
 
       // Test two points
-      c.getPart(ShapeSelector(1, 2)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
+      c.getPart(ShapeSelector(1, 2)).get.apply(t1) should equal (CircleShape(Vector2D(5, 0), 10))
       c.getPart(ShapeSelector(2, 3)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
       c.getPart(ShapeSelector(3, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
       c.getPart(ShapeSelector(1, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))

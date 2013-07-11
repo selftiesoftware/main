@@ -85,8 +85,6 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
-    //Siigna("isLive") = false
-
     // Start by reading the applet parameters
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
@@ -98,15 +96,15 @@ class SiignaApplet extends Applet {
         Log.success("Applet: Found drawing: " + id)
       }
 
-      // Get the active user, if a log in was performed at www.siigna.com
-      val userName = getParameter("contributorName")
+      // Get the active user and token, if a log in was performed at www.siigna.com
+      val userName  = getParameter("contributorName")
+      val userToken = getParameter("contributorToken")
 
       if (userName != null) {
-        // TODO: Refine this
-        Siigna.user = User(0, userName, util.Random.nextString(20))
+        Siigna.user = User(0, userName, if (userToken != null) userToken else "0")
         Log.success("Applet: Found user: " + userName)
       }
-    } catch { case _ : Throwable => Log.info("Applet: No user or drawind-id found.")}
+    } catch { case _ : Throwable => Log.info("Applet: No user or drawing-id found.")}
 
     // Set the layout
     setLayout(new BorderLayout())
