@@ -12,81 +12,170 @@
 package com.siigna.app.controller.remote
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{BeforeAndAfter, FunSpec}
-import com.siigna.app.Siigna
-import org.scalatest.exceptions.TestFailedException
+import org.scalatest.{GivenWhenThen, FunSpec}
+import com.siigna.app.model.server.User
+import com.siigna.app.model.Model
+import scala.util.Random
+import com.siigna.app.model.action.{CreateShape, RemoteAction}
+import com.siigna.app.model.shape.CircleShape
+import com.siigna.util.geom.Vector2D
+import com.siigna.util.collection.Attributes
 
-/**
- * Tests connectivity and fault tolerance of the server.
- */
-class ServerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter {
+class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
-  var badSink : Server  = null
-  var goodSink : Server = null
+  val port = 20005
+  val address = "http://62.243.118.234"
+  //val address = "http://localhost"
+  val fqn = address+":"+port
+  val ses = Session(4L,User(1L,"John","Johnskey"))
 
-  lazy val dummyGet = Get(null, null, dummySession)
-  lazy val dummySession = Session(0L, Siigna.user)
+  def client = new Client(fqn)
 
-  before {
-    badSink  = new Server("localhost", Mode.Production, 1)
-    goodSink = new Server("http://localhost:7788",Mode.http)//new Server("62.243.118.234", Mode.Production)
-  }
+  describe("Siigna communication Client"){
 
-  after {
-    badSink.disconnect()
-    goodSink.disconnect()
-  }
+    it("Can determine if a server is alive"){
 
-  def runUntil(server : Server, retries : Int, cmd : RemoteCommand, f : Any => Unit) : Boolean = {
-    new Thread() {
-      override def run() { server(cmd, f) }
-    }.start()
+      val start = System.currentTimeMillis()
+      assert(client.alive)
 
-    Thread.sleep(server.timeout + 30) // Arbitrary wait
-    if (server.retries > 0) {
-      def shouldRun = server.retries > 0 && server.retries < retries
-      // Block until the server has tried 'retries' times
-      while(shouldRun) {
-        Thread.sleep(server.timeout)
-      }
-      if (server.retries >= retries) {
-        goodSink.disconnect()
-        fail("could not establish connection")
-        false
-      } else true
-    } else true
-  }
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
+    }
 
-  describe("The server") {
-    it ("can establish a connection") {
-      runUntil(goodSink, 10, dummyGet, r => {
-          // Should receive an error
-          r.isInstanceOf[Error] should be (true)
+    it("Can get a new drawingId"){
+
+      val start = System.currentTimeMillis()
+      Given("Two request for ids")
+      val firstId = client.getDrawingId(ses)
+      val secondId = client.getDrawingId(ses)
+
+      Then("The latter is exactly one higher then the former")
+      assert(secondId-firstId==1)
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
+    }
+
+    it("Can get a new drawing"){
+
+      val start = System.currentTimeMillis()
+      client.getDrawing(ses) match {
+        case Some(m: Model) => {
+
+          val firstId = m.attributes.get("id").get.asInstanceOf[Long]
+
+          client.getDrawing(ses) match {
+            case Some(m: Model) => assert(m.attributes.get("id").get.asInstanceOf[Long] - firstId == 1)
+
+            case None => assert(false)
+          }
         }
-      )
+        case None => assert(false)
+      }
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
     }
 
-    it ("knows when it is online") {
-      goodSink.isConnected should be (false)
-      runUntil(goodSink, 10, dummyGet, _ => ())
-      goodSink.isConnected should be (true)
+    it("Can get an existing drawing"){
+      val start = System.currentTimeMillis()
+      val id = client.getDrawingId(ses)
+
+      val drawing = client.getDrawing(id,ses)
+
+      assert(drawing.get.attributes.get("id").get.asInstanceOf[Long] == id)
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
     }
 
-    it ("can exit") {
-      badSink.disconnect()
-      val time = System.currentTimeMillis()
-      badSink(dummyGet, _ => ())
-      // This should not stall
-      System.currentTimeMillis() - time should be < 200L
+    it("Can get a range of shapes"){
+
+      val start = System.currentTimeMillis()
+
+      val amount = Random.nextInt(10)
+
+      client.getShapeIds(amount,ses) match {
+        case Some(r: Range) => r.length == amount
+        case _ => assert(false)
+      }
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
+
     }
 
-    it ("loops if messages time out") {
-      evaluating {
-        runUntil(badSink, 10, dummyGet, _ => ())
-      } should produce [TestFailedException]
-      badSink.retries should be >= 10
+    it("Can set an action"){
+
+      val start = System.currentTimeMillis()
+
+      val drawingId = client.getDrawingId(ses)
+
+      Given("A session with this drawing id "+drawingId)
+      val ses2 = Session(drawingId,ses.user)
+
+      Given("A remoteAction")
+      val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
+
+      val count1 = client.setAction(dummyAction,ses2)
+      val count2 = client.setAction(dummyAction,ses2)
+
+      assert(count2-count1==1)
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
     }
 
+    it("Can get a specific action"){
+
+      Given("A new drawing id")
+      val start = System.currentTimeMillis()
+
+      val drawingId = client.getDrawingId(ses)
+
+      Given("A session with this drawing id "+drawingId)
+      val ses2 = Session(drawingId,ses.user)
+
+      Given("A remoteAction")
+      val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
+
+      When("We set an action on this drawing")
+      client.setAction(dummyAction,ses2)
+
+      Then("We should be able to retrieve the same action (must be id 1)")
+      client.getAction(1,ses2) match {
+        case Some(r: RemoteAction) =>
+        case _ => assert(false)
+      }
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
+
+    }
+
+    it("Can get the next actionId for a drawing"){
+      Given("A new drawing id")
+
+      val start = System.currentTimeMillis()
+
+      val drawingId = client.getDrawingId(ses)
+
+      Given("A session with this drawing id "+drawingId)
+      val ses2 = Session(drawingId,ses.user)
+
+      Given("A remoteAction")
+      val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
+
+      When("We ask for the next actionId")
+      val firstActionId = client.getActionId(ses2)
+
+      Then("initially then it must be 0")
+      assert(firstActionId==0)
+
+      When("We set an action on the drawing")
+      client.setAction(dummyAction,ses2)
+
+      Then("The action id must be 1")
+      val secondActionId = client.getActionId(ses2)
+      assert(secondActionId==1)
+
+      val time = System.currentTimeMillis() - start
+      Then("It took "+time)
+    }
   }
 
 }
