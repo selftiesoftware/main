@@ -28,6 +28,14 @@ class SpatialModelSpec extends FunSpec with ShouldMatchers {
 
     }
 
+    it("can query for shapes that are inside or intersecting the given boundary"){
+
+    }
+
+    it("can query for shapes close to the given point by a given radius"){
+
+    }
+
   }
 
 }
