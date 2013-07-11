@@ -24,29 +24,39 @@ import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
 import shape.Shape
 import com.siigna.app.Siigna
 
+
+
 /**
  * An interface that supplies the model with spatial information and spatial queries to retrieve one or more shapes
  * from their position.
  */
 trait SpatialModel[Key, Value <: Shape] {
 
-  // TODO: Remove this in favour of the tree
-  def shapes : Map[Key, Value]
-  
   /**
-   * The [[org.khelekore.prtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
+   * The [[org.khelekore.prtree]] used by the model.
    */
-  //protected def rtree : PRTree
+  protected var PRT : Option[PRTree[SiignaTree.treeType]] = None
+
+  /**
+   * If PRT has been calculated return it.
+   * If not, create and empty one
+   * @return PRT or none
+   */
+  def rtree = PRT.getOrElse(SiignaTree(Map()))
 
   /**
    * Query for shapes that are inside or intersecting the given boundary.
    * @param query  The query-rectangle or query-view defining the area for the shapes to be returned.
    * @return  The shapes that are inside or intersects the query-rectangle, paired with their keys.
    */
-  def apply(query : Rectangle2D) : Map[Key, Value] = {
+  def apply(query : Rectangle2D) : Map[Int,Shape] = {
+
+    SiignaTree.find(query,rtree)
+
+    /*
     shapes.filter((s : (Key, Value)) => {
       query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
-    })
+    })  */
   }
 
   /**
@@ -57,8 +67,10 @@ trait SpatialModel[Key, Value <: Shape] {
    * @return  A Map of the shapes and their ids found within a distance from the given point <code><=</code> than the
    *          given radius.
    */
-  def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
-    shapes.filter(_._2.geometry.distanceTo(point) <= radius)
+  def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Int,Shape] = {
+
+    SiignaTree.find(point,radius,rtree)
+    //shapes.filter(_._2.geometry.distanceTo(point) <= radius)
   }
 
   /**
@@ -66,14 +78,12 @@ trait SpatialModel[Key, Value <: Shape] {
    * elements in the model.
    * @return  The minimum-bounding rectangle containing all the shapes in the model.
    */
-  def mbr : SimpleRectangle2D =
-    if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
+  def mbr : SimpleRectangle2D = SiignaTree.mbr(rtree)
+  /*  if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
     else if (shapes.size == 1) shapes.head._2.geometry.boundary
     else { //TODO: PERFORMANCE DEPLEATING OPERATION!
       shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : SimpleRectangle2D, b : (Key, Value)) => {
         a.expand(b._2.geometry.boundary)
       })
-    }
-
-
+    }   */
 }

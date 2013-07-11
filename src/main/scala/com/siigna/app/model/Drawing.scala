@@ -21,8 +21,11 @@ package com.siigna.app.model
 
 import shape.Shape
 import collection.immutable.MapProxy
-import com.siigna.app.Siigna
+import com.siigna.app.{model, Siigna}
 import com.siigna.util.geom.SimpleRectangle2D
+import concurrent.ExecutionContext.Implicits.global
+import org.khelekore.prtree.PRTree
+import scala.util.Success
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -31,7 +34,7 @@ import com.siigna.util.geom.SimpleRectangle2D
  * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
  * @see [[com.siigna.app.model.Drawing$]]
  */
-trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel[SiignaTree.leftType,SiignaTree.rightType]{
 
   /**
    * The boundary from the current content of the Model.
@@ -115,7 +118,10 @@ object Drawing extends Drawing {
   }
 
   // Calculates the boundary of the model whenever it changes
-  addActionListener((_, _) => _boundary = calculateBoundary())
+  addActionListener((_, _) => {
+    model.tree.onSuccess{case x => PRT = Some(x)}
+    _boundary = calculateBoundary()
+  })
 
   //calculates the paper header whenever it changes
 
@@ -133,7 +139,7 @@ object Drawing extends Drawing {
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   protected def calculateBoundary() = {
-    val newBoundary  = mbr
+    val newBoundary  = SiignaTree.mbr(rtree)
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
     //val proportion   = 1.41421356
@@ -175,10 +181,4 @@ object Drawing extends Drawing {
    */
   def boundaryScale : Int =
     math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
-
-  /**
-   * The [[com.siigna.util.rtree.PRTree]] used by the model.
-   */
-  //def rtree = model.rtree
-
 }
