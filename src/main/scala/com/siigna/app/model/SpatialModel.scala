@@ -32,6 +32,8 @@ import com.siigna.app.Siigna
  */
 trait SpatialModel[Key, Value <: Shape] {
 
+
+  def model:Model
   /**
    * The [[org.khelekore.prtree]] used by the model.
    */
@@ -42,7 +44,7 @@ trait SpatialModel[Key, Value <: Shape] {
    * If not, create and empty one
    * @return PRT or none
    */
-  def rtree = PRT.getOrElse(SiignaTree(Map()))
+  def rtree = PRT.getOrElse(SiignaTree(model.shapes))
 
   /**
    * Query for shapes that are inside or intersecting the given boundary.
@@ -51,7 +53,9 @@ trait SpatialModel[Key, Value <: Shape] {
    */
   def apply(query : Rectangle2D) : Map[Int,Shape] = {
 
-    SiignaTree.find(query,rtree)
+
+    SiignaTree.find(query,rtree) ++ model.selection.shapes.filter((s : (Int, Shape)) => {
+      query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)})
 
     /*
     shapes.filter((s : (Key, Value)) => {
@@ -69,7 +73,7 @@ trait SpatialModel[Key, Value <: Shape] {
    */
   def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Int,Shape] = {
 
-    SiignaTree.find(point,radius,rtree)
+    SiignaTree.find(point,radius,rtree) ++ model.selection.shapes.filter(_._2.geometry.distanceTo(point) <= radius)
     //shapes.filter(_._2.geometry.distanceTo(point) <= radius)
   }
 

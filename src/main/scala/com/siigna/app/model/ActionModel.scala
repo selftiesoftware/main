@@ -67,7 +67,11 @@ trait ActionModel extends HasAttributes {
   /**
    * The underlying immutable model of Siigna.
    */
-  protected var model = new Model()
+  protected var _model = new Model()
+
+  def model = _model
+
+  def model_=(m : Model) = _model = m
 
   /**
    * A listener for remote actions.

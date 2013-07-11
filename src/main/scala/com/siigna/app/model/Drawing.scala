@@ -31,8 +31,8 @@ import scala.util.Success
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
  * their ids, that can be traversed like a map.
  *
- * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
- * @see [[com.siigna.app.model.Drawing$]]
+ * Used in the [[com.siigna.app.model.Drawing]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.model.Drawing]]
  */
 trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel[SiignaTree.leftType,SiignaTree.rightType]{
 
@@ -181,4 +181,5 @@ object Drawing extends Drawing {
    */
   def boundaryScale : Int =
     math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
-}
+
+  }

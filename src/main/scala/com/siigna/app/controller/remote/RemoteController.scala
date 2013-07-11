@@ -73,7 +73,7 @@ protected[controller] object RemoteController extends Actor {
     case _ => false
   }
 
-  //SiignaDrawing.addAttribute("id",1484L)
+  //SiignaDrawing.addAttribute("id",1482L)
   /**
    * The acting part of the RemoteController.
    */

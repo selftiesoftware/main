@@ -26,7 +26,7 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
-import com.siigna.app.model.shape.TextShape
+import com.siigna.app.model.shape.{CircleShape, TextShape}
 import com.siigna.util.collection.Attributes
 
 /**
@@ -444,6 +444,8 @@ object View extends View {
 
       // Draw selection
       drawing.selection.parts(transformation).foreach(s => {
+        if (s.isInstanceOf[CircleShape])
+          println(s)
         graphics.draw(s.setAttribute("Color" -> color))
       })
 
