@@ -53,7 +53,6 @@ trait SpatialModel[Key, Value <: Shape] {
    */
   def apply(query : Rectangle2D) : Map[Int,Shape] = {
 
-
     SiignaTree.find(query,rtree) ++ model.selection.shapes.filter((s : (Int, Shape)) => {
       query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)})
 
