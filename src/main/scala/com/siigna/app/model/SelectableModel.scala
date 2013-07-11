@@ -306,7 +306,6 @@ trait SelectableModel extends ActionModel{
     // Execute the changes (if any)
     action.foreach(execute(_))
 
-    println("NOTIFYING!!!" + selection)
     // Notify the listeners
     _listenersSelection.foreach(_(selection))
 

@@ -444,8 +444,6 @@ object View extends View {
 
       // Draw selection
       drawing.selection.parts(transformation).foreach(s => {
-        if (s.isInstanceOf[CircleShape])
-          println(s)
         graphics.draw(s.setAttribute("Color" -> color))
       })
 

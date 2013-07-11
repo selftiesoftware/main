@@ -102,9 +102,7 @@ trait Shape extends HasAttributes {
    * @param point  The point to examine
    * @return  A double value indicating the distance from the given point to the closest point on this shape.
    */
-  def distanceTo(point : Vector2D) : Double = {
-    distanceTo(point, Siigna.int("selectionDistance").get)
-  }
+  def distanceTo(point : Vector2D) : Double = geometry.distanceTo(point)
 
   /**
    * Calculates the closest distance to the shape in the given scale.

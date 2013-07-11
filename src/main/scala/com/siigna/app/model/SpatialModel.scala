@@ -52,9 +52,8 @@ trait SpatialModel[Key, Value <: Shape] {
    * @return  The shapes that are inside or intersects the query-rectangle, paired with their keys.
    */
   def apply(query : Rectangle2D) : Map[Int,Shape] = {
-
-    SiignaTree.find(query,rtree) ++ model.selection.shapes.filter((s : (Int, Shape)) => {
-      query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)})
+    SiignaTree.find(query,rtree)
+    //++ model.selection.shapes.filter((s : (Int, Shape)) => {  query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)})
 
     /*
     shapes.filter((s : (Key, Value)) => {
@@ -72,7 +71,7 @@ trait SpatialModel[Key, Value <: Shape] {
    */
   def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Int,Shape] = {
 
-    SiignaTree.find(point,radius,rtree) ++ model.selection.shapes.filter(_._2.geometry.distanceTo(point) <= radius)
+    SiignaTree.find(point,radius,rtree) //++ model.selection.shapes.filter(_._2.geometry.distanceTo(point) <= radius)
     //shapes.filter(_._2.geometry.distanceTo(point) <= radius)
   }
 
