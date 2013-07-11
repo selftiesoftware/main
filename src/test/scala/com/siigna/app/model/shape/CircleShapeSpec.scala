@@ -83,20 +83,40 @@ class CircleShapeSpec extends FunSpec with ShouldMatchers {
       c.getPart(ShapeSelector(0)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
       c.getPart(ShapeSelector(1, 2, 3, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
 
+      // Two points => entire circle
+      c.getPart(ShapeSelector(1, 3)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
+      c.getPart(ShapeSelector(2, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
+
       // Test single point
       c.getPart(ShapeSelector(1)).get.apply(t2) should equal (CircleShape(Vector2D(5, 0), 25))
 
       // Test two points
-      c.getPart(ShapeSelector(1, 2)).get.apply(t1) should equal (CircleShape(Vector2D(5, 0), 10))
-      c.getPart(ShapeSelector(2, 3)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
-      c.getPart(ShapeSelector(3, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
-      c.getPart(ShapeSelector(1, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
-
-      // Cannot select opposite points
-      c.getPart(ShapeSelector(1, 3)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
-      c.getPart(ShapeSelector(2, 4)).get.apply(t1) should equal (CircleShape(Vector2D(10, 0), 10))
+      c.getPart(ShapeSelector(1, 2)).get.apply(TransformationMatrix(Vector2D( 10, 10), 1.0)
+        ) should equal (CircleShape(Vector2D( 5.606601717798213, 5.606601717798213), 26.213203435596427))
+      c.getPart(ShapeSelector(2, 3)).get.apply(TransformationMatrix(Vector2D(-10, 10), 1.0)
+        ) should equal (CircleShape(Vector2D(-5.606601717798213, 5.606601717798213), 26.213203435596427))
+      c.getPart(ShapeSelector(3, 4)).get.apply(TransformationMatrix(Vector2D(-10,-10), 1.0)
+        ) should equal (CircleShape(Vector2D(-5.606601717798213,-5.606601717798213), 26.213203435596427))
+      c.getPart(ShapeSelector(1, 4)).get.apply(TransformationMatrix(Vector2D( 10,-10), 1.0)
+        ) should equal (CircleShape(Vector2D( 5.606601717798213,-5.606601717798213), 26.213203435596427))
 
       // Test three points
+      c.getPart(ShapeSelector(1, 2, 3)).get.apply(TransformationMatrix(Vector2D(  0, 10), 2.0)
+        ) should equal (CircleShape(Vector2D( 0, 15), 35))
+      c.getPart(ShapeSelector(1, 2, 3)).get.apply(TransformationMatrix(Vector2D(  0, 10), 2.0)
+        ).geometry.vertices(4) should equal (Vector2D(  0,-20))
+      c.getPart(ShapeSelector(2, 3, 4)).get.apply(TransformationMatrix(Vector2D(-10,  0), 2.0)
+        ) should equal (CircleShape(Vector2D(-15, 0), 35))
+      c.getPart(ShapeSelector(2, 3, 4)).get.apply(TransformationMatrix(Vector2D(-10,  0), 2.0)
+        ).geometry.vertices(1) should equal (Vector2D( 20,  0))
+      c.getPart(ShapeSelector(1, 3, 4)).get.apply(TransformationMatrix(Vector2D(  0,-10), 2.0)
+        ) should equal (CircleShape(Vector2D( 0,-15), 35))
+      c.getPart(ShapeSelector(1, 3, 4)).get.apply(TransformationMatrix(Vector2D(  0,-10), 2.0)
+        ).geometry.vertices(2) should equal (Vector2D(  0, 20))
+      c.getPart(ShapeSelector(1, 2, 4)).get.apply(TransformationMatrix(Vector2D( 10,  0), 2.0)
+        ) should equal (CircleShape(Vector2D(15,  0), 35))
+      c.getPart(ShapeSelector(1, 2, 4)).get.apply(TransformationMatrix(Vector2D( 10,  0), 2.0)
+        ).geometry.vertices(3) should equal (Vector2D(-20,  0))
     }
 
   }

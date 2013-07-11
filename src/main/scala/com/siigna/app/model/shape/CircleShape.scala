@@ -72,20 +72,24 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       }))
     }
 
-    def findMiddlePointOnCircumference(direction: Vector2D) : Vector2D = center + (direction * (radius / direction.length))
+    def findMiddlePointOnCircumference(direction: Vector2D) : Vector2D = {
+      center + (direction * (radius / direction.length))
+    }
 
     part match {
-      // The full shape
-      case FullShapeSelector | ShapeSelector(0) | ShapeSelector(1, 2, 3, 4) => Some(new PartialShape(this, transform))
+      // The full shape (or two opposite points on the periphery)
+      case FullShapeSelector | ShapeSelector(0) | ShapeSelector(1, 2, 3, 4) |
+           ShapeSelector(1, 3) | ShapeSelector(0, 1, 4) |
+           ShapeSelector(2, 4) | ShapeSelector(0, 1, 4) => Some(new PartialShape(this, transform))
       // Transform a single point on the periphery
       case ShapeSelector(1) | ShapeSelector(0, 1) => createCirclePartFromOppositePoints(1, 3)
       case ShapeSelector(2) | ShapeSelector(0, 2) => createCirclePartFromOppositePoints(2, 4)
       case ShapeSelector(3) | ShapeSelector(0, 3) => createCirclePartFromOppositePoints(3, 1)
       case ShapeSelector(4) | ShapeSelector(0, 4) => createCirclePartFromOppositePoints(4, 2)
-      // Transform two points on the periphery
+      // Transform two adjacent points on the periphery
       case ShapeSelector(1, 2) | ShapeSelector(0, 1, 2) => createCirclePartFromDirection(Vector2D( 1, 1), 3, 4)
       case ShapeSelector(2, 3) | ShapeSelector(0, 2, 3) => createCirclePartFromDirection(Vector2D(-1, 1), 1, 4)
-      case ShapeSelector(3, 4) | ShapeSelector(0, 3, 4) => createCirclePartFromDirection(Vector2D(-1,-1), 1, 3)
+      case ShapeSelector(3, 4) | ShapeSelector(0, 3, 4) => createCirclePartFromDirection(Vector2D(-1,-1), 1, 2)
       case ShapeSelector(1, 4) | ShapeSelector(0, 1, 4) => createCirclePartFromDirection(Vector2D( 1,-1), 2, 3)
       // Transform three points on the periphery
       case ShapeSelector(1, 2, 3) | ShapeSelector(0, 1, 2, 3) => createCirclePartFromOppositePoints(2, 4)
