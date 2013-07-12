@@ -39,7 +39,7 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
       val transformedShape = shape.transform(transformation)
 
       // Retrieve the color-value
-      val color = attributes color("Color") getOrElse(colorDraw)
+      val color = attributes color "Color" getOrElse colorDraw
 
       // Set the server-color
       setColor(color)
@@ -47,16 +47,16 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
       if (attributes.boolean("Visible") != Some(false)) {
         transformedShape match {
           case s : ArcShape         => {
-            setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
+            setStrokeWidth(attributes double "StrokeWidth" getOrElse 1.0)
             drawArc(s.geometry.center, s.geometry.radius, s.geometry.startAngle, s.geometry.angle)
           }
           case s : CircleShape      => {
-            setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
+            setStrokeWidth(attributes double "StrokeWidth"  getOrElse 1.0)
             drawCircle(s.center, s.radius)
             //draw(s.center)
           }
           case s : LineShape        => {
-            setStrokeWidth(attributes double("StrokeWidth") getOrElse(1.0))
+            setStrokeWidth(attributes double "StrokeWidth" getOrElse 0.6)
             if (attributes.boolean("Infinite").getOrElse(false))
               drawLine(s.p1, s.p2)
             else
