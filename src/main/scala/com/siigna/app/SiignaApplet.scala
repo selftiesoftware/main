@@ -85,7 +85,7 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
-    Siigna("isLive") = false
+    //Siigna("isLive") = false
 
     // Start by reading the applet parameters
     try {
