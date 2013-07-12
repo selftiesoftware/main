@@ -85,6 +85,8 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
+    //Siigna("isLive") = false
+
     // Start by reading the applet parameters
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received

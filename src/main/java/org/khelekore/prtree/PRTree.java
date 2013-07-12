@@ -16,9 +16,9 @@ public class PRTree<T> {
     private MBRConverter<T> converter;
     private int branchFactor;
 
-    private Node<T> root;
-    private int numLeafs;
-    private int height;
+    public Node<T> root;
+    public int numLeafs;
+    public int height;
 
     /** Create a new PRTree using the specified branch factor.
      * @param converter the MBRConverter to use for this tree
@@ -62,7 +62,7 @@ public class PRTree<T> {
 	setRoot (nodes);
     }
 
-    private int estimateSize (int dataSize) {
+    public int estimateSize (int dataSize) {
 	return (int)(1.0 / (branchFactor - 1) * dataSize);
     }
 

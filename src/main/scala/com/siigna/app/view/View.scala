@@ -26,7 +26,7 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
-import com.siigna.app.model.shape.TextShape
+import com.siigna.app.model.shape.{CircleShape, TextShape}
 import com.siigna.util.collection.Attributes
 
 /**

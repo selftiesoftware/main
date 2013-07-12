@@ -23,6 +23,9 @@ import action.Action
 import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.model.selection.Selection
+import concurrent.future
+import concurrent.ExecutionContext.Implicits.global
+
 
 /**
  * An immutable model containing shapes with uniquely (and globally for this specific drawing) identifiable keys.
@@ -32,12 +35,30 @@ import com.siigna.app.model.selection.Selection
  * @param undone  The actions that have been undone on this model.
  */
 sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone : Seq[Action], attributes : Attributes)
-       extends ImmutableModel[Int, Shape]
-          with SpatialModel[Int, Shape]
-          with ModelBuilder[Int, Shape]
-          with HasAttributes{
+       extends ModelBuilder[Int, Shape]
+        with HasAttributes{
 
   type T = Model
+
+  /**
+   * Add a shape to the model.
+   */
+  def add(key : Int, shape : Shape) = build(shapes.+((key, shape)))
+
+  /**
+   * Add several shapes to the model.
+   */
+  def add(shapes : Map[Int, Shape]) = build(this.shapes ++ shapes)
+
+  /**
+   * Remove a shape from the model.
+   */
+  def remove(key: Int) = build(shapes - key)
+
+  /**
+   * Remove several shapes from the model.
+   */
+  def remove(keys: Traversable[Int]) = build(shapes.filterNot(i => keys.exists(_ == i._1)))
 
   /**
    * Creates an empty model.
@@ -66,7 +87,9 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
    */
   def setAttributes(newAttributes: Attributes) = Model(shapes,executed,undone,newAttributes)
 
+  val tree = future { SiignaTree.apply(shapes) }
 }
+
 
 /**
  * Trait that provides necessary information to build a model with a
@@ -89,11 +112,4 @@ trait ModelBuilder[Key, Value] {
    * @return A new (immutable) Model.
    */
   protected def build(coll : Map[Key, Value], executed : Seq[Action], undone : Seq[Action]) : Model
-
-  /**
-   * The shapes used to perform actions upon.
-   * @return A Map containing the shapes.
-   */
-  def shapes : Map[Key, Value]
-
 }

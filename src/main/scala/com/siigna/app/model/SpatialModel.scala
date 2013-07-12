@@ -25,28 +25,37 @@ import shape.Shape
 import com.siigna.app.Siigna
 
 /**
- * An interface that supplies the model with spatial information and spatial queries to retrieve one or more shapes
+ * A trait that supplies the model with spatial information and spatial queries to retrieve one or more shapes
  * from their position.
  */
-trait SpatialModel[Key, Value <: Shape] {
+trait SpatialModel {
 
-  // TODO: Remove this in favour of the tree
-  def shapes : Map[Key, Value]
-  
   /**
-   * The [[org.khelekore.prtree.PRTree]] (Prioritized RTree) that stores dimensional orderings.
+   * An empty PRTree for use if the 'real' prtree is unavailable.
    */
-  //protected def rtree : PRTree
+  protected val emptyPRT = SiignaTree(Map())
+
+  /**
+   * The [[org.khelekore.prtree]] used by the model.
+   */
+  protected var PRT : Option[PRTree[SiignaTree.TreeType]] = None
+
+  /**
+   * A spatial search-tree (<a href="http://en.wikipedia.org/wiki/Priority_R-tree" title="PRTrees on Wikipedia">priority
+   * r-tree</a>) for shapes used to search through the model.
+   * The PRT is constructed lazily after the model changes, so the tree might not be up to date. If it has not been
+   * calculated initially we create and return an empty one.
+   * @return An instance of a [[org.khelekore.prtree.PRTree]].
+   */
+  def rtree : PRTree[SiignaTree.TreeType] = PRT.getOrElse(emptyPRT)
 
   /**
    * Query for shapes that are inside or intersecting the given boundary.
    * @param query  The query-rectangle or query-view defining the area for the shapes to be returned.
    * @return  The shapes that are inside or intersects the query-rectangle, paired with their keys.
    */
-  def apply(query : Rectangle2D) : Map[Key, Value] = {
-    shapes.filter((s : (Key, Value)) => {
-      query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
-    })
+  def apply(query : Rectangle2D) : Map[Int,Shape] = {
+    SiignaTree.find(query,rtree)
   }
 
   /**
@@ -57,8 +66,9 @@ trait SpatialModel[Key, Value <: Shape] {
    * @return  A Map of the shapes and their ids found within a distance from the given point <code><=</code> than the
    *          given radius.
    */
-  def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Key, Value] = {
-    shapes.filter(_._2.geometry.distanceTo(point) <= radius)
+  def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Int,Shape] = {
+
+    SiignaTree.find(point,radius,rtree)
   }
 
   /**
@@ -66,14 +76,6 @@ trait SpatialModel[Key, Value <: Shape] {
    * elements in the model.
    * @return  The minimum-bounding rectangle containing all the shapes in the model.
    */
-  def mbr : SimpleRectangle2D =
-    if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
-    else if (shapes.size == 1) shapes.head._2.geometry.boundary
-    else { //TODO: PERFORMANCE DEPLEATING OPERATION!
-      shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : SimpleRectangle2D, b : (Key, Value)) => {
-        a.expand(b._2.geometry.boundary)
-      })
-    }
-
+  def mbr : SimpleRectangle2D = SiignaTree.mbr(rtree)
 
 }
