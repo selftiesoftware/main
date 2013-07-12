@@ -72,16 +72,17 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
       // Create a function that transforms the selected parts of the polyline
       val transformInner = (t : TransformationMatrix) => {
-        val arr      = new Array[InnerPolylineShape](innerShapes.size)
+        val arr      = collection.mutable.ArrayBuffer[InnerPolylineShape]()
         for (i <- 0 until innerShapes.size) {
-          arr(i) = if (xs contains (i + 1)) {
+          val shape = if (xs contains (i + 1)) {
             selected = selected :+ shapes(i)
             innerShapes(i).transform(t)
           } else innerShapes(i)
+          // Make sure there are no duplicate neighbour points
+          if (!arr.isDefinedAt(i - 1) || arr(i - 1) != shape) arr += shape
         }
 
-        // Make sure there are no duplicate points
-        arr.distinct
+        arr
       }
 
       // Create a shape used for drawing
