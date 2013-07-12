@@ -24,27 +24,30 @@ import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
 import shape.Shape
 import com.siigna.app.Siigna
 
-
-
 /**
- * An interface that supplies the model with spatial information and spatial queries to retrieve one or more shapes
+ * A trait that supplies the model with spatial information and spatial queries to retrieve one or more shapes
  * from their position.
  */
-trait SpatialModel[Key, Value <: Shape] {
+trait SpatialModel {
 
+  /**
+   * An empty PRTree for use if the 'real' prtree is unavailable.
+   */
+  protected val emptyPRT = SiignaTree(Map())
 
-  def model:Model
   /**
    * The [[org.khelekore.prtree]] used by the model.
    */
-  protected var PRT : Option[PRTree[SiignaTree.treeType]] = None
+  protected var PRT : Option[PRTree[SiignaTree.TreeType]] = None
 
   /**
-   * If PRT has been calculated return it.
-   * If not, create and empty one
-   * @return PRT or none
+   * A spatial search-tree (<a href="http://en.wikipedia.org/wiki/Priority_R-tree" title="PRTrees on Wikipedia">priority
+   * r-tree</a>) for shapes used to search through the model.
+   * The PRT is constructed lazily after the model changes, so the tree might not be up to date. If it has not been
+   * calculated initially we create and return an empty one.
+   * @return An instance of a [[org.khelekore.prtree.PRTree]].
    */
-  def rtree = PRT.getOrElse(SiignaTree(model.shapes))
+  def rtree : PRTree[SiignaTree.TreeType] = PRT.getOrElse(emptyPRT)
 
   /**
    * Query for shapes that are inside or intersecting the given boundary.

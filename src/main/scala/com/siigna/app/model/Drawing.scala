@@ -21,11 +21,9 @@ package com.siigna.app.model
 
 import shape.Shape
 import collection.immutable.MapProxy
-import com.siigna.app.{model, Siigna}
+import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
 import concurrent.ExecutionContext.Implicits.global
-import org.khelekore.prtree.PRTree
-import scala.util.Success
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -34,7 +32,7 @@ import scala.util.Success
  * Used in the [[com.siigna.app.model.Drawing]] object which can be used throughout the application (modules included).
  * @see [[com.siigna.app.model.Drawing]]
  */
-trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel[SiignaTree.leftType,SiignaTree.rightType]{
+trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel {
 
   /**
    * The boundary from the current content of the Model.
@@ -119,8 +117,10 @@ object Drawing extends Drawing {
 
   // Calculates the boundary of the model whenever it changes
   addActionListener((_, _) => {
-    model.tree.onSuccess{case x => PRT = Some(x)}
-    _boundary = calculateBoundary()
+    model.tree.onSuccess{case x => {
+      PRT = Some(x)
+      _boundary = calculateBoundary()
+    }}
   })
 
   //calculates the paper header whenever it changes

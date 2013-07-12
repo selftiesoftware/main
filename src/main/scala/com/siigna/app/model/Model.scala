@@ -26,11 +26,6 @@ import com.siigna.app.model.selection.Selection
 import concurrent.future
 import concurrent.ExecutionContext.Implicits.global
 
-object Model{
-
-  type treeType = (Int,Shape)
-
-}
 
 /**
  * An immutable model containing shapes with uniquely (and globally for this specific drawing) identifiable keys.
