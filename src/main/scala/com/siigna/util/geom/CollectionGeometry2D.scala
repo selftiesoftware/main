@@ -38,21 +38,16 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
   def intersects(geom : Geometry2D) = geom match {
 
     case collection : CollectionGeometry2D => {
-      var hasIntersection = false
-      collection.geometries.foreach(s => if(s.intersects(this)) hasIntersection = true )
-      if(collection == this) hasIntersection = false //coinciding collections should are not considered to intersect.
-      hasIntersection
+      this.geometries.exists(_.intersects(collection))
     }
 
     case segment : Segment2D => {
-      var hasIntersection = false
-      val segments = this.geometries
-      segments.foreach(s => if(segment.intersects(s) == true) hasIntersection = true)
-      hasIntersection
+      this.geometries.exists(_.intersects(segment))
     }
 
-    case g => geometries.exists(_.intersects(g))
-    //case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
+    case g => {
+      geometries.exists(_.intersects(g))
+    }
   }
 
   //def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))

@@ -314,7 +314,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       } else {
         val UL = Vector2D(circle.center.x - circle.radius, circle.center.y - circle.radius) //Upper left
         val LR = Vector2D(circle.center.x + circle.radius, circle.center.y + circle.radius) //Lower right
-        (contains(UL) && contains(LR))
+        contains(UL) && contains(LR)
       }
     }
 
@@ -322,7 +322,10 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * Examines whether any elements exists inside the collection
      * that does not lie within this Rectangle
      */
-    case collection : CollectionGeometry2D => collection.geometries.exists(g => !contains(g))
+    case collection : CollectionGeometry2D => {
+      println('collection)
+      !collection.geometries.exists(g => !contains(g))
+    }
 
     /**
      * Examines whether an ellipse is within the four boundaries
@@ -358,7 +361,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       if (line.p1 == line.p2) {
         false
       } else {
-        (contains(line.p1) && contains(line.p2))
+        contains(line.p1) && contains(line.p2)
       }
     }
 
@@ -445,10 +448,14 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      *
      * Reference: http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other/306332#306332
      */
-    case that : SimpleRectangle2D =>
+    case that : SimpleRectangle2D => {
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
+    }
 
-    case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
+    case g => {
+      println("R" + g)
+      false
+    }
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {

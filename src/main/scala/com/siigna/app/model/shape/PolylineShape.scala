@@ -105,7 +105,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
   def getSelector(rect: SimpleRectangle2D) =
     if (rect.contains(geometry.boundary)) {
       FullShapeSelector
-    } else if (rect.intersects(geometry.boundary)) {
+    } else if (rect.intersects(geometry)) {
       var set = BitSet()
       // Add the start point if it is inside the rectangle
       if (rect.contains(startPoint)) {
