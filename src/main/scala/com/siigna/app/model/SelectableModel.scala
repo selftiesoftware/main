@@ -33,7 +33,7 @@ import com.siigna.util.Log
  *</p>
  *
  * <p>
- *   The SelectableModel is a way to indirectly manipulate the underlying [[com.siigna.app.model.ImmutableModel]]
+ *   The SelectableModel is a way to indirectly manipulate the underlying [[com.siigna.app.model.Model]]
  *   through the temporary "dynamic layer" that can be changed and updated without any effect on the actual
  *   shapes, but with visual feedback to the user. This can be very useful (and gives enormous performance benefits)
  *   when you need to alter shapes many times before storing any final changes.
@@ -77,7 +77,7 @@ import com.siigna.util.Log
  * @see [[com.siigna.app.model.selection.Selection]]
  * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
-trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
+trait SelectableModel extends ActionModel{
 
   /**
    * The listernes associated with the selection. They will be notified whenever the selection changes.
@@ -307,7 +307,7 @@ trait SelectableModel extends ActionModel with SpatialModel[Int, Shape] {
     action.foreach(execute(_))
 
     // Notify the listeners
-    _listenersSelection.foreach(_(this.selection))
+    _listenersSelection.foreach(_(selection))
 
     this
   }

@@ -62,7 +62,6 @@ import com.siigna.app.model.SpatialModel
  * @see [[com.siigna.app.model.selection.ShapeSelector]]
  */
 trait Selection extends HasAttributes
-                   with SpatialModel[Int, Shape]
                    with MapProxy[Int, (Shape, ShapeSelector)]
                    with Externalizable {
 
