@@ -40,6 +40,10 @@ import java.awt.{Color, Dimension}
  * @define siignaAttributes
  * Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
  * {{{
+ *  activeColor
+ *    A Color indicating the default color for shapes
+ *  activeLineWidth
+ *    A Double indicating the default width of new shapes
  *  antiAliasing
  *    A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
  *    The modules are always drawn with anti-aliasing. Defaults to true.
