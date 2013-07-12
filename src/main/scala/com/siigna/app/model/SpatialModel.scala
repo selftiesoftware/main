@@ -56,12 +56,6 @@ trait SpatialModel {
    */
   def apply(query : Rectangle2D) : Map[Int,Shape] = {
     SiignaTree.find(query,rtree)
-    //++ model.selection.shapes.filter((s : (Int, Shape)) => {  query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)})
-
-    /*
-    shapes.filter((s : (Key, Value)) => {
-      query.contains(s._2.geometry.boundary) || query.intersects(s._2.geometry)
-    })  */
   }
 
   /**
@@ -74,8 +68,7 @@ trait SpatialModel {
    */
   def apply(point : Vector2D, radius : Double = Siigna.selectionDistance) : Map[Int,Shape] = {
 
-    SiignaTree.find(point,radius,rtree) //++ model.selection.shapes.filter(_._2.geometry.distanceTo(point) <= radius)
-    //shapes.filter(_._2.geometry.distanceTo(point) <= radius)
+    SiignaTree.find(point,radius,rtree)
   }
 
   /**
@@ -84,11 +77,5 @@ trait SpatialModel {
    * @return  The minimum-bounding rectangle containing all the shapes in the model.
    */
   def mbr : SimpleRectangle2D = SiignaTree.mbr(rtree)
-  /*  if      (shapes.isEmpty)   SimpleRectangle2D(0, 0, 0, 0)
-    else if (shapes.size == 1) shapes.head._2.geometry.boundary
-    else { //TODO: PERFORMANCE DEPLEATING OPERATION!
-      shapes.tail.foldLeft(shapes.head._2.geometry.boundary)((a : SimpleRectangle2D, b : (Key, Value)) => {
-        a.expand(b._2.geometry.boundary)
-      })
-    }   */
+
 }
