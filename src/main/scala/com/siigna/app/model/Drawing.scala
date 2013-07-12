@@ -23,7 +23,6 @@ import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
-import concurrent.ExecutionContext.Implicits.global
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -116,12 +115,7 @@ object Drawing extends Drawing {
   }
 
   // Calculates the boundary of the model whenever it changes
-  addActionListener((_, _) => {
-    model.tree.onSuccess{case x => {
-      PRT = Some(x)
-      _boundary = calculateBoundary()
-    }}
-  })
+  addActionListener((_, _) => _boundary = calculateBoundary())
 
   //calculates the paper header whenever it changes
 
