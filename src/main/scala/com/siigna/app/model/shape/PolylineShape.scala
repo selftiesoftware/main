@@ -179,23 +179,29 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         // Otherwise we add the vertices of the close shapes
         var closeShapeVertices = BitSet()
         val isClosed = isInstanceOf[PolylineShape.PolylineShapeClosed]
+        val isCloseToBothEndPoints = points.head._1 < Siigna.selectionDistance && points.last._1 < Siigna.selectionDistance
 
         // Fetch the shapes
         val xs = if (closeShapes.size <= 2) {
-          closeShapes.toArray
+          closeShapes
         } else {
-          closeShapes.toArray.sortBy(t => t._1).take(1)
+          closeShapes.sortBy(t => t._1).take(1)
         }
 
-        xs.foreach( t => {
-          closeShapeVertices += t._2
+        // Avoid cases where the first and last segment are selected if both endpoints in an open PL is close
+        if (!isClosed && isCloseToBothEndPoints)
+          closeShapeVertices += (0, points.last._2)
+        else {
+          xs.foreach( t => {
+            closeShapeVertices += t._2
 
-          // Make sure not to duplicate points in a closed polylineShape
-          closeShapeVertices += (
-            if (isClosed && t._2 == innerShapes.size) 0
-            else t._2 + 1
-          )
-        })
+            // Make sure not to duplicate points in a closed polylineShape
+            closeShapeVertices += (
+              if (isClosed && t._2 == innerShapes.size) 0
+              else t._2 + 1
+            )
+          })
+        }
 
         // Lastly we return
         BitSetShapeSelector(closeShapeVertices)
@@ -257,8 +263,8 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         (firstPoint, isConsistent) match {
           case (true, true)   => Some(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes))
           case (true, false)  => Some(GroupShape(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes)))
-          case (false, true) if (parts.size > 1)  => Some(PolylineShape.PolylineShapeOpen(parts.head.point, parts.tail, attributes))
-          case (false, false) if (parts.size > 1) => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
+          case (false, true) if parts.size > 1  => Some(PolylineShape.PolylineShapeOpen(parts.head.point, parts.tail, attributes))
+          case (false, false) if parts.size > 1 => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
           case _ => None
         }
       }
