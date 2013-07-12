@@ -38,7 +38,7 @@ import com.siigna.util.Log
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
  */
-trait ActionModel extends HasAttributes {
+trait ActionModel extends SpatialModel with HasAttributes {
 
   type T = ActionModel
 
@@ -144,7 +144,7 @@ trait ActionModel extends HasAttributes {
    * @param t  A number of shapes in dire need of an id.
    * @return  A map with ids for the now not-so-needy shapes.
    */
-  def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(getId -> _).toMap
+  def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(getId ->).toMap
 
   /**
    * Notifies the listeners that an action has been executed, undone or redone.
@@ -153,8 +153,13 @@ trait ActionModel extends HasAttributes {
    * @param remote  Whether the action should go to the remote source as well.
    */
   protected def notifyListeners(action : Action, undo : Boolean, remote : Boolean) {
-    listeners.foreach(_(action, undo))
-    if (remote) remoteListener(action, undo)
+    model.tree.onSuccess {
+      case x => {
+        PRT = Some(x)
+        listeners.foreach(_(action, undo))
+        if (remote) remoteListener(action, undo)
+      }
+    }(concurrent.ExecutionContext.Implicits.global)
   }
 
   /**
