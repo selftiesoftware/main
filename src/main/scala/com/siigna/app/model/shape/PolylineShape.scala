@@ -64,46 +64,6 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    */
   protected def copy(startPoint : Vector2D = startPoint, innerShapes : Seq[InnerPolylineShape] = innerShapes, attributes : Attributes = attributes) : T
 
-  def delete(part : ShapeSelector) = part match {
-    case FullShapeSelector => Nil
-    case BitSetShapeSelector(xs) => {
-
-      if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
-        Nil
-      } else if (xs.size == 0) { // Nothing is selected, carry on...
-        Seq(this)
-      } else {
-        // Find groups in the selection and return them
-        var groups    = Seq[PolylineShape]() // The sequence of groups
-        var low       = 0                    // The value for the lower bound of the current group
-        xs.-(0) foreach { x =>
-        // Subtract one since we're not dealing with the startPoint
-          val i = x - 1
-          // Split the polylineshape at the given index and store the remainder if non-empty
-          val group = innerShapes.slice(low, i)
-          // Create the group if
-          if (group.size > 0 && low == 0 && !xs(0)) { // Size == 1 but start point included
-            groups = groups :+ copy(startPoint, group, attributes)
-          } else if (group.size > 1) {                      // Size > 2 and no start point
-            groups = groups :+ copy(group.head.point, group.tail, attributes)
-          }
-
-          // Update the lowest bound for the next group
-          low = i + 1
-        }
-
-        // Add the remaining tail elements (if there are more than 2)
-        if (low < innerShapes.size - 1) {
-          val elems = innerShapes.drop(low)
-          groups = groups :+ copy(elems.head.point, elems.tail, attributes)
-        }
-
-        groups
-      }
-    }
-    case EmptyShapeSelector => Seq(this)
-  }
-
   def getPart(part : ShapeSelector) = part match {
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case BitSetShapeSelector(xs) => {
@@ -342,8 +302,6 @@ object PolylineShape {
 
   /**
    * A PolylineShape that is closed, i. e. where start and end points are the same.
-   * Contrafy to the [[com.siigna.app.model.shape.PolylineShape.PolylineShapeOpen]] this polyline does not have a start point
-   * since the shape is circular.
    *
    * $polylineAttributes
    *
@@ -352,11 +310,65 @@ object PolylineShape {
    * @param attributes  The attributes to give the PolylineShape
    */
   // TODO extend ClosedShape
-    case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+  case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) =
       PolylineShapeClosed(startPoint, innerShapes, attributes)
+
+    def delete(part : ShapeSelector) = {
+      // Deletes a number of vertices starting at index, while replacing with the given insert
+      def deleteVertices(index : Int, number : Int, insert : Option[InnerPolylineShape]) = {
+        val xs = innerShapes.splitAt(index)
+        val ys = xs._2.drop(number)
+        insert.map(ys :+ _).getOrElse(ys) ++ xs._1
+      }
+
+      part match {
+        case FullShapeSelector => Nil
+        case BitSetShapeSelector(xs) => {
+          // Find any continuous groups
+          def findCoherentVerticesFrom(bits : BitSet, i : Int) : Seq[BitSet] = {
+            val group = bits.tail.takeWhile(i => bits(i - 1)) + bits.head
+            if (group.isEmpty || group.last >= bits.last) Seq(group)
+            else Seq(group) ++ findCoherentVerticesFrom(bits.drop(group.size), group.last)
+          }
+
+          // Test if the given bitset is continuous
+          def testContinuous(bits : BitSet, current : Int, previous : Int) : Boolean = {
+            bits.last < current || (current == previous + 1 && testContinuous(bits, current + 1, current))
+          }
+
+          // Examine if the PL is continuous
+          val isContinuous = xs.size == 1 || testContinuous(xs, xs.tail.head, xs.head)
+          if (isContinuous) {
+            xs.head match {
+              case 0 if innerShapes.size > xs.size => {
+                val vertices = deleteVertices(xs.head - 1, xs.size - 1, None)
+                Seq(PolylineShape(vertices.head.point, vertices.tail, attributes))
+              }
+              case _ if innerShapes.size > xs.size => {
+                val verticesWithStartPoint = deleteVertices(xs.head - 1, xs.size, Some(PolylineLineShape(startPoint)))
+                Seq(PolylineShape(verticesWithStartPoint.head.point, verticesWithStartPoint.tail, attributes))
+              }
+              case _ => Nil
+            }
+          // Include cases where the last and first points are included
+          } else if (xs(0) && xs.last == size - 1) {
+            val indices = innerShapes.indices.map(_ + 1)
+            val coherentBits = indices.diff(findCoherentVerticesFrom(xs, 0).flatten)
+            if (coherentBits.size > 1) {
+              val vertices = coherentBits.map(i => innerShapes(i - 1))
+              Seq(PolylineShape(vertices.head.point, vertices.tail, attributes))
+            } else Seq()
+          // If the PL is not continuous we need to search for subgroups
+          } else {
+            Nil
+          }
+        }
+        case EmptyShapeSelector => Seq(this)
+      }
+    }
 
     protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
       if (!inner.isEmpty) {
@@ -392,6 +404,49 @@ object PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =
       PolylineShape(startPoint, innerShapes, attributes)
+
+    def delete(part : ShapeSelector) = {
+      part match {
+        case FullShapeSelector => Nil
+        case BitSetShapeSelector(xs) => {
+
+          if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
+            Nil
+          } else if (xs.size == 0) { // Nothing is selected, carry on...
+            Seq(this)
+          } else {
+            // Find groups in the selection and return them
+            var groups    = Seq[PolylineShape]() // The sequence of groups
+            var low       = 0                    // The value for the lower bound of the current group
+            xs.-(0) foreach { x =>
+            // Subtract one since we're not dealing with the startPoint
+              val i = x - 1
+              // Split the polylineshape at the given index and store the remainder if non-empty
+              //  - add the first point (inner shape) to the end if the PL is closed
+              val group = innerShapes.slice(low, i)
+              // Create the group if
+              if (group.size > 0 && low == 0 && !xs(0)) { // Size == 1 but start point included
+                groups = groups :+ PolylineShape(startPoint, group, attributes)
+              } else if (group.size > 1) {                      // Size > 2 and no start point
+                groups = groups :+ PolylineShape(group.head.point, group.tail, attributes)
+              }
+
+              // Update the lowest bound for the next group
+              low = i + 1
+            }
+
+            // Add the remaining tail elements (if there are more than 2)
+            if (low < innerShapes.size - 1) {
+              val elems = innerShapes.drop(low)
+              groups = groups :+ PolylineShape(elems.head.point, elems.tail, attributes)
+            }
+
+            groups
+          }
+        }
+        case EmptyShapeSelector => Seq(this)
+      }
+    }
 
     protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
       if (!inner.isEmpty) {
