@@ -269,10 +269,9 @@ object Select {
     val shapes = if (!entireShapes) {
       Drawing(rectangle).map(t => t._1 -> (t._2 -> t._2.getSelector(rectangle)))
     } else {
-      // TODO: Write a method that can take t._2.geometry and NOT it's boundary...
       Drawing(rectangle).collect {
-        case t if (rectangle.intersects(t._2.geometry.boundary)) => {
-          (t._1 -> (t._2 -> FullShapeSelector))
+        case t if rectangle.intersects(t._2.geometry) || rectangle.contains(t._2.geometry) => {
+          t._1 -> (t._2 -> FullShapeSelector)
         }
       }
     }

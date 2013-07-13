@@ -40,6 +40,10 @@ import java.awt.{Color, Dimension}
  * @define siignaAttributes
  * Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
  * {{{
+ *  activeColor
+ *    A Color indicating the default color for shapes
+ *  activeLineWidth
+ *    A Double indicating the default width of new shapes
  *  antiAliasing
  *    A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
  *    The modules are always drawn with anti-aliasing. Defaults to true.
@@ -102,8 +106,6 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   def self = toMap
 
   // Set the values
-  this("activeColor")           = new Color(0.00f, 0.00f, 0.00f, 1.00f)
-  this("activeLineWidth")       = 0.2
   this("antiAliasing")          = true
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color

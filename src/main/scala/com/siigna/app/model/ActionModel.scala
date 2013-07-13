@@ -144,7 +144,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * @param t  A number of shapes in dire need of an id.
    * @return  A map with ids for the now not-so-needy shapes.
    */
-  def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(getId ->).toMap
+  def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(i => getId -> i).toMap
 
   /**
    * Notifies the listeners that an action has been executed, undone or redone.

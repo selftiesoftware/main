@@ -45,6 +45,12 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
     case _ => Seq(this)
   }
 
+  override def distanceTo(point : Vector2D, scale : Double) = {
+    val distToGeometry = geometry.distanceTo(point)
+    val distToCenter   = center.distanceTo(point)
+    (if (distToGeometry < distToCenter) distToGeometry else distToCenter) * scale
+  }
+
   /**
    * The distance to the closest handle from a given point.
    * @param point  The point to calculate the distance from this circle.

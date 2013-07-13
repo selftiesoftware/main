@@ -27,6 +27,8 @@ class PolylineShapeClosedSpec extends FunSpec with ShouldMatchers {
     val PLClosed = PolylineShape(Vector2D(0, 0), Vector2D(0, 100), Vector2D(100, 100), Vector2D(0, 0))
     val PLSmall  = PolylineShape(Vector2D(0, 0), Vector2D(-1, 0), Vector2D(0, -1), Vector2D(0, 0))
 
+    val square = PolylineShape(Vector2D(0, 0), Vector2D(10, 0), Vector2D(10, 10), Vector2D(0, 10), Vector2D(0, 0))
+
     it ("can select a single point from a point") {
       PLClosed.getSelector(Vector2D(0, 0)) should equal(ShapeSelector(BitSet(0)))
       PLClosed.getSelector(Vector2D(0, 100)) should equal(ShapeSelector(BitSet(1)))
@@ -47,6 +49,22 @@ class PolylineShapeClosedSpec extends FunSpec with ShouldMatchers {
       PLSmall.getSelector(Vector2D(-0.3, -0.3)) should equal (ShapeSelector(BitSet(1, 2)))
       PLSmall.getSelector(Vector2D(0, -0.5)) should equal (ShapeSelector(BitSet(0, 2)))
     }
+
+    it ("can delete a single point") {
+      square.delete(ShapeSelector(0)) should equal(Seq(PolylineShape(Vector2D(10, 0), Vector2D(10, 10), Vector2D(0, 10))))
+      square.delete(ShapeSelector(1)) should equal(Seq(PolylineShape(Vector2D(10, 10), Vector2D(0, 10), Vector2D(0, 0))))
+      square.delete(ShapeSelector(2)) should equal(Seq(PolylineShape(Vector2D(0, 10), Vector2D(0, 0), Vector2D(10, 0))))
+      square.delete(ShapeSelector(3)) should equal(Seq(PolylineShape(Vector2D(0, 0), Vector2D(10, 0), Vector2D(10, 10))))
+    }
+
+    it ("can delete a single segment (two points)") {
+      square.delete(ShapeSelector(0, 1)) should equal(Seq(PolylineShape(Vector2D(10, 10), Vector2D( 0, 10))))
+      square.delete(ShapeSelector(1, 2)) should equal(Seq(PolylineShape(Vector2D( 0, 10), Vector2D( 0,  0))))
+      square.delete(ShapeSelector(2, 3)) should equal(Seq(PolylineShape(Vector2D( 0,  0), Vector2D(10,  0))))
+      square.delete(ShapeSelector(0, 3)) should equal(Seq(PolylineShape(Vector2D(10,  0), Vector2D(10, 10))))
+    }
+
+    it ("can delete several segments ") {}
 
   }
 
