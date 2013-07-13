@@ -123,7 +123,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("printMargin")           = 13.0
   this("printFormatMin")        = 210.0
   this("printFormatMax")        = 297.0
-  this("selectionDistance")     = 12.0
+  this("selectionDistance")     = 7.0
   this("snap")                  = true
   this("track")                 = true
   this("trackDistance")         = 4.0
