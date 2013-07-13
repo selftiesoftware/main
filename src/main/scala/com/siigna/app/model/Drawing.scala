@@ -154,9 +154,9 @@ object Drawing extends Drawing {
       aFormatMax *= factor
       take = if (take < 2) take + 1 else 0
     }
-    //reduces the "paper" with the print margins.
-    aFormatMin-=printMargin
-    aFormatMax-=printMargin
+    // Augment the "paper" with the print margins.
+    aFormatMin += printMargin
+    aFormatMax += printMargin
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
