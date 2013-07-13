@@ -23,8 +23,9 @@ import action.Action
 import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.app.model.selection.Selection
-import concurrent.future
+import scala.concurrent.{Future, future}
 import concurrent.ExecutionContext.Implicits.global
+import org.khelekore.prtree.PRTree
 
 
 /**
@@ -39,6 +40,11 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
         with HasAttributes{
 
   type T = Model
+
+  /**
+   * A Priority R-tree constructed asynchronously, used to perform spatial queries on the shapes.
+   */
+  val tree : Future[PRTree[(Int, Shape)]] = future { SiignaTree.apply(shapes) }
 
   /**
    * Add a shape to the model.
@@ -87,7 +93,6 @@ sealed case class Model(shapes : Map[Int, Shape], executed : Seq[Action], undone
    */
   def setAttributes(newAttributes: Attributes) = Model(shapes,executed,undone,newAttributes)
 
-  val tree = future { SiignaTree.apply(shapes) }
 }
 
 

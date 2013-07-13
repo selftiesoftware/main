@@ -323,7 +323,6 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * that does not lie within this Rectangle
      */
     case collection : CollectionGeometry2D => {
-      println('collection)
       !collection.geometries.exists(g => !contains(g))
     }
 

@@ -1,6 +1,6 @@
 package com.siigna.app.controller.remote
 
-import java.net.{HttpURLConnection, URL}
+import java.net.{ConnectException, HttpURLConnection, URL}
 import java.io.ByteArrayOutputStream
 import javax.xml.bind.DatatypeConverter
 import com.siigna.util.Log
@@ -25,13 +25,16 @@ class Connection(val url: String) {
     }
   }
 
-  def get = {
-    val con = destination.openConnection.asInstanceOf[HttpURLConnection]
-    con.setDoInput(true)
-    con.setUseCaches(false)
+  def get : Array[Byte] = {
+    try {
+      val con = destination.openConnection.asInstanceOf[HttpURLConnection]
+      con.setDoInput(true)
+      con.setUseCaches(false)
 
-    respondAndClose(con)
-
+      respondAndClose(con)
+    } catch {
+      case e : ConnectException => Log.warning(s"Connection error: $e"); Array()
+    }
   }
 
   def post(message:Array[Byte]) = {
