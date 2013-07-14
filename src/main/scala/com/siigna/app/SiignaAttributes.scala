@@ -94,6 +94,8 @@ import java.awt.{Color, Dimension}
  *    a point. Defaults to #00FFFF in hex.
  *  version
  *    The version string of the current running instance of Siigna.
+ *  versionStability
+ *    The stability of the version. Can currently be set to stable or nightly.
  *  zoomSpeed
  *    The speed with which the client zooms, given in percentages. Defaults to 0.5.
  * }}}
