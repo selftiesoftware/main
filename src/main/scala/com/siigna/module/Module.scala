@@ -235,7 +235,7 @@ trait Module {
    * Parses the given events inside the current module
    * @param events The list of events to use
    */
-  protected def parse(events : List[Event]) : Option[ModuleEvent] = {
+  protected final def parse(events : List[Event]) : Option[ModuleEvent] = {
     // The event to return
     var moduleEvent : Option[ModuleEvent] = None
 
@@ -282,7 +282,15 @@ trait Module {
               if (e != Unit) Log.debug(s"Module $toString: Received unknown input: $e. Ignoring.")
           }
         }
-        case e => { // No state defined: Do nothing
+
+        // Start could not be found.. That's not good
+        case None if state == 'Start => {
+            moduleEvent = Some(End("Module did not have a Start state"))
+            Log.warning(s"Module $toString: Could not find 'Start state. Shutting down. That's bad mmkay.")
+        }
+
+        // No state defined: Do nothing but log the missing state
+        case e => {
           Log.debug(s"Module $toString: StateMap not defined for state $state with event: $e.")
         }
       }
@@ -301,7 +309,7 @@ trait Module {
    * @param events  The events to give to the child
    * @return Some[ModuleEvent] if something interesting occurred, None otherwise
    */
-  protected def parseChild(events : List[Event]) = {
+  protected def parseChild(events : List[Event]) : Option[ModuleEvent] = {
     // Stops the child
     def endChild(message : String = null){
       val name = child.get.toString
@@ -324,6 +332,15 @@ trait Module {
         endChild("Caught Escape")
         None
       }
+
+      // Force all modules to go to the 'End state upon escape
+      case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
+        if (stateMap.contains('End)) {
+          state = 'End
+        } else endChild("Caught exit, but could not find End state")
+        None
+      }
+
       // Otherwise we give the events to the child and match on the result
       case _ => _child.get.apply(events.head) match {
         // The child ended without a message
