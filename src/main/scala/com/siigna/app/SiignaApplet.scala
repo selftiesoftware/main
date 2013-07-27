@@ -87,7 +87,7 @@ class SiignaApplet extends Applet {
 
     //Siigna("isLive") = false
 
-    // Start by reading the applet parameters
+    // --- Read the applet parameters --- \\
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
       val drawingId = getParameter("drawingId")
@@ -106,8 +106,17 @@ class SiignaApplet extends Applet {
         Siigna.user = User(0, userName, if (userToken != null) userToken else "0")
         Log.success("Applet: Found user: " + userName)
       }
-    } catch { case _ : Throwable => Log.info("Applet: No user or drawing-id found.")}
 
+      // Read the version stability
+      Siigna("versionStability") = getParameter("versionStability") match {
+        case "nightly" => "nightly"
+        case _ => "stable"
+      }
+    } catch {
+      case _ : NullPointerException => // Not in an applet environment
+    }
+
+    // --- Initialize applet, event-listeners and view  --- \\
     // Set the layout
     setLayout(new BorderLayout())
 
