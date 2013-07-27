@@ -24,7 +24,6 @@ import scala.collection.immutable.MapProxy
 import com.siigna.app.model.shape.Shape
 import java.io.{ObjectInput, NotSerializableException, ObjectOutput, Externalizable}
 import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, Rectangle2D}
-import com.siigna.app.model.SpatialModel
 
 /**
  * <p>
@@ -66,6 +65,14 @@ trait Selection extends HasAttributes
                    with Externalizable {
 
   type T = Selection
+
+  /**
+   * The [[com.siigna.util.geom.TransformationMatrix]] representing the changes made so far to the shapes in the
+   * selection.
+   * @return A TransformationMatrix describing some geometric transformation. If no changes have been made the
+   *         matrix will have no effect once applied (a unit matrix).
+   */
+  var transformation : TransformationMatrix = TransformationMatrix()
 
   /**
    * Adds a single shape along with its part to the selection.
@@ -178,14 +185,6 @@ trait Selection extends HasAttributes
   def transform(transformation: TransformationMatrix) : Selection
 
   /**
-   * The [[com.siigna.util.geom.TransformationMatrix]] representing the changes made so far to the shapes in the
-   * selection.
-   * @return A TransformationMatrix describing some geometric transformation. If no changes have been made the
-   *         matrix will have no effect once applied (a unit matrix).
-   */
-  def transformation : TransformationMatrix
-
-  /**
    * The vertices of the selection, i.e. the selected points, described by a number of
    * [[com.siigna.util.geom.Vector2D]]s.
    * @return A number of vertices.
@@ -292,13 +291,6 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
   override def toString() = s"NonEmptySelection[$self]($transformation, $attributes)"
 
   /**
-   * The transformation applied to the selection so far, that will be applied on the [[com.siigna.app.model.Drawing]]
-   * when deselected. Initially empty.
-   * @return  The [[com.siigna.util.geom.TransformationMatrix]] of the selection.
-   */
-  var transformation : TransformationMatrix = TransformationMatrix.empty
-
-  /**
    * Transforms the selected shape-parts by replacing the previously stored transformation with the new.
    * @param transformation  The TransformationMatrix to apply to the parts.
    * @return  The Selection with the transformation applied.
@@ -355,8 +347,6 @@ case object EmptySelection extends Selection {
   override def toString() = "Empty Selection"
 
   def transform(transformation : TransformationMatrix) = this
-
-  def transformation = TransformationMatrix()
 
   def vertices = Traversable.empty
 }
