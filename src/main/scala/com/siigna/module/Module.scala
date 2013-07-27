@@ -290,8 +290,14 @@ trait Module {
         }
 
         // No state defined: Do nothing but log the missing state
+        case None if !stateMap.contains(state) => {
+          Log.debug(s"Module $toString: State not found: $state. Reverting to start.")
+          state = 'Start
+        }
+
+        // No events defined for
         case e => {
-          Log.debug(s"Module $toString: StateMap not defined for state $state with event: $e.")
+          Log.debug(s"Module $toString: StateMap not defined for state $state with events: $events.")
         }
       }
     } catch {
