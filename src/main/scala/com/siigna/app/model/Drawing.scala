@@ -173,7 +173,9 @@ object Drawing extends Drawing {
    *
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale : Int =
-    math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
-
+  def boundaryScale : Int = {
+    var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
+    //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
+    scale - 1
+    }
   }

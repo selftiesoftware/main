@@ -49,6 +49,7 @@ object ModuleLoader {
    */
   protected lazy val modules = collection.mutable.Map[Symbol, collection.mutable.Map[String, Class[Module]]]()
 
+
   /**
    * The class path to siigna modules. Currently set to "com.siigna.module".
    */
