@@ -68,7 +68,6 @@ case object EndPoints extends EventSnap {
         case s : CircleShape => closestPoints(s.geometry.vertices)
         //case s : ImageShape => closestPoints(s.geometry.vertices)
         case LineShape(start, end, _) => {
-          println("AAA")
           closestTwo(start, end)
         }
         case s : PolylineShape => closestPoints(s.geometry.vertices)
@@ -81,18 +80,15 @@ case object EndPoints extends EventSnap {
       if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
         //the snapPoint variable is set, so that it can be used to draw visual feedback:
         snapPoint = Some(closestPoint)
-        println("SNAPPING!: "+snapPoint)
         //RETURN: the snapped (moved) point, transformed back to the drawing coordinates is returned:
         closestPoint.transform(View.drawingTransformation)
       } else {
         //no snap in range, return the point
-        println("NONE, returning q: "+q)
 
         snapPoint = None
         q
       }
     } else {
-      println("NONE")
       snapPoint = None
       q
     }

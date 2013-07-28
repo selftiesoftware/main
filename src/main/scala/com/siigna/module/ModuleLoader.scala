@@ -60,7 +60,7 @@ object ModuleLoader {
   load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.10/stable", "siigna-cad-suite_2.10-stable.jar", local = false))
   load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.10/stable", "siigna-porter_2.10-stable.jar", local = false))
 
-  // ****** OLE DESKTOP ******
+  // ****** OLE ******
 
   //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
   //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))

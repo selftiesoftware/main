@@ -40,7 +40,6 @@ import java.awt.{BorderLayout, Dimension, Frame}
  */
 object SiignaApplication
 {
-
   /**
    * This is the main entrance of the of Siigna application, when run on the
    * desktop.
@@ -73,6 +72,8 @@ class ApplicationWindow extends Frame
 
   // Set the title of the application
   setTitle("Siigna " + Siigna.string("version").getOrElse("unknown"))
+
+
 
   // Setup event handlers for when the window is closed.
   // We dispose the window, which in the end terminates
@@ -116,6 +117,8 @@ class ApplicationWindow extends Frame
 
   // Pack the elements of this window. The panel requests a certain size.
   pack()
+
+
 
   // Start the applet
   applet.init()

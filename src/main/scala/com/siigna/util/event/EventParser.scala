@@ -69,12 +69,6 @@ class EventParser {
   var mousePosition : Vector2D = View.mousePositionScreen
 
   /**
-   * The margin of the graphical query done by the parser i. e. how large a space is included in the search
-   * for relevant shapes. Defaults to 5.
-   */
-  var margin : Double = 5
-
-  /**
    * The size of the list the EventParser returns. Defaults to 10.
    * Edit this if you need larger event-lists for very complex modules. But note
    * that the size of the event-list given when the modules initiates depends on
@@ -182,7 +176,7 @@ class EventParser {
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
-        val model = Drawing(View.mousePositionScreen.transform(View.deviceTransformation), margin).values ++ snapModel()
+        val model = Drawing(View.mousePositionScreen.transform(View.deviceTransformation)).values ++ snapModel()
 
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)

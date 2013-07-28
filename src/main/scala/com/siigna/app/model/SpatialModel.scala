@@ -21,8 +21,9 @@ package com.siigna.app.model
 
 import org.khelekore.prtree.PRTree
 import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
-import shape.Shape
+import com.siigna.app.model.shape.{LineShape, Shape}
 import com.siigna.app.Siigna
+import com.siigna.app.model.action.Create
 
 /**
  * A trait that supplies the model with spatial information and spatial queries to retrieve one or more shapes

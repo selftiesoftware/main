@@ -85,7 +85,6 @@ object SiignaTree {
         point.y+radius
       )
     ).toMap
-
   }
 
   /**
