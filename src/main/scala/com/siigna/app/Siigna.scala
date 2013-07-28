@@ -160,5 +160,4 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def setCursor(cursor : Cursor) {
     View setCursor cursor
   }
-
 }

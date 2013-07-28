@@ -45,8 +45,20 @@ case object EndPoints extends EventSnap {
     case some => some
   }
 
+  /**
+   *
+   * @param q the point entering Snap is in DeviceCoordinates. (See View.deviceTransformation for explanation)
+   *          it is changed to drawingCoordinates in order to be able to evaluate its position
+   *          relative to shapes in the drawing
+   * @param model If snap is in range, the mouse is moved to to sit on top of the closest end point
+   * @return the new mouse point,in deviceCoordinates.
+
+   */
   def snap(q : Vector2D, model : Traversable[Shape]) : Vector2D = {
+
+    //the point is transformed to match the coordinate system of the drawing
     val point = q.transform(View.deviceTransformation)
+
     def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
     def closestPoints(points : Seq[Vector2D]) = points.reduceLeft(closestTwo)
 
@@ -55,20 +67,32 @@ case object EndPoints extends EventSnap {
         case s : ArcShape => closestPoints(s.geometry.vertices)
         case s : CircleShape => closestPoints(s.geometry.vertices)
         //case s : ImageShape => closestPoints(s.geometry.vertices)
-        case LineShape(start, end, _) => closestTwo(start, end)
+        case LineShape(start, end, _) => {
+          println("AAA")
+          closestTwo(start, end)
+        }
         case s : PolylineShape => closestPoints(s.geometry.vertices)
         case s : TextShape => closestPoints(s.geometry.vertices)
         case _ => point
       })
       val closestPoint = res.reduceLeft(closestTwo)
+
+
       if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
+        //the snapPoint variable is set, so that it can be used to draw visual feedback:
         snapPoint = Some(closestPoint)
+        println("SNAPPING!: "+snapPoint)
+        //RETURN: the snapped (moved) point, transformed back to the drawing coordinates is returned:
         closestPoint.transform(View.drawingTransformation)
       } else {
+        //no snap in range, return the point
+        println("NONE, returning q: "+q)
+
         snapPoint = None
         q
       }
     } else {
+      println("NONE")
       snapPoint = None
       q
     }

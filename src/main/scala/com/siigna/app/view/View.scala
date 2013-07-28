@@ -26,8 +26,9 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
-import com.siigna.app.model.shape.{CircleShape, TextShape}
+import com.siigna.app.model.shape.{PolylineShape, CircleShape, TextShape}
 import com.siigna.util.collection.Attributes
+import com.siigna.app.model.action.Create
 
 /**
  * A view in Siigna describing various information related to the visual interface, including a method to paint
@@ -110,6 +111,28 @@ trait View {
    * @param f  The function to be executed, taking the zoom-level after the zoom operation as a parameter.
    */
   def addZoomListener(f : (Double) => Unit) { listenersZoom :+= f }
+
+  //TODO: device and drawing transfnormation should swap; it is more logical that going FROM device TO drawing
+  //is called DrawingTransformation than DeviceTransformation, and vice versa.
+
+  /** EXPLANATION OF DEVICE AND DRAWING COORDINATES AND TRANSFORMATION
+   *
+    *   --> x
+    *  (0,0) DeviceCoordinates
+    *   |  x----------------------x
+    *   y  |  \ _                 |
+    *      |     \                |  DrawingCoordinates
+    *  DrawingTransformation x- - - - - - x
+    *      |           \    |     |      |
+    *      x----------   ---------x
+    *                     \_      y      |
+    *       DeviceTransformation  |
+    *                       |   (0,0)->x |
+    *
+    *                       |            |
+    *                       x- - - - - - x
+   *
+   */
 
   /**
    * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
@@ -220,11 +243,18 @@ trait View {
   def pan : Vector2D = Vector2D(_pan.x, _pan.y)
 
   /**
+   * sets the pan to a given vector
+   * @param vector the vector to pan by. Vector2D(0,0) centers the drawing around (0,0).
+   * */
+  def pan_=(vector : Vector2D) {_pan = vector }
+
+  /**
    * Pans the view by the given delta.
    * @param delta  How much the view should pan.
    */
   def pan(delta : Vector2D) {
     if (Siigna.navigation) {
+
       _pan = _pan + delta
       listenersPan.foreach(_.apply(delta))
     }
@@ -329,6 +359,17 @@ trait View {
     }
   }
 
+  /**
+   * Set the pan zoom level to include the entire paper
+   */
+
+  def zoomExtends() {
+    val viewCtr = View.screen.center
+    val drawingCtr =Drawing.boundary.center
+    View.pan = Vector2D(0,0)
+    val zoom = math.max(View.width,View.height) / math.max(Drawing.boundary.width, Drawing.boundary.height)
+    View.zoom = zoom
+  }
 }
 
 /**
