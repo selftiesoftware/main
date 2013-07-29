@@ -60,4 +60,16 @@ object RemoteConstants extends Enumeration {
    * Used to recognize requests for setting or getting [[com.siigna.app.controller.remote.Session]]s.
    */
   val Client = Value
+
+  /**
+   * Used to change read write of a user or the public. Value should be a tuple3 representing recipient of the access level
+   * and access modification (recipient:Long,drawing:Long,(read:Boolean,write:Boolean)).
+   */
+  val Access = Value
+
+  /**
+   * Change openness (public visibility of a drawing)
+   * Value must be a tuple2 representing (drawing,[[com.siigna.app.model.Drawing.Openness]])
+   */
+  val Openness = Value
 }
