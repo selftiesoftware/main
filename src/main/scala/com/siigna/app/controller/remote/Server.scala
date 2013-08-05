@@ -20,124 +20,38 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.util.Log
-import com.siigna.util.io.{Unmarshal, Marshal}
-import actors.Actor
 import com.siigna.app.controller.remote.RemoteConstants._
 import com.siigna.app.model.action.RemoteAction
-import com.siigna.app.model.Model
 
+/**
+ * A rest endpoint
+ * @param client The endpoint to talk to.
+ */
+class RestEndpoint(client: Client) {
 
-class RestEndpoint(client: Client) extends Actor{
-
-  def respond(r: RemoteCommand) {
-    sender ! com.siigna.util.io.Marshal(r)
-  }
-
-  def handle(r: RemoteCommand) {
+  def handle(r: RemoteCommand) : Option[Any] = {
     r match {
 
+      case Get(DrawingId,v,s) => client.getDrawingId(s).map(Set(DrawingId,_,s))
 
-      case Get(DrawingId,v,s) => {
+      // Specific drawing is what we are after
+      case Get(Drawing,v:Long,s) => client.getDrawing(v,s).map(Set(Drawing,_,s))
 
-        client.getDrawingId(s) match {
-          case id: Long => respond(Set(DrawingId,id,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
+      // A new drawing is what we are after
+      case Get(Drawing,v,s) => client.getDrawing(s).map(Set(Drawing,_,s))
 
-      }
+      case Get(ShapeId,v:Int,s) => client.getShapeIds(v,s).map(Set(ShapeId,_,s))
 
-      case Get(Drawing,v:Long,s) => {
-        // Specific drawing is what we are after
-        val res = client.getDrawing(v,s)
-        res match {
-          case Some(m: Model) => respond(Set(Drawing,m,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-      }
+      case Set(Action,v:RemoteAction,s) => client.setAction(v,s).map(Set(ActionId,_,s))
 
-      case Get(Drawing,v,s) => {
-        // A new drawing is what we are after
-        client.getDrawing(s) match {
-          case Some(m: Model) => respond(Set(Drawing,m,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-      }
+      case Get(Action,v:Int,s) => client.getAction(v,s).map(Set(Action,_,s))
 
-      case Get(ShapeId,v:Int,s) => {
+      case Get(ActionId,v,s) => client.getActionId(s).map(Set(ActionId,_,s))
 
-        client.getShapeIds(v,s) match {
-          case Some(range: Range) => respond(Set(ShapeId,range,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-      }
-
-      case Set(Action,v:RemoteAction,s) => {
-
-        client.setAction(v,s) match {
-          case aid: Int => respond(Set(ActionId,aid,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-
-      }
-
-      case Get(Action,v:Int,s) => {
-        client.getAction(v,s) match {
-          case Some(r: RemoteAction) => respond(Set(Action,r,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-      }
-
-      case Get(ActionId,v,s) => {
-
-        client.getActionId(s) match {
-          case id: Int => respond(Set(ActionId,id,s))
-          case e => {
-            println("Fail")
-            println(e)
-          }
-        }
-      }
-      case e => {
-        println("Out")
-        println(e)
-      }
+      case _ => None
 
     }
 
-  }
-
-  def act {
-    loop {
-      react{
-        case in: Array[Byte] => {
-          com.siigna.util.io.Unmarshal[RemoteCommand](in) match {
-
-            case Some(r) => handle(r)
-
-            case _ =>  //Fail
-
-          }
-        }
-      }
-    }
   }
 
 }
@@ -154,16 +68,13 @@ class RestEndpoint(client: Client) extends Actor{
  *
  * @param host  The URL of the host.
  * @param mode  The mode of the connection, can be in production or testing mode
- * @param timeout  The timeout in milliseconds before we re-send a request to the server.
- *                 Defaults to 10 seconds (10000 ms).
  */
-class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
+class Server(host : String, mode : Mode.Mode) {
 
   // The remote server
   //private val client = new Client("http://62.243.118.234:20005")
   private val client = new Client("http://"+host+":"+mode.id)
   private val remote = new RestEndpoint(client) //select(Node(host, mode.id), 'siigna// )
-  remote.start()
 
   /**
    * An int that shows how many retries have been made AND is used to signal connectivity.
@@ -194,31 +105,21 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
       if (shouldExit) {
         Log.info("Server: Connection closing.")
       } else {
-        // Marshal and send the message
-        val output = Marshal(message).array
 
-        remote.!?(timeout, output) match {
-          case Some(data : Array[Byte]) => { // Call the callback function
-            // Parse the data
-            Unmarshal[RemoteCommand](data) match {
-              case Some(x) => f(x)
-              case x       => f(Error(401, "Failed to parse data to expected type. See log for details.", message.session))
-            }
+        remote.handle(message) match {
+          case Some(cmd : RemoteCommand) => { // Call the callback function
+            f(cmd)
 
             // We're now connected for sure
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
             _retries = 0 // Reset retries
           }
-          case e => { // Timeout
+          case e => { // Timeout or false values
             // Increment retries
-            if (_retries < 0) {
-              _retries = 0
-            } else {
-              _retries += 1
-            }
+            _retries += 1
 
             if (_retries % 10 == 0) {
-              Log.warning("Server: Connection failed after " + retries + " attempts, retrying: " + message + ".")
+              Log.warning(s"Server: Connection to '$host:${mode.id}' failed after ${retries + 1} attempt(s), retrying: $message.")
             }
 
             // Retry

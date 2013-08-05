@@ -31,23 +31,14 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
   def client = new Client(fqn)
 
-  describe("Siigna communication Client"){
-
-    it("Can determine if a server is alive"){
-
-      val start = System.currentTimeMillis()
-      assert(client.alive)
-
-      val time = System.currentTimeMillis() - start
-      Then("It took "+time)
-    }
+  describe("Siigna communication Client") {
 
     it("Can get a new drawingId"){
 
       val start = System.currentTimeMillis()
       Given("Two request for ids")
-      val firstId = client.getDrawingId(ses)
-      val secondId = client.getDrawingId(ses)
+      val firstId = client.getDrawingId(ses).get
+      val secondId = client.getDrawingId(ses).get
 
       Then("The latter is exactly one higher then the former")
       assert(secondId-firstId==1)
@@ -77,7 +68,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
     it("Can get an existing drawing"){
       val start = System.currentTimeMillis()
-      val id = client.getDrawingId(ses)
+      val id = client.getDrawingId(ses).get
 
       val drawing = client.getDrawing(id,ses)
 
@@ -105,7 +96,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
       val start = System.currentTimeMillis()
 
-      val drawingId = client.getDrawingId(ses)
+      val drawingId = client.getDrawingId(ses).get
 
       Given("A session with this drawing id "+drawingId)
       val ses2 = Session(drawingId,ses.user)
@@ -113,8 +104,8 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       Given("A remoteAction")
       val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
 
-      val count1 = client.setAction(dummyAction,ses2)
-      val count2 = client.setAction(dummyAction,ses2)
+      val count1 = client.setAction(dummyAction,ses2).get
+      val count2 = client.setAction(dummyAction,ses2).get
 
       assert(count2-count1==1)
       val time = System.currentTimeMillis() - start
@@ -126,7 +117,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       Given("A new drawing id")
       val start = System.currentTimeMillis()
 
-      val drawingId = client.getDrawingId(ses)
+      val drawingId = client.getDrawingId(ses).get
 
       Given("A session with this drawing id "+drawingId)
       val ses2 = Session(drawingId,ses.user)
@@ -152,7 +143,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
       val start = System.currentTimeMillis()
 
-      val drawingId = client.getDrawingId(ses)
+      val drawingId = client.getDrawingId(ses).get
 
       Given("A session with this drawing id "+drawingId)
       val ses2 = Session(drawingId,ses.user)
@@ -161,7 +152,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
 
       When("We ask for the next actionId")
-      val firstActionId = client.getActionId(ses2)
+      val firstActionId = client.getActionId(ses2).get
 
       Then("initially then it must be 0")
       assert(firstActionId==0)
@@ -170,7 +161,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       client.setAction(dummyAction,ses2)
 
       Then("The action id must be 1")
-      val secondActionId = client.getActionId(ses2)
+      val secondActionId = client.getActionId(ses2).get
       assert(secondActionId==1)
 
       val time = System.currentTimeMillis() - start

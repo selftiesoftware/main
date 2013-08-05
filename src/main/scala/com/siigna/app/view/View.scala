@@ -27,6 +27,7 @@ import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
 import com.siigna.app.model.shape.TextShape
+import com.siigna.module.ModuleMenu
 
 /**
  * A view in Siigna describing various information related to the visual interface, including a method to paint
@@ -498,7 +499,7 @@ object View extends View {
     }
 
     //Paint the module-loading icon in the top left corner
-    //ModuleMenu.paint(graphics,transformation)
+    ModuleMenu.paint(graphics,transformation)
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {
