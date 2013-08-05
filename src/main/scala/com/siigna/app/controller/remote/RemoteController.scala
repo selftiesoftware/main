@@ -28,8 +28,6 @@ import collection.mutable
 import com.siigna.util.Log
 import com.siigna.app.model.Model
 import com.siigna.app.controller.remote.RemoteConstants.Drawing
-import concurrent.future
-import concurrent.ExecutionContext.Implicits.global
 
 /**
  * Controls any remote connection(s).
@@ -93,13 +91,12 @@ object RemoteController {
 
         // Loooopsin' for actions to send
         while(!shouldExit) {
+          // Query for new actions
+          remote(Get(ActionId, null, session), handleGetActionId)
 
           if (!mailbox.isEmpty) {
             val (action, undo) = mailbox.head
             mailbox = mailbox.tail
-
-            // Query for new actions
-            remote(Get(ActionId, null, session), handleGetActionId)
 
             // Parse the local action to ensure all the ids are up to date
             val updatedAction = parseLocalAction(action, undo)
@@ -107,6 +104,10 @@ object RemoteController {
             // Dispatch the data
             remote(Set(Action, updatedAction, session), handleSetAction)
           }
+
+          // Sleep for a bit to avoid pinging continuously
+          Thread.`yield`()
+          Thread.sleep(2000)
         }
       } catch {
         case e : Throwable => Log.error("Error when running remote controller: " + e)
@@ -143,13 +144,7 @@ object RemoteController {
     if (!isLive) {
       Log.debug("Remote: Server is offline, not sending action " + action)
     } else {
-      future {
-        try {
-          mailbox :+= action -> undo
-        } catch {
-          case e : Exception => Log.error("Remote: Unknown error, shutting down.", e)
-        }
-      }
+      mailbox :+= action -> undo
     }
   }
 
