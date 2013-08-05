@@ -63,9 +63,9 @@ object ModuleMenu {
     if (isHighlighted(View.mousePositionScreen)) {
       // Inform the user if siigna is online
       val text = if (Siigna.isOnline) {
-        "online - changer will be stored"
+        "online - changes will be stored automatically"
       } else {
-        "offline - your changes are not stored!"
+        "offline - changes will not be stored!"
       }
 
       g draw TextShape("Siigna is " + text, Vector2D(120, 10), 12)
