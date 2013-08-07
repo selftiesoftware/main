@@ -114,7 +114,7 @@ object Unmarshal {
     // Read the "main" object
     try {
       val x = in.readObject[T]
-      Log.success("Unmarshal: Successfully unmarshalled object " + x)
+      Log.debug("Unmarshal: Successfully unmarshalled object " + x)
       Some(x)
     } catch {
       case e : ClassCastException => Log.warning("Unmarshal: " + e.getMessage); None

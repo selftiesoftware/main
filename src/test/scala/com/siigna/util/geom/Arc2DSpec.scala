@@ -12,21 +12,13 @@
 package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{FunSuite, FlatSpec}
+import org.scalatest.FunSuite
 import collection.mutable.ArrayBuffer
 
 /**
  * Test an arc.
  */
 class Arc2DSpec  extends FunSuite with ShouldMatchers {
-
-  test("Find a center point in an arc given three points on the periphery.") {
-    val p1 = Vector2D(-5, 0)
-    val p2 = Vector2D(0, 5)
-    val p3 = Vector2D(5, 0)
-
-    Arc2D.findCenterPoint(p1, p2, p3) should equal (Vector2D(0, 0))
-  }
 
   test("Calculate the angle-span of an arc from two given angles") {
     val a1 = 90

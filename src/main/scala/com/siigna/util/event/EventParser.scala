@@ -25,6 +25,7 @@ import com.siigna.app.view.{View, Graphics}
 import com.siigna.util.geom.{Vector2D, TransformationMatrix}
 import com.siigna.app.model.Drawing
 import com.siigna.app.model.shape.Shape
+import com.siigna.app.Siigna
 
 /**
  * <p>
@@ -66,12 +67,6 @@ class EventParser {
 
   // The most recent MouseMove or MouseDrag event received by the event-parser.
   var mousePosition : Vector2D = View.mousePositionScreen
-
-  /**
-   * The margin of the graphical query done by the parser i. e. how large a space is included in the search
-   * for relevant shapes. Defaults to 5.
-   */
-  var margin : Double = 5
 
   /**
    * The size of the list the EventParser returns. Defaults to 10.
@@ -126,7 +121,8 @@ class EventParser {
   def isSnapping(snapper : EventSnap) = snap.exists(_ == snapper)
 
   /**
-   * Examines whether the EventParser is tracking or not.
+   * Examines whether the EventParser is currently tracking anything.
+   * @return  True if the tracker is currently active.
    */
   def isTracking = track.isTracking
 
@@ -135,7 +131,7 @@ class EventParser {
    * of guideline as to where the current events are tracked to.
    */
   def paint(graphics : Graphics, transformation : TransformationMatrix) {
-    if(Snap.snapEnabled) snap.foreach(_.paint(graphics, transformation))
+    if(Siigna.isSnapEnabled) snap.foreach(_.paint(graphics, transformation))
   }
 
   /**
@@ -180,13 +176,13 @@ class EventParser {
     if (enabled) {
       events = {
         // Perform 2D query and add any custom additions
-        val model = Drawing(View.mousePositionScreen.transform(View.deviceTransformation), margin).values ++ snapModel()
+        val model = Drawing(View.mousePositionScreen.transform(View.deviceTransformation)).values ++ snapModel()
 
         // Parse the track
         var newEvent = track.parse(events, model, trackModel)
 
         // Parse the snap
-        if(Snap.snapEnabled) {
+        if (Siigna.isSnapEnabled) {
           snap foreach {a => newEvent = a.parse(newEvent, model)}
         }
 

@@ -28,6 +28,7 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.Drawing
 import com.siigna.app.view.Graphics
 import scala.util.Try
+import com.siigna.app.model.shape.CircleShape
 
 /**
  * A tile represents a part of the drawing that can be rendered.

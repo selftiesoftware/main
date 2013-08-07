@@ -28,10 +28,10 @@ import com.siigna.util.geom.SimpleRectangle2D
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
  * their ids, that can be traversed like a map.
  *
- * Used in the [[com.siigna.app.model.Drawing$]] object which can be used throughout the application (modules included).
- * @see [[com.siigna.app.model.Drawing$]]
+ * Used in the [[com.siigna.app.model.Drawing]] object which can be used throughout the application (modules included).
+ * @see [[com.siigna.app.model.Drawing]]
  */
-trait Drawing extends SelectableModel with MapProxy[Int, Shape] {
+trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel {
 
   /**
    * The boundary from the current content of the Model.
@@ -133,7 +133,7 @@ object Drawing extends Drawing {
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   protected def calculateBoundary() = {
-    val newBoundary  = mbr
+    val newBoundary  = SiignaTree.mbr(rtree)
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
     //val proportion   = 1.41421356
@@ -154,9 +154,9 @@ object Drawing extends Drawing {
       aFormatMax *= factor
       take = if (take < 2) take + 1 else 0
     }
-    //reduces the "paper" with the print margins.
-    aFormatMin-=printMargin
-    aFormatMax-=printMargin
+    // Augment the "paper" with the print margins.
+    aFormatMin += printMargin
+    aFormatMax += printMargin
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
@@ -173,12 +173,9 @@ object Drawing extends Drawing {
    *
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale : Int =
-    math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
-
-  /**
-   * The [[com.siigna.util.rtree.PRTree]] used by the model.
-   */
-  //def rtree = model.rtree
-
-}
+  def boundaryScale : Int = {
+    var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
+    //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
+    scale - 1
+    }
+  }

@@ -19,8 +19,6 @@
 
 package com
 
-import com.siigna.app.model.selection.{SelectToggle, Select, Deselect}
-
 package object siigna extends com.siigna.util.Implicits {
 
   // ------------------ APP -------------------- //
@@ -65,9 +63,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   type PolylineShape = com.siigna.app.model.shape.PolylineShape
   val PolylineShape = com.siigna.app.model.shape.PolylineShape
-
-  type RectangleShape = com.siigna.app.model.shape.RectangleShape
-  val RectangleShape = com.siigna.app.model.shape.RectangleShape
 
   type TextShape = com.siigna.app.model.shape.TextShape
   val TextShape = com.siigna.app.model.shape.TextShape
@@ -141,7 +136,6 @@ package object siigna extends com.siigna.util.Implicits {
   type MouseWheel = com.siigna.util.event.MouseWheel
   val MouseWheel = com.siigna.util.event.MouseWheel
 
-  val Snap = com.siigna.util.event.Snap
   val Track = com.siigna.util.event.Track
 
   // Geometry
@@ -150,9 +144,6 @@ package object siigna extends com.siigna.util.Implicits {
 
   type Circle2D = com.siigna.util.geom.Circle2D
   val Circle2D = com.siigna.util.geom.Circle2D
-
-  type ComplexRectangle2D = com.siigna.util.geom.ComplexRectangle2D
-  val ComplexRectangle2D = com.siigna.util.geom.ComplexRectangle2D
 
   //type Ellipse = com.siigna.util.geom.Ellipse
   //lazy val Ellipse = com.siigna.util.geom.Ellipse

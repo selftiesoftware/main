@@ -41,7 +41,6 @@ object Segment {
  * The mathematical class for a line segment, defined as a line with a start
  * point (p1) and a end point (p2). The segment has a finite length.
  */
-@SerialVersionUID(-852679043)
 case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with Segment {
 
   type T = Segment2D
@@ -118,46 +117,63 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
     case arc : Arc2D => arc.intersects(this)
 
     case circle : Circle2D => circle.intersects(this)
-    case collection : CollectionGeometry2D => collection.intersects(this)
+
+    case collection : CollectionGeometry2D => {
+      //val r = collection.geometries.exists(_.intersects(this))
+      //println("R: "+r)
+      //r
+      collection.intersects(this)
+    }
 
     /**
      * Determines whether two line segments intersect.
      */
     case line : Segment2D => {
-      // The line segments are defined by the equations:
-      //   L1 = A*u + C
-      //   L2 = B*v + D
-      val A = p2 - p1
-      val B = line.p2 - line.p1
-      val C = p1
-      val D = line.p1
-      // To find the intersection, set the two above equations equal:
-      //   L1 = L2  <=>  A*u + C = B*v + D
-      // The intersection is defined by solving (u,v) in the linear system:
-      //   A*u - B*v = D - C
-      // Calculate the determinant:
-      //   det = | A - B | = | B  A |
-      // If det = 0 there are no solutions (the lines are parallel). Now we find
-      // the solutions:
-      //   u = | (D - C)  -B | / det = | B  (D - C) | / det
-      //   v =                         | A  (D - C) | / det
-      // The way the segments are defined u and v must be in the range 0...1
-      // (both inclusive), else the intersection is "outside" the line segments.
-      val det = Vector2D.determinant(B, A)
-      val uNotDivided = Vector2D.determinant(B, D - C)
-      val vNotDivided = Vector2D.determinant(A, D - C)
+      //if the two lines coinside, no intersections should exist
+      if(this != line){
+        // The line segments are defined by the equations:
+        //   L1 = A*u + C
+        //   L2 = B*v + D
+        val A = p2 - p1
+        val B = line.p2 - line.p1
+        val C = p1
+        val D = line.p1
+        // To find the intersection, set the two above equations equal:
+        //   L1 = L2  <=>  A*u + C = B*v + D
+        // The intersection is defined by solving (u,v) in the linear system:
+        //   A*u - B*v = D - C
+        // Calculate the determinant:
+        //   det = | A - B | = | B  A |
+        // If det = 0 there are no solutions (the lines are parallel). Now we find
+        // the solutions:
+        //   u = | (D - C)  -B | / det = | B  (D - C) | / det
+        //   v =                         | A  (D - C) | / det
+        // The way the segments are defined u and v must be in the range 0...1
+        // (both inclusive), else the intersection is "outside" the line segments.
+        val det = Vector2D.determinant(B, A)
+        val uNotDivided = Vector2D.determinant(B, D - C)
+        val vNotDivided = Vector2D.determinant(A, D - C)
 
-      //if both segments are equal, no intersections should be returned
-      if(p1 == line.p1 && p2 == line.p2) false
-      //if both segments have just one coinciding endpoint, they intersect:
-      else if((p1 == line.p1 && p2 != line.p2)||(p2 == line.p2 && p1 != line.p1)||(p2 == line.p1 && p1 != line.p2)||(p1 == line.p2 && p2 != line.p1)) true
+        //if both segments are equal, no intersections should be returned
+        if(p1 == line.p1 && p2 == line.p2) false
+        //if both segments have just one coinciding endpoint, they intersect:
+        else if((p1 == line.p1 && p2 != line.p2)||(p2 == line.p2 && p1 != line.p1)||(p2 == line.p1 && p1 != line.p2)||(p1 == line.p2 && p2 != line.p1)) true
 
-      // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
-      else (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
+        // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
+        else (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
+      }
+      else false
     }
     case r : SimpleRectangle2D => {
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
+
+    //TODO: implement this
+    case v : Vector2D => {
+      println("Segment2D / Vector2D intersections not yet implemented")
+      false
+    }
+
     case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
   }
 

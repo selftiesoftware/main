@@ -27,7 +27,7 @@ import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
 import com.siigna.app.model.shape.TextShape
-import com.siigna.util.collection.Attributes
+import com.siigna.module.ModuleMenu
 
 /**
  * A view in Siigna describing various information related to the visual interface, including a method to paint
@@ -110,6 +110,28 @@ trait View {
    * @param f  The function to be executed, taking the zoom-level after the zoom operation as a parameter.
    */
   def addZoomListener(f : (Double) => Unit) { listenersZoom :+= f }
+
+  //TODO: device and drawing transfnormation should swap; it is more logical that going FROM device TO drawing
+  //is called DrawingTransformation than DeviceTransformation, and vice versa.
+
+  /** EXPLANATION OF DEVICE AND DRAWING COORDINATES AND TRANSFORMATION
+   *
+    *   --> x
+    *  (0,0) DeviceCoordinates
+    *   |  x----------------------x
+    *   y  |  \ _                 |
+    *      |     \                |  DrawingCoordinates
+    *  DrawingTransformation x- - - - - - x
+    *      |           \    |     |      |
+    *      x----------   ---------x
+    *                     \_      y      |
+    *       DeviceTransformation  |
+    *                       |   (0,0)->x |
+    *
+    *                       |            |
+    *                       x- - - - - - x
+   *
+   */
 
   /**
    * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
@@ -217,17 +239,27 @@ trait View {
    * drawing is in the center of the screen (width / 2, height / 2). A Vector of (width / 2, height / 2) means
    * that the center of the drawing is in the bottom right of the screen.
    */
-  def pan : Vector2D = Vector2D(_pan.x, _pan.y)
+  def pan : Vector2D = _pan
+
+  /**
+   * Sets the pan to a given vector.
+   * @param vector The vector to pan by. Vector2D(0,0) centers the drawing around (0,0).
+   */
+  def pan_=(vector : Vector2D) {
+    if (Siigna.navigation) {
+      _pan = vector
+    } else {
+      Log.debug("View: Cannot pan the view when navigation is disabled.")
+    }
+  }
 
   /**
    * Pans the view by the given delta.
    * @param delta  How much the view should pan.
    */
   def pan(delta : Vector2D) {
-    if (Siigna.navigation) {
-      _pan = _pan + delta
-      listenersPan.foreach(_.apply(delta))
-    }
+    pan = pan + delta
+    listenersPan.foreach(_.apply(delta))
   }
 
   /**
@@ -236,8 +268,8 @@ trait View {
    */
   def panX(delta : Double) {
     if (Siigna.navigation) {
-      _pan = _pan.copy(x = _pan.x + delta)
-      listenersPan.foreach(_.apply(Vector2D(delta, _pan.y)))
+      pan = pan.copy(x = pan.x + delta)
+      listenersPan.foreach(_.apply(Vector2D(delta, pan.y)))
     }
   }
 
@@ -247,8 +279,8 @@ trait View {
    */
   def panY(delta : Double) {
     if (Siigna.navigation) {
-      _pan = _pan.copy(y = _pan.y + delta)
-      listenersPan.foreach(_.apply(Vector2D(_pan.x, delta)))
+      pan = pan.copy(y = pan.y + delta)
+      listenersPan.foreach(_.apply(Vector2D(pan.x, delta)))
     }
   }
 
@@ -318,17 +350,28 @@ trait View {
     val zoomDelta = if (delta > 10) 10 else if (delta < -10) -10 else delta
     if (Siigna.navigation && (zoom < 50 || zoomDelta > 0)) {
       val zoomFactor = scala.math.pow(2, -zoomDelta * Siigna.double("zoomSpeed").getOrElse(0.5))
-      if ((zoom > 0.000001 || zoomDelta < 0)) {
+      if (zoom > 0.000001 || zoomDelta < 0) {
         zoom *= zoomFactor
       }
-      val oldPan = _pan
-      _pan = ((pan - point + center) * zoomFactor) + point - center
+      pan = ((pan - point + center) * zoomFactor) + point - center
 
       // Notify the listeners
       listenersZoom.foreach(_(zoom))
     }
   }
 
+  /**
+   * Sets the pan and zoom level to include the entire paper. Useful when a large import has occurred or similar.
+   * @param drawing  The drawing containing the boundaries to use.
+   */
+  def zoomExtends(implicit drawing : Drawing) {
+    zoom = math.max(View.width, View.height) / math.max(drawing.boundary.width, drawing.boundary.height) * 0.9 // 10% margin
+    pan = Vector2D(-drawing.boundary.center.x * zoom, drawing.boundary.center.y * zoom)
+
+    // Notify the listeners
+    listenersPan.foreach(_(pan))
+    listenersZoom.foreach(_(zoom))
+  }
 }
 
 /**
@@ -456,7 +499,7 @@ object View extends View {
     }
 
     //Paint the module-loading icon in the top left corner
-    //ModuleMenu.paint(graphics,transformation)
+    ModuleMenu.paint(graphics,transformation)
 
     // Paint the modules, displays and filters accessible by the interfaces.
     try {

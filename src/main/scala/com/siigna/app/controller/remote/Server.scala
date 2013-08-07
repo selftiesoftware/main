@@ -19,10 +19,42 @@
 
 package com.siigna.app.controller.remote
 
-import actors.remote.RemoteActor._
 import com.siigna.util.Log
-import com.siigna.util.io.{Unmarshal, Marshal}
-import actors.remote.Node
+import com.siigna.app.controller.remote.RemoteConstants._
+import com.siigna.app.model.action.RemoteAction
+
+/**
+ * A rest endpoint
+ * @param client The endpoint to talk to.
+ */
+class RestEndpoint(client: Client) {
+
+  def handle(r: RemoteCommand) : Option[Any] = {
+    r match {
+
+      case Get(DrawingId,v,s) => client.getDrawingId(s).map(Set(DrawingId,_,s))
+
+      // Specific drawing is what we are after
+      case Get(Drawing,v:Long,s) => client.getDrawing(v,s).map(Set(Drawing,_,s))
+
+      // A new drawing is what we are after
+      case Get(Drawing,v,s) => client.getDrawing(s).map(Set(Drawing,_,s))
+
+      case Get(ShapeId,v:Int,s) => client.getShapeIds(v,s).map(Set(ShapeId,_,s))
+
+      case Set(Action,v:RemoteAction,s) => client.setAction(v,s).map(Set(ActionId,_,s))
+
+      case Get(Action,v:Int,s) => client.getAction(v,s).map(Set(Action,_,s))
+
+      case Get(ActionId,v,s) => client.getActionId(s).map(Set(ActionId,_,s))
+
+      case _ => None
+
+    }
+
+  }
+
+}
 
 /**
  * <p>
@@ -36,13 +68,13 @@ import actors.remote.Node
  *
  * @param host  The URL of the host.
  * @param mode  The mode of the connection, can be in production or testing mode
- * @param timeout  The timeout in milliseconds before we re-send a request to the server.
- *                 Defaults to 10 seconds (10000 ms).
  */
-class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
+class Server(host : String, mode : Mode.Mode) {
 
   // The remote server
-  private val remote = select(Node(host, mode.id), 'siigna)
+  //private val client = new Client("http://62.243.118.234:20005")
+  private val client = new Client("http://"+host+":"+mode.id)
+  private val remote = new RestEndpoint(client) //select(Node(host, mode.id), 'siigna// )
 
   /**
    * An int that shows how many retries have been made AND is used to signal connectivity.
@@ -73,31 +105,21 @@ class Server(host : String, mode : Mode.Mode, val timeout : Int = 10000) {
       if (shouldExit) {
         Log.info("Server: Connection closing.")
       } else {
-        // Marshal and send the message
-        val output = Marshal(message).array
 
-        remote.!?(timeout, output) match {
-          case Some(data : Array[Byte]) => { // Call the callback function
-            // Parse the data
-            Unmarshal[RemoteCommand](data) match {
-              case Some(x) => f(x)
-              case x       => f(Error(401, "Failed to parse data to expected type. See log for details.", message.session))
-            }
+        remote.handle(message) match {
+          case Some(cmd : RemoteCommand) => { // Call the callback function
+            f(cmd)
 
             // We're now connected for sure
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
             _retries = 0 // Reset retries
           }
-          case _ => { // Timeout
+          case e => { // Timeout or false values
             // Increment retries
-            if (_retries < 0) {
-              _retries = 0
-            } else {
-              _retries += 1
-            }
+            _retries += 1
 
             if (_retries % 10 == 0) {
-              Log.warning("Server: Connection failed after " + retries + " attempts, retrying: " + message + ".")
+              Log.warning(s"Server: Connection to '$host:${mode.id}' failed after ${retries + 1} attempt(s), retrying: $message.")
             }
 
             // Retry
@@ -140,4 +162,5 @@ object Mode extends Enumeration {
   val Production = Value(20004)
   val Testing    = Value(20005)
   val Cleaning   = Value(20006)
+  val http       = Value(7788)
 }

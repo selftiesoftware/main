@@ -1,6 +1,6 @@
 name := "siigna-main"
 
-version := "nightly"
+version := "stable"
 
 organization := "com.siigna"
 
@@ -13,7 +13,7 @@ mainClass in (run) := Some("com.siigna.app.SiignaApplication")
 mainClass in (Compile, packageBin) := Some("com.siigna.app.SiignaApplication")
 
 //publishTo := Some(Resolver.file("file",  new File( "../rls" )) )
-publishTo := Some(Resolver.sftp("Siigna rls", "rls.siigna.com", 22, "/srv/rls") as ("siigna", new File("../budapest/jenkins.rsa")))
+publishTo := Some(Resolver.sftp("Siigna rls", "80.71.132.98", 12022, "/var/www/public_html") as ("www-data", new File("../budapest/jenkins.rsa")))
 
 resolvers += "Siigna" at "http://rls.siigna.com"
 
@@ -23,5 +23,6 @@ libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-actors" % "2.10.0",
   "org.scala-lang" % "scala-library" % "2.10.0",
   "org.scala-lang" % "scala-reflect" % "2.10.0",
-  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+  "org.scalatest" %% "scalatest" % "1.9.1" % "test",
+  "junit" % "junit" % "4.11" % "test"
 )

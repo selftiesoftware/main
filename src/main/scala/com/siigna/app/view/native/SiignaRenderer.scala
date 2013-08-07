@@ -150,7 +150,11 @@ object SiignaRenderer extends SiignaRenderer {
   val drawing = Drawing
   val view = View
 
-  drawing.addActionListener((_, _) => if (isActive) updatePainter())
+  drawing.addActionListener((_, _) => if (isActive) {
+    drawing.model.tree.onSuccess {
+      case _ => updatePainter()
+    }
+  })
   drawing.addSelectionListener(_   => if (isActive) updatePainter())
 
   // Adds a zoom-listener and resize-listener so we can tell if we are still within one tile
@@ -160,7 +164,11 @@ object SiignaRenderer extends SiignaRenderer {
     updatePainter()
 
     // Interrupt the old promise (if it is not already done)
-    background.tryFailure(new InterruptedException)
+    try {
+      background.tryFailure(new InterruptedException)
+    } catch {
+      case _ : IllegalStateException => // Can happen when cancelling
+    }
 
     // Create a new promise
     val p = promise[BufferedImage]()

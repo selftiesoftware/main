@@ -18,8 +18,6 @@
  */
 package com.siigna.util.geom
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
-
 /**
  * A rectangle, defined as four line-segments in a multidimensional space. Can be compared to other rectangles
  * by their areas.
@@ -134,7 +132,7 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
      */
     case point : Vector2D =>
       Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
-        _ distanceTo(point)
+        _ distanceTo point
       ).reduceLeft( (a, b) => if (a < b) a else b)
 
     case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
@@ -334,7 +332,6 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
  * @param xMax  The largest x-value
  * @param yMax  The largest y-value
  */
-@SerialVersionUID(-1453115647)
 case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax : Double) extends Rectangle2D {
 
   type T = SimpleRectangle2D
@@ -407,7 +404,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       } else {
         val UL = Vector2D(circle.center.x - circle.radius, circle.center.y - circle.radius) //Upper left
         val LR = Vector2D(circle.center.x + circle.radius, circle.center.y + circle.radius) //Lower right
-        (contains(UL) && contains(LR))
+        contains(UL) && contains(LR)
       }
     }
 
@@ -415,7 +412,9 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * Examines whether any elements exists inside the collection
      * that does not lie within this Rectangle
      */
-    case collection : CollectionGeometry2D => collection.geometries.exists(g => !contains(g))
+    case collection : CollectionGeometry2D => {
+      !collection.geometries.exists(g => !contains(g))
+    }
 
     /**
      * Examines whether an ellipse is within the four boundaries
@@ -451,7 +450,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       if (line.p1 == line.p2) {
         false
       } else {
-        (contains(line.p1) && contains(line.p2))
+        contains(line.p1) && contains(line.p2)
       }
     }
 
@@ -460,27 +459,16 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      * of a rectangle.
      */
     case point : Vector2D =>
-      (bottomLeft.x <= point.x && point.x <= topRight.x &&
-        bottomLeft.y <= point.y && point.y <= topRight.y)
+      bottomLeft.x <= point.x && point.x <= topRight.x &&
+        bottomLeft.y <= point.y && point.y <= topRight.y
 
     /**
      * Examines whether a given rectangle is within (or on top of) the four boundaries
      * of this rectangle.
      */
     case rectangle : SimpleRectangle2D =>
-      (bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
-        bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y)
-
-    //TODO: wrong! - needs to take into account that the rectangle may be rotated.
-    case rectangle : ComplexRectangle2D => {
-      val left = rectangle.center - Vector2D(width/2,0)
-      val right = rectangle.center + Vector2D(width/2,0)
-      val bottom = rectangle.center - Vector2D(height/2,0)
-      val top = rectangle.center + Vector2D(height/2,0)
-
-      (bottomLeft.x <= left.x && right.x <= topRight.x &&
-        bottomLeft.y <= bottom.y && top.y <= topRight.y)
-    }
+      bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
+        bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y
 
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
   }
@@ -549,14 +537,14 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
      *
      * Reference: http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other/306332#306332
      */
-    case that : SimpleRectangle2D =>
+    case that : SimpleRectangle2D => {
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
+    }
 
-    //TODO: WRONG IMPLEMENTATION, NEEDS UPDATING
-    case that : ComplexRectangle2D =>
-      !(xMin > that.center.x+height/2 || xMax < that.center.x-height/2 || yMin > that.center.y+height/2 || yMax < that.center.y-height/2)
-
-    case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
+    case g => {
+      println("R" + g)
+      false
+    }
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {

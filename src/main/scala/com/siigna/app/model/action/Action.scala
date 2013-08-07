@@ -42,7 +42,7 @@ import com.siigna.app.model.Model
  *
  * @see [[com.siigna.app.model.Model]]
  */
-trait Action extends Serializable {
+trait Action {
 
   /**
    * Executes the action on a given model.

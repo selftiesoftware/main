@@ -22,7 +22,6 @@ package com.siigna.util.geom
 /**
  * A geometry designed for polylines
  */
-@SerialVersionUID(-209654418)
 case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D {
 
   assert(!geometries.isEmpty, "Cannot create empty polyline geometry")
@@ -39,35 +38,32 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
   def intersects(geom : Geometry2D) = geom match {
 
     case collection : CollectionGeometry2D => {
-      var hasIntersection = false
-      collection.geometries.foreach(s => if(s.intersects(this)) hasIntersection = true )
-      if(collection == this) hasIntersection = false //coinciding collections should are not considered to intersect.
-      hasIntersection
+      //if the collectionShapes coinside no ints should exist
+      if(this != geom) this.geometries.exists(_.intersects(collection))
+      else false
     }
 
     case segment : Segment2D => {
-      var hasIntersection = false
-      val segments = this.geometries
-      segments.foreach(s => if(segment.intersects(s) == true) hasIntersection = true)
-      hasIntersection
+      this.geometries.exists(_.intersects(segment))
     }
 
-    case g => geometries.exists(_.intersects(g))
-    //case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
+    case g => {
+      geometries.exists(_.intersects(g))
+    }
   }
 
   //def intersections(s : Geometry2D) = geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(s))
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    //TODO make this!!
     case collection : CollectionGeometry2D => {
-      Set()
+      geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(geom))
+      //Set()
     }
-
+    //TODO: misses the first int if two ints exist on the same segment.
     case segment : Segment2D => {
       var intersections : Set[Vector2D] = Set()
       val segments = this.geometries
       segments.foreach(s => if(!segment.intersections(s).isEmpty) {
-        intersections = segment.intersections(s)
+        intersections = intersections + segment.intersections(s).head
       })
       intersections
     }

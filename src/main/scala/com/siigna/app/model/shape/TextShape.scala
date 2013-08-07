@@ -39,9 +39,9 @@ import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, Sh
  *                           as a vector between (0, 0) and (1, 1).
  * </pre>
  *
- * TODO: Redo this! Completely.
  */
 case class TextShape(text: String, position : Vector2D, scale : Double, attributes : Attributes) extends Shape {
+  // TODO: Redo this! Completely.
 
   type T = TextShape
 
@@ -49,7 +49,7 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   val points = Iterable(position)
 
-  def alignment           = attributes.vector2D("TextAlignment") getOrElse (Vector2D(0, 0))
+  def alignment           = attributes.vector2D("TextAlignment") getOrElse Vector2D(0, 0)
 
   def alignmentPosition   = Vector2D(alignment.x * boundarySize.x, alignment.y * boundarySize.y)
 
@@ -72,7 +72,6 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
    * Defines the layout of the shape.
    * Uses a TransformationMatrix to transform the layout using the relevant
    * attributes.
-   * TODO: Implement rotation.
    */
   def layout : TextLayout = {
 //    val rotationDouble = attributes.double("Rotation")
@@ -110,9 +109,9 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
     }
   }
 
-  def getShape(s : ShapeSelector) = throw new UnsupportedOperationException("TextShape: Not yet implemented")
+  def getShape(s : ShapeSelector) = Some(this)
 
-  def getVertices(selector: ShapeSelector) = throw new UnsupportedOperationException("Not yet implemented")
+  def getVertices(selector: ShapeSelector) = Nil
 
   def setAttributes(attributes : Attributes) = new TextShape(text, position, scale, attributes)
 
@@ -125,6 +124,9 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
   }
 }
 
+/**
+ * Companion object to [[com.siigna.app.model.shape.TextShape]].
+ */
 object TextShape
 {
 

@@ -19,8 +19,7 @@
 package com.siigna.app.controller
 
 import com.siigna.util.event.Event
-import com.siigna.module.{Module, ModuleLoader}
-import com.siigna.app.model.action.Action
+import com.siigna.module.ModuleLoader
 import remote.RemoteController
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
@@ -43,6 +42,9 @@ import com.siigna.util.Log
  */
 class Controller extends EventController {
 
+  // Listen to the drawing
+  Drawing.addRemoteListener((a, u) => RemoteController.sendActionToServer(a, u))
+
   /**
    * <p>
    *   The running part of the controller handling [[com.siigna.app.model.action.Action]]s and
@@ -60,12 +62,6 @@ class Controller extends EventController {
    */
   def act() {
 
-    // Start RemoteController
-    RemoteController.start()
-
-    // Init ModuleLoader
-    ModuleLoader
-
     // Loop and react on incoming messages
     loop {
       react {
@@ -81,7 +77,7 @@ class Controller extends EventController {
           Log.info("Controller is shutting down")
 
           // Quit the RemoteController
-          RemoteController ! 'exit
+          RemoteController.exit()
 
           // Quit the thread
           exit()

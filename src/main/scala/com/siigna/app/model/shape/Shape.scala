@@ -22,6 +22,8 @@ package com.siigna.app.model.shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.geom._
 import com.siigna.app.model.selection.ShapeSelector
+import com.siigna.app.view.View
+import com.siigna.app.Siigna
 
 /**
  * A Shape that can be drawn and transformed.
@@ -100,7 +102,7 @@ trait Shape extends HasAttributes {
    * @param point  The point to examine
    * @return  A double value indicating the distance from the given point to the closest point on this shape.
    */
-  def distanceTo(point : Vector2D) : Double = distanceTo(point, 1)
+  def distanceTo(point : Vector2D) : Double = geometry.distanceTo(point)
 
   /**
    * Calculates the closest distance to the shape in the given scale.

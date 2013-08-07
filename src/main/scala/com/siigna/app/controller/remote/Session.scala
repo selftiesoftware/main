@@ -28,5 +28,4 @@ import com.siigna.app.model.server.User
  * @param drawing The unique identifier of the drawing the client is drawing on.
  * @param user  The user associated with the session.
  */
-@SerialVersionUID(-160078897)
 case class Session(drawing : Long, user : User)

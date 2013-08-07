@@ -84,11 +84,11 @@ object ShapeSelector {
 
   /**
    * Creates a ShapeSelector selecting all the vertices given in the set ´<code>set</code>´.
-   * @param set  The list of indexes to include in the selector.
+   * @param set  A BitSet of indexes to include in the selector.
    * @return A [[com.siigna.app.model.selection.BitSetShapeSelector]] that describes the selected points from the given
    *         BitSet.
    */
-  def apply(set : BitSet) : BitSetShapeSelector = BitSetShapeSelector(set)
+  def apply(set : BitSet) : ShapeSelector = if (set.isEmpty) EmptyShapeSelector else BitSetShapeSelector(set)
 
   /**
    * Gives a selector that describes an empty selection of a [[com.siigna.app.model.shape.Shape]]. I. e. a selection
@@ -123,7 +123,7 @@ object ShapeSelector {
    *          [[com.siigna.app.model.selection.EmptyShapeSelector]], Some(elements) otherwise.
    */
   def unapplySeq(selector : ShapeSelector) : Option[Seq[Int]] = selector match {
-    case BitSetShapeSelector(xs) if (!xs.isEmpty) => Some(xs.toSeq)
+    case BitSetShapeSelector(xs) if !xs.isEmpty => Some(xs.toSeq)
     case _ => None
   }
 

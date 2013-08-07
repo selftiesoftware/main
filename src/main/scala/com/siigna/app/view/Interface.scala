@@ -92,6 +92,11 @@ object Interface {
 	  }
 
     /**
+     * The default arrow-like cursor (on most systems).
+     */
+    lazy val default : Cursor = new Cursor(Cursor.DEFAULT_CURSOR)
+
+    /**
      * The classical point-and-click hand
      */
     lazy val hand = new Cursor(Cursor.HAND_CURSOR)

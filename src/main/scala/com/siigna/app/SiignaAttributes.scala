@@ -40,6 +40,10 @@ import java.awt.{Color, Dimension}
  * @define siignaAttributes
  * Currently the following Attributes of [[com.siigna.app.Siigna]] is defined:
  * {{{
+ *  activeColor
+ *    A Color indicating the default color for shapes
+ *  activeLineWidth
+ *    A Double indicating the default width of new shapes
  *  antiAliasing
  *    A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
  *    The modules are always drawn with anti-aliasing. Defaults to true.
@@ -79,6 +83,10 @@ import java.awt.{Color, Dimension}
  *  selectionDistance
  *    The distance of which single-point selection happens, given in units. The actual distance changes based on
  *    the zoom-level and this value of course. Defaults to 5.
+ *  snap
+ *    A boolean flag signalling whether snapping (forcing mouse-events to 'glue' to certain points) is active or not
+ *  track
+ *    A boolean flag signalling whether tracking (tracing liner and points on any axis) is active or not
  *  trackDistance
  *    Sensitivity of track.
  *  trackGuideColor
@@ -86,6 +94,8 @@ import java.awt.{Color, Dimension}
  *    a point. Defaults to #00FFFF in hex.
  *  version
  *    The version string of the current running instance of Siigna.
+ *  versionStability
+ *    The stability of the version. Can currently be set to stable or nightly.
  *  zoomSpeed
  *    The speed with which the client zooms, given in percentages. Defaults to 0.5.
  * }}}
@@ -98,8 +108,6 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   def self = toMap
 
   // Set the values
-  this("activeColor")           = new Color(0.00f, 0.00f, 0.00f, 1.00f)
-  this("activeLineWidth")      = 0.2
   this("antiAliasing")          = true
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color
@@ -117,11 +125,27 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("printMargin")           = 13.0
   this("printFormatMin")        = 210.0
   this("printFormatMax")        = 297.0
-  this("selectionDistance")     = 12.0
+  this("selectionDistance")     = 7.0
+  this("snap")                  = true
+  this("track")                 = true
   this("trackDistance")         = 4.0
   this("trackGuideColor")       = "#00FFFF".color
   this("version")               = "beta - Xenophanes"
   this("zoomSpeed")             = 0.5
+
+  /**
+   * Examines whether snapping is enabled.
+   * @see [[com.siigna.app.SiignaAttributes.snapToggle]]
+   * @return  True if snapping is on, false otherwise.
+   */
+  def isSnapEnabled : Boolean = boolean("snap").getOrElse(true)
+
+  /**
+   * Examines whether tracking is enabled.
+   * @see [[com.siigna.app.SiignaAttributes.trackToggle]]
+   * @return  True if tracking is on, false otherwise.
+   */
+  def isTrackEnabled: Boolean = boolean("track").getOrElse(true)
   
   /**
    * Toggles a boolean value or sets it to true if it does not exist. If there already is a
@@ -134,6 +158,32 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
     } else if (!isDefinedAt(key)) {
       this.+(key -> true)
     }
+  }
+
+  /**
+   * Toggles snapping on or off and returns the new value.
+   * @return True if snap was disabled before but activated now, false otherwise.
+   */
+  def snapToggle : Boolean = {
+    val value = boolean("snap") match {
+      case Some(b) => !b
+      case _ => true
+    }
+    update("snap", value)
+    value
+  }
+
+  /**
+   * Toggles tracking on or off and returns the new value.
+   * @return True if track was disabled before but activated now, false otherwise.
+   */
+  def trackToggle : Boolean = {
+    val value = boolean("track") match {
+      case Some(b) => !b
+      case _ => true
+    }
+    update("track", value)
+    value
   }
 
 }

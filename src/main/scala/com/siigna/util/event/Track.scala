@@ -23,31 +23,26 @@ import com.siigna.app.view.{View, Graphics}
 import com.siigna.util.geom.{Line2D, Vector2D, TransformationMatrix}
 import com.siigna.util.collection.Attributes
 import com.siigna.app.model.Drawing
-import com.siigna._
-import app.model.shape.LineShape
-import app.model.shape.Shape
+import com.siigna.app.Siigna
 import scala.Some
+import com.siigna.app.model.shape.{LineShape, Shape}
+import java.awt.Color
 
 object Track extends EventTrack {
 
   //evaluate if the shape exists (used to clear the track points if the shape is deleted):
-  var activeShape : Map[Int, Shape] = Map()
+  protected var activeShape : Map[Int, Shape] = Map()
 
-  var counter = 0
-
-  /**
-   * A flag to toggle track on or off.
-   */
-  var trackEnabled : Boolean = true
+  protected var counter = 0
 
   //A flag to see, if horizontal or vertical guides are active:
-  var horizontalGuideActive: Boolean = false
-  var verticalGuideActive: Boolean = false
-  var trackedPoint: Option[Vector2D] = None
+  protected var horizontalGuideActive: Boolean = false
+  protected var verticalGuideActive: Boolean = false
+  protected var trackedPoint: Option[Vector2D] = None
 
   // Get the track color
   // Must be lazy to avoid instantiation errors!
-  protected lazy val color = "Color" -> Siigna.color("trackGuideColor").getOrElse("#00FFFF".color)
+  protected lazy val color = "Color" -> Siigna.color("trackGuideColor").getOrElse(new Color(0, 255, 255))
 
   // Define the attributes of the track lines
   // Must be lazy to avoid instantiation errors!
@@ -55,10 +50,12 @@ object Track extends EventTrack {
 
   //a placeholder for shapes not yet in the model.
   //TODO: hack because the TrackModel is reset constantly.
-  var trackShapes = Traversable[Shape]()
+  protected var trackShapes = Traversable[Shape]()
 
-  // Get method
-  var isTracking: Boolean = false
+  // Private value to register any current trackings
+  private var _isTracking: Boolean = false
+
+  def isTracking : Boolean = _isTracking
 
   // Code to get the horizontal guide from a point
   def horizontalGuide(p : Vector2D) : Line2D = Line2D(p, Vector2D(p.x + 1, p.y))
@@ -106,12 +103,13 @@ object Track extends EventTrack {
 
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], shapes : Traversable[Shape], points : Traversable[Vector2D]) : Event = {
-    if(trackEnabled) {
+    if(Siigna.isTrackEnabled) {
       // Set isTracking to false
-      isTracking = false
+      _isTracking = false
+
       // Get mouse event
       // The events has been unchecked since this match cannot occur if the event-list is empty
-      val (x : Vector2D, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
+      val (_, eventFunction : (Vector2D => Event)) = (events : @unchecked) match {
         case MouseEnter(p, a, b) :: tail => (p, (v : Vector2D) => MouseEnter(v, a, b))
         case MouseExit (p, a, b) :: tail => (p, (v : Vector2D) => MouseExit(v, a, b))
         case MouseMove (p, a, b) :: tail => (p, (v : Vector2D) => MouseMove(v, a, b))
@@ -173,10 +171,10 @@ object Track extends EventTrack {
             val distVert = vertical.distanceTo(p)
 
             if (distHori <= distVert && distHori < Siigna.trackDistance) {
-              isTracking = true
+              _isTracking = true
               horizontal.closestPoint(p)
             } else if (distVert < distHori && distVert < Siigna.trackDistance) {
-              isTracking = true
+              _isTracking = true
               vertical.closestPoint(p)
             } else {
               p
@@ -228,7 +226,7 @@ object Track extends EventTrack {
         g draw LineShape(horizontal2.p1, horizontal2.p2, attributes).transform(t)
     }
 
-    if(trackEnabled == true) {
+    if (Siigna.isTrackEnabled) {
       //PAINT TRACKING POINT ONE
       if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
 
