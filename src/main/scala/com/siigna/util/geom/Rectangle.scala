@@ -500,7 +500,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
 
     case rectangle : ComplexRectangle2D => rectangle.vertices.forall(contains)
 
-    case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
+    case g => false
   }
 
   def expand(geom : Geometry2D) : SimpleRectangle2D = geom match {
@@ -541,7 +541,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       new SimpleRectangle2D(xMin, yMin, xMax, yMax)
     }
 
-    case g => throw new UnsupportedOperationException("Rectangle: Expand not yet implemented for " + g)
+    case g => this
   }
 
 

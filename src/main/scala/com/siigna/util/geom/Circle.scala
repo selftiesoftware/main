@@ -59,7 +59,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
   def contains(geometry : Geometry2D) = geometry match {
     case circle : Circle2D => radius >= circle.radius && (center - circle.center).length < (radius - circle.radius).abs
     case point : Vector2D => (point - center).length < radius
-    case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
+    case g => false
   }
 
   def closestPoint(point : Vector2D) = (center - point).unit * radius
@@ -69,7 +69,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
    */
   def distanceTo(geometry : Geometry2D) = geometry match {
     case point : Vector2D => scala.math.abs(radius - (center - point).length)
-    case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
+    case g => Double.PositiveInfinity
   }
 
   def intersects(geom : Geometry2D) = geom match {
@@ -155,7 +155,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
       else false
     }
 
-    case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
+    case g => false
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
@@ -184,7 +184,7 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
 
     case line : Line2D => line.intersections(this)
     case line : Segment2D => line.intersections(this)
-    case g => throw new UnsupportedOperationException("Circle: Not yet implemented with " + g)
+    case g => Set()
   }
 
   def transform(t : TransformationMatrix) = new Circle2D(t.transform(center), radius * t.scale)
@@ -223,7 +223,7 @@ object Circle2D {
     // Locate the intersections
     val intersections = Line2D(m1, n1).intersections(Line2D(m2, n2))
     if (intersections.size != 1) {
-      throw new UnsupportedOperationException("Unable to calculate the center of the circle.")
+      throw new IllegalArgumentException("Unable to calculate the center of the circle.")
     } else {
       intersections.head
     }

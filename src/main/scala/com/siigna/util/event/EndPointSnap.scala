@@ -21,16 +21,15 @@ package com.siigna.util.event
 
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.{TransformationMatrix, Vector2D}
-import com.siigna.app.model.shape.{PolylineShape}
+import com.siigna.app.model.shape.PolylineShape
 import com.siigna.app.view.{Graphics, View}
-import collection.parallel.immutable.{ParMap, ParIterable}
 import java.awt.Color
 import com.siigna.app.Siigna
 
 /**
  * A hook for parsing points that snaps to end-points of objects.
  */
-case object EndPoints extends EventSnap {
+case object EndPointSnap extends EventSnap {
   var snapPoint : Option[Vector2D] = None
 
   def snapBox (p : Vector2D) = {

@@ -58,9 +58,9 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
     def sign(n : Double) = if (n >= 0) 1 else -1  // The sign of n (- or +).
     if (sign(n) == sign(N)) {
       if (sign(N) == 1)
-        (0 <= n && n <= N)
+        0 <= n && n <= N
       else
-        (0 >= n && n >= N)
+        0 >= n && n >= N
     } else false
   }
 
@@ -68,7 +68,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
   def distanceTo(geom  : Geometry2D) = geom match {
     case point : Vector2D => (point - closestPoint(point)).length
-    case g => throw new UnsupportedOperationException("Segment: distanceTo not yet implemented with " + g)
+    case g => Double.PositiveInfinity
   }
 
   /**
@@ -160,7 +160,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
         else if((p1 == line.p1 && p2 != line.p2)||(p2 == line.p2 && p1 != line.p1)||(p2 == line.p1 && p1 != line.p2)||(p1 == line.p2 && p2 != line.p1)) true
 
         // The determinant must not be 0, and 0 <= u <= 1 and 0 <= v <= 1.
-        else (det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det))
+        else det != 0 && between0And1(uNotDivided, det) && between0And1(vNotDivided, det)
       }
       else false
     }
@@ -168,13 +168,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
 
-    //TODO: implement this
-    case v : Vector2D => {
-      println("Segment2D / Vector2D intersections not yet implemented")
-      false
-    }
-
-    case g => throw new UnsupportedOperationException("Segment: intersects not yet implemented with " + g)
+    case g => false
   }
 
   /**
@@ -203,8 +197,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
       // Filter out the points outside the line-segment.
       t.map(x => f * x + p1).filter( point =>
-        ((p2 - p1) * (point - p1) >= 0 &&
-          (p1 - p2) * (point - p2) >= 0)
+        (p2 - p1) * (point - p1) >= 0 &&
+          (p1 - p2) * (point - p2) >= 0
       )
     }
 
@@ -240,7 +234,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
         else Set[Vector2D]()
       }
     }
-    case g => throw new UnsupportedOperationException("Segment: intersections not yet implemented with " + g)
+    case g => Set()
   }
 
   def transform(t : TransformationMatrix) = new Segment2D(t.transform(p1), t.transform(p2))
