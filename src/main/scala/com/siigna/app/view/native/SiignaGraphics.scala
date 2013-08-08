@@ -64,12 +64,7 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
           }
 
           case s : RectangleShape => {
-            val r = s.geometry
-            drawSegment(r.p0, r.p1)
-            drawSegment(r.p1, r.p2)
-            drawSegment(r.p2, r.p3)
-            drawSegment(r.p3, r.p0)
-
+            val r = s.geometry.segments.foreach(s => drawSegment(s.p1, s.p2))
           }
 
           /** COLLECTION SHAPES **/

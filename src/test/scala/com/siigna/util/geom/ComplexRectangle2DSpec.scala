@@ -13,42 +13,27 @@ package com.siigna.util.geom
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FunSpec
-import com.siigna.app.model.shape.RectangleShape
-import com.siigna.util.collection.Attributes
 
 class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
 
   describe("A ComplexRectangle2D") {
 
-    val c1 = Vector2D(0,0)
-    val c2 = Vector2D(10,10)
-    val width1 = 100
-    val width2 = 50
-    val height1 = 100
-    val height2 = 100
-    val rotation = 0
-    val rotation2 = 30
-
-    val r1 = ComplexRectangle2D(c1,width1,height1,rotation)
-    val r2 = ComplexRectangle2D(c2,width2,height2,rotation)
-    val r3 = ComplexRectangle2D(c2,width2,height2,rotation2) //rotated rectangle
-    val r4 = ComplexRectangle2D(c1, width1, height1, 180)
+    val r1 = ComplexRectangle2D(Vector2D(0,0),100,100,0)
+    val r2 = ComplexRectangle2D(Vector2D(10,10),50,100,0)
+    val r3 = ComplexRectangle2D(Vector2D(10,10),50,100,30) //rotated rectangle
+    val r4 = ComplexRectangle2D(Vector2D(0,0), 100, 100, 180)
 
     it("Can create an instance") {
-      val rectGeom = ComplexRectangle2D(c2,width2,height2,rotation2)
+      val rectGeom = ComplexRectangle2D(Vector2D(10,10),50,100,30)
       rectGeom.p1 should equal (Vector2D(-36.65063509461097,40.80127018922194))
     }
 
     /*
-
-    p1  p0
-    *   *
-    *   *
-    p2  p3
-
+      p1  p0
+      *   *
+      *   *
+      p2  p3
     */
-
-
     it ("can calculate p0") {
       r1.p0 should equal (Vector2D(50, 50))
       r2.p0 should equal (Vector2D(35, 60))
@@ -75,6 +60,100 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
       r2.p3 should equal (Vector2D(35,-40))
       r3.p3 should equal (Vector2D(56.65063509461096,-20.80127018922194))
       r4.p3 should equal(Vector2D(-50, 50))
+    }
+
+    it ("can find the closest point to a given vector") {
+      r1.closestPoint(Vector2D(50, 50)) should equal (Vector2D(50, 50))
+      r1.closestPoint(Vector2D(-50, -50)) should equal (Vector2D(-50, -50))
+      r1.closestPoint(Vector2D(1, 0)) should equal (Vector2D(50, 0))
+      r1.closestPoint(Vector2D(2, 1)) should equal (Vector2D(50, 1))
+      r4.closestPoint(Vector2D(50, 50)) should equal (Vector2D(50, 50))
+      r4.closestPoint(Vector2D(-50, -50)) should equal (Vector2D(-50, -50))
+      r4.closestPoint(Vector2D(1, 0)) should equal (Vector2D(50, 0))
+      r4.closestPoint(Vector2D(2, 1)) should equal (Vector2D(50, 1))
+    }
+
+    it ("can calculate the length vector from a given angle") {
+      // 0 rotation
+      r1.vectorAtAngle(  0) should equal (Vector2D( 50,  0))
+      r1.vectorAtAngle(  1) should equal (Vector2D( 50,  0.8727532464108793))
+      r1.vectorAtAngle( 45) should equal (Vector2D( 50, 50))
+      r1.vectorAtAngle( 90) should equal (Vector2D(  0, 50))
+      r1.vectorAtAngle(135) should equal (Vector2D(-50, 50))
+      r1.vectorAtAngle(180) should equal (Vector2D(-50,  0))
+      r1.vectorAtAngle(225) should equal (Vector2D(-50,-50))
+      r1.vectorAtAngle(270) should equal (Vector2D(  0,-50))
+      r1.vectorAtAngle(315) should equal (Vector2D( 50,-50))
+      r1.vectorAtAngle(360) should equal (Vector2D( 50,  0))
+      r1.vectorAtAngle(405) should equal (Vector2D( 50, 50))
+
+      // Rotated 180 degrees
+      r4.vectorAtAngle(180) should equal (Vector2D( 50,  0))
+      r4.vectorAtAngle(225) should equal (Vector2D( 50, 50))
+      r4.vectorAtAngle(270) should equal (Vector2D(  0, 50))
+      r4.vectorAtAngle(315) should equal (Vector2D(-50, 50))
+      r4.vectorAtAngle(  0) should equal (Vector2D(-50,  0))
+      r4.vectorAtAngle(360) should equal (Vector2D(-50,  0))
+      r4.vectorAtAngle( 45) should equal (Vector2D(-50,-50))
+      r4.vectorAtAngle(405) should equal (Vector2D(-50,-50))
+      r4.vectorAtAngle( 90) should equal (Vector2D(  0,-50))
+      r4.vectorAtAngle(135) should equal (Vector2D( 50,-50))
+    }
+
+    it ("can know whether a geometry is contained in the rectangle") {
+      // Segment2D
+      r1.contains(Segment2D(-50, -50, 50, 50)) should equal (true)
+      r1.contains(Segment2D(-1, -1, 1, 1)) should equal (true)
+      r1.contains(Segment2D(-1, -1, 51, 1)) should equal (false)
+      r4.contains(Segment2D(-1, -1, 51, 1)) should equal (false)
+
+      // SimpleRectangle
+      r1.contains(SimpleRectangle2D(-10, -10, 10, 10)) should equal (true)
+      r1.contains(SimpleRectangle2D(-50, -50, 50, 50)) should equal (true)
+      r1.contains(SimpleRectangle2D(-51, -50, 50, 50)) should equal (false)
+      r4.contains(SimpleRectangle2D(-10, -10, 10, 10)) should equal (true)
+      r4.contains(SimpleRectangle2D(-50, -50, 50, 51)) should equal (false)
+
+      // Vector2D
+      r1.contains(Vector2D(0, 0)) should equal (true)
+      r1.contains(Vector2D(10, 10)) should equal (true)
+      r1.contains(Vector2D(-10, 10)) should equal (true)
+      r1.contains(Vector2D(100, 100)) should equal (false)
+      r1.contains(Vector2D(50, 50)) should equal (true)
+      r1.contains(Vector2D(51, 50)) should equal (false)
+      r1.contains(Vector2D(51, 1)) should equal (false)
+      r1.contains(Vector2D(50, 51)) should equal (false)
+      r1.contains(Vector2D(-50, -50)) should equal (true)
+      r1.contains(Vector2D(-1000, -50)) should equal (false)
+      r4.contains(Vector2D(50, 50)) should equal (true)
+      r4.contains(Vector2D(-50, -50)) should equal (true)
+      r4.contains(Vector2D(-51, -50)) should equal (false)
+      r4.contains(Vector2D(50, 51)) should equal (false)
+    }
+
+    it ("can be transformed") {
+      // Translation
+      r1.transform(TransformationMatrix(Vector2D(10, 0), 1)) should equal(
+        ComplexRectangle2D(Vector2D(10, 0), 100, 100, 0))
+      r1.transform(TransformationMatrix(Vector2D(0, -10), 1)) should equal(
+        ComplexRectangle2D(Vector2D(0, -10), 100, 100, 0))
+
+      // Scale
+      r1.transform(TransformationMatrix(Vector2D(0, 0), 0.5)) should equal(
+        ComplexRectangle2D(Vector2D(0, 0), 50, 50, 0))
+      r1.transform(TransformationMatrix(Vector2D(0, 0), 1).scale(2, 1, Vector2D(0, 0))) should equal( // X
+        ComplexRectangle2D(Vector2D(0, 0), 200, 100, 0))
+      r1.transform(TransformationMatrix(Vector2D(0, 0), 1).scale(1, 2, Vector2D(0, 0))) should equal( // Y
+        ComplexRectangle2D(Vector2D(0, 0), 100, 200, 0))
+
+      // Rotation
+      r1.transform(TransformationMatrix(Vector2D(0, 0), 1).rotate(180)) should equal(
+        ComplexRectangle2D(Vector2D(0, 0), 100, 100, 180))
+      r1.transform(TransformationMatrix(Vector2D(10, 0), 1).rotate(-10)) should equal(
+        ComplexRectangle2D(Vector2D(10, 0), 99.99999999999999, 99.99999999999999, 350))
+      r4.transform(TransformationMatrix(Vector2D(0, 0), 1).rotate(180)) should equal(
+        ComplexRectangle2D(Vector2D(0, 0), 100, 100, 0))
+
     }
   }
 }

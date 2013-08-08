@@ -173,14 +173,14 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   def -(other : Vector2D) = Vector2D(x - other.x, y - other.y)
 
   /**
-   * The scalar product of this vector with another vector.
-   */
-  def *(that : Vector2D) : Double = x * that.x + y * that.y
-
-  /**
    * Multiplies a vector with a number.
    */
   def *(scale : Double) = Vector2D(x * scale, y * scale)
+
+  /**
+   * The scalar product of this vector with another vector.
+   */
+  def *(that : Vector2D) : Double = x * that.x + y * that.y
 
   /**
    * Divides a vector with a number.

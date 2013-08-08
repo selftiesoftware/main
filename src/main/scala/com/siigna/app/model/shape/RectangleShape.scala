@@ -19,6 +19,17 @@ import com.siigna.util.geom.ComplexRectangle2D
 import scala.Some
 import collection.immutable.BitSet
 
+/**
+ * A Rectangle shape.
+ *
+ * TODO: Attributes
+ *
+ * @param center  The center point of the rectangle.
+ * @param width  The width of the rectangle, from the left-most border to the right-most.
+ * @param height The height of the rectangle, from the top-most border to the lowest border.
+ * @param rotation  The rotation of the rectangle, defined counter-clockwise where 0 degrees equals 3 o'clock.
+ * @param attributes  The [[com.siigna.util.collection.Attributes]] of the shape.
+ */
 case class RectangleShape(center : Vector2D, width : Double, height : Double, rotation : Double, attributes : Attributes) extends ClosedShape {
 
   type T = RectangleShape
