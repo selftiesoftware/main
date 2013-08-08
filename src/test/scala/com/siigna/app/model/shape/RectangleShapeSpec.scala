@@ -15,8 +15,7 @@ import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
 import com.siigna.util.geom._
 import com.siigna.util.collection.Attributes
-import com.siigna.app.model.selection.{FullShapeSelector, ShapeSelector}
-import org.scalatest.path
+import com.siigna.app.model.selection.{EmptyShapeSelector, FullShapeSelector, ShapeSelector}
 
 /**
  * Tests the [[com.siigna.app.model.shape.RectangleShape]] class.
@@ -26,76 +25,8 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
   describe("A RectangleShape") {
 
     val r = RectangleShape(Vector2D(0, 0), 100, 100, 0) // Test instance
+    val s = RectangleShape(Vector2D(0, 0), 100, 100, 45) // Test instance
     val t = TransformationMatrix(Vector2D(50, 50))
-
-    it("can be rotated") {
-      val s = RectangleShape(Vector2D(0,0),100,100,0, Attributes())
-      val t = TransformationMatrix(Vector2D(0,0),1).rotate(90)
-      s.transform(t) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
-    }
-
-    it("can be selected by a point") {
-      val pTR = Vector2D(20,20)
-      val pTL = Vector2D(-20,20)
-      val pBR = Vector2D(20,-20)
-      val pBL = Vector2D(-20,-20)
-      val w = 40.0
-      val h = 40.0
-      val center = Vector2D(0,0)
-      val r = RectangleShape(center, w,h, 0, Attributes())
-
-      val selector1 = r.getSelector(pTR)
-      val selector2 = r.getSelector(pTL)
-      val selector3 = r.getSelector(pBL)
-      val selector4 = r.getSelector(pBR)
-
-      /*
-
-       1   0
-       *   *
-
-       *   *
-       2   3
-
-       */
-      selector1 should equal (ShapeSelector(0))
-      selector2 should equal (ShapeSelector(1))
-      selector3 should equal (ShapeSelector(2))
-      selector4 should equal (ShapeSelector(3))
-    }
-
-    /* ROTATED 90 DEG. CLOCKWISE
-
-    2   1
-    *   *
-
-    *   *
-    3   0
-
-    */
-
-    it("can part select a rotated rectangle") {
-      val pTR = Vector2D(20,20)
-      val pTL = Vector2D(-20,20)
-      val pBL = Vector2D(-20,-20)
-      val pBR = Vector2D(20,-20)
-      val w = 40.0
-      val h = 40.0
-      val center = Vector2D(0,0)
-      val r = RectangleShape(center, w,h, -90, Attributes())
-
-      val selector1 = r.getSelector(pTR)
-      val selector2 = r.getSelector(pTL)
-      val selector3 = r.getSelector(pBL)
-      val selector4 = r.getSelector(pBR)
-
-      selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
-      selector2 should equal (ShapeSelector(2))
-      selector3 should equal (ShapeSelector(3))
-      selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
-    }
-
-
 
     it("can be created without attributes") {
       new RectangleShape(Vector2D(0, 0), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0,0),100,100,0))
@@ -109,39 +40,26 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       new RectangleShape(Vector2D(50, 50), 100, 100, 0, Attributes()) should equal (RectangleShape(Vector2D(0, 0), Vector2D(100, 100)))
     }
 
-    it("can be moved") {
-      val s = RectangleShape(0, 0, 100, 100)
-      val t = TransformationMatrix(Vector2D(10, 10), 1)
-      s.transform(t) should equal (RectangleShape(10, 10, 110, 110))
-    }
+    it ("can delete a part of a rectangle") {
+      // One point
+      r.delete(ShapeSelector(0)) should equal(Seq(PolylineShape(r.p1, r.p2, r.p3)))
+      r.delete(ShapeSelector(1)) should equal(Seq(PolylineShape(r.p2, r.p3, r.p0)))
+      r.delete(ShapeSelector(2)) should equal(Seq(PolylineShape(r.p3, r.p0, r.p1)))
+      r.delete(ShapeSelector(3)) should equal(Seq(PolylineShape(r.p0, r.p1, r.p2)))
 
-    it("can draw the segments of a rotated rectangle") {
-      val w = 40.0
-      val h = 40.0
-      val center = Vector2D(0,0)
-      val r = RectangleShape(center, w,h, 45, Attributes())
+      // Two points
+      r.delete(ShapeSelector(0, 1)) should equal(Seq(LineShape(r.p2, r.p3)))
+      r.delete(ShapeSelector(2, 3)) should equal(Seq(LineShape(r.p0, r.p1)))
+      r.delete(ShapeSelector(3, 0)) should equal(Seq(LineShape(r.p1, r.p2)))
+      // Two points: opposite
+      r.delete(ShapeSelector(0, 2)) should equal(Seq())
+      r.delete(ShapeSelector(1, 3)) should equal(Seq())
 
-      val pTop = Vector2D(-14,14)
-      //val pTL = Vector2D(-20,20)
-      //val pBL = Vector2D(-20,-20)
-      //val pBR = Vector2D(20,-20)
-
-      val selector1 = r.getSelector(pTop)
-      //val selector2 = r.getSelector(pTL)
-      //val selector3 = r.getSelector(pBL)
-      //val selector4 = r.getSelector(pBR)
-
-
-      val segment1 = r.getPart(selector1)
-      //val segment2 =
-      //val segment3 =
-      //val segment4 =
-
-      println("segment1: "+segment1)
-      //selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
-      //selector2 should equal (ShapeSelector(2))
-      //selector3 should equal (ShapeSelector(3))
-      //selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
+      // Three points
+      r.delete(ShapeSelector(0, 1, 2)) should equal(Seq())
+      r.delete(ShapeSelector(1, 2, 3)) should equal(Seq())
+      r.delete(ShapeSelector(0, 2, 3)) should equal(Seq())
+      r.delete(ShapeSelector(0, 1, 3)) should equal(Seq())
     }
 
     it ("can return an empty partial shape from an empty selector") {
@@ -233,22 +151,22 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       x012.geometry.p3 should equal (Vector2D(100,   0))
 
       val x013 = r.getPart(s013).get.apply(t).asInstanceOf[RectangleShape]
-      x012.geometry.p0 should equal (Vector2D(100, 100))
-      x012.geometry.p1 should equal (Vector2D(  0, 100))
-      x012.geometry.p2 should equal (Vector2D(  0,   0))
-      x012.geometry.p3 should equal (Vector2D(100,   0))
+      x013.geometry.p0 should equal (Vector2D(100, 100))
+      x013.geometry.p1 should equal (Vector2D(  0, 100))
+      x013.geometry.p2 should equal (Vector2D(  0,   0))
+      x013.geometry.p3 should equal (Vector2D(100,   0))
 
       val x023 = r.getPart(s023).get.apply(t).asInstanceOf[RectangleShape]
-      x012.geometry.p0 should equal (Vector2D(100, 100))
-      x012.geometry.p1 should equal (Vector2D(  0, 100))
-      x012.geometry.p2 should equal (Vector2D(  0,   0))
-      x012.geometry.p3 should equal (Vector2D(100,   0))
+      x023.geometry.p0 should equal (Vector2D(100, 100))
+      x023.geometry.p1 should equal (Vector2D(  0, 100))
+      x023.geometry.p2 should equal (Vector2D(  0,   0))
+      x023.geometry.p3 should equal (Vector2D(100,   0))
 
       val x123 = r.getPart(s123).get.apply(t).asInstanceOf[RectangleShape]
-      x012.geometry.p0 should equal (Vector2D(100, 100))
-      x012.geometry.p1 should equal (Vector2D(  0, 100))
-      x012.geometry.p2 should equal (Vector2D(  0,   0))
-      x012.geometry.p3 should equal (Vector2D(100,   0))
+      x123.geometry.p0 should equal (Vector2D(100, 100))
+      x123.geometry.p1 should equal (Vector2D(  0, 100))
+      x123.geometry.p2 should equal (Vector2D(  0,   0))
+      x123.geometry.p3 should equal (Vector2D(100,   0))
     }
 
 
@@ -262,5 +180,126 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       val x2 = r.getPart(s2).get.apply(t).asInstanceOf[RectangleShape]
       x2 should equal(RectangleShape(Vector2D(50, 50), 100, 100, 0))
     }
+
+
+    it("can be selected by a point") {
+      // Vertices
+      r.getSelector(Vector2D(50,50))   should equal (ShapeSelector(0))
+      r.getSelector(Vector2D(-50,50))  should equal (ShapeSelector(1))
+      r.getSelector(Vector2D(-50,-50)) should equal (ShapeSelector(2))
+      r.getSelector(Vector2D(50,-50))  should equal (ShapeSelector(3))
+
+      // Segments
+      r.getSelector(Vector2D(  0, 50)) should equal (ShapeSelector(0, 1))
+      r.getSelector(Vector2D(-50,  0)) should equal (ShapeSelector(1, 2))
+      r.getSelector(Vector2D(  0,-50)) should equal (ShapeSelector(2, 3))
+      r.getSelector(Vector2D( 50,  0)) should equal (ShapeSelector(0, 3))
+
+      // Rotated
+      val pTR = Vector2D(20,20)
+      val pTL = Vector2D(-20,20)
+      val pBL = Vector2D(-20,-20)
+      val pBR = Vector2D(20,-20)
+      val w = 40.0
+      val h = 40.0
+      val center = Vector2D(0,0)
+      val x = RectangleShape(center, w,h, -90, Attributes())
+
+      val selector1 = x.getSelector(pTR)
+      val selector2 = x.getSelector(pTL)
+      val selector3 = x.getSelector(pBL)
+      val selector4 = x.getSelector(pBR)
+
+      selector1 should equal (ShapeSelector(1)) //SHOULD BE 2 IF CW ROTATION
+      selector2 should equal (ShapeSelector(2))
+      selector3 should equal (ShapeSelector(3))
+      selector4 should equal (ShapeSelector(0)) //SHOULD BE TWO (CCW) OR 3 (CW)
+    }
+
+    it ("can be selected by a rectangle") {
+      // Zero points
+      r.getSelector(SimpleRectangle2D(-1, -1, 1, 1)) should equal (EmptyShapeSelector)
+      r.getSelector(SimpleRectangle2D(-49.9999, -49.9999, 49.9999, 49.9999)) should equal (EmptyShapeSelector)
+      // One point
+      r.getSelector(SimpleRectangle2D(  0,  0, 60, 60)) should equal(ShapeSelector(0))
+      r.getSelector(SimpleRectangle2D(-60,  0,  0, 60)) should equal(ShapeSelector(1))
+      r.getSelector(SimpleRectangle2D(-60,-60,  0,  0)) should equal(ShapeSelector(2))
+      r.getSelector(SimpleRectangle2D(  0,-60, 60,  0)) should equal(ShapeSelector(3))
+      // Two points
+      r.getSelector(SimpleRectangle2D(-60,  0, 60, 60)) should equal(ShapeSelector(0, 1))
+      r.getSelector(SimpleRectangle2D(-60,-60,  0, 60)) should equal(ShapeSelector(1, 2))
+      r.getSelector(SimpleRectangle2D(-60,-60, 60,  0)) should equal(ShapeSelector(2, 3))
+      r.getSelector(SimpleRectangle2D(  0,-60, 60, 60)) should equal(ShapeSelector(0, 3))
+      // Three points
+      s.getSelector(SimpleRectangle2D(-1, -100, 100, 100)) should equal (ShapeSelector(0, 2, 3))
+      // Four points
+      r.getSelector(SimpleRectangle2D(-60, -60, 60, 60)) should equal (FullShapeSelector)
+    }
+
+    it ("can find a shape from a given selector") {
+      // None
+      r.getShape(EmptyShapeSelector) should equal(None)
+      r.getShape(ShapeSelector(0)) should equal(None)
+      r.getShape(ShapeSelector(0, 2)) should equal(None)
+      r.getShape(ShapeSelector(1, 3)) should equal(None)
+      r.getShape(ShapeSelector(1, 3)) should equal(None)
+      // Two points
+      r.getShape(ShapeSelector(0, 1)) should equal(Some(LineShape(r.p0, r.p1)))
+      r.getShape(ShapeSelector(1, 2)) should equal(Some(LineShape(r.p1, r.p2)))
+      r.getShape(ShapeSelector(2, 3)) should equal(Some(LineShape(r.p2, r.p3)))
+      r.getShape(ShapeSelector(0, 3)) should equal(Some(LineShape(r.p0, r.p3)))
+      // Three points
+      r.getShape(ShapeSelector(0, 1, 2)) should equal(Some(PolylineShape(r.p0, r.p1, r.p2)))
+      r.getShape(ShapeSelector(0, 1, 3)) should equal(Some(PolylineShape(r.p3, r.p0, r.p1)))
+      r.getShape(ShapeSelector(0, 2, 3)) should equal(Some(PolylineShape(r.p2, r.p3, r.p0)))
+      r.getShape(ShapeSelector(1, 2, 3)) should equal(Some(PolylineShape(r.p1, r.p2, r.p3)))
+      // Full
+      r.getShape(ShapeSelector(0, 1, 2, 3)) should equal(Some(r))
+      r.getShape(FullShapeSelector) should equal(Some(r))
+    }
+
+    it ("can find the selected vertices from a selector") {
+      // Zero
+      r.getVertices(EmptyShapeSelector) should equal(Seq())
+      // One
+      r.getVertices(ShapeSelector(0)) should equal(Seq(r.geometry.vertices(0)))
+      r.getVertices(ShapeSelector(1)) should equal(Seq(r.geometry.vertices(1)))
+      r.getVertices(ShapeSelector(2)) should equal(Seq(r.geometry.vertices(2)))
+      r.getVertices(ShapeSelector(3)) should equal(Seq(r.geometry.vertices(3)))
+      // Two
+      r.getVertices(ShapeSelector(0, 1)) should equal(Seq(r.geometry.vertices(0), r.geometry.vertices(1)))
+      r.getVertices(ShapeSelector(0, 2)) should equal(Seq(r.geometry.vertices(0), r.geometry.vertices(2)))
+      r.getVertices(ShapeSelector(0, 3)) should equal(Seq(r.geometry.vertices(0), r.geometry.vertices(3)))
+      r.getVertices(ShapeSelector(1, 2)) should equal(Seq(r.geometry.vertices(1), r.geometry.vertices(2)))
+      r.getVertices(ShapeSelector(1, 3)) should equal(Seq(r.geometry.vertices(1), r.geometry.vertices(3)))
+      r.getVertices(ShapeSelector(2, 3)) should equal(Seq(r.geometry.vertices(2), r.geometry.vertices(3)))
+      // Three
+      r.getVertices(ShapeSelector(0, 1, 2)) should equal(r.geometry.vertices.take(3))
+      r.getVertices(ShapeSelector(0, 1, 3)) should equal(r.geometry.vertices.zipWithIndex.filter(_._2 != 2).map(_._1))
+      r.getVertices(ShapeSelector(0, 2, 3)) should equal(r.geometry.vertices.zipWithIndex.filter(_._2 != 1).map(_._1))
+      r.getVertices(ShapeSelector(1, 2, 3)) should equal(r.geometry.vertices.tail)
+      // Four
+      r.getVertices(ShapeSelector(0, 1, 2, 3)) should equal(r.geometry.vertices)
+      r.getVertices(FullShapeSelector) should equal(r.geometry.vertices)
+    }
+
+    it("can be transformed") {
+      // Translation
+      val t1 = TransformationMatrix(Vector2D(10, 10), 1)
+      r.transform(t1) should equal (RectangleShape(-40, -40, 60, 60))
+
+      // Rotation
+      val t2 = TransformationMatrix(Vector2D(0,0),1).rotate(90)
+      r.transform(t2) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
+
+      // Scaling
+      val t3 = TransformationMatrix(Vector2D(0,0),2)
+      r.transform(t3) should equal(new RectangleShape(Vector2D(0, 0), 200, 200, 0, Attributes()))
+      val t4 = TransformationMatrix(Vector2D(0,0),1).scale(2, 1, Vector2D(0, 0))
+      r.transform(t4) should equal(new RectangleShape(Vector2D(0, 0), 200, 100, 0, Attributes()))
+      val t5 = TransformationMatrix(Vector2D(0,0),1).scale(1, 2, Vector2D(0, 0))
+      r.transform(t5) should equal(new RectangleShape(Vector2D(0, 0), 100, 200, 0, Attributes()))
+    }
+
   }
 }

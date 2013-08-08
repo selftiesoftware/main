@@ -16,13 +16,16 @@ import com.siigna.util.collection.Attributes
 import com.siigna.app.model.selection._
 import com.siigna.app.Siigna
 import com.siigna.util.geom.ComplexRectangle2D
-import scala.Some
-import collection.immutable.BitSet
+import com.siigna.util.geom
 
 /**
  * A Rectangle shape.
  *
- * TODO: Attributes
+ * You can use the following attributes:
+ * {{{
+ *  - Color        Color                 The color of the line.
+ *  - StrokeWidth  Double                The width of the line used to draw.
+ * }}}
  *
  * @param center  The center point of the rectangle.
  * @param width  The width of the rectangle, from the left-most border to the right-most.
@@ -42,7 +45,23 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   val p3 = geometry.p3 //BitSet 3
 
   def delete(part : ShapeSelector) = part match {
-    case BitSetShapeSelector(_) | FullShapeSelector => Nil
+    // Three or more points
+    case FullShapeSelector => Nil
+    case s : BitSetShapeSelector if s.size >= 3 => Nil
+    // Two opposite points
+    case ShapeSelector(0, 2) | ShapeSelector(1, 3) => Nil
+    // Two adjacent points
+    case BitSetShapeSelector(xs) if xs.size == 2 => {
+      val seg = geometry.vertices.zipWithIndex.filter(t => !xs.contains(t._2))
+      val p0 = seg.head._1
+      val p1 = seg.tail.head._1
+      Seq(LineShape(p0, p1))
+    }
+    // One point
+    case ShapeSelector(x) => {
+      val (head, tail) = geometry.vertices.splitAt(x)
+      Seq(PolylineShape(tail.tail ++ head))
+    }
     case _ => Seq(this)
   }
 
@@ -117,127 +136,59 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case _ => None
   }
 
-  //TODO: allow returning selected segments, not just points.
   def getSelector(p : Vector2D) = {
+    // Confine a number to a range between 0 - 3
+    def confineToIndices(i : Int) = if (i > 3) 0 else if (i < 0) 3 else i
+    def selectorFromSegmentId(id : Int) = ShapeSelector(id, confineToIndices(id + 1))
+
     val selectionDistance = Siigna.selectionDistance
-    //find out if a point in the rectangle is close. if so, return true and the point's bit value
-    def isCloseToPoint(s : Segment2D, b : BitSet) : (Boolean, BitSet) = {
-      val points = List(s.p1, s.p2)
-      var hasClosePoint = false
-      var bit = BitSet()
-      //evaluate is one of the two points of a segment is close
-      for(i <- 0 until points.size) {
-        if(points(0).distanceTo(p) <= selectionDistance) {
-          hasClosePoint = true
-          bit = BitSet(b.head)
+    geometry.vertices.zipWithIndex.filter(_._1.distanceTo(p) < selectionDistance) match {
+      case Seq(t) => ShapeSelector(t._2)
+      case Seq(t1, t2) => ShapeSelector(t1._2, t2._2)
+      case _ => { // Test for segments
+        geometry.segments.zipWithIndex.filter(_._1.distanceTo(p) < selectionDistance) match {
+          case Seq(t) => selectorFromSegmentId(t._2)
+          case s : Seq[(Segment2D, Int)] if s.size > 1 => {
+            selectorFromSegmentId(s.reduceLeft((a, b) => if (a._1.distanceTo(p) < b._1.distanceTo(p)) a else b)._2)
+          }
+          case _ => EmptyShapeSelector
         }
-        else if (points(1).distanceTo(p) <= selectionDistance) {
-          hasClosePoint = true
-          bit = BitSet(b.last)
-        }
-      }
-      (hasClosePoint, bit)
-    }
-
-    //find out if a segment of the rectangle is close. if so, return true, the segment, and the segment's bit value
-    def isCloseToSegment : (Boolean, Option[Segment2D], BitSet) = {
-      val l = List(Segment2D(p0,p1),Segment2D(p1,p2),Segment2D(p2,p3), Segment2D(p0,p3))
-      var closeSegment : Option[Segment2D] = None
-      var hasCloseSegment = false
-      var bit = BitSet()
-      for(i <- 0 until l.size) {
-        if(p.distanceTo(l(i)) <= selectionDistance) {
-          hasCloseSegment = true
-          closeSegment = Some(l(i))
-          bit = BitSet(i, if (i == 3) 0 else i + 1)
-        }
-      }
-      (hasCloseSegment, closeSegment, bit)
-    }
-    //if the distance to the rectangle is more than the selection distance:
-    if (geometry.distanceTo(p) > selectionDistance) {
-      //If shape is not within selection distance of point, return Empty selector
-      EmptyShapeSelector
-      //if not either the whole rectangle, a segment, or a point should be selected:
-    } else {
-      //if the point is in range of one of the segments of the rectangle... :
-      if(isCloseToSegment._1 == true){
-        val segment = isCloseToSegment._2.get
-        val segmentBitSet = isCloseToSegment._3
-        //ok, the point is close to a segment. IF one of the endpoints are close, return its bit value:
-        if(isCloseToPoint(segment, segmentBitSet)._1 == true) {
-          BitSetShapeSelector(isCloseToPoint(segment, segmentBitSet)._2)
-        }
-        //if no point is close, return the bitset of the segment:
-        else {
-          println("return segment here!")
-          BitSetShapeSelector(isCloseToSegment._3)
-        }
-        //if no point is close, return the segment:
-      } else {
-        EmptyShapeSelector
       }
     }
   }
-  //needed for box selections?
-  //TODO: is this right?
+
   def getSelector(r : SimpleRectangle2D) : ShapeSelector = {
-    if (r.intersects(boundary)) {
-      val cond1 = r.contains(p0)
-      val cond2 = r.contains(p1)
-      val cond3 = r.contains(p2)
-      val cond4 = r.contains(p3)
-      if (cond1 && cond2 && cond3 && cond4) {
-        FullShapeSelector
-      } else if (cond1) {
-        ShapeSelector(0)
-      } else if (cond2) {
-        ShapeSelector(1)
-      } else if (cond3) {
-        ShapeSelector(2)
-      } else if (cond4) {
-        ShapeSelector(3)
-      } else EmptyShapeSelector
-    } else EmptyShapeSelector
+    val xs = geometry.vertices.zipWithIndex.filter(t => r.contains(t._1)).map(_._2)
+    if (xs.size >= 4) FullShapeSelector else if (xs.isEmpty) EmptyShapeSelector else ShapeSelector(xs:_*)
   }
 
-  //TODO: is this right? and when is a complex rectangle ever used to make a selection??
-  def getSelector(r : ComplexRectangle2D) : ShapeSelector = {
-    if (r.intersects(boundary)) {
-      val cond1 = r.contains(p0)
-      val cond2 = r.contains(p1)
-      val cond3 = r.contains(p2)
-      val cond4 = r.contains(p3)
-      if (cond1 && cond2 && cond3 && cond4) {
-        FullShapeSelector
-      } else if (cond1) {
-        ShapeSelector(0)
-      } else if (cond2) {
-        ShapeSelector(1)
-      } else if (cond3) {
-        ShapeSelector(2)
-      } else if (cond4) {
-        ShapeSelector(3)
-      } else EmptyShapeSelector
-    } else EmptyShapeSelector
-  }
-
-  //select all segments of the rectangle (shown as blue lines)
-  //TODO: add part shapex
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
+    case s : BitSetShapeSelector if s.size >= 4 => Some(this)
+    case s : BitSetShapeSelector if s.size == 3 => {
+      // First find the index that is missing
+      var i = 0
+      for (n <- 0 to 3) {
+        if (!s(n)) i = n
+      }
+      // Then use it to create two lists of vertices and connect the dots
+      val (head, tail) = geometry.vertices.splitAt(i)
+      Some(PolylineShape(tail.tail ++ head))
+    }
+    case ShapeSelector(0, 2) => None
+    case ShapeSelector(1, 3) => None
+    case s : BitSetShapeSelector if s.size == 2 => {
+      val xs = s.map(geometry.vertices.apply)
+      Some(LineShape(xs.head, xs.last))
+    }
     case _ => None
   }
 
-  //TODO: expand to allow for all combinations of selections of the four vertices.
   def getVertices(selector: ShapeSelector) = {
-
     selector match {
       case FullShapeSelector => geometry.vertices
-      case ShapeSelector(0) => Seq(p0)
-      case ShapeSelector(1) => Seq(p1)
-      case ShapeSelector(2) => Seq(p2)
-      case ShapeSelector(3) => Seq(p3)
+      case s : BitSetShapeSelector if s.size == 4 => geometry.vertices
+      case BitSetShapeSelector(xs) => geometry.vertices.zipWithIndex.filter(t => xs(t._2)).map(_._1).toSeq
       case _ => Seq()
     }
   }
@@ -245,20 +196,43 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
   def transform(t : TransformationMatrix) =
-    RectangleShape(center transform(t), width * t.scale, height * t.scale, rotation + t.rotation, attributes)
+    RectangleShape(center transform t, width * t.scaleX, height * t.scaleY,
+      geom.normalizeDegrees(rotation + t.rotation), attributes)
 }
 
 /**
- * Companion object to [[com.siigna.app.model.shape.RectangleShape]]
+ * Companion object to [[com.siigna.app.model.shape.RectangleShape]].
  */
 object RectangleShape {
 
+  /**
+   * Creates a rectangle from a center, width, height and rotation but with an empty set of attributes.
+   * @param center  The center point of the rectangle.
+   * @param width  The width of the rectangle, from the left-most border to the right-most.
+   * @param height The height of the rectangle, from the top-most border to the lowest border.
+   * @param rotation  The rotation of the rectangle, defined counter-clockwise where 0 degrees equals 3 o'clock.
+   * @return  An instance of a [[com.siigna.app.model.shape.RectangleShape]]
+   */
   def apply(center : Vector2D, width : Double, height : Double, rotation : Double) : RectangleShape =
-    new RectangleShape(center, width, height, rotation,Attributes())
+    new RectangleShape(center, width, height, geom.normalizeDegrees(rotation) ,Attributes())
 
+  /**
+   * Creates a rectangle with 0 (zero) rotation spanning between the two given points.
+   * @param p1 One of the corners of the rectangle.
+   * @param p2 The other corner of the rectangle.
+   * @return  An instance of a [[com.siigna.app.model.shape.RectangleShape]]
+   */
   def apply(p1 : Vector2D, p2 : Vector2D) : RectangleShape =
-    new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0,Attributes())
+    new RectangleShape((p1+p2)/2, (p2-p1).x.abs, (p2-p1).y.abs, 0, Attributes())
 
+  /**
+   * Creates a rectangle with 0 (zero) rotation spanning between two points, described by the four coordinates.
+   * @param x1 The first x-coordinate.
+   * @param y1 The first y-coordinate.
+   * @param x2 The second x-coordinate.
+   * @param y2 The second y-coordinate.
+   * @return  An instance of a [[com.siigna.app.model.shape.RectangleShape]]
+   */
   def apply(x1 : Double, y1 : Double, x2 : Double, y2 : Double) : RectangleShape =
-    apply(Vector2D(x1,y1),Vector2D(x2,y2))
+    apply(Vector2D(math.min(x1, x2),math.min(y1, y2)),Vector2D(math.max(x1, x2),math.max(y1, y2)))
 }

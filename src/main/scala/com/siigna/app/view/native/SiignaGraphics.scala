@@ -38,37 +38,28 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
       val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
       val transformedShape = shape.transform(transformation)
 
-      // Retrieve the color-value
+      // Retrieve and set the color-value
       val color = attributes color "Color" getOrElse colorDraw
-
-      // Set the server-color
       setColor(color)
+
+      // Set the stroke width
+      setStrokeWidth(attributes double "StrokeWidth" getOrElse 0.6)
 
       if (attributes.boolean("Visible") != Some(false)) {
         transformedShape match {
           case s : ArcShape         => {
-            setStrokeWidth(attributes double "StrokeWidth" getOrElse 1.0)
             drawArc(s.geometry.center, s.geometry.radius, s.geometry.startAngle, s.geometry.angle)
           }
-          case s : CircleShape      => {
-            setStrokeWidth(attributes double "StrokeWidth"  getOrElse 1.0)
-            drawCircle(s.center, s.radius)
-            //draw(s.center)
-          }
+
+          case s : CircleShape      => drawCircle(s.center, s.radius)
+
           case s : LineShape        => {
-            setStrokeWidth(attributes double "StrokeWidth" getOrElse 0.6)
-            if (attributes.boolean("Infinite").getOrElse(false))
-              drawLine(s.p1, s.p2)
-            else
-              drawSegment(s.p1, s.p2)
+            if (attributes.boolean("Infinite").getOrElse(false)) drawLine(s.p1, s.p2) else drawSegment(s.p1, s.p2)
           }
 
-          case s : RectangleShape => {
-            val r = s.geometry.segments.foreach(s => drawSegment(s.p1, s.p2))
-          }
+          case s : RectangleShape => s.geometry.segments.foreach(s => drawSegment(s.p1, s.p2))
 
           /** COLLECTION SHAPES **/
-          // TODO: What about the attributes from the collection-shapes?!
           case s : PolylineShape    => {
             // Examine the raster attribute
             val raster = attributes color "Raster"

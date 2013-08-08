@@ -54,9 +54,10 @@ package object geom {
    * @return  A positive number between 0 and 360.
    */
   def normalizeDegrees(degrees : Double) : Double = {
-    (if (degrees < 0) {
-      degrees + 360 * math.abs(degrees / 360).ceil
-    } else degrees) % 360
+    degrees % 360 match {
+      case d if d < 0 => d + 360
+      case d          => d
+    }
   }
 
 }
