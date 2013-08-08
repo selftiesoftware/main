@@ -101,10 +101,10 @@ trait Rectangle extends Ordered[Rectangle] {
   def overlap(that : T) : Double
 
   /**
-   * Rounds the coordinates of the rectangle to the nearest whole numbers.
-   * @return  A rectangle with its coordinates rounded.
+   * Returns the [[com.siigna.util.geom.Segment]]s the rectangle consists of.
+   * @return Four segments.
    */
-  def round : T
+  def segments : Seq[Segment]
 
   /**
    * The width of the rectangle.
@@ -119,53 +119,9 @@ trait Rectangle extends Ordered[Rectangle] {
  */
 trait Rectangle2D extends Rectangle with GeometryClosed2D {
 
-
   type T <: Rectangle2D
 
   def area = width * height
-
-  /**
-   * The lowest left corner of the rectangle.
-   */
-  def bottomLeft  : Vector2D
-
-  /**
-   * The lowest right corner of the rectangle.
-   */
-  def bottomRight : Vector2D
-
-  /**
-   * Returns the line spanning from the bottom left corner to the bottom right.
-   */
-  def borderBottom = Segment2D(bottomLeft, bottomRight)
-
-  /**
-   * Returns the line spanning from the top left corner to the bottom left.
-   */
-  def borderLeft = Segment2D(topLeft, bottomLeft)
-
-  /**
-   * Returns the line spanning from the top right corner to the bottom right.
-   */
-  def borderRight = Segment2D(topRight, bottomRight)
-
-  /**
-   * Returns the line spanning from the top left corner to the rop right.
-   */
-  def borderTop = Segment2D(topLeft, topRight)
-
-  def boundary = {
-    val vertices = Seq(this.bottomLeft,bottomRight,topRight,topLeft)
-    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
-    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
-
-    val xMax = vertices.map(_.x).reduceLeft(max)
-    val xMin = vertices.map(_.x).reduceLeft(min)
-    val yMax = vertices.map(_.y).reduceLeft(max)
-    val yMin = vertices.map(_.y).reduceLeft(min)
-
-    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
-  }
 
   def circumference = height * 2 + width * 2
 
@@ -175,10 +131,10 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
      */
     case point : Vector2D =>
       Segment2D.segmentsOnClosedPathOfPoints(vertices.toSeq).view.map(
-        _ distanceTo(point)
+        _ distanceTo point
       ).reduceLeft( (a, b) => if (a < b) a else b)
 
-    case _ => throw new UnsupportedOperationException("Rectangle: DistanceTo not yet implemented for " + geom)
+    case _ => Double.PositiveInfinity
   }
 
   /**
@@ -195,17 +151,7 @@ trait Rectangle2D extends Rectangle with GeometryClosed2D {
 
   def onPeriphery(point : Vector2D) : Boolean
 
-  /**
-   * The upper left corner of the rectangle.
-   */
-  def topLeft     : Vector2D
-
-  /**
-   * The upper right corner of the rectangle.
-   */
-  def topRight    : Vector2D
-
-  lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
+  def segments : Seq[Segment2D]
 
   def width : Double
 
@@ -256,6 +202,156 @@ object Rectangle2D {
 }
 
 /**
+ * A [[com.siigna.util.geom.Rectangle]] that can be rotated.
+ *
+ * A complex rectangle is defined from a center, width, height and rotation. The rectangle itself is
+ * created by using the breadth and height to create the four corner points as a normal rectangle, but
+ * rotating it to fit the given rotation. The points are defined counter-clockwise like so (assuming
+ * a rotation of 0):
+ *
+ * {{{
+ *   p1 --- p0
+ *    |      |
+ *   p2 --- p3
+ * }}}
+ *
+ * With a rotation of 90 degrees (we rotate counter-clockwise):
+ * {{{
+ *   p0 - p3
+ *    |    |
+ *    |    |
+ *    |    |
+ *   p1 - p2
+ * }}}
+ *
+ * @param center  The center of the rectangle
+ * @param width  The width of the rectangle.
+ * @param height  The height of the rectangle.
+ * @param rotation  The rotation of the rectangle, defined counter-clockwise, starting at 3 o'clock.
+ */
+case class ComplexRectangle2D(override val center : Vector2D, width : Double, height : Double, rotation : Double) extends Rectangle2D {
+
+  type T = ComplexRectangle2D
+
+  /**
+   * The first vertex on the rectangle (top right in a rectangle with 0 rotation).
+   */
+  lazy val p0 = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
+
+  /**
+   * The second vertex on the rectangle (top left in a rectangle with 0 rotation).
+   */
+  lazy val p1 = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
+
+  /**
+    * The third vertex on the rectangle (bottom left in a rectangle with 0 rotation).
+   */
+  lazy val p2 : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,rotation)
+
+  /**
+    * The fourth vertex on the rectangle (bottom right in a rectangle with 0 rotation).
+   */
+  lazy val p3 = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
+
+  def -(point: Vector2D): ComplexRectangle2D = copy(center = center - point)
+
+  def +(point: Vector2D): ComplexRectangle2D = copy(center = center + point)
+
+  def *(point: Vector2D): ComplexRectangle2D = copy(center = Vector2D(center.x * point.x, center.y * point.y))
+
+  def /(point: Vector2D): ComplexRectangle2D = copy(center = Vector2D(center.x / point.x, center.y / point.y))
+
+  def boundary = {
+    def max(i1: Double, i2: Double): Double = if (i1 > i2) i1 else i2
+    def min(i1: Double, i2: Double): Double = if (i1 < i2) i1 else i2
+
+    val xMax = vertices.map(_.x).reduceLeft(max)
+    val xMin = vertices.map(_.x).reduceLeft(min)
+    val yMax = vertices.map(_.y).reduceLeft(max)
+    val yMin = vertices.map(_.y).reduceLeft(min)
+
+    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
+  }
+
+  def contains(geometry: Geometry2D): Boolean = geometry match {
+    case l : Segment2D => contains(l.p1) && contains(l.p2)
+    case r : SimpleRectangle2D => r.vertices.forall(contains)
+    case p : Vector2D => {
+      val vector = p - center   // Vector relative to the center
+      val angle  = vector.angle // The angle...
+      vectorAtAngle(angle).length >= vector.length
+    }
+    case _ => false
+  }
+
+  def closestPoint(vector: Vector2D): Vector2D = {
+    val Seq(x, y) = vertices.sortBy(_.distanceTo(vector)).take(2)
+    Segment2D(x, y).closestPoint(vector)
+  }
+
+  def expand(geom: Geometry2D): ComplexRectangle2D = this
+
+  def intersects(geometry: Geometry2D): Boolean = geometry match {
+    case r : SimpleRectangle2D => r.intersects(this)
+    case s : Segment2D => segments.exists(s.intersects)
+    case _ => false
+  }
+
+  def intersections(geometry: Geometry2D): Set[Vector2D] = Set.empty
+
+  /**
+   * Calculates the length-vector at a given angle in the rectangle relative from the center.
+   * The length vector is the x and y coordinate the rectangle extends from the center in the complex rectangle
+   * at the given angle. With an angle and rotation of 0 the vector will be (width, 0). With a rotation or angle
+   * of 90 the vector will become (0, height).
+   * @param angle The angle to examine.
+   * @return  A [[com.siigna.util.geom.Vector2D]] describing how far the rectangle extends in the given angle.
+   */
+  def vectorAtAngle(angle : Double) : Vector2D = {
+    val trueAngle = {
+      val a = (angle - rotation) % 360
+      if (a < 0) a + 360 else a
+    }
+
+    // The sign of the coordinates
+    // - we use +/- 0.5 because we only need half the width and height
+    val signX = if (trueAngle <= 90 || trueAngle >= 270) 0.5 else -0.5
+    val signY = if (trueAngle <= 180) 0.5 else -0.5
+
+    // Examine how close the angle is to 45 degrees
+    trueAngle % 90 match {
+      // Either 90 or 270 degrees
+      case 0 if trueAngle == 90 || trueAngle == 270 => Vector2D(0, height * signY)
+      // Full width and height
+      case 45          => Vector2D(width * signX, height * signY)
+      // Below 45 degrees
+      case a if a < 45 => Vector2D(width * signX, height * math.tan(a.toRadians) * signY)
+      // Above 45 degrees
+      case a           => Vector2D(width * math.tan((a - 45).toRadians) * signX, height * signY)
+    }
+  }
+
+  def onPeriphery(point: Vector2D): Boolean = distanceTo(point) < 0.00001
+
+  /**
+   * Calculate the overlap between this and another rectangle. If two rectangles do not overlap the area is 0.
+   */
+  def overlap(that: ComplexRectangle2D): Double = 0.0
+
+  def segments = Seq(Segment2D(p0, p1), Segment2D(p1, p2), Segment2D(p2, p3), Segment2D(p3, p0))
+
+  /**
+   * Transform the geometry with a given matrix.
+   */
+  def transform(transformation: TransformationMatrix): ComplexRectangle2D = {
+    ComplexRectangle2D(center.transform(transformation), width * transformation.scaleX,
+      height * transformation.scaleY, normalizeDegrees(rotation + transformation.rotation))
+  }
+
+  def vertices = Seq(p0, p1, p2, p3)
+}
+
+/**
  * A simple rectangle given by two points. Contrary to a [[com.siigna.util.geom.ComplexRectangle2D]] a simple rectangle
  * cannot be rotated.
  *
@@ -282,6 +378,28 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    * The lowest right corner of the rectangle.
    */
   def bottomRight = Vector2D(xMax, yMin)
+
+  /**
+   * Returns the line spanning from the bottom left corner to the bottom right.
+   */
+  def borderBottom = Segment2D(bottomLeft, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the bottom left.
+   */
+  def borderLeft = Segment2D(topLeft, bottomLeft)
+
+  /**
+   * Returns the line spanning from the top right corner to the bottom right.
+   */
+  def borderRight = Segment2D(topRight, bottomRight)
+
+  /**
+   * Returns the line spanning from the top left corner to the rop right.
+   */
+  def borderTop = Segment2D(topLeft, topRight)
+
+  def boundary = this
 
   /**
    * The upper left corner of the rectangle.
@@ -380,6 +498,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
         bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y
 
+    case rectangle : ComplexRectangle2D => rectangle.contains(this)
+
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
   }
 
@@ -430,7 +550,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
    */
   def height = (yMax - yMin).abs
 
-  def intersects(geom : Geometry2D) = geom match {
+  def intersects(geom : Geometry2D) : Boolean = geom match {
     case arc : Arc2D => arc.intersects(this)
     case circle : Circle2D => circle.intersects(this)
     case collection : CollectionGeometry2D => collection.intersects(this)
@@ -451,10 +571,19 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       !(xMin > that.xMax || xMax < that.xMin || yMin > that.yMax || yMax < that.yMin)
     }
 
-    case g => {
-      println("R" + g)
-      false
+    case that : ComplexRectangle2D => {
+      // 5 cases for containing points
+      vertices.count(that.contains) match {
+        // Contains all points: No intersection
+        case 4 => false
+        // Contains 0 points: Possibility of intersecting the lines
+        case 0 => segments.exists(s => that.segments.exists(s.intersects))
+        // All other cases intersects
+        case _ => true
+      }
     }
+
+    case g => false
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
@@ -467,7 +596,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       Set(top, right, bottom, left).flatMap(_.intersections(line))
     }
     case segment : Segment2D => segment.intersections(this)
-    case g => throw new UnsupportedOperationException("Rectangle: Intersections not yet implemented with " + g)
+    case g => Set.empty
   }
 
   def onPeriphery(point : Vector2D) =
@@ -486,7 +615,13 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     } else 0 // No overlap
   }
 
+  /**
+   * Rounds the coordinates of the rectangle to the nearest whole numbers.
+   * @return  A rectangle with its coordinates rounded.
+   */
   def round = Rectangle2D(topLeft.round, bottomRight.round)
+
+  def segments = Seq(borderLeft, borderBottom, borderRight, borderTop)
 
   def transform(t : TransformationMatrix) = {
     val p1 = topLeft.transform(t)
@@ -494,6 +629,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
 
     SimpleRectangle2D(p1.x, p1.y, p2.x, p2.y)
   }
+
+  lazy val vertices = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def width = (xMax - xMin).abs
 

@@ -11,58 +11,73 @@ import com.siigna.util.Log
  */
 class Connection(val url: String) {
 
+  /**
+   * The destination of the requests.
+   */
   val destination = new URL(url)
 
-  def respondAndClose(con:HttpURLConnection) = {
-    if (con.getResponseCode == 200) {
-      val resp = Connection.decode(con.getInputStream)
-      con.disconnect()
-      resp
-    }else {
-      val resp = Connection.decode(con.getErrorStream)
-      con.disconnect()
-      resp
+  def open : Option[HttpURLConnection] =
+    try {
+      val conn = destination.openConnection.asInstanceOf[HttpURLConnection]
+      conn.setConnectTimeout(5000)
+      Some(conn)
+    } catch {
+      case e : Throwable => None
+    }
+
+  def respondAndClose(con:HttpURLConnection) : Option[Array[Byte]] = {
+    try {
+      if (con.getResponseCode == 200) {
+        val resp = Connection.decode(con.getInputStream)
+        con.disconnect()
+        Some(resp)
+      } else {
+        val resp = Connection.decode(con.getErrorStream)
+        con.disconnect()
+        Some(resp)
+      }
+    } catch {
+      case e : ConnectException => {
+        Thread.sleep(2000) // Avoid spamming retries
+        None
+      }
+      case e : Throwable => None
     }
   }
 
-  def get : Array[Byte] = {
-    try {
-      val con = destination.openConnection.asInstanceOf[HttpURLConnection]
+  def get : Option[Array[Byte]] = {
+    open.flatMap( con => {
       con.setDoInput(true)
       con.setUseCaches(false)
 
       respondAndClose(con)
-    } catch {
-      case e : ConnectException => Log.warning(s"Connection error: $e"); Array()
-    }
+    })
   }
 
-  def post(message:Array[Byte]) = {
-    send(message,"POST")
-  }
+  def post(message:Array[Byte]) : Option[Array[Byte]] = send(message,"POST")
 
-  def send(message:Array[Byte],method:String="POST") = {
-    val con = destination.openConnection.asInstanceOf[HttpURLConnection]
+  def send(message:Array[Byte], method:String="POST") : Option[Array[Byte]] = {
+    open.flatMap( con => {
+      con.setDoInput(true)
+      con.setDoOutput(true)
+      con.setUseCaches(false)
 
-    con.setDoInput(true)
-    con.setDoOutput(true)
-    con.setUseCaches(false)
+      con.setRequestMethod(method)
 
-    con.setRequestMethod(method)
+      val out = con.getOutputStream
 
-    val out = con.getOutputStream
+      try {
+        out.write(message)
+        out.flush
 
-    try{
-      out.write(message)
-      out.flush
+        respondAndClose(con)
 
-      respondAndClose(con)
-
-    } catch {
-      case e : Throwable => Array[Byte]()
-    } finally {
-      out.close()
-    }
+      } catch {
+        case e : Throwable => None
+      } finally {
+        out.close()
+      }
+    })
   }
 
 }

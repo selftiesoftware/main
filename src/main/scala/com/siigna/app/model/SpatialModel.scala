@@ -55,7 +55,7 @@ trait SpatialModel {
    * @param query  The query-rectangle or query-view defining the area for the shapes to be returned.
    * @return  The shapes that are inside or intersects the query-rectangle, paired with their keys.
    */
-  def apply(query : Rectangle2D) : Map[Int,Shape] = {
+  def apply(query : SimpleRectangle2D) : Map[Int,Shape] = {
     SiignaTree.find(query,rtree).filter(s => query.intersects(s._2.geometry) || query.contains(s._2.geometry))
   }
 

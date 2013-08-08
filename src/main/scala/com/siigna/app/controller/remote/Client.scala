@@ -16,47 +16,40 @@ class Client(val address:String) {
    * @return whether the current server is alive
    */
   def alive = {
-
-    try{
-      val response = new Connection(address).get
-
-      new String(response).equals("Siigna")
-    } catch {
-      case e : Throwable => {
-        Log("Couldn't connect",e)
-        false
-      }
-    }
+    val response = new Connection(address).get
+    response.exists(new String(_).equals("Siigna"))
   }
 
   /**
    * @param session: Optionally a session to authenticate with
    * @return a new drawing id from the server
    */
-  def getDrawingId(session:Session) = {
+  def getDrawingId(session:Session) : Option[Long] = {
     val conn = new Connection(address+"/drawingId"+Client.sessionToUrl(session))
 
-    java.lang.Long.parseLong(new String(conn.get))
+    conn.get.map(s => {
+
+      java.lang.Long.parseLong(new String(s))
+    })
   }
 
   /**
    * Get the "next" drawing on the server. Meaning just a new one
    * @param session: Authentication is required
    */
-  def getDrawing(session:Session) = {
+  def getDrawing(session:Session) : Option[Model] = {
 
     val conn = new Connection(address+"/drawing/new"+Client.sessionToUrl(session))
-    val res = conn.get
 
-    Unmarshal[Model](res) match {
-
-      case Some(m:Model) => Some(m)
-
-      case None => {
-        Log.error("Couldn't get a new drawing !")
-        None
+    conn.get.flatMap(res => {
+      Unmarshal[Model](res) match {
+        case s : Some[Model] => s
+        case None => {
+          Log.error("Remote: Couldn't get a new drawing !")
+          None
+        }
       }
-    }
+    })
   }
 
   /**
@@ -64,11 +57,9 @@ class Client(val address:String) {
    * @param drawingId: Drawing to get
    * @param session: Session with access to the drawng
    */
-  def getDrawing(drawingId: Long, session:Session) = {
+  def getDrawing(drawingId: Long, session:Session) : Option[Model] = {
     val conn = new Connection(address+"/drawing/"+drawingId+Client.sessionToUrl(session))
-    val res = conn.get
-
-    Unmarshal[Model](res)
+    conn.get.flatMap(Unmarshal[Model])
   }
 
   /**
@@ -76,12 +67,10 @@ class Client(val address:String) {
    * @param amount: How many shapes to get
    * @param session: Requires auth
    */
-  def getShapeIds(amount:Int, session:Session) = {
+  def getShapeIds(amount:Int, session:Session) : Option[Range] = {
 
     val conn = new Connection(address+"/shapeId/"+amount+Client.sessionToUrl(session))
-    val res = conn.get
-
-    Unmarshal[Range](res)
+    conn.get.flatMap(Unmarshal[Range])
   }
 
   /**
@@ -90,13 +79,10 @@ class Client(val address:String) {
    * @param session
    * @return An action id from the server
    */
-  def setAction(action:RemoteAction,session:Session) ={
-
+  def setAction(action:RemoteAction,session:Session) : Option[Int] = {
     val conn = new Connection(address+"/action"+Client.sessionToUrl(session))
-
     val bytes = Marshal(action)
-
-    new String(conn.post(bytes)).toInt
+    conn.post(bytes).map(new String(_).toInt)
   }
 
   /**
@@ -104,20 +90,18 @@ class Client(val address:String) {
    * @param actionId
    * @param session
    */
-  def getAction(actionId:Int,session:Session) = {
-
+  def getAction(actionId:Int,session:Session) : Option[RemoteAction] = {
     val conn = new Connection(address+"/action/"+actionId+Client.sessionToUrl(session))
-
-    Unmarshal[RemoteAction](conn.get)
+    conn.get.flatMap(Unmarshal[RemoteAction])
   }
 
   /**
    * Get the next action id for the drawing set in the session
    * @param session: specifies the drawing
    */
-  def getActionId(session:Session) = {
+  def getActionId(session:Session) : Option[Int] = {
     val conn = new Connection(address+"/actionId"+Client.sessionToUrl(session))
-    new String(conn.get).toInt
+    conn.get.map(new String(_).toInt)
   }
 
 }

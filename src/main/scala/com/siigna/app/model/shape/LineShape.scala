@@ -25,16 +25,14 @@ import com.siigna.app.Siigna
 import com.siigna.app.model.selection._
 
 /**
- * This class draws a line segment.
+ * This class represents a line segment spanning between two points.
  *
  * You can use the following attributes:
- * <pre>
+ * {{{
  *  - Color        Color                 The color of the line.
  *  - Infinite     Boolean               If true, draws an endless line with the same equation as the given line.
- *  - StrokeWidth  Double                The width of the linestroke used to draw.
- *  - Transform    TransformationMatrix  A matrix to dynamically transform the shape when server.
- * </pre>
- * TODO: Update useable attributes.
+ *  - StrokeWidth  Double                The width of the line used to draw.
+ * }}}
  */
 case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) extends BasicShape {
 

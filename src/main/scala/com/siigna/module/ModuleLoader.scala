@@ -23,6 +23,8 @@ import java.io.FileNotFoundException
 import java.net.URLClassLoader
 import com.siigna.app.Siigna
 import com.siigna.util.Log
+import concurrent.future
+import concurrent.ExecutionContext.Implicits.global
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
@@ -49,40 +51,41 @@ object ModuleLoader {
    */
   protected lazy val modules = collection.mutable.Map[Symbol, collection.mutable.Map[String, Class[Module]]]()
 
-
   /**
    * The class path to siigna modules. Currently set to "com.siigna.module".
    */
   final val modulePath = "com.siigna.module"
 
   // Create a default packages
-  //load(ModulePackage('base, "rls.siigna.com/com/siigna/siigna-base_2.10/stable", "siigna-base_2.10-stable.jar", local = false))
-  //load(ModulePackage('cad, "rls.siigna.com/com/siigna/siigna-cad-suite_2.10/stable", "siigna-cad-suite_2.10-stable.jar", local = false))
-  //load(ModulePackage('porter, "rls.siigna.com/com/siigna/siigna-porter_2.10/stable", "siigna-porter_2.10-stable.jar", local = false))
+  future {
+    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+    load(ModulePackage('cad,  s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
+    load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
 
-  // ****** OLE ******
+    // ****** OLE ******
 
-  load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
-  load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
 
-  //DESKTOP
-  //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
+    //DESKTOP
+    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
 
-  //LAPTOP
-  load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //LAPTOP
+    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
 
-  //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
+    //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
-  //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
+    //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
-  //Niels' modules:
-  //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-  //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
-  //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+    //Niels' modules:
+    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+  }
 
 
   /**
@@ -200,6 +203,12 @@ object ModuleLoader {
    * @return  An Iterable[ModulePackage].
    */
   def packages = modules.keys
+
+  /**
+   * The stability to expect from the modules, fetched from the [[com.siigna.app.SiignaAttributes]].
+   * @return A string with value nightly or stable.
+   */
+  protected def stability = Siigna.string("versionStability").getOrElse("stable")
 
   /**
    * Unloads a [[com.siigna.module.ModulePackage]] so all modules created in the future cannot derive from this

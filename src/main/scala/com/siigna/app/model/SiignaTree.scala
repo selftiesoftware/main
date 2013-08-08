@@ -57,7 +57,7 @@ object SiignaTree {
    * @param rtree  The r-tree to search.
    * @return A Map of the found shapes and their id's.
    */
-  def find(query: Rectangle2D, rtree:PRTree[(LeftType,RightType)]):Map[LeftType,RightType]= {
+  def find(query: SimpleRectangle2D, rtree:PRTree[(LeftType,RightType)]):Map[LeftType,RightType]= {
     iterableAsScalaIterable[TreeType](
       rtree.find(
         query.bottomLeft.x,

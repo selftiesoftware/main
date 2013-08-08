@@ -27,6 +27,7 @@ import java.security.{PrivilegedAction, AccessController}
 import java.nio.channels.{OverlappingFileLockException, FileChannel}
 import java.nio.file.{StandardOpenOption, OpenOption}
 import scala.collection.JavaConversions
+import scala.reflect.runtime.universe._
 
 /**
  * The persistence package is capable of converting objects into byte arrays (marshaling), reading objects from
@@ -89,6 +90,10 @@ package object io {
   private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, FileChannel => Any], options : Set[OpenOption]) extends DialogueFunction
 
   private var dialogue : Option[JFileChooser] = None
+
+  // A mirror used to reflect on classes at runtime
+  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
+  protected[io] val mirror = runtimeMirror(getClass.getClassLoader)
 
   // Initialize the dialogue and the look and feel
   private val t = new Thread() {

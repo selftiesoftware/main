@@ -24,6 +24,7 @@ import view._
 import com.siigna.util.geom._
 import java.awt.Cursor
 import com.siigna.util.event.Track
+import com.siigna.app.controller.remote.RemoteController
 
 /**
  * <p>
@@ -109,6 +110,12 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
 
     setCursor(interface.getCursor)
   }
+
+  /**
+   * A boolean value that indicates if we have made connection to the server and successfully authenticated the user.
+   * @return  True if we can connect to the server and the user have been authenticated, false otherwise.
+   */
+  def isOnline : Boolean = RemoteController.isOnline
 
   /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the

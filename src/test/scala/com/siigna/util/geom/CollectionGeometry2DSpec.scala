@@ -58,23 +58,44 @@ class CollectionGeometry2DSpec extends FunSuite with ShouldMatchers {
     c1.intersects(c2) should equal (true)
     c1.intersects(c3) should equal (false)
 
-    test("Can tell if a CollectionGeometry and a a Segment2D intersect") {
+  }
 
-      val p1 = Vector2D(-20,  0)
-      val p2 = Vector2D(10,  20)
-      val p3 = Vector2D(20,  10)
+  test("Can tell if a CollectionGeometry and a a Segment2D intersect") {
 
-      val c = CollectionGeometry2D(Seq(p1,p2,p3))
-      val s1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
-      val s2 = Segment2D(Vector2D(-30,20),Vector2D(-30,-20))
-      val s3 = Segment2D(Vector2D(-20,0),Vector2D(-30,-20))
+    val p1 = Vector2D(-20,  0)
+    val p2 = Vector2D(10,  20)
+    val p3 = Vector2D(20,  10)
+
+    val c = CollectionGeometry2D(ArrayBuffer(Segment2D(p1,p2),Segment2D(p2,p3)))
+    val s1 = Segment2D(Vector2D(0,20),Vector2D(0,-20))
+    val s2 = Segment2D(Vector2D(-30,20),Vector2D(-30,-20))
+    val s3 = Segment2D(Vector2D(-20,0),Vector2D(-30,-20))
 
 
-      c.intersects(s1) should equal (true)
-      c.intersects(s2) should equal (false)
-      c.intersects(s3) should equal (true) //one point of intersection
-      c.intersects(c) should equal (false)  // TODO: should two identical collectionShapes intersect? - NO..?
-    }
+    c.intersects(s1) should equal (true)
+    c.intersects(s2) should equal (false)
+    c.intersects(s3) should equal (true) //one point of intersection
+    c.intersects(c) should equal (false)  // TODO: should two identical collectionShapes intersect? - NO..
+  }
+  test("Can calculate intersections between two CollectionGeometries") {
+    val p1 = Vector2D(-20, 0)
+    val p2 = Vector2D(-20,20)
+    val p3 = Vector2D( 20,20)
+    val p4 = Vector2D( 20, 0)
 
+    val p5 = Vector2D(-10, 0)
+    val p6 = Vector2D(-10,30)
+    val p7 = Vector2D( 10,30)
+    val p8 = Vector2D( 10, 0)
+
+    val c1 = CollectionGeometry2D(ArrayBuffer(Segment2D(p1,p2),Segment2D(p2,p3),Segment2D(p3,p4)))
+    val c2 = CollectionGeometry2D(ArrayBuffer(Segment2D(p5,p6),Segment2D(p6,p7),Segment2D(p7,p8)))
+    val c3 = CollectionGeometry2D(ArrayBuffer(Segment2D(p5,p6),Segment2D(p6,p7)))
+
+    //one intersection
+    c1.intersections(c3) should equal (Set(Vector2D(-10.0,20.0)))
+
+    //two intersections
+    c1.intersections(c2) should equal (Set(Vector2D(-10.0,20.0),(Vector2D(10.0,20.0))))
   }
 }

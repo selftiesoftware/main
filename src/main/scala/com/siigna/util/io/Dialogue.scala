@@ -191,10 +191,6 @@ import scala.reflect.runtime.universe._
  */
 object Dialogue {
 
-  // A mirror used to reflect on classes at runtime
-  // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
-  protected lazy val mirror = runtimeMirror(getClass.getClassLoader)
-
   /**
    * Opens a JFileChooser for reading operations and lets the user choose a file to read. If the dialogue is not
    * interrupted and the file matches the given file extensions (if any), the function f is called and the value
