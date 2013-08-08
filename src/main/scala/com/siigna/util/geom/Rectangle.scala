@@ -498,7 +498,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       bottomLeft.x <= rectangle.bottomLeft.x && rectangle.topRight.x <= topRight.x &&
         bottomLeft.y <= rectangle.bottomLeft.y && rectangle.topRight.y <= topRight.y
 
-    case rectangle : ComplexRectangle2D => rectangle.contains(this)
+    case rectangle : ComplexRectangle2D => rectangle.vertices.forall(contains)
 
     case g => throw new UnsupportedOperationException("Rectangle: Contains not yet implemented for " + g)
   }
