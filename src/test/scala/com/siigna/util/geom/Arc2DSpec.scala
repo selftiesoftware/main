@@ -56,6 +56,9 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val p3 = Vector2D(10, 0)
     val arc = Arc2D(p1, p2, p3)
 
+    println("startpoint;" + arc.startPoint)
+    println("endpoint;" + arc.endPoint)
+    println("midpoint;" + arc.midPoint)
     arc.startPoint should equal (p3)
     arc.endPoint should equal (p1)
   }

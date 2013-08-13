@@ -34,7 +34,7 @@ class ArcShapeSpec extends FunSpec with ShouldMatchers {
     val a = ArcShape(Vector2D(0, 0), 20,0,180)
 
     it ("can find a selector given a point") {
-      a.getSelector(Vector2D(  0,  0)) should equal (FullShapeSelector)
+      a.getSelector(Vector2D(0, 0)) should equal (FullShapeSelector)
     }
   }
 }

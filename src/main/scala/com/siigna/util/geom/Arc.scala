@@ -21,7 +21,7 @@ package com.siigna.util.geom
 
 /**
  * A mathematical representation of a circle-piece, that is a not-full circle.
- * 
+ *
  * <b>Important:</b> Assumes that (start != middle != end).
  */
 trait Arc {
@@ -36,12 +36,12 @@ trait Arc {
    * A value used to signal arcs defined counter-clockwise.
    */
   val cw, CW, clockwise = 0
-  
+
   /**
    * A value used to signal arcs defined clockwise.
    */
   val ccw, CCW, counterclockwise = 1
-  
+
   /**
    * Calculates the end angle. The end angle is always calculated so the
    * arc is drawn counter-clockwise (ccw). Firstly this is done because there's
@@ -129,6 +129,9 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
    */
   lazy val midPoint = {
     val middleAngle = endAngle - startAngle
+
+
+
     Vector2D(epsilon(math.cos(middleAngle)) * epsilon(radius), epsilon(math.sin(middleAngle)) * epsilon(radius)) + center
   }
 
@@ -273,9 +276,9 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
 
     /**
-   * Returns a list of points, defined as the intersection(s) between the
-   * arc and another arc.
-   */
+     * Returns a list of points, defined as the intersection(s) between the
+     * arc and another arc.
+     */
   }
   def intersections(geometry : Geometry2D) : Set[Vector2D] = geometry match {
     case arc : Arc2D => {
