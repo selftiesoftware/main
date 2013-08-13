@@ -175,19 +175,17 @@ object ModuleLoader {
         loader = new URLClassLoader(loader.getURLs.:+(url), this.getClass.getClassLoader)
 
         // Check for ModuleInit in that package
-        if (_initModule.isEmpty) {
-          try {
-            val c = loader.loadClass("com.siigna.module.ModuleInit")
-            val m = classToModule(c)
-            _initModule = Some(m)
-            Siigna.interface = m.interface
-            Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
-          } catch {
-            // No module found
-            case e: ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
-            // Modules are out of date
-            case e: AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
-          }
+        try {
+          val c = loader.loadClass("com.siigna.module.ModuleInit")
+          val m = classToModule(c)
+          _initModule = Some(m)
+          Siigna.interface = m.interface
+          Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
+        } catch {
+          // No module found
+          case e: ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
+          // Modules are out of date
+          case e: AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
         }
 
         // Add to cache
