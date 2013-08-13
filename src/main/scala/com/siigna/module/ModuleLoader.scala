@@ -58,8 +58,10 @@ object ModuleLoader {
 
   // Create a default packages
   future {
-    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
-    load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
+    load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+    load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+    //load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
 
     // ****** OLE ******
@@ -173,19 +175,17 @@ object ModuleLoader {
         loader = new URLClassLoader(loader.getURLs.:+(url), this.getClass.getClassLoader)
 
         // Check for ModuleInit in that package
-        if (_initModule.isEmpty) {
-          try {
-            val c = loader.loadClass("com.siigna.module.ModuleInit")
-            val m = classToModule(c)
-            _initModule = Some(m)
-            Siigna.interface = m.interface
-            Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
-          } catch {
-            // No module found
-            case e: ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
-            // Modules are out of date
-            case e: AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
-          }
+        try {
+          val c = loader.loadClass("com.siigna.module.ModuleInit")
+          val m = classToModule(c)
+          _initModule = Some(m)
+          Siigna.interface = m.interface
+          Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
+        } catch {
+          // No module found
+          case e: ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
+          // Modules are out of date
+          case e: AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
         }
 
         // Add to cache
