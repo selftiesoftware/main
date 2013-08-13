@@ -21,16 +21,21 @@ package com.siigna.app.controller.remote
 
 import com.siigna.app.model.Model
 import com.siigna.app.model.action.{Action, VolatileAction}
+import com.siigna.app.model.selection.Selection
 
 /**
  * An action that updates all the local actions and replaces local ids with remote ids.
  * @param map  A mapping of local ids to remote ids.
  */
-protected[remote] sealed case class UpdateLocalActions(map : Map[Int, Int]) extends VolatileAction {
+protected[remote] sealed case class UpdateLocalActions(map: Map[Int, Int]) extends VolatileAction {
 
   def execute(model: Model) = {
-    def replaceActionSeq(s : Seq[Action]) = if (s.exists(_.isLocal)) {
-      s.map(a => if (a.isLocal) a.update(map) else a) } else s
+    // Store the old selection with the updated ids
+    val selection = Selection(model.selection.map(t => map.getOrElse(t._1, t._1) -> t._2))
+
+    def replaceActionSeq(s: Seq[Action]) = if (s.exists(_.isLocal)) {
+      s.map(a => if (a.isLocal) a.update(map) else a)
+    } else s
 
     // Replace the shapes
     val shapes = if (model.shapes.exists(_._1 < 0)) {
@@ -43,8 +48,10 @@ protected[remote] sealed case class UpdateLocalActions(map : Map[Int, Int]) exte
     // Find and replace all local undone action
     val undone = replaceActionSeq(model.undone)
 
-    // Return the new model
-    new Model(shapes.seq.toMap, executed, undone, model.attributes)
+    // Return the new model with the old selection added
+    val m = new Model(shapes.seq.toMap, executed, undone, model.attributes)
+    m.selection = selection
+    m
   }
 
 }
