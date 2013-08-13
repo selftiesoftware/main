@@ -52,7 +52,7 @@ import com.siigna.app.Siigna
  */
 class EventParser {
   // The default snap-modules.
-  protected val defaultSnap : Seq[EventSnap] = Seq(CenterPoints, MidPoints, EndPoints)
+  protected val defaultSnap : Seq[EventSnap] = Seq(CenterPointSnap, MidPointSnap, EndPointSnap, IntersectionPointSnap)
 
   // A boolean value of whether the EventParser is enable or not. Defaults to true.
   protected var enabled : Boolean = true
@@ -85,8 +85,8 @@ class EventParser {
   /**
    * The current EventSnaps.
    * Since it's possible that the user wants to snap to various kind of points,
-   * we allow the user to have several snap-settings with a HashSet.
-   * Defaults to: CenterPoints, MidPoints and EndPoints.
+   * we allow the user to have several snap-settings.
+   * Defaults to: CenterPointSnap, MidPointSnap, EndPointSnap and IntersectionPointSnap.
    */
   private var snap = defaultSnap
 

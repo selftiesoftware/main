@@ -113,6 +113,7 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
       r1.contains(SimpleRectangle2D(-51, -50, 50, 50)) should equal (false)
       r4.contains(SimpleRectangle2D(-10, -10, 10, 10)) should equal (true)
       r4.contains(SimpleRectangle2D(-50, -50, 50, 51)) should equal (false)
+      r1.contains(SimpleRectangle2D(-100, -100, 100, 100)) should equal (false)
 
       // Vector2D
       r1.contains(Vector2D(0, 0)) should equal (true)

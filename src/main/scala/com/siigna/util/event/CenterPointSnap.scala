@@ -19,30 +19,34 @@
 
 package com.siigna.util.event
 
-import com.siigna.app.model.shape.{Shape}
+import com.siigna.app.model.shape.{ArcShape, ClosedShape, Shape}
 import com.siigna.util.geom.Vector2D
 import com.siigna.app.view.View
-import collection.parallel.immutable.{ParMap, ParIterable}
+import com.siigna.app.Siigna
 
 /**
  * A hook for parsing points that snaps to center-points on objects.
  */
-case object CenterPoints extends EventSnap {
+case object CenterPointSnap extends EventSnap {
 
   def parse(event : Event, model : Traversable[Shape]) = event match {
-    case MouseMove(point, a, b) => MouseMove(snap(point, model), a, b)
+    case MouseMove(point, a, b) => {
+      MouseMove(snap(point.transform(View.deviceTransformation), model).transform(View.drawingTransformation), a, b)
+    }
     case some => some
   }
 
-  def snap(q : Vector2D, model : Traversable[Shape]) : Vector2D = {
-    val point = q.transform(View.deviceTransformation)
-    if (!model.isEmpty) {
-      val res = model.map(_.geometry.center).reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
-      if (res.distanceTo(point) * View.zoom <= 10) {
-        res.transform(View.drawingTransformation)
+  def snap(point : Vector2D, model : Traversable[Shape]) : Vector2D = {
+    model.collect {
+        case s : ClosedShape => s.geometry.center
+        case a : ArcShape => a.geometry.center
+    } match {
+      case m : Traversable[Vector2D] if m.isEmpty => point
+      case m => {
+        val newPoint = m.reduceLeft((a, b) => if (a.distanceTo(point) < b.distanceTo(point)) a else b)
+        if (newPoint.distanceTo(point) <= Siigna.selectionDistance) newPoint else point
       }
-      else q
-    } else q
+    }
   }
 
 }

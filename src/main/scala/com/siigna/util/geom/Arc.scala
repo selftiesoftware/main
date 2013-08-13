@@ -192,7 +192,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       else
         (p - startPoint).length
     }
-    case _ => throw new UnsupportedOperationException("Not implemented")
+    case _ => Double.PositiveInfinity
   }
 
   /**
@@ -273,7 +273,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case rectangle : SimpleRectangle2D => {
       !(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
     }
-    case g => throw new UnsupportedOperationException("Rectangle: Intersects not yet implemented with " + g)
+    case g => false
 
     /**
      * Returns a list of points, defined as the intersection(s) between the
@@ -350,7 +350,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       else Set()
 
     }
-    case _ => throw new UnsupportedOperationException("Not implemented")
+    case _ => Set()
   }
 
   def transform(t : TransformationMatrix) =

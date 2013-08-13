@@ -20,7 +20,7 @@ import com.siigna.app.view.View
 /**
  * Test end point snap.
  */
-class EndPointsSpec extends FunSuite with ShouldMatchers {
+class EndPointSnapSpec extends FunSuite with ShouldMatchers {
   //simulate points being clicked on the screen (device)
   def deviceCoords = View.drawingTransformation
 
@@ -43,8 +43,8 @@ class EndPointsSpec extends FunSuite with ShouldMatchers {
     val mousePt3 = Vector2D(4000,4000).transform(deviceCoords)
     val p = Traversable(PolylineShape(Vector2D(50000, -100000), Vector2D(0, 0)))
 
-    EndPoints.snap(mousePt3, p) should equal(Vector2D(0,0).transform(deviceCoords)) //inside snap distance
-    EndPoints.snap(mousePt1, p) should equal(Vector2D(50000,-100000).transform(deviceCoords)) //inside snap distance
-    EndPoints.snap(mousePt2, p) should equal(Vector2D(20000,20000).transform(deviceCoords)) //outside snap distance
+    EndPointSnap.snap(mousePt3, p) should equal(Vector2D(0,0).transform(deviceCoords)) //inside snap distance
+    EndPointSnap.snap(mousePt1, p) should equal(Vector2D(50000,-100000).transform(deviceCoords)) //inside snap distance
+    EndPointSnap.snap(mousePt2, p) should equal(Vector2D(20000,20000).transform(deviceCoords)) //outside snap distance
   }
 }

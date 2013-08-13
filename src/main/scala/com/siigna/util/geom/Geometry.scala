@@ -119,7 +119,6 @@ trait Geometry2D extends Geometry {
    * @param center
    * @param rotation
   */
-
   def rotate(center : Vector2D, rotation : Double) : T = {
     transform(TransformationMatrix().rotate(rotation,center))
   }

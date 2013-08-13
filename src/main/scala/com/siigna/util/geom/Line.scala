@@ -70,10 +70,10 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     } else {
       (p1 - point).length
     }
-    case g => throw new UnsupportedOperationException("Line: DistanceTo not yet implemented with " + g)
+    case g => Double.PositiveInfinity
   }
 
-  def intersects(geom : Geometry2D) = throw new UnsupportedOperationException("Line: Intersects not yet implemented with " + geom)
+  def intersects(geom : Geometry2D) = false
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
     /**
@@ -128,7 +128,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       else
         Set[Vector2D](A * u + C)
     }
-    case g => throw new UnsupportedOperationException("Line: Intersections not yet implemented with " + g)
+    case g => Set()
   }
 
   def transform(t : TransformationMatrix) = {
