@@ -58,9 +58,9 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   private var _interface : Option[ModuleInterface] = None
 
   /**
-   * The Miso font.
+   * The Miso font. Also available at www.siigna.com/assets/miso-light.otf
    */
-  lazy val fontMiso = getClass.getResource("/miso-light.otf").toString
+  val fontMiso = getClass.getResource("/miso-light.otf").toString
 
   /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
