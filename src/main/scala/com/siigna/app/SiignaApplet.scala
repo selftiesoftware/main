@@ -102,6 +102,13 @@ class SiignaApplet extends Applet {
         Log.success("Applet: Found drawing: " + id)
       }
 
+      // Gets the active drawing title, if any
+      val drawingTitle = getParameter("drawingTitle")
+      if (drawingTitle != null) {
+        Drawing.setAttribute("title", drawingTitle)
+        Log.success("Applet: Found title: " + drawingTitle)
+      }
+
       // Get the active user and token, if a log in was performed at www.siigna.com
       val userName = getParameter("contributorName")
       val userToken = getParameter("contributorToken")

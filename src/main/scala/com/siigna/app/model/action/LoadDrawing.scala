@@ -20,6 +20,7 @@
 package com.siigna.app.model.action
 
 import com.siigna.app.model.Model
+import com.siigna.app.view.View
 
 /**
  * Loads a drawing from a given input.
@@ -29,5 +30,5 @@ import com.siigna.app.model.Model
 case class LoadDrawing(model : Model) extends VolatileAction {
 
   def execute(old : Model) = model
-  
+
 }

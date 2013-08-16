@@ -28,6 +28,7 @@ import collection.mutable
 import com.siigna.util.Log
 import com.siigna.app.model.Model
 import com.siigna.app.controller.remote.RemoteConstants.Drawing
+import com.siigna.app.view.View
 
 /**
  * Controls any remote connection(s).
@@ -242,6 +243,8 @@ object RemoteController {
             case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
+          //zoom extends
+          View.zoomExtends
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
           case e : Throwable => Log.error("Remote: Error when reading data from server", e)
