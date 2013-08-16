@@ -58,6 +58,11 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   private var _interface : Option[ModuleInterface] = None
 
   /**
+   * The Miso font.
+   */
+  lazy val fontMiso = getClass.getResource("/miso-light.otf").toString
+
+  /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
    * [[com.siigna.app.model.Drawing]] remains where it is while the modules still receives the events and
    * are still able to react.
