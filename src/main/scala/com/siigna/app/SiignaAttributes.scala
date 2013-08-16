@@ -23,6 +23,8 @@ import com.siigna.util.collection.AttributesLike
 import collection.mutable
 import com.siigna.util.Implicits._
 import java.awt.{Color, Dimension}
+import concurrent._
+import concurrent.ExecutionContext.Implicits.global
 
 /**
  * <p>
@@ -132,6 +134,10 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("trackGuideColor")       = "#00FFFF".color
   this("version")               = "beta - Xenophanes"
   this("zoomSpeed")             = 0.5
+
+  future {
+    this("fontMiso") = getClass.getResource("/miso-light.otf").toString
+  }
 
   /**
    * Examines whether snapping is enabled.
