@@ -90,7 +90,7 @@ class SiignaApplet extends Applet {
     // --- Read the applet parameters --- \\
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-      val drawingId = getParameter("drawingId")
+      val id = drawingId.toLong
 
       if (drawingId != null) try {
         val id = drawingId.toLong
