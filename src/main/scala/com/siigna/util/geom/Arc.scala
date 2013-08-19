@@ -21,7 +21,7 @@ package com.siigna.util.geom
 
 /**
  * A mathematical representation of a circle-piece, that is a not-full circle.
- * 
+ *
  * <b>Important:</b> Assumes that (start != middle != end).
  */
 trait Arc {
@@ -36,12 +36,12 @@ trait Arc {
    * A value used to signal arcs defined counter-clockwise.
    */
   val cw, CW, clockwise = 0
-  
+
   /**
    * A value used to signal arcs defined clockwise.
    */
   val ccw, CCW, counterclockwise = 1
-  
+
   /**
    * Calculates the end angle. The end angle is always calculated so the
    * arc is drawn counter-clockwise (ccw). Firstly this is done because there's
@@ -112,11 +112,45 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   /**
    * The point where the arc ends.
    */
-  //TODO: check precision
   lazy val endPoint =  {
     val x = epsilon(math.cos(endAngle.toRadians)*radius + center.x)
     val y = epsilon(math.sin(endAngle.toRadians)*radius + center.y)
+    //println("endAngle degrees; "+endAngle)
+    //println("endAngle radians; "+endAngle.toRadians)
+
     Vector2D(x,y)
+
+    /*
+    //Let the center of the circle be (x,y), the angle of the arc be A, the
+    //radius of the circle be r, and the starting point of the arc be (a,b).
+    //Let angle B be defined by
+    val A = startAngle.toRadians
+    val B = endAngle.toRadians
+    val x = center.x
+    val y = center.y
+    val r = radius
+
+    //Then there are two ending points (c,d) for the arc, corresponding to
+    //clockwise and counterclockwise directions around the circle. They
+    //are given by
+
+    //ENDPOINT:
+    //c = h + r*cos(B-A),
+    //d = k + r*sin(B-A),
+
+    //STARTPOINT;
+    //c = h + r*cos(B+A),
+    //d = k + r*sin(B+A),
+
+    val sX = x + r * math.cos(B-A)
+
+    val sY = x + r * math.sin(B-A)
+
+
+    //OBSOLETE: Vector2D(epsilon(math.cos(startAngle)) * epsilon(radius), epsilon(math.sin(startAngle)) * epsilon(radius)) + center
+
+    Vector2D(epsilon(sX),epsilon(sY))
+    */
   }
 
   /**
@@ -125,17 +159,19 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   lazy val length = radius * radius * math.Pi * (angle / 360.0)
 
   /**
-   * Calculates the middle point of the arc (the point between the start and end point on the circumference).
+   * Calculates the midpoint of the arc (the point between the start and end point on the circumference).
    */
   lazy val midPoint = {
-    val middleAngle = endAngle - startAngle
-    Vector2D(epsilon(math.cos(middleAngle)) * epsilon(radius), epsilon(math.sin(middleAngle)) * epsilon(radius)) + center
+    val midAngle = startAngle + ((((endAngle+360)-startAngle) % 360) / 2)
+    val x = epsilon(math.cos(midAngle.toRadians)*radius + center.x)
+    val y = epsilon(math.sin(midAngle.toRadians)*radius + center.y)
+    Vector2D(x,y)
   }
 
   /**
    * The point where the arc starts. Remember we calculate angles from 3 o'clock counter-clockwise.
    */
-  lazy val startPoint = Vector2D(epsilon(math.cos(startAngle)) * epsilon(radius), epsilon(math.sin(startAngle)) * epsilon(radius)) + center
+  lazy val startPoint = Vector2D(epsilon(math.cos(startAngle.toRadians)) * radius, epsilon(math.sin(startAngle.toRadians)) * radius) + center
 
   /**
    * Calculates the boundary of the arc.
@@ -225,14 +261,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
       //the result is rounded to four decimals to reduce tolerances.
       val intersectValue = math.round(epsilon(math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2)))) * 1000) /1000
-      /*
-      println("pStart and pEnd: "+ this.startPoint + " " + this.endPoint)
-      println("parallelVector * delta: "+ParVXDelta)
-      println("parallelVector length: "+ParVLength)
-      println("delta length: "+deltaLength)
-      println("arc radius pow 2: "+math.pow(this.radius,2))
-      println("arc radius: "+this.radius)
-      */
+
       //intersectValue < 0    no intersection
       //intersectValue = 0    line tangent (one intersection)
       //intersectValue > 0    two intersections
@@ -273,9 +302,9 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case g => false
 
     /**
-   * Returns a list of points, defined as the intersection(s) between the
-   * arc and another arc.
-   */
+     * Returns a list of points, defined as the intersection(s) between the
+     * arc and another arc.
+     */
   }
   def intersections(geometry : Geometry2D) : Set[Vector2D] = geometry match {
     case arc : Arc2D => {
@@ -353,9 +382,8 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   def transform(t : TransformationMatrix) =
     new Arc2D(t.transform(center), radius * t.scale, startAngle, angle)
 
-  // TODO: Add middlepoint
   lazy val vertices = {
-    Seq(startPoint, endPoint)
+    Seq(startPoint,midPoint, endPoint)
   }
 
 }
@@ -383,8 +411,10 @@ object Arc2D {
     // Calculate center and radius
     val center = Circle2D.findCenterPoint(start, middle, end)
     val radius = (start - center).length
+
     // The start angle of the points, NOT the arc
     val startAngle = (start - center).angle
+
     // The end angle of the points, NOT the arc
     val endAngle = (end - center).angle
 
@@ -394,10 +424,11 @@ object Arc2D {
     // Find out which side of the line from start to end, the middle point is on.
     // If it's positive, the arc is counter-clockwise
     val det = (end.x - start.x) * (middle.y - start.y) - (end.y - start.y) * (middle.x - start.x)
-
     if (det > 0) {
+      //CW arc
       new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
     } else {
+      //CCW arc
       new Arc2D(center, radius, startAngle, angle)
     }
   }

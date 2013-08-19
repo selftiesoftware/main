@@ -34,14 +34,14 @@ import concurrent.ExecutionContext.Implicits.global
 object ModuleLoader {
 
   // The private init module.. ssshhh
-  private var _initModule : Option[Module] = None
+  private var _initModule: Option[Module] = None
 
   /**
    * The init [[com.siigna.module.Module]] that we're sending events to.
    * Call <code>initModule_=()</code> if you want to change the behavior.
    * @see [[com.siigna.module.Module]]
    */
-  def initModule : Option[Module] = _initModule
+  def initModule: Option[Module] = _initModule
 
   // The underlying class loader
   protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
@@ -58,9 +58,11 @@ object ModuleLoader {
 
   // Create a default packages
   future {
+
     load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
-    load(ModulePackage('cad,  s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
+    load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+
 
     // ****** OLE ******
 
@@ -93,7 +95,7 @@ object ModuleLoader {
    * @param clazz  The class to cast
    * @return  A Module (hopefully), otherwise probably a nasty error
    */
-  protected def classToModule(clazz : Class[_]) = clazz.newInstance().asInstanceOf[Module]
+  protected def classToModule(clazz: Class[_]) = clazz.newInstance().asInstanceOf[Module]
 
   /**
    * Attempts to load a [[com.siigna.module.Module]] by looking through the given package for resources at the given
@@ -102,13 +104,13 @@ object ModuleLoader {
    * @param classPath  The class path, e. g. "Menu".
    * @return  Some[Module] if a module could be found, None otherwise
    */
-  def load(packageName : Symbol, classPath : String) : Option[Module] = {
+  def load(packageName: Symbol, classPath: String): Option[Module] = {
     modules.get(packageName) match {
       case Some(p) => {
         // Retrieve the module class
         val clazz = p.get(classPath) match {
           // Return the class
-          case s : Some[Class[Module]] => s
+          case s: Some[Class[Module]] => s
 
           // Search for the class in the package
           case _ => try {
@@ -117,7 +119,7 @@ object ModuleLoader {
             modules(packageName) += classPath -> c
             Some(c)
           } catch {
-            case e : ClassNotFoundException => {
+            case e: ClassNotFoundException => {
               Log.debug("ModuleLoader: Class " + classPath + " could not be found in package " + packageName)
               None
             }
@@ -130,11 +132,11 @@ object ModuleLoader {
             try {
               Some(classToModule(c))
             } catch {
-              case _ : InstantiationException | _ : ClassCastException => {
+              case _: InstantiationException | _: ClassCastException => {
                 Log.debug("ModuleLoader: Class " + classPath + " in package " + packageName + " could not be converted to a Module.")
                 None
               }
-              case e : Exception => {
+              case e: Exception => {
                 Log.debug("ModuleLoader: Error when loading module ", e)
                 None
               }
@@ -161,7 +163,7 @@ object ModuleLoader {
    * @param pack  The package to load
    * @throws IOException  If something went wrong while trying to download the .jar file
    */
-  def load(pack : ModulePackage) {
+  def load(pack: ModulePackage) {
     if (!modules.contains(pack.name)) {
       try {
         val url = pack.toURL
@@ -181,9 +183,9 @@ object ModuleLoader {
           Log.success("ModuleLoader: Reloaded init module from " + pack + ".")
         } catch {
           // No module found
-          case e : ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
+          case e: ClassNotFoundException => Log.info("ModuleLoader: No ModuleInit class found in package " + pack)
           // Modules are out of date
-          case e : AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
+          case e: AbstractMethodError => Log.warning("ModuleLoader: ModuleInit from package " + pack.name + "' is incompatible with the current version of Siigna")
         }
 
         // Add to cache
@@ -191,7 +193,7 @@ object ModuleLoader {
 
         Log.success("ModuleLoader: Sucessfully loaded the module package " + pack)
       } catch {
-        case e : FileNotFoundException => Log.error("ModuleLoader: Could not find module package at URL: " + pack.toURL)
+        case e: FileNotFoundException => Log.error("ModuleLoader: Could not find module package at URL: " + pack.toURL)
       }
     } else {
       Log.info("ModuleLoader: A package named '" + pack + "' has already been loaded.")
@@ -215,7 +217,7 @@ object ModuleLoader {
    * package.
    * @param pack  The package to unload.
    */
-  def unload(pack : ModulePackage) {
+  def unload(pack: ModulePackage) {
     modules -= pack.name
     loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), this.getClass.getClassLoader)
   }

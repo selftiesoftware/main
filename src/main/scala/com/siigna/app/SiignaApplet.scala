@@ -52,13 +52,17 @@ import com.siigna.util.Log
 class SiignaApplet extends Applet {
 
   // The canvas on which we can paint
-  private var canvas : Canvas = null
+  private var canvas: Canvas = null
 
   // The controller to whom we send events
-  private var controller : Controller = null
+  private var controller: Controller = null
 
   // The paint thread
-  private val paintThread = new Thread() { override def run() { paintLoop() } }
+  private val paintThread = new Thread() {
+    override def run() {
+      paintLoop()
+    }
+  }
 
   // A boolean value indicating whether to exit the paint-loop
   private var shouldExit = false
@@ -69,10 +73,10 @@ class SiignaApplet extends Applet {
 
     // Stop the controller by interruption so we're sure the controller shuts it
     if (controller != null) controller ! 'exit
-              
+
     // Wait for the paint thread (max 500ms)
     paintThread.join(500)
-    
+
     // Quit the system
     System.exit(0)
   }
@@ -98,8 +102,15 @@ class SiignaApplet extends Applet {
         Log.success("Applet: Found drawing: " + id)
       }
 
+      // Gets the active drawing title, if any
+      val drawingTitle = getParameter("drawingTitle")
+      if (drawingTitle != null) {
+        Drawing.setAttribute("title", drawingTitle)
+        Log.success("Applet: Found title: " + drawingTitle)
+      }
+
       // Get the active user and token, if a log in was performed at www.siigna.com
-      val userName  = getParameter("contributorName")
+      val userName = getParameter("contributorName")
       val userToken = getParameter("contributorToken")
 
       if (userName != null) {
@@ -113,7 +124,7 @@ class SiignaApplet extends Applet {
         case _ => "stable"
       }
     } catch {
-      case _ : NullPointerException => // Not in an applet environment
+      case _: NullPointerException => // Not in an applet environment
     }
 
     // --- Initialize applet, event-listeners and view  --- \\
@@ -129,7 +140,9 @@ class SiignaApplet extends Applet {
     canvas.setSize(getSize)
 
     // Misc initialization
-    setVisible(true); setFocusable(true); requestFocus()
+    setVisible(true);
+    setFocusable(true);
+    requestFocus()
 
     // Allows specific KeyEvents to be detected
     setFocusTraversalKeysEnabled(false)
@@ -143,7 +156,9 @@ class SiignaApplet extends Applet {
 
     // Paint the view
     new Thread() {
-      override def run() { paintLoop() }
+      override def run() {
+        paintLoop()
+      }
     }.start()
   }
 
@@ -161,7 +176,7 @@ class SiignaApplet extends Applet {
     val strategy = canvas.getBufferStrategy
 
     // Run, run, run
-    while(!shouldExit) {
+    while (!shouldExit) {
 
       // Render a single frame
       if (strategy != null) do {
@@ -190,7 +205,7 @@ class SiignaApplet extends Applet {
    * @param width  The width of the entire frame
    * @param height  The height of the entire frame
    */
-  override def resize(width : Int, height : Int) {
+  override def resize(width: Int, height: Int) {
     super.resize(width, height)
     View.resize(width, height)
   }

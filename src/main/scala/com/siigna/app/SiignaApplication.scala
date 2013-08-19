@@ -97,7 +97,6 @@ class ApplicationWindow extends Frame
     override def componentShown   (e : ComponentEvent) { }
     override def componentResized (e : ComponentEvent) {
       applet.resize(getSize.getWidth.toInt, getSize.getHeight.toInt)
-      false
     }
   })
 

@@ -17,18 +17,24 @@
  * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
-package com.siigna.app.model.action
+package com.siigna.app.model.shape
 
-import com.siigna.app.model.Model
-import com.siigna.app.view.View
+import org.scalatest.FunSpec
+import org.scalatest.matchers.ShouldMatchers
+import com.siigna.util.geom.{TransformationMatrix, SimpleRectangle2D, Vector2D}
+import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
 
 /**
- * Loads a drawing from a given input.
- *
- * @param model  The model to store containing the shapes, actions and attributes of the new model.
+ * Tests the [[com.siigna.app.model.shape.ArcShape]].
  */
-case class LoadDrawing(model : Model) extends VolatileAction {
+class ArcShapeSpec extends FunSpec with ShouldMatchers {
 
-  def execute(old : Model) = model
+  describe("An ArcShape") {
 
+    val a = ArcShape(Vector2D(0, 0), 20,0,180)
+
+    it ("can find a selector given a point") {
+      a.getSelector(Vector2D(0, 0)) should equal (FullShapeSelector)
+    }
+  }
 }

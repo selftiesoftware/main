@@ -67,6 +67,8 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       })
       intersections
     }
+      //TODO: Make polyline
+    case _ => Set()
   }
 
   def transform(t : TransformationMatrix) = CollectionGeometry2D(geometries.map(_ transform t))

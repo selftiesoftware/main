@@ -118,7 +118,5 @@ class CircleShapeSpec extends FunSpec with ShouldMatchers {
       c.getPart(ShapeSelector(1, 2, 4)).get.apply(TransformationMatrix(Vector2D( 10,  0), 2.0)
         ).geometry.vertices(3) should equal (Vector2D(-20,  0))
     }
-
   }
-
 }
