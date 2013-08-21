@@ -89,12 +89,12 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
-    //Siigna("isLive") = false
+    Siigna("isLive") = false
 
     // --- Read the applet parameters --- \\
     try {
       // Gets the active drawing id, if one was selected at www.siigna.com, or None if none was received
-      val id = drawingId.toLong
+      val drawingId = getParameter("drawingId")
 
       if (drawingId != null) try {
         val id = drawingId.toLong
@@ -211,4 +211,3 @@ class SiignaApplet extends Applet {
   }
 
 }
-
