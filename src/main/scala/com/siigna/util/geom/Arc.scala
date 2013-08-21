@@ -115,42 +115,8 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   lazy val endPoint =  {
     val x = epsilon(math.cos(endAngle.toRadians)*radius + center.x)
     val y = epsilon(math.sin(endAngle.toRadians)*radius + center.y)
-    //println("endAngle degrees; "+endAngle)
-    //println("endAngle radians; "+endAngle.toRadians)
 
     Vector2D(x,y)
-
-    /*
-    //Let the center of the circle be (x,y), the angle of the arc be A, the
-    //radius of the circle be r, and the starting point of the arc be (a,b).
-    //Let angle B be defined by
-    val A = startAngle.toRadians
-    val B = endAngle.toRadians
-    val x = center.x
-    val y = center.y
-    val r = radius
-
-    //Then there are two ending points (c,d) for the arc, corresponding to
-    //clockwise and counterclockwise directions around the circle. They
-    //are given by
-
-    //ENDPOINT:
-    //c = h + r*cos(B-A),
-    //d = k + r*sin(B-A),
-
-    //STARTPOINT;
-    //c = h + r*cos(B+A),
-    //d = k + r*sin(B+A),
-
-    val sX = x + r * math.cos(B-A)
-
-    val sY = x + r * math.sin(B-A)
-
-
-    //OBSOLETE: Vector2D(epsilon(math.cos(startAngle)) * epsilon(radius), epsilon(math.sin(startAngle)) * epsilon(radius)) + center
-
-    Vector2D(epsilon(sX),epsilon(sY))
-    */
   }
 
   /**
@@ -297,8 +263,15 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
     //TODO: matches on the boundary of the arc, which is not correct.
     case rectangle : SimpleRectangle2D => {
+      println("simpleRect intersects eval for arc - should be updated")
       !(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
     }
+
+    case complexRect : ComplexRectangle2D => {
+      println("PLEASE IMPLEMENT INTERSECTS EVAL FOR ARC, COMPLEXRECT")
+      false
+    }
+
     case g => false
 
     /**
