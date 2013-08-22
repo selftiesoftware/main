@@ -162,5 +162,5 @@ object Mode extends Enumeration {
   val Production = Value(20004)
   val Testing    = Value(20005)
   val Cleaning   = Value(20006)
-  val http       = Value(7788)
+  val http       = Value(80)
 }
