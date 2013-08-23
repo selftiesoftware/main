@@ -54,6 +54,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
    *     -   +    -    n/N < 0, always false
    *     +   -    -    n/N < 0, always false
    */
+  //TODO: add tolerances (0< n <1 = > -epsilon < n < 1 + epsilon).
   private def between0And1(n : Double, N : Double) = {
     def sign(n : Double) = if (n >= 0) 1 else -1  // The sign of n (- or +).
     if (sign(n) == sign(N)) {
@@ -228,7 +229,9 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
         val t = (cx * dy - cy * dx) / dot
         val u = (cx * by - cy * bx) / dot
 
-        if((t >= 0 && t <= 1) && (u >= 0 && u <= 1) ) {
+        //check that U and T are between 0 and 1. In reality the absolute tolerance epsilon is used to prevent rounding errors
+        //that filter intersections which should exist.
+        if((t >= -epsilon && t <= (1 + epsilon)) && (u >= -epsilon && u <= (1 + epsilon)) ) {
           Set(Vector2D(x1+t*bx, y1+t*by))
         }
         else Set[Vector2D]()
