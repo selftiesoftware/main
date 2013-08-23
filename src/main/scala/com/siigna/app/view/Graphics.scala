@@ -187,6 +187,6 @@ trait Graphics {
    * @param  width  the pen width to use.
    */
   def setStrokeWidth(width : Double) {
-    AWTGraphics setStroke new BasicStroke(width.asInstanceOf[Float])
+    AWTGraphics setStroke new BasicStroke(width.asInstanceOf[Float]*2.54f) // the width is multiplied by 2.54 to the a value in inches.
   }
 }

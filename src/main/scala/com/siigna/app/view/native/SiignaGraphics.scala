@@ -41,7 +41,7 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
     setColor(color)
 
     // Set the stroke width
-    setStrokeWidth(attributes double "StrokeWidth" getOrElse 0.6)
+    setStrokeWidth(attributes double "StrokeWidth" getOrElse 0.18)
 
     if (attributes.boolean("Visible") != Some(false)) {
       transformedShape match {
