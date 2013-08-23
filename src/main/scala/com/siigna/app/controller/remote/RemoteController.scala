@@ -47,7 +47,8 @@ object RemoteController {
   private var shouldExit = false
 
   // The remote server
-  private val remote = new Server("80.71.132.98", Mode.Production)
+  //private val remote = new Server("80.71.132.98", Mode.Production)
+  private val remote = new Server("app.siigna.com", Mode.http)
   //val remote = new Server("localhost", Mode.Production)
   //val remote = new Server("localhost", Mode.http)
 

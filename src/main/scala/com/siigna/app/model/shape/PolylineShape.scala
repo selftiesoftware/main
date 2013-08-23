@@ -482,11 +482,20 @@ object PolylineShape {
    * @return  A PolylineShape connecting the given points with lines
    */
   def apply(points : Traversable[Vector2D]) : PolylineShape =
+
+
     if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
     else {
-      val lines = points.toSeq.map(p => new PolylineLineShape(p))
 
-      // Close the shape, if requested
+      //a function to filter out one of any two concecutive coinsiding points
+      def compressRecursive[A](ls: List[A]): List[A] = ls match {
+        case Nil       => Nil
+        case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
+      }
+
+      val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
+
+      // Close the shape, if requested. The points are rounded to avoid non-significant rounding errors.
       if (points.head == points.last)
         PolylineShapeClosed(points.head, lines.tail.take(lines.size - 2), Attributes())
       else

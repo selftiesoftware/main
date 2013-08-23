@@ -30,11 +30,19 @@ import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, Sh
 class ArcShapeSpec extends FunSpec with ShouldMatchers {
 
   describe("An ArcShape") {
-
+    //center, radius, start angle, end angle
     val a = ArcShape(Vector2D(0, 0), 20,0,180)
 
-    it ("can find a selector given a point") {
-      a.getSelector(Vector2D(0, 0)) should equal (FullShapeSelector)
+    it ("can find a selector when clicking the midpoint") {
+      a.getSelector(Vector2D(0, 20)) should equal (FullShapeSelector)
+    }
+
+    it ("can find a selector when clicking the startpoint") {
+      a.getSelector(Vector2D(20, 0)) should equal (FullShapeSelector)
+    }
+
+    it ("can find a selector when clicking the endpoint") {
+      a.getSelector(Vector2D(-20, 0)) should equal (FullShapeSelector)
     }
   }
 }
