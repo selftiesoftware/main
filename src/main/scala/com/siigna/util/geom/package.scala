@@ -49,6 +49,13 @@ package com.siigna.util
 package object geom {
 
   /**
+   * The absolute double tolerance in Siigna                                                               s
+   * @return  the tolerance
+   */
+  val epsilon = 0.00001
+
+
+  /**
    * Normalizes a degree-value (not radians) to fit in a range of 0 - 360.
    * @param degrees  The degrees to normalize.
    * @return  A positive number between 0 and 360.

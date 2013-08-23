@@ -230,6 +230,17 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   def distanceTo(point : Vector2D) = (point - this).length
 
   /**
+   * Determine if two Vector2Ds coinside. Uses the absolute tolerance epsilon, set in main/util/geom/package
+   */
+  override def equals(obj:Any) : Boolean = {
+    obj match {
+      case v : Vector2D =>  (math.abs(this.x - v.x) < epsilon) && (math.abs(this.y - v.y) < epsilon)
+      case _ => false
+    }
+  }
+
+
+  /**
    * Calculates the length of the vector.
    */
   def length = java.lang.Math.hypot(x, y)
