@@ -118,6 +118,13 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def isOnline : Boolean = RemoteController.isOnline
 
   /**
+   * the ID of the latest created shape (used in Trim)
+   *
+   * @return Some(ID : Int) of the shape which was created last if relevant, else None
+   */
+  var latestID : Option[Int] = None
+
+  /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
    * [[com.siigna.app.view.Display]]. For the modules the matrix is forwarded in case the module
    * needs to use/reverse some of the transformations that already have been applied to the view.

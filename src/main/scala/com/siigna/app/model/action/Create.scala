@@ -32,7 +32,9 @@ object Create {
    * @param shape  The shape to create.
    */
   def apply(shape : Shape) {
-    Drawing.execute(CreateShape(Drawing getId, shape))
+    val id = Drawing.getId
+    com.siigna.app.Siigna.latestID = Some(id)
+    Drawing.execute(CreateShape(id, shape))
   }
 
   /**
