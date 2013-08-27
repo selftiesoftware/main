@@ -239,10 +239,10 @@ package object io {
     val User    = 4.toByte
 
     // Util
-    val Attributes = 50.toByte
+    val Attributes           = 50.toByte
     val TransformationMatrix = 51.toByte
-    val Vector2D   = 52.toByte
-    val Model      = 53.toByte
+    val Vector2D             = 52.toByte
+    val Model                = 53.toByte
 
     // Scala
     val Traversable = 80.toByte
@@ -250,7 +250,7 @@ package object io {
     val Range       = 82.toByte
 
     // Java
-    val Color    = 90.toByte
+    val Color       = 90.toByte
 
     // Actions
     val AddAttributes       = 100.toByte
@@ -275,8 +275,7 @@ package object io {
     val LineShape     = 204.toByte
     val PolylineShapeClosed   = 205.toByte
     val PolylineShapeOpen     = 206.toByte
-    val RectangleShapeSimple  = 207.toByte
-    val RectangleShapeComplex = 208.toByte
+    val RectangleShape        = 207.toByte
     val TextShape     = 209.toByte
 
     // Inner polyline shapes

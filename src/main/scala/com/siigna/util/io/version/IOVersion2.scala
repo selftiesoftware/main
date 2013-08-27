@@ -67,12 +67,12 @@ object IOVersion2 extends IOVersion {
     val actual = com.siigna.util.io.mirror.reflect(elem).symbol.toType
     actual match {
       case x if x <:< expected =>   // We're good!
-      case x if (x =:= typeOf[java.lang.Byte]    && expected =:= typeOf[Byte])    => // We're also good
-      case x if (x =:= typeOf[java.lang.Boolean] && expected =:= typeOf[Boolean]) => // We're also good
-      case x if (x =:= typeOf[java.lang.Integer] && expected =:= typeOf[Int])     => // We're also good
-      case x if (x =:= typeOf[java.lang.Long]    && expected =:= typeOf[Long])    => // We're also good
-      case x if (x =:= typeOf[java.lang.Double]  && expected =:= typeOf[Double])  => // We're also good
-      case x if (x =:= typeOf[java.lang.Float]   && expected =:= typeOf[Float])   => // We're also good
+      case x if x =:= typeOf[java.lang.Byte]    && expected =:= typeOf[Byte]    => // We're also good
+      case x if x =:= typeOf[java.lang.Boolean] && expected =:= typeOf[Boolean] => // We're also good
+      case x if x =:= typeOf[java.lang.Integer] && expected =:= typeOf[Int]     => // We're also good
+      case x if x =:= typeOf[java.lang.Long]    && expected =:= typeOf[Long]    => // We're also good
+      case x if x =:= typeOf[java.lang.Double]  && expected =:= typeOf[Double]  => // We're also good
+      case x if x =:= typeOf[java.lang.Float]   && expected =:= typeOf[Float]   => // We're also good
       case x              => { // We're not good - the types differ!
         throw new ClassCastException(s"Could not cast $x to expected type $expected.")
       }
@@ -165,6 +165,7 @@ object IOVersion2 extends IOVersion {
       //case Type.RectangleShapePart    => // Nothing here yet
       //case Type.RectangleShapeSimple  => // Nothing here yet
     else if (byte == ObjectType.Range)          in.readType[E, Range](new Range(in.readMember[Int]("start"), in.readMember[Int]("end"), in.readMember[Int]("step")))
+    else if (byte == ObjectType.RectangleShape) in.readType[E, RectangleShape](new RectangleShape(in.readMember[Vector2D]("center"), in.readMember[Double]("width"), in.readMember[Double]("height"), in.readMember[Double]("rotation"), in.readMember[Attributes]("attributes")))
     else if (byte == ObjectType.RemoteAction)   in.readType[E, RemoteAction](new RemoteAction(in.readMember[Action]("action"), in.readMember[Boolean]("undo")))
     else if (byte == ObjectType.SequenceAction) in.readType[E, SequenceAction](new SequenceAction(in.readMember[Seq[Action]]("actions")))
     else if (byte == ObjectType.Session)        in.readType[E, Session](new Session(in.readMember[Long]("drawing"), in.readMember[User]("user")))
@@ -336,6 +337,14 @@ object IOVersion2 extends IOVersion {
         out.writeMember("innerShapes", p.innerShapes)
         out.writeMember("attributes", p.attributes)
       }
+      case RectangleShape(center, width, height, rotation, attributes) => {
+        out.writeByte(ObjectType.RectangleShape)
+        out.writeMember("center", center)
+        out.writeMember("width", width)
+        out.writeMember("height", height)
+        out.writeMember("rotation", rotation)
+        out.writeMember("attributes", attributes)
+      }
       case TextShape(text, position, scale, attributes) => {
         out.writeByte(ObjectType.TextShape)
         out.writeMember("text", text)
@@ -380,7 +389,7 @@ object IOVersion2 extends IOVersion {
       }
       case c : Color => {
         out.writeByte(ObjectType.Color)
-        out.writeMember("color", (c.getAlpha << 24) | (c.getRed << 16) | (c.getGreen << 8) | (c.getBlue))
+        out.writeMember("color", (c.getAlpha << 24) | (c.getRed << 16) | (c.getGreen << 8) | c.getBlue)
       }
       case i : InnerPolylineShape => {
         i match {
