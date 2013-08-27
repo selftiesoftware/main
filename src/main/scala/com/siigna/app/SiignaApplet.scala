@@ -89,7 +89,7 @@ class SiignaApplet extends Applet {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
 
-    Siigna("isLive") = false
+    //Siigna("isLive") = false
 
     // --- Read the applet parameters --- \\
     try {
@@ -140,8 +140,8 @@ class SiignaApplet extends Applet {
     canvas.setSize(getSize)
 
     // Misc initialization
-    setVisible(true);
-    setFocusable(true);
+    setVisible(true)
+    setFocusable(true)
     requestFocus()
 
     // Allows specific KeyEvents to be detected
