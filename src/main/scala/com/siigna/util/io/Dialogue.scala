@@ -20,7 +20,6 @@
 package com.siigna.util.io
 
 import io.Source
-import com.siigna.util.Log
 import java.nio.file.{OpenOption, StandardOpenOption, Files}
 import java.nio.channels.{FileChannel, ReadableByteChannel}
 import java.util
@@ -28,7 +27,6 @@ import java.nio.charset.Charset
 import javax.swing.filechooser.FileNameExtensionFilter
 import java.nio.ByteBuffer
 import java.io._
-import scala.reflect.runtime.universe._
 
 /**
  * <h2>Dialogue</h2>
@@ -203,7 +201,7 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueRead[T : TypeTag](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
+  protected def openDialogueRead[T](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
     openDialogue[T](DialogueFunctionRead(f, filters))
   }
 
@@ -219,7 +217,7 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueWrite[T : TypeTag](parsers : Map[FileNameExtensionFilter, FileChannel => T], options : Set[OpenOption]) : Option[T] = {
+  protected def openDialogueWrite[T](parsers : Map[FileNameExtensionFilter, FileChannel => T], options : Set[OpenOption]) : Option[T] = {
     // Make sure we have at least one file filter
     require(!parsers.isEmpty, "Needs at least one parser to operate on, none were given.")
     openDialogue[T](
@@ -235,15 +233,16 @@ object Dialogue {
    * @tparam T  The type of data to return.
    * @return Some[T] if the data was successfully returned and parsed to type T, None otherwise.
    */
-  protected def openDialogue[T : TypeTag](function : DialogueFunction) : Option[T] = {
+  protected def openDialogue[T](function : DialogueFunction) : Option[T] = {
     // Continue to open the dialogue
     val result = IOActor !? function
     result match {
       case i : InterruptedException => None
       case e => {
-        mirror.reflect(result).symbol.toType match {
-          case x if x <:< typeOf[T] => Some(e.asInstanceOf[T])
-          case _ => Log.warning("Dialogue: " + e); None
+        try {
+          Some(e.asInstanceOf[T])
+        } catch {
+          case _ : Throwable => None
         }
       }
     }
