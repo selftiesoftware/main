@@ -86,14 +86,16 @@ package object io {
 
   // A private class to perform type-safe callback invocations
   private[io] trait DialogueFunction
-  private[io] case class DialogueFunctionRead(f : File => Any, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
+  private[io] case class DialogueFunctionRead[T](f : File => T, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
   private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, FileChannel => Any], options : Set[OpenOption]) extends DialogueFunction
 
   private var dialogue : Option[JFileChooser] = None
 
   // A mirror used to reflect on classes at runtime
   // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
-  protected[io] val mirror = runtimeMirror(getClass.getClassLoader)
+  protected[io] val mirror = AccessController.doPrivileged(new PrivilegedAction[Mirror] {
+    def run() = { runtimeMirror(getClass.getClassLoader) }
+  })
 
   // Initialize the dialogue and the look and feel
   private val t = new Thread() {
@@ -136,10 +138,10 @@ package object io {
       dialogue match {
         case Some(d) => {
           // Remove the old filters
-          d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter(_))
+          d.getChoosableFileFilters.foreach(d.removeChoosableFileFilter)
 
           // Set the filters
-          fileFilters.foreach(d.addChoosableFileFilter(_))
+          fileFilters.foreach(d.addChoosableFileFilter)
 
           // Open the dialogue
           val result = if (read) d.showOpenDialog(null) else d.showSaveDialog(null)
@@ -168,7 +170,7 @@ package object io {
                 // If the file does not end with the right extension, append the extension
                 val filter = d.getFileFilter.asInstanceOf[FileNameExtensionFilter]
                 val extensions = filter.getExtensions
-                val file    = if (!extensions.exists(selectedFile.getName.endsWith(_))) {
+                val file    = if (!extensions.exists(selectedFile.getName.endsWith)) {
                   new File(selectedFile.getAbsolutePath + "." + extensions.head)
                 } else selectedFile
 
@@ -237,10 +239,10 @@ package object io {
     val User    = 4.toByte
 
     // Util
-    val Attributes = 50.toByte
+    val Attributes           = 50.toByte
     val TransformationMatrix = 51.toByte
-    val Vector2D   = 52.toByte
-    val Model      = 53.toByte
+    val Vector2D             = 52.toByte
+    val Model                = 53.toByte
 
     // Scala
     val Traversable = 80.toByte
@@ -248,7 +250,7 @@ package object io {
     val Range       = 82.toByte
 
     // Java
-    val Color    = 90.toByte
+    val Color       = 90.toByte
 
     // Actions
     val AddAttributes       = 100.toByte
@@ -273,8 +275,7 @@ package object io {
     val LineShape     = 204.toByte
     val PolylineShapeClosed   = 205.toByte
     val PolylineShapeOpen     = 206.toByte
-    val RectangleShapeSimple  = 207.toByte
-    val RectangleShapeComplex = 208.toByte
+    val RectangleShape        = 207.toByte
     val TextShape     = 209.toByte
 
     // Inner polyline shapes

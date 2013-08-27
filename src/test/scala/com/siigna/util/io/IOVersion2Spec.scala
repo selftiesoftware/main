@@ -209,6 +209,11 @@ class IOVersion2Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
       out.writeObject(x)
       in.readObject[Range] should equal(x)
     }
+    it ("can read and write a RectangleShape") {
+      val x = RectangleShape(Vector2D(-99, 231.3), 40, 59, 17.8, Attributes("Color" -> Color.green))
+      out.writeObject(x)
+      in.readObject[RectangleShape] should equal(x)
+    }
     it ("can read and write a RemoteAction") {
       val x = new RemoteAction(new CreateShape(13, LineShape(0, 0, 10, 10)))
       out.writeObject(x)

@@ -48,7 +48,7 @@ object RemoteController {
 
   // The remote server
   //private val remote = new Server("80.71.132.98", Mode.Production)
-  private val remote = new Server("app.siigna.com", Mode.http)
+  private val remote = new Server("app.siigna.com", Mode.Http)
   //val remote = new Server("localhost", Mode.Production)
   //val remote = new Server("localhost", Mode.http)
 
@@ -61,6 +61,8 @@ object RemoteController {
 
       // Wait until we are live
       while (!isLive) Thread.sleep(500)
+
+      Log.debug("Remote: Initiating connection.")
 
       try {
         def drawingId : Option[Long] = SiignaDrawing.attributes.long("id")
