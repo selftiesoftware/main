@@ -44,6 +44,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
   val p2 = geometry.p2 //BitSet 2
   val p3 = geometry.p3 //BitSet 3
 
+
   def delete(part : ShapeSelector) = part match {
     // Three or more points
     case FullShapeSelector => Nil

@@ -63,30 +63,19 @@ object ModuleLoader {
     load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
 
-
-    // ****** OLE ******
-
-    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
-    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-
-    //DESKTOP
-    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad_suite.jar", true))
-
-    //LAPTOP
-    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
-
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
     //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
+    //Jens' local modules:
     //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
     //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
-    //Niels' modules:
+    //Niels' and Ole's local modules:
+    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
     //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
-    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
   }
 
 
