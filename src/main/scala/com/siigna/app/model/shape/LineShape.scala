@@ -115,8 +115,8 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   override def toString = "LineShape[" + p1 + ", " + p2 + " (" + attributes + ")]"
 
   def transform(transformation : TransformationMatrix) : LineShape = {
-    LineShape(p1 transform(transformation),
-              p2 transform(transformation),
+    LineShape(p1 transform transformation,
+              p2 transform transformation,
               attributes)
   }
 }

@@ -55,7 +55,9 @@ class SiignaGraphics(val AWTGraphics : Graphics2D) extends Graphics {
           if (attributes.boolean("Infinite").getOrElse(false)) drawLine(s.p1, s.p2) else drawSegment(s.p1, s.p2)
         }
 
-        case s : RectangleShape => s.geometry.segments.foreach(s => drawSegment(s.p1, s.p2))
+        case s : RectangleShape => {
+          s.geometry.segments.foreach(s => drawSegment(s.p1, s.p2))
+        }
 
         /** COLLECTION SHAPES **/
         case s : PolylineShape    => {

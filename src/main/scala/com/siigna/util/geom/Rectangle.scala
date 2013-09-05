@@ -236,12 +236,12 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
    * The first vertex on the rectangle (top right in a rectangle with 0 rotation).
    */
-  lazy val p0 = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
+  lazy val p0 : Vector2D = Vector2D(center.x+width/2, center.y+height/2).rotate(center,rotation)
 
   /**
    * The second vertex on the rectangle (top left in a rectangle with 0 rotation).
    */
-  lazy val p1 = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
+  lazy val p1 : Vector2D = Vector2D(center.x-width/2, center.y+height/2).rotate(center,rotation)
 
   /**
     * The third vertex on the rectangle (bottom left in a rectangle with 0 rotation).
@@ -251,7 +251,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   /**
     * The fourth vertex on the rectangle (bottom right in a rectangle with 0 rotation).
    */
-  lazy val p3 = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
+  lazy val p3 : Vector2D = Vector2D(center.x+width/2, center.y-height/2).rotate(center,rotation)
 
   def -(point: Vector2D): ComplexRectangle2D = copy(center = center - point)
 
@@ -270,16 +270,14 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
     val yMax = vertices.map(_.y).reduceLeft(max)
     val yMin = vertices.map(_.y).reduceLeft(min)
 
-    Rectangle2D(Vector2D(xMax,yMax), Vector2D(xMin,yMin))
+    Rectangle2D(Vector2D(xMin,yMin), Vector2D(xMax,yMax))
   }
 
   def contains(geometry: Geometry2D): Boolean = geometry match {
     case l : Segment2D => contains(l.p1) && contains(l.p2)
     case r : SimpleRectangle2D => r.vertices.forall(contains)
     case p : Vector2D => {
-      val vector = p - center   // Vector relative to the center
-      val angle  = vector.angle // The angle...
-      vectorAtAngle(angle).length >= vector.length
+      toSimpleRectangle.contains(p.rotate(center, rotation))
     }
     case _ => false
   }
@@ -299,38 +297,6 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
   def intersections(geometry: Geometry2D): Set[Vector2D] = Set.empty
 
-  /**
-   * Calculates the length-vector at a given angle in the rectangle relative from the center.
-   * The length vector is the x and y coordinate the rectangle extends from the center in the complex rectangle
-   * at the given angle. With an angle and rotation of 0 the vector will be (width, 0). With a rotation or angle
-   * of 90 the vector will become (0, height).
-   * @param angle The angle to examine.
-   * @return  A [[com.siigna.util.geom.Vector2D]] describing how far the rectangle extends in the given angle.
-   */
-  def vectorAtAngle(angle : Double) : Vector2D = {
-    val trueAngle = {
-      val a = (angle - rotation) % 360
-      if (a < 0) a + 360 else a
-    }
-
-    // The sign of the coordinates
-    // - we use +/- 0.5 because we only need half the width and height
-    val signX = if (trueAngle <= 90 || trueAngle >= 270) 0.5 else -0.5
-    val signY = if (trueAngle <= 180) 0.5 else -0.5
-
-    // Examine how close the angle is to 45 degrees
-    trueAngle % 90 match {
-      // Either 90 or 270 degrees
-      case 0 if trueAngle == 90 || trueAngle == 270 => Vector2D(0, height * signY)
-      // Full width and height
-      case 45          => Vector2D(width * signX, height * signY)
-      // Below 45 degrees
-      case a if a < 45 => Vector2D(width * signX, height * math.tan(a.toRadians) * signY)
-      // Above 45 degrees
-      case a           => Vector2D(width * math.tan((a - 45).toRadians) * signX, height * signY)
-    }
-  }
-
   def onPeriphery(point: Vector2D): Boolean = distanceTo(point) < 0.00001
 
   /**
@@ -341,6 +307,12 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   def segments = Seq(Segment2D(p0, p1), Segment2D(p1, p2), Segment2D(p2, p3), Segment2D(p3, p0))
 
   /**
+   * Converts this rectangle to a simple rectangle while ignoring rotation.
+   * @return An instance of a [[com.siigna.util.geom.SimpleRectangle2D]] with the same center, width and height.
+   */
+  def toSimpleRectangle = SimpleRectangle2D(center.x - width * 0.5, center.y - height * 0.5, center.x + width * 0.5, center.y + height * 0.5)
+
+  /**
    * Transform the geometry with a given matrix.
    */
   def transform(transformation: TransformationMatrix): ComplexRectangle2D = {
@@ -348,7 +320,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
       height * transformation.scaleY, normalizeDegrees(rotation + transformation.rotation))
   }
 
-  def vertices = Seq(p0, p1, p2, p3)
+  def vertices : Seq[Vector2D] = Seq(p0, p1, p2, p3)
 }
 
 /**

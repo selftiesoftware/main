@@ -223,10 +223,10 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
 
   def add(parts: Map[Int, (Shape, ShapeSelector)]) : Selection = {
     def mergePart(t : (Int, (Shape, ShapeSelector))) : (Int, (Shape, ShapeSelector)) = {
-      (t._1 -> (selection.get(t._1) match {
+      t._1 -> (selection.get(t._1) match {
         case Some(s) => s._1 -> (s._2 ++ t._2._2)
         case _ => t._2
-      }))
+      })
     }
     NonEmptySelection( selection ++ parts.map(t => mergePart(t)))
   }
@@ -257,7 +257,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
   def remove(id : Int, selector : ShapeSelector) : Selection = {
     selection.get(id) match {
       case Some(t) => NonEmptySelection(
-        (t._2 -- selector) match {
+        t._2 -- selector match {
           case EmptyShapeSelector => selection - id
           case s => selection.updated(id, t._1 -> s)
         })
@@ -268,7 +268,7 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
   def remove(parts : Map[Int, ShapeSelector]) : Selection = {
     Selection(parts.foldLeft(selection)((s, t) => {
       s.get(t._1) match {
-        case Some(that) => (that._2 -- t._2) match {
+        case Some(that) => that._2 -- t._2 match {
           case EmptyShapeSelector => s - t._1
           case e => s.updated(t._1, that._1 -> e)
         }
@@ -300,10 +300,10 @@ case class NonEmptySelection(selection : Map[Int, (Shape, ShapeSelector)]) exten
     this
   }
 
-  def vertices = {
+  def vertices : Traversable[Vector2D] = {
     selection.values.map(t => t._2 -> t._1.getPart(t._2)).collect {
-      case (selector, Some(shape)) => selector -> shape(transformation)
-    }.map(t => t._2.getVertices(t._1)).flatten
+      case (selector, Some(shape)) => shape(transformation).getVertices(selector)
+    }.flatten
   }
 
 }
