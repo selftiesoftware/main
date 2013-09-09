@@ -5,6 +5,7 @@ import com.siigna.util.Log
 import com.siigna.app.model.action.RemoteAction
 import com.siigna.app.model.server.User
 import com.siigna.util.io.{Marshal, Unmarshal}
+import java.net.URLEncoder
 
 /**
  * Http Client for siigna communication
@@ -115,9 +116,10 @@ object Client {
    * @param ses
    */
   def sessionToUrl(ses:Session) = {
+    def encode(str : String) = URLEncoder.encode(str, "UTF8")
     ses match {
       case Session(drawing,User(id,name,token)) => {
-        "?session="+drawing+","+id+","+name+","+token
+        s"?session=$drawing,$id,${encode(name)},${encode(token)}"
       }
       case _ => "session=invalid"
     }
