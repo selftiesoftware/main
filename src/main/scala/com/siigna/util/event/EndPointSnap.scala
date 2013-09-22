@@ -70,6 +70,7 @@ case object EndPointSnap extends EventSnap {
           closestTwo(start, end)
         }
         case s : PolylineShape => closestPoints(s.geometry.vertices)
+        case s:  RectangleShape => closestPoints(s.geometry.vertices)
         case s : TextShape => closestPoints(s.geometry.vertices)
         case _ => point
       })
