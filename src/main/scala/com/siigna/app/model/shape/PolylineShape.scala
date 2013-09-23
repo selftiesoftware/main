@@ -542,6 +542,38 @@ object PolylineShape {
   }
 
   /**
+   * Creates a PolylineShape connecting the given points with lines. Even if the first and last point are the same, the
+   * polyline is open ([[com.siigna.app.model.shape.PolylineShape.PolylineShapeOpen]]).
+   *
+   * @param points  The points to use.
+   */
+  def createOpen(points : Vector2D*) : PolylineShape = PolylineShape.createOpen(points.toTraversable)
+
+  /**
+   * Creates a PolylineShape from a collection of points. Even if the first and last points are equal in
+   * the collection, the polyline is kept open.
+   *
+   * @param points  The collection of points to use.
+   * @return  A PolylineShape connecting the given points with lines
+   */
+  def createOpen(points : Traversable[Vector2D]) : PolylineShape =
+
+
+    if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
+    else {
+
+      //a function to filter out one of any two concecutive coinsiding points
+      def compressRecursive[A](ls: List[A]): List[A] = ls match {
+        case Nil       => Nil
+        case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
+      }
+
+      val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
+      println("Create open polyline shape")
+      PolylineShapeOpen(points.head, lines.tail, Attributes())
+    }
+
+  /**
    * Extractor pattern for PolylineShapes
    * @param startPoint  The start point for the polyline
    * @param innerShapes  The [[com.siigna.app.model.shape.InnerPolylineShape]]s for the polyline
