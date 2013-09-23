@@ -33,6 +33,8 @@ import concurrent.ExecutionContext.Implicits.global
  */
 object ModuleLoader {
 
+  var modulesLoaded: Boolean = false
+
   // The private init module.. ssshhh
   private var _initModule: Option[Module] = None
 
@@ -62,6 +64,8 @@ object ModuleLoader {
     load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
     load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+    modulesLoaded = true
+    println("Modules loaded!!!")
 
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
