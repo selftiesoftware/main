@@ -20,6 +20,7 @@
 package com.siigna.app.view
 
 import java.awt.Color
+import com.siigna.util.geom.Vector2D
 
 
 /**
@@ -47,6 +48,14 @@ trait Display {
    */
   def paintFrame(graphics : Graphics, width : Int, height : Int, color : Color = backgroundColor) {
     val center = View.center
+    graphics setColor color
+    graphics.AWTGraphics.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
+  }
+
+  /**
+   * Paints a frame with a given width, height and center
+   */
+  def paintFrameSpecifyCenter(graphics : Graphics, width : Int, height : Int, color : Color = backgroundColor, center : Vector2D) {
     graphics setColor color
     graphics.AWTGraphics.fillRoundRect(center.x.toInt - width / 2, center.y.toInt - height / 2, width, height, 20, 20)
   }

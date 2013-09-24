@@ -91,6 +91,11 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def display(string : String) { display(new Popup(string)) }
 
   /**
+   * A shorthand reference to display a tooltip.
+   */
+  def tooltip(string : String) { display(new Tooltip(string)) }
+
+  /**
    * Returns the active ModuleInterface that's been placed highest in the interface-hierarchy.
    * This is the interface Siigna calls to paint on first. If any interfaces lies before in the
    * module-chain (i. e. if the active interface doesn't belong to the Default module), they won't
