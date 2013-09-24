@@ -404,7 +404,7 @@ object PolylineShape {
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =
-      PolylineShape(startPoint, innerShapes, attributes)
+      PolylineShapeOpen(startPoint, innerShapes, attributes)
 
     def delete(part : ShapeSelector) = {
       part match {
@@ -569,9 +569,24 @@ object PolylineShape {
       }
 
       val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
-      println("Create open polyline shape")
-      PolylineShapeOpen(points.head, lines.tail, Attributes())
+      println("Create open polyline shape place 1")
+      PolylineShape.createOpen(points.head, lines.tail, Attributes())
     }
+
+  /**
+   * Creates an PolylineShape from a start point, the inner shapes (see documentation for the PolylineShape class) and
+   * a number of [[com.siigna.util.collection.Attributes]]. The shape is open, even if start and end points are the same.
+   * @param startPoint  The starting point of the polyline
+   * @param innerShapes  The inner shapes of the polyline
+   * @param attributes  The attributes of the polyline
+   */
+  def createOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) = {
+    if (!innerShapes.isEmpty) {
+      println("Create open polyline shape place 2")
+      new PolylineShapeOpen(startPoint, innerShapes, attributes)
+    }
+    else throw new IllegalArgumentException("Cannot create polyline from zero points.")
+  }
 
   /**
    * Extractor pattern for PolylineShapes
