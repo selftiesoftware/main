@@ -569,7 +569,6 @@ object PolylineShape {
       }
 
       val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
-      println("Create open polyline shape place 1")
       PolylineShape.createOpen(points.head, lines.tail, Attributes())
     }
 
@@ -582,7 +581,6 @@ object PolylineShape {
    */
   def createOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) = {
     if (!innerShapes.isEmpty) {
-      println("Create open polyline shape place 2")
       new PolylineShapeOpen(startPoint, innerShapes, attributes)
     }
     else throw new IllegalArgumentException("Cannot create polyline from zero points.")
