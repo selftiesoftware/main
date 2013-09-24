@@ -33,6 +33,8 @@ import concurrent.ExecutionContext.Implicits.global
  */
 object ModuleLoader {
 
+  var modulesLoaded: Boolean = false
+
   // The private init module.. ssshhh
   private var _initModule: Option[Module] = None
 
@@ -59,9 +61,10 @@ object ModuleLoader {
   // Create a default packages
   future {
 
-    //load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
-    //load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
-    //load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+    load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
+    load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+    modulesLoaded = true
 
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
@@ -72,9 +75,9 @@ object ModuleLoader {
     //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
     //Niels' modules:
-    load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-    load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
-    load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
   }
 
 
