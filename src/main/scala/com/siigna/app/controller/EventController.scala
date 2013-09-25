@@ -157,7 +157,7 @@ trait EventController extends Actor {
       }
       case MouseDown  (_, MouseButtonMiddle, _)    => None
       case MouseDrag  (_, MouseButtonMiddle, _)    => View.pan(delta); None
-      case MouseMove  (_, _, ModifierKeys.Shift) => View.pan(delta); None
+      case MouseMove  (_, _, ModifierKeys.Alt) => View.pan(delta); None
       case MouseUp    (_, MouseButtonMiddle, _)    => View.pan(delta); None
       case MouseEnter (_, _, _) => Some(MouseEnter(point, button, keys))
       case MouseExit  (_, _, _) => Some(MouseExit(point, button, keys))
