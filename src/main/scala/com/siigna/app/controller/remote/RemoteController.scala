@@ -118,6 +118,7 @@ object RemoteController {
       }
     }
   }
+
   // Set a priority and start
   t.setPriority(Thread.MIN_PRIORITY)
   t.start()
@@ -246,8 +247,6 @@ object RemoteController {
             case Some(i : Int) => actionIndices += i
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
-          //zoom extends
-          View.zoomExtends
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
           case e : Throwable => Log.error("Remote: Error when reading data from server", e)
@@ -325,5 +324,6 @@ object RemoteController {
   def session : Session = {
     Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
   }
-
+  //zoom extends
+  View.zoomExtends
 }

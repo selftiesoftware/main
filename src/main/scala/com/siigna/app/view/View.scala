@@ -365,7 +365,7 @@ trait View {
    * @param drawing  The drawing containing the boundaries to use.
    */
   def zoomExtends(implicit drawing : Drawing) {
-    zoom = math.max(View.width, View.height) / math.max(drawing.boundary.width, drawing.boundary.height) * 0.9 // 10% margin
+    zoom = math.max(View.width, View.height) / math.max(drawing.boundary.width, drawing.boundary.height) * 0.5 // 20% margin
     pan = Vector2D(-drawing.boundary.center.x * zoom, drawing.boundary.center.y * zoom)
 
     // Notify the listeners
