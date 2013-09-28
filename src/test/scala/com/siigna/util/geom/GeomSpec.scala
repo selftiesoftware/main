@@ -36,6 +36,7 @@ class GeomSpec extends FunSpec with ShouldMatchers {
       normalizeDegrees(359) should equal(359)
       normalizeDegrees(360) should equal(0)
       normalizeDegrees(361) should equal(1)
+      normalizeDegrees(350 + 20) should equal(10)
       normalizeDegrees(-1) should equal(359)
       normalizeDegrees(-180) should equal(180)
       normalizeDegrees(36000000000000.0) should equal(0)

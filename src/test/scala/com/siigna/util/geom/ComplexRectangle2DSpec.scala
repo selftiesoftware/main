@@ -20,12 +20,16 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
 
     val r1 = ComplexRectangle2D(Vector2D(0,0),100,100,0)
     val r2 = ComplexRectangle2D(Vector2D(10,10),50,100,0)
-    val r3 = ComplexRectangle2D(Vector2D(10,10),50,100,30) //rotated rectangle
+    val r3 = ComplexRectangle2D(Vector2D(10,10),50,100,30) //rotated rectangles
     val r4 = ComplexRectangle2D(Vector2D(0,0), 100, 100, 180)
+    val r5 = ComplexRectangle2D(Vector2D(0,0), 100, 100, 90)
 
     it("Can create an instance") {
-      val rectGeom = ComplexRectangle2D(Vector2D(10,10),50,100,30)
-      rectGeom.p1 should equal (Vector2D(-36.65063509461097,40.80127018922194))
+      val rectGeom = ComplexRectangle2D(Vector2D(0,0),100,100,90)
+      rectGeom.p0 should equal (Vector2D(-50, 50))
+      rectGeom.p1 should equal (Vector2D(-50, -50))
+      rectGeom.p2 should equal (Vector2D(50, -50))
+      rectGeom.p3 should equal (Vector2D(50, 50))
     }
 
     /*
@@ -37,28 +41,24 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
     it ("can calculate p0") {
       r1.p0 should equal (Vector2D(50, 50))
       r2.p0 should equal (Vector2D(35, 60))
-      r3.p0 should equal (Vector2D(6.65063509461097,65.80127018922194))
-      r4.p0 should equal(Vector2D(-50, -50))
+      r4.p0 should equal (Vector2D(-50, -50))
     }
 
     it ("can calculate p1") {
       r1.p1 should equal (Vector2D(-50, 50))
       r2.p1 should equal (Vector2D(-15, 60))
-      r3.p1 should equal (Vector2D(-36.65063509461097,40.80127018922194))
       r4.p1 should equal(Vector2D(50, -50))
     }
 
     it ("can calculate p2") {
       r1.p2 should equal (Vector2D(-50,-50))
       r2.p2 should equal (Vector2D(-15,-40))
-      r3.p2 should equal (Vector2D(13.349364905389027,-45.80127018922194))
       r4.p2 should equal(Vector2D(50, 50))
     }
 
     it ("can calculate p3") {
       r1.p3 should equal (Vector2D(50,-50))
       r2.p3 should equal (Vector2D(35,-40))
-      r3.p3 should equal (Vector2D(56.65063509461096,-20.80127018922194))
       r4.p3 should equal(Vector2D(-50, 50))
     }
 
@@ -71,33 +71,6 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
       r4.closestPoint(Vector2D(-50, -50)) should equal (Vector2D(-50, -50))
       r4.closestPoint(Vector2D(1, 0)) should equal (Vector2D(50, 0))
       r4.closestPoint(Vector2D(2, 1)) should equal (Vector2D(50, 1))
-    }
-
-    it ("can calculate the length vector from a given angle") {
-      // 0 rotation
-      r1.vectorAtAngle(  0) should equal (Vector2D( 50,  0))
-      r1.vectorAtAngle(  1) should equal (Vector2D( 50,  0.8727532464108793))
-      r1.vectorAtAngle( 45) should equal (Vector2D( 50, 50))
-      r1.vectorAtAngle( 90) should equal (Vector2D(  0, 50))
-      r1.vectorAtAngle(135) should equal (Vector2D(-50, 50))
-      r1.vectorAtAngle(180) should equal (Vector2D(-50,  0))
-      r1.vectorAtAngle(225) should equal (Vector2D(-50,-50))
-      r1.vectorAtAngle(270) should equal (Vector2D(  0,-50))
-      r1.vectorAtAngle(315) should equal (Vector2D( 50,-50))
-      r1.vectorAtAngle(360) should equal (Vector2D( 50,  0))
-      r1.vectorAtAngle(405) should equal (Vector2D( 50, 50))
-
-      // Rotated 180 degrees
-      r4.vectorAtAngle(180) should equal (Vector2D( 50,  0))
-      r4.vectorAtAngle(225) should equal (Vector2D( 50, 50))
-      r4.vectorAtAngle(270) should equal (Vector2D(  0, 50))
-      r4.vectorAtAngle(315) should equal (Vector2D(-50, 50))
-      r4.vectorAtAngle(  0) should equal (Vector2D(-50,  0))
-      r4.vectorAtAngle(360) should equal (Vector2D(-50,  0))
-      r4.vectorAtAngle( 45) should equal (Vector2D(-50,-50))
-      r4.vectorAtAngle(405) should equal (Vector2D(-50,-50))
-      r4.vectorAtAngle( 90) should equal (Vector2D(  0,-50))
-      r4.vectorAtAngle(135) should equal (Vector2D( 50,-50))
     }
 
     it ("can know whether a geometry is contained in the rectangle") {

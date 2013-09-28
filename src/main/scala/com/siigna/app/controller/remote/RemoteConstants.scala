@@ -72,4 +72,9 @@ object RemoteConstants extends Enumeration {
    * Value must be a tuple2 representing (drawing,[[com.siigna.app.model.Drawing.Openness]])
    */
   val Openness = Value
+
+  /**
+   * Force clean a drawing
+   */
+  val Cleaning = Value
 }

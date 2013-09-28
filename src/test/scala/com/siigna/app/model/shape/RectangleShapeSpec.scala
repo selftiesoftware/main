@@ -179,6 +179,16 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
 
       val x2 = r.getPart(s2).get.apply(t).asInstanceOf[RectangleShape]
       x2 should equal(RectangleShape(Vector2D(50, 50), 100, 100, 0))
+
+      // Rotation
+      val tr = TransformationMatrix(Vector2D(0, 0), 1).rotate(45)
+      val x3 = r.getPart(s2).get.apply(tr).asInstanceOf[RectangleShape]
+      x3 should equal (RectangleShape(Vector2D(0, 0), 100, 100, 45))
+
+      val x4 = r.getPart(s2).get.apply(tr.rotate(45)).asInstanceOf[RectangleShape]
+      x4 should equal (RectangleShape(Vector2D(0, 0), 100, 100, 89.99999999999999))
+      x4.getVertices(s2) should equal (Seq(Vector2D(-50, 50), Vector2D(-50, -50), Vector2D(50, -50), Vector2D(50, 50)))
+      x4.geometry.vertices should equal (Seq(Vector2D(-50, 50), Vector2D(-50, -50), Vector2D(50, -50), Vector2D(50, 50)))
     }
 
 
@@ -291,6 +301,8 @@ class RectangleShapeSpec extends FunSpec with ShouldMatchers {
       // Rotation
       val t2 = TransformationMatrix(Vector2D(0,0),1).rotate(90)
       r.transform(t2) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 90, Attributes()))
+      val t6 = TransformationMatrix(Vector2D(0,0),1).rotate(45)
+      r.transform(t6) should equal(new RectangleShape(Vector2D(0, 0), 100, 100, 45, Attributes()))
 
       // Scaling
       val t3 = TransformationMatrix(Vector2D(0,0),2)

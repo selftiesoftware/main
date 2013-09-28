@@ -404,7 +404,7 @@ object PolylineShape {
     extends PolylineShape {
 
     protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =
-      PolylineShape(startPoint, innerShapes, attributes)
+      PolylineShapeOpen(startPoint, innerShapes, attributes)
 
     def delete(part : ShapeSelector) = {
       part match {
@@ -539,6 +539,51 @@ object PolylineShape {
         new PolylineShapeClosed(startPoint, innerShapes.take(innerShapes.size - 1), attributes)
       } else new PolylineShapeOpen(startPoint, innerShapes, attributes) // No
     } else throw new IllegalArgumentException("Cannot create polyline from zero points.")
+  }
+
+  /**
+   * Creates a PolylineShape connecting the given points with lines. Even if the first and last point are the same, the
+   * polyline is open ([[com.siigna.app.model.shape.PolylineShape.PolylineShapeOpen]]).
+   *
+   * @param points  The points to use.
+   */
+  def createOpen(points : Vector2D*) : PolylineShape = PolylineShape.createOpen(points.toTraversable)
+
+  /**
+   * Creates a PolylineShape from a collection of points. Even if the first and last points are equal in
+   * the collection, the polyline is kept open.
+   *
+   * @param points  The collection of points to use.
+   * @return  A PolylineShape connecting the given points with lines
+   */
+  def createOpen(points : Traversable[Vector2D]) : PolylineShape =
+
+
+    if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
+    else {
+
+      //a function to filter out one of any two concecutive coinsiding points
+      def compressRecursive[A](ls: List[A]): List[A] = ls match {
+        case Nil       => Nil
+        case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
+      }
+
+      val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
+      PolylineShape.createOpen(points.head, lines.tail, Attributes())
+    }
+
+  /**
+   * Creates an PolylineShape from a start point, the inner shapes (see documentation for the PolylineShape class) and
+   * a number of [[com.siigna.util.collection.Attributes]]. The shape is open, even if start and end points are the same.
+   * @param startPoint  The starting point of the polyline
+   * @param innerShapes  The inner shapes of the polyline
+   * @param attributes  The attributes of the polyline
+   */
+  def createOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) = {
+    if (!innerShapes.isEmpty) {
+      new PolylineShapeOpen(startPoint, innerShapes, attributes)
+    }
+    else throw new IllegalArgumentException("Cannot create polyline from zero points.")
   }
 
   /**

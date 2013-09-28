@@ -37,11 +37,30 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   type T = RectangleShape
 
-  //rotation needs to be negative to make for clockwise rotation of the rectangle
   val geometry : ComplexRectangle2D = ComplexRectangle2D(center,width,height,rotation)
+
+  /**
+   * In a rectangle with zero rotation this is the upper right vertex. The point will be rotated around the center
+   * starting at 3 o'clock moving counter-clockwise.
+   */
   val p0 = geometry.p0 //BitSet 0
+
+  /**
+   * In a rectangle with zero rotation this is the upper left vertex. The point will be rotated around the center
+   * starting at 3 o'clock moving counter-clockwise.
+   */
   val p1 = geometry.p1 //BitSet 1
+
+  /**
+   * In a rectangle with zero rotation this is the lower left vertex. The point will be rotated around the center
+   * starting at 3 o'clock moving counter-clockwise.
+   */
   val p2 = geometry.p2 //BitSet 2
+
+  /**
+   * In a rectangle with zero rotation this is the lower right vertex. The point will be rotated around the center
+   * starting at 3 o'clock moving counter-clockwise.
+   */
   val p3 = geometry.p3 //BitSet 3
 
 
@@ -196,9 +215,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def setAttributes(attributes : Attributes) = RectangleShape(center, width,height,rotation, attributes)
 
-  def transform(t : TransformationMatrix) =
+  def transform(t : TransformationMatrix) = {
     RectangleShape(center transform t, width * t.scaleX, height * t.scaleY,
       geom.normalizeDegrees(rotation + t.rotation), attributes)
+  }
 }
 
 /**

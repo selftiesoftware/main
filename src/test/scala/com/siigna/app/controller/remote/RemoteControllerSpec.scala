@@ -16,7 +16,6 @@ import org.scalatest.matchers.ShouldMatchers
 import com.siigna.app.controller.remote.{RemoteConstants => RC}
 import com.siigna.app.Siigna
 import com.siigna.app.model.action.{CreateShape, RemoteAction}
-import com.siigna.util.io
 import com.siigna.app.model.Model
 import com.siigna.app.model.shape.CircleShape
 import com.siigna.util.geom.Vector2D
@@ -28,7 +27,7 @@ import com.siigna.util.collection.Attributes
 class RemoteControllerSpec extends FunSpec with ShouldMatchers {
 
   // Set all members accessible in RemoteController
-  val sink = new Server("http://62.243.118.234:20005", Mode.http)
+  val sink = new Server("http://app.siigna.com", Mode.Http)
   var session : Session = null
 
   sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),

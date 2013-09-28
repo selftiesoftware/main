@@ -56,6 +56,8 @@ class Connection(val url: String) {
 
   def post(message:Array[Byte]) : Option[Array[Byte]] = send(message,"POST")
 
+  def put(message:Array[Byte]) : Option[Array[Byte]] = send(message,"PUT")
+
   def send(message:Array[Byte], method:String="POST") : Option[Array[Byte]] = {
     open.flatMap( con => {
       con.setDoInput(true)
