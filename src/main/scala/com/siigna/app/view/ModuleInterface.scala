@@ -56,7 +56,8 @@ class ModuleInterface(module : Module) extends Interface {
   /**
    * The cursor of the current interface, if any.
    */
-  protected var cursor : Cursor = Interface.Cursors.crosshair
+  //protected var cursor : Cursor = Interface.Cursors.crosshair
+  protected var cursor : Cursor = new Cursor(Cursor.DEFAULT_CURSOR)
 
   /**
    * Chain the interface to another interface.
@@ -105,7 +106,8 @@ class ModuleInterface(module : Module) extends Interface {
    * if you want to clear the cursor completely.
    */
   def reset() {
-    cursor  = Interface.Cursors.crosshair
+    //cursor  = Interface.Cursors.crosshair
+    cursor  = new Cursor(Cursor.DEFAULT_CURSOR)
   }
 
   /**

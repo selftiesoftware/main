@@ -54,7 +54,7 @@ object ModuleMenu {
 
   def isHighlighted(m : Vector2D) : Boolean = {
     val in = m.x < 110 & m.y < 30
-    if (in) Siigna.setCursor(Cursors.default) else Siigna.setCursor(Cursors.crosshair)
+    //if (in) Siigna.setCursor(Cursors.default) else Siigna.setCursor(Cursors.crosshair)
     in
   }
 
