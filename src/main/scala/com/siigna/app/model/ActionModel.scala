@@ -35,6 +35,8 @@ import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.Log
 import com.siigna.app.view.View
+//import com.sun.javaws.WinExtensionInstallHandler
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -113,8 +115,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
       // Store the action if it is not a VolatileAction
       action match {
         case v : LoadDrawing => {
-          //zoom extends
-          View.zoomExtends
+          model.tree.onComplete(_ => View.zoomExtends)
         }
         case v : VolatileAction => // Do nothing here!
         case _ => { // Store the action
