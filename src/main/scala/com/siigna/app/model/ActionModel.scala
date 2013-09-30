@@ -30,10 +30,11 @@ package com.siigna.app.model
  * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
  */
 
-import action.{VolatileAction, Action}
+import action.{LoadDrawing, VolatileAction, Action}
 import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.Log
+import com.siigna.app.view.View
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -111,6 +112,10 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
       // Store the action if it is not a VolatileAction
       action match {
+        case v : LoadDrawing => {
+          //zoom extends
+          View.zoomExtends
+        }
         case v : VolatileAction => // Do nothing here!
         case _ => { // Store the action
           model = new Model(model.shapes, model.executed.+:(action), Seq(), model.attributes)

@@ -324,6 +324,4 @@ object RemoteController {
   def session : Session = {
     Session(SiignaDrawing.attributes.long("id").getOrElse(-1), Siigna.user)
   }
-  //zoom extends
-  View.zoomExtends
 }
