@@ -233,6 +233,14 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
   type T = ComplexRectangle2D
 
+  //These vertices are rotated MINUS the rotation; those beginnimg with p PLUS the rotation.
+  //The negative and positive ones are needed for drawing the rectangles when rotated - otherwise
+  //shape and selection-points rotate independently...
+  lazy val v0 : Vector2D = Vector2D(center.x+width/2, center.y+height/2).rotate(center,-rotation)
+  lazy val v1 : Vector2D = Vector2D(center.x-width/2, center.y+height/2).rotate(center,-rotation)
+  lazy val v2 : Vector2D = Vector2D(center.x-width/2, center.y-height/2).rotate(center,-rotation)
+  lazy val v3 : Vector2D = Vector2D(center.x+width/2, center.y-height/2).rotate(center,-rotation)
+
   /**
    * The first vertex on the rectangle (top right in a rectangle with 0 rotation).
    */
@@ -320,7 +328,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
       height * transformation.scaleY, normalizeDegrees(rotation + transformation.rotation))
   }
 
-  def vertices : Seq[Vector2D] = Seq(p0, p1, p2, p3)
+  def vertices : Seq[Vector2D] = Seq(v0, v1, v2, v3)
 }
 
 /**
