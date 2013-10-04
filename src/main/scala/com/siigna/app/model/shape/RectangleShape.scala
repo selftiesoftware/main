@@ -217,7 +217,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
 
   def transform(t : TransformationMatrix) = {
     RectangleShape(center transform t, width * t.scaleX, height * t.scaleY,
-      geom.normalizeDegrees(rotation + t.rotation), attributes)
+      geom.normalizeDegrees(rotation - t.rotation), attributes)
   }
 }
 
