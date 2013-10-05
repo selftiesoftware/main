@@ -26,29 +26,29 @@ import com.siigna.app.model.selection.{BitSetShapeSelector, FullShapeSelector, E
 
 /**
  * <p>
- *   A PolylineShape is a shape that can consist of segments or arcs. The class PolylineShape is a trait that covers
- *   polylines that are either closed or not closed.
+ * A PolylineShape is a shape that can consist of segments or arcs. The class PolylineShape is a trait that covers
+ * polylines that are either closed or not closed.
  * </p>
  *
  * <p>
- *   The default constructor uses a [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]] to ensure
- *   that data is not being duplicated in the long list of lines and/or arcs. The <code>shapes</code> </p>
+ * The default constructor uses a [[com.siigna.app.model.shape.PolylineShape# I n n e r P o l y l i n e S h a p e]] to ensure
+ * that data is not being duplicated in the long list of lines and/or arcs. The <code>shapes</code> </p>
  * </p>
  *
  * <p>
- *   PolylineShapes can by convention not contain two duplicate points. If any situation
- *   should arise (transformation, addition etc.) that could result in two equal points, one
- *   of them is removed.
+ * PolylineShapes can by convention not contain two duplicate points. If any situation
+ * should arise (transformation, addition etc.) that could result in two equal points, one
+ * of them is removed.
  * </p>
  *
  * @define polylineAttributes
- * <p>Available attributes:
- * <pre>
- *  - Color        Color   The color of the lines in the Polyline.
- *  - StrokeWidth  Double  The width of the linestroke used to draw.
- *  - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
- *                         in the PolylineShape.
- * </pre></p>
+ *         <p>Available attributes:
+ *         <pre>
+ *         - Color        Color   The color of the lines in the Polyline.
+ *         - StrokeWidth  Double  The width of the linestroke used to draw.
+ *         - Raster       Color   A color that fills out the PolylineShape. The fill is defined as the polygon given by the points
+ *         in the PolylineShape.
+ *         </pre></p>
  */
 trait PolylineShape extends CollectionShape[BasicShape] {
 
@@ -62,17 +62,17 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    * @param attributes  The new inner shapes
    * @return  A new instance of type T < PolylineShape
    */
-  protected def copy(startPoint : Vector2D = startPoint, innerShapes : Seq[InnerPolylineShape] = innerShapes, attributes : Attributes = attributes) : T
+  protected def copy(startPoint: Vector2D = startPoint, innerShapes: Seq[InnerPolylineShape] = innerShapes, attributes: Attributes = attributes): T
 
-  def getPart(part : ShapeSelector) = part match {
+  def getPart(part: ShapeSelector) = part match {
     case FullShapeSelector => Some(new PartialShape(this, transform))
     case BitSetShapeSelector(xs) => {
       // The selected parts, needed for drawing
       var selected = Seq[BasicShape]()
 
       // Create a function that transforms the selected parts of the polyline
-      val transformInner = (t : TransformationMatrix) => {
-        val arr      = collection.mutable.ArrayBuffer[InnerPolylineShape]()
+      val transformInner = (t: TransformationMatrix) => {
+        val arr = collection.mutable.ArrayBuffer[InnerPolylineShape]()
         for (i <- 0 until innerShapes.size) {
           val shape = if (xs contains (i + 1)) {
             selected = selected :+ shapes(i)
@@ -88,10 +88,14 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       // Create a shape used for drawing
       val drawShape = GroupShape(selected)
 
-      Some(new PartialShape(drawShape, (t : TransformationMatrix) =>
+      Some(new PartialShape(drawShape, (t: TransformationMatrix) =>
         copy(
           // Test if the start point is included (binary position 0)
-          if (xs(0)) { startPoint.transform(t) } else { startPoint },
+          if (xs(0)) {
+            startPoint.transform(t)
+          } else {
+            startPoint
+          },
           // Transform the inner shapes that are a part of the selection
           transformInner(t),
           // Forward the attributes as is
@@ -151,16 +155,16 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
         // Avoid cases where the first and last segment are selected if both endpoints in an open PL is close
         if (!isClosed && isCloseToBothEndPoints)
-          closeShapeVertices += (0, points.last._2)
+          closeShapeVertices +=(0, points.last._2)
         else {
-          xs.foreach( t => {
+          xs.foreach(t => {
             closeShapeVertices += t._2
 
             // Make sure not to duplicate points in a closed polylineShape
             closeShapeVertices += (
               if (isClosed && t._2 == innerShapes.size) 0
               else t._2 + 1
-            )
+              )
           })
         }
 
@@ -170,7 +174,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     }
   }
 
-  def getShape(s : ShapeSelector) = s match {
+  def getShape(s: ShapeSelector) = s match {
     case FullShapeSelector => Some(this)
     case BitSetShapeSelector(xs) => {
       if (xs.size < 2) None
@@ -187,7 +191,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         val isCircular = xs(0) && xs(innerShapes.size) && isInstanceOf[PolylineShape.PolylineShapeClosed]
 
         // Iterate the parts
-        xs foreach ( i => {
+        xs foreach (i => {
           // Is the current point equal to the previous + 1?
           val isSuccessor = i == xs.head || lastIndex == i - 1
 
@@ -197,12 +201,12 @@ trait PolylineShape extends CollectionShape[BasicShape] {
           } else if ((!isSuccessor && isCircular) || isUsingTail) {
             circularTail :+= innerShapes(i - 1)
             isUsingTail = true
-          // See if two adjacent elements are selected
+            // See if two adjacent elements are selected
           } else if (xs(i + 1) || xs(i - 1)) {
             // Includes shapes if they are not already there
             if (i != 0) {
               parts :+= innerShapes(i - 1)
-            // Include the start point if s is the head element
+              // Include the start point if s is the head element
             } else if (!isCircular) {
               firstPoint = true
             }
@@ -222,9 +226,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
 
         // Examine whether the first point should be included and whether the result is coherent
         (firstPoint, isConsistent) match {
-          case (true, true)   => Some(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes))
-          case (true, false)  => Some(GroupShape(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes)))
-          case (false, true) if parts.size > 1  => Some(PolylineShape.PolylineShapeOpen(parts.head.point, parts.tail, attributes))
+          case (true, true) => Some(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes))
+          case (true, false) => Some(GroupShape(PolylineShape.PolylineShapeOpen(startPoint, parts, attributes)))
+          case (false, true) if parts.size > 1 => Some(PolylineShape.PolylineShapeOpen(parts.head.point, parts.tail, attributes))
           case (false, false) if parts.size > 1 => Some(GroupShape(shapes(parts.head.point, parts.tail), attributes))
           case _ => None
         }
@@ -239,7 +243,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       var inner = Seq[Vector2D]()
 
       // Add startPoint
-      if (xs(0)) { inner :+= startPoint }
+      if (xs(0)) {
+        inner :+= startPoint
+      }
 
       // Check all the binary positions for matches
       for (i <- 1 to innerShapes.size) {
@@ -260,7 +266,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    * Thw two types of InnerPolylineShapes are: Arcs and Lines.
    * @return  A sequence of [[com.siigna.app.model.shape.InnerPolylineShape]]s.
    */
-  def innerShapes : Seq[InnerPolylineShape]
+  def innerShapes: Seq[InnerPolylineShape]
 
   def join(shape: BasicShape) = copy(startPoint, innerShapes :+ (shape match {
     case ArcShape(p, _, _, _, _) => new PolylineLineShape(p) // TODO: Use PolylineArcShape!
@@ -274,7 +280,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    * [[com.siigna.app.model.shape.ArcShape]]s.
    * @return A number of [[com.siigna.app.model.shape.Shape]]s.
    */
-  def shapes : Seq[BasicShape] = shapes(startPoint, innerShapes)
+  def shapes: Seq[BasicShape] = shapes(startPoint, innerShapes)
 
   /**
    * Retrieves actual BasicShape-types from a given point along with a sequence of InnerPolylineShapes.
@@ -282,15 +288,15 @@ trait PolylineShape extends CollectionShape[BasicShape] {
    * @param inner  A sequence of InnerPolylineShapes
    * @return A collection of BasicShapes.
    */
-  protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape]
+  protected def shapes(point: Vector2D, inner: Seq[InnerPolylineShape]): Seq[BasicShape]
 
   /**
    * The start point for the polyline shape.
    * @return  A Vector2D indicating the first point in the PolylineShape.
    */
-  def startPoint : Vector2D
+  def startPoint: Vector2D
 
-  def transform(t : TransformationMatrix) = copy(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
+  def transform(t: TransformationMatrix) = copy(t.transform(startPoint), innerShapes.map(_.transform(t)), attributes)
 
   override def toString() = "PolylineShape[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
@@ -307,19 +313,19 @@ object PolylineShape {
    * $polylineAttributes
    *
    * @param startPoint  The starting point of the PolylineShape.
-   * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
+   * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of [[com.siigna.app.model.shape.PolylineShape# I n n e r P o l y l i n e S h a p e]].
    * @param attributes  The attributes to give the PolylineShape
    */
   // TODO extend ClosedShape
-  case class PolylineShapeClosed(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+  case class PolylineShapeClosed(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes)
     extends PolylineShape {
 
-    protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) =
+    protected def copy(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes) =
       PolylineShapeClosed(startPoint, innerShapes, attributes)
 
-    def delete(part : ShapeSelector) = {
+    def delete(part: ShapeSelector) = {
       // Deletes a number of vertices starting at index, while replacing with the given insert
-      def deleteVertices(index : Int, number : Int, insert : Option[InnerPolylineShape]) = {
+      def deleteVertices(index: Int, number: Int, insert: Option[InnerPolylineShape]) = {
         val xs = innerShapes.splitAt(index)
         val ys = xs._2.drop(number)
         insert.map(ys :+ _).getOrElse(ys) ++ xs._1
@@ -329,14 +335,14 @@ object PolylineShape {
         case FullShapeSelector => Nil
         case BitSetShapeSelector(xs) => {
           // Find any continuous groups
-          def findCoherentVerticesFrom(bits : BitSet, i : Int) : Seq[BitSet] = {
+          def findCoherentVerticesFrom(bits: BitSet, i: Int): Seq[BitSet] = {
             val group = bits.tail.takeWhile(i => bits(i - 1)) + bits.head
             if (group.isEmpty || group.last >= bits.last) Seq(group)
             else Seq(group) ++ findCoherentVerticesFrom(bits.drop(group.size), group.last)
           }
 
           // Test if the given bitset is continuous
-          def testContinuous(bits : BitSet, current : Int, previous : Int) : Boolean = {
+          def testContinuous(bits: BitSet, current: Int, previous: Int): Boolean = {
             bits.last < current || (current == previous + 1 && testContinuous(bits, current + 1, current))
           }
 
@@ -354,7 +360,7 @@ object PolylineShape {
               }
               case _ => Nil
             }
-          // Include cases where the last and first points are included
+            // Include cases where the last and first points are included
           } else if (xs(0) && xs.last == size - 1) {
             val indices = innerShapes.indices.map(_ + 1)
             val coherentBits = indices.diff(findCoherentVerticesFrom(xs, 0).flatten)
@@ -362,7 +368,7 @@ object PolylineShape {
               val vertices = coherentBits.map(i => innerShapes(i - 1))
               Seq(PolylineShape(vertices.head.point, vertices.tail, attributes))
             } else Seq()
-          // If the PL is not continuous we need to search for subgroups
+            // If the PL is not continuous we need to search for subgroups
           } else {
             Nil
           }
@@ -371,7 +377,7 @@ object PolylineShape {
       }
     }
 
-    protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
+    protected def shapes(point: Vector2D, inner: Seq[InnerPolylineShape]): Seq[BasicShape] = {
       if (!inner.isEmpty) {
         val tmp = new Array[BasicShape](inner.size + 1) // plus one to close the shape
         tmp(0) = inner.head.apply(point)
@@ -384,7 +390,7 @@ object PolylineShape {
       } else Nil
     }
 
-    def setAttributes(attr : Attributes) = copy(attributes = attr)
+    def setAttributes(attr: Attributes) = copy(attributes = attr)
 
     override def toString() = "PolylineShapeClosed[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
@@ -397,43 +403,48 @@ object PolylineShape {
    *
    * @param startPoint  The starting point of the PolylineShape.
    * @param innerShapes  The inner shapes of the PolylineShape, basically a seq of
-   *                     [[com.siigna.app.model.shape.PolylineShape#InnerPolylineShape]].
+   *                     [[com.siigna.app.model.shape.PolylineShape# I n n e r P o l y l i n e S h a p e]].
    * @param attributes  The attributes to give the PolylineShape
    */
-    case class PolylineShapeOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes)
+  case class PolylineShapeOpen(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes)
     extends PolylineShape {
 
-    protected def copy(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : PolylineShape =
+    protected def copy(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes): PolylineShape =
       PolylineShapeOpen(startPoint, innerShapes, attributes)
 
-    def delete(part : ShapeSelector) = {
+    def delete(part: ShapeSelector) = {
       part match {
         case FullShapeSelector => Nil
         case BitSetShapeSelector(xs) => {
 
-          if (xs(0) && xs.size == (innerShapes.size + 1)) { // Everything is selected!
+          if (xs(0) && xs.size == (innerShapes.size + 1)) {
+            // Everything is selected!
             Nil
-          } else if (xs.size == 0) { // Nothing is selected, carry on...
+          } else if (xs.size == 0) {
+            // Nothing is selected, carry on...
             Seq(this)
           } else {
             // Find groups in the selection and return them
-            var groups    = Seq[PolylineShape]() // The sequence of groups
-            var low       = 0                    // The value for the lower bound of the current group
-            xs.-(0) foreach { x =>
-            // Subtract one since we're not dealing with the startPoint
-              val i = x - 1
-              // Split the polylineshape at the given index and store the remainder if non-empty
-              //  - add the first point (inner shape) to the end if the PL is closed
-              val group = innerShapes.slice(low, i)
-              // Create the group if
-              if (group.size > 0 && low == 0 && !xs(0)) { // Size == 1 but start point included
-                groups = groups :+ PolylineShape(startPoint, group, attributes)
-              } else if (group.size > 1) {                      // Size > 2 and no start point
-                groups = groups :+ PolylineShape(group.head.point, group.tail, attributes)
-              }
+            var groups = Seq[PolylineShape]() // The sequence of groups
+            var low = 0 // The value for the lower bound of the current group
+            xs.-(0) foreach {
+              x =>
+              // Subtract one since we're not dealing with the startPoint
+                val i = x - 1
+                // Split the polylineshape at the given index and store the remainder if non-empty
+                //  - add the first point (inner shape) to the end if the PL is closed
+                val group = innerShapes.slice(low, i)
+                // Create the group if
+                if (group.size > 0 && low == 0 && !xs(0)) {
+                  // Size == 1 but start point included
+                  groups = groups :+ PolylineShape(startPoint, group, attributes)
+                } else if (group.size > 1) {
+                  // Size > 2 and no start point
+                  groups = groups :+ PolylineShape(group.head.point, group.tail, attributes)
+                }
 
-              // Update the lowest bound for the next group
-              low = i + 1
+                // Update the lowest bound for the next group
+                low = i + 1
             }
 
             // Add the remaining tail elements (if there are more than 2)
@@ -449,7 +460,7 @@ object PolylineShape {
       }
     }
 
-    protected def shapes(point : Vector2D, inner : Seq[InnerPolylineShape]) : Seq[BasicShape] = {
+    protected def shapes(point: Vector2D, inner: Seq[InnerPolylineShape]): Seq[BasicShape] = {
       if (!inner.isEmpty) {
         val tmp = new Array[BasicShape](inner.size)
         tmp(0) = inner.head.apply(point)
@@ -460,7 +471,7 @@ object PolylineShape {
       } else Nil
     }
 
-    def setAttributes(attr : Attributes) = copy(attributes = attr)
+    def setAttributes(attr: Attributes) = copy(attributes = attr)
 
     override def toString() = "PolylineShapeOpen[" + startPoint + "," + innerShapes + ", " + attributes + "]"
 
@@ -472,7 +483,7 @@ object PolylineShape {
    *
    * @param points  The points to use.
    */
-  def apply(points : Vector2D*) : PolylineShape = apply(points.toTraversable)
+  def apply(points: Vector2D*): PolylineShape = apply(points.toTraversable)
 
   /**
    * Creates a PolylineShape from a collection of points. If the first and last points are equal in
@@ -481,16 +492,13 @@ object PolylineShape {
    * @param points  The collection of points to use.
    * @return  A PolylineShape connecting the given points with lines
    */
-  def apply(points : Traversable[Vector2D]) : PolylineShape =
-
-
+  def apply(points: Traversable[Vector2D]): PolylineShape = {
     if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
     else {
-
-      //a function to filter out one of any two concecutive coinsiding points
+      //a function to filter out one of any two consecutive coinciding points
       def compressRecursive[A](ls: List[A]): List[A] = ls match {
-        case Nil       => Nil
-        case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
+        case Nil => Nil
+        case h :: tail => h :: compressRecursive(if (tail.head == h) tail.tail else tail)
       }
 
       val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
@@ -501,12 +509,13 @@ object PolylineShape {
       else
         PolylineShapeOpen(points.head, lines.tail, Attributes())
     }
+  }
 
   /**
    * Returns a closed PolylineShape with four lines, representing the given Rectangle.
    * @param rect  The [[com.siigna.util.geom.SimpleRectangle2D]] to construct the Polyline from.
    */
-  def apply(rect : Rectangle2D) : PolylineShape = apply(rect.vertices :+ rect.vertices.head)
+  def apply(rect: Rectangle2D): PolylineShape = apply(rect.vertices :+ rect.vertices.head)
 
   /**
    * Constructs a PolylineShape from regular lines and arcs. A polyline requires that the shapes are connected, so
@@ -532,10 +541,11 @@ object PolylineShape {
    * @param innerShapes  The inner shapes of the polyline
    * @param attributes  The attributes of the polyline
    */
-  def apply(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) = {
+  def apply(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes) = {
     if (!innerShapes.isEmpty) {
       // Is it a closed polyline?
-      if (startPoint.equals(innerShapes.last.point)) { // Yes
+      if (startPoint.equals(innerShapes.last.point)) {
+        // Yes
         new PolylineShapeClosed(startPoint, innerShapes.take(innerShapes.size - 1), attributes)
       } else new PolylineShapeOpen(startPoint, innerShapes, attributes) // No
     } else throw new IllegalArgumentException("Cannot create polyline from zero points.")
@@ -547,7 +557,7 @@ object PolylineShape {
    *
    * @param points  The points to use.
    */
-  def createOpen(points : Vector2D*) : PolylineShape = PolylineShape.createOpen(points.toTraversable)
+  def createOpen(points: Vector2D*): PolylineShape = PolylineShape.createOpen(points.toTraversable)
 
   /**
    * Creates a PolylineShape from a collection of points. Even if the first and last points are equal in
@@ -556,7 +566,7 @@ object PolylineShape {
    * @param points  The collection of points to use.
    * @return  A PolylineShape connecting the given points with lines
    */
-  def createOpen(points : Traversable[Vector2D]) : PolylineShape =
+  def createOpen(points: Traversable[Vector2D]): PolylineShape =
 
 
     if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
@@ -564,7 +574,7 @@ object PolylineShape {
 
       //a function to filter out one of any two concecutive coinsiding points
       def compressRecursive[A](ls: List[A]): List[A] = ls match {
-        case Nil       => Nil
+        case Nil => Nil
         case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
       }
 
@@ -579,7 +589,7 @@ object PolylineShape {
    * @param innerShapes  The inner shapes of the polyline
    * @param attributes  The attributes of the polyline
    */
-  def createOpen(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) = {
+  def createOpen(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes) = {
     if (!innerShapes.isEmpty) {
       new PolylineShapeOpen(startPoint, innerShapes, attributes)
     }
@@ -593,7 +603,7 @@ object PolylineShape {
    * @param attributes  Attributes describing values set in the polyline
    * @return  Some[PolylineShapeOpen].
    */
-  def unapply(startPoint : Vector2D, innerShapes : Seq[InnerPolylineShape], attributes : Attributes) : Option[PolylineShape] = {
+  def unapply(startPoint: Vector2D, innerShapes: Seq[InnerPolylineShape], attributes: Attributes): Option[PolylineShape] = {
     Some(
       if (startPoint == innerShapes.last.point)
         new PolylineShapeClosed(startPoint, innerShapes.tail.take(innerShapes.size - 2), attributes)
@@ -614,17 +624,17 @@ sealed trait InnerPolylineShape {
    * Creates a BasicShape to use inside the PolylineShape.
    * @param v  The vector with which the BasicShape is instantiated.
    */
-  def apply(v : Vector2D) : BasicShape
+  def apply(v: Vector2D): BasicShape
 
   /**
    * The only point the InnerPolylineShape knows for certain.
    */
-  def point : Vector2D
+  def point: Vector2D
 
   /**
    * Transforms the InnerPolylineShape with the given [[com.siigna.util.geom.TransformationMatrix]].
    */
-  def transform(t : TransformationMatrix) : InnerPolylineShape
+  def transform(t: TransformationMatrix): InnerPolylineShape
 
 }
 
@@ -632,10 +642,12 @@ sealed trait InnerPolylineShape {
  * A LineShape representation used inside a PolylineShape.
  * @param point  The point given to create a LineShape.
  */
-sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape {
-  def apply(v : Vector2D) = LineShape(v, point)
+sealed case class PolylineLineShape(point: Vector2D) extends InnerPolylineShape {
+  def apply(v: Vector2D) = LineShape(v, point)
+
   override def toString = "PolylineLineShape(" + point + ")"
-  def transform(t : TransformationMatrix) = new PolylineLineShape(point.transform(t))
+
+  def transform(t: TransformationMatrix) = new PolylineLineShape(point.transform(t))
 }
 
 /**
@@ -643,8 +655,10 @@ sealed case class PolylineLineShape(point : Vector2D) extends InnerPolylineShape
  * @param middle  The center point of the arc
  * @param point The point given to create a LineShape.
  */
-sealed case class PolylineArcShape(middle : Vector2D, point : Vector2D) extends InnerPolylineShape {
-  def apply(v : Vector2D) = ArcShape(v, middle, point)
+sealed case class PolylineArcShape(middle: Vector2D, point: Vector2D) extends InnerPolylineShape {
+  def apply(v: Vector2D) = ArcShape(v, middle, point)
+
   override def toString = "PolylineArcShape(" + middle + ", " + point + ")"
-  def transform(t : TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
+
+  def transform(t: TransformationMatrix) = new PolylineArcShape(middle.transform(t), point.transform(t))
 }
