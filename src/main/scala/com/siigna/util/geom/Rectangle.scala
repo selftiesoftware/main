@@ -320,7 +320,7 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
       Set(top, right, bottom, left).flatMap(_.intersections(segment))
     }
-    case g => { Set.empty
+    case g => Set.empty
   }
 
   def onPeriphery(point: Vector2D): Boolean = distanceTo(point) < 0.00001
