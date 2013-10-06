@@ -498,7 +498,7 @@ object PolylineShape {
       //a function to filter out one of any two consecutive coinciding points
       def compressRecursive[A](ls: List[A]): List[A] = ls match {
         case Nil => Nil
-        case h :: tail => h :: compressRecursive(if (tail.head == h) tail.tail else tail)
+        case h :: tail => h :: compressRecursive(if (!tail.isEmpty && tail.head == h) tail.tail else tail)
       }
 
       val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
