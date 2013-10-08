@@ -495,13 +495,7 @@ object PolylineShape {
   def apply(points: Traversable[Vector2D]): PolylineShape = {
     if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
     else {
-      //a function to filter out one of any two consecutive coinciding points
-      def compressRecursive[A](ls: List[A]): List[A] = ls match {
-        case Nil => Nil
-        case h :: tail => h :: compressRecursive(if (!tail.isEmpty && tail.head == h) tail.tail else tail)
-      }
-
-      val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
+      val lines = distinctNeighbour(points.toList).map(p => new PolylineLineShape(p))
 
       // Close the shape, if requested. The points are rounded to avoid non-significant rounding errors.
       if (points.head == points.last)
@@ -571,14 +565,7 @@ object PolylineShape {
 
     if (points.size < 2) throw new IllegalArgumentException("Cannot create polyline from less than 2 points.")
     else {
-
-      //a function to filter out one of any two concecutive coinsiding points
-      def compressRecursive[A](ls: List[A]): List[A] = ls match {
-        case Nil => Nil
-        case h :: tail => h :: compressRecursive(tail.dropWhile(_ == h))
-      }
-
-      val lines = compressRecursive(points.toList).map(p => new PolylineLineShape(p))
+      val lines = distinctNeighbour(points.toList).map(p => new PolylineLineShape(p))
       PolylineShape.createOpen(points.head, lines.tail, Attributes())
     }
 
@@ -594,6 +581,22 @@ object PolylineShape {
       new PolylineShapeOpen(startPoint, innerShapes, attributes)
     }
     else throw new IllegalArgumentException("Cannot create polyline from zero points.")
+  }
+
+  /**
+   * A method to filter away elements if they are the same as the previous. Useful for removing duplicate points.
+   * @param seq  The sequence to filter.
+   * @tparam A  The type of the elements in the sequence.
+   * @return  A new sequence of elements where subsequent duplicates are removed.
+   */
+  private[shape] def distinctNeighbour[A](seq : List[A]) : List[A] = {
+    seq match {
+      case x :: y :: tail => {
+        if (x == y) distinctNeighbour(y :: tail)
+        else   x :: distinctNeighbour(y :: tail)
+      }
+      case x => x
+    }
   }
 
   /**
