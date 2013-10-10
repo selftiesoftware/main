@@ -66,6 +66,7 @@ object ModuleLoader {
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
     modulesLoaded = true
 
+    println("zoom extends in mod loader")
     View.zoomExtends
 
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
