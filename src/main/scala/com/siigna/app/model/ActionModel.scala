@@ -115,6 +115,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
       // Store the action if it is not a VolatileAction
       action match {
         case v : LoadDrawing => {
+          println("ZOOM EXTENDS HERE")
           model.tree.onComplete(_ => View.zoomExtends)
         }
         case v : VolatileAction => // Do nothing here!
