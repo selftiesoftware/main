@@ -25,6 +25,7 @@ import com.siigna.app.Siigna
 import com.siigna.util.Log
 import concurrent.future
 import concurrent.ExecutionContext.Implicits.global
+import com.siigna.app.view.View
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
@@ -64,6 +65,8 @@ object ModuleLoader {
     load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
     modulesLoaded = true
+
+    View.zoomExtends
 
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
