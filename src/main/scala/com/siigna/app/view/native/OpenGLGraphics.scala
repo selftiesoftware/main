@@ -20,6 +20,7 @@
 package com.siigna.app.view.native
 
 import com.siigna.app.view.Graphics
+import java.awt.Graphics2D
 import com.siigna.app.model.shape._
 import com.siigna.util.geom.TransformationMatrix
 import com.siigna.app.model.Drawing
@@ -28,10 +29,10 @@ import com.siigna.app.model.Drawing
  * Siignas own implementation of the [[com.siigna.app.view.Graphics]] trait.
  * Made in openGL
  */
-object OpenGLGraphics extends Graphics {
+class OpenGLGraphics(val AWTGraphics : Graphics2D) extends Graphics {
 
   def draw(shape : Shape) {
-/*
+    /*
     val attributes = shape.attributes
     val transformation = attributes.transformationMatrix("Transform").getOrElse(TransformationMatrix())
     val transformedShape = shape.transform(transformation)

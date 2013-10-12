@@ -458,6 +458,7 @@ object View extends View {
   private var _canvas : Option[Canvas] = None
 
   def paint(screenGraphics : AWTGraphics, drawing : Drawing, interface : Option[Interface] = None) {
+    /*
     // Start the fps counter
     val fpsStart = System.currentTimeMillis()
 
@@ -516,6 +517,7 @@ object View extends View {
     // Update the fps counter
     fpsTimeToDrawLast = fpsTimeToDraw
     fpsTimeToDraw = System.currentTimeMillis() - fpsStart
+    */
   }
 
   /**

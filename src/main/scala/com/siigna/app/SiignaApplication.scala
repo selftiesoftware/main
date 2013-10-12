@@ -89,7 +89,7 @@ class ApplicationWindow extends Frame
     GL11.glColor3f(0.5f,0.5f,1.0f);
 
     // draw quad
-    View.paint(xxx, Drawing, Siigna.interface)
+    View.paint(null, Drawing, Siigna.interface)
     GL11.glBegin(GL11.GL_QUADS);
     GL11.glVertex2f(100,100);
     GL11.glVertex2f(100+200,100);
