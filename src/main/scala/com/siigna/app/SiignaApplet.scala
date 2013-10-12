@@ -185,6 +185,8 @@ class SiignaApplet extends Applet {
         // The following loop ensures that the contents of the drawing buffer
         // are consistent in case the underlying surface was recreated
         do {
+          //
+          val time = System.currentTimeMillis()
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
 
@@ -194,7 +196,12 @@ class SiignaApplet extends Applet {
           // Dispose of the graphics
           graphics.dispose()
 
-          Thread.sleep(30);
+          //The amount of frames we limit to
+          val limit = (1000/15) - (System.currentTimeMillis()-time)
+          if(limit>0){
+            //println(limit)
+            Thread.sleep(limit)
+          }
         } while (strategy.contentsRestored())
 
         // Make the next buffer available
