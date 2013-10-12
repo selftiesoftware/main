@@ -25,6 +25,7 @@ import com.siigna.app.Siigna
 import com.siigna.util.Log
 import concurrent.future
 import concurrent.ExecutionContext.Implicits.global
+import com.siigna.app.view.View
 
 /**
  * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.

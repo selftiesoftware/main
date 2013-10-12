@@ -112,9 +112,10 @@ class SiignaApplet extends Applet {
       // Get the active user and token, if a log in was performed at www.siigna.com
       val userName = getParameter("contributorName")
       val userToken = getParameter("contributorToken")
+      val userId = getParameter("contributorId")
 
       if (userName != null) {
-        Siigna.user = User(0, userName, if (userToken != null) userToken else "0")
+        Siigna.user = User(if (userId != null) userId.toInt else 0, userName, if (userToken != null) userToken else "0")
         Log.success("Applet: Found user: " + userName)
       }
 
