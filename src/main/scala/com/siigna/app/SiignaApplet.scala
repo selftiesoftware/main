@@ -193,6 +193,8 @@ class SiignaApplet extends Applet {
 
           // Dispose of the graphics
           graphics.dispose()
+
+          Thread.sleep(30);
         } while (strategy.contentsRestored())
 
         // Make the next buffer available
@@ -212,3 +214,5 @@ class SiignaApplet extends Applet {
   }
 
 }
+
+// vim: set sw=2 ts=2 et:
