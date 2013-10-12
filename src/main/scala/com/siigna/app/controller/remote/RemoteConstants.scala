@@ -52,9 +52,19 @@ object RemoteConstants extends Enumeration {
   val Action = Value
 
   /**
+   * Used to recognize requests for setting or getting one or more [[com.siigna.app.model.action.Action]]s.
+   */
+  val Actions = Value
+
+  /**
    * Used to recognize requests for setting or getting [[com.siigna.app.model.action.Action]] ids.
    */
   val ActionId = Value
+
+  /**
+   * Used to recognize requests for setting or getting one or more [[com.siigna.app.model.action.Action]] ids.
+   */
+  val ActionIds = Value
 
   /**
    * Used to recognize requests for setting or getting [[com.siigna.app.controller.remote.Session]]s.
