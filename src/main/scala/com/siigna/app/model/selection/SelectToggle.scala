@@ -179,6 +179,7 @@ object SelectToggle {
       case Some((_, s : BitSetShapeSelector)) if (s.contains(selector)) => drawing.selection.remove(id, selector)
       // Otherwise we need to toggle the points if no neighbors exist
       case Some((shape, s : BitSetShapeSelector)) => {
+
         selector match {
           case BitSetShapeSelector(bits) => {
             // If it's a closed polyline we need to treat it specially
@@ -188,15 +189,23 @@ object SelectToggle {
             }
 
             val xs = bits.foldLeft(s.bits)((xs, i) => {
+
               // Add the index if the id has any neighbors or if it does not exist already
               if ((xs(i - 1) || xs(i + 1) || (isClosedPolyline && (i == xs.last || i == xs.head))) || !xs(i)) xs + i
               // Remove the index if no neighbors were found
               else xs - i
             })
+            println(ShapeSelector(xs))
             Selection(drawing.selection.updated(id, drawing.selection(id)._1 -> ShapeSelector(xs)))
           }
-          case EmptyShapeSelector => drawing.selection
-          case _ => drawing.selection.remove(id)
+          case EmptyShapeSelector => {
+            println("2222222222")
+            drawing.selection
+          }
+          case _ => {
+            println("3333333")
+            drawing.selection.remove(id)
+          }
         }
       }
       // Simple cases:

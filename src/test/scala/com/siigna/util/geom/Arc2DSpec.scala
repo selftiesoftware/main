@@ -60,6 +60,7 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val arc = Arc2D(p1, p2, p3)
     val arc2 = Arc2D(p2,p1,p3)
     val arc3 = Arc2D(p3,p2,p1)
+    val arc4 = Arc2D(Vector2D(0,0),Vector2D(10,0),Vector2D(10,10))
 
     arc.center should equal (Vector2D(0,0))
     arc.radius should equal (10)
@@ -76,6 +77,11 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     arc3.startAngle should equal (0)
     arc3.angle should equal (180)
     arc3.endAngle should equal (180)
+    arc4.center should equal (Vector2D(5,5))
+    arc4.radius should equal (7.0710678118654755)
+    arc4.startAngle should equal (225)
+    arc4.angle should equal (180)
+    arc4.endAngle should equal (45)
 
   }
 
@@ -116,6 +122,18 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     arc.midPoint should equal (p2)
     arc2.midPoint should equal (Vector2D(-7.07107,-7.07107))
     arc3.midPoint should equal (Vector2D(22.9289,37.0711))
+
+  }
+
+  test("Can create the right part-selectors") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+
+    val arc = Arc2D(p1, p2, p3)
+    val arc2 = Arc2D(p2,p1,p3)
+    val arc3 = Arc2D(Vector2D(30,20),Vector2D(22.9289,37.0711),Vector2D(40,30))
+
 
   }
 
@@ -231,9 +249,6 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val c1 = CollectionGeometry2D(ArrayBuffer(Segment2D(p4,p5),Segment2D(p5,p6),Segment2D(p6,p7),Segment2D(p7,p8)))
     val c2 = CollectionGeometry2D(ArrayBuffer(Segment2D(p12,p13),Segment2D(p13,p14)))
 
-    //arc.intersections(c1) should equal (Set(Vector2D(10.0,0.0)))
-    //arc2.intersections(c1) should equal (Set(Vector2D(14.1422,0.0), Vector2D(10.0001,9.9999), Vector2D(10.0,10.0), Vector2D(0.0,14.14214)))
-    //arc2.intersections(c2) should equal (Set(Vector2D(-10.0,10.0), Vector2D(-4.9387,13.2516)))
   }
 
   test("Can calculate distance to point") {

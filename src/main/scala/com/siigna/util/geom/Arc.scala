@@ -405,9 +405,9 @@ object Arc2D {
   /**
    * Creates an arc from three points.
    */
-  def apply(p1 : Vector2D, p2 : Vector2D, p3 : Vector2D) : Arc2D = {
+  def apply(p1 : Vector2D, midpoint : Vector2D, p3 : Vector2D) : Arc2D = {
     // Calculate center and radius
-    val center = Circle2D.findCenterPoint(p1, p2, p3)
+    val center = Circle2D.findCenterPoint(p1, midpoint, p3)
     val radius = (p1 - center).length
 
     // The angle to p1
@@ -424,7 +424,7 @@ object Arc2D {
 
     // Find out which side of the line from start to end, the middle point is on.
     // If it's positive, the arc is counter-clockwise
-    val det = (p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)
+    val det = (p3.x - p1.x) * (midpoint.y - p1.y) - (p3.y - p1.y) * (midpoint.x - p1.x)
     //println("DET ER : " + det + " a1, a3: " + a1 + ", " + a3 + " Arc span CW + CCW: " + arcSpanCW + " - " + arcSpanCCW)
     if (det > 0) {
       //CW arc: Start point is P3
