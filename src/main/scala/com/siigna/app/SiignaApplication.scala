@@ -32,6 +32,8 @@ package com.siigna.app
 
 import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
 import java.awt.{BorderLayout, Dimension, Frame}
+import org.lwjgl.LWJGLException
+import org.lwjgl.opengl._
 
 /**
  * This object represents the main class of the Siigna application, when run in
@@ -60,67 +62,103 @@ object SiignaApplication
 class ApplicationWindow extends Frame
 {
 
-  // The applet is also an AWT Panel (the Java applet class extends it), so we
-  // just create a new instance and add it to our window.
-  val applet = new SiignaApplet
+  try {
+    Display.setDisplayMode(new DisplayMode(800,600))
+    Display.create()
+  } catch {
+      case e:LWJGLException =>{
+        e.printStackTrace()
+        System.exit(0)
+      }
+  }
 
-  // Set the layout
-  setLayout(new BorderLayout())
+  // init OpenGL here
+  GL11.glMatrixMode(GL11.GL_PROJECTION);
+  GL11.glLoadIdentity();
+  GL11.glOrtho(0, 800, 0, 600, 1, -1);
+  GL11.glMatrixMode(GL11.GL_MODELVIEW);
 
-  // Add the applet to the application.
-  add(applet, BorderLayout.CENTER)
+  while (!Display.isCloseRequested()) {
 
-  // Set the title of the application
-  setTitle("Siigna " + Siigna.string("version").getOrElse("unknown"))
+    // Clear the screen and depth buffer
+    GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
+    // set the color of the quad (R,G,B,A)
+    GL11.glColor3f(0.5f,0.5f,1.0f);
 
+    // draw quad
+    GL11.glBegin(GL11.GL_QUADS);
+    GL11.glVertex2f(100,100);
+    GL11.glVertex2f(100+200,100);
+    GL11.glVertex2f(100+200,100+200);
+    GL11.glVertex2f(100,100+200);
+    GL11.glEnd();
 
-  // Setup event handlers for when the window is closed.
-  // We dispose the window, which in the end terminates
-  // the program.
-  addWindowListener(new WindowListener {
-    override def windowActivated(e: WindowEvent)   { }
-    override def windowDeactivated(e: WindowEvent) { }
-    override def windowDeiconified(e: WindowEvent) { }
-    override def windowIconified(e: WindowEvent)   { }
-    override def windowClosed(e: WindowEvent)      { }
-    override def windowOpened(e: WindowEvent)      { }
-    override def windowClosing(e: WindowEvent)     {
-      applet.destroy()
-      dispose()
-    }
-  })
+    Display.update()
+  }
 
-  addComponentListener(new ComponentListener {
-    override def componentHidden  (e : ComponentEvent) { }
-    override def componentMoved   (e : ComponentEvent) { }
-    override def componentShown   (e : ComponentEvent) { }
-    override def componentResized (e : ComponentEvent) {
-      applet.resize(getSize.getWidth.toInt, getSize.getHeight.toInt)
-    }
-  })
-
-  // Set preferred size
-  setPreferredSize(
-    Siigna.get("defaultScreenSize") match {
-      case Some(d : Dimension) => d
-      case _ => new Dimension(600, 400)
-    }
-  )
-
-  // Show the window. The program is running.
-  setVisible(true)
-
-  // Request focus
-  requestFocus()
-
-  // Pack the elements of this window. The panel requests a certain size.
-  pack()
-
-
-
-  // Start the applet
-  applet.init()
+  Display.destroy()
+//  // The applet is also an AWT Panel (the Java applet class extends it), so we
+//  // just create a new instance and add it to our window.
+//  val applet = new SiignaApplet
+//
+//  // Set the layout
+//  setLayout(new BorderLayout())
+//
+//  // Add the applet to the application.
+//  add(applet, BorderLayout.CENTER)
+//
+//  // Set the title of the application
+//  setTitle("Siigna " + Siigna.string("version").getOrElse("unknown"))
+//
+//
+//
+//  // Setup event handlers for when the window is closed.
+//  // We dispose the window, which in the end terminates
+//  // the program.
+//  addWindowListener(new WindowListener {
+//    override def windowActivated(e: WindowEvent)   { }
+//    override def windowDeactivated(e: WindowEvent) { }
+//    override def windowDeiconified(e: WindowEvent) { }
+//    override def windowIconified(e: WindowEvent)   { }
+//    override def windowClosed(e: WindowEvent)      { }
+//    override def windowOpened(e: WindowEvent)      { }
+//    override def windowClosing(e: WindowEvent)     {
+//      applet.destroy()
+//      dispose()
+//    }
+//  })
+//
+//  addComponentListener(new ComponentListener {
+//    override def componentHidden  (e : ComponentEvent) { }
+//    override def componentMoved   (e : ComponentEvent) { }
+//    override def componentShown   (e : ComponentEvent) { }
+//    override def componentResized (e : ComponentEvent) {
+//      applet.resize(getSize.getWidth.toInt, getSize.getHeight.toInt)
+//    }
+//  })
+//
+//  // Set preferred size
+//  setPreferredSize(
+//    Siigna.get("defaultScreenSize") match {
+//      case Some(d : Dimension) => d
+//      case _ => new Dimension(600, 400)
+//    }
+//  )
+//
+//  // Show the window. The program is running.
+//  setVisible(true)
+//
+//  // Request focus
+//  requestFocus()
+//
+//  // Pack the elements of this window. The panel requests a certain size.
+//  pack()
+//
+//
+//
+//  // Start the applet
+//  applet.init()
 
 }
 
