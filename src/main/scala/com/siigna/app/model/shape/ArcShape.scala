@@ -53,7 +53,9 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def getPart(part : ShapeSelector) = {
     val t : Option[TransformationMatrix => Shape] = part match {
-      case FullShapeSelector => Some(transform)
+      case FullShapeSelector => {
+        Some(transform)
+      }
       case ShapeSelector(0)    => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint))
       case ShapeSelector(1)    => Some(t => ArcShape(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint))
       case ShapeSelector(0, 1) => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint.transform(t), geometry.endPoint))
@@ -67,7 +69,10 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
 
   def getSelector(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapeSelector else EmptyShapeSelector
 
-  def getSelector(point: Vector2D) = if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapeSelector else EmptyShapeSelector
+  def getSelector(point: Vector2D) = {
+    println("PointSelector")
+    if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapeSelector else EmptyShapeSelector
+  }
   
   def getShape(s : ShapeSelector) = s match {
     case FullShapeSelector => Some(this)

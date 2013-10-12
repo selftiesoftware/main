@@ -50,7 +50,61 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     arc2 should equal (Arc2D(Vector2D(0, 0), 1, 270, 180))
   }
   */
-  test("Can calculate the start, mid, and end points of an arc") {
+
+
+  test("Correct angle with correst center, radius, start angle, angle and end angle from 3 points: ") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+
+    val arc = Arc2D(p1, p2, p3)
+    val arc2 = Arc2D(p2,p1,p3)
+    val arc3 = Arc2D(p3,p2,p1)
+
+    arc.center should equal (Vector2D(0,0))
+    arc.radius should equal (10)
+    arc.startAngle should equal (0)
+    arc.angle should equal (180)
+    arc.endAngle should equal (180)
+    arc2.center should equal (Vector2D(0,0))
+    arc2.radius should equal (10)
+    arc2.startAngle should equal (90)
+    arc2.angle should equal (270)
+    arc2.endAngle should equal (0)
+    arc3.center should equal (Vector2D(0,0))
+    arc3.radius should equal (10)
+    arc3.startAngle should equal (0)
+    arc3.angle should equal (180)
+    arc3.endAngle should equal (180)
+
+  }
+
+  test("Can calculate the start point of an arc") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+
+    val arc = Arc2D(p1, p2, p3)
+    val arc2 = Arc2D(p2,p1,p3)
+    val arc3 = Arc2D(p3,p2,p1)
+    //val arc3 = Arc2D(Vector2D(30,20),Vector2D(22.9289,37.0711),Vector2D(40,30))
+
+
+    arc.startPoint should equal (p3)
+    arc2.startPoint should equal (p2)
+    arc3.startPoint should equal (p3)
+
+    //arc2.startPoint should equal (p2)
+    //arc2.endPoint should equal (p3)
+    //arc2.midPoint should equal (Vector2D(-7.07107,-7.07107))
+
+    //arc with center in 30,30
+    //arc3.startPoint should equal (Vector2D(29.99998,19.99996))
+    //arc3.endPoint should equal (Vector2D(40,30))
+    //arc3.midPoint should equal (Vector2D(22.9289,37.0711))
+  }
+
+  test("Can calculate the mid points of an arc") {
     val p1 = Vector2D(-10, 0)
     val p2 = Vector2D(0, 10)
     val p3 = Vector2D(10, 0)
@@ -59,9 +113,24 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     val arc2 = Arc2D(p2,p1,p3)
     val arc3 = Arc2D(Vector2D(30,20),Vector2D(22.9289,37.0711),Vector2D(40,30))
 
-    //arc.startPoint should equal (p1)
-    arc.endPoint should equal (p3)
-    //arc.midPoint should equal (p2)
+    arc.midPoint should equal (p2)
+    arc2.midPoint should equal (Vector2D(-7.07107,-7.07107))
+    arc3.midPoint should equal (Vector2D(22.9289,37.0711))
+
+  }
+
+  test("Can calculate the end points of an arc") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+
+    val arc = Arc2D(p1, p2, p3)
+    val arc2 = Arc2D(p2,p1,p3)
+    val arc3 = Arc2D(Vector2D(30,20),Vector2D(22.9289,37.0711),Vector2D(40,30))
+
+    arc.endPoint should equal (p1)
+    arc2.endPoint should equal (p3)
+    arc3.endPoint should equal (Vector2D(30,20))
 
     //arc2.startPoint should equal (p2)
     //arc2.endPoint should equal (p3)
@@ -165,6 +234,25 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
     //arc.intersections(c1) should equal (Set(Vector2D(10.0,0.0)))
     //arc2.intersections(c1) should equal (Set(Vector2D(14.1422,0.0), Vector2D(10.0001,9.9999), Vector2D(10.0,10.0), Vector2D(0.0,14.14214)))
     //arc2.intersections(c2) should equal (Set(Vector2D(-10.0,10.0), Vector2D(-4.9387,13.2516)))
+  }
+
+  test("Can calculate distance to point") {
+    val p1 = Vector2D(-10, 0)
+    val p2 = Vector2D(0, 10)
+    val p3 = Vector2D(10, 0)
+
+    val pa = Vector2D(0, 0)
+    val pb = Vector2D(1, 0)
+    val pc = Vector2D(10,0)
+    val pd = Vector2D(100,0)
+
+    val arc = Arc2D(p1, p2, p3)
+
+    arc.distanceTo(pa) should equal (10)
+    arc.distanceTo(pb) should equal (9)
+    arc.distanceTo(pc) should equal (0)
+    arc.distanceTo(pd) should equal (90)
+
   }
 
 

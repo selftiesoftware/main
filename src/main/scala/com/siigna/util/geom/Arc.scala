@@ -261,10 +261,35 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       else false
     }
 
-    //TODO: matches on the boundary of the arc, which is not correct.
     case rectangle : SimpleRectangle2D => {
-      println("simpleRect intersects eval for arc - should be updated")
-      !(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
+      // TODO: calculates for circle - should be altered to arc...
+      val max = rectangle.topRight - center
+      val min = rectangle.bottomLeft - center
+      if (max.x < 0) { // Rectangle to the left
+        if (max.y < 0) {
+          (max.x * max.x + max.y * max.y) < radius * radius
+        } else if (min.y > 0) {
+          (max.x * max.x + min.y * min.y) < radius * radius
+        } else {
+          scala.math.abs(max.x) < radius
+        }
+      } else if (min.x > 0) { // Rectangle to the right
+        if (max.y < 0) {
+          (min.x * min.x + max.y * max.y) < radius * radius
+        } else if (min.y > 0) {
+          (min.x * min.x + min.y * min.y) < radius * radius
+        } else {
+          min.x < radius
+        }
+      } else { // Rectangle on circle vertical centerline
+        if (max.y < 0) { // Due South
+          scala.math.abs(max.y) < radius
+        } else if (min.y > 0) { // Due North
+          min.y < radius
+        } else true
+      }
+      //println("simpleRect intersects eval for arc - should be updated")
+      //!(boundary.xMin > rectangle.xMax || boundary.xMin < rectangle.xMin || boundary.yMin > rectangle.yMax || boundary.yMax < rectangle.yMin)
     }
 
     case complexRect : ComplexRectangle2D => {
@@ -380,29 +405,33 @@ object Arc2D {
   /**
    * Creates an arc from three points.
    */
-  def apply(start : Vector2D, middle : Vector2D, end : Vector2D) : Arc2D = {
+  def apply(p1 : Vector2D, p2 : Vector2D, p3 : Vector2D) : Arc2D = {
     // Calculate center and radius
-    val center = Circle2D.findCenterPoint(start, middle, end)
-    val radius = (start - center).length
+    val center = Circle2D.findCenterPoint(p1, p2, p3)
+    val radius = (p1 - center).length
 
-    // The start angle of the points, NOT the arc
-    val startAngle = (start - center).angle
+    // The angle to p1
+    val a1 = (p1 - center).angle
 
-    // The end angle of the points, NOT the arc
-    val endAngle = (end - center).angle
+    // The angle to p2
+    val a3 = (p3 - center).angle
 
-    // Find the angle spanning start -> end CCW
-    val angle = findArcSpan(startAngle, endAngle)
+    // Find the angle spanning start -> end CW (start point is p3)
+    val arcSpanCW = findArcSpan(a3, a1)
+
+    // Find the angle spanning start -> end CCW (start point is p1)
+    val arcSpanCCW = findArcSpan(a1, a3)
 
     // Find out which side of the line from start to end, the middle point is on.
     // If it's positive, the arc is counter-clockwise
-    val det = (end.x - start.x) * (middle.y - start.y) - (end.y - start.y) * (middle.x - start.x)
+    val det = (p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)
+    //println("DET ER : " + det + " a1, a3: " + a1 + ", " + a3 + " Arc span CW + CCW: " + arcSpanCW + " - " + arcSpanCCW)
     if (det > 0) {
-      //CW arc
-      new Arc2D(center, radius, endAngle, findArcSpan(endAngle, startAngle))
+      //CW arc: Start point is P3
+      new Arc2D(center, radius, a3, arcSpanCW)
     } else {
-      //CCW arc
-      new Arc2D(center, radius, startAngle, angle)
+      //CCW arc: Start point is P1:
+      new Arc2D(center, radius, a1, arcSpanCCW)
     }
   }
 
