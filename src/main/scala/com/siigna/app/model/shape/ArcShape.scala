@@ -60,10 +60,10 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
       case FullShapeSelector => {
         Some(transform)
       }
-      case ShapeSelector(0)    => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint, geometry.endPoint))
+      case ShapeSelector(0)    => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint))
       case ShapeSelector(1)    => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint))
       case ShapeSelector(0, 1) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint))
-      case ShapeSelector(2)    => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint, geometry.endPoint.transform(tm)))
+      case ShapeSelector(2)    => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case ShapeSelector(0, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint, geometry.endPoint.transform(tm)))
       case ShapeSelector(1, 2) => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case ShapeSelector(0, 1, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
