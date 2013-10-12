@@ -115,10 +115,12 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 
   def transform(t : TransformationMatrix) = {
-      ArcShape(t.transform(center),
-               radius * t.scale,
-               startAngle, angle,
-               attributes)
+    //ArcShape(t.transform(geometry.startPoint),t.transform(geometry.midPoint),t.transform(geometry.endPoint))
+    ArcShape(t.transform(center),
+             radius * t.scale,
+             startAngle + t.rotation, angle,
+             attributes)
+
   }
 }
 

@@ -377,8 +377,10 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     case _ => Set()
   }
 
-  def transform(t : TransformationMatrix) =
+  def transform(t : TransformationMatrix) = {
+    println("DER")
     new Arc2D(t.transform(center), radius * t.scale, startAngle, angle)
+  }
 
   lazy val vertices = {
     Seq(startPoint,midPoint, endPoint)
