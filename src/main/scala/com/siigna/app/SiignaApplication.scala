@@ -34,6 +34,8 @@ import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowLis
 import java.awt.{BorderLayout, Dimension, Frame}
 import org.lwjgl.LWJGLException
 import org.lwjgl.opengl._
+import com.siigna.app.view.View
+import com.siigna.app.model.Drawing
 
 /**
  * This object represents the main class of the Siigna application, when run in
@@ -87,6 +89,7 @@ class ApplicationWindow extends Frame
     GL11.glColor3f(0.5f,0.5f,1.0f);
 
     // draw quad
+    View.paint(xxx, Drawing, Siigna.interface)
     GL11.glBegin(GL11.GL_QUADS);
     GL11.glVertex2f(100,100);
     GL11.glVertex2f(100+200,100);
