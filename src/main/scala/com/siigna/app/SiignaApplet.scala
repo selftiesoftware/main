@@ -49,6 +49,18 @@ import com.siigna.util.Log
  * handled by the [[com.siigna.app.view.View]] object by painting the [[com.siigna.app.model.Drawing]]
  * and then allowing the modules to paint additional graphics.
  */
+
+object PaintGuard {
+  private var shouldpaint = true
+  def shouldPaint(should : Boolean){
+    Log.success(s"repaint: $should")
+    this.shouldpaint = should
+  }
+
+  def shouldPaint() = shouldpaint
+
+}
+
 class SiignaApplet extends Applet {
 
   // The canvas on which we can paint
@@ -194,6 +206,7 @@ class SiignaApplet extends Applet {
           // Dispose of the graphics
           graphics.dispose()
 
+          PaintGuard.shouldPaint
           Thread.sleep(30);
         } while (strategy.contentsRestored())
 
