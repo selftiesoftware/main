@@ -2,13 +2,13 @@ import sbt._
 import Keys._
 
 object MyBuild extends Build { 
-    val buildOrganization  = "com.example"
+    val buildOrganization  = "com.siigna"
     val buildVersion       = "0.1.0-SNAPSHOT"
     val buildScalaVersion  = "2.10.3"
 
-    val rootProjectId = "myproject"
+    val rootProjectId = "siigna"
 
-    val lwjglVersion = "2.8.2"
+    val lwjglVersion = "2.9.0"
 
     object Settings {
         lazy val base = Defaults.defaultSettings ++ Seq(
@@ -25,10 +25,10 @@ object MyBuild extends Build {
     }
 
     lazy val broken = Project(
-        id = "broken",
+        id = rootProjectId,
         base = file("."),
         settings = Defaults.defaultSettings ++ Seq(
-            scalaVersion := "2.9.1",
+            scalaVersion := buildScalaVersion,
             target := new File("target/broken"),
             libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl-platform" % lwjglVersion classifier "natives-windows",
             libraryDependencies += "org.lwjgl.lwjgl" % "lwjgl-platform" % lwjglVersion classifier "natives-linux",
