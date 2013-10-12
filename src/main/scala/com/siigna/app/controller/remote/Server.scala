@@ -112,6 +112,8 @@ class Server(host : String, mode : Mode.Mode) {
 
             // We're now connected for sure
             if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
+
+            Log.debug(s"SESSION: ${message.session}")
             _retries = 0 // Reset retries
           }
           case e => { // Timeout or false values
