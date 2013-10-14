@@ -248,7 +248,7 @@ object RemoteController {
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
-          Thread.slep(1000)
+          Thread.sleep(1000)
           println("zoom extends in remote controller")
           View.zoomExtends
         } catch {
