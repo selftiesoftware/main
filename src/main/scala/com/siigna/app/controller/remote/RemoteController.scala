@@ -20,15 +20,15 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.Siigna
-import com.siigna.app.model.{Drawing => SiignaDrawing}
+import com.siigna.app.model.{Drawing => SiignaDrawing, Model}
 import RemoteConstants._
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.app.controller.remote.RemoteConstants.Action
 import collection.mutable
 import com.siigna.util.Log
-import com.siigna.app.model.Model
 import com.siigna.app.controller.remote.RemoteConstants.Drawing
 import com.siigna.app.view.View
+import com.siigna.util.geom.Vector2D
 
 /**
  * Controls any remote connection(s).
@@ -225,6 +225,20 @@ object RemoteController {
   }
 
   /**
+   * set the pan and zoom to enclose the entire drawing
+   * @param drawing the drawing which is being loaded
+   */
+  def zoomExtends(implicit drawing : SiignaDrawing) {
+    View.zoom = math.max(View.width, View.height) / math.max(drawing.boundary.width, drawing.boundary.height) * 0.5 // 20% margin
+    View.pan = Vector2D(-drawing.boundary.center.x * View.zoom, drawing.boundary.center.y * View.zoom)
+
+    // Notify the listeners
+    View.listenersPan.foreach(_(View.pan))
+    View.listenersZoom.foreach(_(View.zoom))
+  }
+
+
+  /**
    * Handles the request for a drawing whose id is specified in the <code>session</code> of this client.
    */
   protected def handleGetDrawing(any : Any) {
@@ -248,9 +262,8 @@ object RemoteController {
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
-          Thread.sleep(1000)
           println("zoom extends in remote controller")
-          View.zoomExtends
+          zoomExtends
         } catch {
           case e : Throwable => Log.error("Remote: Error when reading data from server", e)
         }

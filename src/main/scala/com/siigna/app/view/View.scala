@@ -56,7 +56,7 @@ trait View {
   /**
    * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
    */
-  protected var listenersPan : Seq[Vector2D => Unit] = Nil
+  var listenersPan : Seq[Vector2D => Unit] = Nil
 
   /**
    * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
@@ -66,7 +66,7 @@ trait View {
   /**
    * Zoom listeners to be called whenever the view changes zoom.
    */
-  protected var listenersZoom : Seq[(Double) => Unit] = Nil
+  var listenersZoom : Seq[(Double) => Unit] = Nil
 
   /**
    * The protected renderer instance
