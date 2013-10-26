@@ -29,7 +29,6 @@ class Client(val address:String) {
     val conn = new Connection(address+"/drawingId"+Client.sessionToUrl(session))
 
     conn.get.map(s => {
-
       java.lang.Long.parseLong(new String(s))
     })
   }
@@ -69,7 +68,6 @@ class Client(val address:String) {
    * @param session: Requires auth
    */
   def getShapeIds(amount:Int, session:Session) : Option[Range] = {
-
     val conn = new Connection(address+"/shapeId/"+amount+Client.sessionToUrl(session))
     conn.get.flatMap(Unmarshal[Range])
   }
@@ -87,13 +85,35 @@ class Client(val address:String) {
   }
 
   /**
-   * Get's the action with the given id on the drawing that the session is authenticated with
-   * @param actionId
+   * Performs a number or [[com.siigna.app.model.action.RemoteAction]]s on the drawing id in the session
+   * @param actions
    * @param session
+   * @return An action id from the server
+   */
+  def setActions(actions:Seq[RemoteAction],session:Session) : Option[Seq[Int]] = {
+    val conn = new Connection(address+"/actions"+Client.sessionToUrl(session))
+    val bytes = Marshal(actions)
+    conn.post(bytes).flatMap(Unmarshal[Seq[Int]])
+  }
+
+  /**
+   * Gets the action with the given id on the drawing that the session is authenticated with
+   * @param actionId  The id of the action to fetch from the server
+   * @param session  The current session
    */
   def getAction(actionId:Int,session:Session) : Option[RemoteAction] = {
     val conn = new Connection(address+"/action/"+actionId+Client.sessionToUrl(session))
     conn.get.flatMap(Unmarshal[RemoteAction])
+  }
+
+  /**
+   * Gets one or more actions with the given id on the drawing that the session is authenticated with
+   * @param actionIds  The ids of the actions to fetch from the server
+   * @param session  The current session
+   */
+  def getActions(actionIds : Seq[Int], session : Session) : Option[Seq[RemoteAction]] = {
+    val conn = new Connection(address+"/actions/"+actionIds.mkString("/")+Client.sessionToUrl(session))
+    conn.get.flatMap(b => Unmarshal[Seq[RemoteAction]](b))
   }
 
   /**

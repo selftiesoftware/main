@@ -24,7 +24,7 @@ import view._
 import com.siigna.util.geom._
 import java.awt.Cursor
 import com.siigna.util.event.Track
-import com.siigna.app.controller.remote.RemoteController
+import com.siigna.app.controller.Controller
 
 /**
  * <p>
@@ -46,6 +46,8 @@ import com.siigna.app.controller.remote.RemoteController
  * the [[com.siigna.module.Module]]s.</p>
  */
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
+
+  protected[app] var controller : Option[Controller] = None
 
   /**
    * The active display, if any.
@@ -120,7 +122,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * A boolean value that indicates if we have made connection to the server and successfully authenticated the user.
    * @return  True if we can connect to the server and the user have been authenticated, false otherwise.
    */
-  def isOnline : Boolean = RemoteController.isOnline
+  def isOnline : Boolean = controller.exists(_.isOnline)
 
   /**
    * the ID of the latest created shape (used in Trim)

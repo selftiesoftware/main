@@ -11,94 +11,39 @@
 
 package com.siigna.app.controller.remote
 
-import org.scalatest.FunSpec
+import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.app.controller.remote.{RemoteConstants => RC}
-import com.siigna.app.Siigna
-import com.siigna.app.model.action.{CreateShape, RemoteAction}
-import com.siigna.app.model.Model
-import com.siigna.app.model.shape.CircleShape
-import com.siigna.util.geom.Vector2D
-import com.siigna.util.collection.Attributes
+import com.siigna.app.model.action.{RemoteAction, CreateShape}
+import com.siigna.app.model.ActionModel
+import com.siigna.app.model.shape.LineShape
+import com.sun.net.httpserver.{HttpServer, HttpExchange, HttpHandler}
+import com.siigna.util.io.{Marshal, Unmarshal}
+import java.net.InetSocketAddress
+import scala.collection.immutable.BitSet
 
 /**
  * Tests the remote actor.
  */
-class RemoteControllerSpec extends FunSpec with ShouldMatchers {
-
-  // Set all members accessible in RemoteController
-  val sink = new Server("http://app.siigna.com", Mode.Http)
-  var session : Session = null
-
-  sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)),
-    r => session = Session(r.asInstanceOf[Set].value.asInstanceOf[Long], Siigna.user))
-
-  //describe("The Remote Controller Handles") {
-
-    // Test handles
-
-  //}
+class RemoteControllerSpec extends RemoteController(new ActionModel {}, new RESTEndpoint("app.siigna.com", 80), 0)
+                              with FunSpec with ShouldMatchers with GivenWhenThen {
 
   describe("The Remote Controller") {
-    var range : Range = null
 
-    it ("can fetch a new drawing id") {
-      sink(Get(RC.DrawingId, null, Session(0L, Siigna.user)), r => {
-        val set = r.asInstanceOf[Set]
-        set.name should equal(RC.DrawingId)
-        val id = set.value.asInstanceOf[Long]
-        id should be > 0L
-        session = Session(id, Siigna.user)
-      })
-    }
-
-    it ("can get the latest action id for a drawing") {
-      sink(Get(RC.ActionId, null, session), r => {
-        val set = r.asInstanceOf[Set]
-        val id = set.value.asInstanceOf[Int]
-        id should equal (0)
-      })
-    }
-
-    it ("can get a drawing") {
-      sink(Get(RC.Drawing, session.drawing, session), r => {
-        r match {
-
-          case set:Set => {
-
-            set.value match {
-
-              case m:Model => m.shapes.size should equal (0)
-              case _ => assert(false)
-            }
-          }
-        }
-
-      })
-    }
-
-    it ("can get shape ids") {
-      def getRange(x : Int) {
-        sink(Get(RC.ShapeId, x, session), r => {
-          val set = r.asInstanceOf[Set]
-          range = set.value.asInstanceOf[Range]
-          range.size should equal (x)
-        })
-      }
-      getRange(1)
-      getRange(12)
-    }
-
-    it ("can set an action") {
-      val dummyAction = new RemoteAction(CreateShape(2, CircleShape(new Vector2D(100,100),20,Attributes())))
-
-      if (range != null) {
-        sink(Set(RC.Action, dummyAction, session), r => {
-          val set = r.asInstanceOf[Set]
-          assert(set.value.isInstanceOf[Int])
-        })
-      }
-    }
+//    it("Can keep track of the shape ids") {
+//      val startTime = System.currentTimeMillis()
+//      val actions = (1 to 2).map(i => CreateShape(-i, LineShape(0, 0, 10, 10)))
+//      Given(s"${actions.size} shapes")
+//      When("Synchronizing them with the server")
+//      actions.foreach(a => controller.sendActionToServer(a, undo = false))
+//      while(controller.isSynchronising){}
+//
+//      Then(s"The id should be incremented by ${actions.size}")
+//      println(controller.actionIndices)
+//      controller.actionIndices should equal(BitSet(0, 1))
+//      controller.localIdMap should equal(Map(-1 -> 0, -2 -> 1))
+//      Then(s"Taking ${System.currentTimeMillis() - startTime}ms")
+//      server.stop()
+//    }
 
   }
 }

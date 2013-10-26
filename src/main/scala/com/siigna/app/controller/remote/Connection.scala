@@ -2,7 +2,6 @@ package com.siigna.app.controller.remote
 
 import java.net.{ConnectException, HttpURLConnection, URL}
 import java.io.ByteArrayOutputStream
-import javax.xml.bind.DatatypeConverter
 import com.siigna.util.Log
 
 
@@ -16,6 +15,10 @@ class Connection(val url: String) {
    */
   val destination = new URL(url)
 
+  /**
+   * Attempts to open a URL connection
+   * @return Some[HttpURLConnection] if successful, None otherwise
+   */
   def open : Option[HttpURLConnection] =
     try {
       val conn = destination.openConnection.asInstanceOf[HttpURLConnection]
@@ -89,14 +92,6 @@ object Connection{
   def decode(stream: java.io.InputStream):Array[Byte] = {
 
     try {
-
-      //val reader = new BufferedReader(new InputStreamReader(stream))
-      //val request = reader.readLine() // Read the request line
-      //request.getBytes("UTF-8")
-
-      // val token = request.substring(6, request.size) // Cut off the initial 6 characters (do they mean anyting??)
-      //      raw      parsed   unmarshalled
-
       val bos = new ByteArrayOutputStream()
       val buffer:Array[Byte] = new Array[Byte](4096)
       var len= 0
@@ -113,24 +108,6 @@ object Connection{
         new Array[Byte](0)
       }
     }
-  }
-
-  /**
-   * Mathces user and password against a base64 basic auth string
-   * @param user
-   * @param pass
-   * @param hash A base64 encoded string of the format user:password
-   */
-  def auth(user: String, pass: String, hash: String):Boolean = {
-    DatatypeConverter.parseBase64Binary(user+":"+pass).equals(new String(DatatypeConverter.printBase64Binary(hash.getBytes)))
-  }
-
-  /**
-   * Simple function to return a map of parameters from a query string
-   * @param query
-   */
-  def extractParameters(query: String) = {
-    query.split("=")
   }
 
 }

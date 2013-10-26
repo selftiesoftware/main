@@ -124,6 +124,7 @@ class SiignaApplet extends Applet {
         case "nightly" => "nightly"
         case _ => "stable"
       }
+
     } catch {
       case _: NullPointerException => // Not in an applet environment
     }
@@ -149,8 +150,9 @@ class SiignaApplet extends Applet {
     setFocusTraversalKeysEnabled(false)
 
     // Get the controller and setup event-listeners
-    controller = new Controller()
+    controller = new Controller(Drawing)
     controller.setupEventListenersOn(canvas)
+    Siigna.controller = Some(controller)
 
     // Start the controller
     controller.start()

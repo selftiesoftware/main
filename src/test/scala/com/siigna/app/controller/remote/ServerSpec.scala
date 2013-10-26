@@ -23,13 +23,10 @@ import com.siigna.util.collection.Attributes
 
 class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
-  val port = 20005
-  val address = "http://62.243.118.234"
-  //val address = "http://localhost"
-  val fqn = address+":"+port
+  val address = "http://app.siigna.com"
   val ses = Session(4L,User(1L,"John","Johnskey"))
 
-  def client = new Client(fqn)
+  def client = new Client(address)
 
   describe("Siigna communication Client") {
 
@@ -167,6 +164,7 @@ class ServerSpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       val time = System.currentTimeMillis() - start
       Then("It took "+time)
     }
+
   }
 
 }

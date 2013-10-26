@@ -17,7 +17,7 @@ import org.scalatest.FunSuite
 /**
  * Test a circle.
  */
-class Circle2DSpec  extends FunSuite with ShouldMatchers {
+class Circle2DSpec extends FunSuite with ShouldMatchers {
 
 
   test("Find a center point in an arc given three points on the periphery.") {
