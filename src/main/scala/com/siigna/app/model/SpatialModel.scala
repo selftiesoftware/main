@@ -21,9 +21,8 @@ package com.siigna.app.model
 
 import org.khelekore.prtree.PRTree
 import com.siigna.util.geom.{Rectangle2D, SimpleRectangle2D, Vector2D}
-import com.siigna.app.model.shape.{LineShape, Shape}
+import com.siigna.app.model.shape.Shape
 import com.siigna.app.Siigna
-import com.siigna.app.model.action.Create
 
 /**
  * A trait that supplies the model with spatial information and spatial queries to retrieve one or more shapes
@@ -78,5 +77,18 @@ trait SpatialModel {
    * @return  The minimum-bounding rectangle containing all the shapes in the model.
    */
   def mbr : SimpleRectangle2D = SiignaTree.mbr(rtree)
+
+  /**
+   * Locates one single shape that is closest to the given point. If no shape could be found None is returned.
+   * @param point  The center of the search query.
+   * @param radius  The radius of the search query.
+   * @return  Some[(Int, Shape)] if a shape could be found, None otherwise.
+   */
+  def nearestShape(point : Vector2D, radius : Double = Siigna.selectionDistance) : Option[(Int, Shape)] = {
+    val nearestShapes = apply(point, radius)
+    if (!nearestShapes.isEmpty) {
+      Some(nearestShapes.reduceLeft((a, b) => if (a._2.distanceTo(point) < b._2.distanceTo(point)) a else b))
+    } else None
+  }
 
 }
