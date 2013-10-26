@@ -57,7 +57,6 @@ class Popup(message : String) extends Display {
   def isEnabled = (timeElapsed < displayTime + fadeTime)
 
   def paint(graphics : Graphics) {
-    println("RUNNING DISPLAY")
     if (!message.isEmpty) {
       // Define the transparency for the message
       val alpha : Double =
