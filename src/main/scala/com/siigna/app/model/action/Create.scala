@@ -43,7 +43,9 @@ object Create {
    * @tparam T  The type of the entries in the shape.
    */
   def apply[T <: Shape](collection : CollectionShape[T]) {
-    Drawing.execute(CreateShape(Drawing getId, collection))
+    val id = Drawing.getId
+    com.siigna.app.Siigna.latestID = Some(id)
+    Drawing.execute(CreateShape(id, collection))
   }
 
   /**
