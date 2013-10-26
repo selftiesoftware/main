@@ -23,6 +23,7 @@ import com.siigna.app.model.shape.TextShape
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.Vector2D
 import java.awt.Color
+import com.siigna.app.Siigna
 
 /**
  * A popup that displays a string on the center of the screen, with pre-defined
@@ -30,16 +31,16 @@ import java.awt.Color
  */
 class Tooltip(strings : List[String]) extends Display {
 
+  val isEnabled = if(Siigna.areTooltipsEnabled) true else false
+
   /**
    * The color of the message text.
    */
   private var color = new Color(0, 0, 0, 255)
 
-  var isEnabled = true
-
   def paint(graphics : Graphics) {
     //LINE 1
-    if (!strings(0).isEmpty) {
+    if (strings.length > 0 && !strings(0).isEmpty) {
       // Define the transparency for the message
       val alpha : Double = 0.75
 
@@ -53,7 +54,7 @@ class Tooltip(strings : List[String]) extends Display {
       graphics draw text
     }
     //LINE 2
-    if (!strings(1).isEmpty) {
+    if (strings.length > 1 && !strings(1).isEmpty) {
       // Define the transparency for the message
       val alpha : Double = 0.75
 
@@ -62,12 +63,12 @@ class Tooltip(strings : List[String]) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(strings(1), Vector2D(View.center.x,60), 14, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(strings(1), Vector2D(View.center.x,60), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
       paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,60))
       graphics draw text
     }
     //LINE 3
-    if (!strings(2).isEmpty) {
+    if (strings.length > 2 && !strings(2).isEmpty) {
       // Define the transparency for the message
       val alpha : Double = 0.75
 
@@ -76,7 +77,7 @@ class Tooltip(strings : List[String]) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(strings(2), Vector2D(View.center.x,90), 14, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(strings(2), Vector2D(View.center.x,90), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
       paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,90))
       graphics draw text
     }
