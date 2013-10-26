@@ -339,13 +339,15 @@ trait Module {
         None
       }
 
+      /* Not useful, since some modules require alternative behaviour on escape: Ex: Polyline or angle gizmp should
+         finish in the same way as if "enter" had been pressed" when esc. is pressed.
       // Force all modules to go to the 'End state upon escape
       case KeyUp(Key.Escape, _) :: KeyDown(Key.Escape, _) :: tail => {
         if (stateMap.contains('End)) {
           state = 'End
         } else endChild("Caught exit, but could not find End state")
         None
-      }
+      } */
 
       // Otherwise we give the events to the child and match on the result
       case _ => _child.get.apply(events.head) match {

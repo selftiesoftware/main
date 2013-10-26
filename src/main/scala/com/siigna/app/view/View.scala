@@ -51,17 +51,12 @@ trait View {
   /**
    * The time it takes to draw one frame.
    */
-  protected var fpsTimeToDraw : Double = 0
-
-  /**
-   * The time it took to draw the last frame.
-   */
-  protected var fpsTimeToDrawLast : Double = 0
+  protected var fps : Double = 0
 
   /**
    * Pan listeners to be called whenever the user pans - that is moves the view-port of the drawing.
    */
-  protected var listenersPan : Seq[Vector2D => Unit] = Nil
+  var listenersPan : Seq[Vector2D => Unit] = Nil
 
   /**
    * Resize listeners to be called by whoever initializes the frame or canvas to draw upon.
@@ -71,7 +66,7 @@ trait View {
   /**
    * Zoom listeners to be called whenever the view changes zoom.
    */
-  protected var listenersZoom : Seq[(Double) => Unit] = Nil
+  var listenersZoom : Seq[(Double) => Unit] = Nil
 
   /**
    * The protected renderer instance
@@ -153,13 +148,6 @@ trait View {
    * @return A [[com.siigna.util.geom.Vector2D]] where x = screen-width/2 and y = screen-height/2
    */
   def center = screen.center
-
-  /**
-   * The number of frames drawn per second. Useful for debugging purposes or to see how stressed the computer is.
-   *
-   * Uses an algorithm described at [http://stackoverflow.com/a/87333/999865].
-   */
-  def fps : Double = 100 / (fpsTimeToDraw * 0.1 + fpsTimeToDrawLast * 0.7)
 
   /**
    * The default graphics implementation represented as a function that can be called whenever someone needs an
@@ -514,8 +502,7 @@ object View extends View {
     }
 
     // Update the fps counter
-    fpsTimeToDrawLast = fpsTimeToDraw
-    fpsTimeToDraw = System.currentTimeMillis() - fpsStart
+    fps = 1000/(System.currentTimeMillis() - fpsStart)
   }
 
   /**

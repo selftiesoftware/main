@@ -110,7 +110,7 @@ trait Graphics {
     // We're using Arc2D.Double instead of the function 'drawArc', since Arc2D.Double is using
     // doubles (weird enough) and are thus more precise.
     val arc2d = new JavaArc.Double(center.x - radius, center.y - radius, radius * 2, radius * 2,
-                                   startAngle, arcAngle, JavaArc.OPEN)
+                                   startAngle+180, arcAngle, JavaArc.OPEN)
     AWTGraphics draw arc2d
   }
 

@@ -23,6 +23,10 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D, 
 import com.siigna.util.collection.Attributes
 import com.siigna.app.Siigna
 import com.siigna.app.model.selection._
+import com.siigna.util.geom.SimpleRectangle2D
+import scala.Some
+import com.siigna.app.model.selection.BitSetShapeSelector
+import collection.immutable.BitSet
 
 /**
  * This class draws an arc.
@@ -56,22 +60,39 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
       case FullShapeSelector => {
         Some(transform)
       }
-      case ShapeSelector(0)    => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint))
-      case ShapeSelector(1)    => Some(t => ArcShape(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint))
-      case ShapeSelector(0, 1) => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint.transform(t), geometry.endPoint))
-      case ShapeSelector(2)    => Some(t => ArcShape(geometry.startPoint, geometry.midPoint, geometry.endPoint.transform(t)))
-      case ShapeSelector(0, 2) => Some(t => ArcShape(geometry.startPoint.transform(t), geometry.midPoint, geometry.endPoint.transform(t)))
-      case ShapeSelector(1, 2) => Some(t => ArcShape(geometry.startPoint, geometry.midPoint.transform(t), geometry.endPoint.transform(t)))
+      case ShapeSelector(0)    => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint))
+      case ShapeSelector(1)    => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint))
+      case ShapeSelector(0, 1) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint))
+      case ShapeSelector(2)    => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
+      case ShapeSelector(0, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint, geometry.endPoint.transform(tm)))
+      case ShapeSelector(1, 2) => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
+      case ShapeSelector(0, 1, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case _ => None
     }
     t.map((f : TransformationMatrix => Shape) => new PartialShape(this, f))
   }
 
-  def getSelector(rect: SimpleRectangle2D) = if (rect.intersects(geometry)) FullShapeSelector else EmptyShapeSelector
+  def getSelector(rect: SimpleRectangle2D) = if (rect.contains(geometry)) FullShapeSelector else
+  {
+    ShapeSelector(BitSet(geometry.vertices.zipWithIndex.filter(t => rect.contains(t._1)).map(_._2):_*))
+  }
 
   def getSelector(point: Vector2D) = {
-    println("PointSelector")
-    if (distanceTo(point) < Siigna.double("selectionDistance").get) FullShapeSelector else EmptyShapeSelector
+    var v0 : Boolean = false
+    var v1 : Boolean = false
+    var v2 : Boolean = false
+    if (geometry.startPoint.distanceTo(point) < Siigna.selectionDistance) v0 = true
+    if (geometry.midPoint.distanceTo(point) < Siigna.selectionDistance) v1 = true
+    if (geometry.endPoint.distanceTo(point) < Siigna.selectionDistance) v2 = true
+    if( v0 == false & v1 == false && v2 == false ) EmptyShapeSelector
+    else if( v0 == true & v1 == false && v2 == false ) ShapeSelector(0)
+    else if( v0 == true & v1 == true && v2 == false ) ShapeSelector(0,1)
+    else if( v0 == true & v1 == false && v2 == true ) ShapeSelector(0,2)
+    else if( v0 == true & v1 == true && v2 == true ) ShapeSelector(0,1,2)
+    else if( v0 == false & v1 == true && v2 == false ) ShapeSelector(1)
+    else if( v0 == false & v1 == true && v2 == true ) ShapeSelector(1,2)
+    else if( v0 == false & v1 == false && v2 == true ) ShapeSelector(2)
+    else EmptyShapeSelector
   }
   
   def getShape(s : ShapeSelector) = s match {
@@ -83,21 +104,24 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case FullShapeSelector   => geometry.vertices
     case ShapeSelector(0)    => Seq(geometry.startPoint)
     case ShapeSelector(1)    => Seq(geometry.midPoint)
-    case ShapeSelector(0, 1) => Seq(geometry.startPoint + geometry.midPoint)
+    case ShapeSelector(0, 1) => Seq(geometry.startPoint, geometry.midPoint)
     case ShapeSelector(2)    => Seq(geometry.endPoint)
-    case ShapeSelector(0, 2) => Seq(geometry.startPoint + geometry.endPoint)
-    case ShapeSelector(1, 2) => Seq(geometry.midPoint + geometry.endPoint)
+    case ShapeSelector(0, 2) => Seq(geometry.startPoint, geometry.endPoint)
+    case ShapeSelector(1, 2) => Seq(geometry.midPoint, geometry.endPoint)
+    case ShapeSelector(0, 1, 2) => Seq(geometry.startPoint, geometry.midPoint, geometry.endPoint)
     case _ => Seq()
   }
 
   def setAttributes(attributes : Attributes) = new ArcShape(center, radius, startAngle, angle, attributes)
 
-  def transform(t : TransformationMatrix) =
-      ArcShape(t.transform(center),
-               radius * t.scale,
-               startAngle, angle,
-               attributes)
+  def transform(t : TransformationMatrix) = {
+    //ArcShape(t.transform(geometry.startPoint),t.transform(geometry.midPoint),t.transform(geometry.endPoint))
+    ArcShape(t.transform(center),
+             radius * t.scale,
+             startAngle + t.rotation, angle,
+             attributes)
 
+  }
 }
 
 /**
