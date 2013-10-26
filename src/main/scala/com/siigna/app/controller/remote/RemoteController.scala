@@ -79,7 +79,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         while(!shouldExit) {
 
           // Query for new actions
-          server(Get(ActionId, null, session), handleGetActionId)
+          handleGetActionId(server(Get(ActionId, null, session)))
 
           // Tell the world that we are doing stuff
           _sync = true
@@ -90,7 +90,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
 
             // Dispatch the data, if any
             if (!actions.isEmpty) {
-              server(Set(Actions, actions, session), handleSetActions)
+              handleSetActions(server(Set(Actions, actions, session)))
             }
 
             // Empty mailbox
@@ -134,11 +134,11 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
     // If we have a drawing we need to fetch it if we don't we need to reserve it
     drawingId match {
       case Some(i) => {
-        server(Get(Drawing, i, session), handleGetDrawing)
+        handleGetDrawing(server(Get(Drawing, i, session)))
       }
       case None    => {
         // We need to ask for a new drawing
-        server(Get(DrawingId, null, session), {
+        server(Get(DrawingId, null, session)) match {
           case id : Long => {
             // Gotcha! Set the drawing id
             model.attributes += "id" -> id
@@ -153,7 +153,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
             Log.error("Remote: Could not reserve new drawing, shutting down.", e)
             shouldExit = true
           }
-        })
+        }
       }
     }
   }
@@ -198,7 +198,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         } else if(id > actionIndices.last) {
           val range = actionIndices.last to id
           
-          server(Get(Actions, range, session), {
+          server(Get(Actions, range, session)) match {
             case actions : Seq[RemoteAction] => {
               actions.foreach { action =>
                 try {
@@ -216,7 +216,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
               actionIndices ++= range
             }
             case e : Error => Log.error("Remote: Unexpected format: " + e)
-          })
+          }
         }
 
         // After the check it should be fine to add the index to the set of action indices
@@ -261,7 +261,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
           // which sets the last executed action on the drawing
           model.attributes.int("lastAction") match {
             case Some(i : Int) => actionIndices += i
-            case _ => server(Get(ActionId, null, session), handleGetActionId)
+            case _ => handleGetActionId(server(Get(ActionId, null, session)))
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
@@ -302,7 +302,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         var updatedAction : Option[Action] = None
 
         // .. Then we need to query the server for ids
-        server(Get(ShapeId, localIds.size, session), {
+        server(Get(ShapeId, localIds.size, session)) match {
           case i : Range => {
 
             // Find out how the ids map to the action
@@ -321,7 +321,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
             Log.error("Remote: Expected Set(ShapeId, Range, _), got: " + e)
             shouldExit = true
           }
-        })
+        }
 
         updatedAction
       } else { // Else give the action the new ids
