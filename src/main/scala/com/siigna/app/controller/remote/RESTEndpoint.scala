@@ -63,11 +63,10 @@ class RESTEndpoint(host : String, port : Int) {
    * A method that sends a remote command, represented as a byte array, synchronously with an associated callback
    * function with side effects. The method repeats the procedure until something is received.
    * @param message  The message to send as a remote command
-   * @param f  The callback function to execute when data is successfully retrieved
    */
-  def apply(message : RemoteCommand, f : Any => Unit) {
+  def apply(message : RemoteCommand) : Any = {
     try {
-      f(dispatch(message).merge)
+      dispatch(message).merge
     } catch {
       case e : StackOverflowError => {
         shouldExit = true
