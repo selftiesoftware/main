@@ -61,7 +61,7 @@ object ModuleLoader {
 
   // Create a default packages
   future {
-    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+     load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
     load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
     load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
     modulesLoaded = true

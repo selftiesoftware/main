@@ -38,12 +38,12 @@ class Popup(message : String) extends Display {
   /**
    * The time the display is "alive", i. e. not fading.
    */
-  private var displayTime  = 2000
+  private var displayTime  = 7000
 
   /**
    * The time it takes for the display to fade in milliseconds.
    */
-  private var fadeTime = 1200
+  private var fadeTime = 200
 
   /**
    * The time the display was initiated.

@@ -121,7 +121,9 @@ trait PolylineShape extends CollectionShape[BasicShape] {
           set += (i + 1) // Add one since we already included the startPoint (at index 0)
         }
       }
-      BitSetShapeSelector(set)
+      if(set.isEmpty) EmptyShapeSelector //return an empty selector if no vertices are selected
+      else BitSetShapeSelector(set)
+
     } else EmptyShapeSelector
 
   def getSelector(point: Vector2D) = {
