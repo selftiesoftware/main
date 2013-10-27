@@ -61,7 +61,7 @@ class RESTEndpoint(host : String, port : Int) {
    */
   def get(url : String) : Either[Array[Byte], String] = {
     try {
-      dispatch(new Connection(url), _.get)
+      dispatch(new Connection("http://" + url), _.get)
     } catch {
       case e : StackOverflowError => {
         shouldExit = true
@@ -78,7 +78,7 @@ class RESTEndpoint(host : String, port : Int) {
    */
   def post(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
     try {
-      dispatch(new Connection(url), _.post(message))
+      dispatch(new Connection("http://" + url), _.post(message))
     } catch {
       case e : StackOverflowError => {
         shouldExit = true

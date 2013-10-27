@@ -20,7 +20,7 @@ package com.siigna.app.controller
 
 import com.siigna.util.event.Event
 import com.siigna.module.ModuleLoader
-import com.siigna.app.controller.remote.{RESTEndpoint, RemoteController}
+import com.siigna.app.controller.remote.{RESTGateway, RemoteController}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 
@@ -44,7 +44,7 @@ import com.siigna.util.Log
  */
 class Controller(drawing : Drawing) extends EventController {
 
-  private val remote = new RemoteController(drawing, new RESTEndpoint("app.siigna.com", 80))
+  private val remote = new RemoteController(drawing, new RESTGateway("app.siigna.com"))
 
   // Listen to the drawing
   drawing.addRemoteListener((a, u) => remote.sendActionToServer(a, u))

@@ -35,7 +35,7 @@ import com.siigna.app.controller.remote.RemoteConstants.Drawing
  * @param gateway  Gateway to the specific transport layer
  *
  */
-class RemoteController(protected val model : ActionModel, protected val gateway : Client, sleepTime : Int = 2000) {
+class RemoteController(protected val model : ActionModel, protected val gateway : RESTGateway, sleepTime : Int = 2000) {
 
   // All the ids of the actions that have been executed on the client
   protected[remote] val actionIndices = mutable.BitSet()

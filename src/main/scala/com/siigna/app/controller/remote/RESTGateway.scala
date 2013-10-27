@@ -1,19 +1,19 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.model.Model
-import com.siigna.util.Log
 import com.siigna.app.model.action.RemoteAction
 import com.siigna.app.model.server.User
 import com.siigna.util.io.{Marshal, Unmarshal}
 import java.net.URLEncoder
 
 /**
- * Http Client for siigna communication
+ * Http REST gateway for siigna communication.
  * @param address: Fully qualified domain name for the base address of siigna server to use (including port)
  */
-class Client(val address:String) {
+class RESTGateway(val address:String) {
 
-  val endpoint = new RESTEndpoint(address, 80)
+  // The endpoint to communicate with
+  protected val endpoint = new RESTEndpoint(address, 80)
 
   /**
    * @return whether the current server is alive
@@ -29,7 +29,7 @@ class Client(val address:String) {
    * @param session  The current session
    */
   def getAction(actionId:Int, session:Session) : Either[RemoteAction, String] = {
-    endpoint.get(address+"/action/"+actionId+Client.sessionToUrl(session)).left.flatMap(
+    endpoint.get(address+"/action/"+actionId+RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[RemoteAction](_) match {
         case Some(action) => Left(action)
         case _ => Right("Could not de-serialise to a remote action")
@@ -43,21 +43,20 @@ class Client(val address:String) {
    * @param session  The current session
    */
   def getActions(actionIds : Seq[Int], session : Session) : Either[Seq[RemoteAction], String] = {
-    endpoint.get(address+"/actions/"+actionIds.mkString("/")+Client.sessionToUrl(session)).left.flatMap(
+    endpoint.get(address+"/actions/"+actionIds.mkString("/")+RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Seq[RemoteAction]](_) match {
         case Some(actions) => Left(actions)
         case _ => Right("Could not de-serialise to a sequence of remote action")
       }
     )
   }
-  def isConnected =true
 
   /**
    * Get the next action id for the drawing set in the session
    * @param session: specifies the drawing
    */
   def getActionId(session:Session) : Either[Int, String] = {
-    endpoint.get(address+"/actionId"+Client.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(address+"/actionId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
       try {
         Left(java.lang.Integer.parseInt(new String(bytes)))
       } catch {
@@ -71,7 +70,7 @@ class Client(val address:String) {
    * @return a new drawing id from the server
    */
   def getNewDrawingId(session:Session) : Either[Long, String] = {
-    endpoint.get(address+"/drawingId"+Client.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(address+"/drawingId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
       try {
         Left(java.lang.Long.parseLong(new String(bytes)))
       } catch {
@@ -86,7 +85,7 @@ class Client(val address:String) {
    * @param session: Session with access to the drawng
    */
   def getDrawing(drawingId: Long, session:Session) : Either[Model, String] = {
-    endpoint.get(address+"/drawing/"+drawingId+Client.sessionToUrl(session)).left.flatMap(
+    endpoint.get(address+"/drawing/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Model](_) match {
         case Some(model) => Left(model)
         case _ => Right("Could not de-serialise the model")
@@ -100,13 +99,19 @@ class Client(val address:String) {
    * @param session: Requires auth
    */
   def getShapeIds(amount:Int, session:Session) : Either[Range, String] = {
-    endpoint.get(address+"/shapeId/"+amount+Client.sessionToUrl(session)).left.flatMap(
+    endpoint.get(address+"/shapeId/"+amount+RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Range](_) match {
         case Some(r) => Left(r)
         case _ => Right("Could not de-serialise the model")
       }
     )
   }
+
+  /**
+   * Examines whether the client can connect to an underlying endpoint.
+   * @return True if a connection has been made successfully, false otherwise.
+   */
+  def isConnected = endpoint.isConnected
 
   /**
    * Performs a [[com.siigna.app.model.action.RemoteAction]] on the drawing id in the session
@@ -116,7 +121,7 @@ class Client(val address:String) {
    */
   def setAction(action:RemoteAction,session:Session) : Either[Int, String] = {
     val actionBytes = Marshal(action)
-    endpoint.post(address+"/action"+Client.sessionToUrl(session), actionBytes).left.flatMap( bytes =>
+    endpoint.post(address+"/action"+RESTGateway.sessionToUrl(session), actionBytes).left.flatMap( bytes =>
       try {
         Left(java.lang.Integer.parseInt(new String(bytes)))
       } catch {
@@ -133,7 +138,7 @@ class Client(val address:String) {
    */
   def setActions(actions:Seq[RemoteAction],session:Session) : Either[Seq[Int], String] = {
     val actionBytes = Marshal(actions)
-    endpoint.post(address+"/actions"+Client.sessionToUrl(session), actionBytes).left.flatMap(
+    endpoint.post(address+"/actions"+RESTGateway.sessionToUrl(session), actionBytes).left.flatMap(
       Unmarshal[Seq[Int]](_) match {
         case Some(r) => Left(r)
         case _ => Right("Could not de-serialise the model")
@@ -143,7 +148,7 @@ class Client(val address:String) {
 
 }
 
-object Client {
+object RESTGateway {
 
 
   /**

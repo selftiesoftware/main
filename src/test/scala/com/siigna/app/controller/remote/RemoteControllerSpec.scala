@@ -24,7 +24,7 @@ import scala.collection.immutable.BitSet
 /**
  * Tests the remote actor.
  */
-class RemoteControllerSpec extends RemoteController(new ActionModel {}, new RESTEndpoint("app.siigna.com", 80), 0)
+class RemoteControllerSpec extends RemoteController(new ActionModel {}, new RESTGateway("app.siigna.com"), 0)
                               with FunSpec with ShouldMatchers with GivenWhenThen {
 
   describe("The Remote Controller") {
