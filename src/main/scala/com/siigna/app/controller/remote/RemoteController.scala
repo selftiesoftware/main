@@ -254,7 +254,6 @@ object RemoteController {
         try {
           // Implement the model
           SiignaDrawing.execute(LoadDrawing(model), remote = false)
-
           // Search for the lastAction attribute, or retrieve it manually,
           // which sets the last executed action on the drawing
           SiignaDrawing.attributes.int("lastAction") match {
@@ -262,8 +261,6 @@ object RemoteController {
             case _ => remote(Get(ActionId, null, session), handleGetActionId)
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
-          println("zoom extends in remote controller")
-          zoomExtends
         } catch {
           case e : Throwable => Log.error("Remote: Error when reading data from server", e)
         }
