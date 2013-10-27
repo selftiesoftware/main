@@ -20,8 +20,6 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.util.Log
-import com.siigna.app.controller.remote.RemoteConstants._
-import com.siigna.app.model.action.RemoteAction
 import scala.annotation.tailrec
 
 /**
@@ -38,9 +36,6 @@ import scala.annotation.tailrec
  * @param port The port of the connection
  */
 class RESTEndpoint(host : String, port : Int) {
-
-  // The remote server
-  private val client = new Client("http://"+host+":"+port)
 
   /**
    * An int that shows how many retries have been made AND is used to signal connectivity.
@@ -60,17 +55,34 @@ class RESTEndpoint(host : String, port : Int) {
   def isConnected = _retries == 0
 
   /**
-   * A method that sends a remote command, represented as a byte array, synchronously with an associated callback
-   * function with side effects. The method repeats the procedure until something is received.
-   * @param message  The message to send as a remote command
+   * A method that sends a synchronous GET command over HTTP. The endpoint repeats the
+   * call until something is received, being an error or the actual data.
+   * @param url  The url of the GET request
    */
-  def apply(message : RemoteCommand) : Any = {
+  def get(url : String) : Either[Array[Byte], String] = {
     try {
-      dispatch(message).merge
+      dispatch(new Connection(url), _.get)
     } catch {
       case e : StackOverflowError => {
         shouldExit = true
-        Log.error(s"Remote: Too many retries $retries means stack overflow :-( Shutting down!")
+        Right(s"Remote: Too many retries $retries means stack overflow :-( Shutting down!")
+      }
+    }
+  }
+
+  /**
+   * A method that sends a synchronous POST command over HTTP with some data attached. The
+   * endpoint repeats the call until something is received, being an error or the actual data.
+   * @param url  The URL of the POST request
+   * @param message  The message to send as a remote command
+   */
+  def post(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
+    try {
+      dispatch(new Connection(url), _.post(message))
+    } catch {
+      case e : StackOverflowError => {
+        shouldExit = true
+        Right(s"Remote: Too many retries $retries means stack overflow :-( Shutting down!")
       }
     }
   }
@@ -84,73 +96,40 @@ class RESTEndpoint(host : String, port : Int) {
 
   /**
    * Dispatches the given message and returns either the reply or an error string.
-   * @param message  The message to dispatch
+   * @param connection  The connection to open
+   * @param handler  A function to retrieve the data from the connection
    * @return  The obj if it was successfully returned, otherwise an error message.
    */
-  @tailrec protected final def dispatch(message : RemoteCommand) : Either[Any, String] = {
+  @tailrec protected final def dispatch(connection : Connection, handler : Connection => Option[Array[Byte]]) : Either[Array[Byte], String] = {
     if (shouldExit) {
       Right("Server: Cannot dispatch message; closing.")
     } else {
 
-      handle(message) match {
-        case Some(obj) => { // Call the callback function
-          Log.debug(s"Received: $obj")
+      handler(connection) match {
+        case Some(arr) => { // Call the callback function
+          Log.debug(s"REST received: $arr")
 
           // We're now connected for sure
           if (_retries > 0) Log.debug("Server: Connection (re)established after " + retries + " attempts.")
 
-          Log.debug(s"SESSION: ${message.session}")
+          Log.debug(s"REST URL: ${connection.url}")
           _retries = 0 // Reset retries
 
-          Left(obj)
+          Left(arr)
         }
         case e => { // Connection issue or unexpected reply
           // Increment retries
           _retries += 1
 
           if (_retries % 10 == 0) {
-            Log.warning(s"Server: Connection to '$host:$port' failed after ${retries + 1} attempt(s), retrying: $message.")
+            Log.warning(s"Server: Connection to '$host:$port' failed after ${retries + 1} attempt(s), retrying: ${connection.url}.")
           }
 
           // Retry
-          dispatch(message)
+          dispatch(connection, handler)
         }
       }
     }
-  }
-
-  /**
-   * Handle a server call to the remote endpoint by dispatching the command and retrieving the reply as 
-   * the expected type.
-   * @param r  The remote command to send.
-   * @return Option[Any] if the connection was successful and the reply was the expected type, None otherwise.
-   */
-  protected def handle(r: RemoteCommand) : Option[Any] = {
-    r match {
-      case Get(DrawingId,v,s) => client.getDrawingId(s)
-
-      // Specific drawing is what we are after
-      case Get(Drawing,v:Long,s) => client.getDrawing(v,s)
-
-      // A new drawing is what we are after
-      case Get(Drawing,v,s) => client.getDrawing(s)
-
-      case Get(ShapeId,v:Int,s) => client.getShapeIds(v,s)
-
-      case Set(Action,v:RemoteAction,s) => client.setAction(v,s)
-
-      case Set(Actions, v : Seq[RemoteAction], s) => client.setActions(v,s)
-
-      case Get(Action,v:Int,s) => client.getAction(v,s)
-
-      case Get(Actions,v:Seq[Int],s) => client.getActions(v,s)
-
-      case Get(ActionId,v,s) => client.getActionId(s)
-
-      case x => Log.warning("Remote: Error when communicating with server: " + x); None
-
-    }
-
   }
 
   /**

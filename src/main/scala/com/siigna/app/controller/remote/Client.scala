@@ -1,7 +1,6 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.model.Model
-import com.siigna.util.Log
 import com.siigna.app.model.action.RemoteAction
 import com.siigna.app.model.server.User
 import com.siigna.util.io.{Marshal, Unmarshal}
@@ -13,6 +12,8 @@ import java.net.URLEncoder
  */
 class Client(val address:String) {
 
+  val endpoint = new RESTEndpoint(address, 80)
+
   /**
    * @return whether the current server is alive
    */
@@ -22,34 +23,72 @@ class Client(val address:String) {
   }
 
   /**
-   * @param session: Optionally a session to authenticate with
-   * @return a new drawing id from the server
+   * Gets the action with the given id on the drawing that the session is authenticated with
+   * @param actionId  The id of the action to fetch from the server
+   * @param session  The current session
    */
-  def getDrawingId(session:Session) : Option[Long] = {
-    val conn = new Connection(address+"/drawingId"+Client.sessionToUrl(session))
+  def getAction(actionId:Int, session:Session) : Either[RemoteAction, String] = {
+    endpoint.get(address+"/action/"+actionId+Client.sessionToUrl(session)).left.flatMap(
+      Unmarshal[RemoteAction](_) match {
+        case Some(action) => Left(action)
+        case _ => Right("Could not de-serialise to a remote action")
+      }
+    )
+  }
 
-    conn.get.map(s => {
-      java.lang.Long.parseLong(new String(s))
-    })
+  /**
+   * Gets one or more actions with the given id on the drawing that the session is authenticated with
+   * @param actionIds  The ids of the actions to fetch from the server
+   * @param session  The current session
+   */
+  def getActions(actionIds : Seq[Int], session : Session) : Either[Seq[RemoteAction], String] = {
+    endpoint.get(address+"/actions/"+actionIds.mkString("/")+Client.sessionToUrl(session)).left.flatMap(
+      Unmarshal[Seq[RemoteAction]](_) match {
+        case Some(actions) => Left(actions)
+        case _ => Right("Could not de-serialise to a sequence of remote action")
+      }
+    )
+  }
+
+  /**
+   * Get the next action id for the drawing set in the session
+   * @param session: specifies the drawing
+   */
+  def getActionId(session:Session) : Either[Int, String] = {
+    endpoint.get(address+"/actionId"+Client.sessionToUrl(session)).left.flatMap( bytes =>
+      try {
+        Left(java.lang.Integer.parseInt(new String(bytes)))
+      } catch {
+        case _ : Throwable => Right("Unable to case bytes to Int")
+      }
+    )
   }
 
   /**
    * Get the "next" drawing on the server. Meaning just a new one
    * @param session: Authentication is required
    */
-  def getDrawing(session:Session) : Option[Model] = {
-
-    val conn = new Connection(address+"/drawing/new"+Client.sessionToUrl(session))
-
-    conn.get.flatMap(res => {
-      Unmarshal[Model](res) match {
-        case s : Some[Model] => s
-        case None => {
-          Log.error("Remote: Couldn't get a new drawing !")
-          None
-        }
+  def getNewDrawing(session:Session) : Either[Model, String] = {
+    endpoint.get(address+"/drawing/new"+Client.sessionToUrl(session)).left.flatMap(
+      Unmarshal[Model](_) match {
+        case Some(model) => Left(model)
+        case _ => Right("Could not de-serialise the model")
       }
-    })
+    )
+  }
+
+  /**
+   * @param session: Optionally a session to authenticate with
+   * @return a new drawing id from the server
+   */
+  def getNewDrawingId(session:Session) : Either[Long, String] = {
+    endpoint.get(address+"/drawingId"+Client.sessionToUrl(session)).left.flatMap( bytes =>
+      try {
+        Left(java.lang.Long.parseLong(new String(bytes)))
+      } catch {
+        case _ : Throwable => Right("Unable to case bytes to long")
+      }
+    )
   }
 
   /**
@@ -57,9 +96,13 @@ class Client(val address:String) {
    * @param drawingId: Drawing to get
    * @param session: Session with access to the drawng
    */
-  def getDrawing(drawingId: Long, session:Session) : Option[Model] = {
-    val conn = new Connection(address+"/drawing/"+drawingId+Client.sessionToUrl(session))
-    conn.get.flatMap(Unmarshal[Model])
+  def getDrawing(drawingId: Long, session:Session) : Either[Model, String] = {
+    endpoint.get(address+"/drawing/"+drawingId+Client.sessionToUrl(session)).left.flatMap(
+      Unmarshal[Model](_) match {
+        case Some(model) => Left(model)
+        case _ => Right("Could not de-serialise the model")
+      }
+    )
   }
 
   /**
@@ -67,9 +110,13 @@ class Client(val address:String) {
    * @param amount: How many shapes to get
    * @param session: Requires auth
    */
-  def getShapeIds(amount:Int, session:Session) : Option[Range] = {
-    val conn = new Connection(address+"/shapeId/"+amount+Client.sessionToUrl(session))
-    conn.get.flatMap(Unmarshal[Range])
+  def getShapeIds(amount:Int, session:Session) : Either[Range, String] = {
+    endpoint.get(address+"/shapeId/"+amount+Client.sessionToUrl(session)).left.flatMap(
+      Unmarshal[Range](_) match {
+        case Some(r) => Left(r)
+        case _ => Right("Could not de-serialise the model")
+      }
+    )
   }
 
   /**
@@ -78,10 +125,15 @@ class Client(val address:String) {
    * @param session
    * @return An action id from the server
    */
-  def setAction(action:RemoteAction,session:Session) : Option[Int] = {
-    val conn = new Connection(address+"/action"+Client.sessionToUrl(session))
-    val bytes = Marshal(action)
-    conn.post(bytes).map(new String(_).toInt)
+  def setAction(action:RemoteAction,session:Session) : Either[Int, String] = {
+    val actionBytes = Marshal(action)
+    endpoint.post(address+"/action"+Client.sessionToUrl(session), actionBytes).left.flatMap( bytes =>
+      try {
+        Left(java.lang.Integer.parseInt(new String(bytes)))
+      } catch {
+        case _ : Throwable => Right("Unable to case bytes to long")
+      }
+    )
   }
 
   /**
@@ -90,39 +142,14 @@ class Client(val address:String) {
    * @param session
    * @return An action id from the server
    */
-  def setActions(actions:Seq[RemoteAction],session:Session) : Option[Seq[Int]] = {
-    val conn = new Connection(address+"/actions"+Client.sessionToUrl(session))
-    val bytes = Marshal(actions)
-    conn.post(bytes).flatMap(Unmarshal[Seq[Int]])
-  }
-
-  /**
-   * Gets the action with the given id on the drawing that the session is authenticated with
-   * @param actionId  The id of the action to fetch from the server
-   * @param session  The current session
-   */
-  def getAction(actionId:Int,session:Session) : Option[RemoteAction] = {
-    val conn = new Connection(address+"/action/"+actionId+Client.sessionToUrl(session))
-    conn.get.flatMap(Unmarshal[RemoteAction])
-  }
-
-  /**
-   * Gets one or more actions with the given id on the drawing that the session is authenticated with
-   * @param actionIds  The ids of the actions to fetch from the server
-   * @param session  The current session
-   */
-  def getActions(actionIds : Seq[Int], session : Session) : Option[Seq[RemoteAction]] = {
-    val conn = new Connection(address+"/actions/"+actionIds.mkString("/")+Client.sessionToUrl(session))
-    conn.get.flatMap(b => Unmarshal[Seq[RemoteAction]](b))
-  }
-
-  /**
-   * Get the next action id for the drawing set in the session
-   * @param session: specifies the drawing
-   */
-  def getActionId(session:Session) : Option[Int] = {
-    val conn = new Connection(address+"/actionId"+Client.sessionToUrl(session))
-    conn.get.map(new String(_).toInt)
+  def setActions(actions:Seq[RemoteAction],session:Session) : Either[Seq[Int], String] = {
+    val actionBytes = Marshal(actions)
+    endpoint.post(address+"/actions"+Client.sessionToUrl(session), actionBytes).left.flatMap(
+      Unmarshal[Seq[Int]](_) match {
+        case Some(r) => Left(r)
+        case _ => Right("Could not de-serialise the model")
+      }
+    )
   }
 
 }
