@@ -19,13 +19,12 @@
 
 package com.siigna.app.controller.remote
 
-import com.siigna.app.Siigna
-import com.siigna.app.model.{Model, ActionModel}
-import RemoteConstants._
+import com.siigna.app.model.ActionModel
+import com.siigna.app.model.Model
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import collection.mutable
 import com.siigna.util.Log
-import com.siigna.app.controller.remote.RemoteConstants.Drawing
+import com.siigna.app.Siigna
 
 /**
  * Establishes a connection to the given remote server to synchronise the given model.

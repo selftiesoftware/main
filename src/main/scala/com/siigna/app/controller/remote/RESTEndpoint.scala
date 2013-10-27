@@ -31,11 +31,8 @@ import scala.annotation.tailrec
  * <p>
  *   We use the [[http://ubjson.org UBJSON]] (Universal Binary JSON) format to (un-)marshal data.
  * </p>
- *
- * @param host  The URL of the host.
- * @param port The port of the connection
  */
-class RESTEndpoint(host : String, port : Int) {
+class RESTEndpoint {
 
   /**
    * An int that shows how many retries have been made AND is used to signal connectivity.
@@ -61,7 +58,7 @@ class RESTEndpoint(host : String, port : Int) {
    */
   def get(url : String) : Either[Array[Byte], String] = {
     try {
-      dispatch(new Connection("http://" + url), _.get)
+      dispatch(new Connection(url), _.get)
     } catch {
       case e : StackOverflowError => {
         shouldExit = true
@@ -78,7 +75,7 @@ class RESTEndpoint(host : String, port : Int) {
    */
   def post(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
     try {
-      dispatch(new Connection("http://" + url), _.post(message))
+      dispatch(new Connection(url), _.post(message))
     } catch {
       case e : StackOverflowError => {
         shouldExit = true
@@ -100,13 +97,13 @@ class RESTEndpoint(host : String, port : Int) {
    * @param handler  A function to retrieve the data from the connection
    * @return  The obj if it was successfully returned, otherwise an error message.
    */
-  @tailrec protected final def dispatch(connection : Connection, handler : Connection => Option[Array[Byte]]) : Either[Array[Byte], String] = {
+  @tailrec protected final def dispatch(connection : Connection, handler : Connection => Either[Array[Byte], String]) : Either[Array[Byte], String] = {
     if (shouldExit) {
       Right("Server: Cannot dispatch message; closing.")
     } else {
 
       handler(connection) match {
-        case Some(arr) => { // Call the callback function
+        case Left(arr) => { // Call the callback function
           Log.debug(s"REST received: $arr")
 
           // We're now connected for sure
@@ -117,12 +114,12 @@ class RESTEndpoint(host : String, port : Int) {
 
           Left(arr)
         }
-        case e => { // Connection issue or unexpected reply
+        case Right(message) => { // Connection issue or unexpected reply
           // Increment retries
           _retries += 1
 
           if (_retries % 10 == 0) {
-            Log.warning(s"Server: Connection to '$host:$port' failed after ${retries + 1} attempt(s), retrying: ${connection.url}.")
+            Log.warning(s"Server: $message.")
           }
 
           // Retry

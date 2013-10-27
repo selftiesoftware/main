@@ -187,6 +187,8 @@ class SiignaApplet extends Applet {
         // The following loop ensures that the contents of the drawing buffer
         // are consistent in case the underlying surface was recreated
         do {
+          //Get the current time, to be used for fps limiting.
+          val time = System.currentTimeMillis()
           // Fetch the buffer graphics
           val graphics = strategy.getDrawGraphics
 
@@ -195,6 +197,15 @@ class SiignaApplet extends Applet {
 
           // Dispose of the graphics
           graphics.dispose()
+
+          //The amount of frames we limit
+          val fps = 15
+          //Limiting formula
+          val limit = (1000/fps) - (System.currentTimeMillis()-time)
+          //Limit the fps if it is too high
+          if(limit>0){
+            Thread.sleep(limit)
+          }
         } while (strategy.contentsRestored())
 
         // Make the next buffer available
@@ -214,3 +225,5 @@ class SiignaApplet extends Applet {
   }
 
 }
+
+// vim: set sw=2 ts=2 et:

@@ -1,8 +1,7 @@
 package com.siigna.app.controller.remote
 
 import java.net.{ConnectException, HttpURLConnection, URL}
-import java.io.ByteArrayOutputStream
-import com.siigna.util.Log
+import java.io.{EOFException, ByteArrayOutputStream}
 
 
 /**
@@ -19,37 +18,38 @@ class Connection(val url: String) {
    * Attempts to open a URL connection
    * @return Some[HttpURLConnection] if successful, None otherwise
    */
-  def open : Option[HttpURLConnection] =
+  def open : Either[HttpURLConnection, String] =
     try {
       val conn = destination.openConnection.asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(5000)
-      Some(conn)
+      Left(conn)
     } catch {
-      case e : Throwable => None
+      case e : Throwable => Right("Error when opening TCP connection: " + e.getLocalizedMessage)
     }
 
-  def respondAndClose(con:HttpURLConnection) : Option[Array[Byte]] = {
+  def respondAndClose(con:HttpURLConnection) : Either[Array[Byte], String] = {
     try {
       if (con.getResponseCode == 200) {
         val resp = Connection.decode(con.getInputStream)
         con.disconnect()
-        Some(resp)
+        Left(resp)
       } else {
         val resp = Connection.decode(con.getErrorStream)
         con.disconnect()
-        Some(resp)
+        Left(resp)
       }
     } catch {
       case e : ConnectException => {
         Thread.sleep(2000) // Avoid spamming retries
-        None
+        Right("Connection aborted")
       }
-      case e : Throwable => None
+      case e : EOFException => Right("Unexpected end of file from Server")
+      case e : Throwable => Right("Unknown error: " + e.getLocalizedMessage)
     }
   }
 
-  def get : Option[Array[Byte]] = {
-    open.flatMap( con => {
+  def get : Either[Array[Byte], String] = {
+    open.left.flatMap( con => {
       con.setDoInput(true)
       con.setUseCaches(false)
 
@@ -57,12 +57,12 @@ class Connection(val url: String) {
     })
   }
 
-  def post(message:Array[Byte]) : Option[Array[Byte]] = send(message,"POST")
+  def post(message:Array[Byte]) : Either[Array[Byte], String] = send(message,"POST")
 
-  def put(message:Array[Byte]) : Option[Array[Byte]] = send(message,"PUT")
+  def put(message:Array[Byte]) : Either[Array[Byte], String] = send(message,"PUT")
 
-  def send(message:Array[Byte], method:String="POST") : Option[Array[Byte]] = {
-    open.flatMap( con => {
+  def send(message:Array[Byte], method:String="POST") : Either[Array[Byte], String] = {
+    open.left.flatMap( con => {
       con.setDoInput(true)
       con.setDoOutput(true)
       con.setUseCaches(false)
@@ -73,12 +73,11 @@ class Connection(val url: String) {
 
       try {
         out.write(message)
-        out.flush
+        out.flush()
 
         respondAndClose(con)
-
       } catch {
-        case e : Throwable => None
+        case e : Throwable => Right("Error when writin data to stream: " + e.getLocalizedMessage)
       } finally {
         out.close()
       }
@@ -104,7 +103,6 @@ object Connection{
       bos.toByteArray
     } catch {
       case e : Throwable => {
-        Log.error("Fail: " + e)
         new Array[Byte](0)
       }
     }

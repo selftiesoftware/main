@@ -378,9 +378,12 @@ object Selection {
    */
   def apply(parts : Map[Int, (Shape, ShapeSelector)]) : Selection = {
     val filtered = parts.filter(t => t._2._2 != EmptyShapeSelector)
+    //println("filtered:; "+filtered)
     if (filtered.isEmpty) {
+      //println("ISEMPTY")
       EmptySelection
     } else {
+      //println("NONEMPTY")
       new NonEmptySelection(filtered)
     }
   }

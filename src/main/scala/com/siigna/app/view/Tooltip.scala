@@ -23,22 +23,24 @@ import com.siigna.app.model.shape.TextShape
 import com.siigna.util.collection.Attributes
 import com.siigna.util.geom.Vector2D
 import java.awt.Color
+import com.siigna.app.Siigna
 
 /**
  * A popup that displays a string on the center of the screen, with pre-defined
  * fade functionality.
  */
-class Tooltip(message : String) extends Display {
+class Tooltip(strings : List[String]) extends Display {
+
+  val isEnabled = if(Siigna.areTooltipsEnabled) true else false
 
   /**
    * The color of the message text.
    */
   private var color = new Color(0, 0, 0, 255)
 
-  var isEnabled = true
-
   def paint(graphics : Graphics) {
-    if (!message.isEmpty) {
+    //LINE 1
+    if (strings.length > 0 && !strings(0).isEmpty) {
       // Define the transparency for the message
       val alpha : Double = 0.75
 
@@ -47,8 +49,36 @@ class Tooltip(message : String) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(message, Vector2D(View.center.x,20), 10, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
-      paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 20, setTransparency(backgroundColor),Vector2D(View.center.x,20))
+      val text = TextShape(strings(0), Vector2D(View.center.x,30), 14, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,30))
+      graphics draw text
+    }
+    //LINE 2
+    if (strings.length > 1 && !strings(1).isEmpty) {
+      // Define the transparency for the message
+      val alpha : Double = 0.75
+
+      // Retrieve the relative alpha in relation the the time
+      // expired since startTime for the given color
+      def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
+
+      // Define the text shape, draw the frame and draw the text
+      val text = TextShape(strings(1), Vector2D(View.center.x,60), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,60))
+      graphics draw text
+    }
+    //LINE 3
+    if (strings.length > 2 && !strings(2).isEmpty) {
+      // Define the transparency for the message
+      val alpha : Double = 0.75
+
+      // Retrieve the relative alpha in relation the the time
+      // expired since startTime for the given color
+      def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
+
+      // Define the text shape, draw the frame and draw the text
+      val text = TextShape(strings(2), Vector2D(View.center.x,90), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,90))
       graphics draw text
     }
   }
@@ -59,5 +89,4 @@ class Tooltip(message : String) extends Display {
   def setColor(color : Color) {
     this.color = color
   }
-
 }

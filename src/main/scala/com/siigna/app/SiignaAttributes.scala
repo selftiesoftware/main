@@ -129,6 +129,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("printFormatMax")        = 297.0
   this("selectionDistance")     = 7.0
   this("snap")                  = true
+  this("tooltips")              = true
   this("track")                 = true
   this("trackDistance")         = 4.0
   this("trackGuideColor")       = "#00FFFF".color
@@ -152,7 +153,14 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
    * @return  True if tracking is on, false otherwise.
    */
   def isTrackEnabled: Boolean = boolean("track").getOrElse(true)
-  
+
+  /**
+   * Examines whether tooltops are enabled.
+   * @see [[com.siigna.app.SiignaAttributes.tooltipToggle]]
+   * @return  True if tooltips are on, false otherwise.
+   */
+  def areTooltipsEnabled: Boolean = boolean("tooltips").getOrElse(true)
+
   /**
    * Toggles a boolean value or sets it to true if it does not exist. If there already is a
    * non-boolean value assigned to that name, nothing happens.
@@ -176,6 +184,19 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
       case _ => true
     }
     update("snap", value)
+    value
+  }
+
+  /**
+   * Toggles tooltips on or off and returns the new value.
+   * @return True if tooltips were disabled before but activated now, false otherwise.
+   */
+  def tooltipToggle : Boolean = {
+    val value = boolean("tooltips") match {
+      case Some(b) => !b
+      case _ => true
+    }
+    update("tooltips", value)
     value
   }
 

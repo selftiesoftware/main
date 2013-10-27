@@ -8,19 +8,19 @@ import java.net.URLEncoder
 
 /**
  * Http REST gateway for siigna communication.
- * @param address: Fully qualified domain name for the base address of siigna server to use (including port)
+ * @param address: Fully qualified domain name for the base address of siigna server to use (including port).
  */
-class RESTGateway(val address:String) {
+class RESTGateway(val address : String) {
 
   // The endpoint to communicate with
-  protected val endpoint = new RESTEndpoint(address, 80)
+  protected val endpoint = new RESTEndpoint()
 
   /**
    * @return whether the current server is alive
    */
-  def alive = {
+  def alive : Boolean = {
     val response = new Connection(address).get
-    response.exists(new String(_).equals("Siigna"))
+    response.left.exists(new String(_).equals("Siigna"))
   }
 
   /**
@@ -141,7 +141,9 @@ class RESTGateway(val address:String) {
     endpoint.post(address+"/actions"+RESTGateway.sessionToUrl(session), actionBytes).left.flatMap(
       Unmarshal[Seq[Int]](_) match {
         case Some(r) => Left(r)
-        case _ => Right("Could not de-serialise the model")
+        case _ => {
+          Right("Could not de-serialise the model")
+        }
       }
     )
   }

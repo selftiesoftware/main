@@ -95,7 +95,7 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   /**
    * A shorthand reference to display a tooltip.
    */
-  def tooltip(string : String) { display(new Tooltip(string)) }
+  def tooltip(strings : List[String]) { display(new Tooltip(strings)) }
 
   /**
    * Returns the active ModuleInterface that's been placed highest in the interface-hierarchy.

@@ -21,8 +21,8 @@ package com.siigna.app.model.shape
 
 import org.scalatest.FunSpec
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.util.geom.{TransformationMatrix, SimpleRectangle2D, Vector2D}
-import com.siigna.app.model.selection.{FullShapeSelector, EmptyShapeSelector, ShapeSelector}
+import com.siigna.util.geom._
+import com.siigna.app.model.selection.ShapeSelector
 
 /**
  * Tests the [[com.siigna.app.model.shape.ArcShape]].
@@ -41,15 +41,22 @@ class ArcShapeSpec extends FunSpec with ShouldMatchers {
     }
 
     it ("can find a selector when clicking the midpoint") {
-      a.getSelector(Vector2D(0, 20)) should equal (FullShapeSelector)
+      a.getSelector(Vector2D(0, 20)) should equal (ShapeSelector(1))
     }
 
     it ("can find a selector when clicking the startpoint") {
-      a.getSelector(Vector2D(20, 0)) should equal (FullShapeSelector)
+      a.getSelector(Vector2D(20, 0)) should equal (ShapeSelector(0))
     }
 
     it ("can find a selector when clicking the endpoint") {
-      a.getSelector(Vector2D(-20, 0)) should equal (FullShapeSelector)
+      a.getSelector(Vector2D(-20, 0)) should equal (ShapeSelector(2))
+    }
+
+    it ("can make a correct ShapeSelector(0,2)") {
+      val arc = ArcShape(Vector2D(0,0),Vector2D(10,0),Vector2D(10,10))
+      val ss = arc.getPart(ShapeSelector(0,2))
+      println(ss.get(TransformationMatrix(Vector2D(0,0),1)).geometry.vertices)
+
     }
   }
 }
