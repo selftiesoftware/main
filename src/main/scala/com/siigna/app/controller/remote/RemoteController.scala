@@ -225,20 +225,6 @@ object RemoteController {
   }
 
   /**
-   * set the pan and zoom to enclose the entire drawing
-   * @param drawing the drawing which is being loaded
-   */
-  def zoomExtends(implicit drawing : SiignaDrawing) {
-    View.zoom = math.max(View.width, View.height) / math.max(drawing.boundary.width, drawing.boundary.height) * 0.5 // 20% margin
-    View.pan = Vector2D(-drawing.boundary.center.x * View.zoom, drawing.boundary.center.y * View.zoom)
-
-    // Notify the listeners
-    View.listenersPan.foreach(_(View.pan))
-    View.listenersZoom.foreach(_(View.zoom))
-  }
-
-
-  /**
    * Handles the request for a drawing whose id is specified in the <code>session</code> of this client.
    */
   protected def handleGetDrawing(any : Any) {

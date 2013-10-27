@@ -165,7 +165,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
         //If a drawing has been loaded, zoom to the extends of the drawing
         action match {
           case a: LoadDrawing => {
-            com.siigna.app.controller.remote.RemoteController.zoomExtends
+            View.zoomExtends
           }
           case _ =>
         }
