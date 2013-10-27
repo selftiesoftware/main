@@ -242,7 +242,6 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
         try {
           // Implement the model
           model.execute(LoadDrawing(newModel), remote = false)
-
           // Search for the lastAction attribute, or retrieve it manually,
           // which sets the last executed action on the drawing
           model.attributes.int("lastAction") match {
