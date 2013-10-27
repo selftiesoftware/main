@@ -114,10 +114,6 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
       // Store the action if it is not a VolatileAction
       action match {
-        case v : LoadDrawing => {
-          //println("ZOOM EXTENDS HERE")
-          //model.tree.onComplete(_ => View.zoomExtends)
-        }
         case v : VolatileAction => // Do nothing here!
         case _ => { // Store the action
           model = new Model(model.shapes, model.executed.+:(action), Seq(), model.attributes)
@@ -160,13 +156,21 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * @param remote  Whether the action should go to the remote source as well.
    */
   protected def notifyListeners(action : Action, undo : Boolean, remote : Boolean) {
+
     model.tree.onSuccess {
       case x => {
         PRT = Some(x)
         listeners.foreach(_(action, undo))
         if (remote) remoteListener(action, undo)
+        //If a drawing has been loaded, zoom to the extends of the drawing
+        action match {
+          case a : LoadDrawing => {
+            com.siigna.app.controller.remote.RemoteController.zoomExtends
+          }
+        }
       }
     }(concurrent.ExecutionContext.Implicits.global)
+
   }
 
   /**
