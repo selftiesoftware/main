@@ -1,6 +1,7 @@
 package com.siigna.app.controller.remote
 
 import com.siigna.app.model.Model
+import com.siigna.util.Log
 import com.siigna.app.model.action.RemoteAction
 import com.siigna.app.model.server.User
 import com.siigna.util.io.{Marshal, Unmarshal}
@@ -49,6 +50,7 @@ class Client(val address:String) {
       }
     )
   }
+  def isConnected =true
 
   /**
    * Get the next action id for the drawing set in the session
@@ -60,19 +62,6 @@ class Client(val address:String) {
         Left(java.lang.Integer.parseInt(new String(bytes)))
       } catch {
         case _ : Throwable => Right("Unable to case bytes to Int")
-      }
-    )
-  }
-
-  /**
-   * Get the "next" drawing on the server. Meaning just a new one
-   * @param session: Authentication is required
-   */
-  def getNewDrawing(session:Session) : Either[Model, String] = {
-    endpoint.get(address+"/drawing/new"+Client.sessionToUrl(session)).left.flatMap(
-      Unmarshal[Model](_) match {
-        case Some(model) => Left(model)
-        case _ => Right("Could not de-serialise the model")
       }
     )
   }
