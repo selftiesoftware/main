@@ -45,6 +45,7 @@ import com.siigna.util.Log
 class Controller(drawing : Drawing) extends EventController {
 
   private val remote = new RemoteController(drawing, new RESTGateway("http://app.siigna.com"))
+  remote.init()
 
   // Listen to the drawing
   drawing.addRemoteListener((a, u) => remote.sendActionToServer(a, u))
