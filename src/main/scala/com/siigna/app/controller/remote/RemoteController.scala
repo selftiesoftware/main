@@ -32,10 +32,10 @@ import com.siigna.app.controller.remote.RemoteConstants.Drawing
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  * @param model  The model to execute the actions on synchronise with the server.
- * @param server  The server to
+ * @param gateway  Gateway to the specific transport layer
  *
  */
-class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : Int = 2000) {
+class RemoteController(protected val model : ActionModel, protected val gateway : Client, sleepTime : Int = 2000) {
 
   // All the ids of the actions that have been executed on the client
   protected[remote] val actionIndices = mutable.BitSet()
@@ -63,7 +63,16 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
   def isSynchronising = {
     !mailbox.isEmpty | _sync
   }
+  def sendActions(actionSeq :Seq[(Action, Boolean)])={
 
+    // Parse the local action to ensure all the ids are up to date
+    val actions = actionSeq.map(t => parseLocalAction(t._1, t._2)).collect { case Some(a) => a }
+
+    // Dispatch the data, if any
+    if (!actions.isEmpty) {
+      handleSetActions(gateway.setActions(actions, session))
+    }
+  }
   // -- Initiate connection to server -- //
   // Run a remote thread
   val t = new Thread() {
@@ -79,20 +88,13 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         while(!shouldExit) {
 
           // Query for new actions
-          handleGetActionId(server(Get(ActionId, null, session)))
+          handleGetActionId(gateway.getActionId(session))
 
           // Tell the world that we are doing stuff
           _sync = true
 
           if (!mailbox.isEmpty) {
-            // Parse the local action to ensure all the ids are up to date
-            val actions = mailbox.map(t => parseLocalAction(t._1, t._2)).collect { case Some(a) => a }
-
-            // Dispatch the data, if any
-            if (!actions.isEmpty) {
-              handleSetActions(server(Set(Actions, actions, session)))
-            }
-
+           sendActions(mailbox)
             // Empty mailbox
             mailbox = Nil
           }
@@ -134,28 +136,26 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
     // If we have a drawing we need to fetch it if we don't we need to reserve it
     drawingId match {
       case Some(i) => {
-        handleGetDrawing(server(Get(Drawing, i, session)))
+        handleGetDrawing(gateway.getDrawing(i, session))
       }
       case None    => {
         // We need to ask for a new drawing
-        server(Get(DrawingId, null, session)) match {
-          case id : Long => {
+        gateway.getNewDrawingId(session) match {
+          case Left(id : Long)  => {
             // Gotcha! Set the drawing id
             model.attributes += "id" -> id
             Log.success("Remote: Successfully reserved a new drawing " + id)
           }
-          case id : Int => {
-            // Gotcha! Set the drawing id
-            model.attributes += "id" -> id.toLong
-            Log.success("Remote: Successfully reserved a new drawing" + id)
-          }
-          case e => {
-            Log.error("Remote: Could not reserve new drawing, shutting down.", e)
+          case Right(m) => {
+          Log.error("Remote: Could not reserve new drawing, shutting down.", m)
             shouldExit = true
           }
         }
       }
     }
+
+    // Query for new actions
+    handleGetActionId(gateway.getActionId(session))
   }
 
   /**
@@ -184,11 +184,11 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
   /**
    * Handles requests for action ids. These requests are performed once in a while to make sure the client
    * has received the latest actions from the server.
-   * @param any  The result of the request.
+   * @param response  The result of the request.
    */
-  protected def handleGetActionId(any : Any) {
-    any match {
-      case id : Int => {
+  protected def handleGetActionId( response: Either [Int, String] ) {
+    response match {
+      case Left(id : Int ) => {
         Log.debug("Remote: Got latest action id " + id)
 
         // Store the id if it's the first we get
@@ -197,9 +197,9 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         // If the id is above the action indices then we have a gap to fill!
         } else if(id > actionIndices.last) {
           val range = actionIndices.last to id
-          
-          server(Get(Actions, range, session)) match {
-            case actions : Seq[RemoteAction] => {
+
+          gateway.getActions(range,session) match {
+            case Left(actions : Seq[RemoteAction]) => {
               actions.foreach { action =>
                 try {
                   action.undo match {
@@ -215,7 +215,7 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
               // Note to self: "+=" and NOT "+"... Sigh...
               actionIndices ++= range
             }
-            case e : Error => Log.error("Remote: Unexpected format: " + e)
+            case Right(message) => Log.error("Remote: Unexpected format: " + message)
           }
         }
 
@@ -223,8 +223,8 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
         // Note to self: "+=" and NOT "+"... Sigh...
         actionIndices += id
       }
-      case e => {
-        Log.error("Remote: Error when updating ActionId: Expected Set(ActionId, Int, _), got: " + any)
+      case Right(message) => {
+        Log.error(s"Remote: Error when updating ActionId: Expected Set(ActionId, Int, _): $message")
       }
     }
   }
@@ -232,15 +232,15 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
   /**
    * Handles requests to set one or more actions, initiated by the client. These requests store the actions
    * made by the clients on the server.
-   * @param any  The data received from the server
+   * @param response  The data received from the server
    */
-  protected def handleSetActions(any : Any) {
-    any match {
-      case s : Seq[Int] => {
+  protected def handleSetActions(response : Either[Seq[Int], String]) {
+    response match {
+      case Left(s : Seq[Int]) => {
         actionIndices ++= s
         Log.success("Remote: Received and updated action ids")
       }
-      case message => {
+      case Right(message) => {
         Log.error("Remote: Error when sending actions: " + message)
       }
     }
@@ -249,9 +249,9 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
   /**
    * Handles the request for a drawing whose id is specified in the <code>session</code> of this client.
    */
-  protected def handleGetDrawing(any : Any) {
-    any match {
-      case newModel : Model => {
+  protected def handleGetDrawing(result: Either[Model, String]) {
+    result match {
+      case Left(newModel : Model )=> {
         // Read the bytes
         try {
           // Implement the model
@@ -261,14 +261,14 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
           // which sets the last executed action on the drawing
           model.attributes.int("lastAction") match {
             case Some(i : Int) => actionIndices += i
-            case _ => handleGetActionId(server(Get(ActionId, null, session)))
+            case _ => handleGetActionId(gateway.getActionId(session))
           }
           Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
         } catch {
           case e : Throwable => Log.error("Remote: Error when reading data from server", e)
         }
       }
-      case message => Log.error("Remote: Unknown error when loading drawing: " + message)
+      case Right(message)=> Log.error("Remote: Unknown error when loading drawing: " + message)
     }
   }
 
@@ -276,7 +276,22 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
    * Defines whether the client is connected to a remote server or not.
    * @return true if connected, false if not.
    */
-  def isOnline = server.isConnected
+  def isOnline = gateway.isConnected
+
+  def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
+    // .. Then we need to query the server for ids
+    gateway.getShapeIds(seq.size,session) match {
+    case Left(i : Range )=> {
+    // Find out how the ids map to the action
+    val map = for (n <- 0 until seq.size) yield seq(n) -> i(n)
+    map.toMap
+  }
+    case Right (message)=>{Log.error("Remote: Could not get new ShapeID's from server",message)
+    Map()
+    }
+  }
+  }
+
 
   /**
    * Parses a given local action to a remote action by checking if there are any local ids that we need
@@ -301,28 +316,14 @@ class RemoteController(model : ActionModel, server : RESTEndpoint, sleepTime : I
 
         var updatedAction : Option[Action] = None
 
-        // .. Then we need to query the server for ids
-        server(Get(ShapeId, localIds.size, session)) match {
-          case i : Range => {
+        // Update the map in the remote controller
+        localIdMap ++= mapRemoteIDs(localIds,session)
 
-            // Find out how the ids map to the action
-            val map = for (n <- 0 until localIds.size) yield localIds(n) -> i(n)
+        // Update the model
+        model.execute(UpdateLocalActions(localIdMap), remote = false)
 
-            // Update the map in the remote controller
-            localIdMap ++= map
-
-            // Update the model
-            model.execute(UpdateLocalActions(localIdMap), remote = false)
-
-            // Return the updated action
-            updatedAction = Some(action.update(localIdMap))
-          }
-          case e => {
-            Log.error("Remote: Expected Set(ShapeId, Range, _), got: " + e)
-            shouldExit = true
-          }
-        }
-
+        // Return the updated action
+        updatedAction = Some(action.update(localIdMap))
         updatedAction
       } else { // Else give the action the new ids
         Some(action.update(localIds.zip(ids).toMap))
