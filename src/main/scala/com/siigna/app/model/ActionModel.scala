@@ -159,7 +159,6 @@ trait ActionModel extends SpatialModel with HasAttributes {
       case x => {
         PRT = Some(x)
         listeners.foreach(_(action, undo))
-        if (remote) remoteListener(action, undo)
         //If a drawing has been loaded, zoom to the extends of the drawing
         action match {
           case a : LoadDrawing => View.zoomExtends
@@ -168,6 +167,8 @@ trait ActionModel extends SpatialModel with HasAttributes {
       }
     }(concurrent.ExecutionContext.Implicits.global)
 
+    // Dispatch to remote no matter what
+    if (remote) remoteListener(action, undo)
   }
 
   /**

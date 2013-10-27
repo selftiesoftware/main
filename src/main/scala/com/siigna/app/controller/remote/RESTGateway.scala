@@ -24,6 +24,17 @@ class RESTGateway(val address : String) {
   }
 
   /**
+   * Forces the endpoint to clean a drawing.
+   * @param drawingId  The id of the drawing to clean.
+   * @param session  The session to authenticate the user.
+   * @return  Either a boolean indicating success or failure or a String indicating an error.
+   */
+  def cleanDrawing(drawingId : Long, session : Session) : Either[Boolean, String] = {
+    endpoint.put(address + "/clean/" + drawingId + RESTGateway.sessionToUrl(session), Array()).left
+            .flatMap( bytes => Left(new String(bytes).equals("ok")))
+  }
+
+  /**
    * Gets the action with the given id on the drawing that the session is authenticated with
    * @param actionId  The id of the action to fetch from the server
    * @param session  The current session
@@ -43,10 +54,14 @@ class RESTGateway(val address : String) {
    * @param session  The current session
    */
   def getActions(actionIds : Seq[Int], session : Session) : Either[Seq[RemoteAction], String] = {
-    endpoint.get(address+"/actions/"+actionIds.mkString("/")+RESTGateway.sessionToUrl(session)).left.flatMap(
-      Unmarshal[Seq[RemoteAction]](_) match {
-        case Some(actions) => Left(actions)
-        case _ => Right("Could not de-serialise to a sequence of remote action")
+    endpoint.get(address+"/actions/"+actionIds.mkString("/")+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+      try {
+        Unmarshal[Seq[RemoteAction]](bytes) match {
+          case Some(actions) => Left(actions)
+          case _ => Right("Could not de-serialise to a sequence of remote action")
+        }
+      } catch {
+        case e : Throwable => Right(new String(bytes))
       }
     )
   }
@@ -60,7 +75,7 @@ class RESTGateway(val address : String) {
       try {
         Left(java.lang.Integer.parseInt(new String(bytes)))
       } catch {
-        case _ : Throwable => Right("Unable to case bytes to Int")
+        case _ : Throwable => Right(new String(bytes))
       }
     )
   }

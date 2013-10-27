@@ -57,14 +57,7 @@ class RESTEndpoint {
    * @param url  The url of the GET request
    */
   def get(url : String) : Either[Array[Byte], String] = {
-    try {
-      dispatch(new Connection(url), _.get)
-    } catch {
-      case e : StackOverflowError => {
-        shouldExit = true
-        Right(s"Remote: Too many retries $retries means stack overflow :-( Shutting down!")
-      }
-    }
+    dispatch(new Connection(url), _.get)
   }
 
   /**
@@ -74,14 +67,17 @@ class RESTEndpoint {
    * @param message  The message to send as a remote command
    */
   def post(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
-    try {
-      dispatch(new Connection(url), _.post(message))
-    } catch {
-      case e : StackOverflowError => {
-        shouldExit = true
-        Right(s"Remote: Too many retries $retries means stack overflow :-( Shutting down!")
-      }
-    }
+    dispatch(new Connection(url), _.post(message))
+  }
+
+  /**
+   * A method that sends a synchronous PUT command over HTTP with some data attached. The
+   * endpoint repeats the call until something is received, being an error or the actual data.
+   * @param url  The URL of the PUT request
+   * @param message  The message to send as a remote command
+   */
+  def put(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
+    dispatch(new Connection(url), _.put(message))
   }
 
   /**
@@ -93,15 +89,19 @@ class RESTEndpoint {
 
   /**
    * Dispatches the given message and returns either the reply or an error string.
-   * @param connection  The connection to open
-   * @param handler  A function to retrieve the data from the connection
+   * @param connection  The connection to open.
+   * @param handler  A function to retrieve the data from the connection.
+   * @param retries  The number of times the request have been retried. Defaults to 0.
    * @return  The obj if it was successfully returned, otherwise an error message.
    */
-  @tailrec protected final def dispatch(connection : Connection, handler : Connection => Either[Array[Byte], String]) : Either[Array[Byte], String] = {
+  @tailrec protected final def dispatch(connection : Connection,
+                                        handler : Connection => Either[Array[Byte], String],
+                                        retries : Int = 0 ) : Either[Array[Byte], String] = {
     if (shouldExit) {
-      Right("Server: Cannot dispatch message; closing.")
+      Right("Endpoint is closing.")
+    } else if (retries >= 1000) {
+      Right("Failed after 1000 retries: " + connection.url)
     } else {
-
       handler(connection) match {
         case Left(arr) => { // Call the callback function
           Log.debug(s"REST received: $arr")
@@ -123,7 +123,7 @@ class RESTEndpoint {
           }
 
           // Retry
-          dispatch(connection, handler)
+          dispatch(connection, handler, retries + 1)
         }
       }
     }

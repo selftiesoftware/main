@@ -27,7 +27,12 @@ import com.siigna.util.Log
 import com.siigna.app.Siigna
 
 /**
- * Establishes a connection to the given remote server to synchronise the given model.
+ * A RemoteController which synchronises the drawing in the given [[com.siigna.app.model.ActionModel]] with the
+ * given remote server.
+ * <p>
+ *   <b>Important: </b> To correctly initialise the connection with the server and activate the synchronisation
+ *   the method <code>init()</code> should be called after instantiating the RemoteController.
+ * </p>
  * If the client is not online or no connection could be made we simply wait until a connection can be
  * re-established before pushing all the received events/requests in the given order.
  * @param model  The model to execute the actions on synchronise with the server.
@@ -36,10 +41,95 @@ import com.siigna.app.Siigna
  */
 class RemoteController(protected val model : ActionModel, protected val gateway : RESTGateway, sleepTime : Int = 2000) {
 
+  // -- Initiate connection to server -- //
+  // Run a remote thread
+  val t = new Thread() {
+    override def run() {
+
+      // Wait until we are live
+      while (!isLive) Thread.sleep(500)
+      Log.debug("Remote: Initiating connection.")
+
+      try {
+        // Loooopsin' for actions to send
+        while(!shouldExit) {
+
+          // Query for new actions
+          handleGetActionId(gateway.getActionId(session))
+
+          if (!mailbox.isEmpty) {
+            // Tell the world we are synchronising
+            _sync = true
+
+            sendActions(mailbox)
+
+            // Tell the world that we are done doing stuff
+            _sync = false
+
+            // Empty mailbox
+            mailbox = Nil
+          }
+
+          // Sleep for a bit to avoid pinging continuously
+          Thread.`yield`()
+          Thread.sleep(sleepTime)
+        }
+
+        Log.info("Remote controller exiting.")
+      } catch {
+        case e : Throwable => {
+          Log.error("Error when running remote controller: " + e)
+        }
+      }
+    }
+  }
+
+  /**
+   * Initialises the Remote Controller by asking for a drawing (or finding a new one if no ID have been defined in
+   * the model) and starting a thread that asynchronously listens on incoming actions to synchronise.
+   */
+  def init() {
+    def drawingId : Option[Long] = model.attributes.long("id")
+
+    // Tell the world that we are doing stuff
+    _sync = true
+
+    // Retrieve the drawing
+    drawingId match {
+      case Some(i) => {
+        handleGetDrawing(gateway.getDrawing(i, session))
+      }
+      case None    => {
+        // We need to ask for a new drawing
+        gateway.getNewDrawingId(session) match {
+          case Left(id : Long)  => {
+            // Gotcha! Set the drawing id
+            model.attributes += "id" -> id
+            Log.success("Remote: Successfully reserved a new drawing " + id)
+          }
+          case Right(m) => {
+            Log.error("Remote: Could not reserve new drawing, shutting down.", m)
+            shouldExit = true
+          }
+        }
+      }
+    }
+
+    // Query for new actions
+    handleGetActionId(gateway.getActionId(session))
+
+    // Set status to idle
+    _sync = false
+
+    // Set a priority and start
+    t.setPriority(Thread.MIN_PRIORITY)
+    t.start()
+  }
+
   // All the ids of the actions that have been executed on the client
   protected[remote] val actionIndices = mutable.BitSet()
 
-  // A map of local ids mapped to their remote counterparts
+  // A map of local shape ids mapped to their remote counterparts
   protected[remote] var localIdMap : Map[Int, Int] = Map()
 
   // A boolean flag to signal whether to close down
@@ -57,67 +147,9 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
    * A boolean to indicate if we have pending actions to synchronise with the server. If the flag resolves true the
    * connection should not be closed since any data not synchronised might disappear.
    * @return True if we are currently communicating and synchronising with the server, false if there are no
-   *         pending TCP communication.
+   *         pending communication.
    */
-  def isSynchronising = {
-    !mailbox.isEmpty | _sync
-  }
-  def sendActions(actionSeq :Seq[(Action, Boolean)])={
-
-    // Parse the local action to ensure all the ids are up to date
-    val actions = actionSeq.map(t => parseLocalAction(t._1, t._2)).collect { case Some(a) => a }
-
-    // Dispatch the data, if any
-    if (!actions.isEmpty) {
-      handleSetActions(gateway.setActions(actions, session))
-    }
-  }
-  // -- Initiate connection to server -- //
-  // Run a remote thread
-  val t = new Thread() {
-    override def run() {
-
-      // Wait until we are live
-      while (!isLive) Thread.sleep(500)
-
-      Log.debug("Remote: Initiating connection.")
-
-      try {
-        // Loooopsin' for actions to send
-        while(!shouldExit) {
-
-          // Query for new actions
-          handleGetActionId(gateway.getActionId(session))
-
-          // Tell the world that we are doing stuff
-          _sync = true
-
-          if (!mailbox.isEmpty) {
-           sendActions(mailbox)
-            // Empty mailbox
-            mailbox = Nil
-          }
-
-          // Tell the world that we are done doing stuff
-          _sync = false
-
-          // Sleep for a bit to avoid pinging continuously
-          Thread.`yield`()
-          Thread.sleep(sleepTime)
-        }
-
-        Log.info("Remote controller exiting.")
-      } catch {
-        case e : Throwable => {
-          Log.error("Error when running remote controller: " + e)
-        }
-      }
-    }
-  }
-
-  // Set a priority and start
-  t.setPriority(Thread.MIN_PRIORITY)
-  t.start()
+  def isSynchronising = !mailbox.isEmpty | _sync
 
   // -- Common boring methods -- //
 
@@ -127,57 +159,12 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   def exit() { shouldExit = true }
 
   /**
-   * Initialises the connection by querying for a drawing.
-   */
-  def init() {
-    def drawingId : Option[Long] = model.attributes.long("id")
-
-    // If we have a drawing we need to fetch it if we don't we need to reserve it
-    drawingId match {
-      case Some(i) => {
-        handleGetDrawing(gateway.getDrawing(i, session))
-      }
-      case None    => {
-        // We need to ask for a new drawing
-        gateway.getNewDrawingId(session) match {
-          case Left(id : Long)  => {
-            // Gotcha! Set the drawing id
-            model.attributes += "id" -> id
-            Log.success("Remote: Successfully reserved a new drawing " + id)
-          }
-          case Right(m) => {
-          Log.error("Remote: Could not reserve new drawing, shutting down.", m)
-            shouldExit = true
-          }
-        }
-      }
-    }
-
-    // Query for new actions
-    handleGetActionId(gateway.getActionId(session))
-  }
-
-  /**
    * Determines whether the controller should broadcast to the server.
    * @return  True is Siigna is 'live', false otherwise.
    */
   protected def isLive = Siigna.get("isLive") match {
     case Some(true) => true
     case _ => false
-  }
-
-  /**
-   * Sends the given action to the server on a non-specified time in the future (async).
-   * @param action  The action to execute
-   * @param undo  Whether or not the action should be undone
-   */
-  def sendActionToServer(action : Action, undo : Boolean) {
-    // Only react if we are live
-    if (!isLive) {
-      Log.debug("Remote: Server is offline, not sending action " + action)
-    } else {
-      mailbox :+= action -> undo
-    }
   }
 
   /**
@@ -195,7 +182,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
           actionIndices += id
         // If the id is above the action indices then we have a gap to fill!
         } else if(id > actionIndices.last) {
-          val range = actionIndices.last to id
+          val range = math.max(actionIndices.last, 1) to id
 
           gateway.getActions(range,session) match {
             case Left(actions : Seq[RemoteAction]) => {
@@ -223,7 +210,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
         actionIndices += id
       }
       case Right(message) => {
-        Log.error(s"Remote: Error when updating ActionId: Expected Set(ActionId, Int, _): $message")
+        Log.error(s"Remote: Error when updating ActionId: $message")
       }
     }
   }
@@ -277,18 +264,18 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
    */
   def isOnline = gateway.isConnected
 
-  def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
+  protected def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
     // .. Then we need to query the server for ids
     gateway.getShapeIds(seq.size,session) match {
-    case Left(i : Range )=> {
-    // Find out how the ids map to the action
-    val map = for (n <- 0 until seq.size) yield seq(n) -> i(n)
-    map.toMap
-  }
-    case Right (message)=>{Log.error("Remote: Could not get new ShapeID's from server",message)
-    Map()
+      case Left(i : Range) => {
+        // Find out how the ids map to the action
+        val map = for (n <- 0 until seq.size) yield seq(n) -> i(n)
+        map.toMap
+      }
+      case Right (message)=>{Log.error("Remote: Could not get new ShapeID's from server",message)
+        Map()
+      }
     }
-  }
   }
 
 
@@ -313,8 +300,6 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
         // Find the local ids
         val localIds = ids.filter(_ < 0)
 
-        var updatedAction : Option[Action] = None
-
         // Update the map in the remote controller
         localIdMap ++= mapRemoteIDs(localIds,session)
 
@@ -322,8 +307,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
         model.execute(UpdateLocalActions(localIdMap), remote = false)
 
         // Return the updated action
-        updatedAction = Some(action.update(localIdMap))
-        updatedAction
+        Some(action.update(localIdMap))
       } else { // Else give the action the new ids
         Some(action.update(localIds.zip(ids).toMap))
       }
@@ -333,6 +317,35 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
 
     // Return the updated action as a remote action
     updated.map(a => RemoteAction(a, undo))
+  }
+
+  /**
+   * Send a number of actions to the server by first polling for a remote and unique ID for the actions, assigning
+   * it to the actions and then dispatching them to the given gateway.
+   * @param actionSeq  A sequence of actions to send
+   */
+  protected def sendActions(actionSeq :Seq[(Action, Boolean)]) {
+    // Parse the local action to ensure all the ids are up to date
+    val actions = actionSeq.map(t => parseLocalAction(t._1, t._2)).collect { case Some(a) => a }
+
+    // Dispatch the data, if any
+    if (!actions.isEmpty) {
+      handleSetActions(gateway.setActions(actions, session))
+    }
+  }
+
+  /**
+   * Sends the given action to the server on a non-specified time in the future (async).
+   * @param action  The action to execute
+   * @param undo  Whether or not the action should be undone
+   */
+  def sendActionToServer(action : Action, undo : Boolean) {
+    // Only react if we are live
+    if (!isLive) {
+      Log.debug("Remote: Server is offline, not sending action " + action)
+    } else {
+      mailbox :+= action -> undo
+    }
   }
 
   /**
