@@ -31,7 +31,6 @@ import com.siigna.app.Siigna
  */
 case object EndPointSnap extends EventSnap {
   var snapPoint : Option[Vector2D] = None
-
   def snapBox (p : Vector2D) = {
     val a = 0.3 * Siigna.selectionDistance
     Array(Vector2D(p.x-a,p.y-a),Vector2D(p.x-a,p.y+a),Vector2D(p.x+a,p.y+a),Vector2D(p.x+a,p.y-a),Vector2D(p.x-a,p.y-a))
