@@ -199,7 +199,7 @@ class SiignaApplet extends Applet {
           graphics.dispose()
 
           //The amount of frames we limit
-          val fps = 15
+          val fps = 25
           //Limiting formula
           val limit = (1000/fps) - (System.currentTimeMillis()-time)
           //Limit the fps if it is too high
