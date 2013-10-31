@@ -263,7 +263,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
    */
   def isOnline = gateway.isConnected
 
-  protected def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
+  /*protected*/def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
     // .. Then we need to query the server for ids
     gateway.getShapeIds(seq.size,session) match {
       case Left(i : Range) => {
