@@ -29,7 +29,8 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
   describe("The Remote Controller") {
 
     val dummyModel = new ActionModel {}
-    def gateway = new RESTGateway("http://app.siigna.com")
+    //def gateway = new RESTGateway("http://app.siigna.com")
+    def gateway = new RESTGateway("http://localhost:20004")
 
     // Use case 1 from https://trello.com/c/RMrddOtd/2-shapes-forsvinder
     it ("can persist a drawing over time") {
@@ -95,7 +96,43 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
       Then("the shapes of the new model should be the same as in the old model")
       model2.model.shapes should equal(model.model.shapes)
     }
+    
+    val target = 500;
+    it (s"can execute $target actions serialized") {
 
+      val model = new ActionModel {}
+      val c1 = new RemoteController(model, gateway, 20)
+      c1.init()
+      model.addRemoteListener(c1.sendActionToServer)
+      val drawingId = model.attributes.long("id").get
+      Given(s"a drawing with id $drawingId")
+
+      When(s"creating $target shapes")
+      val shapes = (-1*target to -1).map (i => i -> LineShape(i, 0, 0, i))
+      val actions = shapes.map(t => CreateShape(t._1, t._2))
+      actions.foreach(model.execute(_))
+      while(c1.isSynchronising){ Thread.sleep(200); }
+
+      Then(s"the total number of shapes should be $target")
+      model.model.shapes.size should equal(target)
+
+      Then("all id's should be positive")
+      model.model.shapes.exists(_._1 < 0) should equal(false)
+     
+      model.model.shapes.keys.toList.sorted.reduceLeft((a, b) => {
+        Then("It's sequential")
+        a should equal (b - 1)
+        b
+      })
+
+
+      /*
+      Then("All id should be serial")
+      var lastid=0 
+      for (s <- model.model.shapes)
+        s._1 should equal(lastid+1)
+        */
+    }
   }
 
 }

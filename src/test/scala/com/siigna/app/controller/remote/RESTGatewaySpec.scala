@@ -22,7 +22,8 @@ import com.siigna.app.Siigna
  */
 class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
-  val client  = new RESTGateway("http://app.siigna.com")
+  //val client  = new RESTGateway("http://app.siigna.com")
+  val client  = new RESTGateway("http://localhost:20004")
   val drawingId = client.getNewDrawingId(Session(0, Siigna.user)).left.get
   val session = Session(drawingId, Siigna.user)
 
