@@ -59,8 +59,11 @@ case object IntersectionPointSnap extends EventSnap {
     //the point is transformed to match the coordinate system of the drawing
     val point = q.transform(View.deviceTransformation)
 
-    def closestTwo(p1 : Vector2D, p2 : Vector2D) = if (p1.distanceTo(point) < p2.distanceTo(point)) p1 else p2
-    def closestPoints(points : Seq[Vector2D]) = points.reduceLeft(closestTwo)
+    //find the intersection closest to the mouse
+    def nearestInt (v : List[Vector2D], p : Vector2D) : Vector2D = {
+      val list = v.sortBy(_.distanceTo(p))
+      list.head //return closest point
+    }
 
     def intersections(s : Shape, p : Vector2D) : Seq[Vector2D] = {
       val evalDist = (s.geometry.boundary.topLeft - point).length
@@ -79,45 +82,47 @@ case object IntersectionPointSnap extends EventSnap {
     }
 
     if (!model.isEmpty) {
+
       val res = model.map(_ match {
 
         case s : ArcShape       => {
           val ints = intersections(s, point)
-          if (ints.length > 1) closestPoints(ints)
+          if (ints.length > 1) nearestInt(ints.toList, point)
           else if(ints.length == 1) ints.head
-          else q //TODO: optimize this so it works better when no intersections are found.
+          else q
         }
         case s : CircleShape    => {
           val ints = intersections(s, point)
-          if (ints.length > 1) closestPoints(ints)
+          if (ints.length > 1) nearestInt(ints.toList, point)
           else if(ints.length == 1) ints.head
-          else q //TODO: optimize this so it works better when no intersections are found.
+          else q
         }
-        //TODO: only some intersections are found?
+        //TODO: redo closestPoint evaluation so that all points in the list are evaluated.
         case s : LineShape        => {
           val ints = intersections(s, point)
-          if (ints.length > 1) closestPoints(ints)
+          if (ints.length > 1) nearestInt(ints.toList, point)
           else if(ints.length == 1) ints.head
-          else q //TODO: optimize this so it works better when no intersections are found.
+          else q
         }
-        //TODO: only some intersections are found? - and sometimes vertices are treated as intersections!!
+        //TODO: sometimes vertices are treated as intersections!!
         case s : PolylineShape  => {
           val ints = intersections(s, point)
-          if (ints.length > 1) closestPoints(ints)
+          if (ints.length > 1) nearestInt(ints.toList, point)
           else if(ints.length == 1) ints.head
-          else q //TODO: optimize this so it works better when no intersections are found.
+          else q
         }
 
         //TODO: no intersections are found?
         case s : RectangleShape => {
           val ints = intersections(s, point)
-          if (ints.length > 1) closestPoints(ints)
+          if (ints.length > 1) nearestInt(ints.toList, point)
           else if(ints.length == 1) ints.head
-          else q //TODO: optimize this so it works better when no intersections are found.
+          else q
         }
         case _ => point
       })
-      val closestPoint = res.reduceLeft(closestTwo)
+      //
+      val closestPoint = res.toVector.head
 
       if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
         //the snapPoint variable is set, so that it can be used to draw visual feedback:
@@ -138,7 +143,6 @@ case object IntersectionPointSnap extends EventSnap {
   override def paint(g : Graphics, t : TransformationMatrix) {
     //show the snappoints
     if(snapPoint.isDefined) snapPoint.foreach(p => {
-      g.draw(snapCircle(p).transform(t).addAttributes(colorAttr))
       g.draw(snapCircle(p).transform(t).addAttributes(colorAttr))
     })
   }
