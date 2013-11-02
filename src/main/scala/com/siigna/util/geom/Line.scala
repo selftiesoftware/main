@@ -128,6 +128,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       else
         Set[Vector2D](A * u + C)
     }
+    case l : Segment2D => this.intersections(l)
     case g => Set()
   }
 

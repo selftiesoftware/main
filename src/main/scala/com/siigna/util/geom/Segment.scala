@@ -203,7 +203,9 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       )
     }
 
-    case collection : CollectionGeometry2D => collection.intersections(this)
+    case collection : CollectionGeometry2D => {
+      collection.intersections(this)
+    }
 
     //find the intersection between two line segments
     case segment : Segment2D => {

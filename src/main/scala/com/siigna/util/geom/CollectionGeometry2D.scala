@@ -59,20 +59,23 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       arc.intersections(this)
     }
 
-    case collection : CollectionGeometry2D => {
-      geometries.foldLeft(Set[Vector2D]())((c, a) => c ++ a.intersections(geom))
-      //Set()
-    }
     //TODO: misses the first int if two ints exist on the same segment.
-    case segment : Segment2D => {
-      var intersections : Set[Vector2D] = Set()
-      val segments = this.geometries
-      segments.foreach(s => if(!segment.intersections(s).isEmpty) {
-        intersections = intersections + segment.intersections(s).head
-      })
-      intersections
+    case collection : CollectionGeometry2D => {
+
+      def filterEnds(ints : Set[Vector2D], end1 : Vector2D, end2 : Vector2D) = {
+        val t = ints.filterNot(i => i == end1)
+        t.filterNot(i => i == end2)
+      }
+      def segmentPLeval(segment : Geometry2D) = {
+        val plSegments = this.geometries.toList
+        val ints = plSegments.flatMap(s => segment.intersections(s)).toSet
+        filterEnds(ints,segment.vertices.head,segment.vertices.last)
+      }
+      val r = collection.geometries.flatMap(g => segmentPLeval(g)).toSet
+      r
     }
       //TODO: Make polyline
+
     case _ => Set()
   }
 

@@ -32,9 +32,10 @@ import com.siigna.app.model.{Model, Drawing}
 case object IntersectionPointSnap extends EventSnap {
 
   val colorAttr = "Color" -> new Color(0.10f, 0.95f, 0.95f, 0.40f)
+  val strokeAttr = "StrokeWidth" -> 0.4
   var snapPoint : Option[Vector2D] = None
   def snapCircle (p : Vector2D) = {
-    val r = 0.6 * Siigna.selectionDistance
+    val r = 0.5 * Siigna.selectionDistance
     CircleShape(p,r)
   }
   def parse(event : Event, model : Traversable[Shape]) = event match {
@@ -65,20 +66,12 @@ case object IntersectionPointSnap extends EventSnap {
       list.head //return closest point
     }
 
-    def intersections(s : Shape, p : Vector2D) : Seq[Vector2D] = {
-      val evalDist = (s.geometry.boundary.topLeft - point).length
+    //a function to limit intersection evaluation to shapes within the bounding box of the shape near the mouse.
+    def shapesInRange(s : Shape, p : Vector2D) : Map[Int,Shape] = {
+      val evalDist = (s.geometry.boundary.topLeft - point).length * 2
       //get all shapes which potentially intersect with the current nearest shape
       val shapes = Drawing(point,evalDist)
-      var ints : List[Vector2D] = List()
-
-      if(!shapes.isEmpty) {
-        //add potential intersections to a list
-        shapes.foreach(e => {
-          val l = if(!e._2.geometry.intersections(s.geometry).isEmpty) Some(e._2.geometry.intersections(s.geometry).head) else None
-          if(l.isDefined) ints = ints :+ l.get
-        })
-      }
-      ints.toSeq //return
+      shapes
     }
 
     if (!model.isEmpty) {
@@ -86,39 +79,42 @@ case object IntersectionPointSnap extends EventSnap {
       val res = model.map(_ match {
 
         case s : ArcShape       => {
-          val ints = intersections(s, point)
-          if (ints.length > 1) nearestInt(ints.toList, point)
-          else if(ints.length == 1) ints.head
-          else q
+          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
+          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
+
         case s : CircleShape    => {
-          val ints = intersections(s, point)
-          if (ints.length > 1) nearestInt(ints.toList, point)
-          else if(ints.length == 1) ints.head
-          else q
+          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
+          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
-        //TODO: redo closestPoint evaluation so that all points in the list are evaluated.
+
         case s : LineShape        => {
-          val ints = intersections(s, point)
-          if (ints.length > 1) nearestInt(ints.toList, point)
-          else if(ints.length == 1) ints.head
-          else q
+          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
+          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
-        //TODO: sometimes vertices are treated as intersections!!
+
         case s : PolylineShape  => {
-          val ints = intersections(s, point)
-          if (ints.length > 1) nearestInt(ints.toList, point)
-          else if(ints.length == 1) ints.head
-          else q
+          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
+          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
 
         //TODO: no intersections are found?
         case s : RectangleShape => {
-          val ints = intersections(s, point)
-          if (ints.length > 1) nearestInt(ints.toList, point)
-          else if(ints.length == 1) ints.head
-          else q
+          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
+          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          println("ints in SNAP: "+ints)
+          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
+
         case _ => point
       })
       //
@@ -143,7 +139,7 @@ case object IntersectionPointSnap extends EventSnap {
   override def paint(g : Graphics, t : TransformationMatrix) {
     //show the snappoints
     if(snapPoint.isDefined) snapPoint.foreach(p => {
-      g.draw(snapCircle(p).transform(t).addAttributes(colorAttr))
+      g.draw(snapCircle(p).transform(t).addAttributes(colorAttr,strokeAttr))
     })
   }
 }
