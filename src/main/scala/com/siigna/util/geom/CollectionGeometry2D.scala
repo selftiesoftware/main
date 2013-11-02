@@ -74,9 +74,16 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       val r = collection.geometries.flatMap(g => segmentPLeval(g)).toSet
       r
     }
-      //TODO: Make polyline
 
-    case _ => Set()
+    //Polyline / ComplexRectangle - intersections
+    case rectangle : ComplexRectangle2D => rectangle.segments.toList.flatMap(s => s.intersections(this)).toSet
+
+    //Polyline / Segment2D - intersections
+    case segment : Segment2D =>  this.geometries.flatMap(s => s.intersections(segment)).toSet
+
+    //rectangle / ? - intersections not implemented are caught here.
+    case g => Set()
+
   }
 
   def transform(t : TransformationMatrix) = CollectionGeometry2D(geometries.map(_ transform t))

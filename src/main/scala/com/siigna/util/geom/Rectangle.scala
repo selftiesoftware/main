@@ -585,18 +585,30 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    case line : Line2D => {
-      val top = Line2D(this.topLeft, this.topRight)
-      val right = Line2D(this.topRight, this.bottomRight)
-      val bottom = Line2D(this.bottomRight, this.bottomLeft)
-      val left = Line2D(this.bottomLeft, this.topLeft)
+    case line : Segment2D => {
+      val top = Segment(topLeft, topRight)
+      val right = Segment(topRight, bottomRight)
+      val bottom = Segment(bottomRight, bottomLeft)
+      val left = Segment(bottomLeft, topLeft)
 
       val r = Set(top, right, bottom, left).flatMap(s => line.intersections(s))
-      println("simple rect intersect line;: "+r)
       r
     }
-    case segment : Segment2D => segment.intersections(this)
-    case g => Set.empty
+    case l : Line2D => {
+      l.intersections(this)
+    }
+    case p : CollectionGeometry2D =>  p.geometries.flatMap(s => s.intersections(this)).toSet
+
+
+    case r : ComplexRectangle2D => {
+      //println("implement rect / rect intersections here")
+      Set()
+    }
+
+    case g => Set()
+
+
+
   }
 
   def onPeriphery(point : Vector2D) =

@@ -110,8 +110,10 @@ case object IntersectionPointSnap extends EventSnap {
         case s : RectangleShape => {
           val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
-          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          println("ints in SNAP: "+ints)
+          val ints = shapeGeometries.flatMap(g => {
+              val t = g.intersections(s.geometry)
+              t
+            }) //get intersections to evaluate
           if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
 
