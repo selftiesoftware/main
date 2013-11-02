@@ -116,8 +116,7 @@ case object IntersectionPointSnap extends EventSnap {
             }) //get intersections to evaluate
           if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
-
-        case _ => point
+        case e => point
       })
       //
       val closestPoint = res.toVector.head

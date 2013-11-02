@@ -320,6 +320,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
       Set(top, right, bottom, left).flatMap(_.intersections(segment))
     }
+    case rectangle : ComplexRectangle2D => rectangle.segments.flatMap(s => s.intersections(this)).toSet
+
     case g => Set.empty
   }
 
@@ -599,13 +601,15 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     }
     case p : CollectionGeometry2D =>  p.geometries.flatMap(s => s.intersections(this)).toSet
 
-
     case r : ComplexRectangle2D => {
-      //println("implement rect / rect intersections here")
+      println("implement rect / rect intersections here")
       Set()
     }
 
-    case g => Set()
+    case g => {
+      println("NO SHAPE RECOGNIZED IN RECT INTERSECTION")
+      Set()
+    }
 
 
 
