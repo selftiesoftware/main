@@ -128,8 +128,8 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       else
         Set[Vector2D](A * u + C)
     }
-    //case l : Segment2D => this.intersections(l)
 
+    //catches both ComplexRectangle2D and SimpleRectangle2D
     case r : Rectangle2D => {
       val i = r.segments.flatMap(s => s.intersections(this)).toSet
       i
@@ -165,10 +165,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       }
     }
 
-    case g => {
-      //println("HHHHH: "+g)
-      Set()
-    }
+    case g => Set()
   }
 
   def transform(t : TransformationMatrix) = {

@@ -588,6 +588,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
 
   //Simple Rectangle intersections
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
+
     case line : Segment2D => {
       val top = Segment(topLeft, topRight)
       val right = Segment(topRight, bottomRight)
@@ -597,6 +598,7 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
       val r = Set(top, right, bottom, left).flatMap(s => line.intersections(s))
       r
     }
+
     case l : Line2D => {
       l.intersections(this)
     }

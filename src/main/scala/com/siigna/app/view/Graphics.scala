@@ -140,7 +140,6 @@ trait Graphics {
   def drawLine(p1 : Vector2D, p2 : Vector2D) {
     val boundary = View.screen
     val intersections = boundary.intersections(Line(p1, p2))
-    println("ints: "+intersections)
     if (intersections.size >= 2) drawSegment(intersections.head, intersections.tail.head)
   }
 
