@@ -128,16 +128,44 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
       else
         Set[Vector2D](A * u + C)
     }
-    case l : Segment2D => this.intersections(l)
 
-    case r : ComplexRectangle2D => {
+    //catches both ComplexRectangle2D and SimpleRectangle2D
+    case r : Rectangle2D => {
       val i = r.segments.flatMap(s => s.intersections(this)).toSet
       i
     }
-    case g => {
-      //println("HHHHH: "+g)
-      Set()
+
+    //Segment2D - Line2D intersections
+    case segment : Segment2D => {
+      val x1 = this.p1.x
+      val y1 = this.p1.y
+      val x2 = this.p2.x
+      val y2 = this.p2.y
+      val x3 = segment.p1.x
+      val y3 = segment.p1.y
+      val x4 = segment.p2.x
+      val y4 = segment.p2.y
+
+      val bx = x2 - x1
+      val by = y2 - y1
+      val dx = x4 - x3
+      val dy = y4 - y3
+      val dot = bx * dy - by * dx
+
+      if(dot == 0) Set[Vector2D]()
+      else {
+        val cx = x3 - x1
+        val cy = y3 - y1
+        val t = (cx * dy - cy * dx) / dot
+        val u = (cx * by - cy * bx) / dot
+
+        //check that U is between 0 and 1. In reality the absolute tolerance epsilon is used to prevent rounding errors
+        //that filter intersections which should exist.
+        if((u >= -epsilon && u <= (1 + epsilon))) Set(Vector2D(x1+t*bx, y1+t*by)) else Set[Vector2D]()
+      }
     }
+
+    case g => Set()
   }
 
   def transform(t : TransformationMatrix) = {
