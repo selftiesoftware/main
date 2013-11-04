@@ -196,14 +196,16 @@ object Track extends EventTrack {
       val horizontal = horizontalGuide(p)
       val vertical   = verticalGuide(p)
       val m = View.mousePositionDrawing
+
       //draw the vertical tracking guide
-      if (vertical.distanceTo(m) < Siigna.trackDistance)
+      if (vertical.distanceTo(m) < Siigna.trackDistance){
         g draw LineShape(vertical.p1, vertical.p2, attributes).transform(t)
+      }
 
       //draw the horizontal tracking guide
       if (horizontal.distanceTo(m) < Siigna.trackDistance)
         g draw LineShape(horizontal.p1, horizontal.p2, attributes).transform(t)
-    }
+      }
 
     def paintTwoPoints(p1 : Vector2D, p2 : Vector2D) {
 
@@ -228,7 +230,7 @@ object Track extends EventTrack {
 
     if (Siigna.isTrackEnabled) {
       //PAINT TRACKING POINT ONE
-      if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
+         if (pointOne.isDefined && pointTwo.isEmpty ) paintOnePoint(pointOne.get)
 
       //PAINT BOTH TRACKING POINTS, IF THEY ARE THERE:::
       if (pointTwo.isDefined) paintTwoPoints(pointOne.get, pointTwo.get)
