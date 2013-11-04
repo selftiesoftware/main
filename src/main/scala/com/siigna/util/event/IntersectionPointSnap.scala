@@ -31,6 +31,7 @@ import com.siigna.app.model.{Model, Drawing}
  */
 case object IntersectionPointSnap extends EventSnap {
 
+  var closestInt : Option[Vector2D] = None
   val colorAttr = "Color" -> new Color(0.10f, 0.95f, 0.95f, 0.40f)
   val strokeAttr = "StrokeWidth" -> 0.4
   var snapPoint : Option[Vector2D] = None
@@ -120,6 +121,7 @@ case object IntersectionPointSnap extends EventSnap {
       })
       //
       val closestPoint = res.toVector.head
+      closestInt = Some(res.toVector.head) // set the var used to recognize intersections in Track
 
       if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
         //the snapPoint variable is set, so that it can be used to draw visual feedback:

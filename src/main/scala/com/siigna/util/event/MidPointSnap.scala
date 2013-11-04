@@ -30,7 +30,10 @@ import java.awt.Color
  * A hook for parsing points that snap to mid-points on objects.
  */
 case object MidPointSnap extends EventSnap {
+
+  var closestMid : Option[Vector2D] = None
   var snapPoint : Option[Vector2D] = None
+
   def snapBox (p : Vector2D) = {
     val a = 0.5 * Siigna.selectionDistance
     Array(Vector2D(p.x-a,p.y-a),Vector2D(p.x,p.y+a),Vector2D(p.x+a,p.y-a),Vector2D(p.x-a,p.y-a))
@@ -72,7 +75,8 @@ case object MidPointSnap extends EventSnap {
         case _ => point
       })
       val closestPoint = res.reduceLeft(closestTwo)
-
+      //update a var used in Track
+      closestMid = Some(closestPoint)
 
       if (closestPoint.distanceTo(point) < Siigna.selectionDistance) {
         //the snapPoint variable is set, so that it can be used to draw visual feedback:
@@ -100,6 +104,9 @@ case object MidPointSnap extends EventSnap {
       g.AWTGraphics.fillPolygon(fillScreenX,fillScreenY, fillVector2Ds.size)
     }
     //show the snappoints
-    if(snapPoint.isDefined) snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
+    if(snapPoint.isDefined) {
+      println("SP is defined in mid: "+snapPoint.isDefined)
+      snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
+    }
   }
 }
