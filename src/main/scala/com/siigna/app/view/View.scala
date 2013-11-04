@@ -502,7 +502,10 @@ object View extends View {
     }
 
     // Update the fps counter
-    fps = 1000/(System.currentTimeMillis() - fpsStart)
+    fps = {
+      val f = System.currentTimeMillis() - fpsStart
+      if(f != 0) 1000/f else 1000
+    }
   }
 
   /**

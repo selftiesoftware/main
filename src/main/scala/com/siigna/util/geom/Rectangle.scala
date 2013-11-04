@@ -320,6 +320,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
       Set(top, right, bottom, left).flatMap(_.intersections(segment))
     }
+    case rectangle : ComplexRectangle2D => rectangle.segments.flatMap(s => s.intersections(this)).toSet
+
     case g => Set.empty
   }
 
@@ -585,16 +587,32 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
   }
 
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
-    case line : Line2D => {
-      val top = Line2D(topLeft, topRight)
-      val right = Line2D(topRight, bottomRight)
-      val bottom = Line2D(bottomRight, bottomLeft)
-      val left = Line2D(bottomLeft, topLeft)
+    case line : Segment2D => {
+      val top = Segment(topLeft, topRight)
+      val right = Segment(topRight, bottomRight)
+      val bottom = Segment(bottomRight, bottomLeft)
+      val left = Segment(bottomLeft, topLeft)
 
-      Set(top, right, bottom, left).flatMap(_.intersections(line))
+      val r = Set(top, right, bottom, left).flatMap(s => line.intersections(s))
+      r
     }
-    case segment : Segment2D => segment.intersections(this)
-    case g => Set.empty
+    case l : Line2D => {
+      l.intersections(this)
+    }
+    case p : CollectionGeometry2D =>  p.geometries.flatMap(s => s.intersections(this)).toSet
+
+    case r : ComplexRectangle2D => {
+      println("implement rect / rect intersections here")
+      Set()
+    }
+
+    case g => {
+      println("NO SHAPE RECOGNIZED IN RECT INTERSECTION")
+      Set()
+    }
+
+
+
   }
 
   def onPeriphery(point : Vector2D) =

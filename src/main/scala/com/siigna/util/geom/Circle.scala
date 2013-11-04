@@ -184,6 +184,12 @@ case class Circle2D(override val center : Vector2D, radius : Double) extends Cir
 
     case line : Line2D => line.intersections(this)
     case line : Segment2D => line.intersections(this)
+    case polyline : CollectionGeometry2D => {
+      val plSegments = polyline.geometries.toList
+      val r = plSegments.flatMap(s => s.intersections(this)).toSet
+      r
+    }
+
     case g => Set()
   }
 

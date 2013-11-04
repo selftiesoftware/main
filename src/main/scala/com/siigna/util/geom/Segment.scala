@@ -203,7 +203,12 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       )
     }
 
-    case collection : CollectionGeometry2D => collection.intersections(this)
+    case collection : CollectionGeometry2D => {
+      collection.intersections(this)
+    }
+
+    case r : ComplexRectangle2D => r.segments.flatMap(s => s.intersections(this)).toSet
+
 
     //find the intersection between two line segments
     case segment : Segment2D => {
@@ -238,6 +243,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       }
     }
     case g => Set()
+
   }
 
   def transform(t : TransformationMatrix) = new Segment2D(t.transform(p1), t.transform(p2))
