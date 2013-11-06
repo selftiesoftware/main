@@ -31,13 +31,13 @@ package com.siigna.app
  */
 
 import java.applet.Applet
-import com.siigna.app.controller.Controller
 import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
-import model.Drawing
 import model.server.User
-import view.View
 import com.siigna.util.Log
+import com.siigna.app.model.Drawing
+import com.siigna.app.view.View
+import com.siigna.app.controller.Controller
 
 /**
  * The entry-point of Siigna.

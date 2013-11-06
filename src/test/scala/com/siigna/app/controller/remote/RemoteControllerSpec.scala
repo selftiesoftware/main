@@ -13,13 +13,9 @@ package com.siigna.app.controller.remote
 
 import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.app.model.action._
 import com.siigna.app.model.ActionModel
 import com.siigna.app.model.shape.LineShape
-import com.siigna.util.geom.{Vector2D, TransformationMatrix}
-import com.siigna.app.model.action.TransformShapes
 import com.siigna.app.model.action.CreateShape
-import com.siigna.app.model.action.DeleteShape
 
 /**
  * Tests the remote actor.
@@ -33,7 +29,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
     def gateway = new RESTGateway("http://localhost:20004")
 
     // Use case 1 from https://trello.com/c/RMrddOtd/2-shapes-forsvinder
-    it ("can persist a drawing over time") {
+    /*it ("can persist a drawing over time") {
       val model = new ActionModel {}
       val c1 = new RemoteController(model, gateway, 20)
       c1.init()
@@ -95,13 +91,16 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
 
       Then("the shapes of the new model should be the same as in the old model")
       model2.model.shapes should equal(model.model.shapes)
-    }
+
+      c1.exit()
+      c2.exit()
+    }*/
     
-    val target = 500;
+    val target = 500
     it (s"can execute $target actions serialized") {
 
       val model = new ActionModel {}
-      val c1 = new RemoteController(model, gateway, 20)
+      val c1 = new RemoteController(model, gateway, 50)
       c1.init()
       model.addRemoteListener(c1.sendActionToServer)
       val drawingId = model.attributes.long("id").get
@@ -111,28 +110,51 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
       val shapes = (-1*target to -1).map (i => i -> LineShape(i, 0, 0, i))
       val actions = shapes.map(t => CreateShape(t._1, t._2))
       actions.foreach(model.execute(_))
-      while(c1.isSynchronising){ Thread.sleep(200); }
+
+      // Wait for the model to be synchronised
+      while (c1.isSynchronising) {
+        Thread.sleep(50)
+      }
 
       Then(s"the total number of shapes should be $target")
       model.model.shapes.size should equal(target)
 
       Then("all id's should be positive")
       model.model.shapes.exists(_._1 < 0) should equal(false)
-     
+
+      Then("It's sequential")
       model.model.shapes.keys.toList.sorted.reduceLeft((a, b) => {
-        Then("It's sequential")
         a should equal (b - 1)
         b
       })
 
-
-      /*
-      Then("All id should be serial")
-      var lastid=0 
-      for (s <- model.model.shapes)
-        s._1 should equal(lastid+1)
-        */
+      c1.exit()
     }
+
+    /*it("Handles key uniqeness")        {
+      val target =100
+      val model = new ActionModel {}
+      val c1 = new RemoteController(model, gateway, 1)
+      c1.init()
+      model.addRemoteListener(c1.sendActionToServer)
+      val drawingId = model.attributes.long("id").get
+      Given(s"a drawing with id $drawingId")
+      When(s"making a range of $target internal ids")
+      val ids = Seq.range(-target-1,-1)
+      val remoteIDMap = c1.mapRemoteIDs(ids,c1.session)
+      Then (s"remoteIDMap should contain all ids id's")
+      ids.size should equal(remoteIDMap.size)
+      println(ids+"\n"+remoteIDMap)
+      When(s"when you now make $target new id's then you should get ${target*2} out")
+      val remoteIDMap2 = c1.mapRemoteIDs(ids,c1.session)
+      println(ids+"\n"+remoteIDMap2)
+      var keys = remoteIDMap.keys
+      keys ++= remoteIDMap2.keys
+      val setKeys= keys.toSet
+      Then (s" all keys should be uniqe")
+      setKeys.size equals keys.size
+      c1.exit()
+    }*/
   }
 
 }

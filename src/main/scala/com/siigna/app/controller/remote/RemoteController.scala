@@ -22,9 +22,9 @@ package com.siigna.app.controller.remote
 import com.siigna.app.model.ActionModel
 import com.siigna.app.model.Model
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
-import collection.mutable
 import com.siigna.util.Log
 import com.siigna.app.Siigna
+import scala.concurrent.Lock
 
 /**
  * A RemoteController which synchronises the drawing in the given [[com.siigna.app.model.ActionModel]] with the
@@ -46,29 +46,34 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   val t = new Thread() {
     override def run() {
 
-      // Wait until we are live
-      while (!isLive) Thread.sleep(500)
-      Log.debug("Remote: Initiating connection.")
-
       try {
         // Loooopsin' for actions to send
         while(!shouldExit) {
 
-          // Query for new actions
-          handleGetActionId(gateway.getActionId(session))
+          // Tell the world we are synchronising
+          _sync = true
+
+          // Synchronise actions
+          syncActions()
 
           if (!mailbox.isEmpty) {
-            // Tell the world we are synchronising
-            _sync = true
+            var actionsToSend : Seq[(Action, Boolean)] = null
 
-            sendActions(mailbox)
-
-            // Tell the world that we are done doing stuff
-            _sync = false
+            // Store the actions from the mailbox - and lock it!
+            mailboxLock.acquire()
+            // Store the actions to send
+            actionsToSend = mailbox
 
             // Empty mailbox
             mailbox = Nil
+            mailboxLock.release()
+
+            // Zænd eet!
+            sendActions(actionsToSend)
           }
+
+          // Tell the world that we are done doing stuff
+          _sync = false
 
           // Sleep for a bit to avoid pinging continuously
           Thread.`yield`()
@@ -89,45 +94,29 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
    * the model) and starting a thread that asynchronously listens on incoming actions to synchronise.
    */
   def init() {
-    def drawingId : Option[Long] = model.attributes.long("id")
-
     // Tell the world that we are doing stuff
     _sync = true
 
     // Retrieve the drawing
-    drawingId match {
-      case Some(i) => {
-        handleGetDrawing(gateway.getDrawing(i, session))
+    getDrawing(model.attributes.long("id")) match  {
+
+      case Some(newModel) => {
+        // Implement the model
+        model.execute(LoadDrawing(newModel), remote = false)
+
+        // Log the success
+        Log.success("Remote: Successfully received and loaded drawing #" + session.drawing + " from server")
+
+        // Query for new actions
+        syncActions()
+
+        // Set a priority and start
+        t.setPriority(Thread.MIN_PRIORITY)
+        t.start()
       }
-      case None    => {
-        // We need to ask for a new drawing
-        gateway.getNewDrawingId(session) match {
-          case Left(id : Long)  => {
-            // Gotcha! Set the drawing id
-            model.attributes += "id" -> id
-            Log.success("Remote: Successfully reserved a new drawing " + id)
-          }
-          case Right(m) => {
-            Log.error("Remote: Could not reserve new drawing, shutting down.", m)
-            shouldExit = true
-          }
-        }
-      }
+      case _ => Log.error("Remote: Failed to fetch drawing from the server.")
     }
-
-    // Query for new actions
-    handleGetActionId(gateway.getActionId(session))
-
-    // Set status to idle
-    _sync = false
-
-    // Set a priority and start
-    t.setPriority(Thread.MIN_PRIORITY)
-    t.start()
   }
-
-  // All the ids of the actions that have been executed on the client
-  protected[remote] val actionIndices = mutable.BitSet()
 
   // A map of local shape ids mapped to their remote counterparts
   protected[remote] var localIdMap : Map[Int, Int] = Map()
@@ -136,7 +125,10 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   private var shouldExit = false
 
   // The mailbox where pending actions are stored
-  private var mailbox : Seq[(Action, Boolean)] = Seq()
+  protected[remote] var mailbox : Seq[(Action, Boolean)] = Seq()
+
+  // The mailbox lock
+  protected val mailboxLock : Lock = new Lock
 
   /**
    * A boolean that indicates whether we are currently communicating with the server.
@@ -168,49 +160,38 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   }
 
   /**
-   * Handles requests for action ids. These requests are performed once in a while to make sure the client
-   * has received the latest actions from the server.
-   * @param response  The result of the request.
+   * Retrieves a new drawing from the server. If the id parameter is set we query the server for that specific drawing.
+   * If not, then we ask for a unique global id for this drawing.
+   * @param id  The id of the drawing to retrieve from the server, if any.
+   * @return  Some[Model] with an id and lastAction attribute set, if the model or drawing-id was successfully
+   *          retrieved. None if an error occurred.
    */
-  protected def handleGetActionId( response: Either [Int, String] ) {
-    response match {
-      case Left(id : Int ) => {
-        Log.debug("Remote: Got latest action id " + id)
-
-        // Store the id if it's the first we get
-        if (actionIndices.isEmpty) {
-          actionIndices += id
-        // If the id is above the action indices then we have a gap to fill!
-        } else if(id > actionIndices.last) {
-          val range = math.max(actionIndices.last, 1) to id
-
-          gateway.getActions(range,session) match {
-            case Left(actions : Seq[RemoteAction]) => {
-              actions.foreach { action =>
-                try {
-                  action.undo match {
-                    case true  => model.undo(action.action, remote = false)
-                    case false => model.execute(action.action, remote = false)
-                  }
-                } catch {
-                  case e: Throwable => Log.error("Remote: Error when reading data from server", e)
-                }
-              }
-
-              // Store the ids in the action indices
-              // Note to self: "+=" and NOT "+"... Sigh...
-              actionIndices ++= range
+  protected def getDrawing(id : Option[Long]) : Option[Model] = {
+    id match {
+      case Some(i) => {
+        gateway.getDrawing(i, session) match {
+          case Left(newModel : Model) => Some(newModel) // Return the model
+          case Right(message)=> Log.debug("Remote: ", message); None
+        }
+      }
+      case None    => {
+        // We need to ask for a new drawing
+        gateway.getNewDrawingId(session) match {
+          case Left(id : Long)  => {
+            // Gotcha! Set the drawing id
+            model.attributes += "id" -> id
+            model.attributes.int("lastAction") match {
+              case None => model.attributes += "lastAction" -> 0
+              case _ =>
             }
-            case Right(message) => Log.error("Remote: Unexpected format: " + message)
+            Some(model.model)
+          }
+          case Right(m) => {
+            Log.debug("Remote: ", m)
+            shouldExit = true
+            None
           }
         }
-
-        // After the check it should be fine to add the index to the set of action indices
-        // Note to self: "+=" and NOT "+"... Sigh...
-        actionIndices += id
-      }
-      case Right(message) => {
-        Log.error(s"Remote: Error when updating ActionId: $message")
       }
     }
   }
@@ -223,7 +204,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   protected def handleSetActions(response : Either[Seq[Int], String]) {
     response match {
       case Left(s : Seq[Int]) => {
-        actionIndices ++= s
+        model.attributes += "lastAction" -> s.max
         Log.success("Remote: Received and updated action ids")
       }
       case Right(message) => {
@@ -233,37 +214,12 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   }
 
   /**
-   * Handles the request for a drawing whose id is specified in the <code>session</code> of this client.
-   */
-  protected def handleGetDrawing(result: Either[Model, String]) {
-    result match {
-      case Left(newModel : Model )=> {
-        // Read the bytes
-        try {
-          // Implement the model
-          model.execute(LoadDrawing(newModel), remote = false)
-          // Search for the lastAction attribute, or retrieve it manually,
-          // which sets the last executed action on the drawing
-          model.attributes.int("lastAction") match {
-            case Some(i : Int) => actionIndices += i
-            case _ => handleGetActionId(gateway.getActionId(session))
-          }
-          Log.success("Remote: Successfully received drawing #" + session.drawing + " from server")
-        } catch {
-          case e : Throwable => Log.error("Remote: Error when reading data from server", e)
-        }
-      }
-      case Right(message)=> Log.error("Remote: Unknown error when loading drawing: " + message)
-    }
-  }
-
-  /**
    * Defines whether the client is connected to a remote server or not.
    * @return true if connected, false if not.
    */
   def isOnline = gateway.isConnected
 
-  protected def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
+  /*protected*/ def mapRemoteIDs(seq: Seq[Int],session: Session):Map[Int,Int] ={
     // .. Then we need to query the server for ids
     gateway.getShapeIds(seq.size,session) match {
       case Left(i : Range) => {
@@ -343,7 +299,9 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
     if (!isLive) {
       Log.debug("Remote: Server is offline, not sending action " + action)
     } else {
+      mailboxLock.acquire()
       mailbox :+= action -> undo
+      mailboxLock.release()
     }
   }
 
@@ -353,5 +311,49 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
    */
   def session : Session = {
     Session(model.attributes.long("id").getOrElse(-1), Siigna.user)
+  }
+
+  /**
+   * Synchronises actions on the given drawing with the server by asking for the latest action-id, comparing that to
+   * the latest action id currently in the drawing, and then fetching the actions that have not been executed locally.
+   */
+  def syncActions() {
+    (model.attributes.long("id"), model.attributes.int("lastAction")) match {
+      case (Some(drawingId), Some(currentActionId)) => {
+        gateway.getActionId(session) match {
+          case Left(id) => {
+            Log.debug("Remote: Got latest action id " + id)
+
+            // If the id is above the action indices then we have a gap to fill!
+            if(id > currentActionId) {
+              val range = (currentActionId + 1) to id
+
+              gateway.getActions(range,session) match {
+                case Left(actions : Seq[RemoteAction]) => {
+                  // Execute the received actions
+                  actions.foreach { action =>
+                    action.undo match {
+                      case true  => model.undo(action.action, remote = false)
+                      case false => model.execute(action.action, remote = false)
+                    }
+                  }
+
+                  // Add the id of the last action
+                  model.attributes += "lastAction" -> id
+                }
+                case Right(message) => {
+                  shouldExit = true
+                  Log.error("Remote: Failed to retrieve actions from drawing. Aborting. ", message)
+                }
+              }
+            }
+          }
+          case Right(m) => Log.warning("Remote: Failed to read action id from server: ", m)
+        }
+      }
+      case (Some(x), None) => Log.error("Remote: Could not read last action from model.")
+      case (_, Some(x)) => Log.error("Remote: Could not read drawing id from model.")
+      case _ => Log.error("Remote: Could not read drawing id or last action from the model")
+    }
   }
 }
