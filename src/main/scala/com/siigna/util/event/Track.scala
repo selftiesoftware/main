@@ -124,15 +124,34 @@ object Track extends EventTrack {
       // Only compute the nearest point if we have one.
       if (shapes.nonEmpty || points.nonEmpty) {
 
-        // Find the nearest point
-        val nearestPoint = if (shapes.nonEmpty) {
-          // Locate the nearest shape and point
-          val nearest = shapes.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
-          (nearest.geometry.vertices ++ points).reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+        //the following evaluations are required if Siigna should track to mid and int points for shapes in the making.
+        val in = IntersectionPointSnap.closestInt //using the evaluation going on in IntSnap to see if we should track...
+        val int = if(in.isDefined && in.get.distanceTo(m) < Siigna.selectionDistance) Some(in.get) else None
 
-        } else {
-          // Locate the nearest point
-          points.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+        val mi = MidPointSnap.closestMid //using the evaluation going on in MidPointSnap to see if we should track...
+        val mid = if(mi.isDefined && mi.get.distanceTo(m) < Siigna.selectionDistance) Some(mi.get) else None
+
+        //get the possible tracking points.
+        val nearestPoint = {
+
+          if(int.isDefined)  int.get //intersections if any
+          else if(mid.isDefined) mid.get //midPoints if any
+
+          //End-points (or other shape-handles) if any
+          else if (shapes.nonEmpty && !int.isDefined && !mid.isDefined) {
+            val nearest = shapes.reduceLeft((a, b) => if (a.geometry.distanceTo(m) < b.geometry.distanceTo(m)) a else b)
+            (nearest.geometry.vertices ++ points).reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          }
+          else if(shapes.nonEmpty && int.isDefined || mid.isDefined) {
+            if(int.isDefined)  int.get //intersections if any
+            else if(mid.isDefined) mid.get //midPoints if any
+            else m
+          }
+
+          else {
+            // Locate the nearest point
+            points.reduceLeft((a : Vector2D, b : Vector2D) => if (a.distanceTo(m) < b.distanceTo(m)) a else b)
+          }
         }
 
         //if a tracking point is defined, and the mouse is placed on top of a second point
