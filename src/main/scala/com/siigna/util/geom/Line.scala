@@ -56,8 +56,8 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
     val constant   = ((point.x - p1.x) * (p2.x - p1.x) + (point.y - p1.y) * (p2.y - p1.y)) / (lineVector.length * lineVector.length)
 
     // Use the determinant to calculate the point.
-    val x = p1.x + constant * ((p2.x - p1.x))
-    val y = p1.y + constant * ((p2.y - p1.y))
+    val x = p1.x + constant * (p2.x - p1.x)
+    val y = p1.y + constant * (p2.y - p1.y)
 
     // Return the point.
     Vector2D(x, y)
@@ -161,7 +161,7 @@ case class Line2D(p1 : Vector2D, p2 : Vector2D) extends Line with Geometry2D {
 
         //check that U is between 0 and 1. In reality the absolute tolerance epsilon is used to prevent rounding errors
         //that filter intersections which should exist.
-        if((u >= -epsilon && u <= (1 + epsilon))) Set(Vector2D(x1+t*bx, y1+t*by)) else Set[Vector2D]()
+        if (u >= -epsilon && u <= (1 + epsilon)) Set(Vector2D(x1+t*bx, y1+t*by)) else Set[Vector2D]()
       }
     }
 
@@ -182,9 +182,8 @@ object Line2D {
    * close the whole figure... Example:
    * <pre>
    * *    *        *----*
-   *           ==> |    |
+   *           --> |    |
    * *    *        *    *
-   * </pre>
    *
    * @return List[Line] A list of endless lines
    */
@@ -203,10 +202,9 @@ object Line2D {
    * closes the whole figure... Example:
    * <pre>
    * *    *        *----*
-   *           ==> |    |
+   *           --> |    |
    * *    *        *----*
-   * </pre>
-   * @param points  A list of vectors
+   * </pre>@param points  A list of vectors
    * @return List[Line]  A list of endless lines
    */
   def linesOnClosedPathOfPoints(points : List[Vector2D]) : List[Line] =
