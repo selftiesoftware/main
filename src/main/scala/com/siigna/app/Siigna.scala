@@ -47,6 +47,11 @@ import com.siigna.app.controller.Controller
  */
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
+  /**
+   * Backgroung image and its location defined by two points - if set
+   */
+  var imageBackground : (Option[java.awt.Image],Option[Vector2D],Option[Vector2D]) = (None,None,None)
+
   protected[app] var controller : Option[Controller] = None
 
   /**

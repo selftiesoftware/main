@@ -148,7 +148,7 @@ object ImageShape {
   /**
    * Creates an ImageShape from a given shape by server it with the <code>Graphics</code>
    * class and saving the result.
-   * TODO: Refactorize!
+   * TODO: Refactor!
    */
   def fromShape(rawShape : HasAttributes) = {
     // Force the shape to draw from (0, 0) on the canvas.

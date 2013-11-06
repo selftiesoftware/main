@@ -27,6 +27,7 @@ import java.nio.charset.Charset
 import javax.swing.filechooser.FileNameExtensionFilter
 import java.nio.ByteBuffer
 import java.io._
+import java.awt.Toolkit
 
 /**
  * <h2>Dialogue</h2>
@@ -36,7 +37,7 @@ import java.io._
  *   basics for I/O operations such as import, export etc.
  * </p>
  * <p>
- *   The class have also been created to allow I/O operations in restricted environments, such as applets.
+ *   The class has also been created to allow I/O operations in restricted environments, such as applets.
  *   The Dialogue object will be loaded at runtime which ensures that whatever code being run here have been
  *   approved by the user. Since I/O is near-to impossible to achieve outside restricted environments it also
  *   gives the user (some) certainty that every I/O operation performed in Siigna is defined at the mainline
@@ -272,6 +273,17 @@ object Dialogue {
    */
   def readByteChannel(filters : FileNameExtensionFilter*) : Option[ReadableByteChannel] =
     openDialogueRead(f => Files.newByteChannel(f.toPath, util.EnumSet.of(StandardOpenOption.READ)), filters)
+
+  /**
+   * Attempts to read an image file.
+   * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
+   *                 file-extension, filters away unwanted files, and helps the user choose a file with a
+   *                 certain file-ending, for instance.
+   * @return  Some[java.awt.Image] if the user correctly selected a file and we have sufficient permissions to read it
+   *          None otherwise.
+   */
+  def readImage(filters : FileNameExtensionFilter*) : Option[java.awt.Image] =
+    openDialogueRead(f => Toolkit.getDefaultToolkit.getImage(f.toString), filters)
 
   /**
    * Attempts get the input channel of a file. This is useful when dealing with larger binary or textual
