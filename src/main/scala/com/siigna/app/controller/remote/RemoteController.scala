@@ -46,10 +46,6 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
   val t = new Thread() {
     override def run() {
 
-      // Wait until we are live
-      while (!isLive) Thread.sleep(500)
-      Log.debug("Remote: Initiating connection.")
-
       try {
         // Loooopsin' for actions to send
         while(!shouldExit) {
