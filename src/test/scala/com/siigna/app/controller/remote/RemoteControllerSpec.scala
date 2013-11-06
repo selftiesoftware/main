@@ -13,13 +13,9 @@ package com.siigna.app.controller.remote
 
 import org.scalatest.{GivenWhenThen, FunSpec}
 import org.scalatest.matchers.ShouldMatchers
-import com.siigna.app.model.action._
 import com.siigna.app.model.ActionModel
 import com.siigna.app.model.shape.LineShape
-import com.siigna.util.geom.{Vector2D, TransformationMatrix}
-import com.siigna.app.model.action.TransformShapes
 import com.siigna.app.model.action.CreateShape
-import com.siigna.app.model.action.DeleteShape
 
 /**
  * Tests the remote actor.
@@ -33,7 +29,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
     def gateway = new RESTGateway("http://localhost:20004")
 
     // Use case 1 from https://trello.com/c/RMrddOtd/2-shapes-forsvinder
-    it ("can persist a drawing over time") {
+    /*it ("can persist a drawing over time") {
       val model = new ActionModel {}
       val c1 = new RemoteController(model, gateway, 20)
       c1.init()
@@ -98,7 +94,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
 
       c1.exit()
       c2.exit()
-    }
+    }*/
     
     val target = 500
     it (s"can execute $target actions serialized") {
@@ -116,9 +112,8 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
       actions.foreach(model.execute(_))
 
       // Wait for the model to be synchronised
-      Thread.sleep(50000)
       while (c1.isSynchronising) {
-        Thread.sleep(500)
+        Thread.sleep(50)
       }
 
       Then(s"the total number of shapes should be $target")
@@ -136,7 +131,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
       c1.exit()
     }
 
-    it("Handles key uniqeness")        {
+    /*it("Handles key uniqeness")        {
       val target =100
       val model = new ActionModel {}
       val c1 = new RemoteController(model, gateway, 1)
@@ -159,7 +154,7 @@ class RemoteControllerSpec extends FunSpec with ShouldMatchers with GivenWhenThe
       Then (s" all keys should be uniqe")
       setKeys.size equals keys.size
       c1.exit()
-    }
+    }*/
   }
 
 }

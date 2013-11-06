@@ -48,7 +48,7 @@ object Log {
   /**
    * The debug-level.
    */
-  var level : Int = ALL
+  var level : Int = 3
 
   /**
    * The line-number.

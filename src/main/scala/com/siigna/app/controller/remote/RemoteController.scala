@@ -24,6 +24,7 @@ import com.siigna.app.model.Model
 import com.siigna.app.model.action.{RemoteAction, LoadDrawing, Action}
 import com.siigna.util.Log
 import com.siigna.app.Siigna
+import scala.concurrent.Lock
 
 /**
  * A RemoteController which synchronises the drawing in the given [[com.siigna.app.model.ActionModel]] with the
@@ -49,7 +50,6 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
       while (!isLive) Thread.sleep(500)
       Log.debug("Remote: Initiating connection.")
 
-
       try {
         // Loooopsin' for actions to send
         while(!shouldExit) {
@@ -64,13 +64,13 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
             var actionsToSend : Seq[(Action, Boolean)] = null
 
             // Store the actions from the mailbox - and lock it!
-            this.synchronized {
-              // Store the actions to send
-              actionsToSend = mailbox
+            mailboxLock.acquire()
+            // Store the actions to send
+            actionsToSend = mailbox
 
-              // Empty mailbox
-              mailbox = Nil
-            }
+            // Empty mailbox
+            mailbox = Nil
+            mailboxLock.release()
 
             // Zænd eet!
             sendActions(actionsToSend)
@@ -130,6 +130,9 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
 
   // The mailbox where pending actions are stored
   protected[remote] var mailbox : Seq[(Action, Boolean)] = Seq()
+
+  // The mailbox lock
+  protected val mailboxLock : Lock = new Lock
 
   /**
    * A boolean that indicates whether we are currently communicating with the server.
@@ -300,9 +303,9 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
     if (!isLive) {
       Log.debug("Remote: Server is offline, not sending action " + action)
     } else {
-      this.synchronized {
-        mailbox :+= action -> undo
-      }
+      mailboxLock.acquire()
+      mailbox :+= action -> undo
+      mailboxLock.release()
     }
   }
 
