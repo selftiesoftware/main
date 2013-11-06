@@ -17,17 +17,15 @@
  * Read more at http://siigna.com and https://github.com/siigna/main
  */
 
-/*package com.siigna.app.model.shape
+package com.siigna.app.model.shape
 
 import java.awt.{Color, Graphics2D, Image, RenderingHints, Toolkit}
-import com.siigna.util.dxf.DXFSection
 import java.awt.image.{BufferedImage, MemoryImageSource, PixelGrabber}
 
-import com.siigna._
-import com.siigna.app.view.Graphics
-
 import com.siigna.util.collection.Attributes
-import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{ComplexRectangle2D, SimpleRectangle2D, TransformationMatrix, Vector2D}
+import com.siigna.app.model.selection.{EmptyShapeSelector, FullShapeSelector, ShapeSelector}
+import com.siigna.app.Siigna
 
 /**
  * An ImageShape.
@@ -42,18 +40,51 @@ import com.siigna.util.geom.{SimpleRectangle2D, TransformationMatrix, Vector2D}
  *
  * TODO: Refactor the imageDimension to another type than rectangle. Preferably one that can rotate.
  */
-case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int, attributes : Attributes) extends ClosedShape {
+case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int, attributes : Attributes) extends Shape {
 
   type T = ImageShape
 
-  val geometry = SimpleRectangle2D(p1, p2)
+  val geometry = SimpleRectangle2D(p1.x,p1.y, p2.x,p2.y)
 
   val points = Iterable(p1, p2)
 
   def setAttributes(attributes : Attributes) = new ImageShape(image, p1, p2, width, height, attributes)
 
-  def toDXF = DXFSection(List())
-  
+  def delete(part: ShapeSelector) = part match {
+    case FullShapeSelector => Nil
+    case _ => Seq(this)
+  }
+
+  def getPart(part : ShapeSelector) = Some(new PartialShape(this, transform))
+
+  def getSelector(rect: SimpleRectangle2D) = {
+    if (rect.intersects(geometry)) {
+      ShapeSelector(1)
+      FullShapeSelector
+    }
+    else {
+      ShapeSelector(0)
+      EmptyShapeSelector
+    }
+  }
+
+  def getSelector(point: Vector2D) = {
+    val selectionDistance = Siigna.selectionDistance
+    if (distanceTo(point) < selectionDistance) {
+      ShapeSelector(1)
+      FullShapeSelector
+    }
+    else {
+      ShapeSelector(0)
+      EmptyShapeSelector
+    }
+  }
+
+  def getShape(s : ShapeSelector) = Some(this)
+
+  def getVertices(selector: ShapeSelector) = Nil
+
+
   /**
    * Retrieves the ImageShape as an Image.
    */
@@ -62,6 +93,7 @@ case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : 
     val toolkit     = Toolkit.getDefaultToolkit()
     toolkit.createImage(imageSource)
   }
+
   def transform(transformation : TransformationMatrix) : ImageShape =
   {
     ImageShape(image,
@@ -70,22 +102,18 @@ case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : 
                width, height,
                attributes)
   }
+
+  def fromImage(image : Image, p1 : Vector2D, p2 : Vector2D) : ImageShape =
+    //fromImage(image, p1, p2, image.getWidth(null), image.getHeight(null))
+    fromImage(image,p1,p2)
+
+  //def fromImage(image : Image, p1 : Vector2D, p2 : Vector2D, width : Int, height : Int) : ImageShape =
+  //  fromImage(image, p1, p2, width, height, Attributes())
+
 }
 
 object ImageShape {
 
-  def apply(image : BufferedImage, p1 : Vector2D, p2 : Vector2D) : ImageShape =
-    fromImage(image, p1, p2, image.getWidth, image.getHeight)
-
-  def apply(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int) : ImageShape =
-    ImageShape(image, p1, p2, width, height, Attributes())
-
-  def fromImage(image : Image, p1 : Vector2D, p2 : Vector2D) : ImageShape =
-    fromImage(image, p1, p2, image.getWidth(null), image.getHeight(null))
-
-  def fromImage(image : Image, p1 : Vector2D, p2 : Vector2D, width : Int, height : Int) : ImageShape =
-    fromImage(image, p1, p2, width, height, Attributes())
-  
   /**
    * Creates an ImageShape from a given image.
    */
@@ -104,6 +132,18 @@ object ImageShape {
     // Return an ImageShape
     new ImageShape(pixels, p1, p2, newWidth, newHeight, attributes)
   }
+  def apply(image : BufferedImage, p1 : Vector2D, p2 : Vector2D) : ImageShape =
+    fromImage(image, p1, p2, image.getWidth, image.getHeight, Attributes())
+
+  def apply(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : Int, height : Int) : ImageShape =
+    ImageShape(image, p1, p2, width, height, Attributes())
+
+}
+
+
+
+
+  /*
 
   /**
    * Creates an ImageShape from a given shape by server it with the <code>Graphics</code>
@@ -134,5 +174,4 @@ object ImageShape {
 
     fromImage(bufferedImage, rawShape.boundary.topLeft, rawShape.boundary.bottomRight, boundary.width.toInt, boundary.height.toInt, shape.attributes)
   }
-}
-       */
+  */

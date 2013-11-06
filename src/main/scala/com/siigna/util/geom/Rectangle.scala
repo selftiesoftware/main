@@ -198,8 +198,7 @@ object Rectangle2D {
    */
   def apply(xMin : Double, yMin : Double, xMax : Double, yMax : Double) =
     new SimpleRectangle2D(xMin, yMin, xMax, yMax)
-
-}
+  }
 
 /**
  * A [[com.siigna.util.geom.Rectangle]] that can be rotated.

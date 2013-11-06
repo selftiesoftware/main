@@ -134,5 +134,4 @@ object TextShape
   def apply(text : String, position : Vector2D, attr : Attributes) = new TextShape(text, position, 1.0, attr)
   def apply(text : String, position : Vector2D, scale : Double)    = new TextShape(text, position, scale, Attributes())
 
-
 }
