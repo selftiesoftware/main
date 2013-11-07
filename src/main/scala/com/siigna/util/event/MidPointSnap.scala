@@ -105,7 +105,6 @@ case object MidPointSnap extends EventSnap {
     }
     //show the snappoints
     if(snapPoint.isDefined) {
-      println("SP is defined in mid: "+snapPoint.isDefined)
       snapPoint.foreach(p => drawFill(snapBox(p), new Color(0.10f, 0.95f, 0.95f, 0.40f),t))
     }
   }
