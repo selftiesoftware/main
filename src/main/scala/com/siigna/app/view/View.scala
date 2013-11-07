@@ -464,6 +464,9 @@ object View extends View {
     try {
       // Paint the renderer
       renderer.paint(graphics, drawing, this)
+
+
+
     } catch {
       case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
