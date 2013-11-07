@@ -30,8 +30,6 @@ import java.awt.Color
  */
 class Popup(message : String) extends Display {
 
-  println("IN POPUP")
-
   /**
    * The color of the message text.
    */
