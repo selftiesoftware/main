@@ -474,8 +474,16 @@ object View extends View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      drawing.selection.parts(transformation).foreach(s => {
-        graphics.draw(s.setAttribute("Color" -> color))
+      drawing.selection.par.foreach(p => {
+        //First we draw the part of the selection, that the user interprets as selected.
+        //Which parts it is, is defined for each shape:
+        p._2._1.getSelectedAndUnselectedParts(p._2._2)._1.foreach(ps => {
+          graphics.draw(ps(drawing.selection.transformation).transform(transformation).setAttribute("Color" -> color))
+        })
+        //Then we draw the remaining part(s) of the shapes:
+        p._2._1.getSelectedAndUnselectedParts(p._2._2)._2.foreach(ps => {
+          graphics.draw(ps(drawing.selection.transformation).transform(transformation))
+        })
       })
 
       // Draw vertices

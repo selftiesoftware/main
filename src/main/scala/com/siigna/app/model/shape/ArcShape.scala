@@ -72,6 +72,12 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     t.map((f : TransformationMatrix => Shape) => new PartialShape(this, f))
   }
 
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+    case FullShapeSelector | ShapeSelector(0, 1, 2) => (Traversable( new PartialShape(this, transform)),Traversable())
+    case ShapeSelector(_) | ShapeSelector(_,_)  => (Traversable(),Traversable( new PartialShape(this, transform)))
+    case _ => (Traversable(),Traversable())
+  }
+
   def getSelector(rect: SimpleRectangle2D) = if (rect.contains(geometry)) FullShapeSelector else
   {
     ShapeSelector(BitSet(geometry.vertices.zipWithIndex.filter(t => rect.contains(t._1)).map(_._2):_*))

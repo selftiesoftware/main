@@ -152,9 +152,22 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case ShapeSelector(0, 3) => twoPointPartialShape(p0, p3, isWidth = true)
     case ShapeSelector(1, 2) => twoPointPartialShape(p1, p2, isWidth = true)
     case ShapeSelector(2, 3) => twoPointPartialShape(p2, p3, isWidth = false)
-    case ShapeSelector(0, 2) | ShapeSelector(1, 3) => None
+    case ShapeSelector(0, 2) | ShapeSelector(1, 3) => Some(new PartialShape(this, transform))
     case _ => None
   }
+
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+    case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
+    case x : BitSetShapeSelector if x.size >= 3 => (Traversable(new PartialShape(this, transform)),Traversable())
+    case ShapeSelector(_) => (Traversable(),Traversable(new PartialShape(this, transform)))
+    case ShapeSelector(0, 1) => (Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p0.transform(t), p1, attributes))),Traversable(new PartialShape(this, (t : TransformationMatrix) => PolylineShape(p1.transform(t),p2.transform(t),p3.transform(t),p0.transform(t)).addAttributes(attributes))))
+    case ShapeSelector(0, 3) => (Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p0.transform(t), p3, attributes))),Traversable(new PartialShape(this, (t : TransformationMatrix) => PolylineShape(p0.transform(t),p1.transform(t),p2.transform(t),p3.transform(t)).addAttributes(attributes))))
+    case ShapeSelector(1, 2) => (Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))),Traversable(new PartialShape(this, (t : TransformationMatrix) => PolylineShape(p2.transform(t),p3.transform(t),p0.transform(t),p1.transform(t)).addAttributes(attributes))))
+    case ShapeSelector(2, 3) => (Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p2.transform(t), p3, attributes))),Traversable(new PartialShape(this, (t : TransformationMatrix) => PolylineShape(p3.transform(t),p0.transform(t),p1.transform(t),p2.transform(t)).addAttributes(attributes))))
+    case ShapeSelector(0, 2) | ShapeSelector(1, 3) => (Traversable(new PartialShape(this, transform)),Traversable())
+    case _ => (Traversable(),Traversable())
+  }
+
 
   def getSelector(p : Vector2D) = {
     // Confine a number to a range between 0 - 3

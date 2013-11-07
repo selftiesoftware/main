@@ -60,6 +60,11 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
     case _ => None
   }
 
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = {
+    println("getSelectedAndUnselectedParts not implemented for group shapes - probably not necessary")
+    (Traversable(),Traversable())
+  }
+
   def getSelector(rect: SimpleRectangle2D) = {
     var selector = BitSet()
 
