@@ -38,19 +38,18 @@ import java.awt.{BorderLayout, Dimension, Frame}
  * a desktop-environment. The object uses the [[com.siigna.app.ApplicationWindow]] class to initialize as
  * an actual java.awt.Frame.
  */
-object SiignaApplication
-{
+object SiignaApplication {
   /**
    * This is the main entrance of the of Siigna application, when run on the
    * desktop.
    *
    * @param  args  a string array of command-line arguments.
    */
+
   def main(args : Array[String])
   {
     new ApplicationWindow
   }
-
 }
 
 /**
