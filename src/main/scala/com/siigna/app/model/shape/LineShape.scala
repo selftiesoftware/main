@@ -58,6 +58,17 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     case _ => None
   }
 
+  /*
+  Returns a tuple 2: The first element in the tuple contains the segments of the shape which the user interprets as selected,
+  and which should be coloured in the "selection-color". The second segment contains the part that should not be colored.
+   */
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+    case ShapeSelector(0) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))))
+    case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
+    case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
+    case _ => (Traversable(),Traversable())
+  }
+
   def getSelector(r : SimpleRectangle2D) = {
     if (r.intersects(boundary)) {
       val cond1 = r.contains(p1)

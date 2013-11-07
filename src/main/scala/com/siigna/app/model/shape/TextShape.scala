@@ -86,6 +86,8 @@ case class TextShape(text: String, position : Vector2D, scale : Double, attribut
 
   def getPart(part : ShapeSelector) = Some(new PartialShape(this, transform))
 
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = (Traversable(new PartialShape(this, transform)),Traversable())
+
   def getSelector(rect: SimpleRectangle2D) = {
     if (rect.intersects(geometry)) {
      ShapeSelector(1)

@@ -133,6 +133,15 @@ trait Shape extends HasAttributes {
   def getPart(selector : ShapeSelector) : Option[PartialShape]
 
   /**
+   * Retrieves a part of the shape from the given selector. If no meaningful part can be extracted, an empty part
+   * is returned. A '<i>part</i>' (i. e. a PartialShape) is a sub-selection of a shape, and can be used to only apply
+   * operations on specific parts of a shape.
+   * @param selector  The selector with which to retrieve part of the current shape.
+   * @return  Some[PartialShape] if a part can be extracted, None otherwise.
+   */
+  def getSelectedAndUnselectedParts(selector : ShapeSelector) : (Traversable[PartialShape],Traversable[PartialShape])
+
+  /**
    * Gets a [[com.siigna.app.model.selection.ShapeSelector]] that can be used to retrieve a sub-part of this shape
    * that is closest to the given point. If the entire shape is close, we return a
    * [[com.siigna.app.model.selection.FullShapeSelector]]. If nothing is close we return a

@@ -57,6 +57,8 @@ case class ImageShape(image : Array[Int], p1 : Vector2D, p2 : Vector2D, width : 
 
   def getPart(part : ShapeSelector) = Some(new PartialShape(this, transform))
 
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = (Traversable(new PartialShape(this, transform)),Traversable())
+
   def getSelector(rect: SimpleRectangle2D) = {
     if (rect.intersects(geometry)) {
       ShapeSelector(1)

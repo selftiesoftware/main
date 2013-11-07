@@ -83,10 +83,10 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
     }
 
     part match {
-      // The full shape (or two opposite points on the periphery)
+      // The full shape (or two opposite points on the periphery, ot three across:)
       case FullShapeSelector | ShapeSelector(0) | ShapeSelector(1, 2, 3, 4) |
-           ShapeSelector(1, 3) | ShapeSelector(0, 1, 4) |
-           ShapeSelector(2, 4) | ShapeSelector(0, 1, 4) => Some(new PartialShape(this, transform))
+           ShapeSelector(1, 3) | ShapeSelector(0, 1, 3) |
+           ShapeSelector(2, 4) | ShapeSelector(0, 2, 4) => Some(new PartialShape(this, transform))
       // Transform a single point on the periphery
       case ShapeSelector(1) | ShapeSelector(0, 1) => createCirclePartFromOppositePoints(1, 3)
       case ShapeSelector(2) | ShapeSelector(0, 2) => createCirclePartFromOppositePoints(2, 4)
@@ -105,6 +105,17 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
 
       case _ => None
     }
+  }
+
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+    // The full shape (or two opposite points on the periphery) - the whole circle looks selected:
+    case FullShapeSelector | ShapeSelector(0) | ShapeSelector(1, 2, 3, 4) |
+         ShapeSelector(1, 3) | ShapeSelector(0, 1, 3) |
+         ShapeSelector(2, 4) | ShapeSelector(0, 2, 4) => (Traversable( new PartialShape(this, transform)),Traversable())
+    //Otherwise, the circle doesn't look selected - only the vertices:
+    case ShapeSelector(_) |ShapeSelector(_,_) | ShapeSelector(_,_,_) | ShapeSelector(_,_,_,_) |
+         EmptyShapeSelector => (Traversable(),Traversable( new PartialShape(this, transform)))
+    case _ => (Traversable(),Traversable())
   }
 
   def getSelector(rect: SimpleRectangle2D) =
