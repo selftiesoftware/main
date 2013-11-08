@@ -202,8 +202,8 @@ object SelectToggle {
             println("Select toggle 2222222222")
             drawing.selection
           }
-          case _ => {
-            println("Select toggle 3333333")
+          case x => {
+            println("Select toggle 3333333: " + x)
             drawing.selection.remove(id)
           }
         }
