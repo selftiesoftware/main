@@ -396,7 +396,6 @@ object PolylineShape {
             arr += shape
             //Determine, whether the part of the shape should be highlighted:
             if ((xs(i) && (xs(i+1))) | (i == innerShapes.size - 1 && xs(0) && xs(innerShapes.size))) {
-              println("I, size:" + i + " - " + innerShapes.size + " - xs(innerShapes.size: " + xs(innerShapes.size))
               innerShapes(i) match {
                 case _:PolylineLineShape => {
                   if(i == innerShapes.size - 1 && xs(0) && xs(innerShapes.size)) {
