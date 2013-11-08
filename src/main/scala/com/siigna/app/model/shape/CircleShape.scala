@@ -103,7 +103,10 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       case ShapeSelector(1, 3, 4) | ShapeSelector(0, 1, 3, 4) => createCirclePartFromOppositePoints(4, 2)
       case ShapeSelector(1, 2, 4) | ShapeSelector(0, 1, 2, 4) => createCirclePartFromOppositePoints(1, 3)
 
-      case _ => None
+      case x => {
+        println("Selection of a circle that way not implemented: " + x)
+        None
+      }
     }
   }
 

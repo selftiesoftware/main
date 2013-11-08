@@ -103,7 +103,10 @@ trait PolylineShape extends CollectionShape[BasicShape] {
         )
       ))
     }
-    case _ => None
+    case x => {
+      println("Selection of a polyline that way not implemented: " + x)
+      None
+    }
   }
 
 

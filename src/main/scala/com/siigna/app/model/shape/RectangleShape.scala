@@ -153,7 +153,10 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case ShapeSelector(1, 2) => twoPointPartialShape(p1, p2, isWidth = true)
     case ShapeSelector(2, 3) => twoPointPartialShape(p2, p3, isWidth = false)
     case ShapeSelector(0, 2) | ShapeSelector(1, 3) => Some(new PartialShape(this, transform))
-    case _ => None
+    case x => {
+      println("Selection of a rectangle that way not implemented: " + x)
+      None
+    }
   }
 
   def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {

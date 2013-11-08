@@ -67,7 +67,10 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
       case ShapeSelector(0, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint, geometry.endPoint.transform(tm)))
       case ShapeSelector(1, 2) => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case ShapeSelector(0, 1, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
-      case _ => None
+      case x => {
+        println("Selection of an arc that way not implemented: " + x)
+        None
+      }
     }
     t.map((f : TransformationMatrix => Shape) => new PartialShape(this, f))
   }
