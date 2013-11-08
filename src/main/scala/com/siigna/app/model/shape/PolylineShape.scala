@@ -106,46 +106,6 @@ trait PolylineShape extends CollectionShape[BasicShape] {
     case _ => None
   }
 
-  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
-    case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
-    case BitSetShapeSelector(xs) => {
-      var partShapesToHighlight: Traversable[PartialShape] = Traversable()
-      var partShapesNotToHighlight: Traversable[PartialShape] = Traversable()
-
-      val arr = collection.mutable.ArrayBuffer[InnerPolylineShape]()
-
-      for (i <- 0 until innerShapes.size) {
-          val shape = innerShapes(i)
-
-          // Make sure there are no duplicate neighbour points
-          if (!arr.isDefinedAt(i - 1) || arr(i - 1) != shape) {
-            arr += shape
-            //Determine, whether the part of the shape should be highlighted:
-            if (xs(i) && (xs(i+1))) {
-              innerShapes(i) match {
-                case _:PolylineLineShape => {
-                  if (i > 0) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
-                  else partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
-                }
-                case _ => println("Display of selection of the selected polyline subshape not implemented")
-              }
-            } else innerShapes(i) match {
-              case _:PolylineLineShape => {
-                if (i > 0) partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
-                else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
-
-              }
-              case _ => println("Display of selection of the selected polyline subshape not implemented")
-            }
-          }
-        }
-      (partShapesToHighlight,partShapesNotToHighlight)
-     }
-    case _ => {
-      (Traversable(),Traversable())
-    }
-  }
-
 
   def getSelector(rect: SimpleRectangle2D) =
     if (rect.contains(geometry.boundary)) {
@@ -420,6 +380,62 @@ object PolylineShape {
       }
     }
 
+    def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+      case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
+      case BitSetShapeSelector(xs) => {
+        var partShapesToHighlight: Traversable[PartialShape] = Traversable()
+        var partShapesNotToHighlight: Traversable[PartialShape] = Traversable()
+
+        val arr = collection.mutable.ArrayBuffer[InnerPolylineShape]()
+
+        for (i <- 0 until innerShapes.size) {
+          val shape = innerShapes(i)
+
+          // Make sure there are no duplicate neighbour points
+          if (!arr.isDefinedAt(i - 1) || arr(i - 1) != shape) {
+            arr += shape
+            //Determine, whether the part of the shape should be highlighted:
+            if ((xs(i) && (xs(i+1))) | (i == innerShapes.size - 1 && xs(0) && xs(innerShapes.size))) {
+              println("I, size:" + i + " - " + innerShapes.size + " - xs(innerShapes.size: " + xs(innerShapes.size))
+              innerShapes(i) match {
+                case _:PolylineLineShape => {
+                  if(i == innerShapes.size - 1 && xs(0) && xs(innerShapes.size)) {
+                    //i == innershapes.size needs to evaluate the last segment and the "closing" segment simultaneously:
+                    if (xs(i)) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                    else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                    partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i).point.transform(t), startPoint.transform(t), attributes)))
+                  }
+                  else if (i == innerShapes.size - 1) {
+                    if (xs(i) && xs(innerShapes.size)) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                    else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i).point.transform(t), innerShapes(i-1).point.transform(t), attributes)))
+                    partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i).point.transform(t), startPoint.transform(t), attributes)))
+                  }
+                  else if (i > 0) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                  else partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
+                }
+                case _ => println("Display of selection of the selected polyline subshape not implemented")
+              }
+            } else innerShapes(i) match {
+              case _:PolylineLineShape => {
+                if (i == innerShapes.size - 1) {
+                  partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                  partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i).point.transform(t), startPoint.transform(t), attributes)))
+                }
+                else if (i > 0) partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
+              }
+              case _ => println("Display of selection of the selected polyline subshape not implemented")
+            }
+          }
+        }
+        (partShapesToHighlight,partShapesNotToHighlight)
+      }
+      case x => {
+        println("No method for displaying a polyline selected in this manner is implemented: " + x)
+        (Traversable(),Traversable())
+      }
+    }
+
     protected def shapes(point: Vector2D, inner: Seq[InnerPolylineShape]): Seq[BasicShape] = {
       if (!inner.isEmpty) {
         val tmp = new Array[BasicShape](inner.size + 1) // plus one to close the shape
@@ -500,6 +516,46 @@ object PolylineShape {
           }
         }
         case EmptyShapeSelector => Seq(this)
+      }
+    }
+
+    def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
+      case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
+      case BitSetShapeSelector(xs) => {
+        var partShapesToHighlight: Traversable[PartialShape] = Traversable()
+        var partShapesNotToHighlight: Traversable[PartialShape] = Traversable()
+
+        val arr = collection.mutable.ArrayBuffer[InnerPolylineShape]()
+
+        for (i <- 0 until innerShapes.size) {
+          val shape = innerShapes(i)
+
+          // Make sure there are no duplicate neighbour points
+          if (!arr.isDefinedAt(i - 1) || arr(i - 1) != shape) {
+            arr += shape
+            //Determine, whether the part of the shape should be highlighted:
+            if (xs(i) && (xs(i+1))) {
+              innerShapes(i) match {
+                case _:PolylineLineShape => {
+                  if (i > 0) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                  else partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
+                }
+                case _ => println("Display of selection of the selected polyline subshape not implemented")
+              }
+            } else innerShapes(i) match {
+              case _:PolylineLineShape => {
+                if (i > 0) partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
+                else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
+              }
+              case _ => println("Display of selection of the selected polyline subshape not implemented")
+            }
+          }
+        }
+        (partShapesToHighlight,partShapesNotToHighlight)
+      }
+      case x => {
+        println("No method for displaying an open polyline selected in this manner is implemented: " + x)
+        (Traversable(),Traversable())
       }
     }
 

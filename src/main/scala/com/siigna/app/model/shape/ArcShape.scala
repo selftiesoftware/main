@@ -75,7 +75,10 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
   def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
     case FullShapeSelector | ShapeSelector(0, 1, 2) => (Traversable( new PartialShape(this, transform)),Traversable())
     case ShapeSelector(_) | ShapeSelector(_,_)  => (Traversable(),Traversable( new PartialShape(this, transform)))
-    case _ => (Traversable(),Traversable())
+    case x => {
+      println("No method for displaying an arc selected in this manner is implemented: " + x)
+      (Traversable(),Traversable())
+    }
   }
 
   def getSelector(rect: SimpleRectangle2D) = if (rect.contains(geometry)) FullShapeSelector else

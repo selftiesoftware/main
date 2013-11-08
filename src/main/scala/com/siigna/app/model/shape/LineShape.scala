@@ -66,7 +66,10 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     case ShapeSelector(0) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))))
     case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
     case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
-    case _ => (Traversable(),Traversable())
+    case x => {
+      println("No method for displaying a line selected in this manner is implemented: " + x)
+      (Traversable(),Traversable())
+    }
   }
 
   def getSelector(r : SimpleRectangle2D) = {
