@@ -57,7 +57,10 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
         copy(shapes = inactive.result() ++ active.result().map(_.transform(t)))
       }))
     }
-    case _ => None
+    case x => {
+      println("Selection of a group shape that way not implemented: " + x)
+      None
+    }
   }
 
   def getSelectedAndUnselectedParts(part : ShapeSelector) = {

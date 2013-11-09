@@ -103,7 +103,10 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
       case ShapeSelector(1, 3, 4) | ShapeSelector(0, 1, 3, 4) => createCirclePartFromOppositePoints(4, 2)
       case ShapeSelector(1, 2, 4) | ShapeSelector(0, 1, 2, 4) => createCirclePartFromOppositePoints(1, 3)
 
-      case _ => None
+      case x => {
+        println("Selection of a circle that way not implemented: " + x)
+        None
+      }
     }
   }
 
@@ -115,7 +118,10 @@ case class CircleShape(center : Vector2D, radius : Double, attributes : Attribut
     //Otherwise, the circle doesn't look selected - only the vertices:
     case ShapeSelector(_) |ShapeSelector(_,_) | ShapeSelector(_,_,_) | ShapeSelector(_,_,_,_) |
          EmptyShapeSelector => (Traversable(),Traversable( new PartialShape(this, transform)))
-    case _ => (Traversable(),Traversable())
+    case x => {
+      println("No method for displaying a circle selected in this manner is implemented: " + x)
+      (Traversable(),Traversable())
+    }
   }
 
   def getSelector(rect: SimpleRectangle2D) =

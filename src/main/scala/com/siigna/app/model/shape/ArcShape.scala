@@ -67,15 +67,22 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
       case ShapeSelector(0, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint, geometry.endPoint.transform(tm)))
       case ShapeSelector(1, 2) => Some(tm => ArcShape(geometry.startPoint, geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case ShapeSelector(0, 1, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
-      case _ => None
+      case EmptyShapeSelector => Some(tm => this)
+      case x => {
+        println("Selection of an arc that way not implemented: " + x)
+        None
+      }
     }
     t.map((f : TransformationMatrix => Shape) => new PartialShape(this, f))
   }
 
   def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
     case FullShapeSelector | ShapeSelector(0, 1, 2) => (Traversable( new PartialShape(this, transform)),Traversable())
-    case ShapeSelector(_) | ShapeSelector(_,_)  => (Traversable(),Traversable( new PartialShape(this, transform)))
-    case _ => (Traversable(),Traversable())
+    case ShapeSelector(_) | ShapeSelector(_,_) | EmptyShapeSelector  => (Traversable(),Traversable( new PartialShape(this, transform)))
+    case x => {
+      println("No method for displaying an arc selected in this manner is implemented: " + x)
+      (Traversable(),Traversable())
+    }
   }
 
   def getSelector(rect: SimpleRectangle2D) = if (rect.contains(geometry)) FullShapeSelector else

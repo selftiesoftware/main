@@ -54,19 +54,31 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   def getPart(part : ShapeSelector) = part match {
     case ShapeSelector(0) => Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes)))
     case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes)))
-    case FullShapeSelector => Some(new PartialShape(this, transform))
-    case _ => None
+    case FullShapeSelector | ShapeSelector(0,1) => Some(new PartialShape(this, transform))
+    case x => {
+      println("Selection of a line that way not implemented: " + x)
+      None
+    }
   }
 
   /*
   Returns a tuple 2: The first element in the tuple contains the segments of the shape which the user interprets as selected,
   and which should be coloured in the "selection-color". The second segment contains the part that should not be colored.
    */
-  def getSelectedAndUnselectedParts(part : ShapeSelector) = part match {
-    case ShapeSelector(0) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))))
-    case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
-    case FullShapeSelector => (Traversable(new PartialShape(this, transform)),Traversable())
-    case _ => (Traversable(),Traversable())
+  def getSelectedAndUnselectedParts(part : ShapeSelector) = {
+    println(part)
+    println(ShapeSelector(0))
+    println(ShapeSelector(1))
+    println(ShapeSelector(0,1))
+    part match {
+      case ShapeSelector(0) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))))
+      case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
+      case FullShapeSelector | ShapeSelector(0,1) => (Traversable(new PartialShape(this, transform)),Traversable())
+      case x => {
+        println("No mmethod for displaying a line selected in this manner is implemented: " + x)
+        (Traversable(),Traversable())
+      }
+    }
   }
 
   def getSelector(r : SimpleRectangle2D) = {
@@ -115,7 +127,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   }
 
   def getVertices(selector: ShapeSelector) = selector match {
-    case FullShapeSelector => geometry.vertices
+    case FullShapeSelector | ShapeSelector(0,1) => geometry.vertices
     case ShapeSelector(0) => Seq(p1)
     case ShapeSelector(1) => Seq(p2)
     case _ => Seq()
