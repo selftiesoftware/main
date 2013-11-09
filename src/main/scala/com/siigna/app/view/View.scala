@@ -110,7 +110,7 @@ trait View {
   //is called DrawingTransformation than DeviceTransformation, and vice versa.
 
   /** EXPLANATION OF DEVICE AND DRAWING COORDINATES AND TRANSFORMATION
-   *
+    *
     *   --> x
     *  (0,0) DeviceCoordinates
     *   |  x----------------------x
@@ -125,8 +125,8 @@ trait View {
     *
     *                       |            |
     *                       x- - - - - - x
-   *
-   */
+    *
+    */
 
   /**
    * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>

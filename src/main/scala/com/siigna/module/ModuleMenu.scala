@@ -41,9 +41,11 @@ object ModuleMenu {
   val colorLogo = new Color(0.10f, 0.10f, 0.10f, 0.50f)
 
   //LOGO
-  val frameLogo =  Iterable(LineShape(Vector2D(8.345,2),Vector2D(101.7,2)),LineShape(Vector2D(5,25.56),Vector2D(5,5.345)),LineShape(Vector2D(105,25.56),Vector2D(105,5.345)),LineShape(Vector2D(8.34,28.91),Vector2D(101.7,28.91)),ArcShape(Vector2D(8.34,5.34),3.34,180,-90),ArcShape(Vector2D(101.65,5.34),3.34,0,90),ArcShape(Vector2D(101.65,25.56),3.34,0,-90),ArcShape(Vector2D(8.34,25.56),3.34,180,90))
+  //val frameLogo =   Iterable( LineShape(Vector2D(10,2),Vector2D(300,2)),LineShape(Vector2D(5,24),Vector2D(5,7)),LineShape(Vector2D(10,29),Vector2D(300,29)),LineShape(Vector2D(305,24),Vector2D(305,7)),ArcShape(Vector2D(305,24),Vector2D(303.5,27.54),Vector2D(300,29)),ArcShape(Vector2D(300,2),Vector2D(303.5,3.46),Vector2D(305,7)),ArcShape(Vector2D(5,7),Vector2D(6.464,3.464),Vector2D(10,2)),ArcShape(Vector2D(5,24),Vector2D(6.464,27.54),Vector2D(10,29)))
+  val frameLogo =   Iterable( LineShape(Vector2D(10,2),Vector2D(300,2)),LineShape(Vector2D(5,24),Vector2D(5,7)),LineShape(Vector2D(10,29),Vector2D(300,29)),LineShape(Vector2D(305,24),Vector2D(305,7)),LineShape(Vector2D(305,24),Vector2D(300,29)),LineShape(Vector2D(300,2),Vector2D(305,7)),LineShape(Vector2D(5,7),Vector2D(10,2)),LineShape(Vector2D(5,24),Vector2D(10,29)))
+
   val logo = Iterable(PolylineShape(Vector2D(10.24,6.938),Vector2D(12.10,12.49),Vector2D(12.67,25),Vector2D(13.52,25),Vector2D(13.65,12.49),Vector2D(15.96,6.938),Vector2D(10.24,6.938)), PolylineShape(Vector2D(18.24,6.938),Vector2D(20.10,12.49),Vector2D(20.67,25),Vector2D(21.52,25),Vector2D(21.65,12.49),Vector2D(23.96,6.938),Vector2D(18.24,6.938)))
-  val logoFill = Array(Vector2D(5,5.345),Vector2D(8.345,2),Vector2D(101.7,2),Vector2D(105,5.345),Vector2D(105,25.56),Vector2D(101.7,28.91),Vector2D(8.34,28.91),Vector2D(5,25.56))
+  val logoFill = Array(Vector2D(10,2),Vector2D(6.464,3.464),Vector2D(5,7),Vector2D(5,24),Vector2D(6.464,27.54),Vector2D(10,29),Vector2D(300,29),Vector2D(303.5,27.54),Vector2D(305,24),Vector2D(305,7),Vector2D(303.5,3.464),Vector2D(300,2),Vector2D(10,2))
 
   // Colors: Changes if siigna is online
   val expandedColor = if (Siigna.isOnline) new Color(0.75f, 0.75f, 0.75f, 0.80f) else new Color(0.75f, 0.45f, 0.45f, 0.40f)
@@ -52,27 +54,27 @@ object ModuleMenu {
   val logoFillX = logoFill.map(_.x.toInt).toArray
   val logoFillY = logoFill.map(_.y.toInt).toArray
 
+  val isSyncing : TextShape = TextShape("saving changes to server...",Vector2D(120,9),11).addAttribute("Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
+  val isSynced : TextShape = TextShape("all changes saved",Vector2D(130,9),12).addAttribute(("Color" -> new Color(0.10f, 0.95f, 0.10f, 1.00f)))
+  val isOffline : TextShape = TextShape("offline - changes will not be stored!", Vector2D(130, 9), 10)
+
   def isHighlighted(m : Vector2D) : Boolean = {
-    val in = m.x < 110 & m.y < 30
+    val in = m.x < 290 & m.y < 30
     //if (in) Siigna.setCursor(Cursors.default) else Siigna.setCursor(Cursors.crosshair)
     in
   }
 
   def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
-    //draw modules selection menu
-    if (isHighlighted(View.mousePositionScreen)) {
-      // Inform the user if siigna is online
-      val text = if (Siigna.isOnline) {
-        "online - changes will be stored automatically"
-      } else {
-        "offline - changes will not be stored!"
-      }
 
-      g draw TextShape("Siigna is " + text, Vector2D(120, 10), 12)
-    }
 
     g setColor menuColor
     g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
+
+    //draw online and sync feedback
+    if(Siigna.isOnline) if(Siigna.isSyncronizing) g draw isSyncing else g draw isSynced
+    if (!Siigna.isOnline) g draw isOffline
+
+
     logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
     frameLogo.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
     g draw TextShape("SIIGNA ", Vector2D(30,6),9)

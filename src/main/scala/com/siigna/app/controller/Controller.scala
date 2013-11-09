@@ -100,4 +100,11 @@ class Controller(drawing : Drawing) extends EventController {
    */
   def isOnline = remote.isOnline
 
+  /**
+   * Examines if client and server sync is in progress.
+   * @return True if sync is going on, false otherwise.
+   */
+
+  def isSyncronizing = remote.isSynchronising
+
 }
