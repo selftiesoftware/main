@@ -110,7 +110,7 @@ trait View {
   //is called DrawingTransformation than DeviceTransformation, and vice versa.
 
   /** EXPLANATION OF DEVICE AND DRAWING COORDINATES AND TRANSFORMATION
-   *
+    *
     *   --> x
     *  (0,0) DeviceCoordinates
     *   |  x----------------------x
@@ -125,8 +125,8 @@ trait View {
     *
     *                       |            |
     *                       x- - - - - - x
-   *
-   */
+    *
+    */
 
   /**
    * The device [[com.siigna.util.geom.TransformationMatrix]] that can transform shapes <i>from</i>
@@ -464,9 +464,6 @@ object View extends View {
     try {
       // Paint the renderer
       renderer.paint(graphics, drawing, this)
-
-
-
     } catch {
       case e : Throwable => Log.error("View: Error while rendering: ", e)
     }
@@ -477,17 +474,8 @@ object View extends View {
       val color = Siigna.color("colorSelected").getOrElse("#22FFFF".color)
 
       // Draw selection
-      drawing.selection.shapes.foreach(s => {
-        //First we draw the part of the selection, that the user interprets as selected.
-        //Which parts it is, is defined for each shape:
-        val chosenAndNotChosenParts = s._2.getSelectedAndUnselectedParts(drawing.selection.get(s._1).get._2)
-        chosenAndNotChosenParts._1.foreach(ps => {
-          graphics.draw(ps(drawing.selection.transformation).transform(transformation).setAttribute("Color" -> color))
-        })
-        //Then we draw the remaining part(s) of the shapes:
-        chosenAndNotChosenParts._2.foreach(ps => {
-          graphics.draw(ps(drawing.selection.transformation).transform(transformation))
-        })
+      drawing.selection.parts(transformation).foreach(s => {
+        graphics.draw(s.setAttribute("Color" -> color))
       })
 
       // Draw vertices

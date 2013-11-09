@@ -130,11 +130,18 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   def isOnline : Boolean = controller.exists(_.isOnline)
 
   /**
+   * A boolean value that indicates if the client and server are syncronizing.                                                                         c
+   * @return  True if sync is going on, false otherwise.
+   */
+  def isSyncronizing : Boolean = controller.exists(_.isSyncronizing)
+
+  /**
    * the ID of the latest created shape (used in Trim)
    *
    * @return Some(ID : Int) of the shape which was created last if relevant, else None
    */
   var latestID : Option[Int] = None
+
 
   /**
    * The entrance to the paint-functions of the interfaces, i. e. the modules, and the
