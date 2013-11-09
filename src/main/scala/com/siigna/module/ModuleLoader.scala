@@ -23,18 +23,20 @@ import java.io.FileNotFoundException
 import java.net.URLClassLoader
 import com.siigna.app.Siigna
 import com.siigna.util.Log
-import concurrent.future
+import scala.concurrent.{Lock, future}
 import concurrent.ExecutionContext.Implicits.global
-import com.siigna.app.view.View
 
 /**
- * A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
- * This class loader loads and caches modules in Siigna.
- * @todo implement caching on a per package basis
+ * <p>
+ *   A ClassLoader for [[com.siigna.module.ModulePackage]]s and [[com.siigna.module.Module]]s.
+ *   This class loader loads and caches modules in Siigna.
+ * </p>
+ * <p>
+ *   <b>Note: </b> This class is loading packages synchronously. If you wish to load modules, I would really
+ *   recommend using <code>future</code> or similar.
+ * </p>
  */
 object ModuleLoader {
-
-  var modulesLoaded: Boolean = false
 
   // The private init module.. ssshhh
   private var _initModule: Option[Module] = None
@@ -49,6 +51,9 @@ object ModuleLoader {
   // The underlying class loader
   protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
 
+  // A very crude synchronous lock
+  protected val loaderLock = new Lock()
+
   /**
    * The loaded classes ordered in the name of the module packages and a map of class paths and classes (modules).
    */
@@ -61,9 +66,9 @@ object ModuleLoader {
 
   // Create a default packages
   future {
-    //load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
-    //load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
-    //load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+    load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
+    load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
 
     //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
     //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
@@ -75,14 +80,14 @@ object ModuleLoader {
     //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
     //Niels' and Ole's local modules:
-    load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
-    load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-    load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+
+    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
 
     modulesLoaded = true
 
   }
-
 
   /**
    * Attempt to cast a class to a [[com.siigna.module.Module]].
@@ -109,7 +114,9 @@ object ModuleLoader {
           // Search for the class in the package
           case _ => try {
             val path = modulePath + "." + packageName.name + "." + classPath
+            loaderLock.acquire()
             val c = loader.loadClass(path).asInstanceOf[Class[Module]]
+            loaderLock.release()
             modules(packageName) += classPath -> c
             Some(c)
           } catch {
@@ -160,9 +167,11 @@ object ModuleLoader {
   def load(pack: ModulePackage) {
     if (!modules.contains(pack.name)) {
       try {
-        val url = pack.toURL
+        // Acquire the lock!
+        loaderLock.acquire()
 
         // Does the content exist?
+        val url = pack.toURL
         url.openConnection().connect()
 
         // Add package to URL base
@@ -185,6 +194,9 @@ object ModuleLoader {
         // Add to cache
         modules += pack.name -> collection.mutable.Map()
 
+        // Release the lock
+        loaderLock.release()
+
         Log.success("ModuleLoader: Sucessfully loaded the module package " + pack)
       } catch {
         case e: FileNotFoundException => Log.error("ModuleLoader: Could not find module package at URL: " + pack.toURL)
@@ -192,6 +204,15 @@ object ModuleLoader {
     } else {
       Log.info("ModuleLoader: A package named '" + pack + "' has already been loaded.")
     }
+  }
+
+  /**
+   * Load the given modules synchronously by fetching the given module packages and storing them in the cache via
+   * the [[com.siigna.module.ModuleLoader#load]] method.
+   * @param modules  The module packages to load into the module loaders.
+   */
+  def loadModules(modules : Traversable[ModulePackage]) {
+    modules.foreach(load)
   }
 
   /**
@@ -212,8 +233,10 @@ object ModuleLoader {
    * @param pack  The package to unload.
    */
   def unload(pack: ModulePackage) {
+    loaderLock.acquire()
     modules -= pack.name
     loader = new URLClassLoader(loader.getURLs.filter(_ != pack.toURL), this.getClass.getClassLoader)
+    loaderLock.release()
   }
 
 }

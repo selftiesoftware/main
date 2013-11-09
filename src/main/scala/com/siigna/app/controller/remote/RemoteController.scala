@@ -58,11 +58,11 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
 
           if (!mailbox.isEmpty) {
             var actionsToSend : Seq[(Action, Boolean)] = null
-
             // Store the actions from the mailbox - and lock it!
             mailboxLock.acquire()
             // Store the actions to send
             actionsToSend = mailbox
+            println("actions; "+actionsToSend)
 
             // Empty mailbox
             mailbox = Nil

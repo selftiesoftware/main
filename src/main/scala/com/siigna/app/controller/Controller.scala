@@ -44,7 +44,7 @@ import com.siigna.util.Log
  */
 class Controller(drawing : Drawing) extends EventController {
 
-  private val remote = new RemoteController(drawing, new RESTGateway("http://app.siigna.com"))
+  protected val remote = new RemoteController(drawing, new RESTGateway("http://app.siigna.com"))
   remote.init()
 
   // Listen to the drawing
@@ -99,5 +99,12 @@ class Controller(drawing : Drawing) extends EventController {
    * @return True if the connection has been established correctly, false otherwise.
    */
   def isOnline = remote.isOnline
+
+  /**
+   * Examines if client and server sync is in progress.
+   * @return True if sync is going on, false otherwise.
+   */
+
+  def isSyncronizing = remote.isSynchronising
 
 }

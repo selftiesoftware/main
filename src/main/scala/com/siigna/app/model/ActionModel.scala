@@ -197,8 +197,12 @@ trait ActionModel extends SpatialModel with HasAttributes {
     }
   }
 
+
   def setAttributes(newAttributes : Attributes) = {
+    //Selection is desstryed by this, so it needs to be saved and reapplied
+    val selectionTemp = model.selection
     model = model.copy(attributes = newAttributes)
+    model.selection = selectionTemp
     this
   }
 
