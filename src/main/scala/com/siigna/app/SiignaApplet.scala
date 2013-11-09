@@ -19,17 +19,6 @@
 
 package com.siigna.app
 
-/*
- * Copyright (c) 2012. Siigna is released under the creative common license by-nc-sa. You are free
- * to Share — to copy, distribute and transmit the work,
- * to Remix — to adapt the work
- *
- * Under the following conditions:
- * Attribution —  You must attribute the work to http://siigna.com in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
- * Noncommercial — You may not use this work for commercial purposes.
- * Share Alike — If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one.
- */
-
 import java.applet.Applet
 import java.lang.Thread
 import java.awt.{Canvas, BorderLayout}
@@ -40,7 +29,7 @@ import com.siigna.app.view.View
 import com.siigna.app.controller.Controller
 
 /**
- * The entry-point of Siigna.
+ * The entry-point of the Siigna applet - used to deploy to a Java applet.
  *
  * The applet is first and foremost responsible for setting up the environment for Siigna.
  * That means placing the view in the context of the applet so it's actually run, telling the
@@ -88,8 +77,6 @@ class SiignaApplet extends Applet {
   override def init() {
     // Init parent - this should be the first line in Siigna... Ever!
     super.init()
-
-    //Siigna("isLive") = false
 
     // --- Read the applet parameters --- \\
     try {
@@ -225,5 +212,3 @@ class SiignaApplet extends Applet {
   }
 
 }
-
-// vim: set sw=2 ts=2 et:
