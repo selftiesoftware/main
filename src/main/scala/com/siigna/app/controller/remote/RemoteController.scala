@@ -62,7 +62,6 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
             mailboxLock.acquire()
             // Store the actions to send
             actionsToSend = mailbox
-            println("actions; "+actionsToSend)
 
             // Empty mailbox
             mailbox = Nil

@@ -104,6 +104,7 @@ object Track extends EventTrack {
   // Track on the basis of a maximum of two tracking points.
   def parse(events : List[Event], shapes : Traversable[Shape], points : Traversable[Vector2D]) : Event = {
     if(Siigna.isTrackEnabled) {
+
       // Set isTracking to false
       _isTracking = false
 
