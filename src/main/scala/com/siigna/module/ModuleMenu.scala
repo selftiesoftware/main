@@ -77,8 +77,9 @@ object ModuleMenu {
 
     logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
     frameLogo.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
-    g draw TextShape("SIIGNA ", Vector2D(30,6),9)
-    Siigna.string("version").foreach(s => g draw TextShape(s, Vector2D(30,19),7))
+    g draw TextShape("SIIGNA v1.0", Vector2D(30,6),9)
+    g draw TextShape("BETA", Vector2D(30,18),13).setAttribute("Color" -> new Color(0.90f, 0.10f, 0.10f, 0.80f))
+    //Siigna.string("version").foreach(s => g draw TextShape(s, Vector2D(30,19),7))
   }
 
 }
