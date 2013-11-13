@@ -125,8 +125,8 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("defaultScreenSize")     = new Dimension(600, 400)
   this("isLive")                = true
   this("printMargin")           = 13.0
-  this("printFormatMin")        = 210.0
-  this("printFormatMax")        = 297.0
+  this("printFormatMin")        = 210.0 //default paper short side length
+  this("printFormatMax")        = 297.0 //default paper long side length
   this("selectionDistance")     = 7.0
   this("snap")                  = true
   this("tooltips")              = true
