@@ -134,7 +134,6 @@ object Drawing extends Drawing {
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   def calculateBoundary() = {
-    println("in boundary calc")
     val newBoundary  = SiignaTree.mbr(rtree)
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
