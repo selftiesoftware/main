@@ -23,6 +23,7 @@ import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
+import com.siigna.app.view.View
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -132,7 +133,8 @@ object Drawing extends Drawing {
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  protected def calculateBoundary() = {
+  def calculateBoundary() = {
+    println("in boundary calc")
     val newBoundary  = SiignaTree.mbr(rtree)
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
@@ -142,6 +144,7 @@ object Drawing extends Drawing {
     val printMargin = Siigna.double("printMargin").getOrElse(13.0)
     var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
     var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
+
     // If the format is too small for the least proportion, then up the size
     // one format.
     // TODO: Optimize!
