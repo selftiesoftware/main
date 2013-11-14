@@ -58,6 +58,8 @@ object ModuleMenu {
   val isSynced : TextShape = TextShape("all changes saved",Vector2D(130,9),12).addAttribute(("Color" -> new Color(0.10f, 0.95f, 0.10f, 1.00f)))
   val isOffline : TextShape = TextShape("offline - changes will not be stored!", Vector2D(130, 9), 10)
 
+  var lastSyncShow : Double = 0
+
   def isHighlighted(m : Vector2D) : Boolean = {
     val in = m.x < 290 & m.y < 30
     //if (in) Siigna.setCursor(Cursors.default) else Siigna.setCursor(Cursors.crosshair)
@@ -71,7 +73,13 @@ object ModuleMenu {
     g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
 
     //draw online and sync feedback
-    if(Siigna.isOnline) if(Siigna.isSyncronizing) g draw isSyncing else g draw isSynced
+    if(Siigna.isOnline) if(Siigna.isSyncronizing && System.currentTimeMillis() > Siigna.lastSync + 1000) {
+      lastSyncShow = System.currentTimeMillis()
+      g draw isSyncing
+      //Time after syn complete the sync-indicater stays red (necessary since there sometimes are two sync actions
+      // to complete a save procedure - and we only want it to turn red one time...
+    } else if (System.currentTimeMillis() < lastSyncShow + 2000 ) g draw isSyncing
+      else g draw isSynced
     if (!Siigna.isOnline) g draw isOffline
 
 
