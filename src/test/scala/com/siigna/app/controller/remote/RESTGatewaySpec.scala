@@ -128,6 +128,8 @@ class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       Then("The new drawing should be returned")
       val drawing = iRes.left.get
       drawing.attributes.long("id").get should equal(drawingId)
+      drawing.attributes.int("lastAction")
+      drawing.attributes.char("openness")
     }
 
   }
