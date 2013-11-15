@@ -51,6 +51,7 @@ class RemoteController(protected val model : ActionModel, protected val gateway 
         while(!shouldExit) {
 
           // Tell the world we are synchronising
+          Siigna.lastSyncSet(System.currentTimeMillis())
           _sync = true
 
           // Synchronise actions

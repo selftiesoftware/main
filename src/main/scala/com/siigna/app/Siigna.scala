@@ -65,6 +65,11 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
   private var _interface : Option[ModuleInterface] = None
 
   /**
+   * Last Sync
+   */
+  private var syncStart: Long = 0
+
+  /**
    * If navigation is turned off the canvas of Siigna stops moving. In other words the
    * [[com.siigna.app.model.Drawing]] remains where it is while the modules still receives the events and
    * are still able to react.
@@ -134,6 +139,16 @@ object Siigna extends collection.mutable.HashMap[String, Any] with Interface wit
    * @return  True if sync is going on, false otherwise.
    */
   def isSyncronizing : Boolean = controller.exists(_.isSyncronizing)
+
+  /**
+   * A value indicating when last sync was started.
+   */
+  def lastSync: Long = syncStart
+
+  /**
+   * A value indicating when last sync was started.
+   */
+  def lastSyncSet(t: Long) {syncStart = t}
 
   /**
    * the ID of the latest created shape (used in Trim)
