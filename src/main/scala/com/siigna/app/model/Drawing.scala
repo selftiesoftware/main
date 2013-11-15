@@ -23,6 +23,7 @@ import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
+import com.siigna.app.view.View
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -132,7 +133,7 @@ object Drawing extends Drawing {
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  protected def calculateBoundary() = {
+  def calculateBoundary() = {
     val newBoundary  = SiignaTree.mbr(rtree)
     val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
     val center       = newBoundary.center
@@ -142,6 +143,7 @@ object Drawing extends Drawing {
     val printMargin = Siigna.double("printMargin").getOrElse(13.0)
     var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
     var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
+
     // If the format is too small for the least proportion, then up the size
     // one format.
     // TODO: Optimize!
@@ -160,10 +162,10 @@ object Drawing extends Drawing {
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
-                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
+        center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
       SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
-                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
+        center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 
@@ -177,5 +179,5 @@ object Drawing extends Drawing {
     var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
     //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
     scale - 1
-    }
   }
+}
