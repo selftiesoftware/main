@@ -44,6 +44,7 @@ import com.siigna.util.Log
  */
 class Controller(drawing : Drawing) extends EventController {
 
+  // Start the remote controller
   protected val remote = new RemoteController(drawing, new RESTGateway("http://app.siigna.com"))
   remote.init()
 
@@ -66,6 +67,8 @@ class Controller(drawing : Drawing) extends EventController {
    * The actor also handles commands and the 'exit symbol.</p>
    */
   def act() {
+
+    ModuleLoader.init()
 
     // Loop and react on incoming messages
     loop {

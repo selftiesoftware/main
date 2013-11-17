@@ -25,6 +25,7 @@ import com.siigna.app.Siigna
 import com.siigna.util.Log
 import scala.concurrent.{Lock, future}
 import concurrent.ExecutionContext.Implicits.global
+import java.security.{PrivilegedAction, AccessController}
 
 /**
  * <p>
@@ -65,24 +66,26 @@ object ModuleLoader {
   final val modulePath = "com.siigna.module"
 
   // Create a default packages
-  future {
-    load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
-    load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
-    load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+  def init() {
+    future {
+      load(ModulePackage('porter, s"rls.siigna.com/com/siigna/siigna-porter_2.10/$stability", s"siigna-porter_2.10-$stability.jar", local = false))
+      load(ModulePackage('base, s"rls.siigna.com/com/siigna/siigna-base_2.10/$stability", s"siigna-base_2.10-$stability.jar", local = false))
+      load(ModulePackage('cad, s"rls.siigna.com/com/siigna/siigna-cad-suite_2.10/$stability", s"siigna-cad-suite_2.10-$stability.jar", local = false))
 
-    //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
-    //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
-    //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
+      //load(ModulePackage('base, "c:/workspace/siigna/main/out/artifacts", "base.jar", true))
+      //load(ModulePackage('cad, "c:/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+      //load(ModulePackage('porter, "c:/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
-    //Jens' local modules:
-    //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
-    //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
-    //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
+      //Jens' local modules:
+      //load(ModulePackage('base, "/home/jens/workspace/siigna/main/out/artifacts", "base.jar", true))
+      //load(ModulePackage('cad, "/home/jens/workspace/siigna/main/out/artifacts", "cad-suite.jar", true))
+      //load(ModulePackage('porter, "/home/jens/workspace/siigna/main/out/artifacts", "porter.jar", true))
 
-    //Niels' and Ole's local modules:
-    //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
-    //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
-    //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+      //Niels' and Ole's local modules:
+      //load(ModulePackage('porter, "c:/siigna/main/out/artifacts", "porter.jar", true))
+      //load(ModulePackage('base, "c:/siigna/main/out/artifacts", "base.jar", true))
+      //load(ModulePackage('cad, "c:/siigna/main/out/artifacts", "cad-suite.jar", true))
+    }
   }
 
   /**
@@ -90,7 +93,15 @@ object ModuleLoader {
    * @param clazz  The class to cast
    * @return  A Module (hopefully), otherwise probably a nasty error
    */
-  protected def classToModule(clazz: Class[_]) = clazz.newInstance().asInstanceOf[Module]
+  protected def classToModule(clazz: Class[_]) = {
+    AccessController.doPrivileged(new PrivilegedAction[Module] {
+      def run = {
+        val constructor = clazz.getConstructors.head
+        constructor.setAccessible(true)
+        constructor.newInstance().asInstanceOf[Module]
+      }
+    })
+  }
 
   /**
    * Attempts to load a [[com.siigna.module.Module]] by looking through the given package for resources at the given
