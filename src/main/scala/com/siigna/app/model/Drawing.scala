@@ -162,10 +162,10 @@ object Drawing extends Drawing {
     // Set the boundary-rectangle.
     if (size.x >= size.y) {
       SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
-                center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
+        center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
     } else {
       SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
-                center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
+        center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
     }
   }
 
@@ -179,5 +179,5 @@ object Drawing extends Drawing {
     var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
     //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
     scale - 1
-    }
   }
+}

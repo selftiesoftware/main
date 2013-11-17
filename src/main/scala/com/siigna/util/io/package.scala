@@ -19,7 +19,7 @@
 
 package com.siigna.util
 
-import java.io.File
+import java.io.{IOException, File}
 import actors.Actor
 import javax.swing.{UIManager, JFileChooser}
 import javax.swing.filechooser.{FileFilter, FileNameExtensionFilter}
@@ -197,7 +197,7 @@ package object io {
                   // Return the function applied on the file
                   reply(result)
                 } catch {
-                  case _ : OverlappingFileLockException => reply("File already in use")
+                  case _ : IOException => reply("File already in use")
                 }
               }
             }
