@@ -33,7 +33,7 @@ trait SpatialModel {
   /**
    * An empty PRTree for use if the 'real' prtree is unavailable.
    */
-  protected val emptyPRT = SiignaTree(Map())
+  protected lazy val emptyPRT = SiignaTree(Map())
 
   /**
    * The [[org.khelekore.prtree]] used by the model.
