@@ -411,6 +411,7 @@ object Dialogue {
    */
   def writeOutputStream(extensions : Map[FileNameExtensionFilter, OutputStream => Unit],
                         options : OpenOption*) : Boolean = {
+
     openDialogueWrite(extensions.map(t => t._1 -> ((channel : FileChannel) => {
       val bytes = new ByteArrayOutputStream()
       t._2(bytes)
