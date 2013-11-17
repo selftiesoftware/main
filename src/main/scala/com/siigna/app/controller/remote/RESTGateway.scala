@@ -97,13 +97,39 @@ class RESTGateway(val address : String) {
   /**
    * Get an existing drawing which you have access to
    * @param drawingId: Drawing to get
-   * @param session: Session with access to the drawng
+   * @param session: Session with read access to the drawng
    */
   def getDrawing(drawingId: Long, session:Session) : Either[Model, String] = {
-    endpoint.get(address+"/drawing/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
+
+    // Try to get the data
+    endpoint.get(address+"/drawing/data/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Model](_) match {
-        case Some(model) => Left(model)
-        case _ => Right("Could not de-serialise the model")
+        case Some(model) => {
+          // We got the data (model), now get the meta data
+          endpoint.get(address+"/drawing/meta/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
+            Unmarshal[Map[String,Int]](_) match {
+
+              case Some(m:Map[String,Int]) => {
+
+                (m.get("lastaction"),m.get("openness")) match {
+
+                  case (Some(lastaction:Int),Some(openness:Int)) => {
+                    Left(
+                      model.addAttribute("lastAction",lastaction)
+                           .addAttribute("openness",openness.toChar)
+                           .addAttribute("id",drawingId)
+                    )
+                  }
+                  case _ => Right("Couldn't get meta data from returned map")
+                }
+
+              }
+
+              case None => Right("Couldn't get meta data")
+            }
+          )
+        }
+        case _ => Right("Could get model (data)")
       }
     )
   }

@@ -66,10 +66,6 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
   and which should be coloured in the "selection-color". The second segment contains the part that should not be colored.
    */
   def getSelectedAndUnselectedParts(part : ShapeSelector) = {
-    println(part)
-    println(ShapeSelector(0))
-    println(ShapeSelector(1))
-    println(ShapeSelector(0,1))
     part match {
       case ShapeSelector(0) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1.transform(t), p2, attributes))))
       case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
