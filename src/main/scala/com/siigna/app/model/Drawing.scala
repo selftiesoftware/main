@@ -24,6 +24,7 @@ import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
 import com.siigna.app.view.View
+import com.siigna.util.Log
 
 /**
  * A drawing in Siigna consisting of a model that can be selected and some shapes, mapped to
@@ -116,14 +117,23 @@ object Drawing extends Drawing {
   }
 
   // Calculates the boundary of the model whenever it changes
-  addActionListener((_, _) => _boundary = calculateBoundary())
+  addActionListener((_, _) => _boundary = Some(calculateBoundary()))
 
   //calculates the paper header whenever it changes
 
   // The private boundary instance
-  private var _boundary = calculateBoundary()
+  private var _boundary : Option[SimpleRectangle2D] = None
 
-  def boundary : SimpleRectangle2D = _boundary
+  def boundary : SimpleRectangle2D = {
+      if (_boundary.isEmpty) {
+        try {
+          _boundary = Some(calculateBoundary())
+        } catch {
+          case e : Throwable => Log.error("Drawing: Error when creating boundary: ", e)
+        }
+      }
+    _boundary.getOrElse(SimpleRectangle2D(0, 0, 1, 1))
+  }
 
   /**
    * The boundary from the current content of the Model.

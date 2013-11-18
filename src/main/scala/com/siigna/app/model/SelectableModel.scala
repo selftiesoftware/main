@@ -88,7 +88,9 @@ trait SelectableModel extends ActionModel{
    * Adds a listener to the [[com.siigna.app.model.SelectableModel]] that will be notified whenever the selection
    * changes.
    */
-  def addSelectionListener(listener : (Selection) => Unit) = _listenersSelection :+= listener
+  def addSelectionListener(listener : (Selection) => Unit) {
+    _listenersSelection :+= listener
+  }
 
   /**
    * Deletes the current selection without applying the changes to the [[com.siigna.app.model.Model]]. This can
