@@ -111,6 +111,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
 
   // Set the values
   this("antiAliasing")          = true
+  this("autoScaling")           = true
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color
   this("colorBackgroundBorder") = "#99A199".color
