@@ -30,6 +30,8 @@ import scala.concurrent.{future, promise, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import com.siigna.util.Log
+import com.siigna.app.model.shape.RectangleShape
+import com.siigna.app.model.selection.Select
 
 /**
  * <p>
@@ -78,13 +80,19 @@ trait SiignaRenderer extends Renderer {
     graphics.AWTGraphics.setColor(Siigna.color("colorBackgroundBorder").getOrElse(java.awt.Color.gray))
     graphics.drawRectangle(boundary.bottomLeft, boundary.topRight)
 
-    //paint the background image if there is one
-    if(Siigna.imageBackground._1.isDefined) {
-      val p1 = Siigna.imageBackground._2.get.transform(View.drawingTransformation)
-      val p2 = Siigna.imageBackground._3.get.transform(View.drawingTransformation)
-      val width = p2.x-p1.x
-      val height = p2.y-p1.y
-      graphics.AWTGraphics.drawImage(Siigna.imageBackground._1.get,p1.x.toInt,p1.y.toInt,width.toInt,height.toInt,null)
+    //paint the background image if there is one, and it is valid
+    if(Siigna.imageBackground._1.isDefined && Siigna.imageBackground._2.isDefined && Siigna.imageBackground._2.get != 9999) {
+      val r = Drawing(Siigna.imageBackground._2.get)
+      r match {
+        case r : RectangleShape => {
+          val rect = r.transform(View.drawingTransformation)
+          val width = rect.width
+          val height = rect.height
+          val corner = rect.p0
+          graphics.AWTGraphics.drawImage(Siigna.imageBackground._1.get,corner.x.toInt,corner.y.toInt,width.toInt,height.toInt,null)
+        }
+        case _ => println("could probably not cast "+r+" to rectangleShape; ")
+      }
     }
 
     // Draw the painter
@@ -94,7 +102,7 @@ trait SiignaRenderer extends Renderer {
   /**
    * Renders a background-image consisting of "chess checkered" fields on an image equal to the size of the given
    * rectangle.
-   * Should only be called every time the screen resizes.
+   * Should only be called every time the screen resize.
    * @param screen  The screen given in device coordinates (from (0, 0) to (width, height)).
    * @return  A buffered image with dimensions equal to the given screen and a chess checkered field drawn on it.
    */

@@ -25,6 +25,7 @@ import com.siigna.util.geom._
 import java.awt.Cursor
 import com.siigna.util.event.Track
 import com.siigna.app.controller.Controller
+import com.siigna.app.model.shape.RectangleShape
 
 /**
  * <p>
@@ -48,9 +49,9 @@ import com.siigna.app.controller.Controller
 object Siigna extends collection.mutable.HashMap[String, Any] with Interface with SiignaAttributes {
 
   /**
-   * Backgroung image and its location defined by two points - if set
+   * Background image, its bounding rectangle ID and proportion - if set
    */
-  var imageBackground : (Option[java.awt.Image],Option[Vector2D],Option[Vector2D]) = (None,None,None)
+  var imageBackground : (Option[java.awt.Image],Option[Int],Double)= (None,None,1.0)
 
   protected[app] var controller : Option[Controller] = None
 
