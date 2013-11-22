@@ -158,14 +158,23 @@ object Drawing extends Drawing {
     // one format.
     // TODO: Optimize!
 
-    val list = List[Double](2, 2.5, 2)
-    var take = 0 // which element to "take" from the above list
-    while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
-      val factor = list(take)
-      aFormatMin *= factor
-      aFormatMax *= factor
-      take = if (take < 2) take + 1 else 0
+    //calculate the scale automatically. Results in 1:1, 1:2,1:5,1:10,1:20 etc.
+    if(Siigna("autoScaling") == true) {
+      val list = List[Double](2, 2.5, 2)
+      var take = 0 // which element to "take" from the above list
+      while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
+        val factor = list(take)
+        aFormatMin *= factor
+        aFormatMax *= factor
+        take = if (take < 2) take + 1 else 0
+      }
     }
+    // calculate the paper size on the basis of the scale factor specified by the user
+    else {
+      if(Siigna.double("scale").isDefined) aFormatMin *= Siigna.double("scale").get else aFormatMin
+      if(Siigna.double("scale").isDefined) aFormatMax *= Siigna.double("scale").get else aFormatMax
+    }
+
     // Augment the "paper" with the print margins.
     aFormatMin += printMargin
     aFormatMax += printMargin

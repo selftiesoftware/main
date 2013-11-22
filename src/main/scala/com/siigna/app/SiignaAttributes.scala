@@ -49,6 +49,10 @@ import concurrent.ExecutionContext.Implicits.global
  *  antiAliasing
  *    A boolean value signalling if anti-aliasing should be on for the shapes in the Model.
  *    The modules are always drawn with anti-aliasing. Defaults to true.
+ *  autoScaling
+ *    a Boolean specifying if the paper scale is calculated automatically or set manually.
+ *  scale
+ *    An Int: the scale factor of the paper, if provided - else 1 (unused if autoScaling is true)
  *  backgroundTileSize
  *    The size of the square tiles drawn behind the actual drawable canvas, given in pixels. Defaults to 12.
  *  colorBackground
@@ -112,6 +116,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   // Set the values
   this("antiAliasing")          = true
   this("autoScaling")           = true
+  this("scaling")               = 1.0
   this("backgroundTileSize")    = 12
   this("colorBackground")       = "#F9F9F9".color
   this("colorBackgroundBorder") = "#99A199".color
