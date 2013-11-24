@@ -24,7 +24,7 @@ import actors.Actor
 import javax.swing.{UIManager, JFileChooser}
 import javax.swing.filechooser.{FileFilter, FileNameExtensionFilter}
 import java.security.{PrivilegedAction, AccessController}
-import java.nio.channels.{OverlappingFileLockException, FileChannel}
+import java.nio.channels.FileChannel
 import java.nio.file.{StandardOpenOption, OpenOption}
 import scala.collection.JavaConversions
 import scala.reflect.runtime.universe._
@@ -35,47 +35,47 @@ import scala.reflect.runtime.universe._
  *
  * <h2>Marshaling and unmarshalling</h2>
  * <p>
- *   - is very simple to achieve. We have designed the library to be as independent as possible. No classes needs to
- *   inherit any interface or implement methods. This also gives us the power to version the (un)marshal(l)ing, which
- *   is done beneath the [[com.siigna.util.io.version]] package.
+ * - is very simple to achieve. We have designed the library to be as independent as possible. No classes needs to
+ * inherit any interface or implement methods. This also gives us the power to version the (un)marshal(l)ing, which
+ * is done beneath the [[com.siigna.util.io.version]] package.
  * </p>
  * <p>
- *   It is currently only possible to marshal and unmarshal primitives and selected Java and Scala classes. Both
- *   Map and Traversable are one of these examples, so if you lack any implementation it is always possible to throw the
- *   object data into a collection. A complete overview of which types are supported can be found in the
- *   [[com.siigna.util.io.ObjectType]] object, which reference the currently used data constants for object identification.
+ * It is currently only possible to marshal and unmarshal primitives and selected Java and Scala classes. Both
+ * Map and Traversable are one of these examples, so if you lack any implementation it is always possible to throw the
+ * object data into a collection. A complete overview of which types are supported can be found in the
+ * [[com.siigna.util.io.ObjectType]] object, which reference the currently used data constants for object identification.
  * </p>
  * <h3>Examples on (un)marshaling</h3>
  * <p>
- *   To marshal objects you simply call the [[com.siigna.util.io.Marshal]] object with the data you would like to
- *   marshal like so:
- *   {{{
+ * To marshal objects you simply call the [[com.siigna.util.io.Marshal]] object with the data you would like to
+ * marshal like so:
+ * {{{
  *     import com.siigna.util.io.Marshal
  *     Marshal(123456789L)         // Array[Byte]
  *     Marshal("Hej Verden!")      // Array[Byte]
  *     Marshal(Seq(13, 142, 1392)) // Array[Byte]
- *   }}}
- *   The above mentioned examples will produce an array of bytes which can be used to send over network, store to
- *   a file etc.
+ * }}}
+ * The above mentioned examples will produce an array of bytes which can be used to send over network, store to
+ * a file etc.
  * </p>
  * <p>
- *   To unmarshal objects you simply call the [[com.siigna.util.io.Unmarshal]] object with the type of the
- *   object you expect to get back and the byte-array/byte buffer containing the marshaled data:
- *   {{{
+ * To unmarshal objects you simply call the [[com.siigna.util.io.Unmarshal]] object with the type of the
+ * object you expect to get back and the byte-array/byte buffer containing the marshaled data:
+ * {{{
  *     import com.siigna.util.io.Unmarshal
  *     Unmarshal[Long](byteArray)     // Some(123456789L)
  *     Unmarshal[String](byteArray)   // Some("Hej Verden!")
  *     Unmarshal[Seq[Int]](byteArray) // Some(Seq(13, 142, 1392))
- *   }}}
- *   The above mentioned examples will produce an Option[T] where T is the requested type. If any errors occurs the
- *   returned data will be None and a description of the error will be written to the [[com.siigna.util.Log]].
+ * }}}
+ * The above mentioned examples will produce an Option[T] where T is the requested type. If any errors occurs the
+ * returned data will be None and a description of the error will be written to the [[com.siigna.util.Log]].
  * </p>
  * <p>
- *   It is important to note that for the time being it is not possible to retrieve native Arrays from the
- *   [[com.siigna.util.io.Unmarshal]] object. Instead, retrieve the data as a type like Traversable and use
- *   <code>.toArray</code> to cast it. The reason is that native java arrays cannot be casted at runtime, which
- *   makes is slighty difficult to cast the final objects. We will get around to doing this later, but if you have
- *   a specific need you are welcome to contact us at [[http://siigna.com/development]].
+ * It is important to note that for the time being it is not possible to retrieve native Arrays from the
+ * [[com.siigna.util.io.Unmarshal]] object. Instead, retrieve the data as a type like Traversable and use
+ * <code>.toArray</code> to cast it. The reason is that native java arrays cannot be casted at runtime, which
+ * makes is slighty difficult to cast the final objects. We will get around to doing this later, but if you have
+ * a specific need you are welcome to contact us at [[http://siigna.com/development]].
  * </p>
  *
  * <h2>Storing to and reading contents from disc</h2>
@@ -86,15 +86,19 @@ package object io {
 
   // A private class to perform type-safe callback invocations
   private[io] trait DialogueFunction
-  private[io] case class DialogueFunctionRead[T](f : File => T, callbacks : Traversable[FileNameExtensionFilter]) extends DialogueFunction
-  private[io] case class DialogueFunctionWrite(callback : Map[FileNameExtensionFilter, FileChannel => Any], options : Set[OpenOption]) extends DialogueFunction
 
-  private var dialogue : Option[JFileChooser] = None
+  private[io] case class DialogueFunctionRead[T](f: File => T, callbacks: Traversable[FileNameExtensionFilter]) extends DialogueFunction
+
+  private[io] case class DialogueFunctionWrite(callback: Map[FileNameExtensionFilter, FileChannel => Any], options: Set[OpenOption]) extends DialogueFunction
+
+  private var dialogue: Option[JFileChooser] = None
 
   // A mirror used to reflect on classes at runtime
   // See [[http://docs.scala-lang.org/overviews/reflection/environment-universes-mirrors.html]]
   protected[io] val mirror = AccessController.doPrivileged(new PrivilegedAction[Mirror] {
-    def run() = { runtimeMirror(getClass.getClassLoader) }
+    def run() = {
+      runtimeMirror(getClass.getClassLoader)
+    }
   })
 
   // Initialize the dialogue and the look and feel
@@ -103,7 +107,7 @@ package object io {
       try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
       } catch {
-        case e : Throwable => Log.warning("Dialogue: Error when setting the Look and Feel. Reverting to default.")
+        case e: Throwable => Log.warning("Dialogue: Error when setting the Look and Feel. Reverting to default.")
       }
 
       try {
@@ -120,7 +124,7 @@ package object io {
           }
         })
       } catch {
-        case e : Throwable => Log.warning(s"Dialogue: Error when creating dialogue instance: $e")
+        case e: Throwable => Log.warning(s"Dialogue: Error when creating dialogue instance: $e")
       }
     }
   }
@@ -131,7 +135,7 @@ package object io {
   // Not pretty, but can't think of an alternative
   private[io] val IOActor = new Actor() {
     // Initializes a dialogue
-    private def initializeDialogue(fileFilters : Traversable[FileFilter], read : Boolean) : Either[String, JFileChooser] = {
+    private def initializeDialogue(fileFilters: Traversable[FileFilter], read: Boolean): Either[String, JFileChooser] = {
       // Makes sure the look, feel and dialogue have been attempted to be set
       t.join()
 
@@ -156,6 +160,7 @@ package object io {
         case e => Left("Could not load dialogue.")
       }
     }
+
     def act() {
       loop {
         react {
@@ -170,7 +175,7 @@ package object io {
                 // If the file does not end with the right extension, append the extension
                 val filter = d.getFileFilter.asInstanceOf[FileNameExtensionFilter]
                 val extensions = filter.getExtensions
-                val file    = if (!extensions.exists(selectedFile.getName.endsWith)) {
+                val file = if (!extensions.exists(selectedFile.getName.endsWith)) {
                   new File(selectedFile.getAbsolutePath + "." + extensions.head)
                 } else selectedFile
 
@@ -182,7 +187,7 @@ package object io {
                   // Thanks to http://stackoverflow.com/questions/128038/how-can-i-lock-a-file-using-java-if-possible
                   // #Fixes trello http://goo.gl/b2S6Y
                   val channel = FileChannel.open(file.toPath,
-                                                 JavaConversions.setAsJavaSet(options + StandardOpenOption.WRITE))
+                    JavaConversions.setAsJavaSet(options + StandardOpenOption.WRITE))
 
                   // Try to get a lock on the file
                   val lock = channel.lock()
@@ -197,7 +202,7 @@ package object io {
                   // Return the function applied on the file
                   reply(result)
                 } catch {
-                  case _ : IOException => reply("File already in use")
+                  case _: IOException => reply("File already in use")
                 }
               }
             }
@@ -205,15 +210,15 @@ package object io {
           // Read dialogue
           case DialogueFunctionRead(f, callbacks) => {
             initializeDialogue(callbacks, read = true) match {
-              case Left(m)  => reply(new InterruptedException(m))
+              case Left(m) => reply(new InterruptedException(m))
               case Right(d) => {
                 val file = d.getSelectedFile
 
                 // Give the file the right permissions
                 file.setReadable(true)
 
-                // Reply back
-                reply(f(file))
+                // Reply back with the file name and the data
+                reply(file.toString -> f(file))
               }
             }
           }
@@ -232,71 +237,71 @@ package object io {
    */
   object ObjectType {
     // Remote package
-    val Error   = 0.toByte
-    val Get     = 1.toByte
-    val Set     = 2.toByte
+    val Error = 0.toByte
+    val Get = 1.toByte
+    val Set = 2.toByte
     val Session = 3.toByte
-    val User    = 4.toByte
+    val User = 4.toByte
 
     // Util
-    val Attributes           = 50.toByte
+    val Attributes = 50.toByte
     val TransformationMatrix = 51.toByte
-    val Vector2D             = 52.toByte
-    val Model                = 53.toByte
+    val Vector2D = 52.toByte
+    val Model = 53.toByte
 
     // Scala
     val Traversable = 80.toByte
-    val Map         = 81.toByte
-    val Range       = 82.toByte
+    val Map = 81.toByte
+    val Range = 82.toByte
 
     // Java
-    val Color       = 90.toByte
+    val Color = 90.toByte
 
     // Actions
-    val AddAttributes       = 100.toByte
-    val SetAttributes       = 101.toByte
-    val CreateShape         = 102.toByte
-    val CreateShapes        = 103.toByte
-    val DeleteShape         = 104.toByte
-    val DeleteShapes        = 105.toByte
-    val DeleteShapePart     = 106.toByte
-    val DeleteShapeParts    = 107.toByte
-    val RemoteAction        = 108.toByte
-    val SequenceAction      = 109.toByte
-    val TransformShape      = 110.toByte
+    val AddAttributes = 100.toByte
+    val SetAttributes = 101.toByte
+    val CreateShape = 102.toByte
+    val CreateShapes = 103.toByte
+    val DeleteShape = 104.toByte
+    val DeleteShapes = 105.toByte
+    val DeleteShapePart = 106.toByte
+    val DeleteShapeParts = 107.toByte
+    val RemoteAction = 108.toByte
+    val SequenceAction = 109.toByte
+    val TransformShape = 110.toByte
     val TransformShapeParts = 111.toByte
-    val TransformShapes     = 112.toByte
+    val TransformShapes = 112.toByte
 
     // Shapes
-    val ArcShape      = 200.toByte
-    val CircleShape   = 201.toByte
-    val GroupShape    = 202.toByte
-    val ImageShape    = 203.toByte
-    val LineShape     = 204.toByte
-    val PolylineShapeClosed   = 205.toByte
-    val PolylineShapeOpen     = 206.toByte
-    val RectangleShape        = 207.toByte
-    val TextShape     = 209.toByte
+    val ArcShape = 200.toByte
+    val CircleShape = 201.toByte
+    val GroupShape = 202.toByte
+    val ImageShape = 203.toByte
+    val LineShape = 204.toByte
+    val PolylineShapeClosed = 205.toByte
+    val PolylineShapeOpen = 206.toByte
+    val RectangleShape = 207.toByte
+    val TextShape = 209.toByte
 
     // Inner polyline shapes
     val PolylineLineShape = 220.toByte
-    val PolylineArcShape  = 221.toByte
+    val PolylineArcShape = 221.toByte
 
     // Shape parts (deprecated)
-    val ArcShapePart       = 230.toByte
-    val CircleShapePart    = 231.toByte
-    val GroupShapePart     = 232.toByte
-    val ImageShapePart     = 233.toByte
-    val LineShapePart      = 234.toByte
-    val PolylineShapePart  = 235.toByte
+    val ArcShapePart = 230.toByte
+    val CircleShapePart = 231.toByte
+    val GroupShapePart = 232.toByte
+    val ImageShapePart = 233.toByte
+    val LineShapePart = 234.toByte
+    val PolylineShapePart = 235.toByte
     val RectangleShapePart = 236.toByte
-    val TextShapePart      = 237.toByte
-    val FullShapePart      = 238.toByte
-    val EmptyShapePart     = 239.toByte
+    val TextShapePart = 237.toByte
+    val FullShapePart = 238.toByte
+    val EmptyShapePart = 239.toByte
 
     // Shape selectors
-    val EmptyShapeSelector  = 240.toByte
-    val FullShapeSelector   = 241.toByte
+    val EmptyShapeSelector = 240.toByte
+    val FullShapeSelector = 241.toByte
     val BitSetShapeSelector = 242.toByte
   }
 

@@ -32,17 +32,17 @@ import java.awt.Toolkit
 /**
  * <h2>Dialogue</h2>
  * <p>
- *   The Dialogue object is an utility to reading and writing single files through a file-dialogue that allows
- *   the user to determine which file should be read or written to. The Dialogue object is meant to form the
- *   basics for I/O operations such as import, export etc.
+ * The Dialogue object is an utility to reading and writing single files through a file-dialogue that allows
+ * the user to determine which file should be read or written to. The Dialogue object is meant to form the
+ * basics for I/O operations such as import, export etc.
  * </p>
  * <p>
- *   The class has also been created to allow I/O operations in restricted environments, such as applets.
- *   The Dialogue object will be loaded at runtime which ensures that whatever code being run here have been
- *   approved by the user. Since I/O is near-to impossible to achieve outside restricted environments it also
- *   gives the user (some) certainty that every I/O operation performed in Siigna is defined at the mainline
- *   (which is publicly available and open source) and not in potentially proprietary modules.
- *   So: Please use this object for I/O in sandboxed environments.
+ * The class has also been created to allow I/O operations in restricted environments, such as applets.
+ * The Dialogue object will be loaded at runtime which ensures that whatever code being run here have been
+ * approved by the user. Since I/O is near-to impossible to achieve outside restricted environments it also
+ * gives the user (some) certainty that every I/O operation performed in Siigna is defined at the mainline
+ * (which is publicly available and open source) and not in potentially proprietary modules.
+ * So: Please use this object for I/O in sandboxed environments.
  * </p>
  *
  * <h2>Using FileFilters</h2>
@@ -202,8 +202,8 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueRead[T](f : File => T, filters : Traversable[FileNameExtensionFilter]) : Option[T] = {
-    openDialogue[T](DialogueFunctionRead(f, filters))
+  protected def openDialogueRead[T](f: File => T, filters: Traversable[FileNameExtensionFilter]): Option[(String, T)] = {
+    openDialogue[(String, T)](DialogueFunctionRead[T](f, filters))
   }
 
   /**
@@ -218,7 +218,7 @@ object Dialogue {
    * @throws IOException  If an I/O error occurred when trying to read/write
    * @throws IllegalArgumentException  If no parsers are given, i. e. <code>parsers</code> is empty.
    */
-  protected def openDialogueWrite[T](parsers : Map[FileNameExtensionFilter, FileChannel => T], options : Set[OpenOption]) : Option[T] = {
+  protected def openDialogueWrite[T](parsers: Map[FileNameExtensionFilter, FileChannel => T], options: Set[OpenOption]): Option[T] = {
     // Make sure we have at least one file filter
     require(!parsers.isEmpty, "Needs at least one parser to operate on, none were given.")
     openDialogue[T](
@@ -234,16 +234,17 @@ object Dialogue {
    * @tparam T  The type of data to return.
    * @return Some[T] if the data was successfully returned and parsed to type T, None otherwise.
    */
-  protected def openDialogue[T](function : DialogueFunction) : Option[T] = {
+  protected def openDialogue[T](function: DialogueFunction): Option[T] = {
     // Continue to open the dialogue
     val result = IOActor !? function
     result match {
-      case i : InterruptedException => None
+      case i: InterruptedException => None
+
       case e => {
         try {
           Some(e.asInstanceOf[T])
         } catch {
-          case _ : Throwable => None
+          case _: Throwable => None
         }
       }
     }
@@ -256,10 +257,10 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[Array[Byte] ] if the user correctly selected a file and we have sufficient permissions to read it
-   *          None otherwise.
+   * @return  Some[ ( String, Array[Byte] ) ] containing the full file path and its data if the user correctly
+   *          selected a file and we have sufficient permissions to read it, None otherwise.
    */
-  def readBytes(filters : FileNameExtensionFilter*) : Option[Array[Byte]] =
+  def readBytes(filters: FileNameExtensionFilter*): Option[(String, Array[Byte])] =
     openDialogueRead(f => Files.readAllBytes(f.toPath), filters)
 
   /**
@@ -268,10 +269,11 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[ReadableByteChannel] if the user correctly selected a file and we have sufficient permissions to read it
+   * @return  Some[ (String, ReadableByteChannel) ] containing the full path to the selected file to read and the
+   *          readable byte channel if the user correctly selected a file and we have sufficient permissions to read it,
    *          None otherwise.
    */
-  def readByteChannel(filters : FileNameExtensionFilter*) : Option[ReadableByteChannel] =
+  def readByteChannel(filters: FileNameExtensionFilter*): Option[(String, ReadableByteChannel)] =
     openDialogueRead(f => Files.newByteChannel(f.toPath, util.EnumSet.of(StandardOpenOption.READ)), filters)
 
   /**
@@ -279,10 +281,10 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[java.awt.Image] if the user correctly selected a file and we have sufficient permissions to read it
-   *          None otherwise.
+   * @return  Some[ (String, java.awt.Image) ] containing the full path of the file and the image within the file
+   *          if the user correctly selected a file and we have sufficient permissions to read it, None otherwise.
    */
-  def readImage(filters : FileNameExtensionFilter*) : Option[java.awt.Image] =
+  def readImage(filters: FileNameExtensionFilter*): Option[(String, java.awt.Image)] =
     openDialogueRead(f => Toolkit.getDefaultToolkit.getImage(f.toString), filters)
 
   /**
@@ -291,10 +293,11 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[InputStream] if the user correctly selected a file and we have sufficient permissions to read it
+   * @return  Some[ (String, InputStream) ] containing the full path to the file and the input stream from that file
+   *          if the user correctly selected a file and we have sufficient permissions to read it,
    *          None otherwise.
    */
-  def readInputStream(filters : FileNameExtensionFilter*) : Option[InputStream] = {
+  def readInputStream(filters: FileNameExtensionFilter*): Option[(String, InputStream)] = {
     openDialogueRead(file => Files.newInputStream(file.toPath, StandardOpenOption.READ), filters)
   }
 
@@ -305,11 +308,12 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[Iterator[String] ] if the user correctly selected a file and we have sufficient permissions to read it
+   * @return  Some[ (String, Iterator[String]) ] containing the full path to the file and all the lines in the files as
+   *          an iterator - if the user correctly selected a file and we have sufficient permissions to read it,
    *          None otherwise.
    */
-  def readLines(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter]) : Option[Iterator[String]] =
-    readSource(encoding, filters).map(_.getLines())
+  def readLines(encoding: String = "UTF-8", filters: Seq[FileNameExtensionFilter]): Option[(String, Iterator[String])] =
+    readSource(encoding, filters).map(t => t._1 -> t._2.getLines())
 
   /**
    * Attempts to read a file to a scala [[scala.io.Source]]. This is useful if you want an iterable representation
@@ -318,10 +322,10 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[Source] if the user correctly selected a file and we have sufficient permissions to read it
-   *          None otherwise.
+   * @return  Some[ (String, Source) ] containing the full path to the file to read along with its [[scala.io.Source]]
+   *          if the user correctly selected a file and we have sufficient permissions to read it, None otherwise.
    */
-  def readSource(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter] = Nil) : Option[Source] =
+  def readSource(encoding: String = "UTF-8", filters: Seq[FileNameExtensionFilter] = Nil): Option[(String, Source)] =
     openDialogueRead(file => Source.fromFile(file, encoding), filters)
 
   /**
@@ -331,11 +335,12 @@ object Dialogue {
    * @param filters  A number of [[javax.swing.filechooser.FileNameExtensionFilter]]s that provides the user with a
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
-   * @return  Some[String] if the user correctly selected a file and we have sufficient permissions to read it
-   *          None otherwise.
+   * @return  Some[ (String, String) ] containing the full path of the file as the first entry in the tuple, and the
+   *          actual text as the second. If the user correctly selected a file and we have sufficient permissions to
+   *          read it, Some is returned. None will be returned otherwise.
    */
-  def readText(encoding : String = "UTF-8", filters : Seq[FileNameExtensionFilter]) : Option[String] =
-    readSource(encoding, filters).map(_.getLines().mkString("\n"))
+  def readText(encoding: String = "UTF-8", filters: Seq[FileNameExtensionFilter]): Option[(String, String)] =
+    readSource(encoding, filters).map(t => t._1 -> t._2.getLines().mkString("\n"))
 
   /**
    * Writes the given byte array to a file the user chooses. This can be efficiently coupled with the
@@ -352,25 +357,25 @@ object Dialogue {
    *                 certain file-ending, for instance.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeBytes(bytes : Array[Byte], filters : Seq[FileNameExtensionFilter],
-                 options : StandardOpenOption*) : Boolean = {
+  def writeBytes(bytes: Array[Byte], filters: Seq[FileNameExtensionFilter],
+                 options: StandardOpenOption*): Boolean = {
     openDialogueWrite(filters.map(t =>
-      t -> ((channel : FileChannel) => channel.write(ByteBuffer.wrap(bytes)))).toMap, options.toSet).isDefined
+      t -> ((channel: FileChannel) => channel.write(ByteBuffer.wrap(bytes)))).toMap, options.toSet).isDefined
   }
 
   /**
    * Provides a [[java.nio.channels.WritableByteChannel]] that can be used to write any content to disc. The
    * parameter callback is a callback function that will be called with a byte channel when available.
    * @param extensions  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away
-   *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
-   *                   paired with the functions that takes a byte channel that can be used to store any number of
-   *                   data into the file the user have chosen.
+   *                    unwanted files, or help the user choose a file with a certain file-ending, for instance,
+   *                    paired with the functions that takes a byte channel that can be used to store any number of
+   *                    data into the file the user have chosen.
    * @param options  Zero or more options with which to open the file. Defaults to StandardOpenOption.TRUNCATE_EXISTING
    *                 which truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeChannel(extensions : Map[FileNameExtensionFilter, FileChannel => Unit],
-                   options : OpenOption*) : Boolean = {
+  def writeChannel(extensions: Map[FileNameExtensionFilter, FileChannel => Unit],
+                   options: OpenOption*): Boolean = {
     openDialogueWrite(extensions, options.toSet).isDefined
   }
 
@@ -386,14 +391,14 @@ object Dialogue {
    *                 file-extension, filters away unwanted files, and helps the user choose a file with a
    *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
-   *                choose a file with a certain file-ending, for instance.
+   *                  choose a file with a certain file-ending, for instance.
    * @param options  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
-   *                truncates all the content of the file away before writing.
+   *                 truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeLines(lines : Iterable[String], filters : Seq[FileNameExtensionFilter] = Nil,
-                 encoding : String = "UTF-8", options : Set[OpenOption] = Set()) : Boolean = {
-    openDialogueWrite(filters.map(t => t -> ((channel : FileChannel) => {
+  def writeLines(lines: Iterable[String], filters: Seq[FileNameExtensionFilter] = Nil,
+                 encoding: String = "UTF-8", options: Set[OpenOption] = Set()): Boolean = {
+    openDialogueWrite(filters.map(t => t -> ((channel: FileChannel) => {
       val bytes = ByteBuffer.wrap(lines.mkString("\n").getBytes(Charset.forName(encoding)))
       channel.write(bytes)
     })).toMap, options.toSet).isDefined
@@ -403,16 +408,16 @@ object Dialogue {
    * Provides a [[java.io.OutputStream]] that can be used to write any content to disc. The
    * parameter callback is a callback function that will be called with a output stream, when available.
    * @param extensions  A seq of optional [[javax.swing.filechooser.FileNameExtensionFilter]]s that can filter away
-   *                   unwanted files, or help the user choose a file with a certain file-ending, for instance,
-   *                   mapped with functions to export
+   *                    unwanted files, or help the user choose a file with a certain file-ending, for instance,
+   *                    mapped with functions to export
    * @param options  The option with which to open the file. Defaults to StandardOpenOption.TRUNCATE_EXISTING
    *                 which truncates all the content of the file away before writing..
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeOutputStream(extensions : Map[FileNameExtensionFilter, OutputStream => Unit],
-                        options : OpenOption*) : Boolean = {
+  def writeOutputStream(extensions: Map[FileNameExtensionFilter, OutputStream => Unit],
+                        options: OpenOption*): Boolean = {
 
-    openDialogueWrite(extensions.map(t => t._1 -> ((channel : FileChannel) => {
+    openDialogueWrite(extensions.map(t => t._1 -> ((channel: FileChannel) => {
       val bytes = new ByteArrayOutputStream()
       t._2(bytes)
       channel.write(ByteBuffer.wrap(bytes.toByteArray))
@@ -432,11 +437,11 @@ object Dialogue {
    *                 certain file-ending, for instance.
    * @param encoding  The encoding with which to write the string. Defaults to "UTF-8".
    * @param options  Specifies how the bytes are written. Defaults to StandardOpenOption.TRUNCATE_EXISTING which
-   *                truncates all the content of the file away before writing.
+   *                 truncates all the content of the file away before writing.
    * @return  True if the data was successfully written to the file, false if an error occurred.
    */
-  def writeText(text : String, filters : Seq[FileNameExtensionFilter] = Nil, encoding : String = "UTF-8",
-                options : Set[OpenOption] = Set()) : Boolean = {
+  def writeText(text: String, filters: Seq[FileNameExtensionFilter] = Nil, encoding: String = "UTF-8",
+                options: Set[OpenOption] = Set()): Boolean = {
     writeLines(Seq(text), filters, encoding, options)
   }
 
