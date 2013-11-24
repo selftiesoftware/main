@@ -128,7 +128,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   this("colorOpennessOpen")     = new Color(0.85f, 0.85f, 0.25f, 0.20f)
   this("colorOpennessPrivate")  = new Color(0.85f, 0.25f, 0.25f, 0.20f)
   this("colorSelected")         = "#7777FF".color
-  this("defaultScreenSize")     = new Dimension(600, 400)
+  this("defaultScreenSize")     = new Dimension(852, 480)
   this("isLive")                = true
   this("printMargin")           = 13.0
   this("printFormatMin")        = 210.0 //default paper short side length

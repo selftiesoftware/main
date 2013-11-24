@@ -32,6 +32,7 @@ import scala.util.{Failure, Success}
 import com.siigna.util.Log
 import com.siigna.app.model.shape.RectangleShape
 import com.siigna.app.model.selection.Select
+import java.awt.AlphaComposite
 
 /**
  * <p>

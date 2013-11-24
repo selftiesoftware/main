@@ -56,7 +56,8 @@ object ModuleMenu {
 
   val isSyncing : TextShape = TextShape("synchronising with server...",Vector2D(120,9),11).addAttribute("Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
   val isSynced : TextShape = TextShape("all changes saved",Vector2D(130,9),12).addAttribute(("Color" -> new Color(0.10f, 0.95f, 0.10f, 1.00f)))
-  val isOffline : TextShape = TextShape("offline - changes will not be stored!", Vector2D(130, 9), 10)
+  val isOffline1 : TextShape = TextShape("offline", Vector2D(130, 7), 11).addAttribute("Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
+  val isOffline2 : TextShape = TextShape("changes will not be stored!", Vector2D(130, 17), 10)
 
   var lastSyncShow : Double = 0
   var lastTimeForSync : Double = 1000
@@ -74,7 +75,7 @@ object ModuleMenu {
     g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
 
     //draw online and sync feedback
-    if(Siigna.isOnline) {
+    if(Siigna.isOnline && Siigna("isLive") == true) {
       if(Siigna.isSyncronizing && System.currentTimeMillis() > Siigna.lastSync + 1000) {
         lastSyncShow = System.currentTimeMillis()
         lastTimeForSync = (System.currentTimeMillis() - Siigna.lastSync)
@@ -84,7 +85,10 @@ object ModuleMenu {
       } else if (System.currentTimeMillis() < lastSyncShow + lastTimeForSync ) g draw isSyncing
       else g draw isSynced
     }
-    if (!Siigna.isOnline) g draw isOffline
+    if (!Siigna.isOnline || Siigna("isLive") == false) {
+      g draw isOffline1
+      g draw isOffline2
+    }
 
 
     logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
