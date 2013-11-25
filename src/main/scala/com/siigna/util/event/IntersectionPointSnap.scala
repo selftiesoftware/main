@@ -20,7 +20,7 @@
 package com.siigna.util.event
 
 import com.siigna.app.model.shape._
-import com.siigna.util.geom.{TransformationMatrix, Vector2D}
+import com.siigna.util.geom.{Segment2D, TransformationMatrix, Vector2D}
 import com.siigna.app.view.{Graphics, View}
 import com.siigna.app.Siigna
 import java.awt.Color
@@ -30,6 +30,9 @@ import com.siigna.app.model.{Model, Drawing}
  * A hook for parsing points that snaps to intersections between objects.
  */
 case object IntersectionPointSnap extends EventSnap {
+
+  //a placeholder for shapes not yet in the model
+  protected var snapShapes = Traversable[Shape]()
 
   var closestInt : Option[Vector2D] = None
   val colorAttr = "Color" -> new Color(0.10f, 0.95f, 0.95f, 0.40f)
@@ -60,7 +63,6 @@ case object IntersectionPointSnap extends EventSnap {
 
     //the point is transformed to match the coordinate system of the drawing
     val point = q.transform(View.deviceTransformation)
-
     //find the intersection closest to the mouse
     def nearestInt (v : List[Vector2D], p : Vector2D) : Vector2D = {
       val list = v.sortBy(_.distanceTo(p))
@@ -76,6 +78,8 @@ case object IntersectionPointSnap extends EventSnap {
     }
 
     if (!model.isEmpty) {
+
+      //val eval = model ++ snapShapes
 
       val res = model.map(_ match {
 
@@ -103,8 +107,15 @@ case object IntersectionPointSnap extends EventSnap {
         case s : PolylineShape  => {
           val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
-          val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          val intsModel = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+          //get intersections between the mouse position and existing shapes.
+          def intsMouse : Option[Vector2D] = {
+            val s = Drawing(point,Siigna.selectionDistance)
+            if(!s.isEmpty)Some(s.head._2.geometry.closestPoint(point)) else None
+          }
+          val returnInts = if(intsMouse.isDefined) intsModel.toList :+ intsMouse.get else intsModel
+
+          if(!returnInts.isEmpty) nearestInt(returnInts.toList,point) else q //return nearest intersection or the unparsed point q if no int.
         }
 
         //TODO: no intersections are found?

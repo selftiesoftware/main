@@ -60,5 +60,4 @@ class Segment2DSpec  extends FunSuite with ShouldMatchers {
     l1.intersections(l1) should equal (Set())   //coinciding segments should not give an intersection
 
   }
-
 }
