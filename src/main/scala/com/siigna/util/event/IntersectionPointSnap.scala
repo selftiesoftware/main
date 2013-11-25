@@ -34,6 +34,7 @@ case object IntersectionPointSnap extends EventSnap {
   //a placeholder for shapes not yet in the model
   protected var snapShapes = Traversable[Shape]()
 
+  var sD = Siigna.selectionDistance
   var closestInt : Option[Vector2D] = None
   val colorAttr = "Color" -> new Color(0.10f, 0.95f, 0.95f, 0.40f)
   val strokeAttr = "StrokeWidth" -> 0.4
@@ -105,17 +106,22 @@ case object IntersectionPointSnap extends EventSnap {
         }
 
         case s : PolylineShape  => {
+          var r = q
           val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
           val intsModel = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
           //get intersections between the mouse position and existing shapes.
           def intsMouse : Option[Vector2D] = {
-            val s = Drawing(point,Siigna.selectionDistance)
+            val s = Drawing(point,sD)
             if(!s.isEmpty)Some(s.head._2.geometry.closestPoint(point)) else None
           }
-          val returnInts = if(intsMouse.isDefined) intsModel.toList :+ intsMouse.get else intsModel
-
-          if(!returnInts.isEmpty) nearestInt(returnInts.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          if(!intsModel.isEmpty) {
+            val n = nearestInt(intsModel.toList,point)
+            if(n.distanceTo(point)<sD) r = n
+            else if(intsMouse.isDefined) r = intsMouse.get
+          }
+          else if(intsModel.isEmpty && intsMouse.isDefined) r = intsMouse.get
+          r
         }
 
         //TODO: no intersections are found?

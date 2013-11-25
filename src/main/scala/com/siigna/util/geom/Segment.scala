@@ -172,7 +172,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
 
-    case v : Vector2D => if(v.distanceTo(this)< Drawing.boundaryScale) true else false
+    case v : Vector2D => if(v.distanceTo(this) < Drawing.boundaryScale / 4) true else false
 
     case g => false
   }
