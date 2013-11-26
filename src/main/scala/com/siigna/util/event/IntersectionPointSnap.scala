@@ -65,9 +65,9 @@ case object IntersectionPointSnap extends EventSnap {
     //the point is transformed to match the coordinate system of the drawing
     val point = q.transform(View.deviceTransformation)
     //find the intersection closest to the mouse
-    def nearestInt (v : List[Vector2D], p : Vector2D) : Vector2D = {
+    def nearestInt (v : List[Vector2D], p : Vector2D) : Option[Vector2D] = {
       val list = v.sortBy(_.distanceTo(p))
-      list.head //return closest point
+      if(!list.isEmpty)Some(list.head) else None//return closest point
     }
 
     //a function to limit intersection evaluation to shapes within the bounding box of the shape near the mouse.
@@ -80,59 +80,78 @@ case object IntersectionPointSnap extends EventSnap {
 
     if (!model.isEmpty) {
 
-      //val eval = model ++ snapShapes
-
       val res = model.map(_ match {
 
         case s : ArcShape       => {
-          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapes = shapesInRange(s, point) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
           val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          val n = nearestInt(ints.toList,point)
+          if(!ints.isEmpty && n.isDefined) n.get else q //return nearest intersection or the unparsed point q if no int.
         }
 
         case s : CircleShape    => {
-          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapes = shapesInRange(s, point) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
           val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          val n = nearestInt(ints.toList,point)
+          if(!ints.isEmpty && n.isDefined) n.get else q //return nearest intersection or the unparsed point q if no int.
         }
 
         case s : LineShape        => {
-          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapes = shapesInRange(s, point) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
           val ints = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          val n = nearestInt(ints.toList,point)
+          if(!ints.isEmpty && n.isDefined) n.get else q //return nearest intersection or the unparsed point q if no int.
         }
 
         case s : PolylineShape  => {
+
           var r = q
-          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapes = shapesInRange(s, point) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
-          val intsModel = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
-          //get intersections between the mouse position and existing shapes.
-          def intsMouse : Option[Vector2D] = {
-            val s = Drawing(point,sD)
-            if(!s.isEmpty)Some(s.head._2.geometry.closestPoint(point)) else None
-          }
-          if(!intsModel.isEmpty) {
-            val n = nearestInt(intsModel.toList,point)
-            if(n.distanceTo(point)<sD) r = n
-            else if(intsMouse.isDefined) r = intsMouse.get
-          }
-          else if(intsModel.isEmpty && intsMouse.isDefined) r = intsMouse.get
+
+          //use track intersections with the model as snap points, if any.
+          if(Track.trackGuide.isDefined) {
+            val trackInt = shapeGeometries.flatMap(g => g.intersections(Track.trackGuide.get))
+            val n = nearestInt(trackInt.toList,point)
+            if(n.isDefined && n.get.distanceTo(point)<sD) r = n.get
+
+          //if not, evaluate if there are ints to snap to.
+          // A) between shapes in the model, or - if not, then
+          // B) between the model and the mouse position.
+          } else {
+            val intsModel = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+
+            //get intersections between the mouse position and existing shapes.
+            def intsMouse : Option[Vector2D] = {
+              val s = Drawing(point,sD)
+              //do not use the mouse ints if a track guide is active.
+              if(!s.isEmpty && !Track.trackGuide.isDefined)Some(s.head._2.geometry.closestPoint(point)) else None
+            }
+            //if the model contains ints, evaluate those:
+            if(!intsModel.isEmpty) {
+              val n = nearestInt(intsModel.toList,point)
+              if(n.isDefined && n.get.distanceTo(point)<sD) r = n.get
+              else if(intsMouse.isDefined) r = intsMouse.get
+            }
+            //if no ints in the model, track dynamically.
+            else if(intsModel.isEmpty && intsMouse.isDefined) r = intsMouse.get
+            }
           r
         }
 
         //TODO: no intersections are found?
         case s : RectangleShape => {
-          val shapes = (shapesInRange(s, point)) //get the potentially intersecting shapes
+          val shapes = shapesInRange(s, point) //get the potentially intersecting shapes
           val shapeGeometries = shapes.map(s => s._2.geometry) //make a list of their geometries
           val ints = shapeGeometries.flatMap(g => {
               val t = g.intersections(s.geometry)
               t
             }) //get intersections to evaluate
-          if(!ints.isEmpty) nearestInt(ints.toList,point) else q //return nearest intersection or the unparsed point q if no int.
+          val n = nearestInt(ints.toList,point)
+          if(!ints.isEmpty && n.isDefined) n.get else q //return nearest intersection or the unparsed point q if no int.
         }
         case e => point
       })

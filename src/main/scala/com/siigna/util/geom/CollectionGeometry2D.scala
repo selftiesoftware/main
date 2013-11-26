@@ -82,6 +82,9 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       r
     }
 
+    //Polyline / Line2D - intersections
+    case line : Line2D =>  this.geometries.flatMap(s => s.intersections(line)).toSet
+
     //Polyline / ComplexRectangle - intersections
     case rectangle : ComplexRectangle2D => rectangle.segments.toList.flatMap(s => s.intersections(this)).toSet
 
