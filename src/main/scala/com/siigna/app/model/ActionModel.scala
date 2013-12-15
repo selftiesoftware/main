@@ -35,6 +35,7 @@ import shape.Shape
 import com.siigna.util.collection.{HasAttributes, Attributes}
 import com.siigna.util.Log
 import com.siigna.app.view.View
+import com.siigna.app.controller.remote.UpdateLocalActions
 
 /**
  * A Model capable of executing, undoing and redoing [[com.siigna.app.model.action.Action]]s.
@@ -53,17 +54,22 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * Sets the attributes of the model to the given attributes by completely replacing all current attributes.
    * @param attr  The attributes to set.
    */
-  def attributes_=(attr : Attributes) { setAttributes(attr) }
+  def attributes_=(attr: Attributes) {
+    setAttributes(attr)
+  }
 
   /**
    * A stream of a negative integers used for local ids.
    */
   protected var localIdStream = Stream.iterate(-1)(i => if (i - 1 > 0) -1 else i - 1).iterator
 
+  // A map of local shape ids mapped to their remote counterparts
+  protected var localIdMap: Map[Int, Int] = Map()
+
   /**
    * Listeners that receives events whenever an action is executed, undone or redone.
    */
-  protected var listeners : Seq[(Action, Boolean) => Unit] = Nil
+  protected var listeners: Seq[(Action, Boolean) => Unit] = Nil
 
   /**
    * The underlying immutable model of Siigna.
@@ -72,19 +78,19 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
   def model = _model
 
-  def model_=(m : Model) = _model = m
+  def model_=(m: Model) = _model = m
 
   /**
    * A listener for remote actions.
    */
-  protected var remoteListener : (Action, Boolean) => Unit = (_, _) => Unit
+  protected var remoteListener: (Action, Boolean) => Unit = (_, _) => Unit
 
   /**
    * Adds listeners that will be executed whenever an action is executed, undone or redone on the model.
    * @param listener  The function to be executed receiving an action that has been executed and a boolean
    *                  value indicating whether the action was undone (true) or executed (false; includes redo).
    */
-  def addActionListener(listener : (Action, Boolean) => Unit) {
+  def addActionListener(listener: (Action, Boolean) => Unit) {
     listeners :+= listener
   }
 
@@ -94,7 +100,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * @param listener  The function to be executed receiving an action that has been executed and a boolean
    *                  value indicating whether the action was undone (true) or executed (false; includes redo).
    */
-  def addRemoteListener(listener : (Action, Boolean) => Unit) {
+  def addRemoteListener(listener: (Action, Boolean) => Unit) {
     remoteListener = listener
   }
 
@@ -105,15 +111,17 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * @param action  The action to execute.
    * @param remote  Whether or not to send the action to the server.
    */
-  def execute(action : Action, remote : Boolean = true) {
+  def execute(action: Action, remote: Boolean = true) {
     try {
       // Execute in the model
       model = action.execute(model)
 
       // Store the action if it is not a VolatileAction
       action match {
-        case v : VolatileAction => // Do nothing here!
-        case _ => { // Store the action
+        case UpdateLocalActions(map) => localIdMap = map // Store the new id-map, but don't save the action!
+        case v: VolatileAction => // Do nothing here!
+        case _ => {
+          // Store the action
           model = new Model(model.shapes, model.executed.+:(action), Seq(), model.attributes)
         }
       }
@@ -123,7 +131,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
       Log.success("ActionModel: Successfully executed action: " + action)
     } catch {
-      case e : Exception => Log.error("ActionModel: Error when executing action " + action, e)
+      case e: Exception => Log.error("ActionModel: Error when executing action " + action, e)
     }
   }
 
@@ -131,21 +139,21 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * Retrieves a unique id for a shape.
    * @return A number unique for the given shape.
    */
-  def getId : Int = localIdStream.next()
+  def getId: Int = localIdStream.next()
 
   /**
    * Retrieves a number of unique ids for a number of shapes.
    * @param i  The number of ids to retrieve.
    * @return  An iterator with length <i>i</i>.
    */
-  def getIds(i : Int) = localIdStream.take(i)
+  def getIds(i: Int) = localIdStream.take(i)
 
   /**
    * Retrieves a number of unique ids for the shapes given in the collection.
    * @param t  A number of shapes in dire need of an id.
    * @return  A map with ids for the now not-so-needy shapes.
    */
-  def getIds(t : Traversable[Shape]) : Map[Int, Shape] = t.map(i => getId -> i).toMap
+  def getIds(t: Traversable[Shape]): Map[Int, Shape] = t.map(i => getId -> i).toMap
 
   /**
    * Notifies the listeners that an action has been executed, undone or redone.
@@ -153,7 +161,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
    * @param undo  Whether the action has been undone (true) or executed (false).
    * @param remote  Whether the action should go to the remote source as well.
    */
-  protected def notifyListeners(action : Action, undo : Boolean, remote : Boolean) {
+  protected def notifyListeners(action: Action, undo: Boolean, remote: Boolean) {
 
     model.tree.onSuccess {
       case x => {
@@ -161,7 +169,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
         listeners.foreach(_(action, undo))
         //If a drawing has been loaded, zoom to the extends of the drawing
         action match {
-          case a : LoadDrawing => View.zoomExtends
+          case a: LoadDrawing => View.zoomExtends
           case _ =>
         }
       }
@@ -190,7 +198,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
         Log.success("ActionModel: Action successfully redone: " + action)
       } catch {
-        case e : Exception => Log.error("ActionModel: Error when redoing action " + action, e)
+        case e: Exception => Log.error("ActionModel: Error when redoing action " + action, e)
       }
     } else {
       Log.debug("ActionModel: No more actions to redo.")
@@ -198,7 +206,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
   }
 
 
-  def setAttributes(newAttributes : Attributes) = {
+  def setAttributes(newAttributes: Attributes) = {
     //Selection is desstryed by this, so it needs to be saved and reapplied
     val selectionTemp = model.selection
     model = model.copy(attributes = newAttributes)
@@ -222,7 +230,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
   /**
    * Undo the given action and put it in the list of undone actions.
    */
-  def undo(action : Action, remote : Boolean = false) {
+  def undo(action: Action, remote: Boolean = false) {
     try {
       // Undo it
       model = action.undo(model)
@@ -235,7 +243,7 @@ trait ActionModel extends SpatialModel with HasAttributes {
 
       Log.success("ActionModel: Action successfully undone: " + action)
     } catch {
-      case e : Exception => Log.error("ActionModel: Unable to undo the given action " + action, e)
+      case e: Exception => Log.error("ActionModel: Unable to undo the given action " + action, e)
     }
   }
 

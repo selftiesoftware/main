@@ -43,50 +43,50 @@ trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialMode
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  def boundary : SimpleRectangle2D
+  def boundary: SimpleRectangle2D
 
-  def self = model.shapes
+  def self = model.shapes.withDefault(id => apply(localIdMap(id)))
 }
 
 /**
  * <p>
- *   The model of Siigna where all the drawing data are kept.
+ * The model of Siigna where all the drawing data are kept.
  * </p>
  *
  * <p>
- *   This is the model part of the
- *   <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
- *   The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the currently active drawing.
+ * This is the model part of the
+ * <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">Model-View-Controller</a> pattern.
+ * The Drawing contains all the [[com.siigna.app.model.shape.Shape]]s of the currently active drawing.
  * </p>
  *
  * <h3>Manipulating the Drawing through actions</h3>
  * <p>
- *   The only way to
- *   manipulate the drawing is via [[com.siigna.app.model.action.Action]]s - they can be executed or undone.
- *   That is it. This control structure is in place because it allows the user to undo and redo; important features
- *   when you are creating a large and complex drawing.
- *   The Drawing is also subject to change from other parts, namely other clients attached to the same drawing. This
- *   is also done via [[com.siigna.app.model.action.Action]]s, which affects everyone - so be sure be careful when
- *   erasing the entire model for instance...
+ * The only way to
+ * manipulate the drawing is via [[com.siigna.app.model.action.Action]]s - they can be executed or undone.
+ * That is it. This control structure is in place because it allows the user to undo and redo; important features
+ * when you are creating a large and complex drawing.
+ * The Drawing is also subject to change from other parts, namely other clients attached to the same drawing. This
+ * is also done via [[com.siigna.app.model.action.Action]]s, which affects everyone - so be sure be careful when
+ * erasing the entire model for instance...
  * </p>
  *
  * <h3>Selection</h3>
  * <p>
- *  Drawing also has a [[com.siigna.app.model.selection.Selection]]. This represents the way any number or
- *  [[com.siigna.app.model.shape.Shape]]s have been selected. So besides <i>which</i>
- *  [[com.siigna.app.model.shape.Shape]] has been selected, we also need to know <i>how</i> they were selected.
- *  If no selection is present, the selection is None.
+ * Drawing also has a [[com.siigna.app.model.selection.Selection]]. This represents the way any number or
+ * [[com.siigna.app.model.shape.Shape]]s have been selected. So besides <i>which</i>
+ * [[com.siigna.app.model.shape.Shape]] has been selected, we also need to know <i>how</i> they were selected.
+ * If no selection is present, the selection is None.
  * </p>
  *
  * <h3>Boundaries</h3>
  * <p>
- *  A standard Drawing is designed to fit the <a href="http://en.wikipedia.org/wiki/Paper_size">international
- *  paper-size standard</a> with an aspect ratio of sqrt(2) (square root of 2). We chose this format to make
- *  it simpler to view, print and send drawings in ways that as many people as possible understands. The
- *  absolute paper-size is subject to change, or course, and the dimensions of the paper as a
- *  [[com.siigna.util.geom.Rectangle]] can be found via the <code>boundary()</code> method.
- *  <br />
- *  It is possible to set a print margin. See more in the [[com.siigna.app.Siigna]] object.
+ * A standard Drawing is designed to fit the <a href="http://en.wikipedia.org/wiki/Paper_size">international
+ * paper-size standard</a> with an aspect ratio of sqrt(2) (square root of 2). We chose this format to make
+ * it simpler to view, print and send drawings in ways that as many people as possible understands. The
+ * absolute paper-size is subject to change, or course, and the dimensions of the paper as a
+ * [[com.siigna.util.geom.Rectangle]] can be found via the <code>boundary()</code> method.
+ * <br />
+ * It is possible to set a print margin. See more in the [[com.siigna.app.Siigna]] object.
  * </p>
  */
 object Drawing extends Drawing {
@@ -101,7 +101,7 @@ object Drawing extends Drawing {
     /**
      * A drawings is open and available for all.
      */
-    val OPEN   = Value('o')
+    val OPEN = Value('o')
 
     /**
      * Private. A drawing cannot be seen, copied or edited by anyone.
@@ -111,7 +111,7 @@ object Drawing extends Drawing {
     /**
      * A drawing cannot be edited, but can be copied to the other users accounts.
      */
-    val COPY   = Value('c')
+    val COPY = Value('c')
 
     // val PRINT - TODO
   }
@@ -122,16 +122,16 @@ object Drawing extends Drawing {
   //calculates the paper header whenever it changes
 
   // The private boundary instance
-  private var _boundary : Option[SimpleRectangle2D] = None
+  private var _boundary: Option[SimpleRectangle2D] = None
 
-  def boundary : SimpleRectangle2D = {
-      if (_boundary.isEmpty) {
-        try {
-          _boundary = Some(calculateBoundary())
-        } catch {
-          case e : Throwable => Log.error("Drawing: Error when creating boundary: ", e)
-        }
+  def boundary: SimpleRectangle2D = {
+    if (_boundary.isEmpty) {
+      try {
+        _boundary = Some(calculateBoundary())
+      } catch {
+        case e: Throwable => Log.error("Drawing: Error when creating boundary: ", e)
       }
+    }
     _boundary.getOrElse(SimpleRectangle2D(0, 0, 1, 1))
   }
 
@@ -144,9 +144,9 @@ object Drawing extends Drawing {
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
   def calculateBoundary() = {
-    val newBoundary  = SiignaTree.mbr(rtree)
-    val size         = (newBoundary.bottomRight - newBoundary.topLeft).abs
-    val center       = newBoundary.center
+    val newBoundary = SiignaTree.mbr(rtree)
+    val size = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center = newBoundary.center
     //val proportion   = 1.41421356
 
     // Fetches the values for the format
@@ -159,7 +159,7 @@ object Drawing extends Drawing {
     // TODO: Optimize!
 
     //calculate the scale automatically. Results in 1:1, 1:2,1:5,1:10,1:20 etc.
-    if(Siigna("autoScaling") == true) {
+    if (Siigna("autoScaling") == true) {
       val list = List[Double](2, 2.5, 2)
       var take = 0 // which element to "take" from the above list
       while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
@@ -171,8 +171,8 @@ object Drawing extends Drawing {
     }
     // calculate the paper size on the basis of the scale factor specified by the user
     else {
-      if(Siigna.double("scale").isDefined) aFormatMin *= Siigna.double("scale").get else aFormatMin
-      if(Siigna.double("scale").isDefined) aFormatMax *= Siigna.double("scale").get else aFormatMax
+      if (Siigna.double("scale").isDefined) aFormatMin *= Siigna.double("scale").get else aFormatMin
+      if (Siigna.double("scale").isDefined) aFormatMax *= Siigna.double("scale").get else aFormatMax
     }
 
     // Augment the "paper" with the print margins.
@@ -194,7 +194,7 @@ object Drawing extends Drawing {
    *
    * Uses toInt since it always rounds down to an integer.
    */
-  def boundaryScale : Int = {
+  def boundaryScale: Int = {
     var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
     //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
     scale - 1
