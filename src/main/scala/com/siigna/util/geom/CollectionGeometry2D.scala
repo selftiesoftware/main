@@ -47,6 +47,13 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       this.geometries.exists(_.intersects(segment))
     }
 
+    case v : Vector2D => {
+      var int = false
+      this.geometries.foreach(s => if(s.intersects(v)) int = true) //int = true
+      int
+    }
+
+
     case g => {
       geometries.exists(_.intersects(g))
     }
@@ -75,14 +82,22 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
       r
     }
 
+    //Polyline / Line2D - intersections
+    case line : Line2D =>  this.geometries.flatMap(s => s.intersections(line)).toSet
+
     //Polyline / ComplexRectangle - intersections
     case rectangle : ComplexRectangle2D => rectangle.segments.toList.flatMap(s => s.intersections(this)).toSet
 
     //Polyline / Segment2D - intersections
     case segment : Segment2D =>  this.geometries.flatMap(s => s.intersections(segment)).toSet
 
+    case v : Vector2D => this.geometries.flatMap(s => s.intersections(v)).toSet
+
     //rectangle / ? - intersections not implemented are caught here.
-    case g => Set()
+    case g => {
+      println("intersections eval for CollectionGeometry2D and "+g+ " not supported")
+      Set()
+    }
 
   }
 

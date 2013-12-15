@@ -303,6 +303,9 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
   }
 
   def intersections(geom: Geometry2D): Set[Vector2D] = geom match {
+
+    case c : CollectionGeometry2D => c.intersections(this)
+
     case line : Line2D => {
       val top = Line2D(p0, p1)
       val right = Line2D(p1, p2)
@@ -321,7 +324,10 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
     }
     case rectangle : ComplexRectangle2D => rectangle.segments.flatMap(s => s.intersections(this)).toSet
 
-    case g => Set.empty
+    case e => {
+      println("complexRectangle intersections with "+e+ "is not implemented")
+      Set.empty
+    }
   }
 
   def onPeriphery(point: Vector2D): Boolean = distanceTo(point) < 0.00001

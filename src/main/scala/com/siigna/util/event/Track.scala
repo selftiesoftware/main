@@ -30,12 +30,15 @@ import java.awt.Color
 
 object Track extends EventTrack {
 
+  //the active guide, if any. (Used in shap)
+  var trackGuide : Option[Line2D] = None
+
   //evaluate if the shape exists (used to clear the track points if the shape is deleted):
   protected var activeShape : Map[Int, Shape] = Map()
 
   protected var counter = 0
 
-  //A flag to see, if horizontal or vertical guides are active:
+  //A flag to see if horizontal or vertical guides are active:
   protected var horizontalGuideActive: Boolean = false
   protected var verticalGuideActive: Boolean = false
   protected var trackedPoint: Option[Vector2D] = None
@@ -192,15 +195,20 @@ object Track extends EventTrack {
 
             if (distHori <= distVert && distHori < Siigna.trackDistance) {
               _isTracking = true
+              trackGuide = Some(horizontal)
               horizontal.closestPoint(p)
+
             } else if (distVert < distHori && distVert < Siigna.trackDistance) {
               _isTracking = true
+              trackGuide = Some(vertical)
               vertical.closestPoint(p)
             } else {
+              trackGuide = None
               p
             }
           }
           case None => {
+            trackGuide = None
             p
           }
         }

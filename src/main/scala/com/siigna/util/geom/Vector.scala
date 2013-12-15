@@ -272,7 +272,14 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
   def intersects(geometry: Geometry2D) = geometry.intersects(this)
 
-  def intersections(geometry: Geometry2D) = geometry.intersections(this)
+  def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
+
+    case s : Segment2D => s.intersections(this) //implemented in Segment2D
+    case e => {
+      println("interesections eval for Vector2D and "+e+ " not suppored yet")
+      Set()
+    }
+  }
 
   def closestPoint(vector: Vector2D) = this
 

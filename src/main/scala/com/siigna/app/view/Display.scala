@@ -31,7 +31,7 @@ trait Display {
   /**
    * The background-color of the message, defaults to a black color with 10% transparency.
    */
-  var backgroundColor = new Color(0f, 0f, 0f, 0.1f)
+  var backgroundColor = new Color(0.95f, 0.95f, 0.95f, 0.9f)
 
   /**
    * A flag that signals whether the Display is disabled or otherwise ready to be discarded.

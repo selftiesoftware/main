@@ -19,6 +19,9 @@
 
 package com.siigna.util.geom
 
+import com.siigna.app.view.View
+import com.siigna.app.model.Drawing
+
 /**
  * The mathematical class for a line segment, defined as a line with a start
  * point (p1) and a end point (p2). The segment has a finite length.
@@ -169,6 +172,8 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
       Seq(r.borderTop, r.borderRight, r.borderBottom, r.borderLeft).exists(_.intersects(this))
     }
 
+    case v : Vector2D => if(v.distanceTo(this) < Drawing.boundaryScale / 4) true else false
+
     case g => false
   }
 
@@ -213,6 +218,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
     //find the intersection between two line segments
     case segment : Segment2D => {
+
       val x1 = this.p1.x
       val y1 = this.p1.y
       val x2 = this.p2.x
@@ -237,13 +243,25 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
 
         //check that U and T are between 0 and 1. In reality the absolute tolerance epsilon is used to prevent rounding errors
         //that filter intersections which should exist.
+        //println("T;_ "+t)
+        //println("U;_ "+u)
         if((t >= -epsilon && t <= (1 + epsilon)) && (u >= -epsilon && u <= (1 + epsilon)) ) {
-          Set(Vector2D(x1+t*bx, y1+t*by))
+          val r = Set(Vector2D(x1+t*bx, y1+t*by))
+          r
         }
         else Set[Vector2D]()
       }
     }
-    case g => Set()
+    case v : Vector2D => {
+      //if the point intersects the line, then it is also the intersection point!
+      if(this.intersects(v)) Set(v)
+      else Set()
+    }
+
+    case g => {
+      println("intersections calc for Segment2D and "+g+ " not supported")
+      Set()
+    }
 
   }
 
