@@ -18,6 +18,8 @@
  */
 package com.siigna.util.geom
 
+import com.siigna.app.Siigna
+
 
 /**
  * A mathematical representation of a circle-piece, that is a not-full circle.
@@ -102,7 +104,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
   val circle = Circle2D(center, radius)
 
   //a function to round a number to four decimals
-  def epsilon (d : Double) = math.round(d * 100000)/100000.toDouble
+  def epsilon (d : Double) = math.round(d * 1000)/1000.toDouble
 
   /**
    * The end angle of the arc.
@@ -243,14 +245,14 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       //evaluate if the intersections are on the arc (onArc should be >= 0)
       val int1OnArc = (int1 - a) * ortVector
       val int2OnArc = (int2 - a) * ortVector
-      val tPonArc = if(int1OnArc >= 0) true else false
-      val tNonArc = if(int2OnArc >= 0) true else false
+      val tPonArc = if(int1OnArc >= 0.00001) true else false
+      val tNonArc = if(int2OnArc >= 0.00001) true else false
 
       //if both tP and tN are outside the range 0-1, there are no intersections:
-      if( tP < 0 && tP > 1 && tN < 0 && tN > 1 ) false
+      if( tP < -0.00001 && tP > 1.00001 && tN < -0.00001 && tN > 1.00001 ) false
 
       //if one of tP of tN are in range 0-1, there is an intersection - if the respective intersection is on the arc segment:
-      else if ((tP >= 0 && tP <= 1 && tPonArc) || (tN >= 0 && tN <= 1 && tNonArc)) true
+      else if ((tP >= -0.00001 && tP <= 1.00001 && tPonArc) || (tN >= -0.00001 && tN <= 1.00001 && tNonArc)) true
 
       //if intersectValue is zero, the segment is tangent to the arc (one intersection)
       else if(intersectValue == 0) {
@@ -325,6 +327,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     }
 
     case segment : Segment2D => {
+      println("S")
       val p1 = Vector2D(epsilon(segment.p1.x),epsilon(segment.p1.y))
       val p2 = Vector2D(epsilon(segment.p2.x),epsilon(segment.p2.y))
       val parallelVectorD = p2 - p1  //normalized vector (p2 moved)
@@ -342,6 +345,10 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
       val tPraw = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
       val tNraw = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
+
+      println(tPraw)
+      println(tNraw)
+
       val tP = if(!tPraw.isNaN) epsilon(tPraw) else Double.NaN
       val tN = if(!tPraw.isNaN) epsilon(tNraw) else Double.NaN
 
@@ -370,17 +377,21 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
         val p = segment.closestPoint(this.center)
         Set(Vector2D(epsilon(p.x),epsilon(p.y)))
       }
+
+      //TODO: repair the geom. eval so this is not necessary to get segment endpoints ints with arc
+      else if (endPoint.distanceTo(this) < Siigna.selectionDistance) Set(this.closestPoint(endPoint))
+      else if (startPoint.distanceTo(this) < Siigna.selectionDistance ) Set(this.closestPoint(startPoint))
       //zero intersections: if intersectValue < 0
       else Set()
 
     }
-    case _ => Set()
+    case e => {
+      println("intersections eval for Arc2D and "+e+ " not yet implemented")
+      Set()
+    }
   }
 
-  def transform(t : TransformationMatrix) = {
-    println("DER")
-    new Arc2D(t.transform(center), radius * t.scale, startAngle, angle)
-  }
+  def transform(t : TransformationMatrix) = new Arc2D(t.transform(center), radius * t.scale, startAngle, angle)
 
   lazy val vertices = {
     Seq(startPoint,midPoint, endPoint)

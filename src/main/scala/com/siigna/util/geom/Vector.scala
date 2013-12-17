@@ -257,6 +257,13 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
   def round = Vector2D(scala.math.round(x), scala.math.round(y))
 
   /**
+   * Rounds the vector to two decimals.
+   * @return  A vector whose coordinates have been rounded to the nearest 0.01.
+   */
+  def roundTwoDec = Vector2D((scala.math.round(x*100))/100, (scala.math.round(y*100))/100)
+
+
+  /**
    * Returns the [[java.awt.Point]]-representation of the Vector.
    */
   def toPoint = new Point(x.toInt, y.toInt)

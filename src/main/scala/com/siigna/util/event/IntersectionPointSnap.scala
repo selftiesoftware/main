@@ -88,7 +88,12 @@ case object IntersectionPointSnap extends EventSnap {
       // A) between shapes in the model, or - if not, then
       // B) between the model and the mouse position.
     } else {
-      val intsModel = shapeGeometries.flatMap(g => g.intersections(s.geometry)) //get intersections to evaluate
+      val intsModel = shapeGeometries.flatMap(g => {
+        //println("g: "+g)
+        //println("s: "+s.geometry)
+        //println("ints: "+g.intersections(s.geometry))
+        g.intersections(s.geometry)
+      }) //get intersections to evaluate
 
       //get intersections between the mouse position and existing shapes.
       def intsMouse : Option[Vector2D] = {
@@ -99,7 +104,9 @@ case object IntersectionPointSnap extends EventSnap {
       //if the model contains ints, evaluate those:
       if(!intsModel.isEmpty) {
         val n = nearestInt(intsModel.toList,point)
-        if(n.isDefined && n.get.distanceTo(point)<sD) r = n.get
+        if(n.isDefined && n.get.distanceTo(point)<sD) {
+          r = n.get
+        }
         else if(intsMouse.isDefined) r = intsMouse.get
       }
       //if no ints in the model, track dynamically.
