@@ -70,6 +70,7 @@ trait SiignaRenderer extends Renderer {
 
   // Simply forwards the painting to the active painter
   def paint(graphics : Graphics, drawing : Drawing, view : View) {
+
     // Draw the background (if any)
     backgroundImage.foreach(image => graphics.AWTGraphics.drawImage(image, 0, 0, null))
 
@@ -82,17 +83,26 @@ trait SiignaRenderer extends Renderer {
     graphics.drawRectangle(boundary.bottomLeft, boundary.topRight)
 
     //paint the background image if there is one, and it is valid
+
     if(Siigna.imageBackground._1.isDefined && Siigna.imageBackground._2.isDefined && Siigna.imageBackground._2.get != 9999) {
-      val r = Drawing(Siigna.imageBackground._2.get)
-      r match {
-        case r : RectangleShape => {
-          val rect = r.transform(View.drawingTransformation)
-          val width = rect.width
-          val height = rect.height
-          val corner = rect.p0
-          graphics.AWTGraphics.drawImage(Siigna.imageBackground._1.get,corner.x.toInt,corner.y.toInt,width.toInt,height.toInt,null)
+      try {
+        val r = Drawing(Siigna.imageBackground._2.get)
+        r match {
+          case r : RectangleShape => {
+            val rect = r.transform(View.drawingTransformation)
+            val width = rect.width
+            val height = rect.height
+            val corner = rect.p0
+            graphics.AWTGraphics.drawImage(Siigna.imageBackground._1.get,corner.x.toInt,corner.y.toInt,width.toInt,height.toInt,null)
+          }
+          case _ => println("could probably not cast "+r+" to rectangleShape; ")
         }
-        case _ => println("could probably not cast "+r+" to rectangleShape; ")
+      }
+      catch {
+        case e : Throwable => {
+          Siigna.imageBackground = (None,None,0.0) //clear the placeholder if the image was deleted
+          println("error while painting the background image: "+e)
+        }
       }
     }
 
