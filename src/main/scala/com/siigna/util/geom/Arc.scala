@@ -19,6 +19,7 @@
 package com.siigna.util.geom
 
 import com.siigna.app.Siigna
+import com.siigna.util.Log
 
 
 /**
@@ -343,7 +344,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
     }
 
     case complexRect : ComplexRectangle2D => {
-      println("PLEASE IMPLEMENT INTERSECTS EVAL FOR ARC, COMPLEXRECT")
+
       false
     }
 
@@ -374,8 +375,9 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
       intersections.toSet
     }
 
+    case rectangle : Rectangle2D => rectangle.segments.flatMap(s => intersections(s)).toSet
+
     case segment : Segment2D => {
-      println("S")
       val p1 = Vector2D(epsilon(segment.p1.x),epsilon(segment.p1.y))
       val p2 = Vector2D(epsilon(segment.p2.x),epsilon(segment.p2.y))
       val parallelVectorD = p2 - p1  //normalized vector (p2 moved)
@@ -393,9 +395,6 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
       val tPraw = (-parallelVectorD * delta + math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
       val tNraw = (-parallelVectorD * delta - math.sqrt(math.pow(parallelVectorD * delta,2) - math.pow(parallelVectorD.length,2)*(math.pow(delta.length,2) -math.pow(circle.radius,2)))) / math.pow(parallelVectorD.length,2)
-
-      println(tPraw)
-      println(tNraw)
 
       val tP = if(!tPraw.isNaN) epsilon(tPraw) else Double.NaN
       val tN = if(!tPraw.isNaN) epsilon(tNraw) else Double.NaN
@@ -434,7 +433,7 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
     }
     case e => {
-      println("intersections eval for Arc2D and "+e+ " not yet implemented")
+      Log.debug("intersections eval for Arc2D and "+e+ " not yet implemented")
       Set()
     }
   }

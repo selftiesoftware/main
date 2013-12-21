@@ -20,6 +20,7 @@
 package com.siigna.util.geom
 
 import java.awt.Point
+import com.siigna.util.Log
 
 /**
  * A vector class utility.
@@ -283,7 +284,7 @@ case class Vector2D(x : Double, y : Double) extends Vector with Geometry2D {
 
     case s : Segment2D => s.intersections(this) //implemented in Segment2D
     case e => {
-      println("interesections eval for Vector2D and "+e+ " not suppored yet")
+      Log.debug("interesections eval for Vector2D and "+e+ " not suppored yet")
       Set()
     }
   }

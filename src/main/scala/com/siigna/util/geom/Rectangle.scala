@@ -18,6 +18,8 @@
  */
 package com.siigna.util.geom
 
+import com.siigna.util.Log
+
 /**
  * A rectangle, defined as four line-segments in a multidimensional space. Can be compared to other rectangles
  * by their areas.
@@ -304,6 +306,8 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
   def intersections(geom: Geometry2D): Set[Vector2D] = geom match {
 
+    case a : Arc2D => a.intersections(this)
+
     case c : CollectionGeometry2D => c.intersections(this)
 
     case circle : Circle2D => {
@@ -331,10 +335,10 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
       Set(top, right, bottom, left).flatMap(_.intersections(segment))
     }
-    case rectangle : ComplexRectangle2D => rectangle.segments.flatMap(s => s.intersections(this)).toSet
+    case rectangle : Rectangle2D => rectangle.segments.flatMap(s => s.intersections(this)).toSet
 
     case e => {
-      println("complexRectangle intersections with "+e+ "is not implemented")
+      Log.debug("complexRectangle intersections with "+e+ "is not implemented")
       Set.empty
     }
   }
@@ -603,6 +607,8 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
   //Simple Rectangle intersections
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
 
+    case a : Arc2D => a.intersections(this)
+
     case line : Segment2D => {
       val top = Segment(topLeft, topRight)
       val right = Segment(topRight, bottomRight)
@@ -618,13 +624,10 @@ case class SimpleRectangle2D(xMin : Double, yMin : Double, xMax : Double, yMax :
     }
     case p : CollectionGeometry2D =>  p.geometries.flatMap(s => s.intersections(this)).toSet
 
-    case r : ComplexRectangle2D => {
-      println("implement rect / rect intersections here")
-      Set()
-    }
+    case r : Rectangle2D => r.segments.flatMap(s => s.intersections(this)).toSet
 
     case g => {
-      println("NO SHAPE RECOGNIZED IN RECT INTERSECTION")
+      Log.debug("NO SHAPE RECOGNIZED IN RECT INTERSECTION")
       Set()
     }
 

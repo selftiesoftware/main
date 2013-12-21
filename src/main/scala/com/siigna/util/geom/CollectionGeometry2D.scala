@@ -19,6 +19,8 @@
 
 package com.siigna.util.geom
 
+import com.siigna.util.Log
+
 /**
  * A geometry designed for polylines
  */
@@ -88,8 +90,8 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
     //Polyline / Line2D - intersections
     case line : Line2D =>  this.geometries.flatMap(s => s.intersections(line)).toSet
 
-    //Polyline / ComplexRectangle - intersections
-    case rectangle : ComplexRectangle2D => rectangle.segments.toList.flatMap(s => s.intersections(this)).toSet
+    //Polyline / Rectangle - intersections
+    case rectangle : Rectangle2D => rectangle.segments.toList.flatMap(s => s.intersections(this)).toSet
 
     //Polyline / Segment2D - intersections
     case segment : Segment2D =>  this.geometries.flatMap(s => s.intersections(segment)).toSet
@@ -98,7 +100,7 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
 
     //rectangle / ? - intersections not implemented are caught here.
     case g => {
-      println("intersections eval for CollectionGeometry2D and "+g+ " not supported")
+      Log.debug("intersections eval for CollectionGeometry2D and "+g+ " not supported")
       Set()
     }
 

@@ -25,7 +25,6 @@ import com.siigna.util.geom._
 import java.awt.Cursor
 import com.siigna.util.event.Track
 import com.siigna.app.controller.Controller
-import com.siigna.app.model.shape.RectangleShape
 
 /**
  * <p>

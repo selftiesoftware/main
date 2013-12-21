@@ -21,6 +21,7 @@ package com.siigna.util.geom
 
 import com.siigna.app.view.View
 import com.siigna.app.model.Drawing
+import com.siigna.util.Log
 
 /**
  * The mathematical class for a line segment, defined as a line with a start
@@ -259,7 +260,7 @@ case class Segment2D(p1 : Vector2D, p2 : Vector2D) extends GeometryBasic2D with 
     }
 
     case g => {
-      println("intersections calc for Segment2D and "+g+ " not supported")
+      Log.debug("intersections calc for Segment2D and "+g+ " not supported")
       Set()
     }
 

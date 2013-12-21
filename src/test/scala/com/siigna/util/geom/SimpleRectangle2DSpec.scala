@@ -28,12 +28,20 @@ class SimpleRectangle2DSpec extends FunSpec with ShouldMatchers {
 
     val r = SimpleRectangle2D(0, 0, 10, 10)
 
-    it ("can determine if it intersects with other geometries") {
+    /****** INTERSECTION ********/
+    it ("can determine if it intersects with a complex rectangle") {
       r.intersects(ComplexRectangle2D(Vector2D(5, 5), 5, 5, 0)) should equal (true)
       r.intersects(ComplexRectangle2D(Vector2D(5, 5), 4, 4, 0)) should equal (false)
       r.intersects(ComplexRectangle2D(Vector2D(7, 5), 4, 4, 0)) should equal (true)
       r.intersects(ComplexRectangle2D(Vector2D(5, 5), 6, 4, 90)) should equal (true)
       r.intersects(ComplexRectangle2D(Vector2D(5, 5), 5, 5, 45)) should equal (true)
+    }
+
+    /****** INTERSECTIONS ********/
+    it ("can calculate rectangle-arc intersections") {
+      val a = Arc2D(Vector2D(0, 0), 10, 0, 180)
+      val r = SimpleRectangle2D(-10, -10, 10, 10)
+      r.intersections(a) should equal(Set(Vector2D(-10, 0), Vector2D(10, 0), Vector2D(0, 10)))
     }
 
   }

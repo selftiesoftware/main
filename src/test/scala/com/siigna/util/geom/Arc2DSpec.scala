@@ -270,5 +270,15 @@ class Arc2DSpec  extends FunSuite with ShouldMatchers {
 
   }
 
+  /******* INTERSECTIONS ********/
+  test("can calculate arc-rectangle intersections") {
+    // TODO: WTH??
+    val r0 = SimpleRectangle2D(-50, -50, 50, 50)
+    val r1 = ComplexRectangle2D(Vector2D(0,0),100,100,0)
+    val a = Arc2D(Vector2D(0, 0), 10, 0, 180)
+    r0.intersections(a) should equal(Set())
+    r1.intersections(a) should equal(Set())
+  }
+
 
 }
