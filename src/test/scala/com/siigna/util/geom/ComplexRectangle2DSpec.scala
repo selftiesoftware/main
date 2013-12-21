@@ -129,5 +129,10 @@ class ComplexRectangle2DSpec extends FunSpec with ShouldMatchers {
         ComplexRectangle2D(Vector2D(0, 0), 100, 100, 0))
 
     }
+    it ("can calculate rectangle-circle intersections") {
+      val circle = Circle2D(Vector2D(-50,-100),100)
+      r1.intersections(circle) should equal (Set(Vector2D(-50,0), Vector2D(36.60254037844386,-50.0)))
+    }
+
   }
 }

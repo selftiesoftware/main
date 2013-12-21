@@ -63,8 +63,11 @@ case class CollectionGeometry2D(geometries : Seq[Geometry2D]) extends Geometry2D
   def intersections(geom : Geometry2D) : Set[Vector2D] = geom match {
 
     case arc : Arc2D => {
-      arc.intersections(this)
+      this.geometries.flatMap(s => s.intersections(arc)).toSet
     }
+
+    //Polyline / Circle2D - intersections
+    case circle : Circle2D =>  this.geometries.flatMap(s => s.intersections(circle)).toSet
 
     //TODO: misses the first int if two ints exist on the same segment.
     case collection : CollectionGeometry2D => {

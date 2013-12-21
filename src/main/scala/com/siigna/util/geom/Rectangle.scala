@@ -306,6 +306,15 @@ case class ComplexRectangle2D(override val center : Vector2D, width : Double, he
 
     case c : CollectionGeometry2D => c.intersections(this)
 
+    case circle : Circle2D => {
+      val top = Segment2D(p0, p1)
+      val right = Segment2D(p1, p2)
+      val bottom = Segment2D(p2, p3)
+      val left = Segment2D(p3, p0)
+
+      Set(top, right, bottom, left).flatMap(_.intersections(circle))
+    }
+
     case line : Line2D => {
       val top = Line2D(p0, p1)
       val right = Line2D(p1, p2)

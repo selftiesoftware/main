@@ -210,6 +210,54 @@ case class Arc2D(override val center : Vector2D, radius : Double, startAngle : D
 
     case collection : CollectionGeometry2D => collection.intersects(this)
 
+    //TODO: this is just copied from Segment2D eval. Tp and Tn is left out.
+    case line : Line2D => {
+      //TODO: a hack to prevent missing intersections when they are marginally off (0,00001 units or so)
+      val p1 = Vector2D(epsilon(line.p1.x),epsilon(line.p1.y))
+      val p2 = Vector2D(epsilon(line.p2.x),epsilon(line.p2.y))
+
+      val parallelVectorD = p2 - p1  //normalized vector (p2 moved)
+      val delta = p1 - this.center  //delta = p2 - the circle center. (CHECK IF THIS IS RIGHT)
+
+      val a = this.endPoint
+      val b = this.startPoint
+
+      val ParVLength = epsilon(parallelVectorD.length)
+      val ParVXDelta = epsilon(parallelVectorD * delta)
+      val deltaLength = epsilon(delta.length)
+      //define a circle which contains an arc implicitly      |X-C|^2 = R^2  C = center
+      //get intersections (aka Delta) = (D dot /\)^2 - |D|^2(|/\|^2 -R^2)     where |D| = length of the parallelVectorD
+      //the result is rounded to four decimals to reduce tolerances.
+      val intersectValue = math.round(epsilon(math.pow(ParVXDelta,2) - (math.pow(ParVLength,2) * (math.pow(deltaLength,2) - math.pow(this.radius,2)))) * 1000) /1000
+
+      //intersectValue < 0    no intersection
+      //intersectValue = 0    line tangent (one intersection)
+      //intersectValue > 0    two intersections
+
+      val tP = (-parallelVectorD * delta + math.sqrt(math.pow(ParVXDelta,2) - math.pow(ParVLength,2)*(math.pow(deltaLength,2) -math.pow(circle.radius,2)))) / math.pow(ParVLength,2)
+      val tN = (-parallelVectorD * delta - math.sqrt(math.pow(ParVXDelta,2) - math.pow(ParVLength,2)*(math.pow(deltaLength,2) -math.pow(circle.radius,2)))) / math.pow(ParVLength,2)
+
+      val int1 = p1 + parallelVectorD * tP
+      val int2 = p1 + parallelVectorD * tN
+
+      val ortVector = (b - a).normal
+
+      //evaluate if the intersections are on the arc (onArc should be >= 0)
+      val int1OnArc = (int1 - a) * ortVector
+      val int2OnArc = (int2 - a) * ortVector
+      val tPonArc = if(int1OnArc >= 0.00001) true else false
+      val tNonArc = if(int2OnArc >= 0.00001) true else false
+
+      //if both tP and tN are outside the range 0-1, there are no intersections:
+      //if( tP < -0.00001 && tP > 1.00001 && tN < -0.00001 && tN > 1.00001 ) false
+
+      //if one of tP of tN are in range 0-1, there is an intersection - if the respective intersection is on the arc segment:
+      //else if ((tP >= -0.00001 && tP <= 1.00001 && tPonArc) || (tN >= -0.00001 && tN <= 1.00001 && tNonArc)) true
+
+      //if intersectValue is zero, the segment is tangent to the arc (one intersection)
+      if(intersectValue == 0 && tPonArc && tNonArc) true else false
+    }
+
     case segment : Segment2D => {
 
       //TODO: a hack to prevent missing intersections when they are marginally off (0,00001 units or so)
