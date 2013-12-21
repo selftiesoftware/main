@@ -195,15 +195,15 @@ object SelectToggle {
               // Remove the index if no neighbors were found
               else xs - i
             })
-            println("SelectToggle on: " + ShapeSelector(xs))
+            //println("SelectToggle on: " + ShapeSelector(xs))
             Selection(drawing.selection.updated(id, drawing.selection(id)._1 -> ShapeSelector(xs)))
           }
           case EmptyShapeSelector => {
-            println("Select toggle 2222222222")
+            //println("Select toggle 2222222222")
             drawing.selection
           }
           case x => {
-            println("Select toggle 3333333: " + x)
+            //println("Select toggle 3333333: " + x)
             drawing.selection.remove(id)
           }
         }

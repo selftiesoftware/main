@@ -154,7 +154,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case ShapeSelector(2, 3) => twoPointPartialShape(p2, p3, isWidth = false)
     case ShapeSelector(0, 2) | ShapeSelector(1, 3) => Some(new PartialShape(this, transform))
     case x => {
-      println("Selection of a rectangle that way not implemented: " + x)
+      //println("Selection of a rectangle that way not implemented: " + x)
       None
     }
   }
@@ -169,7 +169,7 @@ case class RectangleShape(center : Vector2D, width : Double, height : Double, ro
     case ShapeSelector(2, 3) => (Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p2.transform(t), p3, attributes))),Traversable(new PartialShape(this, (t : TransformationMatrix) => PolylineShape(p3.transform(t),p0.transform(t),p1.transform(t),p2.transform(t)).addAttributes(attributes))))
     case ShapeSelector(0, 2) | ShapeSelector(1, 3) => (Traversable(new PartialShape(this, transform)),Traversable())
     case x => {
-      println("No method for displaying a rectangle selected in this manner is implemented: " + x)
+      //println("No method for displaying a rectangle selected in this manner is implemented: " + x)
       (Traversable(),Traversable())
     }
   }

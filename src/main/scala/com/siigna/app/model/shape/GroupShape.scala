@@ -58,13 +58,13 @@ case class GroupShape(shapes : Seq[Shape], attributes : Attributes) extends Coll
       }))
     }
     case x => {
-      println("Selection of a group shape that way not implemented: " + x)
+      //println("Selection of a group shape that way not implemented: " + x)
       None
     }
   }
 
   def getSelectedAndUnselectedParts(part : ShapeSelector) = {
-    println("getSelectedAndUnselectedParts not implemented for group shapes - probably not necessary")
+    //println("getSelectedAndUnselectedParts not implemented for group shapes - probably not necessary")
     (Traversable(),Traversable())
   }
 

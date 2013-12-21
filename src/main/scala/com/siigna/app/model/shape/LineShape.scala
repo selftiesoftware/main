@@ -56,7 +56,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
     case ShapeSelector(1) => Some(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes)))
     case FullShapeSelector | ShapeSelector(0,1) => Some(new PartialShape(this, transform))
     case x => {
-      println("Selection of a line that way not implemented: " + x)
+      //println("Selection of a line that way not implemented: " + x)
       None
     }
   }
@@ -71,7 +71,7 @@ case class LineShape(p1 : Vector2D, p2 : Vector2D, attributes : Attributes) exte
       case ShapeSelector(1) => (Traversable(),Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(p1, p2.transform(t), attributes))))
       case FullShapeSelector | ShapeSelector(0,1) => (Traversable(new PartialShape(this, transform)),Traversable())
       case x => {
-        println("No mmethod for displaying a line selected in this manner is implemented: " + x)
+        //println("No mmethod for displaying a line selected in this manner is implemented: " + x)
         (Traversable(),Traversable())
       }
     }
