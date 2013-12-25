@@ -22,7 +22,13 @@ class Connection(val url: String) {
     try {
       val conn = destination.openConnection.asInstanceOf[HttpURLConnection]
       conn.setConnectTimeout(5000)
-      Left(conn)
+      // Examine return code
+      val code = conn.getResponseCode
+      if (code >= 200 && code < 300) {
+        Left(conn)
+      } else {
+        Right(s"Error; code $code with message: ${conn.getResponseMessage}")
+      }
     } catch {
       case e : Throwable => Right("Error when opening TCP connection: " + e.getLocalizedMessage)
     }
