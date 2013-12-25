@@ -69,7 +69,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
       case ShapeSelector(0, 1, 2) => Some(tm => ArcShape(geometry.startPoint.transform(tm), geometry.midPoint.transform(tm), geometry.endPoint.transform(tm)))
       case EmptyShapeSelector => Some(tm => this)
       case x => {
-        println("Selection of an arc that way not implemented: " + x)
+        //println("Selection of an arc that way not implemented: " + x)
         None
       }
     }
@@ -80,7 +80,7 @@ case class ArcShape(center : Vector2D, radius : Double, startAngle : Double, ang
     case FullShapeSelector | ShapeSelector(0, 1, 2) => (Traversable( new PartialShape(this, transform)),Traversable())
     case ShapeSelector(_) | ShapeSelector(_,_) | EmptyShapeSelector  => (Traversable(),Traversable( new PartialShape(this, transform)))
     case x => {
-      println("No method for displaying an arc selected in this manner is implemented: " + x)
+      //println("No method for displaying an arc selected in this manner is implemented: " + x)
       (Traversable(),Traversable())
     }
   }

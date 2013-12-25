@@ -104,7 +104,7 @@ trait PolylineShape extends CollectionShape[BasicShape] {
       ))
     }
     case x => {
-      println("Selection of a polyline that way not implemented: " + x)
+      //println("Selection of a polyline that way not implemented: " + x)
       None
     }
   }
@@ -415,7 +415,7 @@ object PolylineShape {
                   else if (i > 0) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
                   else partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
                 }
-                case _ => println("Display of selection of the selected polyline subshape not implemented")
+                case _ => //println("Display of selection of the selected polyline subshape not implemented")
               }
             } else innerShapes(i) match {
               case _:PolylineLineShape => {
@@ -426,14 +426,14 @@ object PolylineShape {
                 else if (i > 0) partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
                 else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
               }
-              case _ => println("Display of selection of the selected polyline subshape not implemented")
+              case _ => //println("Display of selection of the selected polyline subshape not implemented")
             }
           }
         }
         (partShapesToHighlight,partShapesNotToHighlight)
       }
       case x => {
-        println("No method for displaying a polyline selected in this manner is implemented: " + x)
+        //println("No method for displaying a polyline selected in this manner is implemented: " + x)
         (Traversable(),Traversable())
       }
     }
@@ -542,21 +542,21 @@ object PolylineShape {
                   if (i > 0) partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
                   else partShapesToHighlight = partShapesToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
                 }
-                case _ => println("Display of selection of the selected polyline subshape not implemented")
+                case _ => //println("Display of selection of the selected polyline subshape not implemented")
               }
             } else innerShapes(i) match {
               case _:PolylineLineShape => {
                 if (i > 0) partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(innerShapes(i-1).point.transform(t), innerShapes(i).point.transform(t), attributes)))
                 else partShapesNotToHighlight = partShapesNotToHighlight ++ Traversable(new PartialShape(this, (t : TransformationMatrix) => LineShape(startPoint.transform(t), innerShapes(i).point.transform(t), attributes)))
               }
-              case _ => println("Display of selection of the selected polyline subshape not implemented")
+              case _ => //println("Display of selection of the selected polyline subshape not implemented")
             }
           }
         }
         (partShapesToHighlight,partShapesNotToHighlight)
       }
       case x => {
-        println("No method for displaying an open polyline selected in this manner is implemented: " + x)
+        //println("No method for displaying an open polyline selected in this manner is implemented: " + x)
         (Traversable(),Traversable())
       }
     }

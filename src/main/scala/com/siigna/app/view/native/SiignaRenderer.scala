@@ -95,13 +95,13 @@ trait SiignaRenderer extends Renderer {
             val corner = rect.p0
             graphics.AWTGraphics.drawImage(Siigna.imageBackground._1.get,corner.x.toInt,corner.y.toInt,width.toInt,height.toInt,null)
           }
-          case _ => println("could probably not cast "+r+" to rectangleShape; ")
+          case _ => //println("could probably not cast "+r+" to rectangleShape; ")
         }
       }
       catch {
         case e : Throwable => {
           Siigna.imageBackground = (None,None,0.0) //clear the placeholder if the image was deleted
-          println("error while painting the background image: "+e)
+          //println("error while painting the background image: "+e)
         }
       }
     }
