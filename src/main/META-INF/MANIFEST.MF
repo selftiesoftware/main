@@ -1,5 +1,9 @@
 Manifest-Version: 1.0
 Trusted-Library: true
 Application-Name: Siigna
+Application-Library-Allowable-Codebase: *
+Caller-Allowable-Codebase: *
+Codebase: *
+Permissions: all-permissions
 Main-Class: com.siigna.app.SiignaApplication
 

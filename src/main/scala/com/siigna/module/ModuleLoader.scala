@@ -50,7 +50,7 @@ object ModuleLoader {
   def initModule: Option[Module] = _initModule
 
   // The underlying class loader
-  protected var loader = new URLClassLoader(Array(), this.getClass.getClassLoader)
+  protected var loader = new URLClassLoader(Array(), Thread.currentThread().getContextClassLoader)
 
   // A very crude synchronous lock
   protected val loaderLock = new Lock()
