@@ -445,7 +445,27 @@ object View extends View {
   // The canvas of the View
   private var _canvas : Option[Canvas] = None
 
+  //variables used for benchmarking: show the time needed to cycle through the paint loop a given number of times.
+  //var iterationNr = 0
+  //var startTime = 0L
+  //var endTime = 0L
+
+  //the place where shapes are drawn on the canvas.
   def paint(screenGraphics : AWTGraphics, drawing : Drawing, interface : Option[Interface] = None) {
+
+    /* benchmark test: time to draw ten times
+
+    if(iterationNr == 0) {
+      startTime = System.currentTimeMillis()
+      iterationNr += 1
+    } else if(iterationNr == 10) {
+      endTime = System.currentTimeMillis()
+      iterationNr = 0
+      println("seconds to paint ten times: "+(endTime - startTime).toDouble/1000)
+    } else iterationNr += 1
+
+    */
+
     // Start the fps counter
     val fpsStart = System.currentTimeMillis()
 
@@ -481,6 +501,9 @@ object View extends View {
         drawing.selection.shapes.foreach(s => {
           //First we draw the part of the selection, that the user interprets as selected.
           //Which parts it is, is defined for each shape:
+
+          try {
+
           val chosenAndNotChosenParts = s._2.getSelectedAndUnselectedParts(drawing.selection.get(s._1).get._2)
 
           //make sure rotate or scale is not active -the selection is transformed wrong and should not be diplayed then.
@@ -492,7 +515,8 @@ object View extends View {
                 val s = ps.apply(drawingTransformation)
                 s match {
                   case l : LineShape => graphics.draw(LineShape(l.p1,l.p2.transform(drawingTransformation)).setAttribute("Color" -> color))
-                  case _ =>
+                  case r : RectangleShape => graphics.draw(ps.apply(drawingTransformation).setAttribute("Color" -> color))
+                  case e =>
                 }
               }
               case _ => {
@@ -504,6 +528,9 @@ object View extends View {
           chosenAndNotChosenParts._2.foreach(ps => {
             graphics.draw(ps.apply(drawingTransformation))
           })
+          } catch {
+            case e : Throwable => println("error when drawing selection: "+e)
+          }
         })
       }
 
