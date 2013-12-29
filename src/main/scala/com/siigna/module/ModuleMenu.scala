@@ -19,16 +19,15 @@
 
 package com.siigna.module
 
-import java.awt._
+import java.awt.Color
 
+import com.siigna._
 import com.siigna.app.Siigna
 import com.siigna.util.geom.Vector2D
-import com.siigna.app.view.View
-import com.siigna._
-import app.model.shape.ArcShape
 import app.model.shape.LineShape
 import app.model.shape.PolylineShape
 import app.model.shape.TextShape
+import util.collection.Attributes
 
 /**
  * A menu for viewing and configuring [[com.siigna.module.ModulePackage]]s.
@@ -62,14 +61,20 @@ object ModuleMenu {
   var lastSyncShow : Double = 0
   var lastTimeForSync : Double = 1000
 
-  def isHighlighted(m : Vector2D) : Boolean = {
-    val in = m.x < 290 & m.y < 30
-    //if (in) Siigna.setCursor(Cursors.default) else Siigna.setCursor(Cursors.crosshair)
+  def menuIconHighlight(m : Vector2D) : Boolean = {
+    val in = m.x < 70 &  m.y < 80
     in
+  }
+
+    //an icon for opening the radial menu
+  def radialMenuButton : Traversable[Shape] = {
+    Traversable(CircleShape(Vector2D(50,70),24).addAttributes("StrokeWidth" -> 0.8),TextShape("TOOLS", Vector2D(50,70),14,Attributes("TextAlignment" -> Vector2D(0.5, 0.5))))
   }
 
   def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
 
+    //draw an icon for opening the radial menu
+    radialMenuButton.foreach(s => g draw s)
 
     g setColor menuColor
     g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
