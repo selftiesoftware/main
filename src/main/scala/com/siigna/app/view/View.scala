@@ -26,7 +26,7 @@ import java.awt.{Graphics => AWTGraphics, _}
 import com.siigna.app.model.Drawing
 import com.siigna.util.Log
 import com.siigna.app.view.native.{SiignaRenderer, SiignaGraphics}
-import com.siigna.app.model.shape.TextShape
+import com.siigna.app.model.shape.{LineShape, RectangleShape, PartialShape, TextShape}
 import com.siigna.module.ModuleMenu
 
 /**
@@ -485,7 +485,20 @@ object View extends View {
 
           //make sure rotate or scale is not active -the selection is transformed wrong and should not be diplayed then.
           chosenAndNotChosenParts._1.foreach(ps => {
-            graphics.draw(ps.apply(drawingTransformation).setAttribute("Color" -> color))
+            //TODO: complexRect active segments p1 or p2 is transformed wrong. Probably an error in RectangleShape.
+            //for now it is fixed by not transforming one point of the selected rectangle segment.
+            ps.part match {
+              case c : RectangleShape => {
+                val s = ps.apply(drawingTransformation)
+                s match {
+                  case l : LineShape => graphics.draw(LineShape(l.p1,l.p2.transform(drawingTransformation)).setAttribute("Color" -> color))
+                  case _ =>
+                }
+              }
+              case _ => {
+                graphics.draw(ps.apply(drawingTransformation).setAttribute("Color" -> color))
+              }
+            }
           })
           //Then we draw the remaining part(s) of the shapes:
           chosenAndNotChosenParts._2.foreach(ps => {
