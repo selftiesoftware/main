@@ -114,6 +114,7 @@ trait SiignaAttributes extends mutable.Map[String, Any] with AttributesLike {
   def self = toMap
 
   // Set the values
+  this("activeLineWidth")       = 0.18
   this("antiAliasing")          = true
   this("autoScaling")           = true
   this("scaling")               = 1.0
