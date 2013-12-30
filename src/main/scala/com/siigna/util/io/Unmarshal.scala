@@ -109,10 +109,9 @@ object Unmarshal {
     val expectedType = typeOf[T]
     if (expectedType =:= typeOf[Nothing]) throw new IllegalArgumentException("Unmarshal: Please specify return type")
 
-    val in = getInputStream(input)
-
     // Read the "main" object
     try {
+      val in = getInputStream(input)
       val x = in.readObject[T]
       Log.debug("Unmarshal: Successfully unmarshalled object " + x)
       Some(x)
