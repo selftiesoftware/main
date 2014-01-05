@@ -30,7 +30,7 @@ class RESTGateway(val address : String) {
    * @return  Either a boolean indicating success or failure or a String indicating an error.
    */
   def cleanDrawing(drawingId : Long, session : Session) : Either[Boolean, String] = {
-    endpoint.put(address + "/clean/" + drawingId + RESTGateway.sessionToUrl(session), Array()).left
+    endpoint.put(s"$address/drawing/${session.drawing}/clean/$drawingId" + RESTGateway.sessionToUrl(session), Array()).left
             .flatMap( bytes => Left(new String(bytes).equals("ok")))
   }
 
@@ -40,7 +40,7 @@ class RESTGateway(val address : String) {
    * @param session  The current session
    */
   def getAction(actionId:Int, session:Session) : Either[RemoteAction, String] = {
-    endpoint.get(address+"/action/"+actionId+RESTGateway.sessionToUrl(session)).left.flatMap(
+    endpoint.get(s"$address/drawing/${session.drawing}/action/$actionId" + RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[RemoteAction](_) match {
         case Some(action) => Left(action)
         case _ => Right("Could not de-serialise to a remote action")
@@ -54,7 +54,8 @@ class RESTGateway(val address : String) {
    * @param session  The current session
    */
   def getActions(actionIds : Seq[Int], session : Session) : Either[Seq[RemoteAction], String] = {
-    endpoint.get(address+"/actions/"+actionIds.mkString("/")+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(s"$address/drawing/${session.drawing}/actions/${actionIds.mkString("/")}" + RESTGateway.sessionToUrl(session))
+      .left.flatMap( bytes =>
       try {
         Unmarshal[Seq[RemoteAction]](bytes) match {
           case Some(actions) => Left(actions)
@@ -71,7 +72,7 @@ class RESTGateway(val address : String) {
    * @param session: specifies the drawing
    */
   def getActionId(session:Session) : Either[Int, String] = {
-    endpoint.get(address+"/actionId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(s"$address/drawing/${session.drawing}/action/latestId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
       try {
         Left(java.lang.Integer.parseInt(new String(bytes)))
       } catch {
@@ -85,11 +86,11 @@ class RESTGateway(val address : String) {
    * @return a new drawing id from the server
    */
   def getNewDrawingId(session:Session) : Either[Long, String] = {
-    endpoint.get(address+"/drawingId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(s"$address/drawing/new" + RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
       try {
         Left(java.lang.Long.parseLong(new String(bytes)))
       } catch {
-        case _ : Throwable => Right("Unable to case bytes to long")
+        case _ : Throwable => Right("Unable to cast bytes to long")
       }
     )
   }
@@ -102,21 +103,22 @@ class RESTGateway(val address : String) {
   def getDrawing(drawingId: Long, session:Session) : Either[Model, String] = {
 
     // Try to get the data
-    endpoint.get(address+"/drawing/data/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
+    endpoint.get(s"$address/drawing/$drawingId" + RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Model](_) match {
         case Some(model) => {
           // We got the data (model), now get the meta data
-          endpoint.get(address+"/drawing/meta/"+drawingId+RESTGateway.sessionToUrl(session)).left.flatMap(
-            Unmarshal[Map[String,Int]](_) match {
+          val a = s"$address/drawing/${session.drawing}/metaData" + RESTGateway.sessionToUrl(session)
+          endpoint.get(a).left.flatMap( bytes => {
+            Unmarshal[Map[String,String]](bytes) match {
 
-              case Some(m:Map[String,Int]) => {
+              case Some(m:Map[String,Any]) => {
 
                 (m.get("lastaction"),m.get("openness")) match {
 
-                  case (Some(lastaction:Int),Some(openness:Int)) => {
+                  case (Some(lastaction),Some(openness)) => {
                     Left(
-                      model.addAttribute("lastAction",lastaction)
-                           .addAttribute("openness",openness.toChar)
+                      model.addAttribute("lastAction",lastaction.toInt)
+                           .addAttribute("openness",openness.head)
                            .addAttribute("id",drawingId)
                     )
                   }
@@ -127,7 +129,7 @@ class RESTGateway(val address : String) {
 
               case None => Right("Couldn't get meta data")
             }
-          )
+          })
         }
         case _ => Right("Could get model (data)")
       }
@@ -140,7 +142,7 @@ class RESTGateway(val address : String) {
    * @param session: Requires auth
    */
   def getShapeIds(amount:Int, session:Session) : Either[Range, String] = {
-    endpoint.get(address+"/shapeId/"+amount+RESTGateway.sessionToUrl(session)).left.flatMap(
+    endpoint.get(s"$address/drawing/${session.drawing}/shapeIds/$amount" + RESTGateway.sessionToUrl(session)).left.flatMap(
       Unmarshal[Range](_) match {
         case Some(r) => Left(r)
         case _ => Right("Could not de-serialise the model")
@@ -162,11 +164,12 @@ class RESTGateway(val address : String) {
    */
   def setAction(action:RemoteAction,session:Session) : Either[Int, String] = {
     val actionBytes = Marshal(action)
-    endpoint.post(address+"/action"+RESTGateway.sessionToUrl(session), actionBytes).left.flatMap( bytes =>
+    endpoint.post(s"$address/drawing/${session.drawing}/action" + RESTGateway.sessionToUrl(session), actionBytes)
+      .left.flatMap( bytes =>
       try {
-        Left(java.lang.Integer.parseInt(new String(bytes)))
+        Left(new String(bytes).toInt)
       } catch {
-        case _ : Throwable => Right("Unable to case bytes to long")
+        case _ : Throwable => Right("Unable to cast bytes to long")
       }
     )
   }
@@ -179,12 +182,12 @@ class RESTGateway(val address : String) {
    */
   def setActions(actions:Seq[RemoteAction],session:Session) : Either[Seq[Int], String] = {
     val actionBytes = Marshal(actions)
-    endpoint.post(address+"/actions"+RESTGateway.sessionToUrl(session), actionBytes).left.flatMap(
-      Unmarshal[Seq[Int]](_) match {
-        case Some(r) => Left(r)
-        case _ => {
-          Right("Could not de-serialise the model")
-        }
+    endpoint.post(s"$address/drawing/${session.drawing}/actions" + RESTGateway.sessionToUrl(session), actionBytes)
+      .left.flatMap( bytes =>
+      try {
+        Left(new String(bytes).split(",").map(_.toInt))
+      } catch {
+        case _ : Throwable => Right("Unable to cast bytes to sequence of longs")
       }
     )
   }

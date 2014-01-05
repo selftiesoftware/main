@@ -23,7 +23,7 @@ import com.siigna.app.Siigna
 class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
   //val client  = new RESTGateway("http://app.siigna.com")
-  val client  = new RESTGateway("http://localhost:20004")
+  val client  = new RESTGateway("http://localhost:8080")
   val drawingId = client.getNewDrawingId(Session(0, Siigna.user)).left.get
   val session = Session(drawingId, Siigna.user)
 
@@ -40,6 +40,7 @@ class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
       val iRes = client.getShapeIds(1, session)
 
       Then("It should return an Int")
+
       val range = iRes.left.get
       range.size should equal (1)
       val id = range.head
@@ -50,7 +51,6 @@ class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
       When("Dispatching it to the gateway")
       val res = client.setAction(action, session)
-
       Then("The server should return an id")
       val aId = res.left.get
       aId should be >= 0

@@ -119,7 +119,7 @@ class RESTEndpoint {
           _retries += 1
 
           if (_retries % 10 == 0) {
-            Log.warning(s"Server: $message.")
+            Log.warning(s"Server: Get error ($message) with query: ${connection.url}.")
           }
 
           // Retry

@@ -29,7 +29,8 @@ class Connection(val url: String) {
 
   def respondAndClose(con:HttpURLConnection) : Either[Array[Byte], String] = {
     try {
-      if (con.getResponseCode == 200) {
+      val code = con.getResponseCode
+      if (code >= 200 && code < 300) {
         val resp = Connection.decode(con.getInputStream)
         con.disconnect()
         Left(resp)
