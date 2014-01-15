@@ -68,6 +68,7 @@ class Connection(val url: String) {
       con.setUseCaches(false)
 
       con.setRequestMethod(method)
+      con.setRequestProperty("Accept", "application/ubjson")
 
       val out = con.getOutputStream
 

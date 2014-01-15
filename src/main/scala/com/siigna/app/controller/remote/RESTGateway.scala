@@ -103,8 +103,8 @@ class RESTGateway(val address : String) {
   def getDrawing(drawingId: Long, session:Session) : Either[Model, String] = {
 
     // Try to get the data
-    endpoint.get(s"$address/drawing/$drawingId" + RESTGateway.sessionToUrl(session)).left.flatMap(
-      Unmarshal[Model](_) match {
+    endpoint.get(s"$address/drawing/$drawingId" + RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+      Unmarshal[Model](bytes) match {
         case Some(model) => {
           // We got the data (model), now get the meta data
           val a = s"$address/drawing/${session.drawing}/metaData" + RESTGateway.sessionToUrl(session)
@@ -131,7 +131,7 @@ class RESTGateway(val address : String) {
             }
           })
         }
-        case _ => Right("Could get model (data)")
+        case x => Right("Could not read model from bytes: " + bytes.mkString(", "))
       }
     )
   }

@@ -22,8 +22,8 @@ import com.siigna.app.Siigna
  */
 class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
-  //val client  = new RESTGateway("http://app.siigna.com")
-  val client  = new RESTGateway("http://localhost:8080")
+  val client  = new RESTGateway("http://app.siigna.com")
+  //val client  = new RESTGateway("http://localhost:8080")
   val drawingId = client.getNewDrawingId(Session(0, Siigna.user)).left.get
   val session = Session(drawingId, Siigna.user)
 
@@ -124,7 +124,7 @@ class RESTGatewaySpec extends FunSpec with ShouldMatchers with GivenWhenThen {
 
       When("Getting the existing drawing")
       val iRes = client.getDrawing(drawingId, session)
-
+      println(iRes)
       Then("The new drawing should be returned")
       val drawing = iRes.left.get
       drawing.attributes.long("id").get should equal(drawingId)
