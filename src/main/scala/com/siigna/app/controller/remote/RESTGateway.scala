@@ -19,7 +19,7 @@ class RESTGateway(val address : String) {
    * @return whether the current server is alive
    */
   def alive : Boolean = {
-    val response = new Connection(address).get
+    val response = new Connection(address, "text/plain").get
     response.left.exists(new String(_).equals("Siigna"))
   }
 
@@ -72,13 +72,15 @@ class RESTGateway(val address : String) {
    * @param session: specifies the drawing
    */
   def getActionId(session:Session) : Either[Int, String] = {
-    endpoint.get(s"$address/drawing/${session.drawing}/action/latestId"+RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
-      try {
-        Left(java.lang.Integer.parseInt(new String(bytes)))
-      } catch {
-        case _ : Throwable => Right(new String(bytes))
-      }
-    )
+    endpoint
+      .get(s"$address/drawing/${session.drawing}/action/latestId"+RESTGateway.sessionToUrl(session), "text/plain")
+      .left.flatMap( bytes =>
+        try {
+          Left(java.lang.Integer.parseInt(new String(bytes)))
+        } catch {
+          case _ : Throwable => Right(new String(bytes))
+        }
+      )
   }
 
   /**
@@ -86,7 +88,7 @@ class RESTGateway(val address : String) {
    * @return a new drawing id from the server
    */
   def getNewDrawingId(session:Session) : Either[Long, String] = {
-    endpoint.get(s"$address/drawing/new" + RESTGateway.sessionToUrl(session)).left.flatMap( bytes =>
+    endpoint.get(s"$address/drawing/new" + RESTGateway.sessionToUrl(session), "text/plain").left.flatMap( bytes =>
       try {
         Left(java.lang.Long.parseLong(new String(bytes)))
       } catch {
@@ -164,7 +166,7 @@ class RESTGateway(val address : String) {
    */
   def setAction(action:RemoteAction,session:Session) : Either[Int, String] = {
     val actionBytes = Marshal(action)
-    endpoint.post(s"$address/drawing/${session.drawing}/action" + RESTGateway.sessionToUrl(session), actionBytes)
+    endpoint.post(s"$address/drawing/${session.drawing}/action" + RESTGateway.sessionToUrl(session), actionBytes, "text/plain")
       .left.flatMap( bytes =>
       try {
         Left(new String(bytes).toInt)
@@ -182,7 +184,7 @@ class RESTGateway(val address : String) {
    */
   def setActions(actions:Seq[RemoteAction],session:Session) : Either[Seq[Int], String] = {
     val actionBytes = Marshal(actions)
-    endpoint.post(s"$address/drawing/${session.drawing}/actions" + RESTGateway.sessionToUrl(session), actionBytes)
+    endpoint.post(s"$address/drawing/${session.drawing}/actions" + RESTGateway.sessionToUrl(session), actionBytes, "text/plain")
       .left.flatMap( bytes =>
       try {
         Left(new String(bytes).split(",").map(_.toInt))

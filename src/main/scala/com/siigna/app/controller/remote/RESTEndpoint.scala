@@ -56,8 +56,8 @@ class RESTEndpoint {
    * call until something is received, being an error or the actual data.
    * @param url  The url of the GET request
    */
-  def get(url : String) : Either[Array[Byte], String] = {
-    dispatch(new Connection(url), _.get)
+  def get(url : String, accept : String = "application/ubjson") : Either[Array[Byte], String] = {
+    dispatch(new Connection(url, accept), _.get)
   }
 
   /**
@@ -66,8 +66,8 @@ class RESTEndpoint {
    * @param url  The URL of the POST request
    * @param message  The message to send as a remote command
    */
-  def post(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
-    dispatch(new Connection(url), _.post(message))
+  def post(url : String, message : Array[Byte], accept : String = "application/ubjson") : Either[Array[Byte], String] = {
+    dispatch(new Connection(url, accept), _.post(message))
   }
 
   /**
@@ -76,8 +76,8 @@ class RESTEndpoint {
    * @param url  The URL of the PUT request
    * @param message  The message to send as a remote command
    */
-  def put(url : String, message : Array[Byte]) : Either[Array[Byte], String] = {
-    dispatch(new Connection(url), _.put(message))
+  def put(url : String, message : Array[Byte], accept : String = "application/ubjson") : Either[Array[Byte], String] = {
+    dispatch(new Connection(url, accept), _.put(message))
   }
 
   /**

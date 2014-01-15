@@ -6,8 +6,10 @@ import java.io.{EOFException, ByteArrayOutputStream}
 
 /**
  * Class used for communicating with the siigna HTTP server
+ * @param url  The url for the HTTP connection
+ * @param accept  The mime-type to accept as return-value
  */
-class Connection(val url: String) {
+class Connection(val url: String, accept : String) {
 
   /**
    * The destination of the requests.
@@ -52,6 +54,7 @@ class Connection(val url: String) {
     open.left.flatMap( con => {
       con.setDoInput(true)
       con.setUseCaches(false)
+      con.setRequestProperty("Accept", accept)
 
       respondAndClose(con)
     })
@@ -68,7 +71,7 @@ class Connection(val url: String) {
       con.setUseCaches(false)
 
       con.setRequestMethod(method)
-      con.setRequestProperty("Accept", "application/ubjson")
+      con.setRequestProperty("Accept", accept)
 
       val out = con.getOutputStream
 
@@ -78,7 +81,7 @@ class Connection(val url: String) {
 
         respondAndClose(con)
       } catch {
-        case e : Throwable => Right("Error when writin data to stream: " + e.getLocalizedMessage)
+        case e : Throwable => Right("Error when writing data to stream: " + e.getLocalizedMessage)
       } finally {
         out.close()
       }
