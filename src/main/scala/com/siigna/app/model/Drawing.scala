@@ -34,6 +34,10 @@ import com.siigna.util.Log
  */
 trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialModel {
 
+  //calculates the paper header whenever it changes
+  // The private boundary instance
+  private var _boundary: Option[SimpleRectangle2D] = None
+
   /**
    * The boundary from the current content of the Model.
    * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
@@ -42,7 +46,16 @@ trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialMode
    *
    * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
    */
-  def boundary: SimpleRectangle2D
+  def boundary: SimpleRectangle2D = {
+    if (_boundary.isEmpty) {
+      try {
+        _boundary = Some(calculateBoundary())
+      } catch {
+        case e: Throwable => Log.error("Drawing: Error when creating boundary: ", e)
+      }
+    }
+    _boundary.getOrElse(SimpleRectangle2D(0, 0, 1, 1))
+  }
 
   def self = model.shapes.withDefault(id => apply(localIdMap(id)))
 
@@ -180,20 +193,4 @@ object Drawing extends Drawing {
 
   // Calculates the boundary of the model whenever it changes
   addActionListener((_, _) => _boundary = Some(calculateBoundary()))
-
-  //calculates the paper header whenever it changes
-
-  // The private boundary instance
-  private var _boundary: Option[SimpleRectangle2D] = None
-
-  def boundary: SimpleRectangle2D = {
-    if (_boundary.isEmpty) {
-      try {
-        _boundary = Some(calculateBoundary())
-      } catch {
-        case e: Throwable => Log.error("Drawing: Error when creating boundary: ", e)
-      }
-    }
-    _boundary.getOrElse(SimpleRectangle2D(0, 0, 1, 1))
-  }
 }
