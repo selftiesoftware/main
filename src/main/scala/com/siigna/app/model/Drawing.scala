@@ -23,7 +23,6 @@ import shape.Shape
 import collection.immutable.MapProxy
 import com.siigna.app.Siigna
 import com.siigna.util.geom.SimpleRectangle2D
-import com.siigna.app.view.View
 import com.siigna.util.Log
 
 /**
@@ -46,6 +45,71 @@ trait Drawing extends SelectableModel with MapProxy[Int, Shape] with SpatialMode
   def boundary: SimpleRectangle2D
 
   def self = model.shapes.withDefault(id => apply(localIdMap(id)))
+
+  /**
+   * The boundary from the current content of the Model.
+   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
+   * This is done in order to make sure that the print viewed on page is the
+   * actual print you get.
+   *
+   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
+   */
+  def calculateBoundary() = {
+    val newBoundary = SiignaTree.mbr(rtree)
+    val size = (newBoundary.bottomRight - newBoundary.topLeft).abs
+    val center = newBoundary.center
+    //val proportion   = 1.41421356
+
+    // Fetches the values for the format
+    val printMargin = Siigna.double("printMargin").getOrElse(13.0)
+    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
+    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
+
+    // If the format is too small for the least proportion, then up the size
+    // one format.
+    // TODO: Optimize!
+
+    //calculate the scale automatically. Results in 1:1, 1:2,1:5,1:10,1:20 etc.
+    if (Siigna("autoScaling") == true) {
+      val list = List[Double](2, 2.5, 2)
+      var take = 0 // which element to "take" from the above list
+      while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
+        val factor = list(take)
+        aFormatMin *= factor
+        aFormatMax *= factor
+        take = if (take < 2) take + 1 else 0
+      }
+    }
+    // calculate the paper size on the basis of the scale factor specified by the user
+    else {
+      if (Siigna.double("scale").isDefined) aFormatMin *= Siigna.double("scale").get else aFormatMin
+      if (Siigna.double("scale").isDefined) aFormatMax *= Siigna.double("scale").get else aFormatMax
+    }
+
+    // Augment the "paper" with the print margins.
+    aFormatMin += printMargin
+    aFormatMax += printMargin
+    // Set the boundary-rectangle.
+    if (size.x >= size.y) {
+      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
+        center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
+    } else {
+      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
+        center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
+    }
+  }
+
+  /**
+   * The scale of the height and width boundary of the model, or in other words, the relation between the height
+   * and width of the paper and the maximum print scale.
+   *
+   * Uses toInt since it always rounds down to an integer.
+   */
+  def boundaryScale: Int = {
+    var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
+    //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
+    scale - 1
+  }
 }
 
 /**
@@ -112,8 +176,6 @@ object Drawing extends Drawing {
      * A drawing cannot be edited, but can be copied to the other users accounts.
      */
     val COPY = Value('c')
-
-    // val PRINT - TODO
   }
 
   // Calculates the boundary of the model whenever it changes
@@ -133,70 +195,5 @@ object Drawing extends Drawing {
       }
     }
     _boundary.getOrElse(SimpleRectangle2D(0, 0, 1, 1))
-  }
-
-  /**
-   * The boundary from the current content of the Model.
-   * The rectangle returned fits an A-paper format, but <b>a margin is added</b>.
-   * This is done in order to make sure that the print viewed on page is the
-   * actual print you get.
-   *
-   * @return A rectangle in an A-paper format (margin included). The scale is given in <code>boundaryScale</code>.
-   */
-  def calculateBoundary() = {
-    val newBoundary = SiignaTree.mbr(rtree)
-    val size = (newBoundary.bottomRight - newBoundary.topLeft).abs
-    val center = newBoundary.center
-    //val proportion   = 1.41421356
-
-    // Fetches the values for the format
-    val printMargin = Siigna.double("printMargin").getOrElse(13.0)
-    var aFormatMin = Siigna.double("printFormatMin").getOrElse(210.0)
-    var aFormatMax = Siigna.double("printFormatMax").getOrElse(297.0)
-
-    // If the format is too small for the least proportion, then up the size
-    // one format.
-    // TODO: Optimize!
-
-    //calculate the scale automatically. Results in 1:1, 1:2,1:5,1:10,1:20 etc.
-    if (Siigna("autoScaling") == true) {
-      val list = List[Double](2, 2.5, 2)
-      var take = 0 // which element to "take" from the above list
-      while (aFormatMin < scala.math.min(size.x, size.y) || aFormatMax < scala.math.max(size.x, size.y)) {
-        val factor = list(take)
-        aFormatMin *= factor
-        aFormatMax *= factor
-        take = if (take < 2) take + 1 else 0
-      }
-    }
-    // calculate the paper size on the basis of the scale factor specified by the user
-    else {
-      if (Siigna.double("scale").isDefined) aFormatMin *= Siigna.double("scale").get else aFormatMin
-      if (Siigna.double("scale").isDefined) aFormatMax *= Siigna.double("scale").get else aFormatMax
-    }
-
-    // Augment the "paper" with the print margins.
-    aFormatMin += printMargin
-    aFormatMax += printMargin
-    // Set the boundary-rectangle.
-    if (size.x >= size.y) {
-      SimpleRectangle2D(center.x - aFormatMax * 0.5, center.y - aFormatMin * 0.5,
-        center.x + aFormatMax * 0.5, center.y + aFormatMin * 0.5)
-    } else {
-      SimpleRectangle2D(center.x - aFormatMin * 0.5, center.y - aFormatMax * 0.5,
-        center.x + aFormatMin * 0.5, center.y + aFormatMax * 0.5)
-    }
-  }
-
-  /**
-   * The scale of the height and width boundary of the model, or in other words, the relation between the height
-   * and width of the paper and the maximum print scale.
-   *
-   * Uses toInt since it always rounds down to an integer.
-   */
-  def boundaryScale: Int = {
-    var scale = math.ceil(scala.math.max(boundary.width, boundary.height) / Siigna.double("printFormatMax").getOrElse(297.0).toInt).toInt
-    //TODO: the scale is one int to high, it is currently fixed by subtracting one, but maybe it should be revised??
-    scale - 1
   }
 }
