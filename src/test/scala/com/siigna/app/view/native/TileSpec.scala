@@ -35,7 +35,7 @@ class TileSpec extends FunSpec with ShouldMatchers {
   describe("A Tile") {
 
     val drawing = new Drawing {
-      def boundary: SimpleRectangle2D = SimpleRectangle2D(-10, -10, 10, 10)
+      override def boundary: SimpleRectangle2D = SimpleRectangle2D(-10, -10, 10, 10)
     }
 
     val view = new View {

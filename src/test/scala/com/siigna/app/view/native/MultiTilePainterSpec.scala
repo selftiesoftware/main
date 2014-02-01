@@ -28,7 +28,7 @@ import java.awt.Graphics
 
 object MultiTilePainterSpec {
   val d = new Drawing {
-    def boundary: SimpleRectangle2D = SimpleRectangle2D(-10, -10, 10, 10)
+    override def boundary: SimpleRectangle2D = SimpleRectangle2D(-10, -10, 10, 10)
   }
   val v = new View {
     def paint(screenGraphics: Graphics, drawing: Drawing, interface: Option[Interface]) {}

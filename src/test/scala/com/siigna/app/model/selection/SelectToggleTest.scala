@@ -38,7 +38,7 @@ class SelectToggleTest extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   before {
     drawing = new Drawing {
-      val boundary = SimpleRectangle2D(0, 0, 0, 0)
+      override def boundary = SimpleRectangle2D(0, 0, 0, 0)
       model = new Model(Map(
         -1 -> line,
         -2 -> openPL,

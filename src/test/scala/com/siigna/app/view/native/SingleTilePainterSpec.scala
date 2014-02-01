@@ -30,7 +30,7 @@ import org.scalatest.FunSpec
  */
 class SingleTilePainterSpec extends SingleTilePainter(
   new Drawing {
-    def boundary: SimpleRectangle2D = SimpleRectangle2D(-1, -1, 1, 1)
+    override def boundary: SimpleRectangle2D = SimpleRectangle2D(-1, -1, 1, 1)
   },
   new View {
     def screen = SimpleRectangle2D(0, 0, 1, 1)

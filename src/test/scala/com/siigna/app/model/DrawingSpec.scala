@@ -36,7 +36,7 @@ import com.siigna.app.model.shape.LineShape
 class DrawingSpec extends FunSpec with ShouldMatchers {
 
   val d = new Drawing() {
-    def boundary: SimpleRectangle2D = SimpleRectangle2D(0, 0, 10, 10)
+    override def boundary: SimpleRectangle2D = SimpleRectangle2D(0, 0, 10, 10)
   }
 
   describe("A Drawing") {

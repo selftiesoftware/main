@@ -30,7 +30,7 @@ import com.siigna.app.model.Drawing
  */
 class TilePainterSpec extends TilePainter with FunSpec with ShouldMatchers {
 
-  protected val drawing = new Drawing { def boundary = SimpleRectangle2D(0, 0, 1, 1) }
+  protected val drawing = new Drawing { override def boundary = SimpleRectangle2D(0, 0, 1, 1) }
 
   protected def update() : TilePainter = this
 
