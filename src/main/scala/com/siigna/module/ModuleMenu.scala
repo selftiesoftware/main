@@ -53,10 +53,10 @@ object ModuleMenu {
   val logoFillX = logoFill.map(_.x.toInt).toArray
   val logoFillY = logoFill.map(_.y.toInt).toArray
 
-  val isSyncing : TextShape = TextShape("synchronising with server...",Vector2D(120,9),11).addAttribute("Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
-  val isSynced : TextShape = TextShape("all changes saved",Vector2D(130,9),12).addAttribute(("Color" -> new Color(0.10f, 0.95f, 0.10f, 1.00f)))
-  val isOffline1 : TextShape = TextShape("offline", Vector2D(130, 7), 11).addAttribute("Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
-  val isOffline2 : TextShape = TextShape("changes will not be stored!", Vector2D(130, 17), 10)
+  val isSyncing : TextShape = TextShape("synchronising..",Vector2D(30,14),14).addAttributes("TextAlignment" -> Vector2D(0, 0.5),"Color" -> new Color(0.95f, 0.12f, 0.00f, 1.00f))
+  val isSynced : TextShape = TextShape("changes saved",Vector2D(30,14),14).addAttributes("TextAlignment" -> Vector2D(0, 0.5),"Color" -> new Color(0.00f, 0.65f, 0.00f, 1.00f))
+  val isOffline1 : TextShape = TextShape("offline", Vector2D(30, 14), 14).addAttributes("TextAlignment" -> Vector2D(0, 0.5),"Color" -> new Color(0.95f, 0.12f, 0.30f, 1.00f))
+  val isOffline2 : TextShape = TextShape("changes will not be stored!", Vector2D(70, 25), 10)
 
   var lastSyncShow : Double = 0
   var lastTimeForSync : Double = 1000
@@ -68,7 +68,24 @@ object ModuleMenu {
 
     //an icon for opening the radial menu
   def radialMenuButton : Traversable[Shape] = {
-    Traversable(CircleShape(Vector2D(50,70),24).addAttributes("StrokeWidth" -> 0.8),TextShape("TOOLS", Vector2D(50,70),14,Attributes("TextAlignment" -> Vector2D(0.5, 0.5))))
+    Traversable(CircleShape(Vector2D(50,70),26).addAttributes("StrokeWidth" -> 0.8),TextShape("TOOLS", Vector2D(50,70),14,Attributes("TextAlignment" -> Vector2D(0.5, 0.5))))
+  }
+
+  //read the title of the active module
+  def activeToolFeedback() : Option[String] = {
+    val m = com.siigna.module.ModuleLoader.initModule
+    if(m.isDefined) {
+      val active = m.get.child
+      if(active.isDefined) {
+        active.toString match {
+          case "Some(Input)" => None
+          case _ => {
+            Some(active.get.toString)
+          }
+        }
+
+      } else None
+    } else None
   }
 
   def paint (g : com.siigna.app.view.Graphics, t : TransformationMatrix) {
@@ -76,14 +93,14 @@ object ModuleMenu {
     //draw an icon for opening the radial menu
     radialMenuButton.foreach(s => g draw s)
 
-    g setColor menuColor
-    g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
+    //g setColor menuColor
+    //g.AWTGraphics.fillPolygon(logoFillX, logoFillY, logoFill.size)
 
     //draw online and sync feedback
     if(Siigna.isOnline && Siigna("isLive") == true) {
       if(Siigna.isSyncronizing && System.currentTimeMillis() > Siigna.lastSync + 1000) {
         lastSyncShow = System.currentTimeMillis()
-        lastTimeForSync = (System.currentTimeMillis() - Siigna.lastSync)
+        lastTimeForSync = System.currentTimeMillis() - Siigna.lastSync
         g draw isSyncing
         //Time after syn complete the sync-indicater stays red (necessary since there sometimes are two sync actions
         // to complete a save procedure - and we only want it to turn red one time...
@@ -96,10 +113,13 @@ object ModuleMenu {
     }
 
 
-    logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
-    frameLogo.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
-    g draw TextShape("SIIGNA v1.0", Vector2D(30,6),9)
-    g draw TextShape("BETA", Vector2D(30,18),13).setAttribute("Color" -> new Color(0.90f, 0.10f, 0.10f, 0.80f))
+    //logo.foreach(s => g.draw(s.setAttribute("Color" -> colorLogo)))
+    //frameLogo.foreach(s => g.draw(s.setAttribute("Color" -> colorFrame)))
+    //g draw TextShape("SIIGNA v1.0", Vector2D(30,6),9)
+    //g draw TextShape("BETA", Vector2D(30,18),13).setAttribute("Color" -> new Color(0.90f, 0.10f, 0.10f, 0.80f))
+    if(activeToolFeedback().isDefined) {
+     g draw TextShape(activeToolFeedback().get+" active" ,Vector2D(View.center.x - 20,30),17).setAttributes("TextAlignment" -> Vector2D(1, 0.5), "Color" -> new Color(0.40f, 0.40f, 0.40f, 0.70f))
+    }
     //Siigna.string("version").foreach(s => g draw TextShape(s, Vector2D(30,19),7))
   }
 

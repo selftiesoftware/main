@@ -46,11 +46,13 @@ class Tooltip(strings : List[String]) extends Display {
 
       // Retrieve the relative alpha in relation the the time
       // expired since startTime for the given color
-      def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
+      //def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(strings(0), Vector2D(View.center.x,30), 14, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
-      paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,30))
+      //val text = TextShape(strings(0), Vector2D(View.center.x,30), 14, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(strings(0),Vector2D(View.center.x,30),17).setAttributes("TextAlignment" -> Vector2D(0, 0.5), "Color" -> new Color(0.40f, 0.40f, 0.40f, 0.70f))
+
+      //paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,30))
       graphics draw text
     }
     //LINE 2
@@ -63,7 +65,7 @@ class Tooltip(strings : List[String]) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(strings(1), Vector2D(View.center.x,60), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(strings(1), Vector2D(View.center.x,60), 12, Attributes("TextAlignment" -> Vector2D(1, 0.5), "Color" -> new Color(0.40f, 0.40f, 0.40f, 0.70f)))
       paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,60))
       graphics draw text
     }
@@ -77,7 +79,7 @@ class Tooltip(strings : List[String]) extends Display {
       def setTransparency(color : Color) = new Color(color.getRed, color.getGreen, color.getBlue, (color.getAlpha * alpha).toInt)
 
       // Define the text shape, draw the frame and draw the text
-      val text = TextShape(strings(2), Vector2D(View.center.x,90), 12, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> setTransparency(color)))
+      val text = TextShape(strings(2), Vector2D(View.center.x,90), 10, Attributes("TextAlignment" -> Vector2D(0.5, 0.5), "Color" -> new Color(0.40f, 0.40f, 0.40f, 0.70f)))
       paintFrameSpecifyCenter(graphics, text.boundary.width.toInt + 40, text.boundary.height.toInt + 15, setTransparency(backgroundColor),Vector2D(View.center.x,90))
       graphics draw text
     }
